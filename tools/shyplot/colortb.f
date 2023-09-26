@@ -23,7 +23,7 @@
 !
 !--------------------------------------------------------------------------
 
-c routines to transform between color spaces
+!  routines to transform between color spaces
 
 ! revision log :
 !
@@ -32,11 +32,11 @@ c routines to transform between color spaces
 ! 18.12.2018	ggu	changed VERS_7_5_52
 ! 21.05.2019	ggu	changed VERS_7_5_62
 
-c****************************************************************
+! ****************************************************************
 
 	subroutine rgb2cmy(r,g,b,c,m,y)
 
-c rgb -> cmy
+!  rgb -> cmy
 
 	implicit none
 
@@ -49,11 +49,11 @@ c rgb -> cmy
 
 	end
 
-c****************************************************************
+! ****************************************************************
 
 	subroutine cmy2rgb(c,m,y,r,g,b)
 
-c cmy -> rgb
+!  cmy -> rgb
 
 	implicit none
 
@@ -66,11 +66,11 @@ c cmy -> rgb
 
 	end
 
-c****************************************************************
+! ****************************************************************
 
 	subroutine rgb2hsv(r,g,b,h,s,v)
 
-c rgb -> hsv		note: h is not [0-360] but [0-1]
+!  rgb -> hsv		note: h is not [0-360] but [0-1]
 
 	implicit none
 
@@ -78,7 +78,7 @@ c rgb -> hsv		note: h is not [0-360] but [0-1]
 	real h,s,v	![0-1]
 
 	real hmax			! 360 or 1
-c	parameter( hmax = 360. )	! h [0-360]
+! 	parameter( hmax = 360. )	! h [0-360]
 	parameter( hmax = 1. )		! h [0-1]
 	real hconv
 	parameter( hconv = hmax / 6. )
@@ -118,16 +118,16 @@ c	parameter( hmax = 360. )	! h [0-360]
 
 	end
 
-c****************************************************************
+! ****************************************************************
 
 	subroutine hsv2rgb(h,s,v,r,g,b)
 
-c hsv -> rgb		note: h is not [0-360] but [0-1]
+!  hsv -> rgb		note: h is not [0-360] but [0-1]
 
 	implicit none
 
 	real hconv,hdist,hmax
-c	parameter( hmax = 360. )
+! 	parameter( hmax = 360. )
 	parameter( hmax = 1. )
 	parameter( hdist = hmax/6. )
 	parameter( hconv = 1./hdist )
@@ -177,7 +177,7 @@ c	parameter( hmax = 360. )
 
 	end
 
-c****************************************************************
+! ****************************************************************
 
       function randomtb(idum)
 
@@ -211,16 +211,16 @@ c****************************************************************
       return
       end
 
-c****************************************************************
+! ****************************************************************
 
 	subroutine test_ct
 
-c testst conversion routine
+!  testst conversion routine
 
 	implicit none
 
 	real hmax
-c	parameter( hmax = 360. )
+! 	parameter( hmax = 360. )
 	parameter( hmax = 1. )
 
 	integer i,j,k
@@ -240,7 +240,7 @@ c	parameter( hmax = 360. )
 	berror = .false.
 
 	write(6,*) '--------------'
-c-----------------------------------------------
+! -----------------------------------------------
 
 	do i=1,itot
 	      
@@ -259,9 +259,9 @@ c-----------------------------------------------
 	  if( berror ) goto 99
 
 	end do
-c-----------------------------------------------
+! -----------------------------------------------
 	write(6,*) '--------------'
-c-----------------------------------------------
+! -----------------------------------------------
 	      
 	do i=1,itot
 
@@ -279,7 +279,7 @@ c-----------------------------------------------
 	  if( berror ) goto 99
 
 	end do
-c-----------------------------------------------
+! -----------------------------------------------
 	write(6,*) '--------------'
 
 	return
@@ -290,11 +290,11 @@ c-----------------------------------------------
  1000	format(9f8.3)
 	end
 
-c****************************************************************
+! ****************************************************************
 	
 	subroutine equaltb(a,b,eps,berror)
 
-c tests for nearly equality
+!  tests for nearly equality
 
 	implicit none
 
@@ -309,7 +309,7 @@ c tests for nearly equality
 
 	end
 
-c****************************************************************
+! ****************************************************************
 
 	subroutine test_ii
 
@@ -340,12 +340,12 @@ c****************************************************************
 
 	end
 
-c****************************************************************
-c
-c	program test
-c	call test_ct	!tests color transform
-c	!call test_ii	!tests color transform interactively
-c	end
-c
-c****************************************************************
+! ****************************************************************
+! 
+! 	program test
+! 	call test_ct	!tests color transform
+! 	!call test_ii	!tests color transform interactively
+! 	end
+! 
+! ****************************************************************
 

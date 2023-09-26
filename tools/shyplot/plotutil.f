@@ -149,10 +149,10 @@
         call clo_add_sep('general options')
 
         call clo_add_option('info',.false.,'only give info on header')
-        call clo_add_option('verbose',.false.
-     +                          ,'be more verbose, write time records')
-        call clo_add_option('quiet',.false.
-     +                          ,'do not write header information')
+        call clo_add_option('verbose',.false. &
+     &                          ,'be more verbose, write time records')
+        call clo_add_option('quiet',.false. &
+     &                          ,'do not write header information')
         call clo_add_option('silent',.false.,'do not write anything')
         call clo_add_option('write',.false.,'write min/max of records')
         call clo_add_option('debug',.false.,'write debug information')
@@ -160,10 +160,10 @@
 
         call clo_add_sep('time options')
 
-        call clo_add_option('tmin time',' '
-     +                  ,'only process starting from time')
-        call clo_add_option('tmax time',' '
-     +                  ,'only process up to time')
+        call clo_add_option('tmin time',' ' &
+     &                  ,'only process starting from time')
+        call clo_add_option('tmax time',' ' &
+     &                  ,'only process up to time')
 	call clo_add_option('freq n',0.,'frequency for plot')
 	call clo_add_com('    time is either YYYY-MM-DD[::hh[:mm[:ss]]]')
         call clo_add_com('    or integer for relative time')
@@ -184,8 +184,8 @@
 
 !	call clo_add_option('dir',.false.
 !     +			,'for directional variable plot arrow')
-	call clo_add_option('regall',.false.
-     +			,'for regular fem files plot whole grid')
+	call clo_add_option('regall',.false. &
+     &			,'for regular fem files plot whole grid')
 
         call clo_add_com('  file can be the following:')
         call clo_add_com('    shy-file to plot results')
@@ -293,7 +293,7 @@
 !************************************************************
 !************************************************************
 
-c***************************************************************
+! ***************************************************************
 
 	subroutine classify_files
 
@@ -410,19 +410,19 @@ c***************************************************************
 	    write(6,*) 'basin given but not needed... ignoring'
 	  end if
 	end if
-	if( 
-     +			      shyfilename == ' ' 
-     +			.and. femfilename == ' ' 
-     +			.and. lgrfilename == ' '
-     +			.and. basfilename == ' '
-     +	  ) then
+	if(  &
+     &			      shyfilename == ' '  &
+     &			.and. femfilename == ' '  &
+     &			.and. lgrfilename == ' ' &
+     &			.and. basfilename == ' ' &
+     &	  ) then
 	  write(6,*) 'no file given for plot...'
 	  call clo_usage
 	end if
 
 	end subroutine classify_files
 
-c***************************************************************
+! ***************************************************************
 
 	subroutine read_str_files(ivar)
 
@@ -454,7 +454,7 @@ c***************************************************************
 	stop 'error stop read_str_files'
 	end subroutine read_str_files
 
-c***************************************************************
+! ***************************************************************
 
 	subroutine init_nls_fnm
 
@@ -467,7 +467,7 @@ c***************************************************************
 	end module plotutil
 !====================================================
 
-c***************************************************************
-c***************************************************************
-c***************************************************************
+! ***************************************************************
+! ***************************************************************
+! ***************************************************************
 

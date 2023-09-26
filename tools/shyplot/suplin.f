@@ -25,74 +25,74 @@
 !
 !--------------------------------------------------------------------------
 
-c routines for section plot (scalars)
-c
-c revision log :
-c
-c 14.09.2009	ggu	routines written from scratch
-c 09.10.2009	ggu	vertical plot nearly ready
-c 14.10.2009	ggu	vertical plot finished (scalar and velocities)
-c 23.03.2010	ggu	changed v6.1.1
-c 26.03.2010	ggu	vertical plot for velocity finished 
-c 13.04.2010	ggu	adapted also to spherical coordinates
-c 15.04.2010	ggu	fix bug where lower layer is plotted with value 0
-c 22.04.2010	ggu	changed VERS_6_1_5
-c 29.09.2010	ggu	finished velocity plot with reference arrow
-c 08.10.2010	ggu	changed VERS_6_1_13
-c 09.10.2010	ggu	better labeling of reference arrow
-c 15.12.2010	ggu	changed VERS_6_1_14
-c 20.12.2010	ggu	changed VERS_6_1_16
-c 21.12.2010	ggu	plotting vertical vector of sigma (not finished)
-c 27.01.2011	ggu	changed VERS_6_1_17
-c 18.08.2011	ggu	better error check of node list
-c 24.08.2011	ggu	small changes to avoid run time error
-c 24.08.2011	ggu	plot real depth for zeta layers
-c 14.11.2011	ggu	hybrid levels introduced
-c 22.11.2011	ggu	changed VERS_6_1_37
-c 23.11.2011	ggu	in line_find_elements() adjust depth for hybrid
-c 09.12.2011	ggu	changed VERS_6_1_38
-c 24.01.2012	ggu	changed VERS_6_1_41
-c 27.01.2012	dbf&ggu	adjusted for hybrid coordinates
-c 20.06.2012	ggu	plots bottom also for sigma layers (plot_bottom())
-c 22.10.2012	ggu	dxmin introduced to plot arrow every dxmin distance
-c 24.10.2012	ggu	bsmooth introduced for smooth bottom plotting
-c 05.03.2014	ggu	bug fix for reference vector
-c 15.05.2014	ggu	changed VERS_6_1_75
-c 21.10.2014	ggu	changed VERS_7_0_3
-c 05.12.2014	ggu	changed VERS_7_0_8
-c 22.12.2014	ggu	new routine integrate_flux()
-c 15.01.2015	ggu	changed VERS_7_1_1
-c 19.01.2015	ggu	changed VERS_7_1_3
-c 21.05.2015	ggu	changed VERS_7_1_11
-c 17.07.2015	ggu	changed VERS_7_1_52
-c 17.07.2015	ggu	changed VERS_7_1_80
-c 20.07.2015	ggu	changed VERS_7_1_81
-c 31.07.2015	ggu	changed VERS_7_1_84
-c 02.12.2015	ggu	bug fix in integrate_flux() - dx was used twice
-c 16.12.2015	ggu	changed VERS_7_3_16
-c 18.12.2015	ggu	changed VERS_7_3_17
-c 27.05.2016	ggu	some restructuring to lower dependencies
-c 17.06.2016	ggu	changed VERS_7_5_15
-c 30.09.2016	ggu	changed VERS_7_5_18
-c 27.10.2016	ccf	use hkv for smooth bottom
-c 12.01.2017	ggu	changed VERS_7_5_21
-c 20.01.2017	ggu	changed VERS_7_5_22
-c 11.07.2017	ggu	changed VERS_7_5_30
-c 25.10.2018	ggu	changed VERS_7_5_51
-c 18.12.2018	ggu	changed VERS_7_5_52
-c 13.03.2019	ggu	changed VERS_7_5_61
-c 16.05.2019	ggu	wrong call to insert_between_layers()
-c
-c notes :
-c
-c hydrodynamic variables are passed to proj_velox() through mod_hydro_print
-c needed are uprv,vprv,wprv
-c
-c************************************************************************
+!  routines for section plot (scalars)
+! 
+!  revision log :
+! 
+!  14.09.2009	ggu	routines written from scratch
+!  09.10.2009	ggu	vertical plot nearly ready
+!  14.10.2009	ggu	vertical plot finished (scalar and velocities)
+!  23.03.2010	ggu	changed v6.1.1
+!  26.03.2010	ggu	vertical plot for velocity finished 
+!  13.04.2010	ggu	adapted also to spherical coordinates
+!  15.04.2010	ggu	fix bug where lower layer is plotted with value 0
+!  22.04.2010	ggu	changed VERS_6_1_5
+!  29.09.2010	ggu	finished velocity plot with reference arrow
+!  08.10.2010	ggu	changed VERS_6_1_13
+!  09.10.2010	ggu	better labeling of reference arrow
+!  15.12.2010	ggu	changed VERS_6_1_14
+!  20.12.2010	ggu	changed VERS_6_1_16
+!  21.12.2010	ggu	plotting vertical vector of sigma (not finished)
+!  27.01.2011	ggu	changed VERS_6_1_17
+!  18.08.2011	ggu	better error check of node list
+!  24.08.2011	ggu	small changes to avoid run time error
+!  24.08.2011	ggu	plot real depth for zeta layers
+!  14.11.2011	ggu	hybrid levels introduced
+!  22.11.2011	ggu	changed VERS_6_1_37
+!  23.11.2011	ggu	in line_find_elements() adjust depth for hybrid
+!  09.12.2011	ggu	changed VERS_6_1_38
+!  24.01.2012	ggu	changed VERS_6_1_41
+!  27.01.2012	dbf&ggu	adjusted for hybrid coordinates
+!  20.06.2012	ggu	plots bottom also for sigma layers (plot_bottom())
+!  22.10.2012	ggu	dxmin introduced to plot arrow every dxmin distance
+!  24.10.2012	ggu	bsmooth introduced for smooth bottom plotting
+!  05.03.2014	ggu	bug fix for reference vector
+!  15.05.2014	ggu	changed VERS_6_1_75
+!  21.10.2014	ggu	changed VERS_7_0_3
+!  05.12.2014	ggu	changed VERS_7_0_8
+!  22.12.2014	ggu	new routine integrate_flux()
+!  15.01.2015	ggu	changed VERS_7_1_1
+!  19.01.2015	ggu	changed VERS_7_1_3
+!  21.05.2015	ggu	changed VERS_7_1_11
+!  17.07.2015	ggu	changed VERS_7_1_52
+!  17.07.2015	ggu	changed VERS_7_1_80
+!  20.07.2015	ggu	changed VERS_7_1_81
+!  31.07.2015	ggu	changed VERS_7_1_84
+!  02.12.2015	ggu	bug fix in integrate_flux() - dx was used twice
+!  16.12.2015	ggu	changed VERS_7_3_16
+!  18.12.2015	ggu	changed VERS_7_3_17
+!  27.05.2016	ggu	some restructuring to lower dependencies
+!  17.06.2016	ggu	changed VERS_7_5_15
+!  30.09.2016	ggu	changed VERS_7_5_18
+!  27.10.2016	ccf	use hkv for smooth bottom
+!  12.01.2017	ggu	changed VERS_7_5_21
+!  20.01.2017	ggu	changed VERS_7_5_22
+!  11.07.2017	ggu	changed VERS_7_5_30
+!  25.10.2018	ggu	changed VERS_7_5_51
+!  18.12.2018	ggu	changed VERS_7_5_52
+!  13.03.2019	ggu	changed VERS_7_5_61
+!  16.05.2019	ggu	wrong call to insert_between_layers()
+! 
+!  notes :
+! 
+!  hydrodynamic variables are passed to proj_velox() through mod_hydro_print
+!  needed are uprv,vprv,wprv
+! 
+! ************************************************************************
 
 	subroutine plot_sect(bvel,sv)
 
-c plots section
+!  plots section
 
 	use levels
 	use basin
@@ -105,7 +105,7 @@ c plots section
 	integer nldim
 	parameter (nldim=400)
 
-c elems(1) is not used, etc..
+!  elems(1) is not used, etc..
 
 	real val(0:2*nlvdi,nldim)	!scalar value along line
 	real vel(3,0:2*nlvdi,nldim)	!projected velocities along line
@@ -181,9 +181,9 @@ c elems(1) is not used, etc..
 
 	integer, save :: icall = 0
 
-c----------------------------------------------------------------
-c initialize
-c----------------------------------------------------------------
+! ----------------------------------------------------------------
+!  initialize
+! ----------------------------------------------------------------
 
 	bdebug = .true.
 	bdebug = .false.
@@ -197,10 +197,10 @@ c----------------------------------------------------------------
 	  call makehkv(hkv)
 	  call line_read_nodes(file,nldim,n,nodes)
           bsmt = nint(getpar('bsmt'))
-	  call line_find_elements(n,nodes,nlv,nen3v,hev,hm3v,hlv
-     +			,elems,helems,lelems,lnodes,hkv,bsmt)
-	  call line_find_min_max(n,nodes,helems,lelems,xgv,ygv
-     +			,isphe,rlmax,rdmax,llmax,xy)
+	  call line_find_elements(n,nodes,nlv,nen3v,hev,hm3v,hlv &
+     &			,elems,helems,lelems,lnodes,hkv,bsmt)
+	  call line_find_min_max(n,nodes,helems,lelems,xgv,ygv &
+     &			,isphe,rlmax,rdmax,llmax,xy)
 	  call make_proj_dir(n,isphe,nodes,xgv,ygv,dxy)
 
 	  bgrid = nint(getpar('ivgrid')) .ne. 0	!plot grid?
@@ -210,8 +210,8 @@ c----------------------------------------------------------------
 
 	  call set_max_dep_lay(nlv,hlv,rdmax,llmax,hvmax,lvmax) !vertical range
 
-c	  rdmax: max depth to be plotted
-c	  llmax: max layer to be plotted
+! 	  rdmax: max depth to be plotted
+! 	  llmax: max layer to be plotted
 
 	  call getfnm('vtitle',vtitle)
 	  call getfnm('xtitle',xtitle)
@@ -234,18 +234,18 @@ c	  llmax: max layer to be plotted
 
 	icall = icall + 1
 
-c----------------------------------------------------------------
-c prepare velocities
-c----------------------------------------------------------------
+! ----------------------------------------------------------------
+!  prepare velocities
+! ----------------------------------------------------------------
 
 	if( bvel ) call prepare_vel(sv)
 
-c----------------------------------------------------------------
-c prepare logical variables
-c----------------------------------------------------------------
+! ----------------------------------------------------------------
+!  prepare logical variables
+! ----------------------------------------------------------------
 
-c ivert:   0=depth  1=layers  2=log depth
-c	   -1=layers scaled by sigma values
+!  ivert:   0=depth  1=layers  2=log depth
+! 	   -1=layers scaled by sigma values
 
 	btwo = .false.
 	btwo = .true.				!plot two arrows for reference
@@ -255,9 +255,9 @@ c	   -1=layers scaled by sigma values
 	blayer = abs(ivert) .eq. 1
 	blog = ivert .eq. 2
 
-c----------------------------------------------------------------
-c start plot
-c----------------------------------------------------------------
+! ----------------------------------------------------------------
+!  start plot
+! ----------------------------------------------------------------
 
 	call ptime_get_itime(it)
 
@@ -265,16 +265,16 @@ c----------------------------------------------------------------
         call annotes('vertical plot')
 	call annote
 
-c----------------------------------------------------------------
-c prepare data
-c----------------------------------------------------------------
+! ----------------------------------------------------------------
+!  prepare data
+! ----------------------------------------------------------------
 
 	if( bvel ) then
-	  call proj_velox(vmode,n,nodes,lnodes,ilhkv,dxy,vel,val
-     +					,vmin,vmax,vhmin,vhmax)
+	  call proj_velox(vmode,n,nodes,lnodes,ilhkv,dxy,vel,val &
+     &					,vmin,vmax,vhmin,vhmax)
 	else
-	  call line_insert_scalars(n,nodes,lnodes,ilhkv,sv
-     +					,val,vmin,vmax)
+	  call line_insert_scalars(n,nodes,lnodes,ilhkv,sv &
+     &					,val,vmin,vmax)
 	  vhmin = vmin	!...
 	  vhmax = vmax	!not needed, only to avoid run time error
 	end if
@@ -284,16 +284,16 @@ c----------------------------------------------------------------
 	write(6,1000) 'section min/max: ',vmin,vmax,n,rlmax,rdmax
  1000	format(a,2f14.4,i5,2f14.4)
 
-c----------------------------------------------------------------
-c compute fluxes
-c----------------------------------------------------------------
+! ----------------------------------------------------------------
+!  compute fluxes
+! ----------------------------------------------------------------
 
 	call integrate_flux(n,xy,lelems,helems,hlv,val,flux,area)
 	!write(111,*) it,flux,area
 
-c----------------------------------------------------------------
-c set viewport
-c----------------------------------------------------------------
+! ----------------------------------------------------------------
+!  set viewport
+! ----------------------------------------------------------------
 
 	xrmin = 0.
 	yrmin = 0.
@@ -331,11 +331,11 @@ c----------------------------------------------------------------
 
 	call qsetvpnc(xmin,ymin,xmax,ymax)	!this is the plotting area
 
-c-----------------------------------------------------------------
-c set world coordinates
-c-----------------------------------------------------------------
+! -----------------------------------------------------------------
+!  set world coordinates
+! -----------------------------------------------------------------
 
-c	hvmax == rdmax
+! 	hvmax == rdmax
 
 	xrmin = 0.
 	xrmax = rlmax
@@ -346,9 +346,9 @@ c	hvmax == rdmax
 
 	call qworld(xrmin,yrmin,xrmax,yrmax)
 
-c--------------------------------------------------------------------
-c plot scalar
-c--------------------------------------------------------------------
+! --------------------------------------------------------------------
+!  plot scalar
+! --------------------------------------------------------------------
 
 	ib = 0
 
@@ -369,8 +369,8 @@ c--------------------------------------------------------------------
 	    yt2 = ya(2,l-1)
 	    yb1 = ya(1,l)
 	    yb2 = ya(2,l)
-	    call plot_scal(x1,yt1,yb1,x2,yt2,yb2,ya(1,ltot),ya(2,ltot)
-     +				,val(ltop,i-1),val(ltop,i))
+	    call plot_scal(x1,yt1,yb1,x2,yt2,yb2,ya(1,ltot),ya(2,ltot) &
+     &				,val(ltop,i-1),val(ltop,i))
 	  end do
 	end do
 
@@ -389,9 +389,9 @@ c--------------------------------------------------------------------
 	  end do
 	end if
 
-c--------------------------------------------------------------------
-c plot vector
-c--------------------------------------------------------------------
+! --------------------------------------------------------------------
+!  plot vector
+! --------------------------------------------------------------------
 
 	vhmax = max(abs(vhmin),abs(vhmax))
 	scale = rlmax/(2.*vhmax*(n-1))
@@ -450,9 +450,9 @@ c--------------------------------------------------------------------
 	  end do
 	end do
 
-c--------------------------------------------------------------------
-c plot reference vector
-c--------------------------------------------------------------------
+! --------------------------------------------------------------------
+!  plot reference vector
+! --------------------------------------------------------------------
 
 	if( barrow ) then
 	
@@ -529,9 +529,9 @@ c--------------------------------------------------------------------
 
 	end if
 
-c--------------------------------------------------------------------
-c labeling
-c--------------------------------------------------------------------
+! --------------------------------------------------------------------
+!  labeling
+! --------------------------------------------------------------------
 
         call qfont('Times-Roman')
         call qgray(0.0)
@@ -579,9 +579,9 @@ c--------------------------------------------------------------------
 	  end if
 	end do
 
-c--------------------------------------------------------------------
-c titles
-c--------------------------------------------------------------------
+! --------------------------------------------------------------------
+!  titles
+! --------------------------------------------------------------------
 
 	call qcomm('Titles')
         call qtxtcr(0.,0.)
@@ -608,9 +608,9 @@ c--------------------------------------------------------------------
 
 	call pbox(xrmin,yrmin,xrmax,yrmax)
 
-c--------------------------------------------------------------------
-c color bar
-c--------------------------------------------------------------------
+! --------------------------------------------------------------------
+!  color bar
+! --------------------------------------------------------------------
 
         if( bhoriz ) then
 	  dx = xmax - xmin
@@ -650,12 +650,12 @@ c--------------------------------------------------------------------
         call getfnm('legcol',line)
 
 	call qgray(0.0)
-	call colbar(line,bhoriz,nctick,ipllog,ndec,fact
-     +				,xrmin,yrmin,xrmax,yrmax)
+	call colbar(line,bhoriz,nctick,ipllog,ndec,fact &
+     &				,xrmin,yrmin,xrmax,yrmax)
 
-c--------------------------------------------------------------------
-c plot in/out indicator
-c--------------------------------------------------------------------
+! --------------------------------------------------------------------
+!  plot in/out indicator
+! --------------------------------------------------------------------
 
 	if( bvel .and. vmode .eq. 0 ) then
 	  call qcomm('in/out indicator')
@@ -693,24 +693,24 @@ c--------------------------------------------------------------------
 	  end if
 	end if
 
-c--------------------------------------------------------------------
-c date on plot
-c--------------------------------------------------------------------
+! --------------------------------------------------------------------
+!  date on plot
+! --------------------------------------------------------------------
 
 	call qsetvp(xomin,yomin,xomax,yomax)
 	call plot_date_on_sect
 
-c--------------------------------------------------------------------
-c end of routine
-c--------------------------------------------------------------------
+! --------------------------------------------------------------------
+!  end of routine
+! --------------------------------------------------------------------
 
         call qend
 
 	end
 
-c************************************************************************
-c************************************************************************
-c************************************************************************
+! ************************************************************************
+! ************************************************************************
+! ************************************************************************
 
 	function hlog(x,rd)
 
@@ -723,7 +723,7 @@ c************************************************************************
 
 	end
 
-c************************************************************************
+! ************************************************************************
 
 	subroutine insert_bottom(i,xy,ya,ib,xbot,ybot)
 
@@ -752,7 +752,7 @@ c************************************************************************
 
 	end 
 
-c************************************************************************
+! ************************************************************************
 
 	subroutine plot_tot_bottom(n,xbot,ybot,yrmax)
 
@@ -779,11 +779,11 @@ c************************************************************************
 
 	end
 
-c************************************************************************
+! ************************************************************************
 
 	subroutine plot_bottom(x1,x2,yrmin,ya_bot)
 
-c plots bottom with gray color
+!  plots bottom with gray color
 
 	implicit none
 
@@ -813,30 +813,30 @@ c plots bottom with gray color
 
 	end
 
-c************************************************************************
+! ************************************************************************
 
-	subroutine plot_scal(x1,ytt1,ybb1,x2,ytt2,ybb2
-     +					,ybot1,ybot2,vv1,vv2)
+	subroutine plot_scal(x1,ytt1,ybb1,x2,ytt2,ybb2 &
+     &					,ybot1,ybot2,vv1,vv2)
 
-c x coords must be the same, but y coords may be different
-c
-c       ---------------    ytt1    y(1)
-c       |\     |     /|
-c       | \  2 | 3  / |
-c       |  \   |   /  |
-c       |   \  |  /   |
-c       | 1  \ | /  4 |
-c       |     \|/     |
-c       |-------------|    ym      y(2)
-c       |     /|\     |
-c       | 5  / | \  8 |
-c       |   /  |  \   |
-c       |  /   |   \  |
-c       | /  6 | 7  \ |
-c       |/     |     \|
-c       ---------------    ybb1    y(3)
-c
-c       x1     xm    x2
+!  x coords must be the same, but y coords may be different
+! 
+!        ---------------    ytt1    y(1)
+!        |\     |     /|
+!        | \  2 | 3  / |
+!        |  \   |   /  |
+!        |   \  |  /   |
+!        | 1  \ | /  4 |
+!        |     \|/     |
+!        |-------------|    ym      y(2)
+!        |     /|\     |
+!        | 5  / | \  8 |
+!        |   /  |  \   |
+!        |  /   |   \  |
+!        | /  6 | 7  \ |
+!        |/     |     \|
+!        ---------------    ybb1    y(3)
+! 
+!        x1     xm    x2
 
 	use color
 
@@ -886,7 +886,7 @@ c       x1     xm    x2
 
 	end
 
-c************************************************************************
+! ************************************************************************
 
 	function isdiff(y)
 
@@ -899,7 +899,7 @@ c************************************************************************
 
 	end
 
-c************************************************************************
+! ************************************************************************
 
 	subroutine setdpt(yt,yb,ybot,vv,y,v)
 
@@ -922,11 +922,11 @@ c************************************************************************
 
 	end
 
-c************************************************************************
+! ************************************************************************
 
 	subroutine plot_rect(x1,y1,x2,y2,v1,v2)
 
-c not used anymore -> delete
+!  not used anymore -> delete
 
 	use color
 
@@ -980,7 +980,7 @@ c not used anymore -> delete
 
 	end
 
-c************************************************************************
+! ************************************************************************
 
 	subroutine setxyf(x1,x2,x3,y1,y2,y3,f1,f2,f3,x,y,f)
 	implicit none
@@ -997,7 +997,7 @@ c************************************************************************
 	f(3)=f3
 	end
 
-c************************************************************************
+! ************************************************************************
 
 	subroutine plot_arrow(x,y,u,w,scale,stip)
 
@@ -1015,11 +1015,11 @@ c************************************************************************
 
 	end
 
-c************************************************************************
+! ************************************************************************
 
 	subroutine make_proj_dir(n,isphe,nodes,xgv,ygv,dxy)
 
-c computes projection line for nodes
+!  computes projection line for nodes
 
 	implicit none
 
@@ -1051,15 +1051,15 @@ c computes projection line for nodes
 
 	end
 
-c************************************************************************
+! ************************************************************************
 
-	subroutine proj_velox(mode,n,nodes,lnodes,ilhkv,dxy,vel,val
-     +				,vmin,vmax,vhmin,vhmax)
+	subroutine proj_velox(mode,n,nodes,lnodes,ilhkv,dxy,vel,val &
+     &				,vmin,vmax,vhmin,vhmax)
 
-c computes vel (vector) and val (scalar) for section
-c in vel is normal/tangential/vertical velocity
-c in val is scalar velocity used for overlay
-c modes: 0=use normal vel   1=use tangent vel   as scalar velocity
+!  computes vel (vector) and val (scalar) for section
+!  in vel is normal/tangential/vertical velocity
+!  in val is scalar velocity used for overlay
+!  modes: 0=use normal vel   1=use tangent vel   as scalar velocity
  
 	use mod_hydro_print
 	use levels, only : nlvdi,nlv
@@ -1142,11 +1142,11 @@ c modes: 0=use normal vel   1=use tangent vel   as scalar velocity
 
 	end
 
-c************************************************************************
+! ************************************************************************
 
 	subroutine integrate_flux(n,xy,lelems,helems,hlv,val,flux,area)
 
-c computes flux through section
+!  computes flux through section
 
 	use levels, only : nlvdi,nlv
 
@@ -1193,7 +1193,7 @@ c computes flux through section
 
 	end
 
-c************************************************************************
+! ************************************************************************
 
 	subroutine insert_between_layers(nd,nl,vals)
 
@@ -1214,12 +1214,12 @@ c************************************************************************
 
 	end
 
-c************************************************************************
+! ************************************************************************
 
-	subroutine line_insert_scalars(n,nodes,lnodes,ilhkv,sv
-     +					,values,vmin,vmax)
+	subroutine line_insert_scalars(n,nodes,lnodes,ilhkv,sv &
+     &					,values,vmin,vmax)
 
-c inserts scalar values into matrix section
+!  inserts scalar values into matrix section
 
 	use levels, only : nlvdi,nlv
 
@@ -1267,12 +1267,12 @@ c inserts scalar values into matrix section
 
 	end
 
-c************************************************************************
+! ************************************************************************
 
-	subroutine line_find_min_max(n,nodes,helems,lelems,xgv,ygv
-     +					,isphe,rlmax,rdmax,llmax,xy)
+	subroutine line_find_min_max(n,nodes,helems,lelems,xgv,ygv &
+     &					,isphe,rlmax,rdmax,llmax,xy)
 
-c finds length and max depth of line
+!  finds length and max depth of line
 
 	implicit none
 
@@ -1313,11 +1313,11 @@ c finds length and max depth of line
 
 	end
 
-c************************************************************************
+! ************************************************************************
 
 	subroutine make_dist_fact(isphe,y,xfact,yfact)
 
-c computes factor for transformation from spherical to cartesian coordinates
+!  computes factor for transformation from spherical to cartesian coordinates
 
 	implicit none
 
@@ -1338,15 +1338,15 @@ c computes factor for transformation from spherical to cartesian coordinates
 
 	end
 
-c************************************************************************
+! ************************************************************************
 
-	subroutine line_find_elements(n,nodes,nlv,nen3v,hev,hm3v,hlv
-     +					,elems,helems,lelems,lnodes,hkv
-     +					,bsmt)
+	subroutine line_find_elements(n,nodes,nlv,nen3v,hev,hm3v,hlv &
+     &					,elems,helems,lelems,lnodes,hkv &
+     &					,bsmt)
 
-c finds elements along line given by nodes
-c
-c deepest element is chosen
+!  finds elements along line given by nodes
+! 
+!  deepest element is chosen
 
 	implicit none
 
@@ -1378,9 +1378,9 @@ c deepest element is chosen
 	bsigma = nsigma .gt. 0
 	berror = .false.
 
-c------------------------------------------------------------------
-c set up depth structure in line (elements)
-c------------------------------------------------------------------
+! ------------------------------------------------------------------
+!  set up depth structure in line (elements)
+! ------------------------------------------------------------------
 
 	do i=2,n
 	  k1 = nodes(i-1)
@@ -1417,9 +1417,9 @@ c------------------------------------------------------------------
 
 	if( berror ) goto 99
 
-c------------------------------------------------------------------
-c compute total layers in line (elements)
-c------------------------------------------------------------------
+! ------------------------------------------------------------------
+!  compute total layers in line (elements)
+! ------------------------------------------------------------------
 
 	do i=2,n
 	  h = max(helems(1,i),helems(2,i))
@@ -1434,9 +1434,9 @@ c------------------------------------------------------------------
 	  end if
 	end do
 	  
-c------------------------------------------------------------------
-c compute total layers in line (nodes)
-c------------------------------------------------------------------
+! ------------------------------------------------------------------
+!  compute total layers in line (nodes)
+! ------------------------------------------------------------------
 
 	lnodes(1) = lelems(2)
 	do i=2,n-1
@@ -1444,9 +1444,9 @@ c------------------------------------------------------------------
 	end do
 	lnodes(n) = lelems(n)
 	  
-c------------------------------------------------------------------
-c end of routine
-c------------------------------------------------------------------
+! ------------------------------------------------------------------
+!  end of routine
+! ------------------------------------------------------------------
 
 	return
    99	continue
@@ -1455,11 +1455,11 @@ c------------------------------------------------------------------
 	stop 'error stop line_find_elements: cannot find elements'
 	end
 
-c************************************************************************
+! ************************************************************************
 
 	subroutine line_read_nodes(file,ndim,n,nodes)
 
-c reads line given by nodes
+!  reads line given by nodes
 
 	implicit none
 
@@ -1509,11 +1509,11 @@ c reads line given by nodes
 	stop 'error stop line_read_nodes: no such file'
 	end
 
-c************************************************************************
+! ************************************************************************
 
 	subroutine set_max_dep_lay(nlv,hlv,rdmax,llmax,hvmax,lvmax)
 
-c sets hvmax and lvmax
+!  sets hvmax and lvmax
 
 	implicit none
 
@@ -1562,13 +1562,13 @@ c sets hvmax and lvmax
 
 	end
 
-c************************************************************************
+! ************************************************************************
 
 	subroutine find_nc(x,nc)
 
-c finds first significant position of x after decimal point - returns in nc
+!  finds first significant position of x after decimal point - returns in nc
 
-c 0.3 -> 2    0.03 -> 3       3 -> 0   30 -> 0
+!  0.3 -> 2    0.03 -> 3       3 -> 0   30 -> 0
 
 	implicit none
 
@@ -1594,7 +1594,7 @@ c 0.3 -> 2    0.03 -> 3       3 -> 0   30 -> 0
 
 	end
 
-c************************************************************************
+! ************************************************************************
 
 	subroutine get_vel_unit(fact,string)
 
@@ -1616,7 +1616,7 @@ c************************************************************************
 
 	end
 
-c************************************************************************
+! ************************************************************************
 
 	subroutine make_segment_depth(ivert,nlv,hdep,hvmax,hlv,ya)
 
@@ -1669,7 +1669,7 @@ c************************************************************************
 
 	end
 
-c************************************************************************
+! ************************************************************************
 
 	subroutine trapez(x1,yt1,yb1,x2,yt2,yb2)
 
@@ -1684,7 +1684,7 @@ c************************************************************************
 
 	end
 
-c************************************************************************
+! ************************************************************************
 
 	subroutine plot_date_on_sect
 
@@ -1727,5 +1727,5 @@ c************************************************************************
 
 	end
 
-c************************************************************************
+! ************************************************************************
 

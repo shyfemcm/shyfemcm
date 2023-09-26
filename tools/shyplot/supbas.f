@@ -23,109 +23,109 @@
 !
 !--------------------------------------------------------------------------
 
-c routines for plotting basin
-c
-c contents :
-c
-c subroutine basinit			internal initialization
-c
-c subroutine bash(mode)			plots basin (shell)
-c
-c subroutine basin(mode)		plots basin
-c subroutine bpixel			writes the pixel size as a comment 
-c subroutine frame(mode)		plots frame
-c subroutine basmima(mode)		computes min/max of basin
-c subroutine setbas(x0,y0,x1,y1)	sets min/max of basin to plot
-c subroutine getbas(x0,y0,x1,y1)	gets min/max of basin to plot
-c subroutine boundline			plots boundary line for lagoon
-c
-c subroutine reggrid(ngrid,dist,gray)	plots regular grid
-c
-c subroutine basscale(dist)		computes typical length scale for basin
-c
-c function roundm(r,mode)		rounds r to the closest value
-c function rround(r,rmaster,mode)	rounds r to next rmaster value
-c function rdist(xmin,ymin,xmax,ymax)	computes gridspacing 
-c function divdist(x,n,mode)		divides x into n equal pieces
-c
-c subroutine handle_spherical		handles spherical coordinates
-c subroutine plot_reg_grid		handles plotting of regular grid
-c subroutine label_bw_frame		handles labeling of regular grid
-c
-c revision log :
-c
-c 16.02.1999	ggu	bpixel: write bounding box to ps file (as comment)
-c 09.02.2000	ggu	use inboxdim to compute box to plot
-c 12.06.2000	ggu	get gray value for basin mode 3 from str file
-c 11.02.2001	ggu	routine to compute typical length scale
-c 21.08.2003	ggu	occupy is called elsewhere
-c 16.12.2004	ggu	changed reggrid to plot regular grid
-c 02.03.2005	ggu	in bash: bug fix -> get size of grid if not given
-c 12.06.2009	ggu	new routines to handle spherical coords. & regular grid
-c 15.06.2009	ggu	call to reggrid() changeed -> pass in gray value
-c 14.09.2009	ggu	new routine divdist()
-c 22.02.2010	ggu	new routine bw_frame() to plot bw scale around plot
-c 23.03.2010	ggu	changed v6.1.1
-c 09.04.2010	ggu	bug fix in frac_pos() -> maybe compiler error
-c 20.12.2010	ggu	changed VERS_6_1_16
-c 17.05.2011	ggu	new routine basin_number()
-c 31.05.2011	ggu	changed VERS_6_1_23
-c 30.03.2012	ggu	changed VERS_6_1_51
-c 30.08.2012	ggu	new routines to automatically label spherical grid
-c 12.09.2012	ggu	changed VERS_6_1_57
-c 24.10.2012	ggu	bug in labelling non spherical grid (returned -1)
-c 02.05.2013	ggu	handle fact in spherical coords
-c 02.05.2013	ggu	meteo point plotting (plot_meteo_points())
-c 13.06.2013	ggu	bug fix in spherical_fact() -> set fact to 1
-c 19.06.2013	ggu	changed VERS_6_1_66
-c 13.12.2013	ggu	new mode=4 for plotting gray grid over scalar variable
-c 28.01.2014	ggu	changed VERS_6_1_71
-c 30.05.2014	ggu	new metpnt for meteo points, imicro computed
-c 18.07.2014	ggu	changed VERS_7_0_1
-c 13.10.2014	ggu	changed VERS_7_0_2
-c 26.11.2014	ggu	changed VERS_7_0_7
-c 05.12.2014	ggu	changed VERS_7_0_8
-c 23.12.2014	ggu	changed VERS_7_0_11
-c 15.01.2015	ggu	changed VERS_7_1_1
-c 19.01.2015	ggu	changed VERS_7_1_3
-c 10.02.2015	ggu	also plot other points, also regular points
-c 26.02.2015	ggu	changed VERS_7_1_5
-c 05.05.2015	ggu	changed VERS_7_1_10
-c 10.07.2015	ggu	changed VERS_7_1_50
-c 17.07.2015	ggu	changed VERS_7_1_80
-c 20.07.2015	ggu	changed VERS_7_1_81
-c 12.10.2015	ggu	fix in rround() to handle rmaster==0 case
-c 19.02.2016	ggu	changed VERS_7_5_2
-c 10.06.2016	ggu	changed VERS_7_5_13
-c 17.06.2016	ggu	changed VERS_7_5_15
-c 27.06.2016	ggu	changed VERS_7_5_16
-c 30.09.2016	ggu	changed VERS_7_5_18
-c 25.05.2017	ggu	changed VERS_7_5_28
-c 11.07.2017	ggu	changed VERS_7_5_30
-c 26.09.2017	ggu	changed VERS_7_5_32
-c 14.11.2017	ggu	changed VERS_7_5_36
-c 22.02.2018	ggu	changed VERS_7_5_42
-c 19.04.2018	ggu	changed VERS_7_5_45
-c 06.07.2018	ggu	changed VERS_7_5_48
-c 18.12.2018	ggu	changed VERS_7_5_52
-c 13.03.2019	ggu	changed VERS_7_5_61
-c 21.05.2019	ggu	changed VERS_7_5_62
-c 13.02.2020	ggu	rounding routines into new file subround.f
-c 10.11.2021    ggu     avoid warning for stack size
-c
-c notes :
-c
-c rules for regular frame around plot:
-c
-c if reggrd is given		-> use this value
-c if reggrd == 0		-> do not plot frame
-c else (reggrd==-1)
-c if no legend is requested	-> do not plot frame
-c if legend is requested
-c	if spherical		-> plot frame and no scale/north
-c	else			-> plot scale/north and no frame
-c
-c*************************************************************
+!  routines for plotting basin
+! 
+!  contents :
+! 
+!  subroutine basinit			internal initialization
+! 
+!  subroutine bash(mode)			plots basin (shell)
+! 
+!  subroutine basin(mode)		plots basin
+!  subroutine bpixel			writes the pixel size as a comment 
+!  subroutine frame(mode)		plots frame
+!  subroutine basmima(mode)		computes min/max of basin
+!  subroutine setbas(x0,y0,x1,y1)	sets min/max of basin to plot
+!  subroutine getbas(x0,y0,x1,y1)	gets min/max of basin to plot
+!  subroutine boundline			plots boundary line for lagoon
+! 
+!  subroutine reggrid(ngrid,dist,gray)	plots regular grid
+! 
+!  subroutine basscale(dist)		computes typical length scale for basin
+! 
+!  function roundm(r,mode)		rounds r to the closest value
+!  function rround(r,rmaster,mode)	rounds r to next rmaster value
+!  function rdist(xmin,ymin,xmax,ymax)	computes gridspacing 
+!  function divdist(x,n,mode)		divides x into n equal pieces
+! 
+!  subroutine handle_spherical		handles spherical coordinates
+!  subroutine plot_reg_grid		handles plotting of regular grid
+!  subroutine label_bw_frame		handles labeling of regular grid
+! 
+!  revision log :
+! 
+!  16.02.1999	ggu	bpixel: write bounding box to ps file (as comment)
+!  09.02.2000	ggu	use inboxdim to compute box to plot
+!  12.06.2000	ggu	get gray value for basin mode 3 from str file
+!  11.02.2001	ggu	routine to compute typical length scale
+!  21.08.2003	ggu	occupy is called elsewhere
+!  16.12.2004	ggu	changed reggrid to plot regular grid
+!  02.03.2005	ggu	in bash: bug fix -> get size of grid if not given
+!  12.06.2009	ggu	new routines to handle spherical coords. & regular grid
+!  15.06.2009	ggu	call to reggrid() changeed -> pass in gray value
+!  14.09.2009	ggu	new routine divdist()
+!  22.02.2010	ggu	new routine bw_frame() to plot bw scale around plot
+!  23.03.2010	ggu	changed v6.1.1
+!  09.04.2010	ggu	bug fix in frac_pos() -> maybe compiler error
+!  20.12.2010	ggu	changed VERS_6_1_16
+!  17.05.2011	ggu	new routine basin_number()
+!  31.05.2011	ggu	changed VERS_6_1_23
+!  30.03.2012	ggu	changed VERS_6_1_51
+!  30.08.2012	ggu	new routines to automatically label spherical grid
+!  12.09.2012	ggu	changed VERS_6_1_57
+!  24.10.2012	ggu	bug in labelling non spherical grid (returned -1)
+!  02.05.2013	ggu	handle fact in spherical coords
+!  02.05.2013	ggu	meteo point plotting (plot_meteo_points())
+!  13.06.2013	ggu	bug fix in spherical_fact() -> set fact to 1
+!  19.06.2013	ggu	changed VERS_6_1_66
+!  13.12.2013	ggu	new mode=4 for plotting gray grid over scalar variable
+!  28.01.2014	ggu	changed VERS_6_1_71
+!  30.05.2014	ggu	new metpnt for meteo points, imicro computed
+!  18.07.2014	ggu	changed VERS_7_0_1
+!  13.10.2014	ggu	changed VERS_7_0_2
+!  26.11.2014	ggu	changed VERS_7_0_7
+!  05.12.2014	ggu	changed VERS_7_0_8
+!  23.12.2014	ggu	changed VERS_7_0_11
+!  15.01.2015	ggu	changed VERS_7_1_1
+!  19.01.2015	ggu	changed VERS_7_1_3
+!  10.02.2015	ggu	also plot other points, also regular points
+!  26.02.2015	ggu	changed VERS_7_1_5
+!  05.05.2015	ggu	changed VERS_7_1_10
+!  10.07.2015	ggu	changed VERS_7_1_50
+!  17.07.2015	ggu	changed VERS_7_1_80
+!  20.07.2015	ggu	changed VERS_7_1_81
+!  12.10.2015	ggu	fix in rround() to handle rmaster==0 case
+!  19.02.2016	ggu	changed VERS_7_5_2
+!  10.06.2016	ggu	changed VERS_7_5_13
+!  17.06.2016	ggu	changed VERS_7_5_15
+!  27.06.2016	ggu	changed VERS_7_5_16
+!  30.09.2016	ggu	changed VERS_7_5_18
+!  25.05.2017	ggu	changed VERS_7_5_28
+!  11.07.2017	ggu	changed VERS_7_5_30
+!  26.09.2017	ggu	changed VERS_7_5_32
+!  14.11.2017	ggu	changed VERS_7_5_36
+!  22.02.2018	ggu	changed VERS_7_5_42
+!  19.04.2018	ggu	changed VERS_7_5_45
+!  06.07.2018	ggu	changed VERS_7_5_48
+!  18.12.2018	ggu	changed VERS_7_5_52
+!  13.03.2019	ggu	changed VERS_7_5_61
+!  21.05.2019	ggu	changed VERS_7_5_62
+!  13.02.2020	ggu	rounding routines into new file subround.f
+!  10.11.2021    ggu     avoid warning for stack size
+! 
+!  notes :
+! 
+!  rules for regular frame around plot:
+! 
+!  if reggrd is given		-> use this value
+!  if reggrd == 0		-> do not plot frame
+!  else (reggrd==-1)
+!  if no legend is requested	-> do not plot frame
+!  if legend is requested
+! 	if spherical		-> plot frame and no scale/north
+! 	else			-> plot scale/north and no frame
+! 
+! *************************************************************
 
 	module mod_bash
 
@@ -136,7 +136,7 @@ c*************************************************************
 
 	end module mod_bash
 
-c*************************************************************
+! *************************************************************
 
 	subroutine bash_verbose(bverbose)
 
@@ -150,11 +150,11 @@ c*************************************************************
 
 	end
 
-c*************************************************************
+! *************************************************************
 
 	subroutine basinit
 
-c internal initialization
+!  internal initialization
 
 	use mod_bash
 
@@ -171,7 +171,7 @@ c internal initialization
 
 	end
 
-c**************************************************************
+! **************************************************************
 
 	subroutine bash(mode)
 
@@ -285,8 +285,8 @@ c**************************************************************
 	if( is_box_given('leg') ) then	!write legend
           if( is_spherical() ) then
 	    if( bverb ) then
-              write(6,*) 'coordinates are spherical' //
-     +			' ...no north and scale written'
+              write(6,*) 'coordinates are spherical' // &
+     &			' ...no north and scale written'
 	    end if
             return
 	  else
@@ -321,18 +321,18 @@ c**************************************************************
 
 	end
 
-c*************************************************************
+! *************************************************************
 
 	subroutine plot_basin(mode)
 
-c plots basin
-c
-c mode	
-c	0: only scaling  
-c	1: net  
-c	2: boundary  
-c	3: net in gray (for bathymetry - use bgray)
-c	4: net in gray (for scalar and velocities - use bsgray)
+!  plots basin
+! 
+!  mode	
+! 	0: only scaling  
+! 	1: net  
+! 	2: boundary  
+! 	3: net in gray (for bathymetry - use bgray)
+! 	4: net in gray (for scalar and velocities - use bsgray)
 
 	use mod_geom
 	use basin
@@ -402,14 +402,14 @@ c	4: net in gray (for scalar and velocities - use bsgray)
 
 	end
 
-c*************************************************************
+! *************************************************************
 
 	subroutine basin_number(mode)
 
-c plots basin with node and element numbers
-c
-c mode	1: node number   2: element number
-c	positive: external    negative: internal
+!  plots basin with node and element numbers
+! 
+!  mode	1: node number   2: element number
+! 	positive: external    negative: internal
 
 	use mod_geom
 	use basin
@@ -476,11 +476,11 @@ c	positive: external    negative: internal
 
 	end
 
-c*****************************************************************
+! *****************************************************************
 
 	subroutine bpixel
 
-c writes the pixel size as a comment to PS file
+!  writes the pixel size as a comment to PS file
 
 	implicit none
 
@@ -502,23 +502,23 @@ c writes the pixel size as a comment to PS file
 	ixmax = fact * ( xvmax + dxy ) + idxy
 	iymax = fact * ( yvmax + dxy ) + idxy
 
-c	write(6,*) 'message from basin() ...'
-c	write(6,*) '****** ',xvmin,yvmin,xvmax,yvmax
-c	write(6,*) '****** ',ixmin,iymin,ixmax,iymax
+! 	write(6,*) 'message from basin() ...'
+! 	write(6,*) '****** ',xvmin,yvmin,xvmax,yvmax
+! 	write(6,*) '****** ',ixmin,iymin,ixmax,iymax
 
-	write(line,'(a,4i8)') 'InternalBoundingBox'
-     +				,ixmin,iymin,ixmax,iymax
+	write(line,'(a,4i8)') 'InternalBoundingBox' &
+     &				,ixmin,iymin,ixmax,iymax
 	call qcomm(line)
 
 	end
 
-c*****************************************************************
+! *****************************************************************
 
 	subroutine frame(mode)
 
-c plots frame
-c
-c 0: just box around plot (only mode allowed)
+!  plots frame
+! 
+!  0: just box around plot (only mode allowed)
 
 	use mod_bash
 
@@ -552,13 +552,13 @@ c 0: just box around plot (only mode allowed)
 	stop 'error stop frame: only mode == 0 is allowed'
 	end
 
-c*************************************************************
+! *************************************************************
 
 	subroutine basmima(mode)
 
-c computes min/max of basin
-c
-c mode	0: exact dimensions  1: larger dimensions
+!  computes min/max of basin
+! 
+!  mode	0: exact dimensions  1: larger dimensions
 
 	use basin
 	use mod_bash
@@ -599,11 +599,11 @@ c mode	0: exact dimensions  1: larger dimensions
 
 	end
 
-c*************************************************************
+! *************************************************************
 
 	subroutine setbas(x0,y0,x1,y1)
 
-c sets min/max of basin to plot
+!  sets min/max of basin to plot
 
 	use mod_bash
 
@@ -620,11 +620,11 @@ c sets min/max of basin to plot
 
 	end
 
-c*************************************************************
+! *************************************************************
 
 	subroutine getbas(x0,y0,x1,y1)
 
-c gets min/max of basin to plot
+!  gets min/max of basin to plot
 
 	use mod_bash
 
@@ -639,11 +639,11 @@ c gets min/max of basin to plot
 
 	end
 
-c*************************************************************
+! *************************************************************
 
 	subroutine boundline
 
-c plots boundary line for lagoon
+!  plots boundary line for lagoon
 
 	implicit none
 
@@ -688,15 +688,15 @@ c plots boundary line for lagoon
 	stop 'error stop boundline'
 	end
 
-c*************************************************************
+! *************************************************************
 
 	subroutine reggrid(ngrid,dist,gray)
 
-c plots regular grid
-c
-c if ngrid > 0                          use ngrid
-c if ngrid <= 0 and dist > 0.           use dist
-c otherwise                             do nothing
+!  plots regular grid
+! 
+!  if ngrid > 0                          use ngrid
+!  if ngrid <= 0 and dist > 0.           use dist
+!  otherwise                             do nothing
 
 	use mod_bash
 
@@ -758,15 +758,15 @@ c otherwise                             do nothing
 
 	end
 
-c*************************************************************
+! *************************************************************
 
 	subroutine bastlscale
 
-c computes typical length scale for basin
-c
-c dxygrd is used first
-c then typls is used if given
-c else it is computed from grid
+!  computes typical length scale for basin
+! 
+!  dxygrd is used first
+!  then typls is used if given
+!  else it is computed from grid
 
 	use basin, only : nkn,nel,ngr,mbw
 	use mod_bash
@@ -810,13 +810,13 @@ c else it is computed from grid
 
 	end
 
-c***************************************************
-c***************************************************
-c***************************************************
+! ***************************************************
+! ***************************************************
+! ***************************************************
 
 	subroutine frac_pos(r,np)
 
-c computes number of fractional digits of real r
+!  computes number of fractional digits of real r
 
 	implicit none
 
@@ -842,11 +842,11 @@ c computes number of fractional digits of real r
 
 	end
 
-c**************************************************************
+! **************************************************************
 
 	subroutine frac_pos1(r,np)
 
-c computes number of fractional digits of real r
+!  computes number of fractional digits of real r
 
 	implicit none
 
@@ -883,13 +883,13 @@ c computes number of fractional digits of real r
 	stop 'error stop frac_pos: internal error'
 	end
 
-c**************************************************************
-c**************************************************************
-c**************************************************************
+! **************************************************************
+! **************************************************************
+! **************************************************************
 
 	subroutine spherical_fact(fact,afact)
 
-c computes factors for for spherical coordinates
+!  computes factors for for spherical coordinates
 
 	implicit none
 
@@ -920,11 +920,11 @@ c computes factors for for spherical coordinates
 
 	end
 
-c**************************************************************
+! **************************************************************
 
 	subroutine handle_spherical
 
-c handles spherical coordinates
+!  handles spherical coordinates
 
 	use mod_bash
 
@@ -947,13 +947,13 @@ c handles spherical coordinates
 
 	end
 
-c**************************************************************
-c**************************************************************
-c**************************************************************
+! **************************************************************
+! **************************************************************
+! **************************************************************
 
 	subroutine adjust_reg_grid_spacing(bverb,dreg,imicro)
 
-c checks if regular grid should be written
+!  checks if regular grid should be written
 
 	implicit none
 
@@ -974,11 +974,11 @@ c checks if regular grid should be written
 
 	end
 
-c**************************************************************
+! **************************************************************
 
 	subroutine compute_reg_grid_spacing(bverb,dreg,imicro)
 
-c tries to find best regular grid spacing value
+!  tries to find best regular grid spacing value
 
 	implicit none
 
@@ -1011,11 +1011,11 @@ c tries to find best regular grid spacing value
 
 	end
 
-c**************************************************************
+! **************************************************************
 
 	subroutine plot_reg_grid
 
-c handles plotting of regular grid
+!  handles plotting of regular grid
 
 	use mod_bash
 
@@ -1051,11 +1051,11 @@ c handles plotting of regular grid
 
 	end
 
-c**************************************************************
+! **************************************************************
 
 	subroutine label_bw_frame
 
-c handles labeling of frame
+!  handles labeling of frame
 	
 	use plot_fonts
 	use mod_bash
@@ -1115,7 +1115,7 @@ c handles labeling of frame
 
 	call qsetvpnc(xvmin,yvmin,xvmax,yvmax)
 
-c here labeling
+!  here labeling
 
 	dist = reggrd
 	call frac_pos(dist,nc)
@@ -1186,11 +1186,11 @@ c here labeling
 	stop 'error stop label_bw_frame: nx,ny too high'
 	end
 
-c**************************************************************
+! **************************************************************
 
 	subroutine plot_bw_frame(imicro,x0,y0,dx,dy,xmin,xmax,ymin,ymax)
 
-c plot black/white frame around geographical grid
+!  plot black/white frame around geographical grid
 
 	implicit none
 
@@ -1205,9 +1205,9 @@ c plot black/white frame around geographical grid
 	real xn,yn
 	real fact
 
-c------------------------------------------------------------
-c set parameters
-c------------------------------------------------------------
+! ------------------------------------------------------------
+!  set parameters
+! ------------------------------------------------------------
 
 	if( dx .le. 0. .or. dy .le. 0. ) goto 97
 
@@ -1217,7 +1217,7 @@ c------------------------------------------------------------
 
 	fact = 1.5
 
-c	here we should define how many boxes inbetween labels -> empirical
+! 	here we should define how many boxes inbetween labels -> empirical
 
 	if( imicro .le. 0 ) then
 	  ddx = dx/2.
@@ -1229,9 +1229,9 @@ c	here we should define how many boxes inbetween labels -> empirical
 	  ddy = dy/imicro
 	end if
 
-c------------------------------------------------------------
-c plot along x-axis
-c------------------------------------------------------------
+! ------------------------------------------------------------
+!  plot along x-axis
+! ------------------------------------------------------------
 
 	x = x0
 	do while( x .lt. xmin )
@@ -1269,9 +1269,9 @@ c------------------------------------------------------------
 	  x = x - ddx
 	end do
 
-c------------------------------------------------------------
-c plot small corner boxes
-c------------------------------------------------------------
+! ------------------------------------------------------------
+!  plot small corner boxes
+! ------------------------------------------------------------
 
 	if( imicro .ge. 0 ) then
 	  call make_box(0,xmin-hx,ymax,xmin,ymax+hy)
@@ -1280,9 +1280,9 @@ c------------------------------------------------------------
 	  call make_box(0,xmax,ymin-hy,xmax+hx,ymin)
 	end if
 
-c------------------------------------------------------------
-c plot along y-axis
-c------------------------------------------------------------
+! ------------------------------------------------------------
+!  plot along y-axis
+! ------------------------------------------------------------
 
 	y = y0
 	do while( y .lt. ymin )
@@ -1320,9 +1320,9 @@ c------------------------------------------------------------
 	  y = y - ddy
 	end do
 
-c------------------------------------------------------------
-c end of routine
-c------------------------------------------------------------
+! ------------------------------------------------------------
+!  end of routine
+! ------------------------------------------------------------
 
 	return
    97	continue
@@ -1330,7 +1330,7 @@ c------------------------------------------------------------
 	stop 'error stop plot_bw_frame: dx,dy'
 	end
 
-c**************************************************************
+! **************************************************************
 
 	subroutine make_box(ic,x1,y1,x2,y2)
 
@@ -1350,9 +1350,9 @@ c**************************************************************
 
 	end
 
-c**************************************************************
-c**************************************************************
-c**************************************************************
+! **************************************************************
+! **************************************************************
+! **************************************************************
 
         subroutine setreg_grid(regpar)
 
@@ -1366,11 +1366,11 @@ c**************************************************************
 
         end
 
-c**************************************************************
+! **************************************************************
 
 	subroutine plot_regular_points
 
-c plots regular points
+!  plots regular points
 
 	use mod_bash
 
@@ -1448,14 +1448,14 @@ c plots regular points
 
 	end
 
-c**************************************************************
+! **************************************************************
 
 	subroutine plot_obs_points(mode,file,text)
 
-c plots special points from observation/meteo file
-c
-c name of coords.dat has to passed into the subroutine
-c if sea_land.dat exists it is used, otherwise we can do without
+!  plots special points from observation/meteo file
+! 
+!  name of coords.dat has to passed into the subroutine
+!  if sea_land.dat exists it is used, otherwise we can do without
 
 	implicit none
 
@@ -1580,7 +1580,7 @@ c if sea_land.dat exists it is used, otherwise we can do without
 	stop 'error stop plot_obs_points: different length'
 	end
 
-c**************************************************************
+! **************************************************************
 
 	subroutine plot_plus(x,y,dx,dy)
 
@@ -1604,11 +1604,11 @@ c**************************************************************
 	
 	end
 
-c**************************************************************
+! **************************************************************
 
 	subroutine plot_islands(cgray)
 
-c plots islands gray
+!  plots islands gray
 
 	use mod_geom
 	use basin
@@ -1684,11 +1684,11 @@ c plots islands gray
 
 	end
 
-c**************************************************************
+! **************************************************************
 
 	subroutine plot_outer(n,xa,ya)
 
-c plots outer island
+!  plots outer island
 
 	use mod_bash
 
@@ -1754,5 +1754,5 @@ c plots outer island
 
 	end
 
-c**************************************************************
+! **************************************************************
 

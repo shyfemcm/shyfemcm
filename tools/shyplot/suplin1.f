@@ -23,26 +23,26 @@
 !
 !--------------------------------------------------------------------------
 
-c utilitiy routines for section plot (velocities)
-c
-c revision log :
-c
-c 13.10.2009	ggu	routines written from scratch
-c 23.03.2010	ggu	changed v6.1.1
-c 23.12.2014	ggu	changed VERS_7_0_11
-c 19.01.2015	ggu	changed VERS_7_1_2
-c 19.01.2015	ggu	changed VERS_7_1_3
-c 10.07.2015	ggu	changed VERS_7_1_50
-c 17.07.2015	ggu	changed VERS_7_1_52
-c 17.07.2015	ggu	changed VERS_7_1_80
-c 20.07.2015	ggu	changed VERS_7_1_81
-c 25.05.2016	ggu	changed VERS_7_5_10
-c 30.05.2016	ggu	changed VERS_7_5_11
-c 12.01.2017	ggu	changed VERS_7_5_21
-c 18.12.2018	ggu	changed VERS_7_5_52
-c 21.05.2019	ggu	changed VERS_7_5_62
-c
-c*******************************************************************
+!  utilitiy routines for section plot (velocities)
+! 
+!  revision log :
+! 
+!  13.10.2009	ggu	routines written from scratch
+!  23.03.2010	ggu	changed v6.1.1
+!  23.12.2014	ggu	changed VERS_7_0_11
+!  19.01.2015	ggu	changed VERS_7_1_2
+!  19.01.2015	ggu	changed VERS_7_1_3
+!  10.07.2015	ggu	changed VERS_7_1_50
+!  17.07.2015	ggu	changed VERS_7_1_52
+!  17.07.2015	ggu	changed VERS_7_1_80
+!  20.07.2015	ggu	changed VERS_7_1_81
+!  25.05.2016	ggu	changed VERS_7_5_10
+!  30.05.2016	ggu	changed VERS_7_5_11
+!  12.01.2017	ggu	changed VERS_7_5_21
+!  18.12.2018	ggu	changed VERS_7_5_52
+!  21.05.2019	ggu	changed VERS_7_5_62
+! 
+! *******************************************************************
 
 	subroutine prepare_vel(pp3)
 
@@ -78,11 +78,11 @@ c*******************************************************************
 
 	end
 
-c*******************************************************************
+! *******************************************************************
 
 	subroutine make_vel_from_tra(het3v)
 
-c from transports to velocities (on elements)
+!  from transports to velocities (on elements)
 
 	use mod_hydro_vel
 	use mod_hydro
@@ -113,12 +113,12 @@ c from transports to velocities (on elements)
 	stop 'error stop make_vel_from_tra: zero depth'
 	end
 
-c*******************************************************************
+! *******************************************************************
 
 	subroutine vel_to_node
 
-c transfers velocities at elements to nodes 
-c and vertical velocities to center of layer
+!  transfers velocities at elements to nodes 
+!  and vertical velocities to center of layer
 
 	use mod_hydro_print
 	use mod_hydro_vel
@@ -169,5 +169,5 @@ c and vertical velocities to center of layer
 
 	end
 
-c*******************************************************************
+! *******************************************************************
 

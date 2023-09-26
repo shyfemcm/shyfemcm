@@ -24,82 +24,82 @@
 !
 !--------------------------------------------------------------------------
 
-c routines for anotating plot
-c
-c contents :
-c
-c revision log :
-c
-c 09.02.2000	ggu	use inboxdim to compute box to plot
-c 07.04.2000	ggu	new format for legend read
-c 12.06.2000	ggu	ndim renamed into legdim
-c 04.02.2001	ggu	color bar legend now works with nctick
-c 21.05.2003	ggu	various changes in legend
-c 21.08.2003	ggu	uses occupy to decide where to put color bar
-c 04.09.2003	ggu	new routines to read legend, legend.h
-c 05.10.2003	ggu	new routines to plot vectors autonomously
-c 08.03.2004	ggu	legdate to write date to plot (called in legplo)
-c 03.09.2004	ggu	legwind to write wind data (preliminary)
-c 22.09.2004	ggu	small bug fix in legwind, qlwidth(0.) for reset
-c 05.10.2004	ggu	changes in legdate and legwind
-c 02.12.2004	ggu	legwind and legdate prepared for str input
-c 02.03.2005	ggu	new format for exffil
-c 11.03.2005	ggu	date and wind are now specified in STR file
-c 27.05.2005	ggu	new routines to make absolute coordinates (for text)
-c 18.10.2006	ggu	may give relative coords for date/time
-c 06.06.2007	ggu	new mode for idate (4)
-c 06.12.2008	ggu	new routine blank_window(), in velsh handle wind/waves
-c 06.12.2008	ggu	make colbar smaller than box size
-c 09.01.2009	ggu	allow any factor in velsh, no traref etc..
-c 21.04.2009	ggu	allow just one isoline (bug)
-c 09.10.2009	ggu	sclvel for scaling arrow, lots of changes in color bar
-c 13.10.2009	ggu	changes to colbar, new inbox routines
-c 23.02.2010	ggu	for colorbar switch to generic color table
-c 23.03.2010	ggu	changed v6.1.1
-c 09.12.2011	ggu	changed VERS_6_1_38
-c 30.03.2012	ggu	changed VERS_6_1_51
-c 01.06.2012	ggu	new circle item for legend, auto determ for ndec
-c 12.09.2012	ggu	changed VERS_6_1_57
-c 19.06.2013	ggu	changed VERS_6_1_66
-c 05.09.2013	ggu	adjust for scale distortion in ref and wind arrows
-c 12.09.2013	ggu	changed VERS_6_1_67
-c 05.03.2014	ggu	in annotation use date information
-c 30.05.2014	ggu	changed VERS_6_1_76
-c 18.07.2014	ggu	changed VERS_7_0_1
-c 16.10.2014	ggu	annotes doesnt need it anymore
-c 26.11.2014	ggu	changed VERS_7_0_7
-c 05.12.2014	ggu	changed VERS_7_0_8
-c 23.12.2014	ggu	changed VERS_7_0_11
-c 19.01.2015	ggu	changed VERS_7_1_3
-c 26.02.2015	ggu	changed VERS_7_1_5
-c 01.04.2015	ggu	changed VERS_7_1_7
-c 05.05.2015	ggu	changed VERS_7_1_10
-c 06.05.2015	ggu	prepared for logarithmic color bar
-c 21.05.2015	ggu	changed VERS_7_1_11
-c 05.06.2015	ggu	new keyword vart in legend for variable text
-c 10.07.2015	ggu	changed VERS_7_1_50
-c 17.07.2015	ggu	changed VERS_7_1_80
-c 20.07.2015	ggu	changed VERS_7_1_81
-c 19.02.2016	ggu	changed VERS_7_5_2
-c 17.06.2016	ccf	include kn units and correct date/time for tzshow
-c 13.09.2016	ggu	old legend deleted, new keyword ctxt for centering
-c 30.09.2016	ggu	changed VERS_7_5_18
-c 11.07.2017	ggu	changed VERS_7_5_30
-c 14.11.2017	ggu	changed VERS_7_5_36
-c 22.02.2018	ggu	changed VERS_7_5_42
-c 06.07.2018	ggu	changed VERS_7_5_48
-c 18.12.2018	ggu	changed VERS_7_5_52
-c 21.05.2019	ggu	changed VERS_7_5_62
-c
-c notes :
-c
-c for format of legend please see routine newleg()
-c
-c***************************************************************
+!  routines for anotating plot
+! 
+!  contents :
+! 
+!  revision log :
+! 
+!  09.02.2000	ggu	use inboxdim to compute box to plot
+!  07.04.2000	ggu	new format for legend read
+!  12.06.2000	ggu	ndim renamed into legdim
+!  04.02.2001	ggu	color bar legend now works with nctick
+!  21.05.2003	ggu	various changes in legend
+!  21.08.2003	ggu	uses occupy to decide where to put color bar
+!  04.09.2003	ggu	new routines to read legend, legend.h
+!  05.10.2003	ggu	new routines to plot vectors autonomously
+!  08.03.2004	ggu	legdate to write date to plot (called in legplo)
+!  03.09.2004	ggu	legwind to write wind data (preliminary)
+!  22.09.2004	ggu	small bug fix in legwind, qlwidth(0.) for reset
+!  05.10.2004	ggu	changes in legdate and legwind
+!  02.12.2004	ggu	legwind and legdate prepared for str input
+!  02.03.2005	ggu	new format for exffil
+!  11.03.2005	ggu	date and wind are now specified in STR file
+!  27.05.2005	ggu	new routines to make absolute coordinates (for text)
+!  18.10.2006	ggu	may give relative coords for date/time
+!  06.06.2007	ggu	new mode for idate (4)
+!  06.12.2008	ggu	new routine blank_window(), in velsh handle wind/waves
+!  06.12.2008	ggu	make colbar smaller than box size
+!  09.01.2009	ggu	allow any factor in velsh, no traref etc..
+!  21.04.2009	ggu	allow just one isoline (bug)
+!  09.10.2009	ggu	sclvel for scaling arrow, lots of changes in color bar
+!  13.10.2009	ggu	changes to colbar, new inbox routines
+!  23.02.2010	ggu	for colorbar switch to generic color table
+!  23.03.2010	ggu	changed v6.1.1
+!  09.12.2011	ggu	changed VERS_6_1_38
+!  30.03.2012	ggu	changed VERS_6_1_51
+!  01.06.2012	ggu	new circle item for legend, auto determ for ndec
+!  12.09.2012	ggu	changed VERS_6_1_57
+!  19.06.2013	ggu	changed VERS_6_1_66
+!  05.09.2013	ggu	adjust for scale distortion in ref and wind arrows
+!  12.09.2013	ggu	changed VERS_6_1_67
+!  05.03.2014	ggu	in annotation use date information
+!  30.05.2014	ggu	changed VERS_6_1_76
+!  18.07.2014	ggu	changed VERS_7_0_1
+!  16.10.2014	ggu	annotes doesnt need it anymore
+!  26.11.2014	ggu	changed VERS_7_0_7
+!  05.12.2014	ggu	changed VERS_7_0_8
+!  23.12.2014	ggu	changed VERS_7_0_11
+!  19.01.2015	ggu	changed VERS_7_1_3
+!  26.02.2015	ggu	changed VERS_7_1_5
+!  01.04.2015	ggu	changed VERS_7_1_7
+!  05.05.2015	ggu	changed VERS_7_1_10
+!  06.05.2015	ggu	prepared for logarithmic color bar
+!  21.05.2015	ggu	changed VERS_7_1_11
+!  05.06.2015	ggu	new keyword vart in legend for variable text
+!  10.07.2015	ggu	changed VERS_7_1_50
+!  17.07.2015	ggu	changed VERS_7_1_80
+!  20.07.2015	ggu	changed VERS_7_1_81
+!  19.02.2016	ggu	changed VERS_7_5_2
+!  17.06.2016	ccf	include kn units and correct date/time for tzshow
+!  13.09.2016	ggu	old legend deleted, new keyword ctxt for centering
+!  30.09.2016	ggu	changed VERS_7_5_18
+!  11.07.2017	ggu	changed VERS_7_5_30
+!  14.11.2017	ggu	changed VERS_7_5_36
+!  22.02.2018	ggu	changed VERS_7_5_42
+!  06.07.2018	ggu	changed VERS_7_5_48
+!  18.12.2018	ggu	changed VERS_7_5_52
+!  21.05.2019	ggu	changed VERS_7_5_62
+! 
+!  notes :
+! 
+!  for format of legend please see routine newleg()
+! 
+! ***************************************************************
 
 	subroutine annotes(var)
 
-c writes annotation for simulation
+!  writes annotation for simulation
 
 	implicit none
 
@@ -123,18 +123,18 @@ c writes annotation for simulation
         debug = .true.
         debug = .false.
 
-c--------------------------------------------------------------
-c set up variables
-c--------------------------------------------------------------
+! --------------------------------------------------------------
+!  set up variables
+! --------------------------------------------------------------
 
 	call qgetvp(xmin,ymin,xmax,ymax)
 
 	call qtxts(6)
         call qfont('Courier')
 
-c--------------------------------------------------------------
-c determine total width to use
-c--------------------------------------------------------------
+! --------------------------------------------------------------
+!  determine total width to use
+! --------------------------------------------------------------
 
 	dx = (xmax - xmin)
 	wx = 0.9 * dx
@@ -146,17 +146,17 @@ c--------------------------------------------------------------
 	  write(6,*) xmin,ymin,xmax,ymax
         end if
 
-c--------------------------------------------------------------
-c write description of simulation
-c--------------------------------------------------------------
+! --------------------------------------------------------------
+!  write description of simulation
+! --------------------------------------------------------------
 
 	y = ymin + 0.6
 	x = xmin + 0.1 * dx
 	call qtext(x,y,descrp)
 
-c--------------------------------------------------------------
-c write time in seconds
-c--------------------------------------------------------------
+! --------------------------------------------------------------
+!  write time in seconds
+! --------------------------------------------------------------
 
 	y = ymin + 1.1
 	x = xmin + 0.1 * dx
@@ -165,9 +165,9 @@ c--------------------------------------------------------------
 	write(line,'(i12,a)') it,' sec'
 	call qtext(x,y,line)
 
-c--------------------------------------------------------------
-c write time/date
-c--------------------------------------------------------------
+! --------------------------------------------------------------
+!  write time/date
+! --------------------------------------------------------------
 
 	x = x + wx/4.
 	if( dts_has_date() ) then
@@ -181,9 +181,9 @@ c--------------------------------------------------------------
 
 	call qtext(x,y,line)
 
-c--------------------------------------------------------------
-c write level
-c--------------------------------------------------------------
+! --------------------------------------------------------------
+!  write level
+! --------------------------------------------------------------
 
 	x = x + wx/4.
         line = 'level = '
@@ -191,30 +191,30 @@ c--------------------------------------------------------------
         iaux = ialfa(aux,line(9:),-1,-1)
 	call qtext(x,y,line)
 
-c--------------------------------------------------------------
-c write description of what is plotted
-c--------------------------------------------------------------
+! --------------------------------------------------------------
+!  write description of what is plotted
+! --------------------------------------------------------------
 
 	x = x + wx/4.
 	call qtext(x,y,var)
 
-c--------------------------------------------------------------
-c reset plotting area -> is done in annote (basin)
-c--------------------------------------------------------------
+! --------------------------------------------------------------
+!  reset plotting area -> is done in annote (basin)
+! --------------------------------------------------------------
 
-c	call qsetvp(xmin,ymin+1.5,xmax,ymax)
+! 	call qsetvp(xmin,ymin+1.5,xmax,ymax)
 
-c--------------------------------------------------------------
-c end of routine
-c--------------------------------------------------------------
+! --------------------------------------------------------------
+!  end of routine
+! --------------------------------------------------------------
 
 	end
 
-c***************************************************************
+! ***************************************************************
 
 	subroutine annote
 
-c writes annotation
+!  writes annotation
 
 	implicit none
 
@@ -247,21 +247,21 @@ c writes annotation
 
 	end
 
-c****************************************************************
+! ****************************************************************
 
 	subroutine makehm(it,line)
 
-c converts it (seconds) to ddd:hh:mm (alpha string)
+!  converts it (seconds) to ddd:hh:mm (alpha string)
 
 	implicit none
 
-c arguments
+!  arguments
 	integer it
 	character*(*) line
-c local
+!  local
 	integer is,ih,im,id,ii
 	character sec*2, min*2, hour*2, day*5, sign*1
-c functions
+!  functions
 	integer ialfa
 
 	is = it
@@ -293,11 +293,11 @@ c functions
 	return
 	end
 
-c*******************************************************************
+! *******************************************************************
 
 	subroutine scalbar(x,y,dist,h,ntack,scale,ndec,unit)
 
-c plots scale
+!  plots scale
 
 	implicit none
 
@@ -317,7 +317,7 @@ c plots scale
 	dh = 0.5 * h
 	call qgray(0.)
 
-c outer box
+!  outer box
 
 	xe = x + dist*ntack
 	ye = y + h
@@ -327,7 +327,7 @@ c outer box
 	call qline(xe,ye,x,ye)
 	call qline(x,ye,x,y)
 
-c internal division
+!  internal division
 
 	ye = y + dh
 	call qline(x,ye,xe,ye)
@@ -338,7 +338,7 @@ c internal division
 	  call qline(xe,y,xe,ye)
 	end do
 
-c black boxes
+!  black boxes
 
 	ii = 0
 	do n=1,ntack
@@ -350,7 +350,7 @@ c black boxes
 	  call qrfill(xa,ya,xe,ye)
 	end do
 
-c legend
+!  legend
 
         call qtxts(12)
         call qfont('Times-Roman')
@@ -370,18 +370,18 @@ c legend
 	
 	end
 
-c
-c*************************************************************
-c
+! 
+! *************************************************************
+! 
         subroutine dnord0(xm,ym,radius,angle)
-c
-c plots northern direction
-c
-c xm,ym         coordinates of centre of circle
-c radius        radius of circle
-c angle         angle of inclination of true north
-c               ...positive if true north is pointing to the east
-c
+! 
+!  plots northern direction
+! 
+!  xm,ym         coordinates of centre of circle
+!  radius        radius of circle
+!  angle         angle of inclination of true north
+!                ...positive if true north is pointing to the east
+! 
 	implicit none
 
 	real xm,ym,radius,angle
@@ -395,61 +395,61 @@ c
 	real xtop,ytop,angbot
 	real xbot1,ybot1,xbot2,ybot2
 	real xh,yh,xr,yr
-c
+! 
         hsymb=radius/4.
-c
-c plot circle
-c
+! 
+!  plot circle
+! 
         call qmove(xm+radius,ym)
-c
+! 
         do i=1,360
         ri=i*radian
         x=xm+radius*cos(ri)
         y=ym+radius*sin(ri)
         call qplot(x,y)
         end do
-c
-c plot arrow
-c
+! 
+!  plot arrow
+! 
         xtop=xm+radius*sin(angle*radian)
         ytop=ym+radius*cos(angle*radian)
-c
+! 
         angbot=amod(angle+180.,360.)
-c
+! 
         xbot1=xm+radius*sin((angbot+10.)*radian)
         ybot1=ym+radius*cos((angbot+10.)*radian)
-c
+! 
         xbot2=xm+radius*sin((angbot-10.)*radian)
         ybot2=ym+radius*cos((angbot-10.)*radian)
-c
+! 
         call qmove(xtop,ytop)
         call qplot(xbot1,ybot1)
         call qplot(xbot2,ybot2)
         call qplot(xtop,ytop)
-c
-c find lower left corner for 'N' and plot it
-c
+! 
+!  find lower left corner for 'N' and plot it
+! 
         xh=-hsymb*2./6.
         yh=radius+0.5*hsymb
-c
+! 
         xr= xh*cos(angle*radian)+yh*sin(angle*radian)
         yr=-xh*sin(angle*radian)+yh*cos(angle*radian)
-c
-c        call qsymb(xr+xm,yr+ym,hsymb,'N',-angle)
-c
+! 
+!         call qsymb(xr+xm,yr+ym,hsymb,'N',-angle)
+! 
 	return
 	end
-c
-c*************************************************************
-c
+! 
+! *************************************************************
+! 
         subroutine dnord(xm,ym,radius,angle)
-c
-c plots northern direction
-c
-c xm,ym         coordinates of centre of circle
-c radius        radius of circle
-c angle         angle of inclination of true north
-c               ...positive if true north is pointing to the east
+! 
+!  plots northern direction
+! 
+!  xm,ym         coordinates of centre of circle
+!  radius        radius of circle
+!  angle         angle of inclination of true north
+!                ...positive if true north is pointing to the east
 
 	implicit none
 
@@ -502,16 +502,16 @@ c               ...positive if true north is pointing to the east
 	yp(4) = ym+r4
 	call qafill(4,xp,yp)
 
-c	call qfont('Times-Roman')
-c	call qtxts()
+! 	call qfont('Times-Roman')
+! 	call qtxts()
 
         end
 
-c*****************************************************************
+! *****************************************************************
 
 	subroutine scale_legend(x0,y0,x1,y1)
 
-c creates legend (north wheel and scale bar)
+!  creates legend (north wheel and scale bar)
 
 	implicit none
 
@@ -538,38 +538,38 @@ c creates legend (north wheel and scale bar)
 
 	!write(6,*) '===================== legend =============='
 
-c blanking of window
+!  blanking of window
 
 	if( bblank ) call blank_window(x0,y0,x1,y1)
 
-c extension of window
+!  extension of window
 
 	dx = x1 - x0
 	dy = y1 - y0
 
-c dimensions for north wheel
+!  dimensions for north wheel
 
 	xr = x0 + 0.5 * dx
 	yr = y0 + 0.75 * dy
 	r = 0.2 * dy
 
-c find length of scale bar - dd must not be larger than 80% of full length
+!  find length of scale bar - dd must not be larger than 80% of full length
 
 	dd = rnext(dx,-3)			!find lower 1,2,3,4,5,8
 	if( dd .gt. 0.8*dx ) then
 	  dd = rnext(0.8*dx,-3)
 	end if
 
-c dimensions for scale bar (starting point and height)
+!  dimensions for scale bar (starting point and height)
 
 	x0s = x0 + 0.5 * ( dx - dd )
 	y0s = y0 + dy * 0.35
 	h = 0.1 * dy
 
-c	write(6,*) x0,y0,dx,dy
-c	write(6,*) x0s,y0s,h
+! 	write(6,*) x0,y0,dx,dy
+! 	write(6,*) x0s,y0s,h
 
-c find leading digit (must be 1,2,3,4,5,8)
+!  find leading digit (must be 1,2,3,4,5,8)
 
 	is = istell(dd)
 	i0 = iround( dd / 10**is )
@@ -610,21 +610,21 @@ c find leading digit (must be 1,2,3,4,5,8)
         call qcomm('Plotting north')
         call dnord(xr,yr,r,0.)
 
-c	call qmove(x0,y0)
-c	call qplot(x1,y0)
-c	call qplot(x1,y1)
-c	call qplot(x0,y1)
-c	call qplot(x0,y0)
+! 	call qmove(x0,y0)
+! 	call qplot(x1,y0)
+! 	call qplot(x1,y1)
+! 	call qplot(x0,y1)
+! 	call qplot(x0,y0)
 
         call qcomm('end of plotting legend')
 
 	end
 
-c******************************************************************
+! ******************************************************************
 
 	subroutine colsh
 
-c shell for color bar
+!  shell for color bar
 
 	use color
 
@@ -660,12 +660,12 @@ c shell for color bar
 
 	end
 
-c******************************************************************
+! ******************************************************************
 
-	subroutine colbar(title,bhoriz,nticks,ipllog,ndec,fact
-     +				,xmin,ymin,xmax,ymax)
+	subroutine colbar(title,bhoriz,nticks,ipllog,ndec,fact &
+     &				,xmin,ymin,xmax,ymax)
 
-c writes color bar
+!  writes color bar
 
 	use plot_fonts
 
@@ -679,7 +679,7 @@ c writes color bar
 	real fact
 	real xmin,ymin,xmax,ymax
 
-c color
+!  color
 	integer isoanz
 	real fnull
 
@@ -738,11 +738,11 @@ c color
 	  call write_color_table
 	end if
 
-c blanking of window
+!  blanking of window
 
 	if( bblank ) call blank_window(xmin,ymin,xmax,ymax)
 
-c determine min/max
+!  determine min/max
 
 	dx = xmax - xmin	! total width of colorbar
 	dy = ymax - ymin	! height of color bar (including legend)
@@ -754,9 +754,9 @@ c determine min/max
 	  write(6,*) 'colbar:  colors = ',imax,'  isolines = ',isoanz
 	end if
 
-c position of colorbar on plot (colorbar is a little smaller than box)
-c (x0,y0) and (x1,y1) are the extremes of the color bar
-c dx,dy is width of box
+!  position of colorbar on plot (colorbar is a little smaller than box)
+!  (x0,y0) and (x1,y1) are the extremes of the color bar
+!  dx,dy is width of box
 
 	if( bhoriz ) then
 	  xperc = 0.10
@@ -771,7 +771,7 @@ c dx,dy is width of box
 	y0 = ymin + yperc * dy
 	y1 = ymin + (1.-yperc) * dy
 
-c plot single boxes - dxc/dyc are width/height of single color box
+!  plot single boxes - dxc/dyc are width/height of single color box
 
 	if( bdebug ) call write_color_table
 	!call set_auto_color_table
@@ -809,7 +809,7 @@ c plot single boxes - dxc/dyc are width/height of single color box
 	!call reset_auto_color_table
 	if( bdebug ) call write_color_table
 
-c write legend
+!  write legend
 
 	call qcm(xcm,ycm)
 	dxtick = 0.1*xcm
@@ -891,13 +891,13 @@ c write legend
 	  end if
 	end do
 
-c plot box around colorbar
+!  plot box around colorbar
 
         call qgray(0.)
 	call pbox(x0,y0,x1,y1)
 	!call pbox(xmin,ymin,xmax,ymax)		!just for debug
 
-c write legend over colorbar
+!  write legend over colorbar
 
         !call qtxts(15)
 	call qtxts(fs_cbar_text)
@@ -918,13 +918,13 @@ c write legend over colorbar
  1000	format(i5,4f14.4,5x,a10)
 	end
 
-c************************************************************
-c************************************************************
-c************************************************************
+! ************************************************************
+! ************************************************************
+! ************************************************************
 
         subroutine legini
 
-c initializes legend
+!  initializes legend
 
         implicit none
 
@@ -943,7 +943,7 @@ c initializes legend
 
 	end
 
-c************************************************************
+! ************************************************************
 
 	subroutine set_plotleg(ipl)
 
@@ -957,11 +957,11 @@ c************************************************************
 
 	end
 
-c************************************************************
+! ************************************************************
 
         subroutine legerr
 
-c error message for legend
+!  error message for legend
 
         implicit none
 
@@ -978,11 +978,11 @@ c error message for legend
 
         end
 
-c************************************************************
+! ************************************************************
 
         subroutine legrd
 
-c reads legend from str file
+!  reads legend from str file
 
         implicit none
 
@@ -1018,30 +1018,30 @@ c reads legend from str file
 	return
         end
 
-c************************************************************
+! ************************************************************
 
 	subroutine newleg(line)
 
-c reads legend - new version
-c
-c text	30500 11800     15      'Chioggia'	#text, 15pt
-c vart	30500 11800     15      'a'		#text, 15pt, change on each call
-c ctxt	0 0					#text centering (horiz, vert)
-c ignu	1 					#ignore underscore (0/1)
-c line	30500 11800 35000 15000			#line
-c vect	30500 11800 35000 15000	0.1		#arrow, tipsize 0.1
-c rect	30500 11800 35000 15000	0.1		#rectangle, fill color 0.1
-c rect	30500 11800 35000 15000	-1		#rectangle (outline, no fill)
-c circ	30500 11800 5000 -1			#circle (outline, no fill)
-c wid	5					#set line width to 5
-c col	0.5					#set color to 0.5
-c
-c values for ctxt:
-c		-1:left/bottom  0:center  +1:right/top
-c possible text for vart:
-c		a	gives a b c d ...
-c		A	gives A B C D ...
-c		1	gives 1 2 3 4 ...
+!  reads legend - new version
+! 
+!  text	30500 11800     15      'Chioggia'	#text, 15pt
+!  vart	30500 11800     15      'a'		#text, 15pt, change on each call
+!  ctxt	0 0					#text centering (horiz, vert)
+!  ignu	1 					#ignore underscore (0/1)
+!  line	30500 11800 35000 15000			#line
+!  vect	30500 11800 35000 15000	0.1		#arrow, tipsize 0.1
+!  rect	30500 11800 35000 15000	0.1		#rectangle, fill color 0.1
+!  rect	30500 11800 35000 15000	-1		#rectangle (outline, no fill)
+!  circ	30500 11800 5000 -1			#circle (outline, no fill)
+!  wid	5					#set line width to 5
+!  col	0.5					#set color to 0.5
+! 
+!  values for ctxt:
+! 		-1:left/bottom  0:center  +1:right/top
+!  possible text for vart:
+! 		a	gives a b c d ...
+! 		A	gives A B C D ...
+! 		1	gives 1 2 3 4 ...
 
 	implicit none
 
@@ -1152,11 +1152,11 @@ c		1	gives 1 2 3 4 ...
 	stop 'error stop newleg: read error'
 	end
 
-c************************************************************
+! ************************************************************
 
         subroutine legplo
 
-c plots legend
+!  plots legend
 
         implicit none
 
@@ -1285,7 +1285,7 @@ c plots legend
 	stop 'error stop legplo: keyword error'
 	end
 
-c*****************************************************************
+! *****************************************************************
 
 	subroutine adjust_vartext(iadd,text)
 
@@ -1317,11 +1317,11 @@ c*****************************************************************
 
 	end
 
-c*****************************************************************
+! *****************************************************************
 
         subroutine legwind
 
-c plots wind vector
+!  plots wind vector
 
         implicit none
 
@@ -1439,7 +1439,7 @@ c plots wind vector
 
         end
 
-c*****************************************************************
+! *****************************************************************
 
         subroutine make_wind_text(wtext,wunit,s,text)
 
@@ -1461,11 +1461,11 @@ c*****************************************************************
 
         end
 
-c*****************************************************************
+! *****************************************************************
 
         subroutine legdate
 
-c plots date legend
+!  plots date legend
 
         implicit none
 
@@ -1572,12 +1572,12 @@ c plots date legend
 
         end
 
-c*****************************************************************
+! *****************************************************************
 
-	subroutine velarr(title,unit,scale,ndec,fact
-     +				,arrlen,sclvel,velmax,x0,y0,x1,y1)
+	subroutine velarr(title,unit,scale,ndec,fact &
+     &				,arrlen,sclvel,velmax,x0,y0,x1,y1)
 
-c creates legend for velocity arrow and plots arrow
+!  creates legend for velocity arrow and plots arrow
 
 	use mod_bash
 
@@ -1612,19 +1612,19 @@ c creates legend for velocity arrow and plots arrow
 	bdebug = .true.
 	bdebug = .false.
 
-c blanking of window
+!  blanking of window
 
 	if( bblank ) call blank_window(x0,y0,x1,y1)
 
-c extension of window
+!  extension of window
 
 	dx = x1 - x0
 	dy = y1 - y0
 
-c find length of arrow
-c
-c dd	length of velocity vector in world coordinates
-c val	length of velocity vector in velocity (transport) coordinates
+!  find length of arrow
+! 
+!  dd	length of velocity vector in world coordinates
+!  val	length of velocity vector in velocity (transport) coordinates
 
 	if( arrlen .le. 0. ) then	!automatic length
 	  dd = 0.5 * dx			!maximum length is half of space
@@ -1675,16 +1675,16 @@ c val	length of velocity vector in velocity (transport) coordinates
 
 	end
 
-c******************************************************************
+! ******************************************************************
 
 	subroutine velsh(ivel,scale,velmax)
 
-c shell for velocity arrow
-c
-c ivel = 1      velocities
-c ivel = 2      transports
-c ivel = 3      wind
-c ivel = 4      waves
+!  shell for velocity arrow
+! 
+!  ivel = 1      velocities
+!  ivel = 2      transports
+!  ivel = 3      wind
+!  ivel = 4      waves
 
 	implicit none
 
@@ -1745,12 +1745,12 @@ c ivel = 4      waves
 	  write(6,*) '  end velsh ================================='
 	end if
 
-	call velarr(title,unit,scale,ndec,fact,arrlen,sclvel
-     +				,velmax,x0,y0,x1,y1)
+	call velarr(title,unit,scale,ndec,fact,arrlen,sclvel &
+     &				,velmax,x0,y0,x1,y1)
 
 	end
 
-c******************************************************************
+! ******************************************************************
 
 	subroutine make_unit(fact,unit)
 
@@ -1776,11 +1776,11 @@ c******************************************************************
 
 	end
 
-c******************************************************************
+! ******************************************************************
 
 	subroutine setboxdim(name,x0,y0,x1,y1)
 
-c sets dimension of box
+!  sets dimension of box
 
 	implicit none
 
@@ -1801,11 +1801,11 @@ c sets dimension of box
 
 	end
 
-c******************************************************************
+! ******************************************************************
 
 	subroutine getboxdim(name,x0,y0,x1,y1)
 
-c gets dimension of box
+!  gets dimension of box
 
 	implicit none
 
@@ -1828,7 +1828,7 @@ c gets dimension of box
 
 	end
 
-c******************************************************************
+! ******************************************************************
 
 	function inboxdim(name,x0,y0,x1,y1)
 
@@ -1844,7 +1844,7 @@ c******************************************************************
 
 	end
 
-c******************************************************************
+! ******************************************************************
 
 	function inboxdim_noabs(name,x0,y0,x1,y1)
 
@@ -1860,11 +1860,11 @@ c******************************************************************
 
 	end
 	
-c******************************************************************
+! ******************************************************************
 
 	function inboxdim_intern(name,babs,x0,y0,x1,y1)
 
-c computes size of box inside plot
+!  computes size of box inside plot
 
 	implicit none
 
@@ -1877,7 +1877,7 @@ c computes size of box inside plot
 
 	call getboxdim(name,x0,y0,x1,y1)
 
-c	write(6,*) '------ ',name,' ----',x0,y0,x1,y1
+! 	write(6,*) '------ ',name,' ----',x0,y0,x1,y1
 
 	if( x0 .eq. x1 .or. y0 .eq. y1 ) return	!nothing to do
 
@@ -1886,13 +1886,13 @@ c	write(6,*) '------ ',name,' ----',x0,y0,x1,y1
 
 	inboxdim_intern = .true.
 
-c	we are nearly done -> see if units are relative and convert
+! 	we are nearly done -> see if units are relative and convert
 
 	if( babs ) call make_absolute(x0,y0,x1,y1)
 
 	end
 
-c******************************************************************
+! ******************************************************************
 
 	subroutine swapr(a,b)
 	c=a
@@ -1900,11 +1900,11 @@ c******************************************************************
 	b=c
 	end
 
-c******************************************************************
+! ******************************************************************
 
 	function is_box_given(name)
 
-c checks if box is given
+!  checks if box is given
 
 	implicit none
 
@@ -1918,11 +1918,11 @@ c checks if box is given
 
 	end
 
-c******************************************************************
+! ******************************************************************
 
 	function is_relative(x,y)
 
-c checks if coordinates are relative or absolute
+!  checks if coordinates are relative or absolute
 
 	implicit none
 
@@ -1931,8 +1931,8 @@ c checks if coordinates are relative or absolute
 
 	real relmin,relmax
 
-c	relmin =  0.
-c	relmax = +1.
+! 	relmin =  0.
+! 	relmax = +1.
 	relmin = -1.
 	relmax = +2.
 
@@ -1945,11 +1945,11 @@ c	relmax = +1.
 
 	end
 
-c******************************************************************
+! ******************************************************************
 
 	subroutine make_abs(x,y)
 
-c makes coordinates absolute
+!  makes coordinates absolute
 
 	implicit none
 
@@ -1964,11 +1964,11 @@ c makes coordinates absolute
 
 	end
 
-c******************************************************************
+! ******************************************************************
 
 	subroutine make_absolute1(x,y)
 
-c makes coordinates absolute (1 pair)
+!  makes coordinates absolute (1 pair)
 
 	implicit none
 
@@ -1982,11 +1982,11 @@ c makes coordinates absolute (1 pair)
 
 	end
 
-c******************************************************************
+! ******************************************************************
 
 	subroutine make_absolute2(x0,y0,x1,y1)
 
-c makes coordinates absolute (2 pairs)
+!  makes coordinates absolute (2 pairs)
 
 	implicit none
 
@@ -2001,11 +2001,11 @@ c makes coordinates absolute (2 pairs)
 
 	end
 
-c******************************************************************
+! ******************************************************************
 
 	subroutine make_absolute(x0,y0,x1,y1)
 
-c makes absolute coordinates -> old version
+!  makes absolute coordinates -> old version
 
 	implicit none
 
@@ -2014,8 +2014,8 @@ c makes absolute coordinates -> old version
 	real relmin,relmax
 	real xmin,ymin,xmax,ymax
 
-c	relmin =  0.
-c	relmax = +1.
+! 	relmin =  0.
+! 	relmax = +1.
 	relmin = -1.
 	relmax = +2.
 
@@ -2024,11 +2024,11 @@ c	relmax = +1.
 	if( x1 .lt. relmin .or. x1 .gt. relmax ) return
 	if( y1 .lt. relmin .or. y1 .gt. relmax ) return
 
-c	units are relative -> convert
+! 	units are relative -> convert
 
 	call getbas(xmin,ymin,xmax,ymax)
 
-c	write(6,*) '------ minmax ----',xmin,ymin,xmax,ymax
+! 	write(6,*) '------ minmax ----',xmin,ymin,xmax,ymax
 
 	x0 = xmin + x0 * (xmax-xmin)
 	y0 = ymin + y0 * (ymax-ymin)
@@ -2037,11 +2037,11 @@ c	write(6,*) '------ minmax ----',xmin,ymin,xmax,ymax
 
 	end
 
-c******************************************************************
+! ******************************************************************
 
 	subroutine occupy_dim(x0,y0,x1,y1)
 
-c uses info from occupy to set up x/y for color bar
+!  uses info from occupy to set up x/y for color bar
 
 	use mod_bash
 
@@ -2079,19 +2079,19 @@ c uses info from occupy to set up x/y for color bar
 
 	end
 
-c******************************************************************
+! ******************************************************************
 
 	subroutine occupy(iquad)
 
-c computes free area for legend -> must still be used by another routine
+!  computes free area for legend -> must still be used by another routine
 
-c quadrante:
-c
-c	+---+---+
-c	| 4 | 3 |
-c	+---+---+
-c	| 1 | 2 |
-c	+---+---+
+!  quadrante:
+! 
+! 	+---+---+
+! 	| 4 | 3 |
+! 	+---+---+
+! 	| 1 | 2 |
+! 	+---+---+
 
 	use basin
 	use mod_bash
@@ -2190,11 +2190,11 @@ c	+---+---+
 
 	end
 
-c******************************************************************
+! ******************************************************************
 
         subroutine blank_window(x0,y0,x1,y1)
 
-c blanks window given by coordinates
+!  blanks window given by coordinates
 
         implicit none
 
@@ -2210,6 +2210,6 @@ c blanks window given by coordinates
 
         end
 
-c******************************************************************
+! ******************************************************************
 
 

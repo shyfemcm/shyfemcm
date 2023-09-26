@@ -23,46 +23,46 @@
 !
 !--------------------------------------------------------------------------
 
-c routines to find nodes close to line
-c
-c revision log :
-c
-c 14.09.2009	ggu	routines written from scratch
-c 23.03.2010	ggu	changed v6.1.1
-c 01.09.2011	ggu	changed VERS_6_1_32
-c 04.11.2011	ggu	changed VERS_6_1_35
-c 21.06.2012	ggu	changed VERS_6_1_54
-c 05.12.2014	ggu	changed VERS_7_0_8
-c 12.12.2014	ggu	changed VERS_7_0_9
-c 23.12.2014	ggu	changed VERS_7_0_11
-c 19.01.2015	ggu	changed VERS_7_1_3
-c 10.07.2015	ggu	changed VERS_7_1_50
-c 17.07.2015	ggu	changed VERS_7_1_52
-c 17.07.2015	ggu	changed VERS_7_1_80
-c 20.07.2015	ggu	changed VERS_7_1_81
-c 30.07.2015	ggu	changed VERS_7_1_83
-c 17.06.2016	ggu	changed VERS_7_5_15
-c 18.12.2018	ggu	changed VERS_7_5_52
-c 21.05.2019	ggu	changed VERS_7_5_62
-c
-c************************************************************************
-c
-c given a line defined by 2 or more points (coordinates x,y)
-c the program returns the nodes that closest aproximate the line
-c
-c main routine to call: find_line_nodes
-c
-c needs basin information and ilinkv(1),lenkv(1),linkv(1) data structure
-c to be link with links.f sublnku.f
-c
-c****************************************************************
+!  routines to find nodes close to line
+! 
+!  revision log :
+! 
+!  14.09.2009	ggu	routines written from scratch
+!  23.03.2010	ggu	changed v6.1.1
+!  01.09.2011	ggu	changed VERS_6_1_32
+!  04.11.2011	ggu	changed VERS_6_1_35
+!  21.06.2012	ggu	changed VERS_6_1_54
+!  05.12.2014	ggu	changed VERS_7_0_8
+!  12.12.2014	ggu	changed VERS_7_0_9
+!  23.12.2014	ggu	changed VERS_7_0_11
+!  19.01.2015	ggu	changed VERS_7_1_3
+!  10.07.2015	ggu	changed VERS_7_1_50
+!  17.07.2015	ggu	changed VERS_7_1_52
+!  17.07.2015	ggu	changed VERS_7_1_80
+!  20.07.2015	ggu	changed VERS_7_1_81
+!  30.07.2015	ggu	changed VERS_7_1_83
+!  17.06.2016	ggu	changed VERS_7_5_15
+!  18.12.2018	ggu	changed VERS_7_5_52
+!  21.05.2019	ggu	changed VERS_7_5_62
+! 
+! ************************************************************************
+! 
+!  given a line defined by 2 or more points (coordinates x,y)
+!  the program returns the nodes that closest aproximate the line
+! 
+!  main routine to call: find_line_nodes
+! 
+!  needs basin information and ilinkv(1),lenkv(1),linkv(1) data structure
+!  to be link with links.f sublnku.f
+! 
+! ****************************************************************
 
 	subroutine find_line_nodes(nl,x,y,ndim,n,nodes)
 
-c find nodes close to line
-c
-c given a line defined by 2 or more points (coordinates x,y)
-c the program returns the nodes that closest aproximate the line
+!  find nodes close to line
+! 
+!  given a line defined by 2 or more points (coordinates x,y)
+!  the program returns the nodes that closest aproximate the line
 
 	implicit none
 
@@ -78,8 +78,8 @@ c the program returns the nodes that closest aproximate the line
 
 	do i=2,nl
 	  nt = nt - 1	!get rid of last node - otherwise we have it twice
-	  call find_segment_nodes(x(i-1),y(i-1),x(i),y(i)
-     +					,ndim,ns,nodes(nt+1))
+	  call find_segment_nodes(x(i-1),y(i-1),x(i),y(i) &
+     &					,ndim,ns,nodes(nt+1))
 	  nt = nt + ns	!add new nodes found
 	end do
 
@@ -87,11 +87,11 @@ c the program returns the nodes that closest aproximate the line
 
 	end
 
-c****************************************************************
+! ****************************************************************
 
 	subroutine find_segment_nodes(x1,y1,x2,y2,ndim,n,nodes)
 
-c find nodes close to one segment of line
+!  find nodes close to one segment of line
 
 	implicit none
 
@@ -131,11 +131,11 @@ c find nodes close to one segment of line
 	stop 'error stop find_segment_nodes: ndim'
 	end
 
-c****************************************************************
+! ****************************************************************
 
 	subroutine get_next_node(k1,k2,ka,kn)
 
-c gets next node close to line segment starting from ka
+!  gets next node close to line segment starting from ka
 
 	implicit none
 
@@ -172,11 +172,11 @@ c gets next node close to line segment starting from ka
 
 	end
 
-c****************************************************************
+! ****************************************************************
 
 	subroutine get_distance_from_line(k1,k2,kp,dist,t)
 
-c computes distance of kp from line given by k1,k2
+!  computes distance of kp from line given by k1,k2
 
 	use basin
 
@@ -187,9 +187,9 @@ c computes distance of kp from line given by k1,k2
 	real dist		!distance of kp from line segment (return)
 	real t			!position of intersection on segment (return)
 
-c (xs,ys) is intersection point on segment
-c (xa,ya) is vector of segment : (xa,ya) = (x2,y2) - (x1,y1)
-c (xs,ys) = (x1,y1) + t * (xa,ya)
+!  (xs,ys) is intersection point on segment
+!  (xa,ya) is vector of segment : (xa,ya) = (x2,y2) - (x1,y1)
+!  (xs,ys) = (x1,y1) + t * (xa,ya)
 
 	real x1,y1,x2,y2,xp,yp
 	real xa,ya,xs,ys
@@ -214,13 +214,13 @@ c (xs,ys) = (x1,y1) + t * (xa,ya)
 
 	end
 
-c****************************************************************
-c****************************************************************
-c****************************************************************
+! ****************************************************************
+! ****************************************************************
+! ****************************************************************
 
 	subroutine get_closest_node(x0,y0,kc)
 
-c finds closest node to coordinate (x0,y0)
+!  finds closest node to coordinate (x0,y0)
 
 	use basin
 
@@ -246,11 +246,11 @@ c finds closest node to coordinate (x0,y0)
 
 	end
 
-c****************************************************************
+! ****************************************************************
 
 	subroutine write_node_info(k)
 
-c writes node info for node k
+!  writes node info for node k
 
 	use basin
 
@@ -263,11 +263,11 @@ c writes node info for node k
 
 	end
 
-c****************************************************************
-c****************************************************************
-c****************************************************************
-c****************************************************************
-c****************************************************************
+! ****************************************************************
+! ****************************************************************
+! ****************************************************************
+! ****************************************************************
+! ****************************************************************
 
 	subroutine line_points_test
 
@@ -307,7 +307,7 @@ c****************************************************************
 
 	end
 
-c****************************************************************
+! ****************************************************************
 
 	subroutine read_memory_basin(basin)
 
@@ -337,7 +337,7 @@ c****************************************************************
 	stop 'error stop read_memory_basin: memory'
 	end
 
-c****************************************************************
+! ****************************************************************
 
 	subroutine write_line(n,nodes)
 
@@ -353,9 +353,9 @@ c****************************************************************
 
 	integer ipext
 
-c--------------------------------------------------------------
-c write grd file
-c--------------------------------------------------------------
+! --------------------------------------------------------------
+!  write grd file
+! --------------------------------------------------------------
 
         open(66,file='line_nodes.grd',status='unknown',form='formatted')
 
@@ -378,9 +378,9 @@ c--------------------------------------------------------------
 
         write(6,*) 'grd file written to line_nodes.grd'
 
-c--------------------------------------------------------------
-c write txt file
-c--------------------------------------------------------------
+! --------------------------------------------------------------
+!  write txt file
+! --------------------------------------------------------------
 
         open(77,file='line_nodes.txt',status='unknown',form='formatted')
 
@@ -394,9 +394,9 @@ c--------------------------------------------------------------
 
         write(6,*) 'txt file written to line_nodes.txt'
 
-c--------------------------------------------------------------
-c end of routine
-c--------------------------------------------------------------
+! --------------------------------------------------------------
+!  end of routine
+! --------------------------------------------------------------
 
 	return
  1000	format(i1,2i10,2f14.4)
@@ -404,7 +404,7 @@ c--------------------------------------------------------------
  3000	format((5i10))
 	end
 
-c****************************************************************
+! ****************************************************************
 
 	subroutine read_line(ndim,nl,x,y)
 
@@ -436,12 +436,12 @@ c****************************************************************
 
 	end
 
-c****************************************************************
+! ****************************************************************
 
 	program line_points_main
 	implicit none
 	call line_points_test
 	end
 
-c****************************************************************
+! ****************************************************************
 

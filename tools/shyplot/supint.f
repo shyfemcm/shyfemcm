@@ -25,53 +25,53 @@
 !
 !--------------------------------------------------------------------------
 
-c interactive routines for plotsim
-c
-c revision log :
-c
-c 12.02.1999	ggu	adapted to auto mode
-c 29.01.2002	ggu	new routine getisec()
-c 17.03.2004	ggu	new routine okvar()
-c 02.03.2005	ggu	new routines set_flag and get_flag
-c 17.09.2008	ggu	comments for level = -1
-c 06.12.2008	ggu	in extlev set not-existing values to flag
-c 14.09.2009	ggu	new way to determine if section plot in getisec()
-c 23.03.2010	ggu	changed v6.1.1
-c 18.08.2011	ggu	make vsect bigger
-c 31.08.2011	ggu	new plotting eos
-c 01.09.2011	ggu	changed VERS_6_1_32
-c 23.02.2012	ccf	allow plotting also for last layer
-c 13.06.2013	ggu	scans varnam to decide what to plot
-c 19.06.2013	ggu	changed VERS_6_1_66
-c 05.09.2013	ggu	handle variable choice better
-c 12.09.2013	ggu	changed VERS_6_1_67
-c 28.01.2014	ggu	changed VERS_6_1_71
-c 21.10.2014	ggu	changed VERS_7_0_3
-c 05.12.2014	ggu	changed VERS_7_0_8
-c 19.01.2015	ggu	changed VERS_7_1_2
-c 19.01.2015	ggu	changed VERS_7_1_3
-c 05.05.2015	ggu	changed VERS_7_1_10
-c 17.07.2015	ggu	changed VERS_7_1_80
-c 20.07.2015	ggu	changed VERS_7_1_81
-c 18.12.2015	ggu	changed VERS_7_3_17
-c 25.05.2016	ggu	changed VERS_7_5_10
-c 18.12.2018	ggu	changed VERS_7_5_52
-c 21.05.2019	ggu	changed VERS_7_5_62
-c
-c**********************************************************
-c**********************************************************
-c**********************************************************
-c**********************************************************
+!  interactive routines for plotsim
+! 
+!  revision log :
+! 
+!  12.02.1999	ggu	adapted to auto mode
+!  29.01.2002	ggu	new routine getisec()
+!  17.03.2004	ggu	new routine okvar()
+!  02.03.2005	ggu	new routines set_flag and get_flag
+!  17.09.2008	ggu	comments for level = -1
+!  06.12.2008	ggu	in extlev set not-existing values to flag
+!  14.09.2009	ggu	new way to determine if section plot in getisec()
+!  23.03.2010	ggu	changed v6.1.1
+!  18.08.2011	ggu	make vsect bigger
+!  31.08.2011	ggu	new plotting eos
+!  01.09.2011	ggu	changed VERS_6_1_32
+!  23.02.2012	ccf	allow plotting also for last layer
+!  13.06.2013	ggu	scans varnam to decide what to plot
+!  19.06.2013	ggu	changed VERS_6_1_66
+!  05.09.2013	ggu	handle variable choice better
+!  12.09.2013	ggu	changed VERS_6_1_67
+!  28.01.2014	ggu	changed VERS_6_1_71
+!  21.10.2014	ggu	changed VERS_7_0_3
+!  05.12.2014	ggu	changed VERS_7_0_8
+!  19.01.2015	ggu	changed VERS_7_1_2
+!  19.01.2015	ggu	changed VERS_7_1_3
+!  05.05.2015	ggu	changed VERS_7_1_10
+!  17.07.2015	ggu	changed VERS_7_1_80
+!  20.07.2015	ggu	changed VERS_7_1_81
+!  18.12.2015	ggu	changed VERS_7_3_17
+!  25.05.2016	ggu	changed VERS_7_5_10
+!  18.12.2018	ggu	changed VERS_7_5_52
+!  21.05.2019	ggu	changed VERS_7_5_62
+! 
+! **********************************************************
+! **********************************************************
+! **********************************************************
+! **********************************************************
 
 !==================================================================
         module mod_plot
 !==================================================================
 
-c initializes actual level
-c
-c -1	bottom
-c  0	integrated
-c >0	level
+!  initializes actual level
+! 
+!  -1	bottom
+!   0	integrated
+!  >0	level
 
 	implicit none
 
@@ -128,11 +128,11 @@ c >0	level
 
 	end
 
-c**********************************************************
+! **********************************************************
 
 	subroutine setlev( level )
 
-c set actual level
+!  set actual level
 
 	use mod_plot
 
@@ -144,11 +144,11 @@ c set actual level
 
 	end
 
-c**********************************************************
+! **********************************************************
 
 	function getlev()
 
-c get actual level
+!  get actual level
 
 	use mod_plot
 
@@ -160,13 +160,13 @@ c get actual level
 
 	end
 
-c**********************************************************
-c**********************************************************
-c**********************************************************
+! **********************************************************
+! **********************************************************
+! **********************************************************
 
         function getisec()
 
-c is it a vertical section
+!  is it a vertical section
 
 	use mod_plot
 
@@ -178,13 +178,13 @@ c is it a vertical section
 
         end
 
-c**********************************************************
-c**********************************************************
-c**********************************************************
+! **********************************************************
+! **********************************************************
+! **********************************************************
 
 	subroutine setvar(ivar)
 
-c set actual variable
+!  set actual variable
 
 	use mod_plot
 
@@ -196,11 +196,11 @@ c set actual variable
 
 	end
 
-c**********************************************************
+! **********************************************************
 
 	function getvar()
 
-c get actual variable
+!  get actual variable
 
 	use mod_plot
 
@@ -212,11 +212,11 @@ c get actual variable
 
 	end
 
-c**********************************************************
+! **********************************************************
 
 	function okvar(ivar)
 
-c shall we plot this variable ?
+!  shall we plot this variable ?
 
 	use mod_plot
 
@@ -229,12 +229,12 @@ c shall we plot this variable ?
 
 	end
 
-c**********************************************************
+! **********************************************************
 
        subroutine checkvar(ivar)
 
-c checks what variable has to be plotted
-c returns in ivar the variable to be plotted
+!  checks what variable has to be plotted
+!  returns in ivar the variable to be plotted
 
        implicit none
 
@@ -263,13 +263,13 @@ c returns in ivar the variable to be plotted
        stop 'error stop checkvar: different values of ivar3 and ivar'
        end
 
-c**********************************************************
-c**********************************************************
-c**********************************************************
+! **********************************************************
+! **********************************************************
+! **********************************************************
 
 	subroutine extnlev(level,nlvddi,nkn,p3,p2)
 
-c extract level from 3d array (nodes)
+!  extract level from 3d array (nodes)
 
 	use levels
 
@@ -285,11 +285,11 @@ c extract level from 3d array (nodes)
 
 	end
 
-c**********************************************************
+! **********************************************************
 
 	subroutine extelev(level,nlvddi,nel,p3,p2)
 
-c extract level from 3d array (elements)
+!  extract level from 3d array (elements)
 
 	use levels
 
@@ -305,11 +305,11 @@ c extract level from 3d array (elements)
 
 	end
 
-c**********************************************************
+! **********************************************************
 
 	subroutine extlev(level,nlvddi,n,ilv,p3,p2)
 
-c extract level from 3d array
+!  extract level from 3d array
 
 	implicit none
 
@@ -348,11 +348,11 @@ c extract level from 3d array
 
 	end
 
-c**********************************************************
+! **********************************************************
 
 	subroutine intlev(nlvddi,n,ilv,p3,p2)
 
-c integrate over water column
+!  integrate over water column
 
 	implicit none
 
@@ -388,9 +388,9 @@ c integrate over water column
 	stop 'error stop intlev : error in lmax'
 	end
 
-c**********************************************************
-c**********************************************************
-c**********************************************************
+! **********************************************************
+! **********************************************************
+! **********************************************************
 
 	subroutine set_flag(flag)
 
@@ -416,5 +416,5 @@ c**********************************************************
 
 	end
 
-c**********************************************************
+! **********************************************************
 

@@ -24,21 +24,21 @@
 !
 !--------------------------------------------------------------------------
 
-c general utilities for plot routines
-c
-c revision log :
-c
-c 16.10.2001    ggu     new routine fpfeil()
-c 03.09.2003    ggu     bug fix XBXT in fpfeil
-c 05.10.2003    ggu     bug fix S_IS_0 in pfeil
-c 26.03.2010    ggu     new routine fcmpfeil for distorted scales
-c 16.03.2012    dbf     bug fix in fcmpfeil (d was used but not set)
-c
-c**************************************************
+!  general utilities for plot routines
+! 
+!  revision log :
+! 
+!  16.10.2001    ggu     new routine fpfeil()
+!  03.09.2003    ggu     bug fix XBXT in fpfeil
+!  05.10.2003    ggu     bug fix S_IS_0 in pfeil
+!  26.03.2010    ggu     new routine fcmpfeil for distorted scales
+!  16.03.2012    dbf     bug fix in fcmpfeil (d was used but not set)
+! 
+! **************************************************
 
 	subroutine pbox(xmin,ymin,xmax,ymax)
 
-c plots box around rectangle with actual color
+!  plots box around rectangle with actual color
 
 	implicit none
 
@@ -51,13 +51,13 @@ c plots box around rectangle with actual color
 
 	end
 
-c*************************************************************
+! *************************************************************
 
         subroutine pwbox(mode,xmin,ymin,xmax,ymax)
 
-c plots box with white background (erasing)
-c
-c mode != 0 -> plot outline
+!  plots box with white background (erasing)
+! 
+!  mode != 0 -> plot outline
 
         implicit none
 
@@ -74,11 +74,11 @@ c mode != 0 -> plot outline
 
         end
 
-c**************************************************
+! **************************************************
 
 	subroutine pcircle(x,y,r)
 
-c plots circle around (x,y) with radius r
+!  plots circle around (x,y) with radius r
 
 	implicit none
 
@@ -88,11 +88,11 @@ c plots circle around (x,y) with radius r
 
 	end
 
-c**************************************************
+! **************************************************
 
 	subroutine pcirclefill(x,y,r)
 
-c fill circle around (x,y) with radius r with actual color
+!  fill circle around (x,y) with radius r with actual color
 
 	implicit none
 
@@ -102,11 +102,11 @@ c fill circle around (x,y) with radius r with actual color
 
 	end
 
-c**************************************************
+! **************************************************
 
 	subroutine pcross(x,y,r)
 
-c plots cross at (x,y) with size r
+!  plots cross at (x,y) with size r
 
 	implicit none
 
@@ -121,17 +121,17 @@ c plots cross at (x,y) with size r
 
 	end 
 
-c**************************************************
-c**************************************************
-c**************************************************
+! **************************************************
+! **************************************************
+! **************************************************
 
         subroutine pfeil(x,y,u,v,s)
 
-c draws arrow
-c
-c x,y           coordinates of arrow base
-c u,v           size of arrow
-c s             scaling of vector
+!  draws arrow
+! 
+!  x,y           coordinates of arrow base
+!  u,v           size of arrow
+!  s             scaling of vector
 
         implicit none
 
@@ -164,15 +164,15 @@ c s             scaling of vector
 
         end
 
-c**************************************************
+! **************************************************
 
         subroutine fpfeil(xb,yb,xt,yt,s)
 
-c draws full arrow
-c
-c xb,yb         coordinates of arrow base
-c xt,yt         coordinates of arrow tip
-c s             size of tip (in fraction, 1 -> whole length)
+!  draws full arrow
+! 
+!  xb,yb         coordinates of arrow base
+!  xt,yt         coordinates of arrow tip
+!  s             size of tip (in fraction, 1 -> whole length)
 
         implicit none
 
@@ -222,17 +222,17 @@ c s             size of tip (in fraction, 1 -> whole length)
 
         end
 
-c**************************************************
+! **************************************************
 
         subroutine fcmpfeil(xb,yb,xt,yt,s)
 
-c draws full arrow - adjusts for distortion
-c
-c xb,yb         coordinates of arrow base
-c xt,yt         coordinates of arrow tip
-c s             size of tip (in fraction, 1 -> whole length)
-c		... 0: only line, no arrow tip, <0: do not plot anything
-c		...good value is 0.3
+!  draws full arrow - adjusts for distortion
+! 
+!  xb,yb         coordinates of arrow base
+!  xt,yt         coordinates of arrow tip
+!  s             size of tip (in fraction, 1 -> whole length)
+! 		... 0: only line, no arrow tip, <0: do not plot anything
+! 		...good value is 0.3
 
         implicit none
 
@@ -249,16 +249,16 @@ c		...good value is 0.3
         real x3(3),y3(3)
 	real xcm,ycm
 
-c	---------------------------------------------
-c	check if we have to plot anything
-c	---------------------------------------------
+! 	---------------------------------------------
+! 	check if we have to plot anything
+! 	---------------------------------------------
 
         if( xb .eq. xt .and. yb .eq. yt ) return	!bug fix XBXT
 	if( s .lt. 0 ) return				!negative -> no arrow
 
-c	---------------------------------------------
-c	first only line is plotted
-c	---------------------------------------------
+! 	---------------------------------------------
+! 	first only line is plotted
+! 	---------------------------------------------
 
         u = xt - xb
         v = yt - yb
@@ -272,17 +272,17 @@ c	---------------------------------------------
 
 	if( d .le. 0 ) return
 
-c	---------------------------------------------
-c	we still have to plot the tip 
-c	(x1,y1) and (x2,y2) are lateral coords of tip
-c	---------------------------------------------
+! 	---------------------------------------------
+! 	we still have to plot the tip 
+! 	(x1,y1) and (x2,y2) are lateral coords of tip
+! 	---------------------------------------------
 
 	call qcm(xcm,ycm)
 	dd = xcm/ycm
 
-c	---------------------------------------------
-c	do all computations in plotting coordinates
-c	---------------------------------------------
+! 	---------------------------------------------
+! 	do all computations in plotting coordinates
+! 	---------------------------------------------
 
 	v = v * dd	!account for distortion
 
@@ -296,18 +296,18 @@ c	---------------------------------------------
 	x2 = rl * xn
 	y2 = rl * yn
 
-c	---------------------------------------------
-c	now get final points in world coordinates
-c	---------------------------------------------
+! 	---------------------------------------------
+! 	now get final points in world coordinates
+! 	---------------------------------------------
 
 	x1 = xs + x1
 	y1 = ys + y1/dd
 	x2 = xs - x2
 	y2 = ys - y2/dd
 
-c	---------------------------------------------
-c	prepare and plot tip
-c	---------------------------------------------
+! 	---------------------------------------------
+! 	prepare and plot tip
+! 	---------------------------------------------
 
         x3(1) = xt
         y3(1) = yt
@@ -318,13 +318,13 @@ c	---------------------------------------------
 
         call qafill(3,x3,y3)
 
-c	---------------------------------------------
-c	end of routine
-c	---------------------------------------------
+! 	---------------------------------------------
+! 	end of routine
+! 	---------------------------------------------
 
         end
 
-c**************************************************
+! **************************************************
 
         subroutine convert_wind(s,d,u,v)
 
@@ -348,5 +348,5 @@ c**************************************************
 
         end subroutine convert_wind
 
-c**************************************************
+! **************************************************
 

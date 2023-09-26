@@ -31,7 +31,7 @@
 
 	program plotcolb
 
-c plots color bar to chose color
+!  plots color bar to chose color
 
 	implicit none
 
@@ -101,7 +101,7 @@ c plots color bar to chose color
 
 	end
 
-c*************************************************
+! *************************************************
 
 	subroutine colb(xmin,ymin,xmax,ymax,ncol,ntics)
 
@@ -142,5 +142,5 @@ c*************************************************
 
 	end
 
-c*************************************************
+! *************************************************
 

@@ -23,85 +23,85 @@
 !
 !--------------------------------------------------------------------------
 
-c routines for reading data files
-c
-c revision log :
-c
-c 31.10.2003	ggu	new routines velclose(), resetsim()
-c 31.10.2003	ggu	new routines for handling wind
-c 22.09.2004	ggu	new routines for handling ous file
-c 22.09.2004	ggu	use OUS file for 3D, try to use alsways 3D (level=0)
-c 05.10.2004	ggu	adjustments -> use always 3D data structure
-c 14.03.2007	ggu	new routines for wave plotting
-c 17.09.2008	ggu	new routine level_e2k to compute ilhkv from ilhv
-c 09.10.2009	ggu	read also pressure from wind file
-c 13.10.2009	ggu	set nlv once file is read
-c 23.02.2010	ggu	change in reading wind file
-c 23.03.2010	ggu	changed v6.1.1
-c 20.12.2010	ggu	changed VERS_6_1_16
-c 30.03.2011	ggu	new routines to handle fvl files (not yet integrated)
-c 31.03.2011	ggu	use fvl routines to exclude areas from plot
-c 14.04.2011	ggu	changed VERS_6_1_22
-c 12.07.2011	ggu	in prepsim use what is available for dry areas
-c 15.07.2011	ggu	changed VERS_6_1_28
-c 18.08.2011	ggu	bug fix in nosopen() -> extra comma eliminated 
-c 31.08.2011	ggu	new routines for handling EOS files
-c 01.09.2011	ggu	changed VERS_6_1_32
-c 14.11.2011	ggu	call to init_sigma_info() to setup layer info
-c 22.11.2011	ggu	changed VERS_6_1_37
-c 09.12.2011	ggu	changed VERS_6_1_38
-c 19.12.2011	ggu	new routine level_k2e -> called for nos files
-c 24.01.2012	ggu	changed VERS_6_1_41
-c 21.06.2012	ggu	changed VERS_6_1_54
-c 13.06.2013	ggu	new routines for handling FEM files
-c 19.06.2013	ggu	changed VERS_6_1_66
-c 03.09.2013	ggu	level_k2e -> level_k2e_sh, level_e2k -> level_e2k_sh
-c 12.09.2013	ggu	changed VERS_6_1_67
-c 28.01.2014	ggu	changed VERS_6_1_71
-c 05.03.2014	ggu	new read for ous and nos files (use date)
-c 30.05.2014	ggu	changed VERS_6_1_76
-c 07.07.2014	ggu	changed VERS_6_1_79
-c 18.07.2014	ggu	changed VERS_7_0_1
-c 20.10.2014	ggu	deleted is2d() and out reading routines
-c 30.10.2014	ggu	changed VERS_7_0_4
-c 26.11.2014	ggu	changed VERS_7_0_7
-c 05.12.2014	ggu	changed VERS_7_0_8
-c 23.12.2014	ggu	changed VERS_7_0_11
-c 19.01.2015	ggu	changed VERS_7_1_2
-c 19.01.2015	ggu	changed VERS_7_1_3
-c 10.02.2015	ggu	use different file units (more than one can be opened)
-c 26.02.2015	ggu	changed VERS_7_1_5
-c 01.04.2015	ggu	changed VERS_7_1_7
-c 10.07.2015	ggu	changed VERS_7_1_50
-c 13.07.2015	ggu	changed VERS_7_1_51
-c 17.07.2015	ggu	changed VERS_7_1_52
-c 17.07.2015	ggu	changed VERS_7_1_80
-c 20.07.2015	ggu	changed VERS_7_1_81
-c 14.09.2015	ggu	introduced bwind and bvel (for velocities)
-c 05.11.2015	ggu	changed VERS_7_3_12
-c 19.02.2016	ggu	changed VERS_7_5_2
-c 28.04.2016	ggu	changed VERS_7_5_9
-c 25.05.2016	ggu	changed VERS_7_5_10
-c 27.06.2016	ggu	changed VERS_7_5_16
-c 12.01.2017	ggu	changed VERS_7_5_21
-c 13.04.2017	ggu	changed VERS_7_5_25
-c 25.05.2017	ggu	changed VERS_7_5_28
-c 11.07.2017	ggu	changed VERS_7_5_30
-c 14.11.2017	ggu	changed VERS_7_5_36
-c 03.04.2018	ggu	changed VERS_7_5_43
-c 18.04.2018	ggu	set up bkplot (node to be plotted)
-c 16.10.2018	ggu	changed VERS_7_5_50
-c 25.10.2018	ggu	changed VERS_7_5_51
-c 18.12.2018	ggu	changed VERS_7_5_52
-c 21.05.2019	ggu	changed VERS_7_5_62
-c
-c**********************************************************
-c**********************************************************
-c**********************************************************
+!  routines for reading data files
+! 
+!  revision log :
+! 
+!  31.10.2003	ggu	new routines velclose(), resetsim()
+!  31.10.2003	ggu	new routines for handling wind
+!  22.09.2004	ggu	new routines for handling ous file
+!  22.09.2004	ggu	use OUS file for 3D, try to use alsways 3D (level=0)
+!  05.10.2004	ggu	adjustments -> use always 3D data structure
+!  14.03.2007	ggu	new routines for wave plotting
+!  17.09.2008	ggu	new routine level_e2k to compute ilhkv from ilhv
+!  09.10.2009	ggu	read also pressure from wind file
+!  13.10.2009	ggu	set nlv once file is read
+!  23.02.2010	ggu	change in reading wind file
+!  23.03.2010	ggu	changed v6.1.1
+!  20.12.2010	ggu	changed VERS_6_1_16
+!  30.03.2011	ggu	new routines to handle fvl files (not yet integrated)
+!  31.03.2011	ggu	use fvl routines to exclude areas from plot
+!  14.04.2011	ggu	changed VERS_6_1_22
+!  12.07.2011	ggu	in prepsim use what is available for dry areas
+!  15.07.2011	ggu	changed VERS_6_1_28
+!  18.08.2011	ggu	bug fix in nosopen() -> extra comma eliminated 
+!  31.08.2011	ggu	new routines for handling EOS files
+!  01.09.2011	ggu	changed VERS_6_1_32
+!  14.11.2011	ggu	call to init_sigma_info() to setup layer info
+!  22.11.2011	ggu	changed VERS_6_1_37
+!  09.12.2011	ggu	changed VERS_6_1_38
+!  19.12.2011	ggu	new routine level_k2e -> called for nos files
+!  24.01.2012	ggu	changed VERS_6_1_41
+!  21.06.2012	ggu	changed VERS_6_1_54
+!  13.06.2013	ggu	new routines for handling FEM files
+!  19.06.2013	ggu	changed VERS_6_1_66
+!  03.09.2013	ggu	level_k2e -> level_k2e_sh, level_e2k -> level_e2k_sh
+!  12.09.2013	ggu	changed VERS_6_1_67
+!  28.01.2014	ggu	changed VERS_6_1_71
+!  05.03.2014	ggu	new read for ous and nos files (use date)
+!  30.05.2014	ggu	changed VERS_6_1_76
+!  07.07.2014	ggu	changed VERS_6_1_79
+!  18.07.2014	ggu	changed VERS_7_0_1
+!  20.10.2014	ggu	deleted is2d() and out reading routines
+!  30.10.2014	ggu	changed VERS_7_0_4
+!  26.11.2014	ggu	changed VERS_7_0_7
+!  05.12.2014	ggu	changed VERS_7_0_8
+!  23.12.2014	ggu	changed VERS_7_0_11
+!  19.01.2015	ggu	changed VERS_7_1_2
+!  19.01.2015	ggu	changed VERS_7_1_3
+!  10.02.2015	ggu	use different file units (more than one can be opened)
+!  26.02.2015	ggu	changed VERS_7_1_5
+!  01.04.2015	ggu	changed VERS_7_1_7
+!  10.07.2015	ggu	changed VERS_7_1_50
+!  13.07.2015	ggu	changed VERS_7_1_51
+!  17.07.2015	ggu	changed VERS_7_1_52
+!  17.07.2015	ggu	changed VERS_7_1_80
+!  20.07.2015	ggu	changed VERS_7_1_81
+!  14.09.2015	ggu	introduced bwind and bvel (for velocities)
+!  05.11.2015	ggu	changed VERS_7_3_12
+!  19.02.2016	ggu	changed VERS_7_5_2
+!  28.04.2016	ggu	changed VERS_7_5_9
+!  25.05.2016	ggu	changed VERS_7_5_10
+!  27.06.2016	ggu	changed VERS_7_5_16
+!  12.01.2017	ggu	changed VERS_7_5_21
+!  13.04.2017	ggu	changed VERS_7_5_25
+!  25.05.2017	ggu	changed VERS_7_5_28
+!  11.07.2017	ggu	changed VERS_7_5_30
+!  14.11.2017	ggu	changed VERS_7_5_36
+!  03.04.2018	ggu	changed VERS_7_5_43
+!  18.04.2018	ggu	set up bkplot (node to be plotted)
+!  16.10.2018	ggu	changed VERS_7_5_50
+!  25.10.2018	ggu	changed VERS_7_5_51
+!  18.12.2018	ggu	changed VERS_7_5_52
+!  21.05.2019	ggu	changed VERS_7_5_62
+! 
+! **********************************************************
+! **********************************************************
+! **********************************************************
 
         subroutine velopen
 
-c opens velocity file (2d and 3d)
+!  opens velocity file (2d and 3d)
 
         implicit none
 
@@ -109,11 +109,11 @@ c opens velocity file (2d and 3d)
 
         end
 
-c**********************************************************
+! **********************************************************
 
         function velnext(it)
 
-c gets next velocity field (2d and 3d)
+!  gets next velocity field (2d and 3d)
 
         implicit none
 
@@ -126,11 +126,11 @@ c gets next velocity field (2d and 3d)
 
         end
 
-c**********************************************************
+! **********************************************************
 
         subroutine velclose
 
-c closes velocity file
+!  closes velocity file
 
         implicit none
 
@@ -138,13 +138,13 @@ c closes velocity file
 
         end
 
-c******************************************************
-c******************************************************
-c******************************************************
+! ******************************************************
+! ******************************************************
+! ******************************************************
 
         subroutine reset_dry_mask
 
-c resets mask data structure
+!  resets mask data structure
 
 	use mod_hydro_plot
 
@@ -157,7 +157,7 @@ c resets mask data structure
 
         end
 
-c******************************************************
+! ******************************************************
 
         subroutine adjust_no_plot_area
 
@@ -188,11 +188,11 @@ c******************************************************
 
         end
 
-c******************************************************
+! ******************************************************
 
 	subroutine prepare_dry_mask
 
-c prepares simulation for use - computes wet and dry areas
+!  prepares simulation for use - computes wet and dry areas
 
 	use mod_hydro_plot
 	use mod_hydro
@@ -209,12 +209,12 @@ c prepares simulation for use - computes wet and dry areas
 	integer getlev
 	real getpar
 
-c---------------------------------------------------
-c set up mask of water points
-c---------------------------------------------------
+! ---------------------------------------------------
+!  set up mask of water points
+! ---------------------------------------------------
 
-c set bshowdry = .true.  if you want to show dried out areas
-c set bshowdry = .false. if you want to plot all areas
+!  set bshowdry = .true.  if you want to show dried out areas
+!  set bshowdry = .false. if you want to plot all areas
 
 	hdry = 0.05				!level for drying
 	bshowdry = .true.			!show dry areas, else plot all
@@ -258,13 +258,13 @@ c set bshowdry = .false. if you want to plot all areas
 	call make_dry_node_mask(bwater,bkwater)		!copy elem to node mask
         call info_dry_mask(bwater,bkwater)
 
-c---------------------------------------------------
-c end of routine
-c---------------------------------------------------
+! ---------------------------------------------------
+!  end of routine
+! ---------------------------------------------------
 
 	end
 
-c******************************************************
+! ******************************************************
 
 	subroutine set_dry_volume_mask(bkw,hdry)
 
@@ -298,9 +298,9 @@ c******************************************************
 
 	end
 
-c******************************************************
-c******************************************************
-c******************************************************
+! ******************************************************
+! ******************************************************
+! ******************************************************
 
         subroutine waveini
 
@@ -326,7 +326,7 @@ c******************************************************
 
         end
 
-c******************************************************
+! ******************************************************
 
         subroutine waveclose
 
@@ -339,7 +339,7 @@ c******************************************************
 
         end
 
-c******************************************************
+! ******************************************************
 
 	subroutine waveopen
 
@@ -361,7 +361,7 @@ c******************************************************
 
 	call waveini
 
-c open file
+!  open file
 
         call open_nos_type('.wav','old',nunit)
 
@@ -378,7 +378,7 @@ c open file
 	call level_k2e_sh
         call init_sigma_info(nlv,hlv)
 
-c initialize time
+!  initialize time
 
         call nos_get_date(nunit,date,time)
         if( date .ne. 0 ) then
@@ -398,7 +398,7 @@ c initialize time
 	stop 'error stop waveopen: parameter mismatch'
         end
 
-c******************************************************
+! ******************************************************
 
 	function wavenext(it)
 
@@ -456,7 +456,7 @@ c******************************************************
 	stop 'error stop wavenext: records not in order'
         end
 
-c******************************************************
+! ******************************************************
 
 	subroutine polar2xy(n,speed,dir,uv,vv)
 
@@ -485,13 +485,13 @@ c******************************************************
 
 	end
 
-c******************************************************
-c******************************************************
-c******************************************************
+! ******************************************************
+! ******************************************************
+! ******************************************************
 
 	subroutine ousini
 
-c initializes internal data structure for OUS file
+!  initializes internal data structure for OUS file
 
 	implicit none
 
@@ -514,11 +514,11 @@ c initializes internal data structure for OUS file
 
 	end
 
-c******************************************************
+! ******************************************************
 
 	function ous_is_available()
 
-c checks if OUS file is opened
+!  checks if OUS file is opened
 
 	implicit none
 
@@ -531,11 +531,11 @@ c checks if OUS file is opened
 
 	end
 
-c******************************************************
+! ******************************************************
 
 	subroutine ousclose
 
-c closes OUS file
+!  closes OUS file
 
 	implicit none
 
@@ -547,11 +547,11 @@ c closes OUS file
 
 	end
 
-c******************************************************
+! ******************************************************
 
         subroutine ousinfo(nvers,nkn,nel,nlv)
 
-c returns info on OUS parameters
+!  returns info on OUS parameters
 
         implicit none
 
@@ -564,11 +564,11 @@ c returns info on OUS parameters
 
         end
 
-c******************************************************
+! ******************************************************
 
 	subroutine ousopen
 
-c opens OUS file and reads header
+!  opens OUS file and reads header
 
 	use mod_depth
 	use levels
@@ -591,11 +591,11 @@ c opens OUS file and reads header
         real href,hzmin
 	integer ifemop
 
-c initialize routines
+!  initialize routines
 
 	call ousini
 
-c open and read header
+!  open and read header
 
         call open_ous_type('.ous','old',nunit)
 
@@ -610,7 +610,7 @@ c open and read header
 	call level_e2k_sh			!computes ilhkv
         call init_sigma_info(nlv,hlv)
 
-c initialize time
+!  initialize time
 
 	call ous_get_date(nunit,date,time)
 	if( date .ne. 0 ) then
@@ -622,7 +622,7 @@ c initialize time
 
 	nunit_ous = nunit
 
-c end
+!  end
 
 	return
    96	continue
@@ -639,11 +639,11 @@ c end
 	stop 'error stop ousopen'
 	end
 
-c******************************************************
+! ******************************************************
 
 	function ousnext(it)
 
-c reads next OUS record - is true if a record has been read, false if EOF
+!  reads next OUS record - is true if a record has been read, false if EOF
 
 	use mod_hydro
 	use levels
@@ -662,7 +662,7 @@ c reads next OUS record - is true if a record has been read, false if EOF
 
 	call rdous(nunit,it,nlvdi,ilhv,znv,zenv,utlnv,vtlnv,ierr)
 
-c set return value
+!  set return value
 
 	if( ierr .gt. 0 ) then
 		!stop 'error stop ousnext: error reading data record'
@@ -678,17 +678,17 @@ c set return value
 
 	end
 
-c******************************************************
-c******************************************************
-c******************************************************
-c 3d-version of concentration
-c******************************************************
-c******************************************************
-c******************************************************
+! ******************************************************
+! ******************************************************
+! ******************************************************
+!  3d-version of concentration
+! ******************************************************
+! ******************************************************
+! ******************************************************
 
 	subroutine nosini
 
-c initializes internal data structure for NOS file
+!  initializes internal data structure for NOS file
 
 	implicit none
 
@@ -711,11 +711,11 @@ c initializes internal data structure for NOS file
 
 	end
 
-c******************************************************
+! ******************************************************
 
 	subroutine nosclose
 
-c closes NOS file
+!  closes NOS file
 
 	implicit none
 
@@ -727,11 +727,11 @@ c closes NOS file
 
 	end
 
-c******************************************************
+! ******************************************************
 
 	subroutine nosopen(type)
 
-c opens NOS file and reads header
+!  opens NOS file and reads header
 
 	use mod_depth
 	use levels
@@ -754,11 +754,11 @@ c opens NOS file and reads header
 	integer ierr,l
 	integer ifemop
 
-c initialize routines
+!  initialize routines
 
 	call nosini
 
-c open file
+!  open file
 
 	if( type /= ' ' ) then
           call open_nos_type(type,'old',nunit)
@@ -777,7 +777,7 @@ c open file
 	call level_k2e_sh
         call init_sigma_info(nlv,hlv)
 
-c initialize time
+!  initialize time
 
         call nos_get_date(nunit,date,time)
         if( date .ne. 0 ) then
@@ -789,7 +789,7 @@ c initialize time
 
 	nunit_nos = nunit
 
-c end
+!  end
 
 	!write(6,*) 'gguuuuuu: (nosopen)',nunit,nunit_fvl
 
@@ -803,11 +803,11 @@ c end
 	stop 'error stop nosopen'
 	end
 
-c******************************************************
+! ******************************************************
 
 	function nosnext(it,ivar,nlvddi,array)
 
-c reads next NOS record - is true if a record has been read, false if EOF
+!  reads next NOS record - is true if a record has been read, false if EOF
 
 	use levels
 
@@ -831,7 +831,7 @@ c reads next NOS record - is true if a record has been read, false if EOF
 
 	call rdnos(nunit,it,ivar,nlvddi,ilhkv,array,ierr)
 
-c set return value
+!  set return value
 
 	if( ierr .gt. 0 ) then
 		!stop 'error stop nosnext: error reading data record'
@@ -847,17 +847,17 @@ c set return value
 
 	end
 
-c******************************************************
-c******************************************************
-c******************************************************
-c routines to read fvl file
-c******************************************************
-c******************************************************
-c******************************************************
+! ******************************************************
+! ******************************************************
+! ******************************************************
+!  routines to read fvl file
+! ******************************************************
+! ******************************************************
+! ******************************************************
 
 	subroutine fvlini
 
-c initializes internal data structure for FVL file
+!  initializes internal data structure for FVL file
 
 	implicit none
 
@@ -880,11 +880,11 @@ c initializes internal data structure for FVL file
 
 	end
 
-c******************************************************
+! ******************************************************
 
 	function fvl_is_available()
 
-c checks if FVL file is opened
+!  checks if FVL file is opened
 
 	implicit none
 
@@ -897,11 +897,11 @@ c checks if FVL file is opened
 
 	end
 
-c******************************************************
+! ******************************************************
 
 	subroutine fvlclose
 
-c closes FVL file
+!  closes FVL file
 
 	implicit none
 
@@ -913,11 +913,11 @@ c closes FVL file
 
 	end
 
-c******************************************************
+! ******************************************************
 
 	subroutine fvlopen(type)
 
-c opens FVL file and reads header
+!  opens FVL file and reads header
 
 	use mod_depth
 	use levels
@@ -940,11 +940,11 @@ c opens FVL file and reads header
 	integer ierr
 	integer ifem_choose_file
 
-c initialize routines
+!  initialize routines
 
 	call fvlini
 
-c open file
+!  open file
 
 	nunit = ifem_choose_file(type,'old')
 	if( nunit .le. 0 ) then
@@ -959,7 +959,7 @@ c open file
                 write(6,*) 'Reading file ...'
 	end if
 
-c read first header
+!  read first header
 
 	nvers = 3
 	call rfnos(nunit,nvers,nknaux,nelaux,nlvaux,nvar,descrp,ierr)
@@ -981,7 +981,7 @@ c read first header
 	if( nlv .ne. nlvaux ) goto 99
 	if( nvar .ne. 1 ) goto 99
 
-c read second header
+!  read second header
 
 	call rsnos(nunit,ilhkv1,hlv1,hev1,ierr)
 
@@ -995,7 +995,7 @@ c read second header
 
 	nunit_fvl = nunit
 
-c end
+!  end
 
 	return
    99	continue
@@ -1009,11 +1009,11 @@ c end
 	!stop 'error stop fvlopen'
 	end
 
-c******************************************************
+! ******************************************************
 
 	subroutine fvlnext(it,nlvddi,array)
 
-c reads next FVL record
+!  reads next FVL record
 
 	use levels
 
@@ -1050,7 +1050,7 @@ c reads next FVL record
 	  write(6,*) 'fvl file read...',itfvl,ivar
 	end do
 
-c set return value
+!  set return value
 
 	if( ierr .ne. 0 ) then
 	  if( ierr .gt. 0 ) then
@@ -1064,12 +1064,12 @@ c set return value
 	  return
 	end if
 
-c check results
+!  check results
 
 	if( it .ne. itfvl ) nunit_fvl = -abs(nunit_fvl)
 	if( ivar .ne. 66 ) goto 99
 
-c end
+!  end
 
 	return
    99	continue
@@ -1077,17 +1077,17 @@ c end
 	stop 'error stop fvlnext: time or variable'
 	end
 
-c******************************************************
-c******************************************************
-c******************************************************
-c element values
-c******************************************************
-c******************************************************
-c******************************************************
+! ******************************************************
+! ******************************************************
+! ******************************************************
+!  element values
+! ******************************************************
+! ******************************************************
+! ******************************************************
 
 	subroutine eosini
 
-c initializes internal data structure for EOS file
+!  initializes internal data structure for EOS file
 
 	implicit none
 
@@ -1110,11 +1110,11 @@ c initializes internal data structure for EOS file
 
 	end
 
-c******************************************************
+! ******************************************************
 
 	subroutine eosclose
 
-c closes EOS file
+!  closes EOS file
 
 	implicit none
 
@@ -1126,11 +1126,11 @@ c closes EOS file
 
 	end
 
-c******************************************************
+! ******************************************************
 
 	subroutine eosopen(type)
 
-c opens EOS file and reads header
+!  opens EOS file and reads header
 
 	use mod_depth
 	use levels
@@ -1151,11 +1151,11 @@ c opens EOS file and reads header
 	integer ierr
 	integer ifemop
 
-c initialize routines
+!  initialize routines
 
 	call eosini
 
-c open file
+!  open file
 
 	nunit = ifemop(type,'unform','old')
 	if( nunit .le. 0 ) then
@@ -1167,7 +1167,7 @@ c open file
                 write(6,*) 'Reading file ...'
 	end if
 
-c read first header
+!  read first header
 
 	nvers = 3
 	call rfeos(nunit,nvers,nknaux,nelaux,nlvaux,nvar,descrp,ierr)
@@ -1192,7 +1192,7 @@ c read first header
 	call get_dimension_post(nknddi,nelddi,nlvddi)
 	if( nlvddi .lt. nlv ) goto 99
 
-c read second header
+!  read second header
 
 	call rseos(nunit,ilhv,hlv,hev,ierr)
 
@@ -1213,11 +1213,11 @@ c read second header
 	stop 'error stop eosopen'
 	end
 
-c******************************************************
+! ******************************************************
 
 	function eosnext(it,ivar,nlvddi,array)
 
-c reads next EOS record - is true if a record has been read, false if EOF
+!  reads next EOS record - is true if a record has been read, false if EOF
 
 	use levels
 
@@ -1240,7 +1240,7 @@ c reads next EOS record - is true if a record has been read, false if EOF
 
 	call rdeos(nunit,it,ivar,nlvddi,ilhv,array,ierr)
 
-c set return value
+!  set return value
 
 	if( ierr .gt. 0 ) then
 		!stop 'error stop eosnext: error reading data record'
@@ -1256,17 +1256,17 @@ c set return value
 
 	end
 
-c******************************************************
-c******************************************************
-c******************************************************
-c aux routines
-c******************************************************
-c******************************************************
-c******************************************************
+! ******************************************************
+! ******************************************************
+! ******************************************************
+!  aux routines
+! ******************************************************
+! ******************************************************
+! ******************************************************
 
 	subroutine level_e2k_sh
 
-c computes max level at nodes from elements
+!  computes max level at nodes from elements
 
 	use levels
 	use basin
@@ -1277,11 +1277,11 @@ c computes max level at nodes from elements
 
 	end
 
-c******************************************************
+! ******************************************************
 
 	subroutine level_k2e_sh
 
-c computes level at elems from nodes (not exact)
+!  computes level at elems from nodes (not exact)
 
 	use levels
 	use basin
@@ -1292,11 +1292,11 @@ c computes level at elems from nodes (not exact)
 
 	end
 
-c******************************************************
+! ******************************************************
 
 	subroutine array_check(n,a1,a2,text)
 
-c checks if arrays are equal
+!  checks if arrays are equal
 
 	implicit none
 
@@ -1317,11 +1317,11 @@ c checks if arrays are equal
 
 	end
 
-c******************************************************
+! ******************************************************
 
 	subroutine array_i_check(n,a1,a2,text)
 
-c checks if arrays are equal
+!  checks if arrays are equal
 
 	implicit none
 
@@ -1342,17 +1342,17 @@ c checks if arrays are equal
 
 	end
 
-c******************************************************
-c******************************************************
-c******************************************************
-c fem files
-c******************************************************
-c******************************************************
-c******************************************************
+! ******************************************************
+! ******************************************************
+! ******************************************************
+!  fem files
+! ******************************************************
+! ******************************************************
+! ******************************************************
 
 	subroutine femini
 
-c initializes internal data structure for FEM files
+!  initializes internal data structure for FEM files
 
 	implicit none
 
@@ -1376,11 +1376,11 @@ c initializes internal data structure for FEM files
 
 	end
 
-c******************************************************
+! ******************************************************
 
 	subroutine femclose
 
-c closes FEM file
+!  closes FEM file
 
 	implicit none
 
@@ -1392,11 +1392,11 @@ c closes FEM file
 
 	end
 
-c******************************************************
+! ******************************************************
 
 	subroutine femopen(type)
 
-c opens FEM file and reads header
+!  opens FEM file and reads header
 
 	use mod_depth
 	use levels
@@ -1421,11 +1421,11 @@ c opens FEM file and reads header
 	double precision dtime
 	integer ifemop,fem_file_regular
 
-c initialize routines
+!  initialize routines
 
 	call femini
 
-c open file
+!  open file
 
 	np = nkn
 	call def_make(type,file)
@@ -1441,10 +1441,10 @@ c open file
                 write(6,*) 'Reading FEM file ...'
 	end if
 
-c read first header
+!  read first header
 
-        call fem_file_read_params(iformat,nunit,dtime
-     +                          ,nvers,np,lmax,nvar,ntype,datetime,ierr)
+        call fem_file_read_params(iformat,nunit,dtime &
+     &                          ,nvers,np,lmax,nvar,ntype,datetime,ierr)
 
 	if( ierr .ne. 0 ) then
 		write(6,*) 'ierr = ',ierr
@@ -1475,10 +1475,10 @@ c read first header
 
 	it = nint(dtime)
 
-c read second header
+!  read second header
 
-	call fem_file_read_2header(iformat,nunit,ntype,nlv
-     +				,hlv,regpar,ierr)
+	call fem_file_read_2header(iformat,nunit,ntype,nlv &
+     &				,hlv,regpar,ierr)
 
 	if( ierr .ne. 0 ) then
 		write(6,*) 'ierr = ',ierr
@@ -1491,7 +1491,7 @@ c read second header
 	write(6,*) 'hlv: ',nlv
 	write(6,*) (hlv(l),l=1,nlv)
 
-c rewind for a clean state
+!  rewind for a clean state
 
 	nunit_fem = nunit
 	rewind(nunit)
@@ -1510,11 +1510,11 @@ c rewind for a clean state
 	stop 'error stop femopen'
 	end
 
-c******************************************************
+! ******************************************************
 
 	function femnext(atime,ivar,nlvddi,nkn,array)
 
-c reads next FEM record - is true if a record has been read, false if EOF
+!  reads next FEM record - is true if a record has been read, false if EOF
 
 	use levels
 
@@ -1554,13 +1554,13 @@ c reads next FEM record - is true if a record has been read, false if EOF
 	!write(6,*) 'femnext format: ',bformat,iformat
 
 	np = 0
-        call fem_file_read_params(iformat,nunit,dtime
-     +                          ,nvers,np,lmax,nvar,ntype,datetime,ierr)
+        call fem_file_read_params(iformat,nunit,dtime &
+     &                          ,nvers,np,lmax,nvar,ntype,datetime,ierr)
 	if( ierr .ne. 0 ) goto 7
 	nlv = lmax
 	regpar = 0
-	call fem_file_read_2header(iformat,nunit,ntype,nlv
-     +				,hlv,regpar,ierr)
+	call fem_file_read_2header(iformat,nunit,ntype,nlv &
+     &				,hlv,regpar,ierr)
 	if( ierr .ne. 0 ) goto 7
 
 	bregdata = fem_file_regular(ntype) > 0
@@ -1589,17 +1589,17 @@ c reads next FEM record - is true if a record has been read, false if EOF
 	bfound = .false.
 	do i=1,nvar
 	  if( bfound ) then
-            call fem_file_skip_data(iformat,nunit
-     +                          ,nvers,np,lmax
-     +                          ,string,ierr)
+            call fem_file_skip_data(iformat,nunit &
+     &                          ,nvers,np,lmax &
+     &                          ,string,ierr)
 	    if( ierr .ne. 0 ) goto 98
 	  else
 	    write(6,*) 'reading data: ',bregdata,nlvddi,nkn,np,ip
-            call fem_file_read_data(iformat,nunit
-     +                          ,nvers,np,lmax
-     +				,string
-     +                          ,ilhkv,v1v
-     +                          ,nlvddi,p3read(1,1,ip),ierr)
+            call fem_file_read_data(iformat,nunit &
+     &                          ,nvers,np,lmax &
+     &				,string &
+     &                          ,ilhkv,v1v &
+     &                          ,nlvddi,p3read(1,1,ip),ierr)
 	    if( ierr .ne. 0 ) goto 98
 	    call string2ivar(string,iv)
 	    bfound = iv .eq. ivar
@@ -1622,8 +1622,8 @@ c reads next FEM record - is true if a record has been read, false if EOF
 	if( bregdata ) then
 	  write(6,*) 'interpolating from regular grid... ',ip
 	  ip = min(2,ip)
-	  call fem_interpolate(nlvddi,nkn,np,ip,regpar,ilhkv
-     +					,p3read,array)
+	  call fem_interpolate(nlvddi,nkn,np,ip,regpar,ilhkv &
+     &					,p3read,array)
 	  regp = regpar		!save for later
 	else
 	  array = p3read
@@ -1637,7 +1637,7 @@ c reads next FEM record - is true if a record has been read, false if EOF
 	  ivar = 0
 	end if
 
-c set return value
+!  set return value
 
     7	continue
 
@@ -1651,7 +1651,7 @@ c set return value
 		femnext = .true.
 	end if
 
-c end
+!  end
 
 	return
    98	continue
@@ -1664,7 +1664,7 @@ c end
 	stop 'error stop femnext: np different from nkn'
 	end
 
-c******************************************************
+! ******************************************************
 
 	subroutine femscale(nlvddi,nkn,fact,array)
 
@@ -1684,12 +1684,12 @@ c******************************************************
 
 	end
 
-c******************************************************
+! ******************************************************
 
-	subroutine fem_interpolate(nlvddi,nkn,np,ip,regpar,ilhkv
-     +			,p3reg,array)
+	subroutine fem_interpolate(nlvddi,nkn,np,ip,regpar,ilhkv &
+     &			,p3reg,array)
 
-c interpolates from a regular grid (only for 2D)
+!  interpolates from a regular grid (only for 2D)
 
 	implicit none
 
@@ -1732,9 +1732,9 @@ c interpolates from a regular grid (only for 2D)
 
 	end
 
-c*****************************************************************
-c*****************************************************************
-c*****************************************************************
+! *****************************************************************
+! *****************************************************************
+! *****************************************************************
 
 	subroutine allocate_simulation(npd)
 
@@ -1770,9 +1770,9 @@ c*****************************************************************
 
 	end
 
-c*****************************************************************
-c*****************************************************************
-c*****************************************************************
+! *****************************************************************
+! *****************************************************************
+! *****************************************************************
 
 	subroutine get_dimension_post(nknddi,nelddi,nlvddi)
 
@@ -1785,7 +1785,7 @@ c*****************************************************************
 
 	end
 
-c*****************************************************************
+! *****************************************************************
 
 	subroutine get_dimension_post_2d(nknddi,nelddi)
 
@@ -1799,7 +1799,7 @@ c*****************************************************************
 
 	end
 
-c*****************************************************************
+! *****************************************************************
 
 	subroutine get_dimension_post_3d(nlvddi)
 
@@ -1813,5 +1813,5 @@ c*****************************************************************
 
 	end
 
-c*****************************************************************
+! *****************************************************************
 

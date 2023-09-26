@@ -30,22 +30,22 @@
 
 !--------------------------------------------------------------------------
 
-c    Red, Green, Blue in [0,1]
-c    Hue, Saturation, Intensity in [0,1]
-c
-c    x = Red-0.5*(Green+Blue)
-c    y = 0.866*(Green-Blue)
-c
-c    Hue = arctan2(x,y)/(2*PI) 
-c    Saturation = (x^2+y^2)^0.5
-c    Intensity = (Red+Green+Blue)/3
-c
+!     Red, Green, Blue in [0,1]
+!     Hue, Saturation, Intensity in [0,1]
+! 
+!     x = Red-0.5*(Green+Blue)
+!     y = 0.866*(Green-Blue)
+! 
+!     Hue = arctan2(x,y)/(2*PI) 
+!     Saturation = (x^2+y^2)^0.5
+!     Intensity = (Red+Green+Blue)/3
+! 
 
-c*****************************************************************
+! *****************************************************************
 
 	subroutine rgb2hsi(r,g,b,h,s,i)
 
-c computes HSI from RGB
+!  computes HSI from RGB
 
 	implicit none
 
@@ -66,7 +66,7 @@ c computes HSI from RGB
 	  h = atan2(x,y) / ( 2. * pi )
 	end if
 
-c	h in [-0.5,0.5] -> bring to [0,1]
+! 	h in [-0.5,0.5] -> bring to [0,1]
 
 	if( h .lt. 0. ) h = h + 1.
 
@@ -75,11 +75,11 @@ c	h in [-0.5,0.5] -> bring to [0,1]
 
 	end
 
-c*****************************************************************
+! *****************************************************************
 
 	subroutine hsi2rgb(h,s,i,r,g,b)
 
-c computes RGB from HSI
+!  computes RGB from HSI
 
 	implicit none
 
@@ -100,7 +100,7 @@ c computes RGB from HSI
 	  h = atan2(x,y) / ( 2. * pi )
 	end if
 
-c	h in [-0.5,0.5] -> bring to [0,1]
+! 	h in [-0.5,0.5] -> bring to [0,1]
 
 	if( h .lt. 0. ) h = h + 1.
 
@@ -109,7 +109,7 @@ c	h in [-0.5,0.5] -> bring to [0,1]
 
 	end
 
-c*****************************************************************
+! *****************************************************************
 
 
 

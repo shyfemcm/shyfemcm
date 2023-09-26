@@ -23,74 +23,74 @@
 !
 !--------------------------------------------------------------------------
 
-c revision log :
-c
-c 12.02.1999	ggu	adapted to auto mode
-c 30.10.2003	ggu	added plowind()
-c 22.03.2004	ggu	lagrang model output added (mode 12)
-c 04.10.2004	ggu	temp and salt from nos file
-c 02.12.2004	ggu	copyright statement added
-c 02.03.2005	ggu	introduced flag for scalar plot
-c 18.10.2005	ggu	data structures introduced to call set_geom
-c 14.03.2007	ggu	wave plotting
-c 16.04.2008	ggu	new Makefile structure
-c 09.12.2008	ggu	changes from Malta integrated (annotation)
-c 26.01.2009	ggu	new makedepend
-c 06.04.2009	ggu	new param.h structure
-c 20.04.2009	ggu	level.h eliminated
-c 09.10.2009	ggu	plotting of atmos. pressure
-c 13.10.2009	ggu	new arrays for velocity section plot
-c 23.02.2010	ggu	new call to set_default_color_table()
-c 23.03.2010	ggu	changed v6.1.1
-c 14.04.2010	ggu	changed v6.1.4
-c 08.10.2010	ggu	changed VERS_6_1_13
-c 17.12.2010	ggu	substituted hv with hkv
-c 31.03.2011	ggu	new arrays fvlv, arfvlv for scalar plotting
-c 14.04.2011	ggu	changed VERS_6_1_22
-c 31.08.2011	ggu	new copyright, eos plotting
-c 01.09.2011	ggu	changed VERS_6_1_32
-c 14.11.2011	ggu	new array hl for depth structure
-c 22.11.2011	ggu	changed VERS_6_1_37
-c 09.12.2011	ggu	changed VERS_6_1_38
-c 24.01.2012	ggu	changed VERS_6_1_41
-c 27.02.2013	ggu	deleted amat, better color handling
-c 03.05.2013	ggu	changed VERS_6_1_63
-c 13.06.2013	ggu	new plotting for fem files
-c 05.09.2013	ggu	better handling of variable
-c 12.09.2013	ggu	changed VERS_6_1_67
-c 28.01.2014	ggu	changed VERS_6_1_71
-c 05.03.2014	ggu	bug fix: isphe was not stored
-c 30.05.2014	ggu	changed VERS_6_1_76
-c 18.07.2014	ggu	changed VERS_7_0_1
-c 20.10.2014	ggu	handle absolute and plotting time
-c 23.12.2014	ggu	changed VERS_7_0_11
-c 19.01.2015	ggu	changed VERS_7_1_2
-c 19.01.2015	ggu	changed VERS_7_1_3
-c 26.02.2015	ggu	changed VERS_7_1_5
-c 10.07.2015	ggu	changed VERS_7_1_50
-c 17.07.2015	ggu	changed VERS_7_1_52
-c 17.07.2015	ggu	changed VERS_7_1_80
-c 20.07.2015	ggu	changed VERS_7_1_81
-c 24.07.2015	ggu	changed VERS_7_1_82
-c 30.07.2015	ggu	changed VERS_7_1_83
-c 29.09.2015	ggu	changed VERS_7_2_5
-c 28.04.2016	ggu	changed VERS_7_5_9
-c 25.05.2016	ggu	changed VERS_7_5_10
-c 30.05.2016	ggu	changed VERS_7_5_11
-c 17.06.2016	ggu	changed VERS_7_5_15
-c 12.01.2017	ggu	changed VERS_7_5_21
-c 31.03.2017	ggu	changed VERS_7_5_24
-c 09.05.2017	ggu	changed VERS_7_5_26
-c 14.11.2017	ggu	changed VERS_7_5_36
-c 25.10.2018	ggu	changed VERS_7_5_51
-c 18.12.2018	ggu	changed VERS_7_5_52
-c 21.05.2019	ggu	changed VERS_7_5_62
-c
-c*************************************************************
+!  revision log :
+! 
+!  12.02.1999	ggu	adapted to auto mode
+!  30.10.2003	ggu	added plowind()
+!  22.03.2004	ggu	lagrang model output added (mode 12)
+!  04.10.2004	ggu	temp and salt from nos file
+!  02.12.2004	ggu	copyright statement added
+!  02.03.2005	ggu	introduced flag for scalar plot
+!  18.10.2005	ggu	data structures introduced to call set_geom
+!  14.03.2007	ggu	wave plotting
+!  16.04.2008	ggu	new Makefile structure
+!  09.12.2008	ggu	changes from Malta integrated (annotation)
+!  26.01.2009	ggu	new makedepend
+!  06.04.2009	ggu	new param.h structure
+!  20.04.2009	ggu	level.h eliminated
+!  09.10.2009	ggu	plotting of atmos. pressure
+!  13.10.2009	ggu	new arrays for velocity section plot
+!  23.02.2010	ggu	new call to set_default_color_table()
+!  23.03.2010	ggu	changed v6.1.1
+!  14.04.2010	ggu	changed v6.1.4
+!  08.10.2010	ggu	changed VERS_6_1_13
+!  17.12.2010	ggu	substituted hv with hkv
+!  31.03.2011	ggu	new arrays fvlv, arfvlv for scalar plotting
+!  14.04.2011	ggu	changed VERS_6_1_22
+!  31.08.2011	ggu	new copyright, eos plotting
+!  01.09.2011	ggu	changed VERS_6_1_32
+!  14.11.2011	ggu	new array hl for depth structure
+!  22.11.2011	ggu	changed VERS_6_1_37
+!  09.12.2011	ggu	changed VERS_6_1_38
+!  24.01.2012	ggu	changed VERS_6_1_41
+!  27.02.2013	ggu	deleted amat, better color handling
+!  03.05.2013	ggu	changed VERS_6_1_63
+!  13.06.2013	ggu	new plotting for fem files
+!  05.09.2013	ggu	better handling of variable
+!  12.09.2013	ggu	changed VERS_6_1_67
+!  28.01.2014	ggu	changed VERS_6_1_71
+!  05.03.2014	ggu	bug fix: isphe was not stored
+!  30.05.2014	ggu	changed VERS_6_1_76
+!  18.07.2014	ggu	changed VERS_7_0_1
+!  20.10.2014	ggu	handle absolute and plotting time
+!  23.12.2014	ggu	changed VERS_7_0_11
+!  19.01.2015	ggu	changed VERS_7_1_2
+!  19.01.2015	ggu	changed VERS_7_1_3
+!  26.02.2015	ggu	changed VERS_7_1_5
+!  10.07.2015	ggu	changed VERS_7_1_50
+!  17.07.2015	ggu	changed VERS_7_1_52
+!  17.07.2015	ggu	changed VERS_7_1_80
+!  20.07.2015	ggu	changed VERS_7_1_81
+!  24.07.2015	ggu	changed VERS_7_1_82
+!  30.07.2015	ggu	changed VERS_7_1_83
+!  29.09.2015	ggu	changed VERS_7_2_5
+!  28.04.2016	ggu	changed VERS_7_5_9
+!  25.05.2016	ggu	changed VERS_7_5_10
+!  30.05.2016	ggu	changed VERS_7_5_11
+!  17.06.2016	ggu	changed VERS_7_5_15
+!  12.01.2017	ggu	changed VERS_7_5_21
+!  31.03.2017	ggu	changed VERS_7_5_24
+!  09.05.2017	ggu	changed VERS_7_5_26
+!  14.11.2017	ggu	changed VERS_7_5_36
+!  25.10.2018	ggu	changed VERS_7_5_51
+!  18.12.2018	ggu	changed VERS_7_5_52
+!  21.05.2019	ggu	changed VERS_7_5_62
+! 
+! *************************************************************
 
 	program plotsim
 
-c plots simulation
+!  plots simulation
 
 	use mod_hydro_plot
 	use mod_geom
@@ -104,12 +104,12 @@ c plots simulation
 
 	implicit none
 
-c parameters
+!  parameters
 
 	include 'mkonst.h'
 	include 'pkonst.h'
 
-c local
+!  local
 	character*20 what
 	integer mode,ivar
 	integer ie,ii,k,l,i
@@ -120,15 +120,15 @@ c local
 	real sflag
 	real getpar
 
-c----------------------------------------------
-c copyright
-c----------------------------------------------
+! ----------------------------------------------
+!  copyright
+! ----------------------------------------------
 
 	call shyfem_copyright('plotsim - plotting maps on FE grids')
 
-c----------------------------------------------
-c initialize parameters
-c----------------------------------------------
+! ----------------------------------------------
+!  initialize parameters
+! ----------------------------------------------
 
 	eps=1.e-5
 	eps1=1.e-5
@@ -142,18 +142,18 @@ c----------------------------------------------
 
 	call set_flag(sflag)
 
-c----------------------------------------------
-c read basin
-c----------------------------------------------
+! ----------------------------------------------
+!  read basin
+! ----------------------------------------------
 
 	if(iapini(7,0,0,0).eq.0) then
 		stop 'error stop : iapini'
 	end if
 	write(6,*) 'Basin:   nkn = ',nkn,'  nel = ',nel
 
-c----------------------------------------------
-c set up elements
-c----------------------------------------------
+! ----------------------------------------------
+!  set up elements
+! ----------------------------------------------
 
 	call allocate_2d_arrays(nel)
 
@@ -164,16 +164,16 @@ c----------------------------------------------
 	call get_coords_ev(isphe)
 	call putpar('isphe',float(isphe))
 
-c----------------------------------------------
-c make depth on nodes and elements
-c----------------------------------------------
+! ----------------------------------------------
+!  make depth on nodes and elements
+! ----------------------------------------------
 
 	call makehev(hev)
 	call makehkv(hkv)
 
-c----------------------------------------------
-c time management
-c----------------------------------------------
+! ----------------------------------------------
+!  time management
+! ----------------------------------------------
 
 	call ptime_init
 	call get_date_time(date,time)
@@ -181,9 +181,9 @@ c----------------------------------------------
 	call ptime_min_max
 	call iff_init_global_2d(nkn,nel,hkv,hev,date,time)	!FIXME
 
-c----------------------------------------------
-c interactive set up
-c----------------------------------------------
+! ----------------------------------------------
+!  interactive set up
+! ----------------------------------------------
 
 	call init_plot
 
@@ -192,21 +192,21 @@ c----------------------------------------------
 	call read_apn_file(ivar)
 	call initialize_color
 
-c----------------------------------------------
-c open plot
-c----------------------------------------------
+! ----------------------------------------------
+!  open plot
+! ----------------------------------------------
 
 	call qopen
 
-c----------------------------------------------
-c do plotting
-c----------------------------------------------
+! ----------------------------------------------
+!  do plotting
+! ----------------------------------------------
 
 	if( mode .eq. 1 )  call plobas
 	if( mode .eq. 2 )  call plosim(.true.)
 	if( mode .eq. 3 )  call plosim(.false.)
 	if( mode .eq. 4 )  call plozet
-c	if( mode .eq. 4 )  call plobar
+! 	if( mode .eq. 4 )  call plobar
 	if( mode .eq. 5 )  call plonos('.con',10)
 	if( mode .eq. 6 )  call plonos('.nos',12)
 	if( mode .eq. 7 )  call plonos('.nos',11)
@@ -220,19 +220,19 @@ c	if( mode .eq. 4 )  call plobar
 	if( mode .eq. 15 ) call ploeos('.eos',0)
 	if( mode .eq. 16 ) call plofem('.fem',0)
 
-c----------------------------------------------
-c close plot
-c----------------------------------------------
+! ----------------------------------------------
+!  close plot
+! ----------------------------------------------
 
 	call qclose
 
-c----------------------------------------------
-c end of routine
-c----------------------------------------------
+! ----------------------------------------------
+!  end of routine
+! ----------------------------------------------
 
 	end
 
-c*****************************************************************
+! *****************************************************************
 
 	subroutine ichoice(mode,ivar)
 
@@ -252,10 +252,10 @@ c*****************************************************************
 
 	character*10 whats(0:ndim)
 	save whats
-	data whats /' ','bath','vel','trans','zeta','conz'
-     +			,'temp','salt','rms','oxygen','nos'
-     +			,'wind','lgr','wave','pres','elem'
-     +			,'fem'/
+	data whats /' ','bath','vel','trans','zeta','conz' &
+     &			,'temp','salt','rms','oxygen','nos' &
+     &			,'wind','lgr','wave','pres','elem' &
+     &			,'fem'/
 	
 	iwhat = nint(getpar('iwhat'))
 	iauto = nint(getpar('iauto'))
@@ -301,7 +301,7 @@ c*****************************************************************
 
 	end
 
-c*****************************************************************
+! *****************************************************************
 
 	subroutine initialize_color0
 
@@ -317,7 +317,7 @@ c*****************************************************************
 
 	end
 
-c*****************************************************************
+! *****************************************************************
 
         subroutine initialize_color
 
@@ -340,7 +340,7 @@ c*****************************************************************
 
         end
 
-c*****************************************************************
+! *****************************************************************
 
         subroutine get_date_time(date,time)
 
@@ -355,7 +355,7 @@ c*****************************************************************
 
         end
 
-c*****************************************************************
+! *****************************************************************
 
 	subroutine allocate_2d_arrays(npd)
 
@@ -386,7 +386,7 @@ c*****************************************************************
 
 	end
 
-c*****************************************************************
+! *****************************************************************
 
 	subroutine reallocate_2d_arrays(npd)
 
@@ -407,5 +407,5 @@ c*****************************************************************
 
 	end
 
-c*****************************************************************
+! *****************************************************************
 

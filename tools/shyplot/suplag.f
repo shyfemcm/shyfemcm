@@ -24,56 +24,56 @@
 !
 !--------------------------------------------------------------------------
 
-c utility routines for plotsim
-c
-c contents :
-c
-c subroutine plolagr
-c
-c revision log :
-c
-c 03.03.2005	ggu	revised lagrangian plotting routines
-c 05.06.2007	ggu	plot lagrangian particles in color (LAG_COLOR)
-c 13.06.2008	ggu	use also z for plotting
-c 17.09.2008	ggu	new version for plotting lagrangian particles in color
-c 27.01.2009	ggu	better error check reading particles, routines deleted
-c 23.03.2010	ggu	changed v6.1.1
-c 15.07.2011	ggu	changed VERS_6_1_28
-c 01.09.2011	ggu	changed VERS_6_1_32
-c 23.01.2012	ggu	use nbdydim in plolagr, plot z with color in plo_xy
-c 01.10.2012	ggu	use station to get color in plot (ip_station)
-c 08.10.2012	ggu	changed VERS_6_1_58
-c 25.10.2012	ggu	changed VERS_6_1_59
-c 13.06.2013	ggu	changed VERS_6_1_65
-c 05.05.2014	ggu	changed VERS_6_1_74
-c 21.10.2014	ggu	changed VERS_7_0_3
-c 23.12.2014	ggu	changed VERS_7_0_11
-c 19.01.2015	ggu	changed VERS_7_1_3
-c 23.04.2015	ggu	plotting for 3d particles
-c 21.05.2015	ggu	changed VERS_7_1_11
-c 17.07.2015	ggu	changed VERS_7_1_80
-c 20.07.2015	ggu	changed VERS_7_1_81
-c 20.11.2015	ggu	changed VERS_7_3_15
-c 16.12.2015	ggu	changed VERS_7_3_16
-c 19.02.2016	ggu	changed VERS_7_5_2
-c 17.06.2016	ggu	changed VERS_7_5_15
-c 12.01.2017	ggu	changed VERS_7_5_21
-c 09.05.2017	ggu	changed VERS_7_5_26
-c 11.07.2017	ggu	changed VERS_7_5_30
-c 19.09.2018	ccf	plotting lagrangian trajectories
-c 25.10.2018	ggu	changed VERS_7_5_51
-c 18.12.2018	ggu	changed VERS_7_5_52
-c 21.05.2019	ggu	changed VERS_7_5_62
-c
-c**********************************************************
+!  utility routines for plotsim
+! 
+!  contents :
+! 
+!  subroutine plolagr
+! 
+!  revision log :
+! 
+!  03.03.2005	ggu	revised lagrangian plotting routines
+!  05.06.2007	ggu	plot lagrangian particles in color (LAG_COLOR)
+!  13.06.2008	ggu	use also z for plotting
+!  17.09.2008	ggu	new version for plotting lagrangian particles in color
+!  27.01.2009	ggu	better error check reading particles, routines deleted
+!  23.03.2010	ggu	changed v6.1.1
+!  15.07.2011	ggu	changed VERS_6_1_28
+!  01.09.2011	ggu	changed VERS_6_1_32
+!  23.01.2012	ggu	use nbdydim in plolagr, plot z with color in plo_xy
+!  01.10.2012	ggu	use station to get color in plot (ip_station)
+!  08.10.2012	ggu	changed VERS_6_1_58
+!  25.10.2012	ggu	changed VERS_6_1_59
+!  13.06.2013	ggu	changed VERS_6_1_65
+!  05.05.2014	ggu	changed VERS_6_1_74
+!  21.10.2014	ggu	changed VERS_7_0_3
+!  23.12.2014	ggu	changed VERS_7_0_11
+!  19.01.2015	ggu	changed VERS_7_1_3
+!  23.04.2015	ggu	plotting for 3d particles
+!  21.05.2015	ggu	changed VERS_7_1_11
+!  17.07.2015	ggu	changed VERS_7_1_80
+!  20.07.2015	ggu	changed VERS_7_1_81
+!  20.11.2015	ggu	changed VERS_7_3_15
+!  16.12.2015	ggu	changed VERS_7_3_16
+!  19.02.2016	ggu	changed VERS_7_5_2
+!  17.06.2016	ggu	changed VERS_7_5_15
+!  12.01.2017	ggu	changed VERS_7_5_21
+!  09.05.2017	ggu	changed VERS_7_5_26
+!  11.07.2017	ggu	changed VERS_7_5_30
+!  19.09.2018	ccf	plotting lagrangian trajectories
+!  25.10.2018	ggu	changed VERS_7_5_51
+!  18.12.2018	ggu	changed VERS_7_5_52
+!  21.05.2019	ggu	changed VERS_7_5_62
+! 
+! **********************************************************
 
 
-c**********************************************************
-c**********************************************************
-c**********************************************************
+! **********************************************************
+! **********************************************************
+! **********************************************************
 
-        subroutine plo_traj(n,nt,nrec,lgmean,xall,yall,rall,aplot,
-     +                       nm,xmll,ymll,rmll,mplot,title)
+        subroutine plo_traj(n,nt,nrec,lgmean,xall,yall,rall,aplot, &
+     &                       nm,xmll,ymll,rmll,mplot,title)
 
         use mod_hydro_plot
 	use plotutil
@@ -119,8 +119,8 @@ c**********************************************************
             call qlwidth(lw)		!line thickness
             if ( lgmean == 1 ) aplot = 2
   	    do ir = 1,n
-              call plo_traj_line(nrec,xall(ir,:),yall(ir,:),
-     +              rall(ir,:),aplot(ir),flag)
+              call plo_traj_line(nrec,xall(ir,:),yall(ir,:), &
+     &              rall(ir,:),aplot(ir),flag)
             end do
 
 !	    do ir = 1,nrec
@@ -138,8 +138,8 @@ c**********************************************************
           end if
           call qlwidth(lw)		!line thickness
 	  do ir = 1,nm
-            call plo_traj_line(nrec,xmll(ir,:),ymll(ir,:),
-     +              rmll(ir,:),mplot(ir),flag)
+            call plo_traj_line(nrec,xmll(ir,:),ymll(ir,:), &
+     &              rmll(ir,:),mplot(ir),flag)
           end do
 
 	  ! plot 1 mean trajectory on top with tichk line
@@ -147,8 +147,8 @@ c**********************************************************
             call qcomm('Plotting first lgr trajectory')
             lw = 0.1
             call qlwidth(lw)		!line thickness
-            call plo_traj_line(nrec,xmll(1,:),ymll(1,:),
-     +              rmll(1,:),mplot(1),flag)
+            call plo_traj_line(nrec,xmll(1,:),ymll(1,:), &
+     &              rmll(1,:),mplot(1),flag)
           end if
 
           call set_color_table(icsave)
@@ -162,7 +162,7 @@ c**********************************************************
 
 	end
 
-c**********************************************************
+! **********************************************************
 
         subroutine plo_part(n,xlag,ylag,rlag,iplot,title)
 
@@ -199,9 +199,9 @@ c**********************************************************
 
         end
 
-c**********************************************************
-c**********************************************************
-c**********************************************************
+! **********************************************************
+! **********************************************************
+! **********************************************************
 
         subroutine write_xy(n,xlag,ylag,zlag,llag,lmax)
 
@@ -227,7 +227,7 @@ c**********************************************************
 
         end
 
-c**********************************************************
+! **********************************************************
 
         subroutine plo_xy_new(n,xlag,ylag,rlag,iplot)
 
@@ -274,7 +274,7 @@ c**********************************************************
 
         end
 
-c**********************************************************
+! **********************************************************
 
         subroutine plo_traj_line(n,xlag,ylag,rlag,iplot,flag)
      
@@ -323,7 +323,7 @@ c**********************************************************
 
        end
 
-c**********************************************************
+! **********************************************************
 ! CCF TO BE DELETED
 
         subroutine plo_xy(n,xlag,ylag,zlag,llag,hlag,tlag,lmax)
@@ -347,7 +347,7 @@ c**********************************************************
 	real cwater,cbottom,col
 	integer t,tm
 
-c--------------------------------------
+! --------------------------------------
 	bcolor = .false.	!use color to plot lagrangian particles
 	bcolor = .true.		!use color to plot lagrangian particles
 	bbottom = .true.	!use color to indicate p. on bottom
@@ -365,7 +365,7 @@ c--------------------------------------
 	cbottom = 0.3		!color to use for particles on bottom
 	cwater = 0.45		!color to use for particles in water
 	cbottom = 0.9		!color to use for particles on bottom
-c--------------------------------------
+! --------------------------------------
 
         call qlwidth(0.065)
 	if( bcolor ) call qhue(cwater)		!LAG_COLOR
@@ -436,7 +436,7 @@ c--------------------------------------
 
        end
 
-c**********************************************************
+! **********************************************************
 
 	subroutine plot_single_particle(x,y)
 
@@ -474,7 +474,7 @@ c**********************************************************
 
 	end
 
-c**********************************************************
+! **********************************************************
 
         subroutine get_station_color(z,is,col)
 
@@ -536,4 +536,4 @@ c**********************************************************
 
 	end
 
-c**********************************************************
+! **********************************************************

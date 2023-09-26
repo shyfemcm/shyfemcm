@@ -257,8 +257,8 @@
         double precision atime,atime0,dtime
 
         INTERFACE
-        subroutine lgr_alloc(nn,nc
-     +          ,id,ty,tt,s,ie,x,y,z,lb,hl,c)
+        subroutine lgr_alloc(nn,nc &
+     &          ,id,ty,tt,s,ie,x,y,z,lb,hl,c)
         integer nn,nc
         integer, allocatable            :: id(:)
         integer, allocatable            :: ty(:)
@@ -394,12 +394,12 @@
 
           call lgr_peek_block_header(iunit,dtime,n_act,iwhat,ierr)
           if( ierr /= 0 ) exit
-          call lgr_alloc(n_act,ncust
-     +          ,ida,tya,tta,sa,iea,xa,ya,za,lba,hla,ca)
+          call lgr_alloc(n_act,ncust &
+     &          ,ida,tya,tta,sa,iea,xa,ya,za,lba,hla,ca)
           allocate(aplot(n_act))
           allocate(ra(n_act))
-          call lgr_get_block(iunit,n_act,ncust,
-     +                  ida,tya,tta,sa,iea,xa,ya,za,lba,hla,ca)
+          call lgr_get_block(iunit,n_act,ncust, &
+     &                  ida,tya,tta,sa,iea,xa,ya,za,lba,hla,ca)
           n = n_act
 
 	  !----------------------------------------------------------------
@@ -416,10 +416,10 @@
 	    ! read inserted particles and store information for age
 	    !----------------------------------------------------------------
 
-            call lgr_alloc(n_new,ncust
-     +          ,idn,tyn,ttn,sn,ien,xn,yn,zn,lbn,hln,cn)
-            call lgr_get_block(iunit,n_new,ncust,
-     +                  idn,tyn,ttn,sn,ien,xn,yn,zn,lbn,hln,cn)
+            call lgr_alloc(n_new,ncust &
+     &          ,idn,tyn,ttn,sn,ien,xn,yn,zn,lbn,hln,cn)
+            call lgr_get_block(iunit,n_new,ncust, &
+     &                  idn,tyn,ttn,sn,ien,xn,yn,zn,lbn,hln,cn)
             nn_old = n_init
             n_init = n_init + n_new
             if( n_init == n_new ) then
@@ -470,12 +470,12 @@
           allocate(agem(n_typ))
           allocate(mplot(n_typ))
           allocate(rm(n_typ))
-          call lgr_alloc(n_typ,ncust
-     +        ,idm,tym,ttm,sm,iem,xm,ym,zm,lbm,hlm,cm)
+          call lgr_alloc(n_typ,ncust &
+     &        ,idm,tym,ttm,sm,iem,xm,ym,zm,lbm,hlm,cm)
 
           if ( blgmean ) then
-            call lgr_mean_posit(n_act,ncust,tya,agea,sa,xa,ya,hla,ca,
-     +                     n_typ,tym,agem,sm,xm,ym,hlm,cm)
+            call lgr_mean_posit(n_act,ncust,tya,agea,sa,xa,ya,hla,ca, &
+     &                     n_typ,tym,agem,sm,xm,ym,hlm,cm)
             ttm = atime
           end if
 
@@ -665,8 +665,8 @@
           if( bverb ) write(6,*) 'plotting rlag: ',trim(name),rmin,rmax
 
           if (btraj) then
-            call plo_traj(n,nt,irec,lgmean,xall,yall,rall,aplot,
-     +              n_typ,xmll,ymll,rmll,mplot,'trajectories')
+            call plo_traj(n,nt,irec,lgmean,xall,yall,rall,aplot, &
+     &              n_typ,xmll,ymll,rmll,mplot,'trajectories')
           else
             call plo_part(n,xa,ya,ra,aplot,'particles')
           end if
@@ -942,8 +942,8 @@
 	 ! read new data set
 	 !--------------------------------------------------------------
 
-	 call read_records(id,dtime,bhydro,nvar,nndim,nlvdi,idims
-     +				,cv3,cv3all,ierr)
+	 call read_records(id,dtime,bhydro,nvar,nndim,nlvdi,idims &
+     &				,cv3,cv3all,ierr)
 
          if(ierr.ne.0) exit
 
@@ -1020,8 +1020,8 @@
 	 end if
 
 	 if( bvect ) then
-	   call directional_insert(bvect,bregdata,ivar,ivar3
-     +					,ivarplot,n,cv2,ivel)
+	   call directional_insert(bvect,bregdata,ivar,ivar3 &
+     &					,ivarplot,n,cv2,ivel)
 	    if( iv == 3 ) utlnv(:,1:nel) = cv3(:,1:nel)
 	    if( iv == 4 ) vtlnv(:,1:nel) = cv3(:,1:nel)
 	 end if
@@ -1193,8 +1193,8 @@
 	! read first record
 	!--------------------------------------------------------------
 
-        call fem_file_read_params(iformat,iunit,dtime
-     +                          ,nvers,np,lmax,nvar,ntype,datetime,ierr)
+        call fem_file_read_params(iformat,iunit,dtime &
+     &                          ,nvers,np,lmax,nvar,ntype,datetime,ierr)
 
         if( ierr .ne. 0 ) goto 99
 
@@ -1212,8 +1212,8 @@
         call levels_init(np,np,nlv)	!first call - will be changed later
         call fem_file_make_type(ntype,2,itype)
 
-        call fem_file_read_2header(iformat,iunit,ntype,lmax
-     +                  ,hlv,regpar,ierr)
+        call fem_file_read_2header(iformat,iunit,ntype,lmax &
+     &                  ,hlv,regpar,ierr)
         if( ierr .ne. 0 ) goto 98
 
         if( lmax > 1 .and. .not. bquiet ) then
@@ -1313,8 +1313,8 @@
 	!--------------------------------------------------------------
 
         do i=1,nvar
-          call fem_file_skip_data(iformat,iunit
-     +                          ,nvers,np,lmax,string,ierr)
+          call fem_file_skip_data(iformat,iunit &
+     &                          ,nvers,np,lmax,string,ierr)
           if( ierr .ne. 0 ) goto 97
           strings(i) = string
 	  call string2ivar(strings(i),ivars(i))
@@ -1398,8 +1398,8 @@
           ! read headers of record and elab time
           !------------------------------------------------------------
 
-          call fem_file_read_params(iformat,iunit,dtime
-     +                          ,nvers,np,lmax,nvar,ntype,datetime,ierr)
+          call fem_file_read_params(iformat,iunit,dtime &
+     &                          ,nvers,np,lmax,nvar,ntype,datetime,ierr)
 
           if( ierr .lt. 0 ) exit
           irec = irec + 1
@@ -1414,8 +1414,8 @@
 
           if( bsdebug ) write(6,*) irec,atime,trim(line)
 
-          call fem_file_read_2header(iformat,iunit,ntype,lmax
-     +                  ,hlv,regpar,ierr)
+          call fem_file_read_2header(iformat,iunit,ntype,lmax &
+     &                  ,hlv,regpar,ierr)
           if( ierr .ne. 0 ) goto 98
 	  call init_sigma_info(lmax,hlv)
 
@@ -1440,15 +1440,15 @@
 
           do i=1,nvar
             if( bskip ) then
-              call fem_file_skip_data(iformat,iunit
-     +                          ,nvers,np,lmax,string,ierr)
+              call fem_file_skip_data(iformat,iunit &
+     &                          ,nvers,np,lmax,string,ierr)
             else
-              call fem_file_read_data(iformat,iunit
-     +                          ,nvers,np,lmax
-     +                          ,string
-     +                          ,il,hd
-     +                          ,lmax,data(1,1,i)
-     +                          ,ierr)
+              call fem_file_read_data(iformat,iunit &
+     &                          ,nvers,np,lmax &
+     &                          ,string &
+     &                          ,il,hd &
+     &                          ,lmax,data(1,1,i) &
+     &                          ,ierr)
             end if
             if( ierr .ne. 0 ) goto 97
             if( string .ne. strings(i) ) goto 95
@@ -1478,11 +1478,11 @@
 	    data2d(:) = data3d(1,:)
 	    if( bvect ) data2ddir(:) = data3ddir(1,:)
 	  else if( b2d ) then
-	    call fem_average_vertical(nlvdi,np,lmax,il,hlv,hd
-     +					,data3d,data2d)
+	    call fem_average_vertical(nlvdi,np,lmax,il,hlv,hd &
+     &					,data3d,data2d)
 	    if( bvect ) then
-	      call fem_average_vertical(nlvdi,np,lmax,il,hlv,hd
-     +					,data3ddir,data2ddir)
+	      call fem_average_vertical(nlvdi,np,lmax,il,hlv,hd &
+     &					,data3ddir,data2ddir)
 	    end if
 	  else
 	    call extlev(layer,nlvdi,np,il,data3d,data2d)
@@ -1499,11 +1499,11 @@
 
 	  if( bvect ) then
 	    ivar = ivars(ivs(1))
-	    call directional_insert(bvect,bregdata,ivar,ivar3,ivarplot
-     +					,np,data2d,ivel)
+	    call directional_insert(bvect,bregdata,ivar,ivar3,ivarplot &
+     &					,np,data2d,ivel)
 	    ivar = ivars(ivs(2))
-	    call directional_insert(bvect,bregdata,ivar,ivar3,ivarplot
-     +					,np,data2ddir,ivel)
+	    call directional_insert(bvect,bregdata,ivar,ivar3,ivarplot &
+     &					,np,data2ddir,ivel)
 	  end if
 
 	  if( bregdata ) then
@@ -1647,7 +1647,7 @@
 
 !***************************************************************
 
-c*****************************************************************
+! *****************************************************************
 
         subroutine allocate_2d_arrays
 
@@ -1669,7 +1669,7 @@ c*****************************************************************
 
         end
 
-c*****************************************************************
+! *****************************************************************
 
         subroutine read_command_line_file(file)
 
@@ -1700,13 +1700,13 @@ c*****************************************************************
 
         end
 
-c*****************************************************************
-c*****************************************************************
-c*****************************************************************
-c routines for directional plots
-c*****************************************************************
-c*****************************************************************
-c*****************************************************************
+! *****************************************************************
+! *****************************************************************
+! *****************************************************************
+!  routines for directional plots
+! *****************************************************************
+! *****************************************************************
+! *****************************************************************
 
 	subroutine set_ivel(ivar3,ivel)
 
@@ -1731,7 +1731,7 @@ c*****************************************************************
 
 	end
 
-c*****************************************************************
+! *****************************************************************
 
 	subroutine directional_init(nvar,ivars,ivar33,bvect,ivarplot)
 
@@ -1783,8 +1783,8 @@ c*****************************************************************
 	else if( nv == 1 ) then
 	  if( bvect ) then
 	    bvect = .false.
-	    if( bverb ) write(6,*) 'can plot vector only as scalar: '
-     +					,ivarplot
+	    if( bverb ) write(6,*) 'can plot vector only as scalar: ' &
+     &					,ivarplot
 	  end if
 	else if( nv == 0 ) then
 	  write(6,*) '*** file does not contain needed varid: ',ivar33
@@ -1797,10 +1797,10 @@ c*****************************************************************
 
 	end
 
-c*****************************************************************
+! *****************************************************************
 
-	subroutine directional_insert(bvect,bregdata,ivar,ivar3,ivarplot
-     +					,n,cv2,ivel)
+	subroutine directional_insert(bvect,bregdata,ivar,ivar3,ivarplot &
+     &					,n,cv2,ivel)
 
 	use basin
 	use mod_hydro_plot
@@ -1916,7 +1916,7 @@ c*****************************************************************
 	stop 'error stop directional_insert: transports not on elems'
 	end
 
-c*****************************************************************
+! *****************************************************************
 
 	subroutine choose_var(nvar,ivars,strings,varline,ivarplot,bvect)
 
@@ -2043,10 +2043,10 @@ c*****************************************************************
 
 	end
 
-c*****************************************************************
+! *****************************************************************
 
-	subroutine fem_average_vertical(nlvddi,np,lmax,ilhkv,hlv,hd
-     +					,data,data2d)
+	subroutine fem_average_vertical(nlvddi,np,lmax,ilhkv,hlv,hd &
+     &					,data,data2d)
 
 	implicit none
 
@@ -2078,8 +2078,8 @@ c*****************************************************************
 	  if( h < -990. ) h = hlv(lm)
 	  !if( h == -1. ) h = 1.
 	  if( h+z<zeps ) z = zeps-h
-	  call get_layer_thickness(lm,nsigma,0,hsigma,0.
-     +                          ,z,h,hlv,hl)
+	  call get_layer_thickness(lm,nsigma,0,hsigma,0. &
+     &                          ,z,h,hlv,hl)
 
 	  vacu = 0.
 	  dacu = 0.
@@ -2094,7 +2094,7 @@ c*****************************************************************
 
 	end
 
-c*****************************************************************
+! *****************************************************************
 
 	subroutine adjust_levels_with_flag(nlvddi,np,ilhkv,flag,data3d)
 
@@ -2116,9 +2116,9 @@ c*****************************************************************
 
 	end
 
-c*****************************************************************
-c*****************************************************************
-c*****************************************************************
+! *****************************************************************
+! *****************************************************************
+! *****************************************************************
 
 	subroutine get_var_to_plot(nvar,ivars,ivar,iv)
 
@@ -2137,10 +2137,10 @@ c*****************************************************************
 
 	end
 
-c*****************************************************************
+! *****************************************************************
 
-	subroutine get_vars_to_plot(nvar,ivars,ivar,ivarplot
-     +					,bvect,ivnum,ivs)
+	subroutine get_vars_to_plot(nvar,ivars,ivar,ivarplot &
+     &					,bvect,ivnum,ivs)
 
 	implicit none
 
@@ -2180,7 +2180,7 @@ c*****************************************************************
 
 	end
 
-c*****************************************************************
+! *****************************************************************
 
         subroutine shy_write_time2(irec,atime,ivar)
 
@@ -2202,5 +2202,5 @@ c*****************************************************************
 
         end
 
-c*****************************************************************
+! *****************************************************************
 

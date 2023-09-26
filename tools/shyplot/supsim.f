@@ -25,138 +25,138 @@
 !
 !--------------------------------------------------------------------------
 
-c utility routines for plotsim
-c
-c contents :
-c
-c subroutine plofem(type,ivarin)
-c subroutine plonos(type)
-c subroutine mkvarline(ivar,line)       makes variable description in nos file
-c subroutine plozet
-c subroutine plobar			plots barene
-c subroutine plosim(bvel)
-c subroutine ploval(nkn,parray,title)
-c subroutine plozbar
-c subroutine plovel(ivel)
-c subroutine plo2vel(bvel)
-c subroutine plo3vel(bvel)
-c subroutine por2vel(n,up,vp,uv,vv,ht)
-c subroutine plobas
-c
-c subroutine elkdep(nkn,hkv)
-c subroutine eltype0(nel,iarv)
-c subroutine eldepth(nel,hm3v,auxv,color,title)
-c subroutine eltype(nel,iarv,color,title)
-c
-c subroutine plotel( ie , color )
-c subroutine basplc( nel , color , line , descrr )
-c
-c subroutine bnd2val(a,val)			sets values on boundary to val
-c subroutine moduv(u,v,uv,n,uvmax)		computes modulus and maximum
-c subroutine normuv(u,v,vv,n)			normalize horizontal velocities
-c subroutine apply_dry_mask(bmask,value,n,flag)	aplies mask to nodes
-c
-c revision log :
-c
-c 30.01.2002	ggu	better debug info, allow for vertical plotting
-c 30.01.2002	ggu	new routines mkvarline, aspecial, traxy, rdspecial
-c 05.10.2003	ggu	changes to allow for automatical plotting of vector
-c 31.10.2003	ggu	subroutine plowind()
-c 17.03.2004	ggu	use okvar to decide which var to plot (0->all)
-c 05.10.2004	ggu	use znv instead xv
-c 05.10.2004	ggu	inorm instead ivert, overlay over z/h, comp_scale()
-c 16.12.2004	ggu	plot also regular net
-c 04.03.2005	ggu	gray plot over bathy
-c 14.03.2007	ggu	wave plotting with plowave
-c 17.09.2008	ggu	plot last layer
-c 06.12.2008	ggu	new routine get_minmax_flag(), bvel -> ivel for velsh
-c 09.01.2009	ggu	deleted traref, tramin
-c 27.01.2009	ggu	bug in plonos (input variable ivar has been changed)
-c 07.05.2009	ggu	bug fix for grid and color plotting (plobas)
-c 14.09.2009	ggu	section plot for scalars in plonos
-c 09.10.2009	ggu	new routine plopres() for atmos. pressure
-c 13.10.2009	ggu	section plot for velocities in plosim
-c 23.03.2010	ggu	changed v6.1.1
-c 26.03.2010	ggu	section plot for velocities in plosim adapted
-c 17.12.2010	ggu	substituted hv with hkv
-c 31.03.2011	ggu	no plotting in dry nodes implemented - read fvl file
-c 14.04.2011	ggu	changed VERS_6_1_22
-c 17.05.2011	ggu	in plobas may plot node and element numbers
-c 31.05.2011	ggu	changed VERS_6_1_23
-c 12.07.2011	ggu	eliminated all references to out routines
-c 31.08.2011	ggu	new eos plotting (pleos,ploeval)
-c 01.09.2011	ggu	changed VERS_6_1_32
-c 07.10.2011	ggu&dbf	error calling extelev with nkn, and not nel
-c 18.10.2011	ggu	changed VERS_6_1_33
-c 09.12.2011	ggu	changed VERS_6_1_38
-c 24.01.2012	ggu	changed VERS_6_1_41
-c 10.02.2012	ggu	belem in plobas to plot bathymetry on elements
-c 26.03.2012	ccf&ggu	call mkht only for bvel .or. btrans (plo2vel)
-c 01.06.2012	ggu	changed VERS_6_1_53
-c 03.05.2013	ggu	changed VERS_6_1_63
-c 13.06.2013	ggu	new routine plofem()
-c 05.09.2013	ggu	endtime() and nplot introduced
-c 12.09.2013	ggu	changed VERS_6_1_67
-c 28.01.2014	ggu	changed VERS_6_1_71
-c 30.05.2014	ggu	flag no data points and do not plot
-c 18.07.2014	ggu	changed VERS_7_0_1
-c 20.10.2014	ggu	new time management
-c 30.10.2014	ggu	changed VERS_7_0_4
-c 26.11.2014	ggu	changed VERS_7_0_7
-c 05.12.2014	ggu	changed VERS_7_0_8
-c 23.12.2014	ggu	changed VERS_7_0_11
-c 15.01.2015	ggu	changed VERS_7_1_1
-c 19.01.2015	ggu	changed VERS_7_1_2
-c 19.01.2015	ggu	changed VERS_7_1_3
-c 05.06.2015	ggu	some plotting routines adjourned (flag)
-c 10.07.2015	ggu	changed VERS_7_1_50
-c 17.07.2015	ggu	changed VERS_7_1_52
-c 17.07.2015	ggu	changed VERS_7_1_80
-c 20.07.2015	ggu	changed VERS_7_1_81
-c 14.09.2015	ggu	prepared for plotting velocities given in fem file
-c 06.11.2015	ggu	set valref to 1 if vel field == 0
-c 19.02.2016	ggu	changed VERS_7_5_2
-c 28.04.2016	ggu	changed VERS_7_5_9
-c 25.05.2016	ggu	changed VERS_7_5_10
-c 10.06.2016	ggu	changed VERS_7_5_13
-c 14.06.2016	ggu	changed VERS_7_5_14
-c 27.06.2016	ggu	changed VERS_7_5_16
-c 12.01.2017	ggu	changed VERS_7_5_21
-c 20.01.2017	ggu	changed VERS_7_5_22
-c 21.03.2017	ggu	new parameter valmax introduced
-c 31.03.2017	ggu	changed VERS_7_5_24
-c 13.04.2017	ggu	changed VERS_7_5_25
-c 09.05.2017	ggu	changed VERS_7_5_26
-c 16.05.2017	ggu	changed VERS_7_5_27
-c 11.07.2017	ggu	changed VERS_7_5_30
-c 14.11.2017	ggu	changed VERS_7_5_36
-c 17.11.2017	ggu	changed VERS_7_5_37
-c 17.11.2017	ggu	changed VERS_7_5_38
-c 24.01.2018	ggu	changed VERS_7_5_41
-c 13.02.2018	ggu	new routine for plotting boxes (plobox)
-c 22.02.2018	ggu	changed VERS_7_5_42
-c 19.04.2018	ggu	changed VERS_7_5_45
-c 16.10.2018	ggu	changed VERS_7_5_50
-c 25.10.2018	ggu	changed VERS_7_5_51
-c 18.12.2018	ggu	changed VERS_7_5_52
-c 13.03.2019	ggu	in plobas use parameters from STR file
-c 21.05.2019	ggu	changed VERS_7_5_62
-c 13.07.2021	ggu	better box plotting
-c 21.10.2021	ggu	allow for vertical velocity overlay
-c 01.02.2023	ggu	use real area in plobox()
-c
-c notes :
-c
-c customize belem in plobas() to plot bathymetry on elements
-c customize bnumber in plobas() to write node and element numbers
-c
-c**********************************************************
-c**********************************************************
-c**********************************************************
+!  utility routines for plotsim
+! 
+!  contents :
+! 
+!  subroutine plofem(type,ivarin)
+!  subroutine plonos(type)
+!  subroutine mkvarline(ivar,line)       makes variable description in nos file
+!  subroutine plozet
+!  subroutine plobar			plots barene
+!  subroutine plosim(bvel)
+!  subroutine ploval(nkn,parray,title)
+!  subroutine plozbar
+!  subroutine plovel(ivel)
+!  subroutine plo2vel(bvel)
+!  subroutine plo3vel(bvel)
+!  subroutine por2vel(n,up,vp,uv,vv,ht)
+!  subroutine plobas
+! 
+!  subroutine elkdep(nkn,hkv)
+!  subroutine eltype0(nel,iarv)
+!  subroutine eldepth(nel,hm3v,auxv,color,title)
+!  subroutine eltype(nel,iarv,color,title)
+! 
+!  subroutine plotel( ie , color )
+!  subroutine basplc( nel , color , line , descrr )
+! 
+!  subroutine bnd2val(a,val)			sets values on boundary to val
+!  subroutine moduv(u,v,uv,n,uvmax)		computes modulus and maximum
+!  subroutine normuv(u,v,vv,n)			normalize horizontal velocities
+!  subroutine apply_dry_mask(bmask,value,n,flag)	aplies mask to nodes
+! 
+!  revision log :
+! 
+!  30.01.2002	ggu	better debug info, allow for vertical plotting
+!  30.01.2002	ggu	new routines mkvarline, aspecial, traxy, rdspecial
+!  05.10.2003	ggu	changes to allow for automatical plotting of vector
+!  31.10.2003	ggu	subroutine plowind()
+!  17.03.2004	ggu	use okvar to decide which var to plot (0->all)
+!  05.10.2004	ggu	use znv instead xv
+!  05.10.2004	ggu	inorm instead ivert, overlay over z/h, comp_scale()
+!  16.12.2004	ggu	plot also regular net
+!  04.03.2005	ggu	gray plot over bathy
+!  14.03.2007	ggu	wave plotting with plowave
+!  17.09.2008	ggu	plot last layer
+!  06.12.2008	ggu	new routine get_minmax_flag(), bvel -> ivel for velsh
+!  09.01.2009	ggu	deleted traref, tramin
+!  27.01.2009	ggu	bug in plonos (input variable ivar has been changed)
+!  07.05.2009	ggu	bug fix for grid and color plotting (plobas)
+!  14.09.2009	ggu	section plot for scalars in plonos
+!  09.10.2009	ggu	new routine plopres() for atmos. pressure
+!  13.10.2009	ggu	section plot for velocities in plosim
+!  23.03.2010	ggu	changed v6.1.1
+!  26.03.2010	ggu	section plot for velocities in plosim adapted
+!  17.12.2010	ggu	substituted hv with hkv
+!  31.03.2011	ggu	no plotting in dry nodes implemented - read fvl file
+!  14.04.2011	ggu	changed VERS_6_1_22
+!  17.05.2011	ggu	in plobas may plot node and element numbers
+!  31.05.2011	ggu	changed VERS_6_1_23
+!  12.07.2011	ggu	eliminated all references to out routines
+!  31.08.2011	ggu	new eos plotting (pleos,ploeval)
+!  01.09.2011	ggu	changed VERS_6_1_32
+!  07.10.2011	ggu&dbf	error calling extelev with nkn, and not nel
+!  18.10.2011	ggu	changed VERS_6_1_33
+!  09.12.2011	ggu	changed VERS_6_1_38
+!  24.01.2012	ggu	changed VERS_6_1_41
+!  10.02.2012	ggu	belem in plobas to plot bathymetry on elements
+!  26.03.2012	ccf&ggu	call mkht only for bvel .or. btrans (plo2vel)
+!  01.06.2012	ggu	changed VERS_6_1_53
+!  03.05.2013	ggu	changed VERS_6_1_63
+!  13.06.2013	ggu	new routine plofem()
+!  05.09.2013	ggu	endtime() and nplot introduced
+!  12.09.2013	ggu	changed VERS_6_1_67
+!  28.01.2014	ggu	changed VERS_6_1_71
+!  30.05.2014	ggu	flag no data points and do not plot
+!  18.07.2014	ggu	changed VERS_7_0_1
+!  20.10.2014	ggu	new time management
+!  30.10.2014	ggu	changed VERS_7_0_4
+!  26.11.2014	ggu	changed VERS_7_0_7
+!  05.12.2014	ggu	changed VERS_7_0_8
+!  23.12.2014	ggu	changed VERS_7_0_11
+!  15.01.2015	ggu	changed VERS_7_1_1
+!  19.01.2015	ggu	changed VERS_7_1_2
+!  19.01.2015	ggu	changed VERS_7_1_3
+!  05.06.2015	ggu	some plotting routines adjourned (flag)
+!  10.07.2015	ggu	changed VERS_7_1_50
+!  17.07.2015	ggu	changed VERS_7_1_52
+!  17.07.2015	ggu	changed VERS_7_1_80
+!  20.07.2015	ggu	changed VERS_7_1_81
+!  14.09.2015	ggu	prepared for plotting velocities given in fem file
+!  06.11.2015	ggu	set valref to 1 if vel field == 0
+!  19.02.2016	ggu	changed VERS_7_5_2
+!  28.04.2016	ggu	changed VERS_7_5_9
+!  25.05.2016	ggu	changed VERS_7_5_10
+!  10.06.2016	ggu	changed VERS_7_5_13
+!  14.06.2016	ggu	changed VERS_7_5_14
+!  27.06.2016	ggu	changed VERS_7_5_16
+!  12.01.2017	ggu	changed VERS_7_5_21
+!  20.01.2017	ggu	changed VERS_7_5_22
+!  21.03.2017	ggu	new parameter valmax introduced
+!  31.03.2017	ggu	changed VERS_7_5_24
+!  13.04.2017	ggu	changed VERS_7_5_25
+!  09.05.2017	ggu	changed VERS_7_5_26
+!  16.05.2017	ggu	changed VERS_7_5_27
+!  11.07.2017	ggu	changed VERS_7_5_30
+!  14.11.2017	ggu	changed VERS_7_5_36
+!  17.11.2017	ggu	changed VERS_7_5_37
+!  17.11.2017	ggu	changed VERS_7_5_38
+!  24.01.2018	ggu	changed VERS_7_5_41
+!  13.02.2018	ggu	new routine for plotting boxes (plobox)
+!  22.02.2018	ggu	changed VERS_7_5_42
+!  19.04.2018	ggu	changed VERS_7_5_45
+!  16.10.2018	ggu	changed VERS_7_5_50
+!  25.10.2018	ggu	changed VERS_7_5_51
+!  18.12.2018	ggu	changed VERS_7_5_52
+!  13.03.2019	ggu	in plobas use parameters from STR file
+!  21.05.2019	ggu	changed VERS_7_5_62
+!  13.07.2021	ggu	better box plotting
+!  21.10.2021	ggu	allow for vertical velocity overlay
+!  01.02.2023	ggu	use real area in plobox()
+! 
+!  notes :
+! 
+!  customize belem in plobas() to plot bathymetry on elements
+!  customize bnumber in plobas() to write node and element numbers
+! 
+! **********************************************************
+! **********************************************************
+! **********************************************************
 
 	subroutine plofem(type,ivarin)
 
-c 3D concentrations
+!  3D concentrations
 
 	use mod_hydro_plot
 	use levels, only : nlvdi,nlv,ilhkv
@@ -233,7 +233,7 @@ c 3D concentrations
 	stop 'error stop plofem: no such variable in file'
 	end
 
-c**********************************************************
+! **********************************************************
 
 	subroutine set_uvfem(nlvddi,nkn,level,ilhkv,p)
 
@@ -263,7 +263,7 @@ c**********************************************************
 
 	end
 
-c**********************************************************
+! **********************************************************
 
 	subroutine set_uv(nlvddi,nkn,p)
 
@@ -284,11 +284,11 @@ c**********************************************************
 
 	end
 
-c**********************************************************
+! **********************************************************
 
 	subroutine plonos(type,ivar_in)
 
-c 3D concentrations
+!  3D concentrations
 
 	use mod_hydro_plot
 	use levels, only : nlvdi,nlv
@@ -351,11 +351,11 @@ c 3D concentrations
 
 	end
 
-c**********************************************************
+! **********************************************************
 
 	subroutine ploeos(type,ivar_in)
 
-c 3D concentrations (element values)
+!  3D concentrations (element values)
 
 	use mod_hydro_plot
 	use levels, only : nlvdi,nlv
@@ -416,11 +416,11 @@ c 3D concentrations (element values)
 
 	end
 
-c**********************************************************
+! **********************************************************
 
         subroutine mkvarline(ivar,line)
 
-c makes variable description in nos file
+!  makes variable description in nos file
 
         implicit none
 
@@ -439,7 +439,7 @@ c makes variable description in nos file
 
         end
 
-c**********************************************************
+! **********************************************************
 
 	subroutine plozet
 
@@ -474,11 +474,11 @@ c**********************************************************
 
 	end
 
-c**********************************************************
+! **********************************************************
 
 	subroutine plobar
 
-c plots barene
+!  plots barene
 
 	use mod_hydro_plot
 	use basin, only : nkn,nel,ngr,mbw
@@ -510,7 +510,7 @@ c plots barene
 
 	end
 
-c**********************************************************
+! **********************************************************
 
 	subroutine plowave
 
@@ -544,7 +544,7 @@ c**********************************************************
 
 	end
 
-c**********************************************************
+! **********************************************************
 
 	subroutine plosim(bvel)
 
@@ -603,11 +603,11 @@ c**********************************************************
 
 	end
 
-c**********************************************************
+! **********************************************************
 
 	subroutine ploreg(nreg,preg,regpar,title,bintp)
 
-c plots scalar values from regular grid
+!  plots scalar values from regular grid
 
 	use basin
 	use mod_hydro_plot
@@ -635,8 +635,8 @@ c plots scalar values from regular grid
 	  call setregextend(.false.)
 	  call setregextend(.true.)
 	  call set_flag(flag)
-          call intp_reg_nodes(nx,ny,x0,y0,dx,dy,flag,preg
-     +                          ,pa,ierr)
+          call intp_reg_nodes(nx,ny,x0,y0,dx,dy,flag,preg &
+     &                          ,pa,ierr)
 	  if( ierr /= 0 .and. berrintp ) then
 	    write(6,*) 'intp_reg_nodes ierr = ',ierr
 	    !stop 'error stop ploreg: interpolation'
@@ -676,7 +676,7 @@ c plots scalar values from regular grid
 
 	end
 
-c**********************************************************
+! **********************************************************
 
 	subroutine plo_scal_val(n,pa,title)
 
@@ -699,11 +699,11 @@ c**********************************************************
 
 	end
 
-c**********************************************************
+! **********************************************************
 
 	subroutine ploval(nkn,pa,title)
 
-c plots node values
+!  plots node values
 
 	use mod_hydro_plot
 
@@ -741,11 +741,11 @@ c plots node values
 
 	end
 
-c**********************************************************
+! **********************************************************
 
 	subroutine ploeval(nel,pa,title)
 
-c plots element values
+!  plots element values
 
 	use mod_hydro_plot
 
@@ -781,11 +781,11 @@ c plots element values
 
 	end
 
-c**********************************************************
+! **********************************************************
 
 	subroutine ploarea(nel,area,title)
 
-c plots element type values
+!  plots element type values
 
 	use mod_hydro_plot
 
@@ -832,11 +832,11 @@ c plots element type values
 
 	end
 
-c**********************************************************
+! **********************************************************
 
 	subroutine plobox(title)
 
-c interprets element type as boxes and plots
+!  interprets element type as boxes and plots
 
 	use basin
 	use mod_hydro_plot
@@ -929,8 +929,8 @@ c interprets element type as boxes and plots
 	call qtxtcc(0,0)
 
 	write(6,*) trim(title)
-	write(6,*) '      index     x-center         y-center' //
-     +			'             area     index'
+	write(6,*) '      index     x-center         y-center' // &
+     &			'             area     index'
 	do ia=0,iamax
 	  if( na(ia) > 0 ) then
 	    x = xa(ia)
@@ -952,7 +952,7 @@ c interprets element type as boxes and plots
 
 	end
 
-c**********************************************************
+! **********************************************************
 
 	subroutine insert_connect(ngr,nkn,k1,k2,ia,connect)
 
@@ -1010,7 +1010,7 @@ c**********************************************************
 	stop 'error stop insert_connect: ngr'
 	end
 
-c**********************************************************
+! **********************************************************
 
 	subroutine plozbar
 
@@ -1044,7 +1044,7 @@ c**********************************************************
 
 	end
 
-c**********************************************************
+! **********************************************************
 
 	subroutine plovel(ivel)
 
@@ -1068,7 +1068,7 @@ c**********************************************************
 
 	end
 
-c**********************************************************
+! **********************************************************
 
 	subroutine plo2vel(ivel,title)
 
@@ -1081,22 +1081,22 @@ c**********************************************************
 
 	end
 
-c**********************************************************
+! **********************************************************
 
 	subroutine plovect(ivel,title,bregdata)
 
-c plots entity with vectors
-c
-c ivel = 1	velocities
-c ivel = 2	transports
-c ivel = 3	wind
-c ivel = 4	waves
-c ivel = 5	velocities already prepared
-c
-c for ivel == 1,2:	utrans,vtrans must be set
-c for other values:	uvnode,vvnode must be set
-c
-c bonelem,bistrans are set in mod_hydro_plot
+!  plots entity with vectors
+! 
+!  ivel = 1	velocities
+!  ivel = 2	transports
+!  ivel = 3	wind
+!  ivel = 4	waves
+!  ivel = 5	velocities already prepared
+! 
+!  for ivel == 1,2:	utrans,vtrans must be set
+!  for other values:	uvnode,vvnode must be set
+! 
+!  bonelem,bistrans are set in mod_hydro_plot
 
 	use mod_hydro_plot
 	use mod_depth
@@ -1140,24 +1140,24 @@ c bonelem,bistrans are set in mod_hydro_plot
 	real regpar(7)
 	integer nx,ny
 
-	character*13, save :: varname(5) =	(/
-     +						 'velocity     '
-     +						,'transport    '
-     +						,'wind velocity'
-     +						,'waves        '
-     +						,'velocity     '
-     +						/)
+	character*13, save :: varname(5) =	(/ &
+     &						 'velocity     ' &
+     &						,'transport    ' &
+     &						,'wind velocity' &
+     &						,'waves        ' &
+     &						,'velocity     ' &
+     &						/)
 
 	real getpar,getcol
 	integer getlev
 
-c------------------------------------------------------------------
-c set up parameters
-c------------------------------------------------------------------
+! ------------------------------------------------------------------
+!  set up parameters
+! ------------------------------------------------------------------
 
-c	-----------------------------------------------------------
-c	locally defined parameters (please change here)
-c	-----------------------------------------------------------
+! 	-----------------------------------------------------------
+! 	locally defined parameters (please change here)
+! 	-----------------------------------------------------------
 
 	bdebug = .true.
 	bdebug = .false.
@@ -1167,9 +1167,9 @@ c	-----------------------------------------------------------
 	bbound = .false. 	!plot arrows on boundary nodes
 	fscale = 3.		!extra empirical factor for computing arrows
 
-c	-----------------------------------------------------------
-c	global parameters from STR file
-c	-----------------------------------------------------------
+! 	-----------------------------------------------------------
+! 	global parameters from STR file
+! 	-----------------------------------------------------------
 
         bvel   = ivel .eq. 1		!want vel but have trans
         btrans = ivel .eq. 2		!want trans
@@ -1200,25 +1200,25 @@ c	-----------------------------------------------------------
 
         anoline = title//varname(ivel)
 
-c	-----------------------------------------------------------
-c	check some settings
-c	-----------------------------------------------------------
+! 	-----------------------------------------------------------
+! 	check some settings
+! 	-----------------------------------------------------------
 
 	if( bvel .and. .not. bistrans ) goto 99
 	if( btrans .and. .not. bistrans ) goto 99
 	if( bistrans .and. .not. bonelem ) goto 99
 	
-c	-----------------------------------------------------------
-c	start plotting
-c	-----------------------------------------------------------
+! 	-----------------------------------------------------------
+! 	start plotting
+! 	-----------------------------------------------------------
 
 	call qstart
 	call annotes(anoline)
 	call bash(0)
 
-c------------------------------------------------------------------
-c see if regular grid -> set bregplot and nx,ny if needed
-c------------------------------------------------------------------
+! ------------------------------------------------------------------
+!  see if regular grid -> set bregplot and nx,ny if needed
+! ------------------------------------------------------------------
 
 	call getgeoflag(flag)
 	if( bregdata ) then		!data is on regular grid (global value)
@@ -1229,9 +1229,9 @@ c------------------------------------------------------------------
 	!if( bregplot ) write(6,*) 'plotting on regular grid'
 	!write(6,*) 'bregdata,bregplot: ',bregdata,bregplot
 
-c------------------------------------------------------------------
-c prepare for velocity or transport
-c------------------------------------------------------------------
+! ------------------------------------------------------------------
+!  prepare for velocity or transport
+! ------------------------------------------------------------------
 
 	valref = velref
 	valmin = velmin
@@ -1249,9 +1249,9 @@ c------------------------------------------------------------------
 	  stop 'error stop plo2vel: internal error (77)'
 	end if
 
-c------------------------------------------------------------------
-c compute values on nodes -> 0 for dry nodes
-c------------------------------------------------------------------
+! ------------------------------------------------------------------
+!  compute values on nodes -> 0 for dry nodes
+! ------------------------------------------------------------------
 
 	if( bonelem ) then
 	  call intp2node(uvelem,uvnode,bwater)
@@ -1280,9 +1280,9 @@ c------------------------------------------------------------------
           write(112,*) (vvnode(i),i=1,nkn,nnn)
         end if
 
-c------------------------------------------------------------------
-c regular interpolation
-c------------------------------------------------------------------
+! ------------------------------------------------------------------
+!  regular interpolation
+! ------------------------------------------------------------------
 
 	if( bregdata ) then	!is already regular grid - we just copy
 	  call mod_hydro_get_regpar(regpar)	!regular data description
@@ -1310,9 +1310,9 @@ c------------------------------------------------------------------
 	  call av2amk(bwater,vvnode,vreg,nx,ny)
 	end if
 
-c------------------------------------------------------------------
-c compute modulus and maximum of velocity
-c------------------------------------------------------------------
+! ------------------------------------------------------------------
+!  compute modulus and maximum of velocity
+! ------------------------------------------------------------------
 
 	call moduv(uvnode,vvnode,uvmod,nkn,uvmax,uvmed) !compute mod/max/aver
 
@@ -1321,9 +1321,9 @@ c------------------------------------------------------------------
 	  call bnd2val(vvnode,0.)	
 	end if
 
-c------------------------------------------------------------------
-c underlying color 
-c------------------------------------------------------------------
+! ------------------------------------------------------------------
+!  underlying color 
+! ------------------------------------------------------------------
 
 	if( boverl ) then
 	  if( ioverl .eq. 1 ) then		!horizontal velocities
@@ -1348,9 +1348,9 @@ c------------------------------------------------------------------
 
 	call plot_dry_areas
 
-c------------------------------------------------------------------
-c get scale (if not given, typls is computed in bastlscale)
-c------------------------------------------------------------------
+! ------------------------------------------------------------------
+!  get scale (if not given, typls is computed in bastlscale)
+! ------------------------------------------------------------------
 
 	typls  = getpar('typls')		!is available only now...
 	if( valref .le. 0. ) then		!use maximum
@@ -1377,9 +1377,9 @@ c------------------------------------------------------------------
  1100	 format(a,4f14.3)
 	end if
 
-c------------------------------------------------------------------
-c plotting of arrow
-c------------------------------------------------------------------
+! ------------------------------------------------------------------
+!  plotting of arrow
+! ------------------------------------------------------------------
 
 	call qgray(0.)
 
@@ -1421,9 +1421,9 @@ c------------------------------------------------------------------
 	  end do
 	end if
 
-c------------------------------------------------------------------
-c plotting of color bar or scale arrow
-c------------------------------------------------------------------
+! ------------------------------------------------------------------
+!  plotting of color bar or scale arrow
+! ------------------------------------------------------------------
 
 	if( boverl ) then			!plot color scale
 	  call colsh
@@ -1434,17 +1434,17 @@ c------------------------------------------------------------------
 	  call velsh(ivel,scale,valref)
 	end if
 
-c------------------------------------------------------------------
-c end of plot
-c------------------------------------------------------------------
+! ------------------------------------------------------------------
+!  end of plot
+! ------------------------------------------------------------------
 
 	call bash(4)
 	call bash(2)
 	call qend
 
-c------------------------------------------------------------------
-c end of routine
-c------------------------------------------------------------------
+! ------------------------------------------------------------------
+!  end of routine
+! ------------------------------------------------------------------
 
 	return
    99	continue
@@ -1452,7 +1452,7 @@ c------------------------------------------------------------------
 	stop 'error stop plo2vel: internal error (1)'
 	end
 
-c**********************************************************
+! **********************************************************
 
 	subroutine plo3vel(ivel)
 
@@ -1476,11 +1476,11 @@ c**********************************************************
 	bdebug = .true.
 	bdebug = .false.
 
-c make vertical velocities
+!  make vertical velocities
 
 	call make_vertical_velocity
 
-c handle level
+!  handle level
 
 	level = getlev()
 	write(6,*) 'plo3vel: level = ',level,' ivel = ',ivel
@@ -1530,7 +1530,7 @@ c handle level
 	  end do
 	end if
 
-c debug
+!  debug
 
 	if( bdebug ) then
 	  ie = 100
@@ -1541,13 +1541,13 @@ c debug
 	  end do
 	end if
 
-c call 2d routine
+!  call 2d routine
 
 	call plo2vel(ivel,'3D ')
 	
 	end
 
-c**********************************************************
+! **********************************************************
 
 	subroutine por2vel(n,up,vp,uv,vv,ht)
 
@@ -1566,7 +1566,7 @@ c**********************************************************
 
 	end
 
-c**********************************************************
+! **********************************************************
 
 	subroutine plobas
 
@@ -1596,14 +1596,14 @@ c**********************************************************
 	call adjust_no_plot_area
 	call make_dry_node_mask(bwater,bkwater)
 
-c only boundary line
+!  only boundary line
 
 	call qstart
 	call bash(0)
 	call bash(2)
 	call qend
 
-c grid with black
+!  grid with black
 
 	call qstart
 	call bash(0)
@@ -1611,7 +1611,7 @@ c grid with black
 	call bash(2)
 	call qend
 
-c grid with gray
+!  grid with gray
 
 	call qstart
 	call bash(0)
@@ -1619,7 +1619,7 @@ c grid with gray
 	call bash(2)
 	call qend
 
-c bathymetry (gray or color)
+!  bathymetry (gray or color)
 
 	if( belem ) then
 	  call ploeval(nkn,hev,'basin')
@@ -1627,7 +1627,7 @@ c bathymetry (gray or color)
 	  call ploval(nkn,hkv,'basin')
 	end if
 
-c bathymetry with grid (black)
+!  bathymetry with grid (black)
 
 	call qstart
 	call bash(0)
@@ -1645,7 +1645,7 @@ c bathymetry with grid (black)
 	call bash(2)
 	call qend
 
-c bathymetry with grid (gray)
+!  bathymetry with grid (gray)
 
 	call qstart
 	call bash(0)
@@ -1663,7 +1663,7 @@ c bathymetry with grid (gray)
 	call bash(2)
 	call qend
 
-c element code
+!  element code
 
 	if( maxval(iarv) > 0 ) then
 	  write(6,*) 'plotting element code...'
@@ -1671,11 +1671,11 @@ c element code
 	  if( bbox ) call plobox('box information')
 	end if
 
-c partition
+!  partition
 
 	call plot_partition
 
-c boundary line with regular overview grid
+!  boundary line with regular overview grid
 
 	call qstart
 	call bash(0)
@@ -1683,7 +1683,7 @@ c boundary line with regular overview grid
         call reggrid(10,0.,0.5)
 	call qend
 
-c here only debug (node and element numbers)
+!  here only debug (node and element numbers)
 
 	if( bnumber ) then
 
@@ -1717,11 +1717,11 @@ c here only debug (node and element numbers)
 
 	end if
 
-c end of routine
+!  end of routine
 
 	end
 
-c**************************************************************
+! **************************************************************
 
 	subroutine plot_partition
 
@@ -1760,7 +1760,7 @@ c**************************************************************
 
 	end
 
-c**************************************************************
+! **************************************************************
 
 	subroutine elkdep(nkn,hkv)
 
@@ -1783,7 +1783,7 @@ c**************************************************************
 
 	end
 
-c**************************************************************
+! **************************************************************
 
 	subroutine eltype0(nel,iarv)
 
@@ -1802,10 +1802,10 @@ c**************************************************************
 
 	do ie=1,nel
 	  ia = iarv(ie)
-c	  if( ia .eq. 1 ) then					!channels
-c	  if( ia .ge. 3 .and. ia .le. 5 .or. ia .eq. 9 ) then	!inlets
-c	  if( ia .ne. 0 ) then					!special type
-c	  if( ia .ge. 3 .and. ia .le. 5 .or. ia .eq. 9 ) then	!inlets
+! 	  if( ia .eq. 1 ) then					!channels
+! 	  if( ia .ge. 3 .and. ia .le. 5 .or. ia .eq. 9 ) then	!inlets
+! 	  if( ia .ne. 0 ) then					!special type
+! 	  if( ia .ge. 3 .and. ia .le. 5 .or. ia .eq. 9 ) then	!inlets
           if( ia .ge. 12 ) then                                 !valli pesca
             call plotel(ie,0.4)
           end if
@@ -1817,7 +1817,7 @@ c	  if( ia .ge. 3 .and. ia .le. 5 .or. ia .eq. 9 ) then	!inlets
 
 	end
 
-c**************************************************************
+! **************************************************************
 
 	subroutine eldepth(nel,hm3v,auxv,color,title)
 
@@ -1870,7 +1870,7 @@ c**************************************************************
 
 	end
 
-c**************************************************************
+! **************************************************************
 
 	subroutine eltype(nel,iarv,color,title)
 
@@ -1921,7 +1921,7 @@ c**************************************************************
 
 	end
 
-c**************************************************************
+! **************************************************************
 
 	subroutine plotel( ie , color )
 
@@ -1948,7 +1948,7 @@ c**************************************************************
 
 	end
 
-c**************************************************************
+! **************************************************************
 
 	subroutine basplc( nel , color , line , descrr )
 
@@ -1977,11 +1977,11 @@ c**************************************************************
 
 	end
 
-c*****************************************************************
+! *****************************************************************
 
 	subroutine bnd2val(a,val)	
 
-c sets values on boundary to val
+!  sets values on boundary to val
 
 	use mod_geom
 	use basin, only : nkn,nel,ngr,mbw
@@ -2004,17 +2004,17 @@ c sets values on boundary to val
 
 	end
 
-c*****************************************************************
+! *****************************************************************
 
 	subroutine comp_scale(mode,amax,vmin,vmax,vref,u,v,scale)
 
-c computes scale to apply for plot
-c
-c mode:
-c       0       uses real length
-c       1       normalizes vector (all vectors have same length)
-c       2       uses linear scale
-c       3       uses logarithmic scale
+!  computes scale to apply for plot
+! 
+!  mode:
+!        0       uses real length
+!        1       normalizes vector (all vectors have same length)
+!        2       uses linear scale
+!        3       uses logarithmic scale
 
 	implicit none
 
@@ -2055,11 +2055,11 @@ c       3       uses logarithmic scale
 
 	end
 
-c*****************************************************************
+! *****************************************************************
 
 	subroutine moduv(u,v,uv,n,uvmax,uvmed)
 
-c computes modulus for velocity vector and maximum and average
+!  computes modulus for velocity vector and maximum and average
 
 	implicit none
 
@@ -2097,11 +2097,11 @@ c computes modulus for velocity vector and maximum and average
 
 	end
 
-c*****************************************************************
+! *****************************************************************
 
 	subroutine normuv(u,v,vv,n)
 
-c normalize horizontal velocities
+!  normalize horizontal velocities
 
 	implicit none
 
@@ -2115,11 +2115,11 @@ c normalize horizontal velocities
 
 	end
 
-c*****************************************************************
+! *****************************************************************
 
 	subroutine intp2elem(vnv,vev,bwater)
 
-c compute elemental values vev()
+!  compute elemental values vev()
 
 	use basin
 
@@ -2152,11 +2152,11 @@ c compute elemental values vev()
 
 	end
 
-c*****************************************************************
+! *****************************************************************
 
 	subroutine intp2node(vev,vnv,bwater)
 
-c compute nodal values vnv()
+!  compute nodal values vnv()
 
 	use basin
 
@@ -2201,11 +2201,11 @@ c compute nodal values vnv()
 
 	end
 
-c*****************************************************************
+! *****************************************************************
 
 	subroutine count_flag(value,n,flag,nflag)
 
-c counts total number of flagged nodes
+!  counts total number of flagged nodes
 
 	implicit none
 
@@ -2227,11 +2227,11 @@ c counts total number of flagged nodes
 
 	end
 
-c*****************************************************************
+! *****************************************************************
 
 	subroutine apply_dry_mask(bmask,value,n,flag)
 
-c aplies mask to nodal value
+!  aplies mask to nodal value
 
 	implicit none
 
@@ -2248,11 +2248,11 @@ c aplies mask to nodal value
 
 	end
 
-c*****************************************************************
+! *****************************************************************
 
         subroutine aspecial(file,xgv,ygv,uv,vv,scale)
 
-c plots arrow on special points
+!  plots arrow on special points
 
 	use basin, only : nkn
 
@@ -2316,11 +2316,11 @@ c plots arrow on special points
 
         end
 
-c*****************************************************************
+! *****************************************************************
 
         subroutine traxy(xo,yo,u,v,dist,xn,yn)
 
-c translates x/y to new coordinate to the left of direction (u,v) by dist
+!  translates x/y to new coordinate to the left of direction (u,v) by dist
 
 	implicit none
 
@@ -2336,7 +2336,7 @@ c translates x/y to new coordinate to the left of direction (u,v) by dist
 
           end
 
-c*****************************************************************
+! *****************************************************************
 
         subroutine rdspecial(file,n,ks,us,vs)
 
@@ -2399,7 +2399,7 @@ c*****************************************************************
         stop 'error stop rdspecial: line'
         end
 
-c*****************************************************************
+! *****************************************************************
 
 	subroutine get_minmax_flag(pa,nkn,pmin,pmax,flag)
 
@@ -2428,11 +2428,11 @@ c*****************************************************************
 
         end
 
-c*****************************************************************
+! *****************************************************************
 
 	subroutine plot_dry_areas
 
-c plots dry areas with gray shading
+!  plots dry areas with gray shading
 
 	use mod_hydro_plot
 	use basin
@@ -2463,9 +2463,9 @@ c plots dry areas with gray shading
 
 	end
 
-c*****************************************************************
-c*****************************************************************
-c*****************************************************************
+! *****************************************************************
+! *****************************************************************
+! *****************************************************************
 
 	subroutine init_regular
 
@@ -2500,7 +2500,7 @@ c*****************************************************************
 
 	end
 
-c*****************************************************************
+! *****************************************************************
 
 	subroutine prepare_regular(nx,ny,bregplot)
 
@@ -2533,7 +2533,7 @@ c*****************************************************************
 
 	end
 
-c*****************************************************************
+! *****************************************************************
 
 	subroutine info_regular(bregplot,nx,ny,dx,dy)
 
@@ -2550,7 +2550,7 @@ c*****************************************************************
 
 	end
 
-c*****************************************************************
+! *****************************************************************
 
 	subroutine transform_color_to_min(ids)
 
@@ -2579,5 +2579,5 @@ c*****************************************************************
 
 	end
 
-c*****************************************************************
+! *****************************************************************
 

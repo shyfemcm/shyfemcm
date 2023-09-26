@@ -23,64 +23,64 @@
 !
 !--------------------------------------------------------------------------
 
-c include file for colors
-c
-c revision log :
-c
-c 05.08.2003	ggu	changed adjcoltab, new cfast, init_cfast
-c 20.08.2003	ggu	some more comments
-c 21.08.2003	ggu	colini is called in colsetup
-c 04.10.2004	ggu	adjust amin and decimal point in colauto
-c 21.04.2009	ggu	allow for constant values (make 2 isolines)
-c 23.03.2010	ggu	changed v6.1.1
-c 09.12.2011	ggu	changed VERS_6_1_38
-c 13.06.2013	ggu	small bug fix for computation of dval with rnext
-c 01.10.2013	ggu	bug fix for valmin/valmax too close
-c 25.10.2013	ggu	changed VERS_6_1_68
-c 18.07.2014	ggu	changed VERS_7_0_1
-c 06.05.2015	ggu	logarithmic scale introduced (ilog, blog)
-c 21.05.2015	ggu	changed VERS_7_1_11
-c 16.11.2015	ggu	changed VERS_7_3_14
-c 18.12.2015	ggu	changed VERS_7_3_17
-c 30.05.2016	ggu	changed VERS_7_5_11
-c 15.06.2016	ggu	adjcoltab deleted
-c 30.09.2016	ggu	changed VERS_7_5_18
-c 13.04.2017	ggu	changed VERS_7_5_25
-c 11.07.2017	ggu	changed VERS_7_5_30
-c 07.12.2017	ggu	changed VERS_7_5_40
-c 24.01.2018	ggu	changed VERS_7_5_41
-c 19.04.2018	ggu	changed VERS_7_5_45
-c 31.08.2018	ggu	changed VERS_7_5_49
-c 18.12.2018	ggu	changed VERS_7_5_52
-c 21.05.2019	ggu	changed VERS_7_5_62
-c 20.09.2022	ggu	in colauto() use absolute value in case val is constant
-c
-c**********************************************************
-c
-c---------------------------------------------------------------------
-c
-c typical usage:
-c
-c $color
-c         x0col = 0.1  y0col = 0.65
-c         x1col = 0.45 y1col = 0.7
-c  
-c         legcol = 'Bathymetry [m]'
-c         ndccol = -1  faccol = 1
-c         icolor = 1
-c  
-c         colmin = 0   colmax = 0.666
-c         valmin = 0   valmax = 300
-c         niso = 50   nisomx = 70
-c         nctick = 5
-c $end
-c
-c other variables:
-c
-c	 isoval =    1.   3.   5.
-c	 color  = 0.3  0.4  0.5  0.6
-c
-c**********************************************************
+!  include file for colors
+! 
+!  revision log :
+! 
+!  05.08.2003	ggu	changed adjcoltab, new cfast, init_cfast
+!  20.08.2003	ggu	some more comments
+!  21.08.2003	ggu	colini is called in colsetup
+!  04.10.2004	ggu	adjust amin and decimal point in colauto
+!  21.04.2009	ggu	allow for constant values (make 2 isolines)
+!  23.03.2010	ggu	changed v6.1.1
+!  09.12.2011	ggu	changed VERS_6_1_38
+!  13.06.2013	ggu	small bug fix for computation of dval with rnext
+!  01.10.2013	ggu	bug fix for valmin/valmax too close
+!  25.10.2013	ggu	changed VERS_6_1_68
+!  18.07.2014	ggu	changed VERS_7_0_1
+!  06.05.2015	ggu	logarithmic scale introduced (ilog, blog)
+!  21.05.2015	ggu	changed VERS_7_1_11
+!  16.11.2015	ggu	changed VERS_7_3_14
+!  18.12.2015	ggu	changed VERS_7_3_17
+!  30.05.2016	ggu	changed VERS_7_5_11
+!  15.06.2016	ggu	adjcoltab deleted
+!  30.09.2016	ggu	changed VERS_7_5_18
+!  13.04.2017	ggu	changed VERS_7_5_25
+!  11.07.2017	ggu	changed VERS_7_5_30
+!  07.12.2017	ggu	changed VERS_7_5_40
+!  24.01.2018	ggu	changed VERS_7_5_41
+!  19.04.2018	ggu	changed VERS_7_5_45
+!  31.08.2018	ggu	changed VERS_7_5_49
+!  18.12.2018	ggu	changed VERS_7_5_52
+!  21.05.2019	ggu	changed VERS_7_5_62
+!  20.09.2022	ggu	in colauto() use absolute value in case val is constant
+! 
+! **********************************************************
+! 
+! ---------------------------------------------------------------------
+! 
+!  typical usage:
+! 
+!  $color
+!          x0col = 0.1  y0col = 0.65
+!          x1col = 0.45 y1col = 0.7
+!   
+!          legcol = 'Bathymetry [m]'
+!          ndccol = -1  faccol = 1
+!          icolor = 1
+!   
+!          colmin = 0   colmax = 0.666
+!          valmin = 0   valmax = 300
+!          niso = 50   nisomx = 70
+!          nctick = 5
+!  $end
+! 
+!  other variables:
+! 
+! 	 isoval =    1.   3.   5.
+! 	 color  = 0.3  0.4  0.5  0.6
+! 
+! **********************************************************
 
 !==========================================================
 	module color
@@ -120,7 +120,7 @@ c**********************************************************
 
 	use color
 
-c sets up color table after read from $color section
+!  sets up color table after read from $color section
 
 	logical bdebug
 	integer niso,nisomx,nisodf
@@ -134,9 +134,9 @@ c sets up color table after read from $color section
 	bdebug = .true.
 	bdebug = .false.
 
-c-------------------------------------------------
-c initialize value and check for error
-c-------------------------------------------------
+! -------------------------------------------------
+!  initialize value and check for error
+! -------------------------------------------------
 
 	call colini
 	call colchk			!finishes set up of color section
@@ -176,15 +176,15 @@ c-------------------------------------------------
 	iusear = 0			!use array for lookup
 	if( bfunc .or. blog ) iusear = 1
 
-c-----------------------------------------------------
-c see what has been read -> compute niso
-c-----------------------------------------------------
+! -----------------------------------------------------
+!  see what has been read -> compute niso
+! -----------------------------------------------------
 
 	if( bisord .or. bcolrd ) then
 
-c	  --------------------------------------------
-c	  at least one type of values has been read
-c	  --------------------------------------------
+! 	  --------------------------------------------
+! 	  at least one type of values has been read
+! 	  --------------------------------------------
 
 	  if( bisord .and. bcolrd ) then
 	    if( nisord + 1 .ne. ncolrd ) then
@@ -196,16 +196,16 @@ c	  --------------------------------------------
 	    end if
 	  end if
 
-c	  --------------------------------------------
-c	  set niso
-c	  --------------------------------------------
+! 	  --------------------------------------------
+! 	  set niso
+! 	  --------------------------------------------
 
 	  if( bisord ) niso = nisord
 	  if( bcolrd ) niso = ncolrd - 1
 
-c	  --------------------------------------------
-c	  check computed number of isovalues
-c	  --------------------------------------------
+! 	  --------------------------------------------
+! 	  check computed number of isovalues
+! 	  --------------------------------------------
 
 	  if( niso .le. 0 ) then
 	    write(6,*) 'Cannot use only one color.'
@@ -217,17 +217,17 @@ c	  --------------------------------------------
 	    end if
 	  end if
 
-c	  --------------------------------------------
-c	  if we cannot determine isovalues -> automatic
-c	  --------------------------------------------
+! 	  --------------------------------------------
+! 	  if we cannot determine isovalues -> automatic
+! 	  --------------------------------------------
 
 	  if( .not. bisord .and. valmax .eq. valmin ) icauto = 1
 
 	else if( valmin .ne. valmax ) then
 
-c	  --------------------------------------------
-c	  isovalues can be determined
-c	  --------------------------------------------
+! 	  --------------------------------------------
+! 	  isovalues can be determined
+! 	  --------------------------------------------
 
 	  if( dval .ne. 0. ) then
 	    niso = nint((valmax-valmin)/dval) + 1
@@ -242,23 +242,23 @@ c	  --------------------------------------------
 
 	else ! if( valmin .eq. valmax ) then
 
-c	  --------------------------------------------
-c	  here we can do only automatic evaluation
-c	  --------------------------------------------
+! 	  --------------------------------------------
+! 	  here we can do only automatic evaluation
+! 	  --------------------------------------------
 
 	  if( dval .ne. 0. ) then
 	    niso = 0
-c	  else
-c	    use given value or 0
+! 	  else
+! 	    use given value or 0
 	  end if
 
 	  icauto = 1
 
 	end if
 
-c-----------------------------------------------------
-c check computed niso value and store
-c-----------------------------------------------------
+! -----------------------------------------------------
+!  check computed niso value and store
+! -----------------------------------------------------
 
 	if( niso .gt. nisomx ) then
 	  write(6,*) 'Value of niso > nisomx.'
@@ -270,15 +270,15 @@ c-----------------------------------------------------
 	call putpar('niso',float(niso))
 	isoanz = niso
 
-c-----------------------------------------------------
-c compute all other values that can be set up
-c-----------------------------------------------------
+! -----------------------------------------------------
+!  compute all other values that can be set up
+! -----------------------------------------------------
 
 	if( icauto .eq. 0 ) then
 
-c	  --------------------------------------------
-c	  no automatic evaluation -> set up everything
-c	  --------------------------------------------
+! 	  --------------------------------------------
+! 	  no automatic evaluation -> set up everything
+! 	  --------------------------------------------
 
 	  if( niso .le. 0 ) stop 'internal error colsetup (1)'
 
@@ -295,9 +295,9 @@ c	  --------------------------------------------
 
 	else ! if( icauto .ne. 0 ) then
 
-c	  --------------------------------------------
-c	  automatic evaluation -> set up as much as possible
-c	  --------------------------------------------
+! 	  --------------------------------------------
+! 	  automatic evaluation -> set up as much as possible
+! 	  --------------------------------------------
 
 	  if( niso .gt. 0 ) then
 
@@ -311,9 +311,9 @@ c	  --------------------------------------------
 
 	end if
 
-c-----------------------------------------------------
-c debug output
-c-----------------------------------------------------
+! -----------------------------------------------------
+!  debug output
+! -----------------------------------------------------
 
 	if( bdebug ) then
 	  write(6,*) 'colsetup: ',icauto
@@ -322,19 +322,19 @@ c-----------------------------------------------------
 	  write(6,*) 'niso,nisomx,nisodf: ',niso,nisomx,nisodf
 	end if
 
-c-----------------------------------------------------
-c end of routine
-c-----------------------------------------------------
+! -----------------------------------------------------
+!  end of routine
+! -----------------------------------------------------
 
 	end
 
-c**********************************************************
+! **********************************************************
 
 	subroutine colauto(valmin,valmax)
 
 	use color
 
-c sets up color table in automatic mode
+!  sets up color table in automatic mode
 
 	implicit none
 
@@ -359,9 +359,9 @@ c sets up color table in automatic mode
 	amin = 0.
 	amax = 0.
 
-c-------------------------------------------------
-c check if we are in automatic mode
-c-------------------------------------------------
+! -------------------------------------------------
+!  check if we are in automatic mode
+! -------------------------------------------------
 
 	if( bdebug ) then
 	  write(6,*) 'colauto: ',icauto
@@ -376,9 +376,9 @@ c-------------------------------------------------
 	if( icauto .lt. 0 ) stop 'error stop colauto: no initialization'
 	if( icauto .eq. 0 ) return
 
-c-------------------------------------------------
-c initialize values
-c-------------------------------------------------
+! -------------------------------------------------
+!  initialize values
+! -------------------------------------------------
 
 	colmin = getpar('colmin')	!min color [0..1]
 	colmax = getpar('colmax')	!max color [0..1]
@@ -401,9 +401,9 @@ c-------------------------------------------------
 	  write(6,*) 'niso,nisomx,nisodf: ',niso,nisomx,nisodf
 	end if
 
-c-------------------------------------------------
-c set up data structures
-c-------------------------------------------------
+! -------------------------------------------------
+!  set up data structures
+! -------------------------------------------------
 
 	if( valmin > valmax ) then	!no good values
 	  valmin = 0.
@@ -412,9 +412,9 @@ c-------------------------------------------------
 
 	if( niso .gt. 0 ) then
 
-c	  ----------------------------------------
-c	  we already know how many isolines to draw (and color table)
-c	  ----------------------------------------
+! 	  ----------------------------------------
+! 	  we already know how many isolines to draw (and color table)
+! 	  ----------------------------------------
 
 	  dval = 0.
 	  if( bfunc .or. blog ) then
@@ -425,9 +425,9 @@ c	  ----------------------------------------
 
 	else
 
-c	  ----------------------------------------
-c	  we must compute everything -> niso and dval first
-c	  ----------------------------------------
+! 	  ----------------------------------------
+! 	  we must compute everything -> niso and dval first
+! 	  ----------------------------------------
 
 	  if( dval .ne. 0. ) then
 	    niso = nint((valmax-valmin)/dval) + 1
@@ -445,9 +445,9 @@ c	  ----------------------------------------
 	    end if
 	  end if
 
-c	  ----------------------------------------
-c	  be sure values computed make sense
-c	  ----------------------------------------
+! 	  ----------------------------------------
+! 	  be sure values computed make sense
+! 	  ----------------------------------------
 
 	  ddval = max(abs(valmax),abs(valmin))
 	  eps = 0.
@@ -457,9 +457,9 @@ c	  ----------------------------------------
 	    niso = 1
 	  end if
 
-c	  ----------------------------------------
-c	  check niso if in range
-c	  ----------------------------------------
+! 	  ----------------------------------------
+! 	  check niso if in range
+! 	  ----------------------------------------
 
 	  if( niso .le. 0 ) then
 	    write(6,*) 'Error computing niso.'
@@ -473,9 +473,9 @@ c	  ----------------------------------------
 	    stop 'error stop colauto: nisomx'
 	  end if
 
-c	  ----------------------------------------
-c	  now we have a good niso and dval -> get amin
-c	  ----------------------------------------
+! 	  ----------------------------------------
+! 	  now we have a good niso and dval -> get amin
+! 	  ----------------------------------------
 
 	  amin = valmin / dval
 	  amin = rnexta(amin,+4)
@@ -489,9 +489,9 @@ c	  ----------------------------------------
           amax = amin + (niso-1)*dval   !this is maximum isoline
 	  amax = valmax
 
-c	  ----------------------------------------
-c	  special case - constant array
-c	  ----------------------------------------
+! 	  ----------------------------------------
+! 	  special case - constant array
+! 	  ----------------------------------------
 
 	  if( valmin .eq. valmax ) then
 	    niso = 2
@@ -501,9 +501,9 @@ c	  ----------------------------------------
 	    amax = amin + dval
 	  end if
 
-c	  ----------------------------------------
-c	  adjust decimal point
-c	  ----------------------------------------
+! 	  ----------------------------------------
+! 	  adjust decimal point
+! 	  ----------------------------------------
 
           ndec = getpar('ndccol')
           fact = getpar('faccol')
@@ -515,9 +515,9 @@ c	  ----------------------------------------
             !write(6,*) 'decimal point adjusted: ',fact,dval,ndec,idec
           end if
 
-c	  ----------------------------------------
-c	  set up arrays
-c	  ----------------------------------------
+! 	  ----------------------------------------
+! 	  set up arrays
+! 	  ----------------------------------------
 
 	  if( bfunc .or. blog ) then
 	    call mkval(-niso,fiso,valmin,valmax,rfiso,ipllog)
@@ -545,14 +545,14 @@ c	  ----------------------------------------
 
 	end
 
-c**********************************************************
+! **********************************************************
 
 	subroutine mkval(nn,array,amin,amax,da,ilog)
 
-c makes array of values
-c
-c if nn is negative in da is power of function to use
-c if nn is negative and ilog is not zero - use logarithmic scale
+!  makes array of values
+! 
+!  if nn is negative in da is power of function to use
+!  if nn is negative and ilog is not zero - use logarithmic scale
 
 	implicit none
 
@@ -622,7 +622,7 @@ c if nn is negative and ilog is not zero - use logarithmic scale
 
 	end
 
-c**********************************************************
+! **********************************************************
 
 	subroutine colset_reg(nmin,nmax)
 
@@ -662,9 +662,9 @@ c**********************************************************
 
 	end
 
-c**********************************************************
-c**********************************************************
-c**********************************************************
+! **********************************************************
+! **********************************************************
+! **********************************************************
 
 	subroutine read_color_table(cname,imap,berr)
 
@@ -699,7 +699,7 @@ c**********************************************************
 
 	end
 
-c**********************************************************
+! **********************************************************
 
 	subroutine admin_color_table
 
@@ -722,8 +722,8 @@ c**********************************************************
 	call getfnm('colfil',cfile)
 	if( cfile == ' ' ) return
 
-	write(6,*) 'initializing color table from file: '
-     +		,trim(cfile),'  ',trim(cname)
+	write(6,*) 'initializing color table from file: ' &
+     &		,trim(cfile),'  ',trim(cname)
 
 	call read_colormap(cfile,cname,imap,coldim,coltab,berr)
 	if( berr ) then
@@ -747,7 +747,7 @@ c**********************************************************
 
 	end
 
-c**********************************************************
+! **********************************************************
 
 	subroutine set_max_color(coldim,coltab,icmax)
 
@@ -766,7 +766,7 @@ c**********************************************************
 
 	end
 
-c**********************************************************
+! **********************************************************
 
 	function has_color_table()
 
@@ -780,7 +780,7 @@ c**********************************************************
 
 	end
 
-c**********************************************************
+! **********************************************************
 
 !******************************************************************
 

@@ -24,24 +24,24 @@
 !
 !--------------------------------------------------------------------------
 
-c revision log :
-c
-c 12.02.1999	ggu	adapted to auto mode
-c 27.05.2005	ggu	increase nrec always in oktime (even when it is the same)
-c 13.11.2008	ggu	in oktime() increase irec only for new time
-c 06.12.2008	ggu	in oktime() set itact to actual time
-c 23.03.2010	ggu	changed v6.1.1
-c 09.10.2010	ggu	in oktime() handle negative itfreq
-c 15.12.2010	ggu	changed VERS_6_1_14
-c 05.09.2013	ggu	new routine endtime()
-c 12.09.2013	ggu	changed VERS_6_1_67
-c 20.10.2014	ggu	completely restructured, old routines deleted
-c 30.10.2014	ggu	changed VERS_7_0_4
-c 05.11.2015	ggu	changed VERS_7_3_12
-c 18.12.2018	ggu	inlude file substituted with module timlim
-c 21.05.2019	ggu	changed VERS_7_5_62
-c
-c******************************************************
+!  revision log :
+! 
+!  12.02.1999	ggu	adapted to auto mode
+!  27.05.2005	ggu	increase nrec always in oktime (even when it is the same)
+!  13.11.2008	ggu	in oktime() increase irec only for new time
+!  06.12.2008	ggu	in oktime() set itact to actual time
+!  23.03.2010	ggu	changed v6.1.1
+!  09.10.2010	ggu	in oktime() handle negative itfreq
+!  15.12.2010	ggu	changed VERS_6_1_14
+!  05.09.2013	ggu	new routine endtime()
+!  12.09.2013	ggu	changed VERS_6_1_67
+!  20.10.2014	ggu	completely restructured, old routines deleted
+!  30.10.2014	ggu	changed VERS_7_0_4
+!  05.11.2015	ggu	changed VERS_7_3_12
+!  18.12.2018	ggu	inlude file substituted with module timlim
+!  21.05.2019	ggu	changed VERS_7_5_62
+! 
+! ******************************************************
 
 	module timlim
 
@@ -52,28 +52,28 @@ c******************************************************
 
 	end module timlim
 
-c******************************************************
-c******************************************************
-c******************************************************
-c
-c itime		relative time in integer (old it)
-c dtime		relative time in double precision (in fem files)
-c atime		absolute time (seconds from 1.1.1)
-c
-c atime0	absolute time for fem time 0
-c
-c if no date/time is available then:
-c
-c		itime == dtime == atime
-c		atime0 = 0
-c
-c******************************************************
-c******************************************************
-c******************************************************
+! ******************************************************
+! ******************************************************
+! ******************************************************
+! 
+!  itime		relative time in integer (old it)
+!  dtime		relative time in double precision (in fem files)
+!  atime		absolute time (seconds from 1.1.1)
+! 
+!  atime0	absolute time for fem time 0
+! 
+!  if no date/time is available then:
+! 
+! 		itime == dtime == atime
+! 		atime0 = 0
+! 
+! ******************************************************
+! ******************************************************
+! ******************************************************
 
         subroutine ptime_init
 
-c initializes ptime
+!  initializes ptime
 
 	use timlim
 
@@ -86,19 +86,19 @@ c initializes ptime
 
 	!include 'timlim.h'
 
-c the first 4 variables might be useless
+!  the first 4 variables might be useless
 
         itmin = -ihigh
         itmax =  ihigh
 	idto  = 0
 	itact = itmin
 
-c these are still used
+!  these are still used
 
         itfreq = 1
 	nrec = 0
 
-c these are the new used variables
+!  these are the new used variables
 
 	atime0 = 0.
 	atimeact = 0.
@@ -107,11 +107,11 @@ c these are the new used variables
 
         end
 
-c******************************************************
+! ******************************************************
 
         subroutine ptime_min_max
 
-c sets time limits
+!  sets time limits
 
 	use timlim
 
@@ -163,7 +163,7 @@ c sets time limits
 
         end
 
-c******************************************************
+! ******************************************************
 
 	subroutine ptime_info
 
@@ -186,9 +186,9 @@ c******************************************************
 
 	end
 
-c******************************************************
-c******************************************************
-c******************************************************
+! ******************************************************
+! ******************************************************
+! ******************************************************
 
 	subroutine ptime_set_date_time(date,time)
 
@@ -209,9 +209,9 @@ c******************************************************
 
 	end
 
-c******************************************************
-c******************************************************
-c******************************************************
+! ******************************************************
+! ******************************************************
+! ******************************************************
 
 	subroutine ptime_set_itime(it)
 
@@ -227,7 +227,7 @@ c******************************************************
 
 	end
 
-c******************************************************
+! ******************************************************
 
 	subroutine ptime_set_atime(atime)
 
@@ -243,7 +243,7 @@ c******************************************************
 
 	end
 
-c******************************************************
+! ******************************************************
 
 	subroutine ptime_set_dtime(dtime)
 
@@ -259,7 +259,7 @@ c******************************************************
 
 	end
 
-c******************************************************
+! ******************************************************
 
 	subroutine ptime_get_itime(it)
 
@@ -275,7 +275,7 @@ c******************************************************
 
 	end
 
-c******************************************************
+! ******************************************************
 
 	subroutine ptime_get_atime(atime)
 
@@ -291,7 +291,7 @@ c******************************************************
 
 	end
 
-c******************************************************
+! ******************************************************
 
 	subroutine ptime_get_dtime(dtime)
 
@@ -307,7 +307,7 @@ c******************************************************
 
 	end
 
-c******************************************************
+! ******************************************************
 
 	subroutine ptime_i2a(it,atime)
 
@@ -324,13 +324,13 @@ c******************************************************
 
 	end
 
-c******************************************************
-c******************************************************
-c******************************************************
+! ******************************************************
+! ******************************************************
+! ******************************************************
 
         function ptime_ok()
 
-c is time ok?
+!  is time ok?
 
 	use timlim
 
@@ -373,11 +373,11 @@ c is time ok?
 
 	end
 
-c******************************************************
+! ******************************************************
 
         function ptime_end()
 
-c is time over max limit?
+!  is time over max limit?
 
 	use timlim
 
@@ -391,7 +391,7 @@ c is time over max limit?
 
 	end
 
-c******************************************************
-c******************************************************
-c******************************************************
+! ******************************************************
+! ******************************************************
+! ******************************************************
 

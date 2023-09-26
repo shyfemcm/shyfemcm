@@ -23,68 +23,68 @@
 !
 !--------------------------------------------------------------------------
 
-c routines for plotting isoline and colering area
-c
-c contents :
-c
-c subroutine isoline(val,nval,dis,mode)
-c subroutine pliso(f,x,y,dist,isoanz,fnull,fiso)
-c subroutine plcol(x,y,z,color,rlev,ncol,fnull)
-c 
-c revision log :
-c
-c 17.10.2001	ggu	use parameter isolin in isoline()
-c 05.12.2003	ggu	filling is done in fill_area()
-c 05.12.2003	ggu	is_r_nan() introduced for BUG search
-c 11.03.2004	ggu	debugging in fill_area()
-c 02.03.2005	ggu	in isoline: only plot if not flag
-c 06.12.2008	ggu	plot isolines only where area is existing (bplot)
-c 09.01.2009	ggu	deleted plcol0 (not used), new set_fxy_vals()
-c 09.01.2009	ggu	plot only part of isolines using make_single_isolines()
-c 23.02.2010	ggu	restructured and commented, use generic color table
-c 23.03.2010	ggu	changed v6.1.1
-c 14.07.2011	ggu	changed VERS_6_1_27
-c 18.08.2011	ggu	use isoinp to decide if interpolate or not in element
-c 01.09.2011	ggu	changed VERS_6_1_32
-c 30.03.2012	ggu	changed VERS_6_1_51
-c 29.10.2013	ggu	new routine pldif (plotting isolines between areas)
-c 12.11.2013	ggu	changed VERS_6_1_69
-c 26.11.2014	ggu	changed VERS_7_0_7
-c 12.12.2014	ggu	changed VERS_7_0_9
-c 23.12.2014	ggu	changed VERS_7_0_11
-c 19.01.2015	ggu	changed VERS_7_1_3
-c 05.05.2015	ggu	changed VERS_7_1_10
-c 17.07.2015	ggu	changed VERS_7_1_80
-c 20.07.2015	ggu	changed VERS_7_1_81
-c 10.06.2016	ggu	changed VERS_7_5_13
-c 17.06.2016	ggu	changed VERS_7_5_15
-c 27.06.2016	ggu	changed VERS_7_5_16
-c 05.10.2016	ggu	changed VERS_7_5_19
-c 13.04.2017	ggu	changed VERS_7_5_25
-c 11.07.2017	ggu	changed VERS_7_5_30
-c 02.09.2017	ggu	changed VERS_7_5_31
-c 18.04.2018	ggu	use bplot to decide what element to plot
-c 25.10.2018	ggu	changed VERS_7_5_51
-c 18.12.2018	ggu	changed VERS_7_5_52
-c 14.03.2019	ggu	allow for plotting constant element value
-c 21.05.2019	ggu	changed VERS_7_5_62
-c
-c****************************************************
+!  routines for plotting isoline and colering area
+! 
+!  contents :
+! 
+!  subroutine isoline(val,nval,dis,mode)
+!  subroutine pliso(f,x,y,dist,isoanz,fnull,fiso)
+!  subroutine plcol(x,y,z,color,rlev,ncol,fnull)
+!  
+!  revision log :
+! 
+!  17.10.2001	ggu	use parameter isolin in isoline()
+!  05.12.2003	ggu	filling is done in fill_area()
+!  05.12.2003	ggu	is_r_nan() introduced for BUG search
+!  11.03.2004	ggu	debugging in fill_area()
+!  02.03.2005	ggu	in isoline: only plot if not flag
+!  06.12.2008	ggu	plot isolines only where area is existing (bplot)
+!  09.01.2009	ggu	deleted plcol0 (not used), new set_fxy_vals()
+!  09.01.2009	ggu	plot only part of isolines using make_single_isolines()
+!  23.02.2010	ggu	restructured and commented, use generic color table
+!  23.03.2010	ggu	changed v6.1.1
+!  14.07.2011	ggu	changed VERS_6_1_27
+!  18.08.2011	ggu	use isoinp to decide if interpolate or not in element
+!  01.09.2011	ggu	changed VERS_6_1_32
+!  30.03.2012	ggu	changed VERS_6_1_51
+!  29.10.2013	ggu	new routine pldif (plotting isolines between areas)
+!  12.11.2013	ggu	changed VERS_6_1_69
+!  26.11.2014	ggu	changed VERS_7_0_7
+!  12.12.2014	ggu	changed VERS_7_0_9
+!  23.12.2014	ggu	changed VERS_7_0_11
+!  19.01.2015	ggu	changed VERS_7_1_3
+!  05.05.2015	ggu	changed VERS_7_1_10
+!  17.07.2015	ggu	changed VERS_7_1_80
+!  20.07.2015	ggu	changed VERS_7_1_81
+!  10.06.2016	ggu	changed VERS_7_5_13
+!  17.06.2016	ggu	changed VERS_7_5_15
+!  27.06.2016	ggu	changed VERS_7_5_16
+!  05.10.2016	ggu	changed VERS_7_5_19
+!  13.04.2017	ggu	changed VERS_7_5_25
+!  11.07.2017	ggu	changed VERS_7_5_30
+!  02.09.2017	ggu	changed VERS_7_5_31
+!  18.04.2018	ggu	use bplot to decide what element to plot
+!  25.10.2018	ggu	changed VERS_7_5_51
+!  18.12.2018	ggu	changed VERS_7_5_52
+!  14.03.2019	ggu	allow for plotting constant element value
+!  21.05.2019	ggu	changed VERS_7_5_62
+! 
+! ****************************************************
 
 	subroutine isoline(val,nval,dis,mode)
 
-c plots color and isolines in elements
-c
-c if isoanz in /isolin/ is 0 dis is used to determine isolines
-c ...else isoanz gives number of isolines on fiso
-c
-c val           array with values
-c nval          dimension of val
-c dis           distance of isolines (dis>0)
-c mode		0: isolines with dis  1: isolines in /isolin/
-c		2: color on nodes  3: color on elements
-c
-c for all values of mode except 3 values are given on nodes
+!  plots color and isolines in elements
+! 
+!  if isoanz in /isolin/ is 0 dis is used to determine isolines
+!  ...else isoanz gives number of isolines on fiso
+! 
+!  val           array with values
+!  nval          dimension of val
+!  dis           distance of isolines (dis>0)
+!  mode		0: isolines with dis  1: isolines in /isolin/
+! 		2: color on nodes  3: color on elements
+! 
+!  for all values of mode except 3 values are given on nodes
 
 	use basin
 	use color
@@ -92,12 +92,12 @@ c for all values of mode except 3 values are given on nodes
 
 	implicit none
 
-c argument
+!  argument
 	integer nval
 	real val(nval)
 	real dis
 	integer mode
-c local
+!  local
 	character*80 line
 	real f(3),x(3),y(3)
 	real dist,flag,faver
@@ -108,11 +108,11 @@ c local
 	integer icsave
 
         real getpar
-c       logical is_r_nan
+!        logical is_r_nan
 
-c--------------------------------------------------------------------
-c initialization
-c--------------------------------------------------------------------
+! --------------------------------------------------------------------
+!  initialization
+! --------------------------------------------------------------------
 
         isolin = nint(getpar('isolin'))	!plot isoline also for color
         isoinp = nint(getpar('isoinp'))	!interpolate in element?
@@ -126,9 +126,9 @@ c--------------------------------------------------------------------
 	call get_flag(flag)
 	fnull = flag
 
-c--------------------------------------------------------------------
-c find isolines to be plotted
-c--------------------------------------------------------------------
+! --------------------------------------------------------------------
+!  find isolines to be plotted
+! --------------------------------------------------------------------
 
 	if( mode .eq. 0 ) then
 		dist = dis
@@ -136,17 +136,17 @@ c--------------------------------------------------------------------
 		dist = 0.
 	end if
 
-c--------------------------------------------------------------------
-c loop over elements
-c--------------------------------------------------------------------
+! --------------------------------------------------------------------
+!  loop over elements
+! --------------------------------------------------------------------
 
 	!write(6,*) 'isoline: isoanz... ',isoanz,mode
 
 	if( mode .ge. 2 ) then
 
-c	  -----------------------------------------
-c	  color plot
-c	  -----------------------------------------
+! 	  -----------------------------------------
+! 	  color plot
+! 	  -----------------------------------------
 
 	  call qcomm('plotting elements')
 	  call get_color_table(icsave)
@@ -174,9 +174,9 @@ c	  -----------------------------------------
 
 	else
 
-c	  -----------------------------------------
-c	  isoline plot
-c	  -----------------------------------------
+! 	  -----------------------------------------
+! 	  isoline plot
+! 	  -----------------------------------------
 
 	  do ie=1,nel
 	    if( .not. bplot(ie) ) cycle
@@ -188,9 +188,9 @@ c	  -----------------------------------------
 
 	end if
 
-c--------------------------------------------------------------------
-c plot isolines
-c--------------------------------------------------------------------
+! --------------------------------------------------------------------
+!  plot isolines
+! --------------------------------------------------------------------
 
         if( mode .eq. 2 .and. isolin .gt. 0 ) then	!plot single isolines
 	  call qcomm('plotting isolines')
@@ -210,39 +210,39 @@ c--------------------------------------------------------------------
 	  call qcomm('finished plotting isolines')
         end if
 	
-c--------------------------------------------------------------------
-c	end of routine
-c--------------------------------------------------------------------
+! --------------------------------------------------------------------
+! 	end of routine
+! --------------------------------------------------------------------
 
 	end
 
-c****************************************************
+! ****************************************************
 
 	subroutine isoreg(regval,nval,regpar,dis,mode)
 
-c plots color and isolines of regular grid
-c
-c if isoanz in /isolin/ is 0 dis is used to determine isolines
-c ...else isoanz gives number of isolines on fiso
-c
-c val           array with values
-c nval          dimension of val
-c dis           distance of isolines (dis>0)
-c mode		0: isolines with dis  1: isolines in /isolin/
-c		2: color  3: color on element values
+!  plots color and isolines of regular grid
+! 
+!  if isoanz in /isolin/ is 0 dis is used to determine isolines
+!  ...else isoanz gives number of isolines on fiso
+! 
+!  val           array with values
+!  nval          dimension of val
+!  dis           distance of isolines (dis>0)
+!  mode		0: isolines with dis  1: isolines in /isolin/
+! 		2: color  3: color on element values
 
 	use basin
 	use color
 
 	implicit none
 
-c argument
+!  argument
 	integer nval
 	real regval(nval)
 	real regpar(7)
 	real dis
 	integer mode
-c local
+!  local
 	character*80 line
 	real x(4),y(4),z(4)
 	real dist,flag
@@ -256,17 +256,17 @@ c local
 	real, allocatable :: femval(:)
 
         real getpar
-c       logical is_r_nan
+!        logical is_r_nan
 
-c--------------------------------------------------------------------
-c initialization
-c--------------------------------------------------------------------
+! --------------------------------------------------------------------
+!  initialization
+! --------------------------------------------------------------------
 
 	bexreg = nint(getpar('iexreg')) > 0	!plot in half valid box
 
-c--------------------------------------------------------------------
-c find isolines to be plotted
-c--------------------------------------------------------------------
+! --------------------------------------------------------------------
+!  find isolines to be plotted
+! --------------------------------------------------------------------
 
 	if( mode .eq. 0 ) then
 		dist = dis
@@ -284,17 +284,17 @@ c--------------------------------------------------------------------
 
 	fnull = flag
 
-c--------------------------------------------------------------------
-c loop over elements
-c--------------------------------------------------------------------
+! --------------------------------------------------------------------
+!  loop over elements
+! --------------------------------------------------------------------
 
 	!write(6,*) 'isoline: isoanz... ',isoanz,mode
 
 	if( mode .eq. 2 ) then
 
-c	  -----------------------------------------
-c	  color plot
-c	  -----------------------------------------
+! 	  -----------------------------------------
+! 	  color plot
+! 	  -----------------------------------------
 
 	  call qcomm('plotting regular grid')
 	  call get_color_table(icsave)
@@ -318,7 +318,7 @@ c	  -----------------------------------------
 
 	end
 
-c***************************************************************
+! ***************************************************************
 
 	subroutine extend_box_val(z,flag)
 
@@ -344,7 +344,7 @@ c***************************************************************
 
 	end
 
-c***************************************************************
+! ***************************************************************
 
 	subroutine set_box_val(nx,ny,ix,iy,x0,y0,dx,dy,val,x,y,z)
 
@@ -378,25 +378,25 @@ c***************************************************************
 
 	end
 
-c***************************************************************
+! ***************************************************************
 
 	subroutine  pldif(f,x,y,dist,flag)
 
-c plots isolines between different regions
+!  plots isolines between different regions
 
 	implicit none
 
-c arguments
+!  arguments
 	real f(3)		!values at vertices
 	real x(3)		!x-coordinates of vertices
 	real y(3)		!y-coordinates of vertices
 	real dist		!distance between isolines
 	real flag		!null value -> do not plot
 
-c local
+!  local
 	integer ii,i1
 	real xm,ym,xc,yc
-c save
+!  save
 
 	xm = 0.
 	ym = 0.
@@ -421,15 +421,15 @@ c save
 
 	end
 
-c***************************************************************
+! ***************************************************************
 
 	subroutine pliso(f,x,y,dist,isoanz,fnull,fiso)
 
-c plots isolines
+!  plots isolines
 
 	implicit none
 
-c arguments
+!  arguments
 	real f(3)		!values at vertices
 	real x(3)		!x-coordinates of vertices
 	real y(3)		!y-coordinates of vertices
@@ -437,7 +437,7 @@ c arguments
 	integer isoanz		!number of isolines in fiso
 	real fnull		!null value -> do not plot
 	real fiso(isoanz)	!values of isolines
-c local
+!  local
 	real fmin,fmax
 	real fisol
 	real xp(2),yp(2)
@@ -446,17 +446,17 @@ c local
 	integer is,iss
 	integer i1,i2
 	integer inull,isum
-c save
+!  save
 	real epsp
 	save epsp
 	data epsp /1.e-10/
 
-c get min/max
+!  get min/max
 
 	fmin = min(f(1),f(2),f(3))
 	fmax = max(f(1),f(2),f(3))
 
-c look for null value (if just one null value, we plot border)
+!  look for null value (if just one null value, we plot border)
 
 	inull = 0
 	isum = 0
@@ -476,11 +476,11 @@ c look for null value (if just one null value, we plot border)
 
 	if( inull .gt. 0 ) return
 	  
-c if constant no processing
+!  if constant no processing
 
 	if( fmin .eq. fmax ) return
 
-c starting point
+!  starting point
 
 	iisol = 0
 	if( dist .gt. 0. ) then
@@ -495,7 +495,7 @@ c starting point
 		fisol = fiso(i)
 	end if
 
-c loop over isolines
+!  loop over isolines
 
 	do while( fisol .lt. fmax )
 
@@ -546,7 +546,7 @@ c loop over isolines
 		end if
 	end if
 
-c new isoline
+!  new isoline
 
 	if( dist .gt. 0. ) then
 	  fisol = fisol + dist
@@ -561,22 +561,22 @@ c new isoline
 
 	end do	!do while over isolines
 
-c end of loop
+!  end of loop
 
 	return
 	end
 
-c*********************************************************************
+! *********************************************************************
 
 	subroutine plcol(x,y,z,color,rlev,ncol,fnull)
 
-c interpolates and plots colors in triangle
-c
-c x,y,z		coordinates and values of vertices in triangle
-c color		array of colors to use (in total ncol colors)
-c rlev		levels to use (in total ncol-1 levels)
-c ncol		total number of colors in color
-c fnull		null value -> do not interpolate
+!  interpolates and plots colors in triangle
+! 
+!  x,y,z		coordinates and values of vertices in triangle
+!  color		array of colors to use (in total ncol colors)
+!  rlev		levels to use (in total ncol-1 levels)
+!  ncol		total number of colors in color
+!  fnull		null value -> do not interpolate
 
 	implicit none
 
@@ -599,19 +599,19 @@ c fnull		null value -> do not interpolate
 	real x2,y2,z2
 	real zr,dz
 
-c       logical is_r_nan
+!        logical is_r_nan
 
 	real eps
 	save eps
 	data eps /1.e-5/	!befor eps=0	!$$ALPHA - ERROR
 
-c find min/max %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+!  find min/max %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
 	call mima(z,3,zmin,zmax)
 
         idebug = 0
 
-c see if null value %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+!  see if null value %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
 	bnull = .false.
 	do i=1,3
@@ -620,26 +620,26 @@ c see if null value %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
 	if( bnull ) return
 
-c put nodes in order %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-c
-c if there is more then one node with z == zmin ==> btypa = .true.
-c (corresponds to one free (high) node)
-c the first low node is called (xa,ya), the second node (xb,yb)
-c the free node is called (x1,y1)
-c
-c if there is only one node with z = zmin ==> btypa = .false.
-c this node is called (xa,ya)
-c a dummy node (xb,yb) is created with (xa,ya) = (xb,yb)
-c the free nodes are called (x1,y1) and (x2,y2)
-c
-c in all cases the following is true:
-c
-c za == zb <= z1 <= z2
-c
-c for btypa == .true.  => (xa,ya) != (xb,yb) and there is no (x2,y2)
-c for btypa == .false. => (xa,ya) == (xb,yb) and (x2,y2) exists
-c
-c avoid compiler warnings
+!  put nodes in order %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+! 
+!  if there is more then one node with z == zmin ==> btypa = .true.
+!  (corresponds to one free (high) node)
+!  the first low node is called (xa,ya), the second node (xb,yb)
+!  the free node is called (x1,y1)
+! 
+!  if there is only one node with z = zmin ==> btypa = .false.
+!  this node is called (xa,ya)
+!  a dummy node (xb,yb) is created with (xa,ya) = (xb,yb)
+!  the free nodes are called (x1,y1) and (x2,y2)
+! 
+!  in all cases the following is true:
+! 
+!  za == zb <= z1 <= z2
+! 
+!  for btypa == .true.  => (xa,ya) != (xb,yb) and there is no (x2,y2)
+!  for btypa == .false. => (xa,ya) == (xb,yb) and (x2,y2) exists
+! 
+!  avoid compiler warnings
 
 	xa = 0.
 	ya = 0.
@@ -655,7 +655,7 @@ c avoid compiler warnings
 	z2 = 0.
 	btypa = .false.
 
-c find first and last node
+!  find first and last node
 
 	bdiff = .false.
 	icont=0
@@ -680,7 +680,7 @@ c find first and last node
 	end if
 	end do
 
-c find free nodes
+!  find free nodes
 
 	if(icont.eq.1) then
 		xb=xa
@@ -714,20 +714,20 @@ c find free nodes
 		btypa=.true.
 	end if
 
-c find first level .ge. nodes a and b %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+!  find first level .ge. nodes a and b %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
 	do icol=1,ncol-1
-c		if(rlev(icol).ge.zmin) goto 2
+! 		if(rlev(icol).ge.zmin) goto 2
 		if(rlev(icol).gt.zmin) goto 2
 	end do
     2	continue
 	imin = icol
 
-c start plotting %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+!  start plotting %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
 	do icol = imin,ncol
 
-c zr is actual level (last level must be always true)
+!  zr is actual level (last level must be always true)
 
 	if(icol.lt.ncol) then
 		zr=rlev(icol)
@@ -735,11 +735,11 @@ c zr is actual level (last level must be always true)
 		zr=zmax+1.
 	end if
 
-c two cases
+!  two cases
 
 	if(btypa) then
 
-c case a (one free node)
+!  case a (one free node)
 
 		if(z1.le.zr) then	!case a1, fill remaining triangle
 			xp(1)=xa
@@ -749,8 +749,8 @@ c case a (one free node)
 			xp(3)=xb
 			yp(3)=yb
 			ip=3
-                        call fill_area(idebug,"case a1"
-     +                                  ,ip,xp,yp,color(icol))
+                        call fill_area(idebug,"case a1" &
+     &                                  ,ip,xp,yp,color(icol))
 			goto 99
 		else			!case a2, one free node
 			xp(1)=xa
@@ -774,8 +774,8 @@ c case a (one free node)
 			xp(4)=xb
 			yp(4)=yb
 			ip=4
-                        call fill_area(idebug,"case a2"
-     +                                  ,ip,xp,yp,color(icol))
+                        call fill_area(idebug,"case a2" &
+     &                                  ,ip,xp,yp,color(icol))
 			xa=xp(2)
 			ya=yp(2)
 			za=zr
@@ -785,7 +785,7 @@ c case a (one free node)
 		end if
 	else
 
-c case b (two free nodes)
+!  case b (two free nodes)
 
 		if( z2 .le. zr ) then	!case b1, fill remaining triangle
 
@@ -801,8 +801,8 @@ c case b (two free nodes)
 				yp(4)=yb
 				ip = 4
 			end if
-                        call fill_area(idebug,"case b1"
-     +                                  ,ip,xp,yp,color(icol))
+                        call fill_area(idebug,"case b1" &
+     &                                  ,ip,xp,yp,color(icol))
 
 			goto 99
 
@@ -838,8 +838,8 @@ c case b (two free nodes)
 				yp(ip)=yb
 			end if
 
-                        call fill_area(idebug,"case b2"
-     +                                  ,ip,xp,yp,color(icol))
+                        call fill_area(idebug,"case b2" &
+     &                                  ,ip,xp,yp,color(icol))
 
 			xa = xp(2)
 			ya = yp(2)
@@ -885,8 +885,8 @@ c case b (two free nodes)
 				yp(ip)=yb
 			end if
 
-                        call fill_area(idebug,"case b3"
-     +                                  ,ip,xp,yp,color(icol))
+                        call fill_area(idebug,"case b3" &
+     &                                  ,ip,xp,yp,color(icol))
 
 			xa = xp(3)
 			ya = yp(3)
@@ -910,17 +910,17 @@ c case b (two free nodes)
 	return
 	end
 
-c***************************************************************
+! ***************************************************************
 
 	subroutine plnode(x,y,z,color,rlev,ncol,fnull)
 
-c plots colors of nodal values without interpolation
-c
-c x,y,z		coordinates and values of vertices in triangle
-c color		array of colors to use (in total ncol colors)
-c rlev		levels to use (in total ncol-1 levels)
-c ncol		total number of colors in color
-c fnull		null value -> do not interpolate
+!  plots colors of nodal values without interpolation
+! 
+!  x,y,z		coordinates and values of vertices in triangle
+!  color		array of colors to use (in total ncol colors)
+!  rlev		levels to use (in total ncol-1 levels)
+!  ncol		total number of colors in color
+!  fnull		null value -> do not interpolate
 
 	implicit none
 
@@ -948,7 +948,7 @@ c fnull		null value -> do not interpolate
 
 	end
 
-c***************************************************************
+! ***************************************************************
 
 	subroutine plot_box_val(x,y,z,ciso,fiso,ncol,fnull)
 
@@ -982,7 +982,7 @@ c***************************************************************
 
 	end
 
-c***************************************************************
+! ***************************************************************
 
 	subroutine set_tria_val(xx,yy,zz,i1,i2,i3,xxx,yyy,zzz)
 
@@ -1004,11 +1004,11 @@ c***************************************************************
 
 	end
 
-c***************************************************************
+! ***************************************************************
 
 	function get_color(z,ncol,color,rlev)
 
-c returns color for value z
+!  returns color for value z
 
 	implicit none
 
@@ -1028,11 +1028,11 @@ c returns color for value z
 
 	end
 
-c***************************************************************
+! ***************************************************************
 
         subroutine make_xy(in,x,y,xp,yp)
 
-c makes x/y of finite volume of local node ii
+!  makes x/y of finite volume of local node ii
 
 	implicit none
 
@@ -1065,11 +1065,11 @@ c makes x/y of finite volume of local node ii
 
 	end
 
-c***************************************************************
+! ***************************************************************
 
         subroutine fill_area(idebug,text,ip,xp,yp,col)
 
-c fills area of polygon given by xp,yp with color
+!  fills area of polygon given by xp,yp with color
 
         implicit none
 
@@ -1094,11 +1094,11 @@ c fills area of polygon given by xp,yp with color
 
         end
 
-c***************************************************************
+! ***************************************************************
 
 	subroutine set_fxy_vals(ie,flag,val,f,x,y,faver,inull)
 
-c returns x,y,val of element, and indication of flag values
+!  returns x,y,val of element, and indication of flag values
 
 	use basin
 
@@ -1130,11 +1130,11 @@ c returns x,y,val of element, and indication of flag values
 
 	end
 
-c***************************************************************
+! ***************************************************************
 
 	subroutine set_xy(ie,x,y)
 
-c returns x,y of element
+!  returns x,y of element
 
 	use basin
 
@@ -1153,5 +1153,5 @@ c returns x,y of element
 
 	end
 
-c***************************************************************
+! ***************************************************************
 

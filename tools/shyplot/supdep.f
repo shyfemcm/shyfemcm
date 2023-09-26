@@ -25,54 +25,54 @@
 !
 !--------------------------------------------------------------------------
 
-c routines for averaging depth
-c
-c contents :
-c
-c subroutine mkht(hetv,href)		makes hetv (elem depth of actual layer)
-c subroutine mkht3(nlvddi,het3v,href)	makes het3v (3D depth structure)
-c function hlthick(l,lmax,hl)		layer thickness
-c
-c revision log :
-c
-c 26.05.2000	ggu	routines written from scratch
-c 17.09.2008	ggu	routine mkht changed for layer = -1
-c 13.10.2009	ggu	new routine mkht3
-c 13.10.2009	ggu	new routine mkht3
-c 23.03.2010	ggu	changed v6.1.1
-c 17.12.2010	ggu	substituted hv with hkv, new routine hlthick()
-c 30.03.2011	ggu	new routine mkareafvl()
-c 14.04.2011	ggu	changed VERS_6_1_22
-c 14.11.2011	ggu	use get_layer_thickness() for layer structure
-c 22.11.2011	ggu	changed VERS_6_1_37
-c 23.02.2012	ccf	bug fix in mkht (get_layer_thicknes, get_sigma_info)
-c 16.03.2012	dbf	bug fix in mkht3 (get_layer_thicknes, get_sigma_info)
-c 10.06.2013	ggu	bug fix in mkht,mkht3 (get_layer_thicknes_e)
-c 05.09.2013	ggu	adapt to new get_layer_thickness()
-c 12.09.2013	ggu	changed VERS_6_1_67
-c 23.12.2014	ggu	changed VERS_7_0_11
-c 19.01.2015	ggu	changed VERS_7_1_2
-c 19.01.2015	ggu	changed VERS_7_1_3
-c 05.05.2015	ggu	changed VERS_7_1_10
-c 10.07.2015	ggu	changed VERS_7_1_50
-c 17.07.2015	ggu	changed VERS_7_1_80
-c 20.07.2015	ggu	changed VERS_7_1_81
-c 25.05.2016	ggu	changed VERS_7_5_10
-c 27.05.2016	ggu	mkhkv,mkhev deleted
-c 12.01.2017	ggu	changed VERS_7_5_21
-c 25.10.2018	ggu	changed VERS_7_5_51
-c 18.12.2018	ggu	changed VERS_7_5_52
-c 13.03.2019	ggu	changed VERS_7_5_61
-c 21.05.2019	ggu	changed VERS_7_5_62
-c 26.07.2023    lrp     introduce zstar in shyplot
-c
-c******************************************************************
+!  routines for averaging depth
+! 
+!  contents :
+! 
+!  subroutine mkht(hetv,href)		makes hetv (elem depth of actual layer)
+!  subroutine mkht3(nlvddi,het3v,href)	makes het3v (3D depth structure)
+!  function hlthick(l,lmax,hl)		layer thickness
+! 
+!  revision log :
+! 
+!  26.05.2000	ggu	routines written from scratch
+!  17.09.2008	ggu	routine mkht changed for layer = -1
+!  13.10.2009	ggu	new routine mkht3
+!  13.10.2009	ggu	new routine mkht3
+!  23.03.2010	ggu	changed v6.1.1
+!  17.12.2010	ggu	substituted hv with hkv, new routine hlthick()
+!  30.03.2011	ggu	new routine mkareafvl()
+!  14.04.2011	ggu	changed VERS_6_1_22
+!  14.11.2011	ggu	use get_layer_thickness() for layer structure
+!  22.11.2011	ggu	changed VERS_6_1_37
+!  23.02.2012	ccf	bug fix in mkht (get_layer_thicknes, get_sigma_info)
+!  16.03.2012	dbf	bug fix in mkht3 (get_layer_thicknes, get_sigma_info)
+!  10.06.2013	ggu	bug fix in mkht,mkht3 (get_layer_thicknes_e)
+!  05.09.2013	ggu	adapt to new get_layer_thickness()
+!  12.09.2013	ggu	changed VERS_6_1_67
+!  23.12.2014	ggu	changed VERS_7_0_11
+!  19.01.2015	ggu	changed VERS_7_1_2
+!  19.01.2015	ggu	changed VERS_7_1_3
+!  05.05.2015	ggu	changed VERS_7_1_10
+!  10.07.2015	ggu	changed VERS_7_1_50
+!  17.07.2015	ggu	changed VERS_7_1_80
+!  20.07.2015	ggu	changed VERS_7_1_81
+!  25.05.2016	ggu	changed VERS_7_5_10
+!  27.05.2016	ggu	mkhkv,mkhev deleted
+!  12.01.2017	ggu	changed VERS_7_5_21
+!  25.10.2018	ggu	changed VERS_7_5_51
+!  18.12.2018	ggu	changed VERS_7_5_52
+!  13.03.2019	ggu	changed VERS_7_5_61
+!  21.05.2019	ggu	changed VERS_7_5_62
+!  26.07.2023    lrp     introduce zstar in shyplot
+! 
+! ******************************************************************
 
 	subroutine mkht(hetv,href)
 
-c makes hetv (elementwise depth of actual layer)
-c
-c uses level to decide what to do
+!  makes hetv (elementwise depth of actual layer)
+! 
+!  uses level to decide what to do
 
 	use mod_depth
 	use mod_hydro
@@ -95,9 +95,9 @@ c uses level to decide what to do
 	integer getlev
 	real hlthick
 
-c-------------------------------------------------------------------
-c initialization
-c-------------------------------------------------------------------
+! -------------------------------------------------------------------
+!  initialization
+! -------------------------------------------------------------------
 
         bdebug = .true.
         bdebug = .false.
@@ -105,25 +105,25 @@ c-------------------------------------------------------------------
 	level = getlev()
         call get_sigma_info(nlvaux,nsigma,hsigma)
 
-c-------------------------------------------------------------------
-c handle different kind of levels
-c-------------------------------------------------------------------
+! -------------------------------------------------------------------
+!  handle different kind of levels
+! -------------------------------------------------------------------
 
 	do ie=1,nel
 	  lmax = ilhv(ie)
 	  lmin = 1
 	  call compute_levels_on_element(ie,zenv,zeta)
 	  zmin = minval(zenv(:,ie))   !min: z-adapt coords works with zmin
-	  call compute_zadapt_info(zmin,hlv,nsigma,lmax,lmin,
-     + 				   nadapt,hadapt)
-	  call get_layer_thickness(lmax,nsigma,nadapt,
-     +				   hsigma,hadapt,zeta,hev(ie),hlv,hl)
+	  call compute_zadapt_info(zmin,hlv,nsigma,lmax,lmin, &
+     & 				   nadapt,hadapt)
+	  call get_layer_thickness(lmax,nsigma,nadapt, &
+     &				   hsigma,hadapt,zeta,hev(ie),hlv,hl)
 	  hetv(ie) = hlthick(level,lmax,hl)
 	end do
 
-c-------------------------------------------------------------------
-c debug output
-c-------------------------------------------------------------------
+! -------------------------------------------------------------------
+!  debug output
+! -------------------------------------------------------------------
 
 	if( bdebug ) then
 	  ie = 1644
@@ -134,17 +134,17 @@ c-------------------------------------------------------------------
 	  end do
 	end if
 
-c-------------------------------------------------------------------
-c end of routine
-c-------------------------------------------------------------------
+! -------------------------------------------------------------------
+!  end of routine
+! -------------------------------------------------------------------
 
 	end
 
-c******************************************************************
+! ******************************************************************
 
 	subroutine mkht3(nlvddi,het3v,href)
 
-c makes het3v (3D depth structure)
+!  makes het3v (3D depth structure)
 
 	use mod_depth
 	use mod_hydro
@@ -153,11 +153,11 @@ c makes het3v (3D depth structure)
 
 	implicit none
 
-c arguments
+!  arguments
 	integer nlvddi
 	real het3v(nlvddi,nel)
 	real href
-c local
+!  local
 	logical bdebug
 	integer ie,ii
 	integer l,lmax,lmin
@@ -165,45 +165,45 @@ c local
 	real hsigma,hadapt
 	real zeta,zmin
 
-c-------------------------------------------------------------------
-c initialization
-c-------------------------------------------------------------------
+! -------------------------------------------------------------------
+!  initialization
+! -------------------------------------------------------------------
 
         bdebug = .true.
         bdebug = .false.
 
         call get_sigma_info(nlvaux,nsigma,hsigma)
 
-c-------------------------------------------------------------------
-c compute layer thickness
-c-------------------------------------------------------------------
+! -------------------------------------------------------------------
+!  compute layer thickness
+! -------------------------------------------------------------------
 
 	do ie=1,nel
 	  lmax = ilhv(ie)
 	  lmin = 1
 	  call compute_levels_on_element(ie,zenv,zeta)
           zmin = minval(zenv(:,ie))   !min: z-adapt coords works with zmin
-          call compute_zadapt_info(zmin,hlv,nsigma,lmax,lmin,
-     +                             nadapt,hadapt)
-	  call get_layer_thickness(lmax,nsigma,nadapt,
-     +			hsigma,hadapt,zeta,hev(ie),hlv,het3v(1,ie))
+          call compute_zadapt_info(zmin,hlv,nsigma,lmax,lmin, &
+     &                             nadapt,hadapt)
+	  call get_layer_thickness(lmax,nsigma,nadapt, &
+     &			hsigma,hadapt,zeta,hev(ie),hlv,het3v(1,ie))
 !	  call get_layer_thickness_e(ie,lmax,bzeta,nsigma,hsigma
 !     +				,het3v(1,ie))
 	end do
 
-c-------------------------------------------------------------------
-c end of routine
-c-------------------------------------------------------------------
+! -------------------------------------------------------------------
+!  end of routine
+! -------------------------------------------------------------------
 
 	end
 
-c******************************************************************
+! ******************************************************************
 
 	function hlthick(l,lmax,hl)
 
-c computes thickness of layer l
-c
-c works also for sigma layers
+!  computes thickness of layer l
+! 
+!  works also for sigma layers
 
 	implicit none
 
@@ -231,11 +231,11 @@ c works also for sigma layers
 
 	end
 
-c******************************************************************
+! ******************************************************************
 
 	subroutine mkareafvl
 
-c makes area of finite volume
+!  makes area of finite volume
 
 	use mod_hydro_plot
 	use evgeom
@@ -260,5 +260,5 @@ c makes area of finite volume
 
 	end
 
-c******************************************************************
+! ******************************************************************
 

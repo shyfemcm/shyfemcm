@@ -95,8 +95,8 @@
 
 	integer nkn,nel,nlv,np
 
-        if( nkn == nkn_hydro_plot .and. nel == nel_hydro_plot .and.
-     +          nlv == nlv_hydro_plot .and. np == np_hydro_plot ) return
+        if( nkn == nkn_hydro_plot .and. nel == nel_hydro_plot .and. &
+     &          nlv == nlv_hydro_plot .and. np == np_hydro_plot ) return
 
         if( nel > 0 .or. nkn > 0 .or. nlv > 0 .or. np > 0 ) then
           if( nel == 0 .or. nkn == 0 . or. nlv == 0 .or. np == 0 ) then
@@ -175,8 +175,8 @@
         if( nx > 0 .or. ny > 0 ) then
           if( nx == 0 .or. ny == 0 ) then
             write(6,*) 'nx,ny: ',nx,ny
-	    stop 'error stop mod_hydro_plot_regular_init: ' //
-     +				'incompatible params'
+	    stop 'error stop mod_hydro_plot_regular_init: ' // &
+     &				'incompatible params'
           end if
         end if
 

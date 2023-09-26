@@ -23,38 +23,38 @@
 !
 !--------------------------------------------------------------------------
 
-c color handling routines
-c
-c revision log :
-c
-c 26.10.2001	ggu	in colrd allow only one array to be given
-c 06.06.2008	ggu	new colortable introduced
-c 19.11.2008	ggu	new routine coltst()
-c 09.01.2009	ggu	some re-formatting
-c 09.01.2009	ggu	deleted setcol(), new make_single_isolines()
-c 26.01.2009	ggu	some more color tables
-c 23.02.2010	ggu	new set_default_color_table(), renamed qchsc()
-c 23.03.2010	ggu	make it easier to change between color tables
-c 29.09.2010	ggu	changed VERS_6_1_12
-c 01.06.2012	ggu	changed VERS_6_1_53
-c 12.09.2013	ggu	changed VERS_6_1_67
-c 18.07.2014	ggu	changed VERS_7_0_1
-c 05.12.2014	ggu	changed VERS_7_0_8
-c 17.06.2016	ggu	changed VERS_7_5_15
-c 30.09.2016	ggu	changed VERS_7_5_18
-c 11.07.2017	ggu	changed VERS_7_5_30
-c 07.12.2017	ggu	changed VERS_7_5_40
-c 24.01.2018	ggu	changed VERS_7_5_41
-c 19.04.2018	ggu	changed VERS_7_5_45
-c 25.10.2018	ggu	changed VERS_7_5_51
-c 18.12.2018	ggu	changed VERS_7_5_52
-c 21.05.2019	ggu	changed VERS_7_5_62
-c
-c************************************************************
+!  color handling routines
+! 
+!  revision log :
+! 
+!  26.10.2001	ggu	in colrd allow only one array to be given
+!  06.06.2008	ggu	new colortable introduced
+!  19.11.2008	ggu	new routine coltst()
+!  09.01.2009	ggu	some re-formatting
+!  09.01.2009	ggu	deleted setcol(), new make_single_isolines()
+!  26.01.2009	ggu	some more color tables
+!  23.02.2010	ggu	new set_default_color_table(), renamed qchsc()
+!  23.03.2010	ggu	make it easier to change between color tables
+!  29.09.2010	ggu	changed VERS_6_1_12
+!  01.06.2012	ggu	changed VERS_6_1_53
+!  12.09.2013	ggu	changed VERS_6_1_67
+!  18.07.2014	ggu	changed VERS_7_0_1
+!  05.12.2014	ggu	changed VERS_7_0_8
+!  17.06.2016	ggu	changed VERS_7_5_15
+!  30.09.2016	ggu	changed VERS_7_5_18
+!  11.07.2017	ggu	changed VERS_7_5_30
+!  07.12.2017	ggu	changed VERS_7_5_40
+!  24.01.2018	ggu	changed VERS_7_5_41
+!  19.04.2018	ggu	changed VERS_7_5_45
+!  25.10.2018	ggu	changed VERS_7_5_51
+!  18.12.2018	ggu	changed VERS_7_5_52
+!  21.05.2019	ggu	changed VERS_7_5_62
+! 
+! ************************************************************
 
 	subroutine colini
 
-c initializes color
+!  initializes color
 
 	use color
 
@@ -78,13 +78,13 @@ c initializes color
 
 	end
 
-c************************************************************
+! ************************************************************
 
 	subroutine colrd
 
-c reads color block from str file
-c
-c this is not called anymore - the setup is done in colchk
+!  reads color block from str file
+! 
+!  this is not called anymore - the setup is done in colchk
 
 	use color
 
@@ -140,7 +140,7 @@ c this is not called anymore - the setup is done in colchk
 	end if
 
 	isoanz = nisord
-c	call putpar('dval',0.)	!if section is given -> no automatic
+! 	call putpar('dval',0.)	!if section is given -> no automatic
 
 	if( bdebug ) then
 	  write(6,*) 'color debug : ',nisord,ncolrd
@@ -150,7 +150,7 @@ c	call putpar('dval',0.)	!if section is given -> no automatic
 
 	end
 
-c************************************************************
+! ************************************************************
 
 	subroutine colchk
 
@@ -207,11 +207,11 @@ c************************************************************
 
 	end
 
-c************************************************************
+! ************************************************************
 
 	subroutine coltst
 
-c debug write of color
+!  debug write of color
 
 	use color
 
@@ -241,17 +241,17 @@ c debug write of color
 	stop 'error stop coltst: nisord/ncolrd'
 	end
 
-c************************************************************
-c************************************************************
-c************************************************************
-c accessor routines
-c************************************************************
-c************************************************************
-c************************************************************
+! ************************************************************
+! ************************************************************
+! ************************************************************
+!  accessor routines
+! ************************************************************
+! ************************************************************
+! ************************************************************
 
 	subroutine colcopy(nval,fisov,col)
 
-c sets colors and isolevels
+!  sets colors and isolevels
 
 	use color
 
@@ -279,11 +279,11 @@ c sets colors and isolevels
 
 	end
  
-c************************************************************
+! ************************************************************
 
 	subroutine colnul(fnul)
 
-c sets null value
+!  sets null value
 
 	use color
 
@@ -297,11 +297,11 @@ c sets null value
 
 	end
  
-c************************************************************
+! ************************************************************
 
 	subroutine colinfo(numiso,fnul)
 
-c returns info on color table
+!  returns info on color table
 
 	use color
 
@@ -317,11 +317,11 @@ c returns info on color table
 
 	end
  
-c************************************************************
+! ************************************************************
 
 	subroutine colminmax(vmin,vmax)
 
-c returns minimum and maximum value in color table
+!  returns minimum and maximum value in color table
 
 	use color
 
@@ -336,11 +336,11 @@ c returns minimum and maximum value in color table
 
 	end
 
-c************************************************************
+! ************************************************************
 
 	subroutine colentry(icol,viso,col)
 
-c returns entry of color table
+!  returns entry of color table
 
 	use color
 
@@ -367,11 +367,11 @@ c returns entry of color table
 
 	end
  
-c************************************************************
+! ************************************************************
 
 	function getcol(value)
 
-c gets color for value
+!  gets color for value
 
 	use color
 
@@ -390,14 +390,14 @@ c gets color for value
 
 	end
 
-c************************************************************
+! ************************************************************
 
 	function getcolval(rindex)
 
-c gets value for real index
-c
-c if array has been read -> closest value
-c if regular values (valmin/max) -> use real rindex
+!  gets value for real index
+! 
+!  if array has been read -> closest value
+!  if regular values (valmin/max) -> use real rindex
 
 	use color
 
@@ -428,11 +428,11 @@ c if regular values (valmin/max) -> use real rindex
 
 	end
  
-c************************************************************
+! ************************************************************
 
 	subroutine make_single_isolines(ntick)
 
-c computes values for which single isolines are plotted
+!  computes values for which single isolines are plotted
 
 	use color
 
@@ -464,13 +464,13 @@ c computes values for which single isolines are plotted
 
 	end
 
-c************************************************************
-c************************************************************
-c************************************************************
+! ************************************************************
+! ************************************************************
+! ************************************************************
 
 	subroutine set_default_color_table( ictab )
 
-c sets default color table
+!  sets default color table
 
 	implicit none
 
@@ -480,11 +480,11 @@ c sets default color table
 
 	end
 
-c*****************************************************************
+! *****************************************************************
 
 	subroutine get_color_table( icolor )
 
-c gets color table used
+!  gets color table used
 
 	use color
 
@@ -496,11 +496,11 @@ c gets color table used
 
 	end
 
-c*****************************************************************
+! *****************************************************************
 
 	subroutine set_color_table( icolor )
 
-c sets color table to be used
+!  sets color table to be used
 
 	use color
 
@@ -513,11 +513,11 @@ c sets color table to be used
 
 	end
 
-c*****************************************************************
+! *****************************************************************
 
 	subroutine reset_color_table
 
-c sets default color table
+!  sets default color table
 
 	use color
 
@@ -527,11 +527,11 @@ c sets default color table
 
 	end
 
-c*****************************************************************
+! *****************************************************************
 
 	subroutine write_color_table
 
-c writes default color table to terminal
+!  writes default color table to terminal
 
 	use color
 
@@ -542,19 +542,19 @@ c writes default color table to terminal
 
 	end
 
-c*****************************************************************
-c
-c set image colorscale hsb 0.666 0.0 1.0 .min. hsb 0.666 1.0 1.0 .max.
-c Panel "3. White-blue (HSB blending)"
-c 
-c set image colorscale rgb 1.0 0.0 0.0 .min. rgb 0.0 0.0 1.0 .max.
-c Panel "4a. Red-blue (RGB blending)"
-c
-c*****************************************************************
+! *****************************************************************
+! 
+!  set image colorscale hsb 0.666 0.0 1.0 .min. hsb 0.666 1.0 1.0 .max.
+!  Panel "3. White-blue (HSB blending)"
+!  
+!  set image colorscale rgb 1.0 0.0 0.0 .min. rgb 0.0 0.0 1.0 .max.
+!  Panel "4a. Red-blue (RGB blending)"
+! 
+! *****************************************************************
 
 	subroutine qsetc( col )
 
-c changes color using the actual color table
+!  changes color using the actual color table
 
 	use color
 
@@ -593,9 +593,9 @@ c changes color using the actual color table
 
 	end
 
-c*****************************************************************
-c*****************************************************************
-c*****************************************************************
+! *****************************************************************
+! *****************************************************************
+! *****************************************************************
 
 	subroutine white_blue( color )
 	implicit none
@@ -655,5 +655,5 @@ c*****************************************************************
 	!write(6,*) 'color... : ',color,c,ic,coltab(:,ic)
 	end
 
-c*****************************************************************
+! *****************************************************************
 

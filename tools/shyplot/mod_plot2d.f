@@ -56,8 +56,8 @@
 
 	integer nkn,nel,np
 
-        if( nkn == nkn_plot2d .and. nel == nel_plot2d 
-     +		.and. np == np_plot2d ) return
+        if( nkn == nkn_plot2d .and. nel == nel_plot2d  &
+     &		.and. np == np_plot2d ) return
 
         if( nel > 0 .or. nkn > 0 .and. np > 0 ) then
           if( nel == 0 .or. nkn == 0 .and. np == 0 ) then

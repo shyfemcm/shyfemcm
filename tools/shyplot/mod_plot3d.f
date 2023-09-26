@@ -55,8 +55,8 @@
 
 	integer nkn,nel,nlv,np
 
-        if( nkn == nkn_plot3d .and. nel == nel_plot3d .and.
-     +		nlv == nlv_plot3d .and. np == np_plot3d ) return
+        if( nkn == nkn_plot3d .and. nel == nel_plot3d .and. &
+     &		nlv == nlv_plot3d .and. np == np_plot3d ) return
 
         if( nel > 0 .or. nkn > 0 .or. nlv > 0 .or. np > 0 ) then
           if( nel == 0 .or. nkn == 0 .or. nlv == 0 .or. np == 0 ) then
