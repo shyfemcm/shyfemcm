@@ -339,8 +339,8 @@
 	end do
   
 	format = '(i8,3f16.3)'
-	header = '#  layer    center_depth    bottom_depth' //
-     +			' layer_thickness'
+	header = '#  layer    center_depth    bottom_depth' // &
+     &			' layer_thickness'
 	iu = 1
 	file = 'depth.txt'
 	open(iu,file=file,status='unknown',form='formatted')
@@ -563,8 +563,8 @@
 
 !*************************************************************************
 
-	subroutine handle_intp(nitem,nbox,nx,ny,nz
-     +				,boxes,layers,mask,dlayer)
+	subroutine handle_intp(nitem,nbox,nx,ny,nz &
+     &				,boxes,layers,mask,dlayer)
 
 ! handle interpolation
 
@@ -642,9 +642,9 @@
           call ncf_print_variable(vitem)
 	  ndims = vitem%ndims
 	  if( ndims == 4 ) then
-	    call interpolate(nitem,nbox,ivt,varid,vitem,nx,ny
-     +			,boxes,layers,dlayer,lmaxs
-     +			,mask,idz,idt,record)
+	    call interpolate(nitem,nbox,ivt,varid,vitem,nx,ny &
+     &			,boxes,layers,dlayer,lmaxs &
+     &			,mask,idz,idt,record)
 	  end if
 	  !len = vitem%len
 	  !rlen = vitem%rlen
@@ -656,9 +656,9 @@
 
 !*************************************************************************
 
-	subroutine interpolate(nitem,nbox,ivt,varid,vitem,nx,ny
-     +			,boxes,layers,dlayer,lmaxs
-     +			,mask,nz,nt,record)
+	subroutine interpolate(nitem,nbox,ivt,varid,vitem,nx,ny &
+     &			,boxes,layers,dlayer,lmaxs &
+     &			,mask,nz,nt,record)
 
 	use ncf
 
@@ -726,16 +726,16 @@
 
 	  do ibox = 1,nbox
 	    lmax = lmaxs(ibox)
-	    values2d(ibox) = sum(values(ibox,1:lmax)) 
-     +				/ sum(volumes(ibox,1:lmax))
+	    values2d(ibox) = sum(values(ibox,1:lmax))  &
+     &				/ sum(volumes(ibox,1:lmax))
 	  end do
 	  where( volumes > 0 ) values = values / volumes
 
 	  do ibox=1,nbox
 	    iu = ius(ibox)
 	    lmax = lmaxs(ibox)
-	    call write_file_values(iu,irec,dline,nbox,ibox,lmax
-     +					,values2d,values)
+	    call write_file_values(iu,irec,dline,nbox,ibox,lmax &
+     &					,values2d,values)
 	  end do
 
 	end do
@@ -881,8 +881,8 @@
 
 !*************************************************************************
 
-	subroutine write_file_values(iu,irec,dline,nbox,ibox,lmax
-     +					,values2d,values)
+	subroutine write_file_values(iu,irec,dline,nbox,ibox,lmax &
+     &					,values2d,values)
 
 	implicit none
 

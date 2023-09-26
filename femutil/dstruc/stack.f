@@ -70,21 +70,21 @@
 	public :: stack_info		!call stack_info(id)
 
         INTERFACE stack_push
-        MODULE PROCEDURE         stack_push_d
-     +                          ,stack_push_r
-     +                          ,stack_push_i
+        MODULE PROCEDURE         stack_push_d &
+     &                          ,stack_push_r &
+     &                          ,stack_push_i
         END INTERFACE
 
         INTERFACE stack_pop
-        MODULE PROCEDURE         stack_pop_d
-     +                          ,stack_pop_r
-     +                          ,stack_pop_i
+        MODULE PROCEDURE         stack_pop_d &
+     &                          ,stack_pop_r &
+     &                          ,stack_pop_i
         END INTERFACE
 
         INTERFACE stack_peek
-        MODULE PROCEDURE         stack_peek_d
-     +                          ,stack_peek_r
-     +                          ,stack_peek_i
+        MODULE PROCEDURE         stack_peek_d &
+     &                          ,stack_peek_r &
+     &                          ,stack_peek_i
         END INTERFACE
 
 !===============================================================
@@ -297,8 +297,8 @@
 
 	subroutine stack_info(id)
 	integer id
-	write(6,*) 'stack_info: ',id,pentry(id)%top
-     +			,pentry(id)%max,pentry(id)%type
+	write(6,*) 'stack_info: ',id,pentry(id)%top &
+     &			,pentry(id)%max,pentry(id)%type
 	end subroutine stack_info
 
 !===============================================================

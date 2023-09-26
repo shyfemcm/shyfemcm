@@ -91,7 +91,7 @@ program simple_xy_wr
 
   print *, "*** SUCCESS writing example file simple_xy.nc! "
 
-contains
+  contains
   subroutine check(status)
     integer, intent ( in) :: status
     

@@ -23,60 +23,60 @@
 !
 !--------------------------------------------------------------------------
 
-c hash routines
-c
-c to change for new type of info and key :
-c
-c probably only changes to make in hashin internal routine
-c
-c flagf, flagd	must be different from any possible value in key
-c ndim          must be greater than about twice the elements
-c			to be inserted and must be a prime
-c keyt		is key table that should be ok for any use (integer)
-c infot		is the information to be inserted  -> change the
-c			structure of this array if needed.
-c			you must change also routine copyi
-c			that actually performs the copy of
-c			info and infot. the other functions
-c			probably may be left unchanged since
-c			they only pass info to hashin
-c hash		the hash function -> first statement in hashin
-c
-c revision log :
-c
-c 30.06.2000	ggu	error check for hash table half full
-c 02.12.2011	ggu	initialize hashin to zero
-c
-c******************************************************************
+! hash routines
+!
+! to change for new type of info and key :
+!
+! probably only changes to make in hashin internal routine
+!
+! flagf, flagd	must be different from any possible value in key
+! ndim          must be greater than about twice the elements
+!			to be inserted and must be a prime
+! keyt		is key table that should be ok for any use (integer)
+! infot		is the information to be inserted  -> change the
+!			structure of this array if needed.
+!			you must change also routine copyi
+!			that actually performs the copy of
+!			info and infot. the other functions
+!			probably may be left unchanged since
+!			they only pass info to hashin
+! hash		the hash function -> first statement in hashin
+!
+! revision log :
+!
+! 30.06.2000	ggu	error check for hash table half full
+! 02.12.2011	ggu	initialize hashin to zero
+!
+!******************************************************************
 
-c integer function insert(key,info) inserts element into hash table
-c integer function retriv(key,info) retrieves element from hash table
-c integer function delete(key,info) deletes element from hash table
-c integer function visit(key,info)  visits hash table
-c subroutine reset                  resets hash table for visiting
-c subroutine init                   initializes hash table
-c subroutine copyi(infos,infod)     copies from source (s) to destination (d)
-c subroutine test                   tests hash routines
-c
-c arguments :
-c
-c integer function insert(key,info) in: key,info
-c integer function retriv(key,info) in: key  out: info
-c integer function delete(key,info) in: key  out: info
-c integer function visit(key,info)  out: key,info
-c
-c return values :
-c
-c insert	1: inserted  0: already there  -1: error
-c retriv	1: found     0: not found      -1: error
-c delete	1: deleted   0: not there      -1: error
-c visit		1: found     0: finish
+! integer function insert(key,info) inserts element into hash table
+! integer function retriv(key,info) retrieves element from hash table
+! integer function delete(key,info) deletes element from hash table
+! integer function visit(key,info)  visits hash table
+! subroutine reset                  resets hash table for visiting
+! subroutine init                   initializes hash table
+! subroutine copyi(infos,infod)     copies from source (s) to destination (d)
+! subroutine test                   tests hash routines
+!
+! arguments :
+!
+! integer function insert(key,info) in: key,info
+! integer function retriv(key,info) in: key  out: info
+! integer function delete(key,info) in: key  out: info
+! integer function visit(key,info)  out: key,info
+!
+! return values :
+!
+! insert	1: inserted  0: already there  -1: error
+! retriv	1: found     0: not found      -1: error
+! delete	1: deleted   0: not there      -1: error
+! visit		1: found     0: finish
 
-c******************************************************************
+!******************************************************************
 
 	integer function insert(key,info)
 
-c inserts element into hash table
+! inserts element into hash table
 
 	implicit none
 
@@ -89,11 +89,11 @@ c inserts element into hash table
 	return
 	end
 
-c******************************************************************
+!******************************************************************
 
 	integer function retriv(key,info)
 
-c retrieves element from hash table
+! retrieves element from hash table
 
 	implicit none
 
@@ -106,11 +106,11 @@ c retrieves element from hash table
 	return
 	end
 
-c******************************************************************
+!******************************************************************
 
 	integer function delete(key,info)
 
-c deletes element from hash table
+! deletes element from hash table
 
 	implicit none
 
@@ -123,11 +123,11 @@ c deletes element from hash table
 	return
 	end
 
-c******************************************************************
+!******************************************************************
 
 	integer function visit(key,info)
 
-c visits hash table
+! visits hash table
 
 	implicit none
 
@@ -140,11 +140,11 @@ c visits hash table
 	return
 	end
 
-c******************************************************************
+!******************************************************************
 
 	subroutine reset
 
-c resets hash table for visiting
+! resets hash table for visiting
 
 	implicit none
 
@@ -157,11 +157,11 @@ c resets hash table for visiting
 
 	return
 	end
-c******************************************************************
+!******************************************************************
 
 	subroutine init
 
-c initializes hash table
+! initializes hash table
 
 	implicit none
 
@@ -175,11 +175,11 @@ c initializes hash table
 	return
 	end
 
-c******************************************************************
+!******************************************************************
 
 	subroutine copyi(infos,infod)
 
-c copies from source (infos) to destination (infod)
+! copies from source (infos) to destination (infod)
 
 	implicit none
 
@@ -190,40 +190,40 @@ c copies from source (infos) to destination (infod)
 	return
 	end
 
-c******************************************************************
-c	internal routines
-c******************************************************************
+!******************************************************************
+!	internal routines
+!******************************************************************
 
 	integer function hashin(key,info,mode)
 
-c internal hash table function
+! internal hash table function
 
-c mode :
-c		0	initialize
-c		1	insert
-c		2	retrieve
-c		3	delete
-c		4	visit
-c		5	reset for visiting
-c
-c return :
-c		-1	error
-c		0	not found, nothing more, already there
-c		1	ok
-c flags :
-c		flagf	flags free entry
-c		flagd	flags deleted entry (may be reused)
-c
-c	-> both flags must be different from
-c		any possible key used
+! mode :
+!		0	initialize
+!		1	insert
+!		2	retrieve
+!		3	delete
+!		4	visit
+!		5	reset for visiting
+!
+! return :
+!		-1	error
+!		0	not found, nothing more, already there
+!		1	ok
+! flags :
+!		flagf	flags free entry
+!		flagd	flags deleted entry (may be reused)
+!
+!	-> both flags must be different from
+!		any possible key used
 
 	implicit none
 
 	integer ndim,ndim2,flagf,flagd
-c using a prime number for ndim is a save choice
-c	parameter (ndim=7957)
-c	parameter (ndim=21973)
-c	parameter (ndim=54563)
+! using a prime number for ndim is a save choice
+!	parameter (ndim=7957)
+!	parameter (ndim=21973)
+!	parameter (ndim=54563)
 	parameter (ndim=99991)
 	parameter (ndim2=(ndim-1)/2)
 	parameter (flagf=0,flagd=-1)
@@ -282,8 +282,8 @@ c	parameter (ndim=54563)
 	    hashin=i
 	  end if
 	else if(mode.eq.4) then	!-------------------------- visit
-	  do while(ipos.le.ndim.and.
-     +		(keyt(ipos).eq.flagf.or.keyt(ipos).eq.flagd))
+	  do while(ipos.le.ndim.and. &
+     &		(keyt(ipos).eq.flagf.or.keyt(ipos).eq.flagd))
 	    ipos=ipos+1
 	  end do
 	  if(ipos.le.ndim) then
@@ -310,19 +310,19 @@ c	parameter (ndim=54563)
 	stop 'error stop hashin: dimension of hash table'
 	end
 
-c***********************************************************
+!***********************************************************
 
 	integer function lookup(key,keyt,start,flag,ndim)
 
-c looks up index for key in keyt()
+! looks up index for key in keyt()
 
-c starts search at index start
-c flag flags free index
-c
-c return value :
-c			i	index in keyt 
-c			0	not found
-c			-1	error
+! starts search at index start
+! flag flags free index
+!
+! return value :
+!			i	index in keyt 
+!			0	not found
+!			-1	error
 
 	implicit none
 
@@ -357,18 +357,18 @@ c			-1	error
 	return
 	end
 
-c***********************************************************
+!***********************************************************
 
 	integer function nfree(keyt,start,flagf,flagd,ndim)
 
-c looks for first free index in keyt()
+! looks for first free index in keyt()
 
-c starts search at index start
-c flagf, flagd flag free or deleted index
-c
-c return value :
-c			i	index in keyt 
-c			-1	error
+! starts search at index start
+! flagf, flagd flag free or deleted index
+!
+! return value :
+!			i	index in keyt 
+!			-1	error
 
 	implicit none
 
@@ -403,11 +403,11 @@ c			-1	error
 	return
 	end
 
-c*************************************************************
+!*************************************************************
 
 	subroutine test
 
-c tests hash routines
+! tests hash routines
 
 	implicit none
 
@@ -451,8 +451,8 @@ c tests hash routines
 
 	end
 
-c********************************************************************
+!********************************************************************
 
-c	program test
-c	call test
-c	end
+!	program test
+!	call test
+!	end

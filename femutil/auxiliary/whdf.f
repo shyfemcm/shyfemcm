@@ -30,7 +30,7 @@
 
 	program whdf
 
-c writes hdf files
+! writes hdf files
 
 	parameter (irank=3)
 	parameter (idimx=25,idimy=10,idimz=50)

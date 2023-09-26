@@ -23,69 +23,69 @@
 !
 !--------------------------------------------------------------------------
 
-c smoothing program
-c
-c contents :
-c
-c revision log :
-c 
-c 01.02.2002    ggu     handle periodic line
-c 06.08.2002    ggu     read also depth value
-c 23.09.2004    ggu     adapted for malta, bug fix
-c 19.10.2005    ggu     documentation and description
-c 02.12.2011    ggu     bug fix in intpdep() and reduce()
-c 02.12.2011    ggu     use depth also for smoothing (change in distxy())
-c 27.05.2012    ggu     renamed ndim to nsdim in smooth()
-c
-c description :
-c
-c This program smothes and reduces the number of points on a line
-c
-c The program ask for the GRD file that contains the lines
-c It also asks for the smoothing parameter (sigma) and reduction
-c	parameter (reduct)
-c The units of these values must be in the units of the line coordinates.
-c 
-c Smoothing:
-c
-c The program uses a gaussian curve as the smoothing operator, with
-c its standard deviation given by sigma. Therefore, if (x,y) coordinates
-c of the lines are in meters and sigma=100, the lengthscale for the 
-c smoothing is about 100 meters, which means that points closer than 100
-c meters to the point will have much more effect than points further away
-c than 100 m.
-c
-c Reduction:
-c
-c The program uses the parameter reduct to decide if a point should
-c be kept or not. If reduct=100, than all points closer than 100 m
-c to the reference point are discarded. At the end a line is left with
-c a distance between the points of minimum 100 m.
-c
-c Adaption of resolution:
-c
-c If the points of the line have no depth values, then the 
-c smoothing and reduction is working as described above. If, however,
-c depth values do exists, then they are used to change the resolution
-c of the line points. For a value of 2, twice the points in the reduction
-c algorithm are retained. In other words, the value for reduct is changed
-c locally to a value of 100/2=50, and only points closer as 50 are
-c eliminated. Line points without depth receive an implicit value of 1.
-c The value -1 indicates that this point should never be eliminated 
-c nor should it be smoothed.
-c
-c To do:
-c
-c the fixed points should be handled better (stop smoothing, reducing)
-c adaption of reduce on short lines, look at line globally
-c
-c***********************************************************************
+! smoothing program
+!
+! contents :
+!
+! revision log :
+! 
+! 01.02.2002    ggu     handle periodic line
+! 06.08.2002    ggu     read also depth value
+! 23.09.2004    ggu     adapted for malta, bug fix
+! 19.10.2005    ggu     documentation and description
+! 02.12.2011    ggu     bug fix in intpdep() and reduce()
+! 02.12.2011    ggu     use depth also for smoothing (change in distxy())
+! 27.05.2012    ggu     renamed ndim to nsdim in smooth()
+!
+! description :
+!
+! This program smothes and reduces the number of points on a line
+!
+! The program ask for the GRD file that contains the lines
+! It also asks for the smoothing parameter (sigma) and reduction
+!	parameter (reduct)
+! The units of these values must be in the units of the line coordinates.
+! 
+! Smoothing:
+!
+! The program uses a gaussian curve as the smoothing operator, with
+! its standard deviation given by sigma. Therefore, if (x,y) coordinates
+! of the lines are in meters and sigma=100, the lengthscale for the 
+! smoothing is about 100 meters, which means that points closer than 100
+! meters to the point will have much more effect than points further away
+! than 100 m.
+!
+! Reduction:
+!
+! The program uses the parameter reduct to decide if a point should
+! be kept or not. If reduct=100, than all points closer than 100 m
+! to the reference point are discarded. At the end a line is left with
+! a distance between the points of minimum 100 m.
+!
+! Adaption of resolution:
+!
+! If the points of the line have no depth values, then the 
+! smoothing and reduction is working as described above. If, however,
+! depth values do exists, then they are used to change the resolution
+! of the line points. For a value of 2, twice the points in the reduction
+! algorithm are retained. In other words, the value for reduct is changed
+! locally to a value of 100/2=50, and only points closer as 50 are
+! eliminated. Line points without depth receive an implicit value of 1.
+! The value -1 indicates that this point should never be eliminated 
+! nor should it be smoothed.
+!
+! To do:
+!
+! the fixed points should be handled better (stop smoothing, reducing)
+! adaption of reduce on short lines, look at line globally
+!
+!***********************************************************************
 
 	program gridr
 
-c smoothing program
-c
-c same as gridf but smooth on length of line, not points
+! smoothing program
+!
+! same as gridf but smooth on length of line, not points
 
 	use basin
 	use grd
@@ -113,44 +113,44 @@ c same as gridf but smooth on length of line, not points
 
 	call shyfem_copyright('gridr - smoothing of lines')
 
-c-----------------------------------
-c sigma		smoothing parameter (size of gaussian kernel)
-c reduct	reduction of points in line (in meters)
-c-----------------------------------
+!-----------------------------------
+! sigma		smoothing parameter (size of gaussian kernel)
+! reduct	reduction of points in line (in meters)
+!-----------------------------------
 	sigma = 2.0
 	sigma = 1.5
 	sigma = 500.
 	sigma = 200.
 	reduct = 4.0
 	reduct = 200.
-c----------------------------------- hakata
+!----------------------------------- hakata
 	sigma = 200.
 	reduct = 200.
-c----------------------------------- circle
+!----------------------------------- circle
 	sigma = 0.0
 	reduct = 0.1
-c----------------------------------- lido
+!----------------------------------- lido
 	sigma = 0.
 	reduct = 100.
-c----------------------------------- curonian lagoon
+!----------------------------------- curonian lagoon
 	sigma = 200.
 	reduct = 200.
-c----------------------------------- brasile
+!----------------------------------- brasile
 	sigma = 0.005
 	reduct = 0.005
-c----------------------------------- malta
+!----------------------------------- malta
 	sigma = 0.1
 	reduct = 0.2
 	sigma = 0.1 * 245.
 	reduct = 0.2 * 245.
-c----------------------------------- hue
+!----------------------------------- hue
 	sigma = 30.
 	reduct = 300.
-c-----------------------------------
+!-----------------------------------
 
 	call handle_command_line(file,sigma,reduct)
 
-c------------------------------------------------------
+!------------------------------------------------------
 
 	nline = 0
 	nnode = 0
@@ -178,8 +178,8 @@ c------------------------------------------------------
 	do l=1,nl
 	  nll = nnl
 	  nline = ipplv(l)
-	  call extrli(l,nl,ipplv,ialv,ipntlv,inodlv,xgv,ygv,hkv
-     +				,xt,yt,ht,nll,nt)
+	  call extrli(l,nl,ipplv,ialv,ipntlv,inodlv,xgv,ygv,hkv &
+     &				,xt,yt,ht,nll,nt)
 	  call mkperiod(xt,yt,nll,bperiod)
 	  call intpdep(nline,ht,nll,bperiod)
 	  call smooth(sigma,xt,yt,ht,nll,bperiod)
@@ -197,10 +197,10 @@ c------------------------------------------------------
 
 	end
 
-c**********************************************************
+!**********************************************************
 
-	subroutine extrli(l,nli,iplv,ialrv,ipntlv,inodlv,xgv,ygv,hkv
-     +		,xt,yt,ht,nl,nt)
+	subroutine extrli(l,nli,iplv,ialrv,ipntlv,inodlv,xgv,ygv,hkv &
+     &		,xt,yt,ht,nl,nt)
 
 ! extracts line from list
 
@@ -258,7 +258,7 @@ c**********************************************************
 	stop 'error stop extrli: hash routines'
 	end
 
-c**********************************************************
+!**********************************************************
 
 	subroutine mkperiod(xt,yt,nl,bperiod)
 
@@ -318,7 +318,7 @@ c**********************************************************
 	stop 'error stop prlixy: hash routines'
 	end
 
-c**********************************************************
+!**********************************************************
 
 	subroutine prline(nli,iplv,ialrv,ipntlv,inodlv)
 
@@ -343,11 +343,11 @@ c**********************************************************
 
 	end
 
-c**********************************************************
+!**********************************************************
 
 	subroutine insnod(nkn,ipv)
 
-c inserts nodes into hash table
+! inserts nodes into hash table
 
 	implicit none
 
@@ -369,14 +369,14 @@ c inserts nodes into hash table
 	stop 'error stop insnod: hash routines'
 	end
 
-c********************************************************
+!********************************************************
 
 	subroutine distxy(ndim,nl,xt,yt,ht,dxy)
 
-c sets up distance between nodes
+! sets up distance between nodes
 
-c dxy(i) -> distance to next node (i,i+1)
-c dxy(i-1) -> distance to previous node (i,i-1)
+! dxy(i) -> distance to next node (i,i+1)
+! dxy(i-1) -> distance to previous node (i,i-1)
 
 	implicit none
 
@@ -418,13 +418,13 @@ c dxy(i-1) -> distance to previous node (i,i-1)
 
 	end
 	  
-c********************************************************
-c********************************************************
-c********************************************************
+!********************************************************
+!********************************************************
+!********************************************************
 
 	subroutine smooth(sigma,xt,yt,ht,nl,bperiod)
 
-c smoothing
+! smoothing
 
 	implicit none
 
@@ -449,7 +449,7 @@ c smoothing
 
         if( sigma .le. 0. ) return
 
-c set up dxy
+! set up dxy
 
 	call distxy(nsdim,nl,xt,yt,ht,dxy)
 
@@ -463,13 +463,13 @@ c set up dxy
 	dist = sqrt ( dx**2 + dy**2 )
 	write(6,*) 'distance : ',nl,dist,distot,dist/distot,bperiod
 
-c create smoothing kernel - only use with regular point spacing
+! create smoothing kernel - only use with regular point spacing
 
-c	ngk = ndim
-c	call gkernel(sigma,nsdim,ngk,gk)
-c	write(6,*) 'Gaussian kernel : ',sigma,ngk
+!	ngk = ndim
+!	call gkernel(sigma,nsdim,ngk,gk)
+!	write(6,*) 'Gaussian kernel : ',sigma,ngk
 
-c smooth x and y
+! smooth x and y
 
 	call grsmooth(nsdim,nl,sigma,xt,raux,dxy,ht,bperiod)
 	call grsmooth(nsdim,nl,sigma,yt,raux,dxy,ht,bperiod)
@@ -483,11 +483,11 @@ c smooth x and y
 	stop 'error stop smooth: nsdim'
 	end
 
-c********************************************************
+!********************************************************
 
 	subroutine gkernel(sigma,ndim,ngk,gk)
 
-c gaussian smoothing - creates kernel to be used with gsmooth
+! gaussian smoothing - creates kernel to be used with gsmooth
 
 	real sigma
 	integer ndim
@@ -513,17 +513,17 @@ c gaussian smoothing - creates kernel to be used with gsmooth
     1	continue
 	ngk = i-1
 
-c	do i=-ngk,ngk
-c	  write(6,*) i,gk(i)
-c	end do
+!	do i=-ngk,ngk
+!	  write(6,*) i,gk(i)
+!	end do
 
 	end
 
-c********************************************************
+!********************************************************
 
 	subroutine gsmooth(ndim,nl,rt,raux,ngk,gk)
 
-c gaussian smoothing - only good for regular point spacing
+! gaussian smoothing - only good for regular point spacing
 
 	integer ndim
 	integer nl
@@ -535,7 +535,7 @@ c gaussian smoothing - only good for regular point spacing
 	integer i,j
 	real val
 
-c set up circular array
+! set up circular array
 
 	do i=1,nl
 	  val = rt(i)
@@ -544,7 +544,7 @@ c set up circular array
 	  raux(i-nl) = val
 	end do
 
-c convolution
+! convolution
 
 	do i=1,nl
 	  val = 0.
@@ -556,11 +556,11 @@ c convolution
 
 	end
 
-c********************************************************
+!********************************************************
 
 	subroutine grsmooth(ndim,nl,sigma,rt,raux,dxy,ht,bperiod)
 
-c gaussian smoothing - good for irregular point spacing
+! gaussian smoothing - good for irregular point spacing
 
 	integer ndim
 	integer nl
@@ -576,7 +576,7 @@ c gaussian smoothing - good for irregular point spacing
 	real rkern,tkern
 	real rintv
 
-c set up circular array
+! set up circular array
 
 	do i=1,nl
 	  val = rt(i)
@@ -585,7 +585,7 @@ c set up circular array
 	  raux(i-nl) = val
 	end do
 
-c set up gaussian kernel parameters
+! set up gaussian kernel parameters
 
         pi = 4.*atan(1.)
         eps = 1.e-7
@@ -593,7 +593,7 @@ c set up gaussian kernel parameters
         a = 1. / ( sqrt(2.*pi) * sigma )
         b = - 1. / ( 2 * sigma * sigma )
 
-c convolution
+! convolution
 
 	do i=1,nl
 
@@ -608,7 +608,7 @@ c convolution
 	    jmin = max(2,jmin)
 	    jmax = min(nl-1,jmax)
 	  end if
-c	  write(6,*) i,i,weight,rkern,tkern,val
+!	  write(6,*) i,i,weight,rkern,tkern,val
 
 	  rkern = 1.
 	  dist = 0.
@@ -621,10 +621,10 @@ c	  write(6,*) i,i,weight,rkern,tkern,val
 	    weight = rkern * rintv
 	    tkern = tkern + weight
 	    val = val + raux(j) * weight
-c	    write(6,*) i,j,weight,rkern,tkern,val,dist
+!	    write(6,*) i,j,weight,rkern,tkern,val,dist
 	  end do
 
-c	  write(6,*) i,j-i,nl,dist,rkern
+!	  write(6,*) i,j-i,nl,dist,rkern
 
 	  rkern = 1.
 	  dist = 0.
@@ -637,12 +637,12 @@ c	  write(6,*) i,j-i,nl,dist,rkern
 	    weight = rkern * rintv
 	    tkern = tkern + weight
 	    val = val + raux(j) * weight
-c	    write(6,*) i,j,weight,rkern,tkern,val,dist
+!	    write(6,*) i,j,weight,rkern,tkern,val,dist
 	  end do
 
-c	  write(6,*) i,i-j,nl,dist,rkern
+!	  write(6,*) i,i-j,nl,dist,rkern
 
-c	  write(6,*) '*** ',i,val,rt(i),tkern
+!	  write(6,*) '*** ',i,val,rt(i),tkern
 
 	  if( tkern .gt. 0. .and. ht(i) .ge. 0. ) then
 	    rt(i) = val / tkern
@@ -654,11 +654,11 @@ c	  write(6,*) '*** ',i,val,rt(i),tkern
 
 	end
 
-c********************************************************
+!********************************************************
 
 	subroutine wrline(iunit,nline,nnode,nl,xt,yt,ht,nt,bperiod)
 
-c write line
+! write line
 
 	integer iunit
 	integer nline
@@ -679,7 +679,7 @@ c write line
 	  write(iunit,'(i1,2i10,3e14.6)') 1,nnode+i,nt,xt(i),yt(i),ht(i)
 	end do
 	  
-c	nline = nline + 1
+!	nline = nline + 1
 
 	ntot = nl
 	if( bperiod ) ntot = ntot + 1
@@ -694,11 +694,11 @@ c	nline = nline + 1
 
 	end
 
-c********************************************************
+!********************************************************
 
 	  subroutine reduce(reduct,xt,yt,ht,nl)
 
-c reduces points in line
+! reduces points in line
 
 	implicit none
 
@@ -713,7 +713,7 @@ c reduces points in line
 	real dist,dx,dy
 	real h
 
-c very simplicistic approach
+! very simplicistic approach
 
 	if( reduct <= 0 ) return
 
@@ -749,7 +749,7 @@ c very simplicistic approach
 	  end if
 	end do
 
-c	if( nnew .lt. 3 ) stop 'error stop reduce: line too short...'
+!	if( nnew .lt. 3 ) stop 'error stop reduce: line too short...'
 	if( nnew .lt. 3 ) then
 	  write(6,*) 'line too short -> eliminated'
 	  nnew = 0
@@ -760,13 +760,13 @@ c	if( nnew .lt. 3 ) stop 'error stop reduce: line too short...'
 
 	end
 
-c********************************************************
+!********************************************************
 
 	  subroutine intpdep(nline,ht,nl,bperiod)
 
-c interpolates depth values for points in line
-c
-c negative values are not interpolated and are left alone
+! interpolates depth values for points in line
+!
+! negative values are not interpolated and are left alone
 
 	implicit none
 
@@ -789,9 +789,9 @@ c negative values are not interpolated and are left alone
 
         hflag = -990.
 
-c------------------------------------------------------------
-c look for values greater than 0
-c------------------------------------------------------------
+!------------------------------------------------------------
+! look for values greater than 0
+!------------------------------------------------------------
 
 	nonzero = 0
 	ifirst = 0
@@ -807,9 +807,9 @@ c------------------------------------------------------------
 
       if( bdebug ) write(6,*) 'nz: ',nl,nonzero,ifirst,ilast
 
-c------------------------------------------------------------
-c if no value or 1 value found -> set everything constant
-c------------------------------------------------------------
+!------------------------------------------------------------
+! if no value or 1 value found -> set everything constant
+!------------------------------------------------------------
 
 	if( nonzero .le. 1 ) then
 	  if( nonzero .eq. 0 ) then
@@ -823,9 +823,9 @@ c------------------------------------------------------------
 	  return
 	end if
 
-c------------------------------------------------------------
-c interpolate extreme values
-c------------------------------------------------------------
+!------------------------------------------------------------
+! interpolate extreme values
+!------------------------------------------------------------
 
 	vfirst = ht(ifirst)
 	vlast = ht(ilast)
@@ -864,9 +864,9 @@ c------------------------------------------------------------
 	ht(i) = value
 	ilast = i
 
-c------------------------------------------------------------
-c interpolate central values
-c------------------------------------------------------------
+!------------------------------------------------------------
+! interpolate central values
+!------------------------------------------------------------
 
 	do while( ifirst .lt. ilast )
 	  do i=ifirst+1,nl
@@ -885,9 +885,9 @@ c------------------------------------------------------------
 	  ifirst = inext
 	end do
 
-c------------------------------------------------------------
-c do some sanity check
-c------------------------------------------------------------
+!------------------------------------------------------------
+! do some sanity check
+!------------------------------------------------------------
 
 	do i=1,nl
 	  if( ht(i) .eq. 0 ) then
@@ -897,13 +897,13 @@ c------------------------------------------------------------
 	  if( bdebug ) write(6,*) i,ht(i)
 	end do
 
-c------------------------------------------------------------
-c end of routine
-c------------------------------------------------------------
+!------------------------------------------------------------
+! end of routine
+!------------------------------------------------------------
 
 	end
 
-c********************************************************
+!********************************************************
 
 	subroutine handle_command_line(file,sigma,reduct)
 
@@ -920,10 +920,10 @@ c********************************************************
         call clo_init('smooth','grd-file','1.0')
 
         call clo_add_info('smoothes line and reduces points')
-        call clo_add_option('sigma',0.
-     +                    ,'standard deviation for smoothing')
-        call clo_add_option('reduct',0.
-     +                    ,'reduction of points with smaller distance')
+        call clo_add_option('sigma',0. &
+     &                    ,'standard deviation for smoothing')
+        call clo_add_option('reduct',0. &
+     &                    ,'reduction of points with smaller distance')
 
         call clo_parse_options(1)       !expecting 1 file
 
@@ -939,5 +939,5 @@ c********************************************************
 
 	end
 
-c********************************************************
+!********************************************************
 

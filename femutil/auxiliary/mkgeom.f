@@ -30,33 +30,33 @@
 
 	program mkgeom
 
-c------------------------------------------------------------------
-c
-c makes geometry of regular basins
-c
-c nxdim,nydim	number of cells in x/y dir
-c xyfact	factor for x/y coordinates
-c zfact		inverse factor for z coordinates 
-c			-> zfact=1000 => idep=100 -> z=0.1 m
-c idepc		constant depth for basin (may be modified in subs)
-c
-c inumb controls numbering of nodes
-c
-c	inumb > 0  x first      
-c	inumb < 0  y first
-c	abs(inumb) > 1	   every col/row has inumb more
-c
-c etype controls type of triangles
-c
-c	etype = 1		upward triangles
-c	etype = -1		downward triangles
-c	etype = 0		alternating triangles
-c
-c------------------------------------------------------------------
+!------------------------------------------------------------------
+!
+! makes geometry of regular basins
+!
+! nxdim,nydim	number of cells in x/y dir
+! xyfact	factor for x/y coordinates
+! zfact		inverse factor for z coordinates 
+!			-> zfact=1000 => idep=100 -> z=0.1 m
+! idepc		constant depth for basin (may be modified in subs)
+!
+! inumb controls numbering of nodes
+!
+!	inumb > 0  x first      
+!	inumb < 0  y first
+!	abs(inumb) > 1	   every col/row has inumb more
+!
+! etype controls type of triangles
+!
+!	etype = 1		upward triangles
+!	etype = -1		downward triangles
+!	etype = 0		alternating triangles
+!
+!------------------------------------------------------------------
 
 	implicit none
 
-c nxdim,nydim are number of triangles
+! nxdim,nydim are number of triangles
 
 	integer nxdim,nydim
 	real xyfact,zfact
@@ -64,45 +64,45 @@ c nxdim,nydim are number of triangles
 	integer inumb,etype
 	character*72 title
 
-c--------------------------------------------------------------
-c customize parameters of regular grid
-c--------------------------------------------------------------
+!--------------------------------------------------------------
+! customize parameters of regular grid
+!--------------------------------------------------------------
 
-c	parameter(title='0   (FEM-TITLE)   regular basin'
-c	parameter(nxdim=50,nydim=50)
-c	parameter(nxdim=40,nydim=40)
-c	parameter(nxdim=8,nydim=48)
-c	parameter(nxdim=5,nydim=5)
-c	parameter(idepc=200,xyfact=4000.)
-c	parameter(idepc=1,xyfact=1.)
-c	parameter(inumb=1,etype=1)
-c	parameter(zfact=1.)
+!	parameter(title='0   (FEM-TITLE)   regular basin'
+!	parameter(nxdim=50,nydim=50)
+!	parameter(nxdim=40,nydim=40)
+!	parameter(nxdim=8,nydim=48)
+!	parameter(nxdim=5,nydim=5)
+!	parameter(idepc=200,xyfact=4000.)
+!	parameter(idepc=1,xyfact=1.)
+!	parameter(inumb=1,etype=1)
+!	parameter(zfact=1.)
 
-c	parameter(title='0   (FEM-TITLE)   basin for chao simulations')
-c	parameter(nxdim=37,nydim=45)
-c	parameter(idepc=15,xyfact=3000.,inumb=100,etype=0)
-c	parameter(zfact=1.)
+!	parameter(title='0   (FEM-TITLE)   basin for chao simulations')
+!	parameter(nxdim=37,nydim=45)
+!	parameter(idepc=15,xyfact=3000.,inumb=100,etype=0)
+!	parameter(zfact=1.)
 
-c	parameter(title='0   (FEM-TITLE)   channel with step')
-c	parameter(nxdim=100,nydim=20)
-c	parameter(idepc=10,xyfact=250.,inumb=-1,etype=0)
-c	parameter(zfact=1.)
+!	parameter(title='0   (FEM-TITLE)   channel with step')
+!	parameter(nxdim=100,nydim=20)
+!	parameter(idepc=10,xyfact=250.,inumb=-1,etype=0)
+!	parameter(zfact=1.)
 
-c	parameter(title='0   (FEM-TITLE)   idealized inlet')
-c	parameter(nxdim=144,nydim=188)
-c	parameter(idepc=10,xyfact=100.,inumb=-1000,etype=0,zfact=0.001)
+!	parameter(title='0   (FEM-TITLE)   idealized inlet')
+!	parameter(nxdim=144,nydim=188)
+!	parameter(idepc=10,xyfact=100.,inumb=-1000,etype=0,zfact=0.001)
 
-c	parameter(title='0   (FEM-TITLE)   regular basin for diffus')
-c	parameter(nxdim=100,nydim=100)
-c	parameter(idepc=10,xyfact=100.,inumb=1000,etype=0,zfact=1.)
+!	parameter(title='0   (FEM-TITLE)   regular basin for diffus')
+!	parameter(nxdim=100,nydim=100)
+!	parameter(idepc=10,xyfact=100.,inumb=1000,etype=0,zfact=1.)
 
 	parameter(title='0   (FEM-TITLE)   regular basin for mpi')
 	parameter(nxdim=500,nydim=500)
 	parameter(idepc=10,xyfact=100.,inumb=-1,etype=0,zfact=1.)
 
-c--------------------------------------------------------------
-c do not change anything below here
-c--------------------------------------------------------------
+!--------------------------------------------------------------
+! do not change anything below here
+!--------------------------------------------------------------
 
 	integer idep(0:nxdim+1,0:nydim+1)
 	integer node(0:nxdim,0:nydim)
@@ -115,30 +115,30 @@ c--------------------------------------------------------------
 	character*80 outfile
 	integer, parameter :: nfreq = 10000
 
-c--------------------------------------------------------------
-c statement functions -> use one of them
-c--------------------------------------------------------------
+!--------------------------------------------------------------
+! statement functions -> use one of them
+!--------------------------------------------------------------
 
 	integer eltype,i
 
-c	eltype(i) = 1				!upward triangles
-c	eltype(i) = -1				!downward triangles
-c	eltype(i) = 1 - 2*mod(i,2)		!alternating triangles
-c
-c all of the above
-c
-c	etype = 1		upward triangles
-c	etype = -1		downward triangles
-c	etype = 0		alternating triangles
+!	eltype(i) = 1				!upward triangles
+!	eltype(i) = -1				!downward triangles
+!	eltype(i) = 1 - 2*mod(i,2)		!alternating triangles
+!
+! all of the above
+!
+!	etype = 1		upward triangles
+!	etype = -1		downward triangles
+!	etype = 0		alternating triangles
 
 	eltype(i) = 1 - (1-abs(etype))*2*mod(i,2) + 2*min(0,etype)
 
-c	1-abs(etype)	=>	1 for etype=0, 0 else
-c	min(0,etype)	=>	0 for etype=0 or 1, -1 else
+!	1-abs(etype)	=>	1 for etype=0, 0 else
+!	min(0,etype)	=>	0 for etype=0 or 1, -1 else
 
-c--------------------------------------------------------------
-c initialize arrays
-c--------------------------------------------------------------
+!--------------------------------------------------------------
+! initialize arrays
+!--------------------------------------------------------------
 
 	do iy=0,nydim+1
 	  do ix=0,nxdim+1
@@ -152,9 +152,9 @@ c--------------------------------------------------------------
 	  end do
 	end do
 
-c--------------------------------------------------------------
-c set geometry
-c--------------------------------------------------------------
+!--------------------------------------------------------------
+! set geometry
+!--------------------------------------------------------------
 
 	do iy=1,nydim
 	  do ix=1,nxdim
@@ -166,9 +166,9 @@ c--------------------------------------------------------------
 	  end do
 	end do
 	
-c--------------------------------------------------------------
-c set nodes
-c--------------------------------------------------------------
+!--------------------------------------------------------------
+! set nodes
+!--------------------------------------------------------------
 
 	nnode = 0
 
@@ -180,24 +180,24 @@ c--------------------------------------------------------------
 
 	call renumber_node(inumb,node,nxdim,nydim)
 
-c--------------------------------------------------------------
-c open file for write
-c--------------------------------------------------------------
+!--------------------------------------------------------------
+! open file for write
+!--------------------------------------------------------------
 
 	outfile = 'regular.grd'
 	open(1,file=outfile,status='unknown',form='formatted')
 
-c--------------------------------------------------------------
-c write title
-c--------------------------------------------------------------
+!--------------------------------------------------------------
+! write title
+!--------------------------------------------------------------
 
 	write(1,*) 
 	write(1,'(a)') title
 	write(1,*) 
 
-c--------------------------------------------------------------
-c write nodes
-c--------------------------------------------------------------
+!--------------------------------------------------------------
+! write nodes
+!--------------------------------------------------------------
 
 	nn = 0
 
@@ -217,9 +217,9 @@ c--------------------------------------------------------------
 
 	write(1,*) 
 
-c--------------------------------------------------------------
-c write elements
-c--------------------------------------------------------------
+!--------------------------------------------------------------
+! write elements
+!--------------------------------------------------------------
 
 	nelem = 0
 
@@ -236,25 +236,25 @@ c--------------------------------------------------------------
 
 	write(1,*) 
 
-c--------------------------------------------------------------
-c write final message
-c--------------------------------------------------------------
+!--------------------------------------------------------------
+! write final message
+!--------------------------------------------------------------
 
 	write(6,*) 'total number of nodes: ',nn
 	write(6,*) 'total number of elements: ',nelem
 	write(6,*) 'regular grid has been written to ',trim(outfile)
 
-c--------------------------------------------------------------
-c end of routine
-c--------------------------------------------------------------
+!--------------------------------------------------------------
+! end of routine
+!--------------------------------------------------------------
 
 	end
 
-c******************************************************************
+!******************************************************************
 
 	subroutine wrtri(ix,iy,node,idep,nxdim,nydim,ietype,nelem,zfact)
 
-c writes triangle
+! writes triangle
 
 	implicit none
 
@@ -276,16 +276,16 @@ c writes triangle
 	depth = zfact*idep(ix,iy)
 
 	call mktri(ix,iy,node,nxdim,nydim,ietype,nodtri)
-	write(1,'(i1,6i9,f16.4)') 2,ielem,0,3
-     +		,(nodtri(i),i=1,3),depth
+	write(1,'(i1,6i9,f16.4)') 2,ielem,0,3 &
+     &		,(nodtri(i),i=1,3),depth
 
 	end
   
-c******************************************************************
+!******************************************************************
 
 	subroutine mktri(ix,iy,node,nxdim,nydim,ietype,nodtri)
 
-c makes nodes for triangle
+! makes nodes for triangle
 
 	implicit none
 
@@ -315,11 +315,11 @@ c makes nodes for triangle
 
 	end
 
-c******************************************************************
+!******************************************************************
 
 	subroutine mknode(ix,iy,node,idep,nxdim,nydim,nnode)
 
-c makes node
+! makes node
 
 	implicit none
 
@@ -338,11 +338,11 @@ c makes node
 
 	end
 
-c******************************************************************
+!******************************************************************
 
 	subroutine new_node(ix,iy,node,nxdim,nydim,nnode)
 
-c adds new node
+! adds new node
 
 	implicit none
 
@@ -359,11 +359,11 @@ c adds new node
 
 	end
 
-c******************************************************************
+!******************************************************************
 
 	subroutine renumber_node(ihow,node,nxdim,nydim)
 
-c renumber nodes in an intelligent way
+! renumber nodes in an intelligent way
 
 	implicit none
 
@@ -405,11 +405,11 @@ c renumber nodes in an intelligent way
 	
 	end
 
-c******************************************************************
+!******************************************************************
 
 	function linear(i,istart,iend,rstart,rend)
 
-c linear interpolation
+! linear interpolation
 
 	implicit none
 
@@ -426,11 +426,11 @@ c linear interpolation
 
 	end
 
-c******************************************************************
+!******************************************************************
 
 	function quadrat(i,istart,iend,rstart,rend)
 
-c quadratic interpolation
+! quadratic interpolation
 
 	implicit none
 
@@ -449,13 +449,13 @@ c quadratic interpolation
 
 	end
 
-c******************************************************************
-c******************************************************************
-c
-c special bathymetry and geometry
-c
-c******************************************************************
-c******************************************************************
+!******************************************************************
+!******************************************************************
+!
+! special bathymetry and geometry
+!
+!******************************************************************
+!******************************************************************
 
 	subroutine mkgeo0(ix,iy,idep,nxdim,nydim)
 
@@ -475,11 +475,11 @@ c******************************************************************
 
 	end
 
-c******************************************************************
+!******************************************************************
 
 	subroutine mkgeo1(ix,iy,idep,nxdim,nydim)
 
-c set special bathymetry (layer depth is 3 meters)
+! set special bathymetry (layer depth is 3 meters)
 
 	implicit none
 
@@ -490,7 +490,7 @@ c set special bathymetry (layer depth is 3 meters)
 	integer i
 
 	i = ix - 19
-c	i = i / 5
+!	i = i / 5
 	i = i / 3
 	if( i .gt. 0 ) then
 	      idep(ix,iy) = idep(ix,iy) + i * 3
@@ -498,11 +498,11 @@ c	i = i / 5
 
 	end
 
-c******************************************************************
+!******************************************************************
 
 	subroutine mkgeo_chao(ix,iy,idep,nxdim,nydim)
 
-c set special geometry for chao
+! set special geometry for chao
 
 	implicit none
 
@@ -518,11 +518,11 @@ c set special geometry for chao
 
 	end
 
-c******************************************************************
+!******************************************************************
 
 	subroutine mkgeo_step(ix,iy,idep,nxdim,nydim)
 
-c set special geometry for channel step
+! set special geometry for channel step
 
 	implicit none
 
@@ -539,11 +539,11 @@ c set special geometry for channel step
 
 	end
 
-c******************************************************************
+!******************************************************************
 
 	subroutine mkgeo_idinlet(ix,iy,idep,nxdim,nydim)
 
-c set special geometry for idealized inlet
+! set special geometry for idealized inlet
 
 	implicit none
 
@@ -592,11 +592,11 @@ c set special geometry for idealized inlet
 
 	end
 
-c******************************************************************
+!******************************************************************
 
 	subroutine mkxy1(ix,iy,node,idep,nxdim,nydim,x,y)
 
-c makes coordinates
+! makes coordinates
 
 	implicit none
 
@@ -625,5 +625,5 @@ c makes coordinates
 
 	end
 
-c******************************************************************
+!******************************************************************
 

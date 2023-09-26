@@ -23,7 +23,7 @@
 !
 !--------------------------------------------------------------------------
 
-c creates circle with random fluctuation
+! creates circle with random fluctuation
 
 ! revision log :
 !

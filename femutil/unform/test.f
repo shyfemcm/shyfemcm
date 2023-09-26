@@ -38,14 +38,14 @@
 	write(1) 1
 	close(1)
 
-	open(1,file='stream.dat',form='unformatted',status='unknown'
-     +			,access='stream')
+	open(1,file='stream.dat',form='unformatted',status='unknown' &
+     &			,access='stream')
 	write(1) 1
 	close(1)
 
 	iunit = 1
-	open(iunit,file='unform.dat',form='unformatted',status='old'
-     +			,access='stream')
+	open(iunit,file='unform.dat',form='unformatted',status='old' &
+     &			,access='stream')
 	call skip_record(iunit,nl)
 	close(iunit)
 

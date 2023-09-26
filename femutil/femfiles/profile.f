@@ -138,26 +138,26 @@
 	open(iunit,file='profile.fem',form='formatted',status='unknown')
 
 	dtime = dtime1
-        call fem_file_write_header(iformat,iunit,dtime
-     +                          ,nvers,np,lmax
-     +                          ,nvar,ntype
-     +                          ,nlvddi,hlv,datetime,regpar)
-        call fem_file_write_data(iformat,iunit
-     +                          ,nvers,np,lmax
-     +                          ,string
-     +                          ,ilhkv,hd
-     +                          ,nlvddi,temp1)
+        call fem_file_write_header(iformat,iunit,dtime &
+     &                          ,nvers,np,lmax &
+     &                          ,nvar,ntype &
+     &                          ,nlvddi,hlv,datetime,regpar)
+        call fem_file_write_data(iformat,iunit &
+     &                          ,nvers,np,lmax &
+     &                          ,string &
+     &                          ,ilhkv,hd &
+     &                          ,nlvddi,temp1)
 
 	dtime = dtime2
-        call fem_file_write_header(iformat,iunit,dtime
-     +                          ,nvers,np,lmax
-     +                          ,nvar,ntype
-     +                          ,nlvddi,hlv,datetime,regpar)
-        call fem_file_write_data(iformat,iunit
-     +                          ,nvers,np,lmax
-     +                          ,string
-     +                          ,ilhkv,hd
-     +                          ,nlvddi,temp2)
+        call fem_file_write_header(iformat,iunit,dtime &
+     &                          ,nvers,np,lmax &
+     &                          ,nvar,ntype &
+     &                          ,nlvddi,hlv,datetime,regpar)
+        call fem_file_write_data(iformat,iunit &
+     &                          ,nvers,np,lmax &
+     &                          ,string &
+     &                          ,ilhkv,hd &
+     &                          ,nlvddi,temp2)
 
 	close(iunit)
 
@@ -215,15 +215,15 @@
 
 	do i=0,24
 	  dtime = dtime_start + i*dt
-          call fem_file_write_header(iformat,iunit,dtime
-     +                          ,nvers,np,lmax
-     +                          ,nvar,ntype
-     +                          ,nlvddi,hlv,datetime,regpar)
-          call fem_file_write_data(iformat,iunit
-     +                          ,nvers,np,lmax
-     +                          ,string
-     +                          ,ilhkv,hd
-     +                          ,nlvddi,temp)
+          call fem_file_write_header(iformat,iunit,dtime &
+     &                          ,nvers,np,lmax &
+     &                          ,nvar,ntype &
+     &                          ,nlvddi,hlv,datetime,regpar)
+          call fem_file_write_data(iformat,iunit &
+     &                          ,nvers,np,lmax &
+     &                          ,string &
+     &                          ,ilhkv,hd &
+     &                          ,nlvddi,temp)
 	end do
 
 	close(iunit)
@@ -311,15 +311,15 @@
 	open(iunit,file='zeta.fem',form='formatted',status='unknown')
 
 	dtime = 0.
-        call fem_file_write_header(iformat,iunit,dtime
-     +                          ,nvers,np,lmax
-     +                          ,nvar,ntype
-     +                          ,nlvddi,hlv,datetime,regpar)
-        call fem_file_write_data(iformat,iunit
-     +                          ,nvers,np,lmax
-     +                          ,string
-     +                          ,ilhkv,hd
-     +                          ,nlvddi,zeta)
+        call fem_file_write_header(iformat,iunit,dtime &
+     &                          ,nvers,np,lmax &
+     &                          ,nvar,ntype &
+     &                          ,nlvddi,hlv,datetime,regpar)
+        call fem_file_write_data(iformat,iunit &
+     &                          ,nvers,np,lmax &
+     &                          ,string &
+     &                          ,ilhkv,hd &
+     &                          ,nlvddi,zeta)
 
 	close(iunit)
 
@@ -399,46 +399,46 @@
 	open(iunit,file='wind.fem',form='formatted',status='unknown')
 
 	dtime = 0.
-        call fem_file_write_header(iformat,iunit,dtime
-     +                          ,nvers,np,lmax
-     +                          ,nvar,ntype
-     +                          ,nlvddi,hlv,datetime,regpar)
-        call fem_file_write_data(iformat,iunit
-     +                          ,nvers,np,lmax
-     +                          ,'wind velocity in x [m/s]'
-     +                          ,ilhkv,hd
-     +                          ,nlvddi,uw)
-        call fem_file_write_data(iformat,iunit
-     +                          ,nvers,np,lmax
-     +                          ,'wind velocity in y [m/s]'
-     +                          ,ilhkv,hd
-     +                          ,nlvddi,vw)
-        call fem_file_write_data(iformat,iunit
-     +                          ,nvers,np,lmax
-     +                          ,'pressure (atmospheric) [Pa]'
-     +                          ,ilhkv,hd
-     +                          ,nlvddi,pr)
+        call fem_file_write_header(iformat,iunit,dtime &
+     &                          ,nvers,np,lmax &
+     &                          ,nvar,ntype &
+     &                          ,nlvddi,hlv,datetime,regpar)
+        call fem_file_write_data(iformat,iunit &
+     &                          ,nvers,np,lmax &
+     &                          ,'wind velocity in x [m/s]' &
+     &                          ,ilhkv,hd &
+     &                          ,nlvddi,uw)
+        call fem_file_write_data(iformat,iunit &
+     &                          ,nvers,np,lmax &
+     &                          ,'wind velocity in y [m/s]' &
+     &                          ,ilhkv,hd &
+     &                          ,nlvddi,vw)
+        call fem_file_write_data(iformat,iunit &
+     &                          ,nvers,np,lmax &
+     &                          ,'pressure (atmospheric) [Pa]' &
+     &                          ,ilhkv,hd &
+     &                          ,nlvddi,pr)
 
 	dtime = 86400.
-        call fem_file_write_header(iformat,iunit,dtime
-     +                          ,nvers,np,lmax
-     +                          ,nvar,ntype
-     +                          ,nlvddi,hlv,datetime,regpar)
-        call fem_file_write_data(iformat,iunit
-     +                          ,nvers,np,lmax
-     +                          ,'wind velocity in x [m/s]'
-     +                          ,ilhkv,hd
-     +                          ,nlvddi,uw)
-        call fem_file_write_data(iformat,iunit
-     +                          ,nvers,np,lmax
-     +                          ,'wind velocity in y [m/s]'
-     +                          ,ilhkv,hd
-     +                          ,nlvddi,vw)
-        call fem_file_write_data(iformat,iunit
-     +                          ,nvers,np,lmax
-     +                          ,'pressure (atmospheric) [Pa]'
-     +                          ,ilhkv,hd
-     +                          ,nlvddi,pr)
+        call fem_file_write_header(iformat,iunit,dtime &
+     &                          ,nvers,np,lmax &
+     &                          ,nvar,ntype &
+     &                          ,nlvddi,hlv,datetime,regpar)
+        call fem_file_write_data(iformat,iunit &
+     &                          ,nvers,np,lmax &
+     &                          ,'wind velocity in x [m/s]' &
+     &                          ,ilhkv,hd &
+     &                          ,nlvddi,uw)
+        call fem_file_write_data(iformat,iunit &
+     &                          ,nvers,np,lmax &
+     &                          ,'wind velocity in y [m/s]' &
+     &                          ,ilhkv,hd &
+     &                          ,nlvddi,vw)
+        call fem_file_write_data(iformat,iunit &
+     &                          ,nvers,np,lmax &
+     &                          ,'pressure (atmospheric) [Pa]' &
+     &                          ,ilhkv,hd &
+     &                          ,nlvddi,pr)
 
 	close(iunit)
 
@@ -550,16 +550,16 @@
 	open(iunit,file=file,form='formatted',status='unknown')
 
 	dtime = 0.
-        call fem_file_write_header(iformat,iunit,dtime
-     +                          ,nvers,np,lmax
-     +                          ,nvar,ntype
-     +                          ,nlvddi,hlv,datetime,regpar)
+        call fem_file_write_header(iformat,iunit,dtime &
+     &                          ,nvers,np,lmax &
+     &                          ,nvar,ntype &
+     &                          ,nlvddi,hlv,datetime,regpar)
 	do iv=1,nvar
-          call fem_file_write_data(iformat,iunit
-     +                          ,nvers,np,lmax
-     +                          ,string
-     +                          ,ilhkv,hd
-     +                          ,nlvddi,val(:,:,iv))
+          call fem_file_write_data(iformat,iunit &
+     &                          ,nvers,np,lmax &
+     &                          ,string &
+     &                          ,ilhkv,hd &
+     &                          ,nlvddi,val(:,:,iv))
 	end do
 
 	close(iunit)
@@ -678,16 +678,16 @@
 	open(iunit,file=file,form='formatted',status='unknown')
 
 	dtime = 0.
-        call fem_file_write_header(iformat,iunit,dtime
-     +                          ,nvers,np,lmax
-     +                          ,nvar,ntype
-     +                          ,nlvddi,hlv,datetime,regpar)
+        call fem_file_write_header(iformat,iunit,dtime &
+     &                          ,nvers,np,lmax &
+     &                          ,nvar,ntype &
+     &                          ,nlvddi,hlv,datetime,regpar)
 	do iv=1,nvar
-          call fem_file_write_data(iformat,iunit
-     +                          ,nvers,np,lmax
-     +                          ,string
-     +                          ,ilhkv,depth
-     +                          ,nlvddi,val(:,:,:,iv))
+          call fem_file_write_data(iformat,iunit &
+     &                          ,nvers,np,lmax &
+     &                          ,string &
+     &                          ,ilhkv,depth &
+     &                          ,nlvddi,val(:,:,:,iv))
 	end do
 
 	close(iunit)
@@ -795,15 +795,15 @@
 
 	do it=1,ntmax			!loop over time
 	  dtime = (it-1)*86400.		!time records are 1 day apart
-          call fem_file_write_header(iformat,iunit,dtime
-     +                          ,nvers,np,lmax
-     +                          ,nvar,ntype
-     +                          ,nlvddi,hlv,datetime,regpar)
-          call fem_file_write_data(iformat,iunit
-     +                          ,nvers,np,lmax
-     +                          ,string
-     +                          ,ilhkv,depth
-     +                          ,nlvddi,val(:,:,iv))
+          call fem_file_write_header(iformat,iunit,dtime &
+     &                          ,nvers,np,lmax &
+     &                          ,nvar,ntype &
+     &                          ,nlvddi,hlv,datetime,regpar)
+          call fem_file_write_data(iformat,iunit &
+     &                          ,nvers,np,lmax &
+     &                          ,string &
+     &                          ,ilhkv,depth &
+     &                          ,nlvddi,val(:,:,iv))
 	end do
 
 	close(iunit)
@@ -916,16 +916,16 @@
 	open(iunit,file=file,form='formatted',status='unknown')
 
 	dtime = 0.
-        call fem_file_write_header(iformat,iunit,dtime
-     +                          ,nvers,np,lmax
-     +                          ,nvar,ntype
-     +                          ,nlvddi,hlv,datetime,regpar)
+        call fem_file_write_header(iformat,iunit,dtime &
+     &                          ,nvers,np,lmax &
+     &                          ,nvar,ntype &
+     &                          ,nlvddi,hlv,datetime,regpar)
 	do iv=1,nvar
-          call fem_file_write_data(iformat,iunit
-     +                          ,nvers,np,lmax
-     +                          ,strings(iv)
-     +                          ,ilhkv,hd
-     +                          ,nlvddi,val(:,:,iv))
+          call fem_file_write_data(iformat,iunit &
+     &                          ,nvers,np,lmax &
+     &                          ,strings(iv) &
+     &                          ,ilhkv,hd &
+     &                          ,nlvddi,val(:,:,iv))
 	end do
 
 	close(iunit)
