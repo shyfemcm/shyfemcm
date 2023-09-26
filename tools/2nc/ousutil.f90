@@ -23,46 +23,46 @@
 !
 !--------------------------------------------------------------------------
 
-c utilities for OUS files
-c
-c revision log :
-c
-c 16.12.2010	ggu	copied from ousextr_gis.f
-c 03.06.2011	ggu	some routines transfered to genutil.f
-c 08.06.2011	ggu	new routine transp2nodes()
-c 10.11.2011	ggu	new routines for hybrid levels
-c 02.12.2011	ggu	bug fix for call to get_sigma_info() (missing argument)
-c 09.12.2011	ggu	changed VERS_6_1_38
-c 27.01.2012	ggu	changed VERS_6_1_43
-c 21.01.2013	ggu	added two new routines comp_vel2d, comp_barotropic
-c 13.06.2013	ggu	changed VERS_6_1_65
-c 05.09.2013	ggu	new call to get_layer_thickness()
-c 12.09.2013	ggu	changed VERS_6_1_67
-c 20.01.2014	ggu	new helper routines
-c 28.01.2014	ggu	changed VERS_6_1_71
-c 29.04.2015	ggu	new helper routines for start/end time in file
-c 05.06.2015	ggu	changed VERS_7_1_12
-c 10.07.2015	ggu	changed VERS_7_1_50
-c 17.07.2015	ggu	changed VERS_7_1_53
-c 17.07.2015	ggu	changed VERS_7_1_80
-c 20.07.2015	ggu	changed VERS_7_1_81
-c 30.07.2015	ggu	changed VERS_7_1_83
-c 11.09.2015	ggu	weight and hl are local, new velzeta2scal()
-c 05.11.2015	ggu	changed VERS_7_3_12
-c 19.02.2016	ggu	changed VERS_7_5_2
-c 19.02.2016	ggu	changed VERS_7_5_3
-c 09.09.2016	ggu	changed VERS_7_5_17
-c 14.11.2017	ggu	changed VERS_7_5_36
-c 16.02.2019	ggu	changed VERS_7_5_60
-c 09.05.2023    lrp     introduce top layer index variable
-c
-c******************************************************************
+!  utilities for OUS files
+! 
+!  revision log :
+! 
+!  16.12.2010	ggu	copied from ousextr_gis.f
+!  03.06.2011	ggu	some routines transfered to genutil.f
+!  08.06.2011	ggu	new routine transp2nodes()
+!  10.11.2011	ggu	new routines for hybrid levels
+!  02.12.2011	ggu	bug fix for call to get_sigma_info() (missing argument)
+!  09.12.2011	ggu	changed VERS_6_1_38
+!  27.01.2012	ggu	changed VERS_6_1_43
+!  21.01.2013	ggu	added two new routines comp_vel2d, comp_barotropic
+!  13.06.2013	ggu	changed VERS_6_1_65
+!  05.09.2013	ggu	new call to get_layer_thickness()
+!  12.09.2013	ggu	changed VERS_6_1_67
+!  20.01.2014	ggu	new helper routines
+!  28.01.2014	ggu	changed VERS_6_1_71
+!  29.04.2015	ggu	new helper routines for start/end time in file
+!  05.06.2015	ggu	changed VERS_7_1_12
+!  10.07.2015	ggu	changed VERS_7_1_50
+!  17.07.2015	ggu	changed VERS_7_1_53
+!  17.07.2015	ggu	changed VERS_7_1_80
+!  20.07.2015	ggu	changed VERS_7_1_81
+!  30.07.2015	ggu	changed VERS_7_1_83
+!  11.09.2015	ggu	weight and hl are local, new velzeta2scal()
+!  05.11.2015	ggu	changed VERS_7_3_12
+!  19.02.2016	ggu	changed VERS_7_5_2
+!  19.02.2016	ggu	changed VERS_7_5_3
+!  09.09.2016	ggu	changed VERS_7_5_17
+!  14.11.2017	ggu	changed VERS_7_5_36
+!  16.02.2019	ggu	changed VERS_7_5_60
+!  09.05.2023    lrp     introduce top layer index variable
+! 
+! ******************************************************************
 
-        subroutine transp2vel(nel,nkn,nlv,nlvddi,hev,zenv,nen3v
-     +				,ilhv,hlv,utlnv,vtlnv
-     +                          ,uprv,vprv)
+        subroutine transp2vel(nel,nkn,nlv,nlvddi,hev,zenv,nen3v &
+     &				,ilhv,hlv,utlnv,vtlnv &
+     &                          ,uprv,vprv)
 
-c transforms transports at elements to velocities at nodes
+!  transforms transports at elements to velocities at nodes
 
         implicit none
 
@@ -108,8 +108,8 @@ c transforms transports at elements to velocities at nodes
 	  lmax = ilhv(ie)
 	  lmin = 1
 	  call compute_levels_on_element(ie,zenv,zeta)
-	  call get_layer_thickness(lmax,lmin,nsigma,0,
-     +				   hsigma,0.,zeta,hev(ie),hlv,hl)
+	  call get_layer_thickness(lmax,lmin,nsigma,0, &
+     &				   hsigma,0.,zeta,hev(ie),hlv,hl)
 	  !call get_layer_thickness_e(ie,lmax,bzeta,nsigma,hsigma,hl)
 
 	  do l=1,lmax
@@ -137,13 +137,13 @@ c transforms transports at elements to velocities at nodes
 	      
 	end
 
-c******************************************************************
+! ******************************************************************
 
-        subroutine transp2nodes(nel,nkn,nlv,nlvddi,hev,zenv,nen3v
-     +				,ilhv,hlv,utlnv,vtlnv
-     +                          ,utprv,vtprv,weight)
+        subroutine transp2nodes(nel,nkn,nlv,nlvddi,hev,zenv,nen3v &
+     &				,ilhv,hlv,utlnv,vtlnv &
+     &                          ,utprv,vtprv,weight)
 
-c transforms transports at elements to transports at nodes
+!  transforms transports at elements to transports at nodes
 
         implicit none
 
@@ -199,12 +199,12 @@ c transforms transports at elements to transports at nodes
 	      
 	end
 
-c***************************************************************
+! ***************************************************************
 
-        subroutine comp_vel2d(nel,hev,zenv,ut2v,vt2v,u2v,v2v
-     +				,umin,vmin,umax,vmax)
+        subroutine comp_vel2d(nel,hev,zenv,ut2v,vt2v,u2v,v2v &
+     &				,umin,vmin,umax,vmax)
 
-c computes 2D velocities from 2D transports - returns result in u2v,v2v
+!  computes 2D velocities from 2D transports - returns result in u2v,v2v
 
         implicit none
 
@@ -247,12 +247,12 @@ c computes 2D velocities from 2D transports - returns result in u2v,v2v
 
         end
 
-c***************************************************************
+! ***************************************************************
 
-	subroutine comp_barotropic(nel,nlvddi,ilhv
-     +			,utlnv,vtlnv,ut2v,vt2v)
+	subroutine comp_barotropic(nel,nlvddi,ilhv &
+     &			,utlnv,vtlnv,ut2v,vt2v)
 
-c computes barotropic transport
+!  computes barotropic transport
 
 	implicit none
 
@@ -280,7 +280,7 @@ c computes barotropic transport
 
 	end
 
-c***************************************************************
+! ***************************************************************
 
 	subroutine compute_volume(nel,zenv,hev,volume)
 
@@ -317,7 +317,7 @@ c***************************************************************
 
 	end
 
-c***************************************************************
+! ***************************************************************
 
 	subroutine compute_volume_ia(ia,zenv,volume,areaall)
 
@@ -357,13 +357,13 @@ c***************************************************************
 
 	end
 
-c***************************************************************
+! ***************************************************************
 
-        subroutine debug_write_node(ks,it,nrec
-     +		,nknddi,nelddi,nlvddi,nkn,nel,nlv
-     +          ,nen3v,zenv,znv,utlnv,vtlnv)
+        subroutine debug_write_node(ks,it,nrec &
+     &		,nknddi,nelddi,nlvddi,nkn,nel,nlv &
+     &          ,nen3v,zenv,znv,utlnv,vtlnv)
 
-c debug write
+!  debug write
 
         implicit none
 
@@ -402,16 +402,16 @@ c debug write
 
         end
 
-c***************************************************************
-c***************************************************************
-c***************************************************************
+! ***************************************************************
+! ***************************************************************
+! ***************************************************************
 
         subroutine write_ous_header(iu,ilhv,hlv,hev)
 
-c other variables are stored internally
-c
-c must have been initialized with ous_init
-c all other variables must have already been stored internally (title,date..)
+!  other variables are stored internally
+! 
+!  must have been initialized with ous_init
+!  all other variables must have already been stored internally (title,date..)
 
         implicit none
 
@@ -435,11 +435,11 @@ c all other variables must have already been stored internally (title,date..)
         stop 'error stop write_ous_header: writing header'
         end
 
-c***************************************************************
+! ***************************************************************
 
         subroutine peek_ous_header(iu,nkn,nel,nlv)
 
-c get size of data
+!  get size of data
 
         implicit none
 
@@ -464,11 +464,11 @@ c get size of data
         stop 'error stop peek_ous_header: reading header'
         end
 
-c***************************************************************
+! ***************************************************************
 
         subroutine read_ous_header(iu,nknddi,nelddi,nlvddi,ilhv,hlv,hev)
 
-c other variables are stored internally
+!  other variables are stored internally
 
         implicit none
 
@@ -507,7 +507,7 @@ c other variables are stored internally
         stop 'error stop read_ous_header: reading header'
         end
 
-c***************************************************************
+! ***************************************************************
 
 	subroutine write_ous_info(iu)
 
@@ -540,13 +540,13 @@ c***************************************************************
 
 	end
 
-c***************************************************************
-c***************************************************************
-c***************************************************************
+! ***************************************************************
+! ***************************************************************
+! ***************************************************************
 
         subroutine open_ous_type(type,status,nunit)
 
-c open OUS file with default simulation name and given extension
+!  open OUS file with default simulation name and given extension
 
         implicit none
 
@@ -570,7 +570,7 @@ c open OUS file with default simulation name and given extension
 
         end
 
-c***************************************************************
+! ***************************************************************
 
         subroutine open_ous_file(name,status,nunit)
 
@@ -595,11 +595,11 @@ c***************************************************************
 
         end
 
-c***************************************************************
+! ***************************************************************
 
         subroutine qopen_ous_file(text,status,nunit)
 
-c asks for name and opens ous file
+!  asks for name and opens ous file
 
         implicit none
 
@@ -616,13 +616,13 @@ c asks for name and opens ous file
 
         end
 
-c***************************************************************
-c***************************************************************
-c***************************************************************
+! ***************************************************************
+! ***************************************************************
+! ***************************************************************
 
         subroutine ous_get_it_start(file,itstart)
 
-c gets it of first record
+!  gets it of first record
 
         implicit none
 
@@ -646,11 +646,11 @@ c gets it of first record
 
         end
 
-c***************************************************************
+! ***************************************************************
 
         subroutine ous_get_it_end(file,itend)
 
-c gets it of last record
+!  gets it of last record
 
         implicit none
 
@@ -681,7 +681,7 @@ c gets it of last record
 
         end
 
-c***************************************************************
+! ***************************************************************
 
         function check_ous_file(file)
 
@@ -704,11 +704,11 @@ c***************************************************************
         
         end
 
-c***************************************************************
+! ***************************************************************
 
-        subroutine velzeta2scal(nel,nkn,nlv,nlvddi,nen3v,ilhkv
-     +				,zenv,uprv,vprv
-     +                          ,zv,sv,dv)
+        subroutine velzeta2scal(nel,nkn,nlv,nlvddi,nen3v,ilhkv &
+     &				,zenv,uprv,vprv &
+     &                          ,zv,sv,dv)
 
 	implicit none
 
@@ -751,5 +751,5 @@ c***************************************************************
 	
 	end
 
-c***************************************************************
+! ***************************************************************
 

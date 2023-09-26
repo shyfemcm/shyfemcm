@@ -24,31 +24,31 @@
 !
 !--------------------------------------------------------------------------
 
-c writes time series to nc files
-c
-c revision log :
-c
-c 02.09.2003	ggu	adapted to new OUS format
-c 24.01.2005	ggu	computes maximum velocities for 3D (only first level)
-c 16.10.2007	ggu	new debug routine
-c 27.10.2009	ggu	include evmain.h, compute volume
-c 23.03.2011	ggu	compute real u/v-min/max of first level
-c 25.09.2013	ggu	restructured
-c 25.10.2013	ggu	changed VERS_6_1_68
-c 23.12.2014	ggu	changed VERS_7_0_11
-c 19.01.2015	ggu	changed VERS_7_1_3
-c 17.07.2015	ggu	changed VERS_7_1_53
-c 17.07.2015	ggu	changed VERS_7_1_80
-c 20.07.2015	ggu	changed VERS_7_1_81
-c 22.10.2015	ggu	changed VERS_7_3_7
-c 03.04.2018	ggu	changed VERS_7_5_43
-c 16.02.2019	ggu	changed VERS_7_5_60
-c
-c***************************************************************
+!  writes time series to nc files
+! 
+!  revision log :
+! 
+!  02.09.2003	ggu	adapted to new OUS format
+!  24.01.2005	ggu	computes maximum velocities for 3D (only first level)
+!  16.10.2007	ggu	new debug routine
+!  27.10.2009	ggu	include evmain.h, compute volume
+!  23.03.2011	ggu	compute real u/v-min/max of first level
+!  25.09.2013	ggu	restructured
+!  25.10.2013	ggu	changed VERS_6_1_68
+!  23.12.2014	ggu	changed VERS_7_0_11
+!  19.01.2015	ggu	changed VERS_7_1_3
+!  17.07.2015	ggu	changed VERS_7_1_53
+!  17.07.2015	ggu	changed VERS_7_1_80
+!  20.07.2015	ggu	changed VERS_7_1_81
+!  22.10.2015	ggu	changed VERS_7_3_7
+!  03.04.2018	ggu	changed VERS_7_5_43
+!  16.02.2019	ggu	changed VERS_7_5_60
+! 
+! ***************************************************************
 
 	program ts2nc
 
-c reads file and writes time series to nc file
+!  reads file and writes time series to nc file
 
 	use mod_depth
 	use mod_hydro
@@ -96,12 +96,12 @@ c reads file and writes time series to nc file
 	character*80 units
 	character*160 std
 
-c	integer rdous,rfous
+! 	integer rdous,rfous
 	integer iapini,ideffi
 
-c-----------------------------------------------------------------
-c initialize basin and simulation
-c-----------------------------------------------------------------
+! -----------------------------------------------------------------
+!  initialize basin and simulation
+! -----------------------------------------------------------------
 
 	call get_date_and_time(date0,time0)
 
@@ -114,9 +114,9 @@ c-----------------------------------------------------------------
 	nread=0
 	irec = 0
 
-c-----------------------------------------------------------------
-c prepare netcdf file
-c-----------------------------------------------------------------
+! -----------------------------------------------------------------
+!  prepare netcdf file
+! -----------------------------------------------------------------
 
 	nodes = 1
 	lon(1) = 12.515
@@ -125,15 +125,15 @@ c-----------------------------------------------------------------
         call nc_open_ts(ncid,nodes,date0,time0)
 	call nc_global(ncid,descrp)
 
-	std = 'sea_surface_height_correction_due_to_air_pressure' //
-     +		'_and_wind_at_high_frequency'
+	std = 'sea_surface_height_correction_due_to_air_pressure' // &
+     &		'_and_wind_at_high_frequency'
 	units = 'm'
 	call nc_define_2d(ncid,'storm_surge',surge_id)
 	call nc_define_attr(ncid,'units',units,surge_id)
 	call nc_define_attr(ncid,'standard_name',std,surge_id)
 
-	std = 'sea_surface_height_amplitude_due_to_non_equilibrium' //
-     +		'_ocean_tide'
+	std = 'sea_surface_height_amplitude_due_to_non_equilibrium' // &
+     &		'_ocean_tide'
 	units = 'm'
 	call nc_define_2d(ncid,'astronomical_tide',tide_id)
 	call nc_define_attr(ncid,'units',units,tide_id)
@@ -142,9 +142,9 @@ c-----------------------------------------------------------------
         call nc_end_define(ncid)
         call nc_write_coords_ts(ncid,lon,lat)
 
-c-----------------------------------------------------------------
-c loop on data of simulation
-c-----------------------------------------------------------------
+! -----------------------------------------------------------------
+!  loop on data of simulation
+! -----------------------------------------------------------------
 
 	it = -2*86400
 	it = it - 3600
@@ -167,9 +167,9 @@ c-----------------------------------------------------------------
 
   100	continue
 
-c-----------------------------------------------------------------
-c end of loop
-c-----------------------------------------------------------------
+! -----------------------------------------------------------------
+!  end of loop
+! -----------------------------------------------------------------
 
 	write(6,*)
 	write(6,*) nread,' records read'
@@ -177,13 +177,13 @@ c-----------------------------------------------------------------
 
         call nc_close(ncid)
 
-c-----------------------------------------------------------------
-c end of routine
-c-----------------------------------------------------------------
+! -----------------------------------------------------------------
+!  end of routine
+! -----------------------------------------------------------------
 
 	end
 
-c******************************************************************
+! ******************************************************************
 
 	subroutine get_date_and_time(date0,time0)
 
@@ -200,5 +200,5 @@ c******************************************************************
 
 	end
 
-c******************************************************************
+! ******************************************************************
 

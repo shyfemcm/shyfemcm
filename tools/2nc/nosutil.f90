@@ -23,45 +23,45 @@
 !
 !--------------------------------------------------------------------------
 
-c utilities for NOS files
-c
-c revision log :
-c
-c 29.04.2010	ggu	new file from nosaver
-c 03.05.2010	ggu	changed VERS_6_1_8
-c 07.05.2010	ggu	new routines qopen_nos_file(), checks ev initialization
-c 22.07.2010	ggu	changed VERS_6_1_9
-c 15.12.2010	ggu	volume computation also for sigma layers
-c 16.12.2010	ggu	changed VERS_6_1_15
-c 17.02.2011	ggu	changed VERS_6_1_18
-c 07.06.2011	ggu	changed VERS_6_1_25
-c 10.11.2011	ggu	new routines for hybrid levels, init_volume() changed
-c 02.12.2011	ggu	bug fix for call to get_sigma_info() (missing argument)
-c 09.12.2011	ggu	changed VERS_6_1_38
-c 27.01.2012	ggu	changed VERS_6_1_43
-c 10.02.2012	ggu	new routines to get initial/final time of records
-c 25.01.2013	ggu	new routines nos_get_vars()
-c 13.06.2013	ggu	changed VERS_6_1_65
-c 05.09.2013	ggu	new call to get_layer_thickness()
-c 12.09.2013	ggu	changed VERS_6_1_67
-c 20.01.2014	ggu	new helper routines
-c 28.01.2014	ggu	changed VERS_6_1_71
-c 07.07.2014	ggu	changed VERS_6_1_79
-c 01.04.2015	ggu	changed VERS_7_1_7
-c 05.06.2015	ggu	changed VERS_7_1_12
-c 10.07.2015	ggu	changed VERS_7_1_50
-c 17.07.2015	ggu	changed VERS_7_1_53
-c 30.07.2015	ggu	changed VERS_7_1_83
-c 23.09.2015	ggu	close files in nos_get_it_start() nos_get_it_end()
-c 28.04.2016	ggu	changed VERS_7_5_9
-c 25.05.2016	ggu	changed VERS_7_5_10
-c 09.09.2016	ggu	changed VERS_7_5_17
-c 14.11.2017	ggu	changed VERS_7_5_36
-c 16.02.2019	ggu	changed VERS_7_5_60
-c 22.09.2020    ggu     correct warnings for PGI compiler
-c 09.05.2023    lrp     introduce top layer index variable
-c
-c***************************************************************
+!  utilities for NOS files
+! 
+!  revision log :
+! 
+!  29.04.2010	ggu	new file from nosaver
+!  03.05.2010	ggu	changed VERS_6_1_8
+!  07.05.2010	ggu	new routines qopen_nos_file(), checks ev initialization
+!  22.07.2010	ggu	changed VERS_6_1_9
+!  15.12.2010	ggu	volume computation also for sigma layers
+!  16.12.2010	ggu	changed VERS_6_1_15
+!  17.02.2011	ggu	changed VERS_6_1_18
+!  07.06.2011	ggu	changed VERS_6_1_25
+!  10.11.2011	ggu	new routines for hybrid levels, init_volume() changed
+!  02.12.2011	ggu	bug fix for call to get_sigma_info() (missing argument)
+!  09.12.2011	ggu	changed VERS_6_1_38
+!  27.01.2012	ggu	changed VERS_6_1_43
+!  10.02.2012	ggu	new routines to get initial/final time of records
+!  25.01.2013	ggu	new routines nos_get_vars()
+!  13.06.2013	ggu	changed VERS_6_1_65
+!  05.09.2013	ggu	new call to get_layer_thickness()
+!  12.09.2013	ggu	changed VERS_6_1_67
+!  20.01.2014	ggu	new helper routines
+!  28.01.2014	ggu	changed VERS_6_1_71
+!  07.07.2014	ggu	changed VERS_6_1_79
+!  01.04.2015	ggu	changed VERS_7_1_7
+!  05.06.2015	ggu	changed VERS_7_1_12
+!  10.07.2015	ggu	changed VERS_7_1_50
+!  17.07.2015	ggu	changed VERS_7_1_53
+!  30.07.2015	ggu	changed VERS_7_1_83
+!  23.09.2015	ggu	close files in nos_get_it_start() nos_get_it_end()
+!  28.04.2016	ggu	changed VERS_7_5_9
+!  25.05.2016	ggu	changed VERS_7_5_10
+!  09.09.2016	ggu	changed VERS_7_5_17
+!  14.11.2017	ggu	changed VERS_7_5_36
+!  16.02.2019	ggu	changed VERS_7_5_60
+!  22.09.2020    ggu     correct warnings for PGI compiler
+!  09.05.2023    lrp     introduce top layer index variable
+! 
+! ***************************************************************
 
 	subroutine make_vert_aver(nlvddi,nkn,ilhkv,cv3,vol3,cv2)
 
@@ -99,10 +99,10 @@ c***************************************************************
 
 	end
 
-c***************************************************************
+! ***************************************************************
 
-	subroutine make_basin_aver(nlvddi,nkn,ilhkv,cv3,vol3
-     +				,cmin,cmax,cmed,vtot)
+	subroutine make_basin_aver(nlvddi,nkn,ilhkv,cv3,vol3 &
+     &				,cmin,cmax,cmed,vtot)
 
 	implicit none
 
@@ -141,7 +141,7 @@ c***************************************************************
 
 	end
 
-c***************************************************************
+! ***************************************************************
 
 	subroutine make_acumulate(nlvddi,nkn,ilhkv,cv3,cvacu)
 
@@ -164,16 +164,16 @@ c***************************************************************
 
 	end
 
-c***************************************************************
-c***************************************************************
-c***************************************************************
+! ***************************************************************
+! ***************************************************************
+! ***************************************************************
 
 	subroutine write_nos_header(iu,ilhkv,hlv,hev)
 
-c other variables are stored internally
-c
-c must have been initialized with nos_init
-c all other variables must have already been stored internally (title,date..)
+!  other variables are stored internally
+! 
+!  must have been initialized with nos_init
+!  all other variables must have already been stored internally (title,date..)
 
 	implicit none
 
@@ -197,11 +197,11 @@ c all other variables must have already been stored internally (title,date..)
 	stop 'error stop write_nos_header: writing header'
 	end
 
-c***************************************************************
+! ***************************************************************
 
 	subroutine peek_nos_header(iu,nkn,nel,nlv,nvar)
 
-c get size of data
+!  get size of data
 
 	implicit none
 
@@ -226,11 +226,11 @@ c get size of data
 	stop 'error stop peek_nos_header: reading header'
 	end
 
-c***************************************************************
+! ***************************************************************
 
 	subroutine read_nos_header(iu,nknddi,nelddi,nlvddi,ilhkv,hlv,hev)
 
-c other variables are stored internally
+!  other variables are stored internally
 
 	implicit none
 
@@ -268,7 +268,7 @@ c other variables are stored internally
 	stop 'error stop read_nos_header: reading header'
 	end
 
-c***************************************************************
+! ***************************************************************
 
 	subroutine write_nos_info(iu)
 
@@ -297,13 +297,13 @@ c***************************************************************
 
 	end
 
-c***************************************************************
-c***************************************************************
-c***************************************************************
+! ***************************************************************
+! ***************************************************************
+! ***************************************************************
 
 	subroutine open_nos_type(type,status,nunit)
 
-c open NOS file with default simulation name and given extension
+!  open NOS file with default simulation name and given extension
 
 	implicit none
 
@@ -327,7 +327,7 @@ c open NOS file with default simulation name and given extension
 
 	end
 
-c***************************************************************
+! ***************************************************************
 
 	subroutine open_nos_file(name,status,nunit)
 
@@ -353,11 +353,11 @@ c***************************************************************
 
 	end
 
-c***************************************************************
+! ***************************************************************
 
         subroutine qopen_nos_file(text,status,nunit)
 
-c asks for name and opens nos file
+!  asks for name and opens nos file
 
         implicit none
 
@@ -374,17 +374,17 @@ c asks for name and opens nos file
 
         end
 
-c***************************************************************
-c***************************************************************
-c***************************************************************
+! ***************************************************************
+! ***************************************************************
+! ***************************************************************
 
-	subroutine init_volume(nlvddi,nkn,nel,nlv,nen3v,ilhkv
-     +				,hlv,hev,hl,vol3)
+	subroutine init_volume(nlvddi,nkn,nel,nlv,nen3v,ilhkv &
+     &				,hlv,hev,hl,vol3)
 
-c initializes volumes just in case no volume file is found
-c
-c we just set everything to 1.
-c we could do better using information on node area and depth structure
+!  initializes volumes just in case no volume file is found
+! 
+!  we just set everything to 1.
+!  we could do better using information on node area and depth structure
 
 	implicit none
 
@@ -422,8 +422,8 @@ c we could do better using information on node area and depth structure
 	  ak = 4. * weight_elem(ie)	!area of vertex
 	  h = hev(ie)
 	  lmin=1
-	  call get_layer_thickness(nlv,lmin,nsigma,0,
-     +				   hsigma,0.,z,h,hlv,hl)
+	  call get_layer_thickness(nlv,lmin,nsigma,0, &
+     &				   hsigma,0.,z,h,hlv,hl)
 	  do ii=1,3
 	    k = nen3v(ii,ie)
 	    bdebug = k == ks .and. nlv > 1
@@ -457,11 +457,11 @@ c we could do better using information on node area and depth structure
 
 	end
 
-c***************************************************************
+! ***************************************************************
 
 	subroutine get_volume(nvol,it,nlvddi,ilhkv,vol3)
 
-c reads volumes
+!  reads volumes
 
 	implicit none
 
@@ -509,13 +509,13 @@ c reads volumes
 	stop 'error stop get_volume: no vol record for it'
 	end
 
-c***************************************************************
-c***************************************************************
-c***************************************************************
+! ***************************************************************
+! ***************************************************************
+! ***************************************************************
 
 	subroutine check_equal_i(text,n,a1,a2)
 
-c tests array to be equal
+!  tests array to be equal
 
 	implicit none
 
@@ -542,11 +542,11 @@ c tests array to be equal
 	stop 'error stop check_iqual_i: arrays differ'
 	end
 
-c***************************************************************
+! ***************************************************************
 
 	subroutine check_equal_r(text,n,a1,a2)
 
-c tests array to be equal
+!  tests array to be equal
 
 	implicit none
 
@@ -573,13 +573,13 @@ c tests array to be equal
 	stop 'error stop check_iqual_r: arrays differ'
 	end
 
-c***************************************************************
-c***************************************************************
-c***************************************************************
+! ***************************************************************
+! ***************************************************************
+! ***************************************************************
 
 	subroutine nos_get_it_start(file,itstart)
 
-c gets it of first record
+!  gets it of first record
 
 	implicit none
 
@@ -608,11 +608,11 @@ c gets it of first record
 
 	end
 
-c***************************************************************
+! ***************************************************************
 
 	subroutine nos_get_it_end(file,itend)
 
-c gets it of last record
+!  gets it of last record
 
 	implicit none
 
@@ -647,7 +647,7 @@ c gets it of last record
 
 	end
 
-c***************************************************************
+! ***************************************************************
 
 	subroutine nos_get_vars(nin,nvar,ivars)
 
@@ -675,7 +675,7 @@ c***************************************************************
 	stop 'error stop nos_get_vars: nvar'
 	end
 
-c***************************************************************
+! ***************************************************************
 
 	function check_nos_file(file)
 
@@ -698,5 +698,5 @@ c***************************************************************
 
 	end
 
-c***************************************************************
+! ***************************************************************
 
