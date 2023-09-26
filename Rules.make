@@ -189,7 +189,8 @@ SOLVER = SPARSKIT
 
 # PETSC_DIR it the path to the PETSc installation folder, it is 
 # needed for both the PETSc and the PETSc_AmgX solvers
-PETSC_DIR =  /zeus/opt/impi19.5/petsc/3.7.5/
+PETSC_DIR =  /zeus/opt/impi20.1/petsc/3.7.5/
+MPI_DIR =   /zeus/opt/intel20/intel/compilers_and_libraries_2020.1.217/linux/mpi/intel64/
 
 # The next 4 paths must be filled in for the PETSc_AmgX solver only.
 
