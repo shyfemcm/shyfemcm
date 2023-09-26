@@ -127,21 +127,21 @@
 	character*80, save, private :: version_name = ' '
 
 	INTERFACE clo_add_option
-        MODULE PROCEDURE clo_add_option_d, clo_add_option_r, 
-     +			 clo_add_option_i,
-     +			 clo_add_option_f, clo_add_option_s
+        MODULE PROCEDURE clo_add_option_d, clo_add_option_r,  &
+     &			 clo_add_option_i, &
+     &			 clo_add_option_f, clo_add_option_s
 	END INTERFACE
 
 	INTERFACE clo_set_option
-        MODULE PROCEDURE clo_set_option_d, clo_set_option_r, 
-     +			 clo_set_option_i,
-     +			 clo_set_option_f, clo_set_option_s
+        MODULE PROCEDURE clo_set_option_d, clo_set_option_r,  &
+     &			 clo_set_option_i, &
+     &			 clo_set_option_f, clo_set_option_s
 	END INTERFACE
 
 	INTERFACE clo_get_option
-        MODULE PROCEDURE clo_get_option_d, clo_get_option_r, 
-     +			 clo_get_option_i,
-     +			 clo_get_option_f, clo_get_option_s
+        MODULE PROCEDURE clo_get_option_d, clo_get_option_r,  &
+     &			 clo_get_option_i, &
+     &			 clo_get_option_f, clo_get_option_s
 	END INTERFACE
 
 !==================================================================
@@ -1041,8 +1041,8 @@
 	nr = len_trim(routine_name)
 	nf = len_trim(files_name)
 
-	write(6,*) 'Usage: ',routine_name(1:nr)
-     +			,' [-h|-help] [-options] ',files_name(1:nf)
+	write(6,*) 'Usage: ',routine_name(1:nr) &
+     &			,' [-h|-help] [-options] ',files_name(1:nf)
 
 	stop
 	end subroutine clo_usage
@@ -1076,8 +1076,8 @@
 	length = max(length,clo_get_length('v|-version',' '))
 	length = length + 5
 
-	write(6,*) 'Usage: ',routine_name(1:nr)
-     +			,' [-h|-help] [-options] ',files_name(1:nf)
+	write(6,*) 'Usage: ',routine_name(1:nr) &
+     &			,' [-h|-help] [-options] ',files_name(1:nf)
 	if( info /= ' ' ) write(6,*) ' ',info(1:len_trim(info))
 	write(6,*) ' options:'
 	call clo_write_line(length,'h|-help',' ','this help screen')
