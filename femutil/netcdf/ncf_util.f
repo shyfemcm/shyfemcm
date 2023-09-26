@@ -85,17 +85,17 @@
         END INTERFACE
 
         INTERFACE ncf_get_data
-        MODULE PROCEDURE 	  ncf_get_data_d1
-     +				, ncf_get_data_d2
-     +				, ncf_get_data_d3
-     +				, ncf_get_data_d4
+        MODULE PROCEDURE 	  ncf_get_data_d1 &
+     &				, ncf_get_data_d2 &
+     &				, ncf_get_data_d3 &
+     &				, ncf_get_data_d4
         END INTERFACE
 
         INTERFACE ncf_get_record
-        MODULE PROCEDURE 	  ncf_get_record_d1
-     +				, ncf_get_record_d2
-     +				, ncf_get_record_d3
-     +				, ncf_get_record_d4
+        MODULE PROCEDURE 	  ncf_get_record_d1 &
+     &				, ncf_get_record_d2 &
+     &				, ncf_get_record_d3 &
+     &				, ncf_get_record_d4
         END INTERFACE
 
 	private bdebug
@@ -705,8 +705,8 @@
 	allocate(vitem%start(ndims))
 	allocate(vitem%count(ndims))
 
-	retval = NF_INQ_VAR(ncid,varid,vitem%name,vitem%xtype
-     +			,vitem%ndims,vitem%dimids,vitem%natts)
+	retval = NF_INQ_VAR(ncid,varid,vitem%name,vitem%xtype &
+     &			,vitem%ndims,vitem%dimids,vitem%natts)
 	call ncf_handle_err(retval)
 	vitem%is_string = ( vitem%xtype == NF_CHAR )
 
@@ -796,8 +796,8 @@
 	  allocate(vitem%value(vitem%rlen))
 	  vitem%start(idtime) = irec
 	  vitem%count(idtime) = 1
-	  retval = NF_GET_VARA_DOUBLE(ncid,id
-     +			,vitem%start,vitem%count,vitem%value)
+	  retval = NF_GET_VARA_DOUBLE(ncid,id &
+     &			,vitem%start,vitem%count,vitem%value)
 	end if
 	call ncf_handle_err(retval)
 
@@ -816,8 +816,8 @@
 
 	integer varid
 
-	retval = NF_DEF_VAR(ncid,vitem%name,vitem%xtype
-     +				,vitem%ndims,vitem%dimids,varid)
+	retval = NF_DEF_VAR(ncid,vitem%name,vitem%xtype &
+     &				,vitem%ndims,vitem%dimids,varid)
 	call ncf_handle_err(retval)
 
 	if( vitem%id == 0 ) then
@@ -1013,12 +1013,12 @@
         character*(NF_MAX_NAME) :: name
 
 	if( aitem%is_string ) then
-	  retval = NF_PUT_ATT_TEXT(ncid,varid,aitem%name
-     +				,aitem%len,aitem%string)
+	  retval = NF_PUT_ATT_TEXT(ncid,varid,aitem%name &
+     &				,aitem%len,aitem%string)
 	else
-	  retval = NF_PUT_ATT_DOUBLE(ncid,varid,aitem%name
-     +					,aitem%xtype,aitem%len
-     +					,aitem%value)
+	  retval = NF_PUT_ATT_DOUBLE(ncid,varid,aitem%name &
+     &					,aitem%xtype,aitem%len &
+     &					,aitem%value)
 	end if
 	call ncf_handle_err(retval)
 
@@ -1062,9 +1062,9 @@
 
 	type(var_item) :: vitem
 
-        write(6,1000) vitem%id,vitem%xtype,vitem%ndims,vitem%natts
-     +                  ,vitem%len
-     +                  ,'  ',trim(vitem%name)
+        write(6,1000) vitem%id,vitem%xtype,vitem%ndims,vitem%natts &
+     &                  ,vitem%len &
+     &                  ,'  ',trim(vitem%name)
  1000   format(4i5,i10,a,a)
 
 	end
@@ -1152,11 +1152,11 @@
 	l = att_name_length + 2
 
         if( aitem%is_string ) then
-          write(6,3001) '   ',aitem%id,aitem%xtype,aitem%len
-     +                  ,'  ',string(1:l),trim(content)
+          write(6,3001) '   ',aitem%id,aitem%xtype,aitem%len &
+     &                  ,'  ',string(1:l),trim(content)
         else
-          write(6,3002) '   ',aitem%id,aitem%xtype,aitem%len
-     +                  ,'  ',string(1:l),aitem%value(1)
+          write(6,3002) '   ',aitem%id,aitem%xtype,aitem%len &
+     &                  ,'  ',string(1:l),aitem%value(1)
         end if
 
  3001         format(a,3i5,a,a,a)

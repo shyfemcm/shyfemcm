@@ -23,18 +23,18 @@
 !
 !--------------------------------------------------------------------------
 
-c********************************************************
+!********************************************************
 
 ! revision log :
 !
 ! 13.03.2019	ggu	changed VERS_7_5_61
 
-c********************************************************
+!********************************************************
 
 
 	subroutine gsmooth(nl,t,v,sigma,period)
 
-c gaussian smoothing
+! gaussian smoothing
 
 	implicit none
 
@@ -44,8 +44,8 @@ c gaussian smoothing
 	real sigma		!standard deviation for smoothing
 	real period		!if > 0 signal is periodic with period
 
-c if signal is periodic, period is period of signal
-c t(n) - t(1) < period must be true
+! if signal is periodic, period is period of signal
+! t(n) - t(1) < period must be true
 
 	integer ndim
 	parameter(ndim=10000)
@@ -62,15 +62,15 @@ c t(n) - t(1) < period must be true
 	real val
 	real rkern,rknew,tkern
 
-c----------------------------------------------------
-c check dimensions
-c----------------------------------------------------
+!----------------------------------------------------
+! check dimensions
+!----------------------------------------------------
 
 	if( nl .gt. ndim ) stop 'error stop gsmooth: dimension error'
 
-c----------------------------------------------------
-c set up circular array
-c----------------------------------------------------
+!----------------------------------------------------
+! set up circular array
+!----------------------------------------------------
 
 	bperiod = period .gt. 0.
 	dt = t(ndim) - t(1)
@@ -92,9 +92,9 @@ c----------------------------------------------------
 	  vaux(i-nl) = val
 	end do
 
-c----------------------------------------------------
-c set up gaussian kernel parameters
-c----------------------------------------------------
+!----------------------------------------------------
+! set up gaussian kernel parameters
+!----------------------------------------------------
 
         pi = 4.*atan(1.)
         eps = 1.e-7
@@ -102,15 +102,15 @@ c----------------------------------------------------
         a = 1. / ( sqrt(2.*pi) * sigma )
         b = - 1. / ( 2 * sigma * sigma )
 
-c----------------------------------------------------
-c convolution
-c----------------------------------------------------
+!----------------------------------------------------
+! convolution
+!----------------------------------------------------
 
 	do i=1,nl
 
-c	  -------------------------------------------
-c	  initialize
-c	  -------------------------------------------
+!	  -------------------------------------------
+!	  initialize
+!	  -------------------------------------------
 
 	  tkern = 0.		!total weight
 	  val = 0.		!new value
@@ -124,11 +124,11 @@ c	  -------------------------------------------
 	    jmax = min(nl,jmax)
 	  end if
 
-c	  write(6,*) i,i,weight,rkern,tkern,val
+!	  write(6,*) i,i,weight,rkern,tkern,val
 
-c	  -------------------------------------------
-c	  accumulate forward
-c	  -------------------------------------------
+!	  -------------------------------------------
+!	  accumulate forward
+!	  -------------------------------------------
 
 	  rkern = a
 	  j = i
@@ -141,14 +141,14 @@ c	  -------------------------------------------
 	    tkern = tkern + weight
 	    val = val + dt * ( rkern * vaux(j-1) + rknew * vaux(j) )
 	    rkern = rknew
-c	    write(6,*) i,j,weight,rkern,tkern,val
+!	    write(6,*) i,j,weight,rkern,tkern,val
 	  end do
 
-c	  write(6,*) i,j-i,nl,rkern
+!	  write(6,*) i,j-i,nl,rkern
 
-c	  -------------------------------------------
-c	  accumulate backward
-c	  -------------------------------------------
+!	  -------------------------------------------
+!	  accumulate backward
+!	  -------------------------------------------
 
 	  rkern = a
 	  j = i
@@ -161,15 +161,15 @@ c	  -------------------------------------------
 	    tkern = tkern + weight
 	    val = val + dt * ( rkern * vaux(j+1) + rknew * vaux(j) )
 	    rkern = rknew
-c	    write(6,*) i,j,weight,rkern,tkern,val
+!	    write(6,*) i,j,weight,rkern,tkern,val
 	  end do
 
-c	  write(6,*) i,i-j,nl,rkern
-c	  write(6,*) '*** ',i,val,tkern
+!	  write(6,*) i,i-j,nl,rkern
+!	  write(6,*) '*** ',i,val,tkern
 
-c	  -------------------------------------------
-c	  end of accumulation -> set value
-c	  -------------------------------------------
+!	  -------------------------------------------
+!	  end of accumulation -> set value
+!	  -------------------------------------------
 
 	  if( tkern .gt. 0. ) then
 	    v(i) = val / tkern
@@ -179,11 +179,11 @@ c	  -------------------------------------------
 
 	end do
 
-c----------------------------------------------------
-c end of routine
-c----------------------------------------------------
+!----------------------------------------------------
+! end of routine
+!----------------------------------------------------
 
 	end
 
-c********************************************************
+!********************************************************
 

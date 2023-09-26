@@ -23,34 +23,34 @@
 !
 !--------------------------------------------------------------------------
 
-c routines for date and time
-c
-c revision log :
-c
-c 01.12.2003    ggu     new routine month_from_name(), make_lower_case()
-c 09.03.2004    ggu     new routine month_name()
-c 22.09.2004    ggu     rewritten, integrated file newdat.f
-c 05.10.2004    ggu     dtsadj got some FIXME
-c 11.03.2005    ggu     new test added
-c 13.11.2005    ggu     small bug fix (UNPACK)
-c 01.12.2005    ggu     new routine dts_initialized and block data
-c 07.05.2009    ggu     new routine dtsyear() and date_compute()
-c 01.06.2012    ggu     work also with date=0
-c 23.10.2012    ggu     unpackdate() and dtsini() accepts also only year
-c 05.03.2014    ggu     new subdts.h and new routine dts_has_date()
-c 13.10.2014    ggu     absolute time routines inserted
-c 13.10.2014    ggu     one day off error fixed ($ONEDAYOFF)
-c 12.11.2014    ggu     new routines for unformatting and timespan
-c 31.03.2015    ggu     bug fix - month was 71/2, now 61/2
-c
-c notes :
-c
-c important routines:
-c
-c subroutine dtsini(date,time)		    initializes dts routines
-c subroutine dtsyear(year)		    initializes dts routines (for year)
-c subroutine dts2dt(it,year,month,day,hour,min,sec) converts it to date and time
-c subroutine dts2it(it,year,month,day,hour,min,sec) converts date and time to it
+! routines for date and time
+!
+! revision log :
+!
+! 01.12.2003    ggu     new routine month_from_name(), make_lower_case()
+! 09.03.2004    ggu     new routine month_name()
+! 22.09.2004    ggu     rewritten, integrated file newdat.f
+! 05.10.2004    ggu     dtsadj got some FIXME
+! 11.03.2005    ggu     new test added
+! 13.11.2005    ggu     small bug fix (UNPACK)
+! 01.12.2005    ggu     new routine dts_initialized and block data
+! 07.05.2009    ggu     new routine dtsyear() and date_compute()
+! 01.06.2012    ggu     work also with date=0
+! 23.10.2012    ggu     unpackdate() and dtsini() accepts also only year
+! 05.03.2014    ggu     new subdts.h and new routine dts_has_date()
+! 13.10.2014    ggu     absolute time routines inserted
+! 13.10.2014    ggu     one day off error fixed ($ONEDAYOFF)
+! 12.11.2014    ggu     new routines for unformatting and timespan
+! 31.03.2015    ggu     bug fix - month was 71/2, now 61/2
+!
+! notes :
+!
+! important routines:
+!
+! subroutine dtsini(date,time)		    initializes dts routines
+! subroutine dtsyear(year)		    initializes dts routines (for year)
+! subroutine dts2dt(it,year,month,day,hour,min,sec) converts it to date and time
+! subroutine dts2it(it,year,month,day,hour,min,sec) converts date and time to it
 
 !==================================================================
         module dts
@@ -73,19 +73,19 @@ c subroutine dts2it(it,year,month,day,hour,min,sec) converts date and time to it
         end module dts
 !==================================================================
 
-c************************************************************************
-c************************************************************************
-c************************************************************************
-c
-c packing routines
-c
-c************************************************************************
-c************************************************************************
-c************************************************************************
+!************************************************************************
+!************************************************************************
+!************************************************************************
+!
+! packing routines
+!
+!************************************************************************
+!************************************************************************
+!************************************************************************
 
 	subroutine packdate(date,year,month,day)
 
-c packs year, month, day into date [YYYYMMDD]
+! packs year, month, day into date [YYYYMMDD]
 
 	implicit none
 
@@ -96,11 +96,11 @@ c packs year, month, day into date [YYYYMMDD]
 
 	end
 
-c************************************************************************
+!************************************************************************
 
 	subroutine unpackdate(date,year,month,day)
 
-c splits date [YYYYMMDD] into year, month, day
+! splits date [YYYYMMDD] into year, month, day
 
 	implicit none
 
@@ -120,11 +120,11 @@ c splits date [YYYYMMDD] into year, month, day
 
 	end
 
-c************************************************************************
+!************************************************************************
  
 	subroutine packtime(time,hour,min,sec)
 
-c packs hour, min, sec into time [HHMMSS]
+! packs hour, min, sec into time [HHMMSS]
 
 	implicit none
 
@@ -135,11 +135,11 @@ c packs hour, min, sec into time [HHMMSS]
 
 	end
 
-c************************************************************************
+!************************************************************************
 
 	subroutine unpacktime(time,hour,min,sec)
 
-c splits time [HHMMSS] into hour, min, sec
+! splits time [HHMMSS] into hour, min, sec
 
 	implicit none
 
@@ -154,19 +154,19 @@ c splits time [HHMMSS] into hour, min, sec
 
 	end
 
-c************************************************************************
-c************************************************************************
-c************************************************************************
-c
-c dts routines
-c
-c************************************************************************
-c************************************************************************
-c************************************************************************
+!************************************************************************
+!************************************************************************
+!************************************************************************
+!
+! dts routines
+!
+!************************************************************************
+!************************************************************************
+!************************************************************************
 
 	subroutine dtsgf(it,line)
 
-c formats date and time given it (secs)
+! formats date and time given it (secs)
 
 	implicit none
 
@@ -180,11 +180,11 @@ c formats date and time given it (secs)
 
 	end
 
-c************************************************************************
+!************************************************************************
 
 	subroutine dtsgunf(it,line,ierr)
 
-c unformats date and time and convert to it (secs)
+! unformats date and time and convert to it (secs)
 
 	implicit none
 
@@ -201,11 +201,11 @@ c unformats date and time and convert to it (secs)
 
 	end
 
-c************************************************************************
+!************************************************************************
 
 	subroutine dtsform(year,month,day,hour,min,sec,line)
 
-c formats date and time
+! formats date and time
 
 	implicit none
 
@@ -236,11 +236,11 @@ c formats date and time
  2000	format(i10,2h::,i2,1h:,i2,1h:,i2)
 	end
 
-c************************************************************************
+!************************************************************************
 
 	subroutine dtsform_pack(date,time,line)
 
-c formats date and time
+! formats date and time
 
 	implicit none
 
@@ -256,11 +256,11 @@ c formats date and time
 
 	end
 
-c************************************************************************
+!************************************************************************
 
 	subroutine dtsunform(year,month,day,hour,min,sec,line,ierr)
 
-c unformats date and time -> from string to date
+! unformats date and time -> from string to date
 
 	implicit none
 
@@ -326,7 +326,7 @@ c unformats date and time -> from string to date
 	return
 	end
 
-c************************************************************************
+!************************************************************************
 
 	subroutine dtsunform_pack(date,time,line,ierr)
 
@@ -348,13 +348,13 @@ c************************************************************************
 
 	end
 	
-c************************************************************************
+!************************************************************************
 
 	subroutine dtstimespan(idt,line,ierr)
 
-c parses time span given in line and converts it to idt
-c
-c only integer values are allowed
+! parses time span given in line and converts it to idt
+!
+! only integer values are allowed
 
 	implicit none
 
@@ -418,7 +418,7 @@ c only integer values are allowed
 	write(6,*) '              ',(' ',j=1,i-1),'^'
 	end
 
-c************************************************************************
+!************************************************************************
 
 	function in_string(c,string)
 
@@ -441,13 +441,13 @@ c************************************************************************
 
 	end
 
-c************************************************************************
-c************************************************************************
-c************************************************************************
+!************************************************************************
+!************************************************************************
+!************************************************************************
 
 	subroutine adjmod(low,high,modulo)
 
-c re-distributes values (internal routine)
+! re-distributes values (internal routine)
 
 	implicit none
 
@@ -468,11 +468,11 @@ c re-distributes values (internal routine)
 
 	end
 
-c************************************************************************
+!************************************************************************
 
 	subroutine dtsadj(year,month,day,hour,min,sec)
 
-c adjusts date and time (internal routine)
+! adjusts date and time (internal routine)
 
 	implicit none
 
@@ -491,9 +491,9 @@ c adjusts date and time (internal routine)
           write(6,*) 'enter: ',year,month,day,hour,min,sec
         end if
 
-c---------------------------------------------------------
-c adjusts seconds
-c---------------------------------------------------------
+!---------------------------------------------------------
+! adjusts seconds
+!---------------------------------------------------------
 
 	if( sec .lt. 0 .or. sec .ge. 60 ) then
 	  if( bdebug ) write(6,*) day,hour,min,sec
@@ -501,9 +501,9 @@ c---------------------------------------------------------
 	  if( bdebug ) write(6,*) day,hour,min,sec
 	end if
 
-c---------------------------------------------------------
-c adjusts minutes
-c---------------------------------------------------------
+!---------------------------------------------------------
+! adjusts minutes
+!---------------------------------------------------------
 
 	if( min .lt. 0 .or. min .ge. 60 ) then
 	  if( bdebug ) write(6,*) day,hour,min,sec
@@ -511,9 +511,9 @@ c---------------------------------------------------------
 	  if( bdebug ) write(6,*) day,hour,min,sec
 	end if
 
-c---------------------------------------------------------
-c adjusts hours
-c---------------------------------------------------------
+!---------------------------------------------------------
+! adjusts hours
+!---------------------------------------------------------
 
 	if( hour .lt. 0 .or. hour .ge. 24 ) then
 	  if( bdebug ) write(6,*) day,hour,min,sec
@@ -527,9 +527,9 @@ c---------------------------------------------------------
 
 	if( year .eq. 0 ) return
 
-c---------------------------------------------------------
-c adjusts negative days
-c---------------------------------------------------------
+!---------------------------------------------------------
+! adjusts negative days
+!---------------------------------------------------------
 
 	if( day .le. 0 ) then
           call date2j(year,month,1,jd)    !FIXME
@@ -548,9 +548,9 @@ c---------------------------------------------------------
           write(6,*) 'days: ',year,month,day,hour,min,sec
         end if
 
-c---------------------------------------------------------
-c go back to beginning of year
-c---------------------------------------------------------
+!---------------------------------------------------------
+! go back to beginning of year
+!---------------------------------------------------------
 
         call date2j(year,month,1,jd)    !FIXME
 	day = day + jd - 1
@@ -567,25 +567,25 @@ c---------------------------------------------------------
           write(6,*) 'jdays: ',year,month,day,hour,min,sec
         end if
 
-c---------------------------------------------------------
-c adjust days finally
-c---------------------------------------------------------
+!---------------------------------------------------------
+! adjust days finally
+!---------------------------------------------------------
 
 	jd = day
         call j2date(jd,year,month,day)
 	if( bdebug ) write(6,*) 'final: ',jd,day,month,year
 
-c---------------------------------------------------------
-c end of routine
-c---------------------------------------------------------
+!---------------------------------------------------------
+! end of routine
+!---------------------------------------------------------
 
 	end
 
-c************************************************************************
+!************************************************************************
 
 	subroutine dts2dt(it,year,month,day,hour,min,sec)
 
-c converts it to date and time
+! converts it to date and time
 
 	use dts
 
@@ -610,11 +610,11 @@ c converts it to date and time
 
 	end
 
-c************************************************************************
+!************************************************************************
 
 	subroutine dts2it(it,year,month,day,hour,min,sec)
 
-c converts date and time to it
+! converts date and time to it
 
 	use dts
 
@@ -638,13 +638,13 @@ c converts date and time to it
 
 	end
 
-c************************************************************************
-c************************************************************************
-c************************************************************************
+!************************************************************************
+!************************************************************************
+!************************************************************************
 
 	subroutine dtsini(date,time)
 
-c sets date and time for 0 fem time
+! sets date and time for 0 fem time
 
 	use dts
 
@@ -676,11 +676,11 @@ c sets date and time for 0 fem time
 
 	end
 
-c************************************************************************
+!************************************************************************
 
 	subroutine dtsyear(year)
 
-c initialization by only giving year (can give also date)
+! initialization by only giving year (can give also date)
 
         implicit none
 
@@ -702,7 +702,7 @@ c initialization by only giving year (can give also date)
 
         end
 
-c************************************************************************
+!************************************************************************
 
 	subroutine dts_get_date(date,time)
 
@@ -717,7 +717,7 @@ c************************************************************************
 
 	end
 
-c************************************************************************
+!************************************************************************
 
 	subroutine dts_get_init(year,month,day,hour,min,sec)
 
@@ -737,11 +737,11 @@ c************************************************************************
 
 	end
 
-c************************************************************************
+!************************************************************************
 
 	function dts_initialized()
 
-c checks if dts routines are already initialized
+! checks if dts routines are already initialized
 
 	use dts
 
@@ -757,11 +757,11 @@ c checks if dts routines are already initialized
 
 	end
 
-c************************************************************************
+!************************************************************************
 
 	function dts_has_date()
 
-c checks if dts routines have a valid date
+! checks if dts routines have a valid date
 
 	use dts
 
@@ -777,23 +777,23 @@ c checks if dts routines have a valid date
 
 	end
 
-c************************************************************************
-c
-c common block /dtsdts/ is initialized in block data statement
-c
-c************************************************************************
-c************************************************************************
-c************************************************************************
-c
-c convert days and seconds
-c
-c************************************************************************
-c************************************************************************
-c************************************************************************
+!************************************************************************
+!
+! common block /dtsdts/ is initialized in block data statement
+!
+!************************************************************************
+!************************************************************************
+!************************************************************************
+!
+! convert days and seconds
+!
+!************************************************************************
+!************************************************************************
+!************************************************************************
 
         subroutine hms2secs(secs,hour,min,sec)
 
-c packs hour, min, sec into secs
+! packs hour, min, sec into secs
 
         implicit none
 
@@ -804,11 +804,11 @@ c packs hour, min, sec into secs
 
         end
 
-c************************************************************************
+!************************************************************************
 
         subroutine secs2hms(secs,hour,min,sec)
 
-c splits secs into hour, min, sec
+! splits secs into hour, min, sec
 
         implicit none
 
@@ -823,13 +823,13 @@ c splits secs into hour, min, sec
 
         end
 
-c************************************************************************
-c************************************************************************
-c************************************************************************
+!************************************************************************
+!************************************************************************
+!************************************************************************
  
         subroutine date2days(days,year,month,day)
  
-c given date returns total days from 1/1/1
+! given date returns total days from 1/1/1
  
 	implicit none
 
@@ -841,11 +841,11 @@ c given date returns total days from 1/1/1
         iy=year-1
         days=365*iy+iy/4-iy/100+iy/400
 
-c other possibility to sum up years (saver but slower)
-c       days=0
-c       do i=1,iyear-1
-c         days=days+days_in_year(i)
-c	end do
+! other possibility to sum up years (saver but slower)
+!       days=0
+!       do i=1,iyear-1
+!         days=days+days_in_year(i)
+!	end do
 
 	call date2j(year,month,day,jd)
 
@@ -854,11 +854,11 @@ c	end do
  
         end
  
-c************************************************************************
+!************************************************************************
 
         subroutine days2date(days,year,month,day)
 
-c splits days from 1/1/1 into year, month, day
+! splits days from 1/1/1 into year, month, day
 
         implicit none
 
@@ -871,11 +871,11 @@ c splits days from 1/1/1 into year, month, day
         !days1 = days - 1	!this is the original $ONEDAYOFF
         days1 = days
 
-c       estimate year (using average days in 400 years)
+!       estimate year (using average days in 400 years)
 
         iy = (days*400) / (365*400+97) + 2
 
-c       correct year
+!       correct year
 
         auxdays = days1 + 1
         do while( auxdays .gt. days1 )
@@ -883,12 +883,12 @@ c       correct year
           auxdays = 365*iy + iy/4 - iy/100 + iy/400
         end do
 
-c       year found, auxdays days left
+!       year found, auxdays days left
 
         year = iy + 1
         auxdays = days1 - auxdays
 
-c       find month
+!       find month
 
         month = 0
         do while( auxdays .ge. 0 )
@@ -896,25 +896,25 @@ c       find month
           auxdays = auxdays - idmon(year,month)
         end do
 
-c       find day
+!       find day
 
         day = auxdays + idmon(year,month) + 1
 
         end
 
-c************************************************************************
-c************************************************************************
-c************************************************************************
-c
-c julian date routines
-c
-c************************************************************************
-c************************************************************************
-c************************************************************************
+!************************************************************************
+!************************************************************************
+!************************************************************************
+!
+! julian date routines
+!
+!************************************************************************
+!************************************************************************
+!************************************************************************
 
         subroutine date2j(year,month,day,jd)
  
-c converts date to julian days
+! converts date to julian days
 
         implicit none
  
@@ -941,11 +941,11 @@ c converts date to julian days
 
 	end
 
-c************************************************************************
+!************************************************************************
 
         subroutine j2date(jd,year,month,day)
  
-c given julian days and year returns month and day
+! given julian days and year returns month and day
 
         implicit none
  
@@ -966,11 +966,11 @@ c given julian days and year returns month and day
  
         end
  
-c************************************************************************
+!************************************************************************
 
         function jdmon(year,month)
 
-c returns total days from January to end of month
+! returns total days from January to end of month
 
         implicit none
 
@@ -989,11 +989,11 @@ c returns total days from January to end of month
 
         end
 
-c************************************************************************
+!************************************************************************
 
         function idmon(year,month)
 
-c returns days in month
+! returns days in month
 
         implicit none
 
@@ -1012,17 +1012,17 @@ c returns days in month
 
         end
 
-c************************************************************************
+!************************************************************************
  
         function bises(year)
  
-c true if year is bisestial
+! true if year is bisestial
  
         logical bises
         integer year
  
-        if(  ( mod(year,4) .eq. 0 .and. mod(year,100) .ne. 0 )
-     +                  .or. mod(year,400) .eq. 0 ) then
+        if(  ( mod(year,4) .eq. 0 .and. mod(year,100) .ne. 0 ) &
+     &                  .or. mod(year,400) .eq. 0 ) then
                 bises = .true.
         else
                 bises = .false.
@@ -1030,11 +1030,11 @@ c true if year is bisestial
  
         end
  
-c************************************************************************
+!************************************************************************
  
         function days_in_year(year)
  
-c returns total days in year
+! returns total days in year
  
 	integer days_in_year
         integer year
@@ -1049,19 +1049,19 @@ c returns total days in year
  
         end
  
-c************************************************************************
-c************************************************************************
-c************************************************************************
-c
-c month name routines
-c
-c************************************************************************
-c************************************************************************
-c************************************************************************
+!************************************************************************
+!************************************************************************
+!************************************************************************
+!
+! month name routines
+!
+!************************************************************************
+!************************************************************************
+!************************************************************************
 
         subroutine month_name(im,mname)
  
-c returns month name with im given (1-12)
+! returns month name with im given (1-12)
  
 	implicit none
 
@@ -1073,15 +1073,15 @@ c returns month name with im given (1-12)
 
         character*3 months_en(12),months_it(12),months_de(12)
         save months_en,months_it,months_de
-        data months_en
-     +          /'Jan','Feb','Mar','Apr','May','Jun'
-     +          ,'Jul','Aug','Sep','Oct','Nov','Dec'/
-        data months_it
-     +          /'Gen','Feb','Mar','Apr','Mag','Giu'
-     +          ,'Lug','Ago','Set','Ott','Nov','Dic'/
-        data months_de
-     +          /'Jan','Feb','Mar','Apr','Mai','Jun'
-     +          ,'Jul','Aug','Sep','Okt','Nov','Dez'/
+        data months_en &
+     &          /'Jan','Feb','Mar','Apr','May','Jun' &
+     &          ,'Jul','Aug','Sep','Oct','Nov','Dec'/
+        data months_it &
+     &          /'Gen','Feb','Mar','Apr','Mag','Giu' &
+     &          ,'Lug','Ago','Set','Ott','Nov','Dic'/
+        data months_de &
+     &          /'Jan','Feb','Mar','Apr','Mai','Jun' &
+     &          ,'Jul','Aug','Sep','Okt','Nov','Dez'/
 
         if( im .lt. 1 .or. im .gt. 12 ) then
           write(6,*) 'error in month : ',im
@@ -1098,11 +1098,11 @@ c returns month name with im given (1-12)
 
         end
 
-c************************************************************************
+!************************************************************************
 
         function month_from_name(month_name)
  
-c returns month number from name [1-12] , 0 for error
+! returns month number from name [1-12] , 0 for error
  
 	implicit none
 
@@ -1114,9 +1114,9 @@ c returns month number from name [1-12] , 0 for error
 
         character*3 months(12)
         save months
-        data months
-     +          /'jan','feb','mar','apr','may','jun'
-     +          ,'jul','aug','sep','oct','nov','dec'/
+        data months &
+     &          /'jan','feb','mar','apr','may','jun' &
+     &          ,'jul','aug','sep','oct','nov','dec'/
 
         name = month_name
         call make_lower_case(name)
@@ -1133,7 +1133,7 @@ c returns month number from name [1-12] , 0 for error
         return
         end
 
-c************************************************************************
+!************************************************************************
 
         subroutine make_lower_case(name)
 
@@ -1160,23 +1160,23 @@ c************************************************************************
 
         end
 
-c************************************************************************
-c************************************************************************
-c************************************************************************
+!************************************************************************
+!************************************************************************
+!************************************************************************
 
-c************************************************************************
-c************************************************************************
-c************************************************************************
-c
-c absolute time routines
-c
-c************************************************************************
-c************************************************************************
-c************************************************************************
+!************************************************************************
+!************************************************************************
+!************************************************************************
+!
+! absolute time routines
+!
+!************************************************************************
+!************************************************************************
+!************************************************************************
 
 	subroutine dts_to_abs_time(date,time,atime)
 
-c given date and time converts it to absolute time (seconds from 1.1.1)
+! given date and time converts it to absolute time (seconds from 1.1.1)
 
 	implicit none
 
@@ -1203,11 +1203,11 @@ c given date and time converts it to absolute time (seconds from 1.1.1)
 
 	end
 
-c************************************************************************
+!************************************************************************
 
 	subroutine dts_from_abs_time(date,time,atime)
 
-c given absolute time converts to date and time 
+! given absolute time converts to date and time 
 
 	implicit none
 
@@ -1232,11 +1232,11 @@ c given absolute time converts to date and time
 
 	end
 
-c************************************************************************
+!************************************************************************
 
 	subroutine dts_format_abs_time(atime,line)
 
-c formats date and time given absolute time
+! formats date and time given absolute time
 
 	implicit none
 
@@ -1264,22 +1264,22 @@ c formats date and time given absolute time
 
 	end
 
-c************************************************************************
-c************************************************************************
-c************************************************************************
-c
-c extra atime routines
-c
-c************************************************************************
-c************************************************************************
-c************************************************************************
+!************************************************************************
+!************************************************************************
+!************************************************************************
+!
+! extra atime routines
+!
+!************************************************************************
+!************************************************************************
+!************************************************************************
 
 	subroutine dts_string2time(string,atime)
 
-c converts string to time stamp
-c
-c string can be an absolute date (YYYY-MM-DD[::hh:mm:ss])
-c or a relative time (integer)
+! converts string to time stamp
+!
+! string can be an absolute date (YYYY-MM-DD[::hh:mm:ss])
+! or a relative time (integer)
 
 	implicit none
 
@@ -1310,7 +1310,7 @@ c or a relative time (integer)
 	stop 'error stop dts_string2time: conversion error'
 	end
 
-c************************************************************
+!************************************************************
 
 	subroutine dts_convert_to_atime(datetime,dtime,atime)
 
@@ -1331,11 +1331,11 @@ c************************************************************
 
 	end
 
-c************************************************************
+!************************************************************
 
 	subroutine dts_convert_from_atime(datetime,dtime,atime)
 
-c converts from atime to datetime and dtime (only if in atime is real date)
+! converts from atime to datetime and dtime (only if in atime is real date)
 
 	implicit none
 
@@ -1364,19 +1364,19 @@ c converts from atime to datetime and dtime (only if in atime is real date)
 
 	end
 
-c************************************************************************
-c************************************************************************
-c************************************************************************
-c
-c test routines
-c
-c************************************************************************
-c************************************************************************
-c************************************************************************
+!************************************************************************
+!************************************************************************
+!************************************************************************
+!
+! test routines
+!
+!************************************************************************
+!************************************************************************
+!************************************************************************
 
 	subroutine datetest
 
-c tests date routines
+! tests date routines
 
 	implicit none
 
@@ -1463,7 +1463,7 @@ c tests date routines
 
 	end
 
-c************************************************************************
+!************************************************************************
 
         subroutine check_j2date(jd,year,iprint)
         integer jdd,jd,year,month,day,iprint
@@ -1473,7 +1473,7 @@ c************************************************************************
         if( jd .ne. jdd ) write(6,*) '*** error : ',jd,jdd
         end
 
-c************************************************************************
+!************************************************************************
 
         subroutine test_j2date
 
@@ -1509,7 +1509,7 @@ c************************************************************************
 
         end
 
-c************************************************************************
+!************************************************************************
 
         subroutine check_secs_pack(secs,iprint)
         integer secs,secs0,iprint
@@ -1522,7 +1522,7 @@ c************************************************************************
         if( iprint .ne. 0 ) write(6,*) secs,hour,min,sec
         end
 
-c************************************************************************
+!************************************************************************
 
         subroutine check_days_pack(days,iprint)
         integer days,days0,iprint
@@ -1535,7 +1535,7 @@ c************************************************************************
         if( iprint .ne. 0 ) write(6,*) days,year,month,day
         end
 
-c************************************************************************
+!************************************************************************
 
         subroutine test_sd_pack
 
@@ -1562,7 +1562,7 @@ c************************************************************************
 
         end
 
-c************************************************************************
+!************************************************************************
 
         subroutine check_dpack(year,month,day,iprint)
         integer year,month,day,iprint
@@ -1570,14 +1570,14 @@ c************************************************************************
         integer date
         call packdate(date,year,month,day)
         call unpackdate(date,year0,month0,day0)
-        if( year .ne. year0 .or. month .ne. month0 
-     +          .or. day .ne. day0 ) then
+        if( year .ne. year0 .or. month .ne. month0  &
+     &          .or. day .ne. day0 ) then
           write(6,*) '*** error : ',year,month,day,year0,month0,day0
         end if
         if( iprint .ne. 0 ) write(6,*) year,month,day,date
         end
         
-c************************************************************************
+!************************************************************************
 
         subroutine check_tpack(year,month,day,iprint)
         integer year,month,day,iprint
@@ -1585,14 +1585,14 @@ c************************************************************************
         integer date
         call packdate(date,year,month,day)
         call unpackdate(date,year0,month0,day0)
-        if( year .ne. year0 .or. month .ne. month0 
-     +          .or. day .ne. day0 ) then
+        if( year .ne. year0 .or. month .ne. month0  &
+     &          .or. day .ne. day0 ) then
           write(6,*) '*** error : ',year,month,day,year0,month0,day0
         end if
         if( iprint .ne. 0 ) write(6,*) year,month,day,date
         end
         
-c************************************************************************
+!************************************************************************
 
         subroutine test_dt_pack
 
@@ -1616,7 +1616,7 @@ c************************************************************************
 
         end
 
-c************************************************************************
+!************************************************************************
 
         subroutine test_var
 
@@ -1644,11 +1644,11 @@ c************************************************************************
 
 	end
 
-c************************************************************************
+!************************************************************************
 
         subroutine date_compute
 
-c interactively check date/time and seconds
+! interactively check date/time and seconds
 
         implicit none
 
@@ -1695,7 +1695,7 @@ c interactively check date/time and seconds
 
         end
 
-c************************************************************************
+!************************************************************************
 
 	subroutine test_abs_time
 
@@ -1742,7 +1742,7 @@ c************************************************************************
 
 	end
 
-c************************************************************************
+!************************************************************************
 
         subroutine test_timespan
 
@@ -1774,7 +1774,7 @@ c************************************************************************
 	
 	end
 
-c************************************************************************
+!************************************************************************
 
         subroutine test_date_all
 
@@ -1788,10 +1788,10 @@ c************************************************************************
 
         end
 
-c************************************************************************
+!************************************************************************
 !	program datet
 !        !call test_date_all
 !        call test_timespan
 !        !call date_compute
 !	end
-c************************************************************************
+!************************************************************************

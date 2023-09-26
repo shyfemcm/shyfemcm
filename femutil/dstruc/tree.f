@@ -482,8 +482,8 @@
 	do
 	  if( x == 0 ) exit
 	  y = x
-	if( bdebug ) write(6,*) 'iter: ',x,data(x)%key
-     +			,data(x)%left,data(x)%right
+	if( bdebug ) write(6,*) 'iter: ',x,data(x)%key &
+     &			,data(x)%left,data(x)%right
 	  if( key == data(x)%key ) then
 	    tree_insert = 0
 	    return
@@ -583,11 +583,11 @@
 
 	subroutine tree_info(id)
 	integer id
-	write(6,*) 'tree_info: ',id
-     +			,pentry(id)%root
-     +			,pentry(id)%ndim
-     +			,pentry(id)%nfill
-     +			,pentry(id)%nfree
+	write(6,*) 'tree_info: ',id &
+     &			,pentry(id)%root &
+     &			,pentry(id)%ndim &
+     &			,pentry(id)%nfill &
+     &			,pentry(id)%nfree
 	end subroutine tree_info
 
 !===============================================================

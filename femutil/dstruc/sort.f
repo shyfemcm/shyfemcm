@@ -48,17 +48,17 @@
 	public :: compute_rank
 
         INTERFACE sort_array
-        MODULE PROCEDURE        
-     +				 sort_direct_i		!(n,array)
-     +                          ,sort_indirect_i	!(n,array,index)
-     +				,sort_direct_r		!(n,array)
-     +                          ,sort_indirect_r	!(n,array,index)
+        MODULE PROCEDURE         &
+     &				 sort_direct_i		!(n,array) &
+     &                          ,sort_indirect_i	!(n,array,index) &
+     &				,sort_direct_r		!(n,array) &
+     &                          ,sort_indirect_r	!(n,array,index)
         END INTERFACE
 
         INTERFACE copy_array
-        MODULE PROCEDURE        
-     +        			 copy_array_i		!(n,irank,iv)
-     +        			,copy_array_r		!(n,irank,rv)
+        MODULE PROCEDURE         &
+     &        			 copy_array_i		!(n,irank,iv) &
+     &        			,copy_array_r		!(n,irank,rv)
         END INTERFACE
 
 !==============================================================
@@ -283,7 +283,7 @@
 
         subroutine compute_rank(n,index,irank)
 
-c builds rank table from index table
+! builds rank table from index table
 
         implicit none
 
@@ -303,7 +303,7 @@ c builds rank table from index table
 
         subroutine copy_array_i(n,irank,iv)
 
-c copy one array to itself exchanging elements as in irank
+! copy one array to itself exchanging elements as in irank
 
         implicit none
 
@@ -322,11 +322,11 @@ c copy one array to itself exchanging elements as in irank
 
         end
 
-c**********************************************************
+!**********************************************************
 
         subroutine copy_array_r(n,irank,rv)
 
-c copy one array to itself exchanging elements as in irank
+! copy one array to itself exchanging elements as in irank
 
         implicit none
 
@@ -345,7 +345,7 @@ c copy one array to itself exchanging elements as in irank
 
         end
 
-c**********************************************************
+!**********************************************************
 
 !==============================================================
 	end module sort

@@ -135,8 +135,8 @@
 	  write(6,*) trim(atext)
 	end if
 
-	call parse_time_units(bverbose,atext
-     +				,time_type,datetime0,time_fact)
+	call parse_time_units(bverbose,atext &
+     &				,time_type,datetime0,time_fact)
 
 	date0 = datetime0(1)
 	time0 = datetime0(2)
@@ -146,9 +146,9 @@
 
 	ifact = nint(time_fact)
 	if( bverbose ) then
-	  write(6,*) 'setup_nc_time: ',ifact
-     +					,'  ',trim(atext)
-     +					,'  ',trim(tstring)
+	  write(6,*) 'setup_nc_time: ',ifact &
+     &					,'  ',trim(atext) &
+     &					,'  ',trim(tstring)
 	end if
 
 	call correct_nc_time_reference(ncid,bverbose)
@@ -460,8 +460,8 @@
 	call dts_format_abs_time(atime0,tstring)
 
 	ifact = time_fact
-	if( bverb ) write(6,*) 'corrected time ref: ',ifact
-     +					,'  ',trim(tstring)
+	if( bverb ) write(6,*) 'corrected time ref: ',ifact &
+     &					,'  ',trim(tstring)
 
 	end
 

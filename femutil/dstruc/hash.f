@@ -58,12 +58,12 @@
         integer, parameter :: size_default = 100
         logical, parameter :: bremove = .false.	!use slot of removed items
 
-        integer, parameter :: plist(19) = (/
-     +				 7,13,23,47,97,181,379
-     +				,739,1559,3541,7817,13513
-     +				,21973,54563,99991,223469
-     +				,413827,745741,1299533
-     +				/)
+        integer, parameter :: plist(19) = (/ &
+     &				 7,13,23,47,97,181,379 &
+     &				,739,1559,3541,7817,13513 &
+     &				,21973,54563,99991,223469 &
+     &				,413827,745741,1299533 &
+     &				/)
 
         integer, save :: idlast = 0
         integer, save :: ndim = 0
@@ -158,10 +158,10 @@
 	integer nempty,nremove,nuse,nsize
 
 	if( 1 == 2 ) then
-	  write(6,*) 'hash_info: ',id
-     +				,pentry(id)%nsize
-     +				,pentry(id)%nfull
-     +				,pentry(id)%navail
+	  write(6,*) 'hash_info: ',id &
+     &				,pentry(id)%nsize &
+     &				,pentry(id)%nfull &
+     &				,pentry(id)%navail
 	else
 	  write(6,*) 'hash_info: ',id
       	  write(6,*) 'nsize:  ',pentry(id)%nsize
@@ -481,8 +481,8 @@
 	ndim = pentry(id)%nsize
 	do i=ipos,ndim
 	  !write(6,*) 'visit: ',id,i,pentry(id)%key(i)
-	  if( pentry(id)%key(i) /= empty_flag .and.
-     +			pentry(id)%key(i) /= remove_flag ) exit
+	  if( pentry(id)%key(i) /= empty_flag .and. &
+     &			pentry(id)%key(i) /= remove_flag ) exit
 	end do
 	if(i.le.ndim) then
 	  key = pentry(id)%key(i)
@@ -531,8 +531,8 @@
 
 	mode=1
 	do while(mode.ne.0)
-          write(6,*) '0 exit  1 insert  2 retriv  3 remove  '//
-     +				'4 visit  5 info'
+          write(6,*) '0 exit  1 insert  2 retriv  3 remove  '// &
+     &				'4 visit  5 info'
 	  read(5,'(i10)') mode
 
 	  if(mode.eq.1) then
