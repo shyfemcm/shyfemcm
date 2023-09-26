@@ -25,136 +25,136 @@
 !
 !--------------------------------------------------------------------------
 
-c routines for interpolation onto regular grid
-c
-c contents :
-c
-c subroutine setgeo(x0,y0,dx,dy,flag)
-c		sets grid values for interpolation
-c subroutine getgeo(x0,y0,dx,dy,flag)
-c		gets grid values for interpolation
-c subroutine getgeoflag(flag)
-c		gets flag value for interpolation
-c
-c subroutine av2am(av,am,ip,jp)
-c		interpolation of av onto a regular net
-c subroutine av2amk(bwater,av,am,ip,jp)
-c		interpolation of av onto a regular net
-c function intri(x,y,xp,yp)
-c		point in triangle or not
-c function intrid(x,y,xp,yp)
-c		point in triangle or not (double precision version)
-c subroutine am2av(am,av,ip,jp)
-c		interpolation of am onto finite element mesh
-c function am2val(am,ip,jp,xx,yy)
-c		interpolation of am onto finite element mesh
-c subroutine ave2am(av,am,ip,jp)
-c		interpolation of av (elementwise) onto a regular net
-c
-c subroutine mkmask(bwater,zv,href,hzoff)
-c		makes mask in element
-c
-c subroutine mimareg(am,ip,jp,amin,amax)
-c		computes min/max of regular matrix (without flag values)
-c subroutine a2char(am,ac,ip,jp)
-c		creates 1 char representation of matrix
-c subroutine prchar(ac,ip,jp)
-c		prints 1 char representation of matrix
-c
-c subroutine femintp(ie,z,xp,yp,zp)
-c               interpolation in element (with ev)
-c subroutine elemintp(x,y,z,xp,yp,zp)
-c               interpolation in element (no ev)
-c
-c subroutine find_elem_from_old(ieold,xp,yp,ielem)
-c		finds element for point (xp,yp) starting from ieold
-c subroutine find_element(xp,yp,ielem)
-c		finds element for point (xp,yp)
-c function in_element(ie,xp,yp)
-c		checks if point (xp,yp) is in element ie
-c subroutine get_xy_elem(ie,x,y)
-c		returns x,y of vertices of element ie
-c
-c revision log :
-c
-c 18.11.1998	ggu	routine commented
-c 18.11.1998	ggu	routine setgeo introduced
-c 19.11.1998	ggu	routines a2char, prchar added
-c 19.10.1999	ggu	routine mkmask added from subutl
-c 25.11.2004	ggu	new routines femintp and elemintp for interpolation
-c 14.03.2005	ggu	new routines for interpolation in element
-c 11.03.2009	ggu	new helper routine getgeoflag()
-c 12.06.2009	ggu	passing to double precision, intrid, bug bug_f_64bit
-c 23.03.2010	ggu	changed v6.1.1
-c 26.01.2011	ggu&mbj	handling extrapolation in am2av()
-c 27.01.2011	ggu&ccf	bug fix in find_elem_from_old() BUG_27.01.2011
-c 31.03.2011	ggu	new routine elemmask()
-c 14.04.2011	ggu	changed VERS_6_1_22
-c 07.06.2011	ggu	changed VERS_6_1_25
-c 24.11.2011	ggu	new routine find_close_elem()
-c 09.12.2011	ggu	changed VERS_6_1_38
-c 24.01.2012	ggu	changed VERS_6_1_41
-c 30.03.2012	ggu	changed VERS_6_1_51
-c 20.06.2012	ggu	new routine get_scal_elem()
-c 07.10.2012	ggu	new routine av2fm()
-c 10.10.2012	ggu	new routine fm2am2d() and fm2am3d()
-c 25.10.2012	ggu	changed VERS_6_1_59
-c 26.10.2012	ggu	bug fix: do not access not existing storage
-c 05.11.2012	ggu	changed VERS_6_1_60
-c 25.01.2013	ggu	changed VERS_6_1_62
-c 30.05.2014	ggu	in av2amk() do not interpolate for flag values
-c 18.06.2014	ggu	changed VERS_6_1_77
-c 27.06.2014	ggu	changed VERS_6_1_78
-c 07.07.2014	ggu	new routine intp_reg()
-c 26.11.2014	ggu	changed VERS_7_0_7
-c 23.12.2014	ggu	changed VERS_7_0_11
-c 19.01.2015	ggu	changed VERS_7_1_3
-c 05.05.2015	ggu	changed VERS_7_1_10
-c 17.07.2015	ggu	changed VERS_7_1_80
-c 20.07.2015	ggu	changed VERS_7_1_81
-c 25.09.2015	ggu	new routines intp_reg_nodes(), intp_reg_elems()
-c 16.12.2015	ggu	changed VERS_7_3_16
-c 18.12.2015	ggu	changed VERS_7_3_17
-c 19.02.2016	ggu	changed VERS_7_5_2
-c 28.04.2016	ggu	changed VERS_7_5_9
-c 05.05.2016	ggu	file restructured (module)
-c 14.05.2016	ggu	allow for extension of grid -> bregextend
-c 25.05.2016	ggu	changed VERS_7_5_10
-c 10.06.2016	ggu	changed VERS_7_5_13
-c 14.06.2016	ggu	changed VERS_7_5_14
-c 17.06.2016	ggu	changed VERS_7_5_15
-c 23.06.2016	ggu	allow for eps in computing box
-c 23.09.2016	ggu	allow for eps in computing box and reg intp
-c 30.09.2016	ggu	changed VERS_7_5_18
-c 11.10.2016	ggu	changed VERS_7_5_20
-c 20.01.2017	ggu	changed VERS_7_5_22
-c 23.04.2017	ggu	new routine intp_reg_single_nodes()
-c 09.05.2017	ggu	changed VERS_7_5_26
-c 23.05.2017	ggu	file split into subreg, submask and subfind
-c 11.07.2017	ggu	changed VERS_7_5_30
-c 02.09.2017	ggu	changed VERS_7_5_31
-c 17.11.2017	ggu	changed VERS_7_5_37
-c 04.12.2017	ggu	check t,u values and correct if out of bounds
-c 18.05.2018	ggu	more checks on fr routines, introduced ierr, bextend
-c 26.05.2018	ggu	even more checks and debug output
-c 06.07.2018	ggu	changed VERS_7_5_48
-c 13.07.2018	ggu	changed VERS_7_4_1
-c 14.02.2019	ggu	changed VERS_7_5_56
-c 16.02.2019	ggu	changed VERS_7_5_60
-c 13.03.2019	ggu	changed VERS_7_5_61
-c 14.05.2019	ggu	in fm_extra_setup() use double precision
-c 21.05.2019	ggu	changed VERS_7_5_62
-c 01.04.2020	ggu	new routine make_reg_box()
-c 11.04.2022	ggu	new routine condense_valid_coordinates for single nodes
-c 25.11.2022	ggu	new routine recollocate_nodes() and ipg array
-c
-c notes :
-c
-c pxareg,pyareg         coordinates of lower left point of matrix
-c pxdreg,pydreg         grid size of matrix
-c pzlreg                value of z for land points
-c
-c******************************************************
+! routines for interpolation onto regular grid
+!
+! contents :
+!
+! subroutine setgeo(x0,y0,dx,dy,flag)
+!		sets grid values for interpolation
+! subroutine getgeo(x0,y0,dx,dy,flag)
+!		gets grid values for interpolation
+! subroutine getgeoflag(flag)
+!		gets flag value for interpolation
+!
+! subroutine av2am(av,am,ip,jp)
+!		interpolation of av onto a regular net
+! subroutine av2amk(bwater,av,am,ip,jp)
+!		interpolation of av onto a regular net
+! function intri(x,y,xp,yp)
+!		point in triangle or not
+! function intrid(x,y,xp,yp)
+!		point in triangle or not (double precision version)
+! subroutine am2av(am,av,ip,jp)
+!		interpolation of am onto finite element mesh
+! function am2val(am,ip,jp,xx,yy)
+!		interpolation of am onto finite element mesh
+! subroutine ave2am(av,am,ip,jp)
+!		interpolation of av (elementwise) onto a regular net
+!
+! subroutine mkmask(bwater,zv,href,hzoff)
+!		makes mask in element
+!
+! subroutine mimareg(am,ip,jp,amin,amax)
+!		computes min/max of regular matrix (without flag values)
+! subroutine a2char(am,ac,ip,jp)
+!		creates 1 char representation of matrix
+! subroutine prchar(ac,ip,jp)
+!		prints 1 char representation of matrix
+!
+! subroutine femintp(ie,z,xp,yp,zp)
+!               interpolation in element (with ev)
+! subroutine elemintp(x,y,z,xp,yp,zp)
+!               interpolation in element (no ev)
+!
+! subroutine find_elem_from_old(ieold,xp,yp,ielem)
+!		finds element for point (xp,yp) starting from ieold
+! subroutine find_element(xp,yp,ielem)
+!		finds element for point (xp,yp)
+! function in_element(ie,xp,yp)
+!		checks if point (xp,yp) is in element ie
+! subroutine get_xy_elem(ie,x,y)
+!		returns x,y of vertices of element ie
+!
+! revision log :
+!
+! 18.11.1998	ggu	routine commented
+! 18.11.1998	ggu	routine setgeo introduced
+! 19.11.1998	ggu	routines a2char, prchar added
+! 19.10.1999	ggu	routine mkmask added from subutl
+! 25.11.2004	ggu	new routines femintp and elemintp for interpolation
+! 14.03.2005	ggu	new routines for interpolation in element
+! 11.03.2009	ggu	new helper routine getgeoflag()
+! 12.06.2009	ggu	passing to double precision, intrid, bug bug_f_64bit
+! 23.03.2010	ggu	changed v6.1.1
+! 26.01.2011	ggu&mbj	handling extrapolation in am2av()
+! 27.01.2011	ggu&ccf	bug fix in find_elem_from_old() BUG_27.01.2011
+! 31.03.2011	ggu	new routine elemmask()
+! 14.04.2011	ggu	changed VERS_6_1_22
+! 07.06.2011	ggu	changed VERS_6_1_25
+! 24.11.2011	ggu	new routine find_close_elem()
+! 09.12.2011	ggu	changed VERS_6_1_38
+! 24.01.2012	ggu	changed VERS_6_1_41
+! 30.03.2012	ggu	changed VERS_6_1_51
+! 20.06.2012	ggu	new routine get_scal_elem()
+! 07.10.2012	ggu	new routine av2fm()
+! 10.10.2012	ggu	new routine fm2am2d() and fm2am3d()
+! 25.10.2012	ggu	changed VERS_6_1_59
+! 26.10.2012	ggu	bug fix: do not access not existing storage
+! 05.11.2012	ggu	changed VERS_6_1_60
+! 25.01.2013	ggu	changed VERS_6_1_62
+! 30.05.2014	ggu	in av2amk() do not interpolate for flag values
+! 18.06.2014	ggu	changed VERS_6_1_77
+! 27.06.2014	ggu	changed VERS_6_1_78
+! 07.07.2014	ggu	new routine intp_reg()
+! 26.11.2014	ggu	changed VERS_7_0_7
+! 23.12.2014	ggu	changed VERS_7_0_11
+! 19.01.2015	ggu	changed VERS_7_1_3
+! 05.05.2015	ggu	changed VERS_7_1_10
+! 17.07.2015	ggu	changed VERS_7_1_80
+! 20.07.2015	ggu	changed VERS_7_1_81
+! 25.09.2015	ggu	new routines intp_reg_nodes(), intp_reg_elems()
+! 16.12.2015	ggu	changed VERS_7_3_16
+! 18.12.2015	ggu	changed VERS_7_3_17
+! 19.02.2016	ggu	changed VERS_7_5_2
+! 28.04.2016	ggu	changed VERS_7_5_9
+! 05.05.2016	ggu	file restructured (module)
+! 14.05.2016	ggu	allow for extension of grid -> bregextend
+! 25.05.2016	ggu	changed VERS_7_5_10
+! 10.06.2016	ggu	changed VERS_7_5_13
+! 14.06.2016	ggu	changed VERS_7_5_14
+! 17.06.2016	ggu	changed VERS_7_5_15
+! 23.06.2016	ggu	allow for eps in computing box
+! 23.09.2016	ggu	allow for eps in computing box and reg intp
+! 30.09.2016	ggu	changed VERS_7_5_18
+! 11.10.2016	ggu	changed VERS_7_5_20
+! 20.01.2017	ggu	changed VERS_7_5_22
+! 23.04.2017	ggu	new routine intp_reg_single_nodes()
+! 09.05.2017	ggu	changed VERS_7_5_26
+! 23.05.2017	ggu	file split into subreg, submask and subfind
+! 11.07.2017	ggu	changed VERS_7_5_30
+! 02.09.2017	ggu	changed VERS_7_5_31
+! 17.11.2017	ggu	changed VERS_7_5_37
+! 04.12.2017	ggu	check t,u values and correct if out of bounds
+! 18.05.2018	ggu	more checks on fr routines, introduced ierr, bextend
+! 26.05.2018	ggu	even more checks and debug output
+! 06.07.2018	ggu	changed VERS_7_5_48
+! 13.07.2018	ggu	changed VERS_7_4_1
+! 14.02.2019	ggu	changed VERS_7_5_56
+! 16.02.2019	ggu	changed VERS_7_5_60
+! 13.03.2019	ggu	changed VERS_7_5_61
+! 14.05.2019	ggu	in fm_extra_setup() use double precision
+! 21.05.2019	ggu	changed VERS_7_5_62
+! 01.04.2020	ggu	new routine make_reg_box()
+! 11.04.2022	ggu	new routine condense_valid_coordinates for single nodes
+! 25.11.2022	ggu	new routine recollocate_nodes() and ipg array
+!
+! notes :
+!
+! pxareg,pyareg         coordinates of lower left point of matrix
+! pxdreg,pydreg         grid size of matrix
+! pzlreg                value of z for land points
+!
+!******************************************************
 
 !==================================================================
         module regular
@@ -176,11 +176,11 @@ c******************************************************
 
 	subroutine setgeo(x0,y0,dx,dy,flag)
 
-c sets grid values for interpolation
-c
-c pxareg,pyareg         coordinates of lower left point of matrix
-c pxdreg,pydreg         grid size of matrix
-c pzlreg                value of z for land points
+! sets grid values for interpolation
+!
+! pxareg,pyareg         coordinates of lower left point of matrix
+! pxdreg,pydreg         grid size of matrix
+! pzlreg                value of z for land points
 
 	use regular
 
@@ -198,15 +198,15 @@ c pzlreg                value of z for land points
 
 	end
 
-c******************************************************
+!******************************************************
 
 	subroutine getgeo(x0,y0,dx,dy,flag)
 
-c gets grid values for interpolation
-c
-c pxareg,pyareg         coordinates of lower left point of matrix
-c pxdreg,pydreg         grid size of matrix
-c pzlreg                value of z for land points
+! gets grid values for interpolation
+!
+! pxareg,pyareg         coordinates of lower left point of matrix
+! pxdreg,pydreg         grid size of matrix
+! pzlreg                value of z for land points
 
 	use regular
 
@@ -224,13 +224,13 @@ c pzlreg                value of z for land points
 
 	end
 
-c******************************************************
+!******************************************************
 
 	subroutine getgeoflag(flag)
 
-c gets flag value for interpolation
-c
-c flag                value for land points
+! gets flag value for interpolation
+!
+! flag                value for land points
 
 	use regular
 
@@ -242,11 +242,11 @@ c flag                value for land points
 
 	end
 
-c******************************************************
+!******************************************************
 
 	subroutine setregextend(bextend)
 
-c sets flag to decide if extend interpolated grid
+! sets flag to decide if extend interpolated grid
 
 	use regular
 
@@ -258,11 +258,11 @@ c sets flag to decide if extend interpolated grid
 
 	end
 
-c******************************************************
+!******************************************************
 
 	subroutine getregextend(bextend)
 
-c gets flag to decide if extend interpolated grid
+! gets flag to decide if extend interpolated grid
 
 	use regular
 
@@ -274,7 +274,7 @@ c gets flag to decide if extend interpolated grid
 
 	end
 
-c******************************************************
+!******************************************************
 
 	subroutine setreg(regpar,nx,ny,x0,y0,dx,dy,flag)
 
@@ -295,7 +295,7 @@ c******************************************************
 
 	end
 
-c******************************************************
+!******************************************************
 
 	subroutine getreg(regpar,nx,ny,x0,y0,dx,dy,flag)
 
@@ -316,7 +316,7 @@ c******************************************************
 
 	end
 
-c******************************************************
+!******************************************************
 
 	subroutine printreg(regpar)
 
@@ -339,9 +339,9 @@ c******************************************************
 
 	end
 
-c******************************************************
-c******************************************************
-c******************************************************
+!******************************************************
+!******************************************************
+!******************************************************
 
 	subroutine find_position_to_coord(x,y,ix,iy)
 
@@ -361,7 +361,7 @@ c******************************************************
 
 	end
 
-c******************************************************
+!******************************************************
 
 	subroutine find_coord_to_position(ix,iy,x,y)
 
@@ -381,21 +381,21 @@ c******************************************************
 
 	end
 
-c******************************************************
-c******************************************************
-c******************************************************
+!******************************************************
+!******************************************************
+!******************************************************
 
 	subroutine av2am(av,am,ip,jp)
 
-c interpolation of av onto a regular net (nodal values)
-c
-c av                    array to be interpolated
-c am                    matrices of interpolated values (u,v,z,h)
-c ip,jp                 dimension of matrices
-c
-c pxareg,pyareg         coordinates of lower left point of matrix
-c pxdreg,pydreg         grid size of matrix
-c pzlreg                value of z for land points
+! interpolation of av onto a regular net (nodal values)
+!
+! av                    array to be interpolated
+! am                    matrices of interpolated values (u,v,z,h)
+! ip,jp                 dimension of matrices
+!
+! pxareg,pyareg         coordinates of lower left point of matrix
+! pxdreg,pydreg         grid size of matrix
+! pzlreg                value of z for land points
 
 	use basin
 
@@ -413,34 +413,34 @@ c pzlreg                value of z for land points
 
 	end
 
-c******************************************************
+!******************************************************
 
 	subroutine av2amk(bwater,av,am,ip,jp)
 
-c interpolation of av onto a regular net (nodal values) with mask
-c
-c bwater		mask for water points
-c av                    array to be interpolated
-c am                    matrices of interpolated values (u,v,z,h)
-c ip,jp                 dimension of matrices
-c
-c pxareg,pyareg         coordinates of lower left point of matrix
-c pxdreg,pydreg         grid size of matrix
-c pzlreg                value of z for land points
+! interpolation of av onto a regular net (nodal values) with mask
+!
+! bwater		mask for water points
+! av                    array to be interpolated
+! am                    matrices of interpolated values (u,v,z,h)
+! ip,jp                 dimension of matrices
+!
+! pxareg,pyareg         coordinates of lower left point of matrix
+! pxdreg,pydreg         grid size of matrix
+! pzlreg                value of z for land points
 
 	use basin
 
 	implicit none
 
-c arguments
+! arguments
 	integer ip,jp
 	real av(nkn)
 	real am(ip,jp)
 	logical bwater(nel)
-c parameter
+! parameter
 	double precision eps
 	parameter ( eps = 1.d-14 )
-c local
+! local
 	real pxareg,pyareg,pxdreg,pydreg,pzlreg
 	integer i,j,ii,iii,ie,k,kn,iin
 	integer imin,imax,jmin,jmax
@@ -448,7 +448,7 @@ c local
 	double precision x(3),y(3),z(3),a(3),b(3),c(3)
 	double precision zh,fh,f,xp,yp
 	double precision xmin,xmax,ymin,ymax
-c function
+! function
 	integer intrid
 
 	call getgeo(pxareg,pyareg,pxdreg,pydreg,pzlreg)
@@ -525,13 +525,13 @@ c function
 	stop 'error stop av2amk: area of element'
 	end
 
-c************************************************
-c************************************************
-c************************************************
+!************************************************
+!************************************************
+!************************************************
 
 	subroutine av2fm(fm,ip,jp)
 
-c computation of interpolation matrix (nodal values to regular grid) with mask
+! computation of interpolation matrix (nodal values to regular grid) with mask
 
 	use basin
 
@@ -548,42 +548,42 @@ c computation of interpolation matrix (nodal values to regular grid) with mask
 
 	end
 
-c************************************************
+!************************************************
 
 	subroutine av2fmk(bwater,fm,ip,jp)
 
-c computation of interpolation matrix (nodal values to regular grid) with mask
-c
-c the interpolation can be carried out as
-c
-c	do j=1,jp
-c	  do i=1,ip
-c	    ie = nint(fm(4,i,j))
-c	    if( ie .gt. 0 ) then
-c	      a = 0.
-c	      do ii=1,3
-c	        k = nen3v(ii,ie)
-c		a = a + val(k) * fm(ii,i,j)
-c	      end do
-c	    else
-c	      a = flag
-c	    end if
-c	    am(i,j) = a
-c	  end do
-c	end do
+! computation of interpolation matrix (nodal values to regular grid) with mask
+!
+! the interpolation can be carried out as
+!
+!	do j=1,jp
+!	  do i=1,ip
+!	    ie = nint(fm(4,i,j))
+!	    if( ie .gt. 0 ) then
+!	      a = 0.
+!	      do ii=1,3
+!	        k = nen3v(ii,ie)
+!		a = a + val(k) * fm(ii,i,j)
+!	      end do
+!	    else
+!	      a = flag
+!	    end if
+!	    am(i,j) = a
+!	  end do
+!	end do
 	        
 	use basin
 
 	implicit none
 
-c arguments
+! arguments
 	logical bwater(nel)	!wet mask for each element
 	real fm(4,ip,jp)	!values for interpolation (fm(4,i,j) = ie)
 	integer ip,jp		!dimension of matrices
-c parameter
+! parameter
 	double precision eps
 	parameter ( eps = 1.d-14 )
-c local
+! local
 	real pxareg,pyareg,pxdreg,pydreg,pzlreg
 	integer i,j,ii,iii,ie,k,kn,iin
 	integer imin,imax,jmin,jmax
@@ -591,7 +591,7 @@ c local
 	double precision x(3),y(3),z(3),a(3),b(3),c(3)
 	double precision zh,fh,f,xp,yp
 	double precision xmin,xmax,ymin,ymax
-c function
+! function
 	integer intrid
 
 	call getgeo(pxareg,pyareg,pxdreg,pydreg,pzlreg)
@@ -664,7 +664,7 @@ c function
 	stop 'error stop av2fm: area of element'
 	end
 
-c************************************************
+!************************************************
 
 	subroutine av2fm_single(fm,np,xx,yy)
 
@@ -672,21 +672,21 @@ c************************************************
 
 	implicit none
 
-c arguments
+! arguments
 	real fm(4,np,1)	!values for interpolation (fm(4,i,j) = ie)
 	integer np		!dimension of matrices
 	real xx(np),yy(np)
-c parameter
+! parameter
 	double precision eps
 	parameter ( eps = 1.d-14 )
-c local
+! local
 	integer i,j,ii,iii,ie,k,kn,iin
 	integer imin,imax,jmin,jmax
 	logical bok
 	double precision x(3),y(3),z(3),a(3),b(3),c(3)
 	double precision zh,fh,f,xp,yp
 	double precision xmin,xmax,ymin,ymax
-c function
+! function
 	integer intrid
 
 	fm = 0.
@@ -741,11 +741,11 @@ c function
 	stop 'error stop av2fm_single: area of element'
 	end
 
-c************************************************
+!************************************************
 
         subroutine fm2am2d(femval,nx,ny,fm,am)
 
-c interpolation 2d of fem values to regular grid using fm matrix
+! interpolation 2d of fem values to regular grid using fm matrix
 
 	use basin
 
@@ -769,11 +769,11 @@ c interpolation 2d of fem values to regular grid using fm matrix
 
 	end
 
-c************************************************
+!************************************************
 
         subroutine fm2am3d(nlvdi,ilhv,femval,nlv,nx,ny,fm,am)
 
-c interpolation 3d of fem values to regular grid using fm matrix
+! interpolation 3d of fem values to regular grid using fm matrix
 
 	use basin
 
@@ -818,9 +818,9 @@ c interpolation 3d of fem values to regular grid using fm matrix
 
         end
 
-c************************************************
-c************************************************
-c************************************************
+!************************************************
+!************************************************
+!************************************************
 
 	subroutine fm_extra_setup(nx,ny,fmextra)
 
@@ -978,7 +978,7 @@ c************************************************
 
 	end
 
-c************************************************
+!************************************************
 
 	subroutine fm_extra_3d(nlvdi,nlv,il,nx,ny,fmextra,femdata,regdata)
 
@@ -1036,7 +1036,7 @@ c************************************************
 
 	end
 
-c************************************************
+!************************************************
 
 	subroutine fm_extra_2d(nx,ny,fmextra,femdata,regdata)
 
@@ -1115,28 +1115,28 @@ c************************************************
 
 	end
 
-c************************************************
-c************************************************
-c************************************************
+!************************************************
+!************************************************
+!************************************************
 
 	function intri(x,y,xp,yp)
 
-c point in triangle or not
-c
-c x,y		array of coordinates of vertices of triangle
-c xp,yp		coordinates of point
-c intri		1: point is in triangle  0: point outside (return value)
+! point in triangle or not
+!
+! x,y		array of coordinates of vertices of triangle
+! xp,yp		coordinates of point
+! intri		1: point is in triangle  0: point outside (return value)
 
 	implicit none
 
-c arguments
+! arguments
 	integer intri
 	real x(3),y(3),xp,yp
-c local
+! local
 	integer k1,k2
 	double precision x21,y21,xn,yn
 	double precision scal,eps
-c save
+! save
 	save eps
 	data eps /1.e-13/
 
@@ -1156,26 +1156,26 @@ c save
 
 	end
 
-c************************************************
+!************************************************
 
 	function intrid(x,y,xp,yp)
 
-c point in triangle or not (double precision version)
-c
-c x,y		array of coordinates of vertices of triangle
-c xp,yp		coordinates of point
-c intri		1: point is in triangle  0: point outside (return value)
+! point in triangle or not (double precision version)
+!
+! x,y		array of coordinates of vertices of triangle
+! xp,yp		coordinates of point
+! intri		1: point is in triangle  0: point outside (return value)
 
 	implicit none
 
-c arguments
+! arguments
 	integer intrid
 	double precision x(3),y(3),xp,yp
-c local
+! local
 	integer k1,k2
 	double precision x21,y21,xn,yn
 	double precision scal,eps
-c save
+! save
 	save eps
 	data eps /1.e-13/
 
@@ -1195,30 +1195,30 @@ c save
 
 	end
 
-c****************************************************************
-c
+!****************************************************************
+!
 	function intri0(x,y,xp,yp)
-c
-c point in triangle or not
-c
-c x,y		array of coordinates of vertices of triangle
-c xp,yp		coordinates of point
-c intri		1: point is in triangle  0: point outside (return value)
-c
+!
+! point in triangle or not
+!
+! x,y		array of coordinates of vertices of triangle
+! xp,yp		coordinates of point
+! intri		1: point is in triangle  0: point outside (return value)
+!
 	implicit none
-c
-c arguments
+!
+! arguments
 	integer intri0
 	real x(3),y(3),xp,yp
-c local
+! local
 	integer i,k1,k2
 	double precision xs,ys,x12,y12
 	double precision det,detlam,rlamb
 	double precision eps
-c save
+! save
 	save eps
 	data eps /1.e-13/
-c
+!
 	xs=0.
 	ys=0.
 	do i=1,3
@@ -1227,9 +1227,9 @@ c
 	end do
 	xs=xs/3.
 	ys=ys/3.
-c
+!
 	intri0=0
-c
+!
 	do k1=1,3
 	   k2=mod(k1,3)+1
 	   x12=x(k1)-x(k2)
@@ -1241,18 +1241,17 @@ c
 		if(rlamb.gt.0..and.rlamb.lt.1.) return	!outside
 	   end if
 	end do
-c
+!
 	intri0=1	!inside
-c
+!
 	return
 	end
 
-c****************************************************************
-c****************************************************************
-c****************************************************************
+!****************************************************************
+!****************************************************************
+!****************************************************************
 
-	subroutine intp_reg_nodes(nx,ny,x0,y0,dx,dy,flag,regval
-     +				,femval,ierr)
+	subroutine intp_reg_nodes( nx, ny, x0, y0, dx, dy, flag, regval, femval, ierr )
 
 ! interpolates regular grid to FEM grid - values are on nodes
 
@@ -1267,15 +1266,13 @@ c****************************************************************
 	real femval(nkn)	!interpolated values on fem grid (return)
 	integer ierr		!error code (return)
 
-	call intp_reg(nx,ny,x0,y0,dx,dy,flag,regval
-     +				,nkn,xgv,ygv,femval,ierr)
+	call intp_reg( nx, ny, x0, y0, dx, dy, flag, regval, nkn, xgv, ygv, femval, ierr )
 
 	end
 
-c****************************************************************
+!****************************************************************
 
-	subroutine intp_reg_elems(nx,ny,x0,y0,dx,dy,flag,regval
-     +				,femval,ierr)
+	subroutine intp_reg_elems( nx, ny, x0, y0, dx, dy, flag, regval, femval, ierr )
 
 ! interpolates regular grid to FEM grid - values are on elements
 
@@ -1294,16 +1291,13 @@ c****************************************************************
 
 	call bas_get_elem_coordinates(xp,yp)
 
-	call intp_reg(nx,ny,x0,y0,dx,dy,flag,regval
-     +				,nel,xp,yp,femval,ierr)
+	call intp_reg( nx, ny, x0, y0, dx, dy, flag, regval, nel, xp, yp, femval, ierr )
 
 	end
 
-c****************************************************************
+!****************************************************************
 
-	subroutine intp_reg_single_nodes(nx,ny,x0,y0,dx,dy,flag
-     +				,regval,np,nodes
-     +				,femval,ierr)
+	subroutine intp_reg_single_nodes( nx, ny, x0, y0, dx, dy, flag, regval, np, nodes, femval, ierr )
 
 ! interpolates regular grid to single nodes
 
@@ -1325,14 +1319,13 @@ c****************************************************************
 	call condense_valid_coordinates(np,nodes,nc,nodesc,ipg)
 	call bas_get_special_coordinates(nc,nodesc,xp,yp)
 
-	call intp_reg(nx,ny,x0,y0,dx,dy,flag,regval
-     +				,nc,xp,yp,femval,ierr)
+	call intp_reg(nx,ny,x0,y0,dx,dy,flag,regval,nc,xp,yp,femval,ierr)
 
 	call recollocate_nodes(np,nc,ipg,femval)
 
 	end
 
-c****************************************************************
+!****************************************************************
 
 	subroutine condense_valid_coordinates(np,nodes,nc,nodesc,ipg)
 
@@ -1356,7 +1349,7 @@ c****************************************************************
 
 	end
 
-c****************************************************************
+!****************************************************************
 
 	subroutine recollocate_nodes(np,nc,ipg,femval)
 
@@ -1382,17 +1375,16 @@ c****************************************************************
 	
 	end
 
-c****************************************************************
+!****************************************************************
 
-	subroutine intp_reg(nx,ny,x0,y0,dx,dy,flag,regval
-     +				,np,xp,yp,femval,ierr)
+	subroutine intp_reg( nx, ny, x0, y0, dx, dy, flag, regval, np, xp, yp, femval, ierr )
 
-c interpolation of regular array onto fem grid - general routine
-c
-c ierr:
-c		= 0	no errors
-c		< 0	interpolation out of domain (extrapolation)
-c		> 0	flag found in interpolation data
+! interpolation of regular array onto fem grid - general routine
+!
+! ierr:
+!		= 0	no errors
+!		< 0	interpolation out of domain (extrapolation)
+!		> 0	flag found in interpolation data
 
 	implicit none
 
@@ -1537,7 +1529,7 @@ c		> 0	flag found in interpolation data
 	stop 'error stop intp_reg: internal error (1)'
 	end
 
-c****************************************************************
+!****************************************************************
 
 	subroutine reg_debug_1(what,k,x,y)
 
@@ -1551,7 +1543,7 @@ c****************************************************************
 
 	end
 
-c****************************************************************
+!****************************************************************
 
 	subroutine recover_flag(zz,z1,z2,z3,z4,flag)
 
@@ -1587,15 +1579,15 @@ c****************************************************************
 
 	end
 
-c****************************************************************
-c****************************************************************
-c****************************************************************
+!****************************************************************
+!****************************************************************
+!****************************************************************
 
 	subroutine intp_reg_setup_fr(nx,ny,x0,y0,dx,dy,np,xp,yp,fr,ierr)
 
-c interpolation of regular array onto fem grid - general routine
-c
-c produces array fr that can be used to interpolate
+! interpolation of regular array onto fem grid - general routine
+!
+! produces array fr that can be used to interpolate
 
 	use basin
 
@@ -1694,17 +1686,16 @@ c produces array fr that can be used to interpolate
 	stop 'error stop intp_reg_setup_fr: internal error (1)'
 	end
 
-c****************************************************************
+!****************************************************************
 
-	subroutine intp_reg_intp_fr(nx,ny,flag,regval
-     +				,np,fr,femval,ierr)
+	subroutine intp_reg_intp_fr(nx,ny,flag,regval,np,fr,femval,ierr)
 
-c interpolation of regular array onto fem grid - general routine
-c
-c ierr:
-c		= 0	no errors
-c		< 0	interpolation out of domain (extrapolation)
-c		> 0	flag found in interpolation data
+! interpolation of regular array onto fem grid - general routine
+!
+! ierr:
+!		= 0	no errors
+!		< 0	interpolation out of domain (extrapolation)
+!		> 0	flag found in interpolation data
 
 	implicit none
 
@@ -1781,13 +1772,13 @@ c		> 0	flag found in interpolation data
 	stop 'error stop intp_reg_intp_fr: internal error (1)'
 	end
 
-c****************************************************************
-c****************************************************************
-c****************************************************************
+!****************************************************************
+!****************************************************************
+!****************************************************************
 
 	subroutine am2av(am,av,ip,jp)
 
-c compatibility for old calls - from regular to fem
+! compatibility for old calls - from regular to fem
 
 	use basin
 
@@ -1802,8 +1793,7 @@ c compatibility for old calls - from regular to fem
 
 	call getgeo(pxareg,pyareg,pxdreg,pydreg,pzlreg)
 
-	call intp_reg(ip,jp,pxareg,pyareg,pxdreg,pydreg,pzlreg,am
-     +				,nkn,xgv,ygv,av,ierr)
+	call intp_reg(ip,jp,pxareg,pyareg,pxdreg,pydreg,pzlreg,am,nkn,xgv,ygv,av,ierr)
 
 	if( ierr /= 0 ) then
 	  write(6,*) 'interpolation am2av: ierr = ',ierr
@@ -1812,18 +1802,18 @@ c compatibility for old calls - from regular to fem
 
 	end
 
-c******************************************************
-c******************************************************
-c******************************************************
+!******************************************************
+!******************************************************
+!******************************************************
 
         subroutine elemintp(x,y,z,xp,yp,zp)
 
-c interpolation in element (no ev)
-c
-c interpolates in element given by x,y nodal values z to point xp,yp
-c result is in zp
-c
-c needs no other vectors but needs x,y of nodes
+! interpolation in element (no ev)
+!
+! interpolates in element given by x,y nodal values z to point xp,yp
+! result is in zp
+!
+! needs no other vectors but needs x,y of nodes
 
         real x(3),y(3)  !coordinates of nodes
         real z(3)       !values on nodes
@@ -1868,9 +1858,9 @@ c needs no other vectors but needs x,y of nodes
         stop 'error stop elemintp: area of element'
         end
 
-c******************************************************
-c******************************************************
-c******************************************************
+!******************************************************
+!******************************************************
+!******************************************************
 
 	subroutine make_reg_box(dreg,regpar)
 
@@ -1907,5 +1897,5 @@ c******************************************************
 
 	end
 
-c******************************************************
+!******************************************************
 

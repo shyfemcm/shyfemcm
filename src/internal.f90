@@ -70,8 +70,7 @@
         integer nel
         integer nlv
 
-        if( nkn == nkn_internal .and. nel == nel_internal
-     +  .and. nlv == nlv_internal) return
+        if( nkn == nkn_internal .and. nel == nel_internal .and. nlv == nlv_internal) return
 
         if( nkn > 0 .or. nel > 0 .or. nlv > 0) then
           if( nkn == 0 .or. nel == 0 .or. nlv == 0) then

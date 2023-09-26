@@ -293,10 +293,10 @@
 	  name = pinfo(id)%file(ifirst:ilast)
 	  descrp = pinfo(id)%descript
 	  descrp = p%descript
-	  write(iu,format) id,pinfo(id)%ibc
-     +			,pinfo(id)%iunit,pinfo(id)%nvar
-     +			,pinfo(id)%nintp,pinfo(id)%iformat
-     +			,descrp(1:10),trim(name)
+	  write(iu,format) id,pinfo(id)%ibc                &
+      &			,pinfo(id)%iunit,pinfo(id)%nvar        &
+      &			,pinfo(id)%nintp,pinfo(id)%iformat     &
+      &			,descrp(1:10),trim(name)
 	end do
 
 	if( .not. debug ) return
@@ -481,8 +481,7 @@
 	pinfo(id)%strings_file(ivar) = string
 
 	if( bflow ) then
-	  write(iflow,*) 'iff: iff_set_var_description: '
-     +				,id,ivar,trim(string)
+	  write(iflow,*) 'iff: iff_set_var_description: ',id,ivar,trim(string)
 	end if
 
 	return
@@ -558,8 +557,7 @@
 !****************************************************************
 !****************************************************************
 
-	subroutine iff_init_global(nkn,nel,nlv,ilhkv,ilhv
-     +					,hkv,hev,hlv,date,time)
+	subroutine iff_init_global(nkn,nel,nlv,ilhkv,ilhv,hkv,hev,hlv,date,time)
 
 ! passes params and arrays from fem needed for interpolation
 !
@@ -581,8 +579,7 @@
 
 	if( .not. allocated(pinfo) ) allocate(pinfo(ndim))
 
-	if( nkn /= nkn_fem .or. nel /= nel_fem 
-     +				.or. nlv /= nlv_fem ) then
+	if( nkn /= nkn_fem .or. nel /= nel_fem .or. nlv /= nlv_fem ) then
 	  if( nkn_fem > 0 ) then
 	    deallocate(ilhkv_fem,hk_fem)
 	    deallocate(ilhv_fem,he_fem)
@@ -620,8 +617,7 @@
 
 !****************************************************************
 
-	subroutine iff_init(dtime,file,nvar,nexp,lexp,nintp
-     +					,nodes,vconst,id)
+	subroutine iff_init(dtime,file,nvar,nexp,lexp,nintp,nodes,vconst,id)
 
 ! initializes file and sets up various parameters
 ! if called with dtime==-1 does not populate records
@@ -758,8 +754,7 @@
 
 	if( bdebug_internal ) write(6,*) 'iff_init breg = ',breg
 
-	if( nexp > 0 
-     +		.and. nexp /= nkn_fem .and. nexp /= nel_fem) then
+	if( nexp > 0 .and. nexp /= nkn_fem .and. nexp /= nel_fem) then
 	  allocate(pinfo(id)%nodes(nexp))	!lateral BC
 	  pinfo(id)%nodes = nodes
 	end if
@@ -770,8 +765,7 @@
 	  pinfo(id)%strings_file = pinfo(id0)%strings_file
 	  pinfo(id)%bonepoint = pinfo(id0)%bonepoint
 	else if( bfem ) then
-          call fem_file_get_data_description(file
-     +				,pinfo(id)%strings_file,ierr)
+          call fem_file_get_data_description(file,pinfo(id)%strings_file,ierr)
 	  if( ierr /= 0 ) goto 98
 	else if( bts ) then
 	  pinfo(id)%bonepoint = .true.
@@ -872,8 +866,7 @@
 	call iff_print_file_info(id)
 	stop 'error stop iff_init'
    98	continue
-	write(6,*) '*** error reading data description of file: '
-     +				,trim(file)
+	write(6,*) '*** error reading data description of file: ',trim(file)
 	call iff_print_file_info(id)
 	stop 'error stop iff_init'
    99	continue
@@ -886,7 +879,7 @@
 
 	subroutine iff_set_constant(id,vconst)
 
-c (re-) sets constant if no file has been opened 
+! (re-) sets constant if no file has been opened 
 
 	integer id
 	real vconst(pinfo(id)%nvar)
@@ -907,7 +900,7 @@ c (re-) sets constant if no file has been opened
 
 	subroutine iff_get_file_nvar(file,nvar)
 
-c coputes number of variables in file
+! coputes number of variables in file
 
 	character*(*) file
 	integer nvar		!is <= 0 if no data
@@ -924,7 +917,7 @@ c coputes number of variables in file
 
 	subroutine iff_file_exists(file,bexist)
 
-c checks if file exists and is a fem/ts file
+! checks if file exists and is a fem/ts file
 
 	character*(*) file
 	logical bexist
@@ -947,13 +940,13 @@ c checks if file exists and is a fem/ts file
 
 	subroutine iff_get_file_info(file,bverb,np,nvar,ntype,iformat)
 
-c coputes info on type of file
-c
-c	< 0	no file or error
-c	 0	unformatted
-c	 1	formatted
-c	 2	direct
-c	 3	time series
+! coputes info on type of file
+!
+!	< 0	no file or error
+!	 0	unformatted
+!	 1	formatted
+!	 2	direct
+!	 3	time series
 
 	character*(*) file
 	logical bverb
@@ -984,8 +977,7 @@ c	 3	time series
 
 	if( nvar > 0 ) then
 	  if( bverb ) then
-	    write(6,'(a,i2,a)') 'file is fem file (format='
-     +                  ,iformat,   '): '//trim(file)
+	    write(6,'(a,i2,a)') 'file is fem file (format=',iformat,   '): '//trim(file)
 	    !write(6,*) file(1:il)
 	  end if
 	else
@@ -1228,8 +1220,8 @@ c	 3	time series
 	    call iff_adjust_datetime(id,pinfo(id)%datetime,dtime)
 	  end if
 	else
-          call fem_file_peek_params(iformat,iunit,dtime
-     +                          ,nvers,np,lmax,nvar,ntype,datetime,ierr)
+          call fem_file_peek_params(iformat,iunit,dtime           &
+                  &   ,nvers,np,lmax,nvar,ntype,datetime,ierr)
 	  if( ierr == 0 ) then
 	    pinfo(id)%datetime = datetime
 	    call iff_adjust_datetime(id,pinfo(id)%datetime,dtime)
@@ -1286,8 +1278,8 @@ c	 3	time series
 	    call iff_adjust_datetime(id,pinfo(id)%datetime,dtime)
 	  end if
 	else
-          call fem_file_read_params(iformat,iunit,dtime
-     +                          ,nvers,np,lmax,nvar,ntype,datetime,ierr)
+          call fem_file_read_params(iformat,iunit,dtime     &
+      &          ,nvers,np,lmax,nvar,ntype,datetime,ierr)
 	  if( ierr == 0 ) then
 	    pinfo(id)%datetime = datetime
 	    call iff_adjust_datetime(id,pinfo(id)%datetime,dtime)
@@ -1307,10 +1299,8 @@ c	 3	time series
 	  pinfo(id)%nvers = nvers
 	  pinfo(id)%ntype = ntype
 	  call iff_allocate_file_arrays(id,nvar,np,lmax)
-	  call fem_file_read_2header(iformat,iunit,ntype,lmax
-     +					,pinfo(id)%hlv_file
-     +					,pinfo(id)%regpar
-     +					,ierr)
+	  call fem_file_read_2header(iformat,iunit,ntype,lmax,pinfo(id)%hlv_file   &
+                           &        					,pinfo(id)%regpar,ierr)
 	  if( ierr /= 0 ) goto 97
 	end if
 
@@ -1457,14 +1447,14 @@ c	 3	time series
 	else
 	  do i=1,nvar
 	    pinfo(id)%data_file(:,:,i) = flag
-            call fem_file_read_data(iformat,iunit
-     +                          ,nvers,np,lmax
-     +                          ,string
-     +                          ,pinfo(id)%ilhkv_file
-     +                          ,pinfo(id)%hd_file
-     +                          ,nlvddi
-     +				,pinfo(id)%data_file(1,1,i)
-     +				,ierr)
+            call fem_file_read_data(iformat,iunit        &
+      &                          ,nvers,np,lmax          &
+      &                          ,string                 &
+      &                          ,pinfo(id)%ilhkv_file   &
+      &                          ,pinfo(id)%hd_file      &
+      &                          ,nlvddi                 &
+      &				,pinfo(id)%data_file(1,1,i)            &
+      &				,ierr)
 	    if( ierr /= 0 ) goto 99
 	    if( string /= pinfo(id)%strings_file(i) ) goto 98
 	  end do
@@ -1550,7 +1540,7 @@ c	 3	time series
 
 	subroutine iff_space_interpolate(id,iintp,dtime)
 
-c interpolates in space all variables in data set id
+! interpolates in space all variables in data set id
 
 	use shympi
 
@@ -1702,11 +1692,8 @@ c interpolates in space all variables in data set id
 	  imode = 1
 	  do ivar=1,nvar
 	    data2dreg(:) = pinfo(id)%data_file(1,:,ivar)
-	    call intp_reg_nodes(nx,ny,x0,y0,dx,dy,flag
-     +			,data2dreg
-     +			,data2dfem
-     +			,ierr
-     +		    )
+	    call intp_reg_nodes(nx,ny,x0,y0,dx,dy,flag,data2dreg    &
+            &			                        ,data2dfem,ierr)
 	    forall(l=1:lexp,ip=1:nexp) data(l,ip,ivar) = data2dfem(ip)
 	    if( bneedall .and. ierr .ne. 0 ) goto 99
 	  end do
@@ -1714,11 +1701,8 @@ c interpolates in space all variables in data set id
 	  imode = 2
 	  do ivar=1,nvar
 	    data2dreg(:) = pinfo(id)%data_file(1,:,ivar)
-	    call intp_reg_elems(nx,ny,x0,y0,dx,dy,flag
-     +			,data2dreg
-     +			,data2dfem
-     +			,ierr
-     +		    )
+	    call intp_reg_elems(nx,ny,x0,y0,dx,dy,flag,data2dreg    &
+            &			                        ,data2dfem,ierr)
 	    forall(l=1:lexp,ip=1:nexp) data(l,ip,ivar) = data2dfem(ip)
 	    if( bneedall .and. ierr .ne. 0 ) goto 99
 	  end do
@@ -1728,12 +1712,8 @@ c interpolates in space all variables in data set id
 	  call setregextend(.true.)
 	  do ivar=1,nvar
 	    data2dreg(:) = pinfo(id)%data_file(1,:,ivar)
-	    call intp_reg_single_nodes(nx,ny,x0,y0,dx,dy,flag
-     +			,data2dreg
-     +			,nexp,pinfo(id)%nodes
-     +			,data2dfem
-     +			,ierr
-     +		    )
+	    call intp_reg_single_nodes(nx,ny,x0,y0,dx,dy,flag,data2dreg   &
+               &			      ,nexp,pinfo(id)%nodes,data2dfem,ierr)
 	    forall(l=1:lexp,ip=1:nexp) data(l,ip,ivar) = data2dfem(ip)
 	    if( bneedall .and. ierr .ne. 0 ) goto 99
 	  end do
@@ -1853,8 +1833,8 @@ c interpolates in space all variables in data set id
 	else if( nexp == nel_fem ) then
 	  call bas_get_elem_coordinates(xp,yp)
 	else if( allocated(pinfo(id)%nodes) ) then
-	  call condense_valid_coordinates(nexp,pinfo(id)%nodes
-     +					,nc,nodesc,ipg)
+	  call condense_valid_coordinates(nexp,pinfo(id)%nodes   &
+      &					,nc,nodesc,ipg)
 	  nexp = nc
 	  call bas_get_special_coordinates(nexp,nodesc,xp,yp)
 	else
@@ -1872,8 +1852,8 @@ c interpolates in space all variables in data set id
 
 	ierr = 0
 	!if( bdebug ) ierr = -1
-	call intp_reg_intp_fr(nx,ny,flag,pinfo(id)%hd_file
-     +            ,nexp,fr,hfem,ierr)	!interpolate depth from reg to fem
+	call intp_reg_intp_fr(nx,ny,flag,pinfo(id)%hd_file    &
+      &            ,nexp,fr,hfem,ierr)	!interpolate depth from reg to fem
 	call recollocate_nodes(norig,nexp,ipg,hfem)
 
 	ierr = 0	!ignore error from depth interpolation
@@ -1883,14 +1863,14 @@ c interpolates in space all variables in data set id
 	end if
 
 	do ivar=1,nvar
-	  call iff_extend_vertically(lmax,np,flag,pinfo(id)%ilhkv_file
-     +			,pinfo(id)%data_file(:,:,ivar) )
+	  call iff_extend_vertically(lmax,np,flag,pinfo(id)%ilhkv_file    &
+      &			,pinfo(id)%data_file(:,:,ivar) )
 	  do l=1,lmax
 	    data2dreg = pinfo(id)%data_file(l,:,ivar)
 	    ierr = 0
 	    if( bdebug ) ierr = 1000*ivar + l
-	    call intp_reg_intp_fr(nx,ny,flag,data2dreg
-     +                          ,nexp,fr,data2dfem,ierr)
+	    call intp_reg_intp_fr(nx,ny,flag,data2dreg     &
+            &             ,nexp,fr,data2dfem,ierr)
 	    if( ierr /= 0 ) goto 99
 	    call recollocate_nodes(norig,nexp,ipg,data2dfem)
 	    data(l,:,ivar) = data2dfem
@@ -1907,18 +1887,17 @@ c interpolates in space all variables in data set id
 	if( bdebug_internal ) then
 	  write(6,*) 'iff_handle_regular_grid_3d +++ ',nexp,iintp,lmax
 	end if
-	if( bdebugs .and .bdebug ) then
+	if( bdebugs .and. bdebug ) then
 	  write(iu,*) 'iff_handle_regular_grid_3d +++ ',nexp,iintp,lmax
 	  write(iu,*) data(1,:,1)
 	end if
 
 	do ip=1,nexp
-	  if( bdebugs .and .bdebug ) then
+	  if( bdebugs .and. bdebug ) then
 	    write(iu,*) 'xxxxxxxxx',data(1,ip,1)
 	  end if
 	  data_aux = data(:,ip,:)
-	  call iff_interpolate_vertical_int(id,iintp
-     +				,lmax,hfem(ip),data_aux,ip)
+	  call iff_interpolate_vertical_int(id,iintp,lmax,hfem(ip),data_aux,ip)
 	end do
 
 	if( bdebug .and. bdebugs ) then
@@ -2125,8 +2104,8 @@ c interpolates in space all variables in data set id
 	nadapt=0					!file layer structure: nadapt always == 0
 	hadapt=0.			
 	call compute_sigma_info(lmax,pinfo(id)%hlv_file,nsigma,hsigma)
-	call get_layer_thickness(lmax,lmin,nsigma,nadapt,
-     +				 hsigma,hadapt,z,h,pinfo(id)%hlv_file,hl)
+	call get_layer_thickness(lmax,lmin,nsigma,nadapt,              &
+         &				 hsigma,hadapt,z,h,pinfo(id)%hlv_file,hl)
 
 
 	do ivar=1,nvar
@@ -2147,7 +2126,7 @@ c interpolates in space all variables in data set id
 
 	subroutine iff_interpolate_vertical(id,iintp,ip_from,ip_to)
 
-c global lmax and lexp are > 1
+! global lmax and lexp are > 1
 
 	integer id
 	integer iintp
@@ -2177,10 +2156,9 @@ c global lmax and lexp are > 1
 
 !****************************************************************
 
-	subroutine iff_interpolate_vertical_int(id,iintp,lmax,h,data
-     +						,ip_to)
+	subroutine iff_interpolate_vertical_int(id,iintp,lmax,h,data,ip_to)
 
-c global lmax and lexp are > 1
+! global lmax and lexp are > 1
 
 	use shympi
 
@@ -2251,15 +2229,15 @@ c global lmax and lexp are > 1
 	nadapt=0					!file layer structure: nadapt always 0
 	hadapt=0.			
 	call compute_sigma_info(lmax,pinfo(id)%hlv_file,nsigma,hsigma)
-	call get_layer_thickness(lmax,lmin,nsigma,nadapt,
-     +				 hsigma,hadapt,z,hfile,pinfo(id)%hlv_file,hl)
+	call get_layer_thickness(lmax,lmin,nsigma,nadapt,                 &
+         &				 hsigma,hadapt,z,hfile,pinfo(id)%hlv_file,hl)
 	call get_depth_of_layer(bcenter,lmax,z,hl,hz_file(1))
 	hz_file(0) = z
 
 	call compute_sigma_info(lfem,hlv_fem,nsigma,hsigma)
 	call compute_zadapt_info(z,hlv_fem,nsigma,lfem,lmin,nadapt,hadapt)
-	call get_layer_thickness(lfem,lmin,nsigma,nadapt,
-     +				 hsigma,hadapt,z,hfem,hlv_fem,hl_fem)
+	call get_layer_thickness(lfem,lmin,nsigma,nadapt,        &
+         &				hsigma,hadapt,z,hfem,hlv_fem,hl_fem)
 	call get_depth_of_layer(bcenter,lfem,z,hl_fem,hz_fem(1))
 	hz_fem(0) = z
 
@@ -2320,8 +2298,7 @@ c global lmax and lexp are > 1
 	double precision t,tc
 
 	if( bflow ) then
-	  write(iflow,*) 'iff: iff_time_interpolate: '
-     +				,id,ivar,itact
+	  write(iflow,*) 'iff: iff_time_interpolate: ',id,ivar,itact
 	end if
 
 	bdebug = ( id == 7 )
@@ -2434,7 +2411,7 @@ c global lmax and lexp are > 1
 
 	function iff_must_read(id,t)
 
-c this routine determines if new data has to be read from file
+! this routine determines if new data has to be read from file
 
 	logical iff_must_read
 	integer id
@@ -2466,7 +2443,7 @@ c this routine determines if new data has to be read from file
 
 	subroutine iff_read_and_interpolate(id,t)
 
-c this routine reads and space interpolates new data - no parallel execution
+! this routine reads and space interpolates new data - no parallel execution
 
 	use shympi
 
@@ -2528,7 +2505,7 @@ c this routine reads and space interpolates new data - no parallel execution
 
         subroutine iff_final_time_interpolate(id,t,ivar,ndim,ldim,value)
 
-c does the final interpolation in time
+! does the final interpolation in time
 
 	use shympi
 
@@ -2632,9 +2609,8 @@ c does the final interpolation in time
 
 	if( bdebug_internal ) then
 	  string = pinfo(id)%descript
-	  write(6,'(a,a,5i5)') 'xxxxxx end of interpolation: '
-     +				,trim(string)
-     +				,my_id,nn,nexp,ivar,id
+	  write(6,'(a,a,5i5)') 'xxxxxx end of interpolation: '      &
+      &				,trim(string), my_id, nn, nexp, ivar, id
 	end if
 
 	if( iflag > 0 .and. pinfo(id)%bneedall ) then
@@ -2898,7 +2874,7 @@ c does the final interpolation in time
 
 	use intp_fem_file
 
-c opens and inititializes file
+! opens and inititializes file
 
         implicit none
 
@@ -2919,8 +2895,7 @@ c opens and inititializes file
 	nodes = 0
 	nv = nvar
 	
-	call iff_init(dtime,file,nv,nexp,lexp,nintp
-     +					,nodes,vconst,id)
+	call iff_init(dtime,file,nv,nexp,lexp,nintp,nodes,vconst,id)
 	call iff_set_description(id,0,'timeseries')
 
 	if( nv .ne. nvar ) then
@@ -3008,9 +2983,9 @@ c opens and inititializes file
 
 	use intp_fem_file
 
-c opens file and inititializes array
-c
-c everything needed is in array (unit, vars etc...)
+! opens file and inititializes array
+!
+! everything needed is in array (unit, vars etc...)
 
         implicit none
 
@@ -3035,8 +3010,7 @@ c everything needed is in array (unit, vars etc...)
 	nv = nvar
 	if( ndim < 2 ) stop 'error stop exffil: ndim'
 	
-	call iff_init(dtime,file,nvar,nexp,lexp,nintp
-     +					,nodes,vconst,id)
+	call iff_init(dtime,file,nvar,nexp,lexp,nintp,nodes,vconst,id)
 	call iff_set_description(id,0,'timeseries')
 
 	if( nv .ne. nvar ) then
@@ -3053,7 +3027,7 @@ c everything needed is in array (unit, vars etc...)
 
         subroutine exffils0(file,ndim,array)
 
-c opens file and inititializes array - simplified version
+! opens file and inititializes array - simplified version
 
         implicit none
 
@@ -3133,8 +3107,7 @@ c opens file and inititializes array - simplified version
 	ilhv = 1
 	hlv(1) = 10000.
 
-	call iff_init_global(nkn,nel,nlv,ilhkv,ilhv
-     +				,hkv,hev,hlv,date,time)
+	call iff_init_global(nkn,nel,nlv,ilhkv,ilhv,hkv,hev,hlv,date,time)
 
 	end
 

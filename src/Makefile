@@ -11,7 +11,7 @@ EXEC = shyfem
 
 #----------------------	INCLUDE	----------------------
 
-INCLUDE = -I$(FEMDIR)/include -I$(PETSC_DIR)/include
+INCLUDE = -I$(FEMDIR)/include -I$(PETSC_DIR)/include -I$(MPI_DIR)/include
 
 #--------------------	GOTM	-----------------------
 ifeq ($(GOTM),true)
@@ -19,28 +19,33 @@ ifeq ($(GOTM),true)
 endif
 
 #---------------------	PETSC	-----------------------
-ifeq ($(GOTM),true)
+ifeq ($(SOLVER),PETSC)
   LIBG_PETSC = -L$(PETSC_DIR)/lib -lpetsc
 endif
 
+#---------------------	MPI	-----------------------
+ifneq ($(PARALLEL_MPI),NONE)
+  LIBG_MPI = -L$(MPI_DIR)/lib -lmpi
+endif
+
 #----------------------	LIBRARY	------------------------
-LIBGS= $(LIBG_GOTM) $(LIBG_PETSC)
+LIBGS= $(LIBG_PETSC) $(LIBG_MPI)
 LIBFS= $(LIBF_GOTM)
 
 #----------------------------------------------------------------------------------------------------------------
 
 OBJ = convert.o utility.o para.o iso8601.o time_util.o levels.o fil.o basin.o system_matrix.o \
       geom.o lnku.o tvd.o shympi_dummy.o \
-      links.o hydro_admin.o evgeom.o regular.o openmp_admin.o mpi_graph_elem.o bnd_geom.o \
+      links.o hydro_admin.o evgeom.o regular.o openmp_admin.o bnd_geom.o \
       meteo.o waves.o turbulence_util.o sinking.o nudging.o internal.o geom_dynamic.o depth.o \
-      bnd_aux.o gotm_aux.o diff_aux.o bnd_dynamic.o area.o ts.o roughness.o diffusion.o hydro_baro.o \
-      hydro_print.o hydro_vel.o dts.o femfile.o tsfile.o sigma.o intp.o defnames.o mpi_io_elem.o output.o \
+      bnd_aux.o ts.o hydro_vel.o restart.o gotm_aux.o diff_aux.o bnd_dynamic.o area.o roughness.o diffusion.o hydro_baro.o \
+      hydro_print.o dts.o femfile.o tsfile.o sigma.o intp.o defnames.o \
       version.o ionos.o conz_util.o vert_intp.o nls.o bnd.o fem_util.o bnd_admin.o intp_fem_file.o \
-      bnd_scalar.o projection.o coordinates.o subset.o petsc_admin.o tidef.o layer_thickness.o bndo.o \
-      conz_common.o bclfix_util.o nohyd.o outputd.o elems_dealing.o bndo_admin.o heat_util.o meteo_forcing.o \
+      bnd_scalar.o projection.o coordinates.o subset.o tide_utils.o tidef.o layer_thickness.o bndo.o \
+      conz_common.o bclfix_util.o nohyd.o outputd.o elems_dealing.o bndo_admin.o heat_util.o strings.o meteo_forcing.o \
       heat_util2.o heat_admin.o topological.o heat_temp.o heat_mfsbulk.o heat_coare.o heat_gotm.o \
       heat_areg.o heat_gill.o heat_default.o chk_NaN.o meteo_admin.o heat_admin2.o sigma_admin.o \
-      bit10.o ecological.o restart.o transforms.o tsfile_admin.o fluidmud.o mud_admin.o chezy.o line_admin.o \
+      bit10.o ecological.o transforms.o tsfile_admin.o fluidmud.o mud_admin.o chezy.o line_admin.o \
       discharge_flux.o flux_util.o ioflux.o flux.o geometrical.o volume.o ioext.o random.o depth_util.o \
       vec_util.o extra.o ets.o ioets.o waves_admin.o ets_admin.o modls.o ioous.o ioshy.o shy_util.o \
       ous_admin.o flux_box.o residual.o tvd_admin.o check.o wetdry.o stability.o time_admin.o sedim_util.o \
@@ -55,6 +60,7 @@ OBJ = convert.o utility.o para.o iso8601.o time_util.o levels.o fil.o basin.o sy
       iostr.o constants.o f_vol.o mkdistance.o conz_admin.o water_ren_time.o toxical.o custom_admin.o \
       befor_after.o #shympi.o
 
+      #mod_petsc_global.o mod_petsc_system.o simsys_petsc.o
 #----------------------------------------------------------------------------------------------------------------
 
 %.o: %.f 

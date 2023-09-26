@@ -58,8 +58,7 @@
 
 	integer nkn,nel,nlv
 
-        if( nkn == nkn_nudging .and. nel == nel_nudging .and.
-     +      nlv == nlv_nudging ) return
+        if( nkn == nkn_nudging .and. nel == nel_nudging .and. nlv == nlv_nudging ) return
 
         if( nel > 0 .or. nkn > 0 .or. nlv > 0 ) then
           if( nel == 0 .or. nkn == 0 .or. nlv == 0 ) then

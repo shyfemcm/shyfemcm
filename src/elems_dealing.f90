@@ -24,115 +24,115 @@
 !
 !--------------------------------------------------------------------------
 
-c routines for dealing with elements
-c
-c contents :
-c
-c function depele(ie,mode)
-c       computes total (average) depth of element ie
-c subroutine dep3dele(ie,mode,nlev,h)
-c       computes (average) depth of element ie for all layers
-c subroutine dep3dnod(k,mode,flev,nlev,h)
-c       computes depth of node k for all layers
-c function zetaele(ie,mode)
-c       computes (average) zeta of element ie
-c function volele(ie,mode)
-c       computes volume of element ie
-c function areaele(ie)
-c       computes area of element ie
-c subroutine nindex(ie,n,kn)
-c       returns node index for one element
-c subroutine setdepele(ie,h)
-c       sets depth for element ie
-c subroutine depvele(ie,mode,n,h)
-c       computes depth of vertices in element ie
-c function depfvol(ie,ii,mode)
-c       computes total depth in vertex ii of element ie
-c function scalele(ie,sev)
-c       returns average of scalar sev in element ie
-c subroutine scalvele(ie,sv,n,s)
-c       returns scalar value s of vertices in element ie
-c subroutine tempvele(ie,n,s)
-c subroutine saltvele(ie,n,s)
-c subroutine conzvele(ie,n,s)
-c subroutine setsvele(ie,sev,s)
-c       sets scalar values sev to s in element ie
-c subroutine addsvele(ie,sev,s)
-c       adds scalar value s to sev in element ie
-c subroutine elenmax(text,nmax)
-c       checks maximum of vertices of element
-c subroutine ele2node(sev,sv)
-c       computes nodal values from element values (scalar)
-c subroutine elebase(ie,n,ibase)
-c       returns number of vertices and pointer into element array
-c subroutine set_area
-c       sets up area for nodes
-c subroutine dvanode(l,k,mode,dep,vol,area)
-c       returns depth, volume and area of node k on level l
-c function depnode(l,k,mode)
-c       returns depth of node k on level l
-c function volnode(l,k,mode)
-c       returns volume of node k on level l
-c function areanode(l,k)
-c       returns area of node k on level l
-c subroutine setdepth(levdim,hdkn,hden,zenv,area)
-c       sets up depth array for nodes
-c function scalcont(mode,scal)
-c       computes content of scalar in total domain
-c function scalcontk(mode,scal,k)
-c       computes content of scalar at node k
-c
-c revision log :
-c
-c 23.01.2004	ggu	new routines scalcontkh and scalmass
-c 23.01.2004	ggu	-> FIXME: scalmass should go to other file
-c 22.02.2005	ggu	routines deleted: tempvele saltvele conzvele
-c 25.08.2005	ggu	bug in dvanode fixed (use * instead of +)
-c 29.11.2006	ggu	in copydepth do not set to 0 old depths
-c 07.11.2008	ggu	new helper routine make_new_depth()
-c 23.03.2010	ggu	changed v6.1.1
-c 16.12.2010	ggu	setdepth() changed for sigma levels
-c 25.10.2011	ggu	hlhv eliminated
-c 04.11.2011	ggu	adapted for hybrid coordinates
-c 08.11.2011	dbf&ggu	bug in setdepth(): 1 -> l
-c 11.11.2011	ggu	error message for negative last layer
-c 22.11.2011	ggu	changed VERS_6_1_37
-c 09.12.2011	ggu	changed VERS_6_1_38
-c 30.03.2012	ggu	changed VERS_6_1_51
-c 29.03.2013	ggu	avoid call to areaele -> ev(10,ie)
-c 13.06.2013	ggu	new helper functions make_old_depth and copy_depth
-c 12.09.2013	ggu	changed VERS_6_1_67
-c 29.11.2013	ggu	new subroutine masscont()
-c 05.12.2013	ggu	changed VERS_6_1_70
-c 18.06.2014	ggu	changed VERS_6_1_77
-c 13.10.2014	ggu	changed VERS_7_0_2
-c 23.12.2014	ggu	changed VERS_7_0_11
-c 19.01.2015	ggu	changed VERS_7_1_3
-c 05.06.2015	ggu	changed VERS_7_1_12
-c 10.07.2015	ggu	changed VERS_7_1_50
-c 17.07.2015	ggu	changed VERS_7_1_80
-c 20.07.2015	ggu	changed VERS_7_1_81
-c 24.07.2015	ggu	changed VERS_7_1_82
-c 23.09.2015	ggu	changed VERS_7_2_4
-c 05.11.2015	ggu	changed VERS_7_3_12
-c 18.12.2015	ggu	changed VERS_7_3_17
-c 05.12.2017	ggu	changed VERS_7_5_39
-c 03.02.2019	ggu	in setdepth check for zero layer thickness
-c 14.02.2019	ggu	changed VERS_7_5_56
-c 16.02.2019	ggu	changed VERS_7_5_60
-c 01.04.2021	ggu	dimension check in dep3dnod()
-c 02.06.2021	ggu	computing depth at node run over nkn_inner
-c 06.04.2022	ggu	area and depth routines adapted with ie_mpi
-c 11.10.2022	ggu	new routine initialize_layer_depth
-c 02.04.2023	ggu	to compute total mass only run over nkn_inner
-c 09.05.2023    lrp     introduce top layer index variable
-c 05.06.2023    lrp     introduce z-star
-c
-c****************************************************************
+! routines for dealing with elements
+!
+! contents :
+!
+! function depele(ie,mode)
+!       computes total (average) depth of element ie
+! subroutine dep3dele(ie,mode,nlev,h)
+!       computes (average) depth of element ie for all layers
+! subroutine dep3dnod(k,mode,flev,nlev,h)
+!       computes depth of node k for all layers
+! function zetaele(ie,mode)
+!       computes (average) zeta of element ie
+! function volele(ie,mode)
+!       computes volume of element ie
+! function areaele(ie)
+!       computes area of element ie
+! subroutine nindex(ie,n,kn)
+!       returns node index for one element
+! subroutine setdepele(ie,h)
+!       sets depth for element ie
+! subroutine depvele(ie,mode,n,h)
+!       computes depth of vertices in element ie
+! function depfvol(ie,ii,mode)
+!       computes total depth in vertex ii of element ie
+! function scalele(ie,sev)
+!       returns average of scalar sev in element ie
+! subroutine scalvele(ie,sv,n,s)
+!       returns scalar value s of vertices in element ie
+! subroutine tempvele(ie,n,s)
+! subroutine saltvele(ie,n,s)
+! subroutine conzvele(ie,n,s)
+! subroutine setsvele(ie,sev,s)
+!       sets scalar values sev to s in element ie
+! subroutine addsvele(ie,sev,s)
+!       adds scalar value s to sev in element ie
+! subroutine elenmax(text,nmax)
+!       checks maximum of vertices of element
+! subroutine ele2node(sev,sv)
+!       computes nodal values from element values (scalar)
+! subroutine elebase(ie,n,ibase)
+!       returns number of vertices and pointer into element array
+! subroutine set_area
+!       sets up area for nodes
+! subroutine dvanode(l,k,mode,dep,vol,area)
+!       returns depth, volume and area of node k on level l
+! function depnode(l,k,mode)
+!       returns depth of node k on level l
+! function volnode(l,k,mode)
+!       returns volume of node k on level l
+! function areanode(l,k)
+!       returns area of node k on level l
+! subroutine setdepth(levdim,hdkn,hden,zenv,area)
+!       sets up depth array for nodes
+! function scalcont(mode,scal)
+!       computes content of scalar in total domain
+! function scalcontk(mode,scal,k)
+!       computes content of scalar at node k
+!
+! revision log :
+!
+! 23.01.2004	ggu	new routines scalcontkh and scalmass
+! 23.01.2004	ggu	-> FIXME: scalmass should go to other file
+! 22.02.2005	ggu	routines deleted: tempvele saltvele conzvele
+! 25.08.2005	ggu	bug in dvanode fixed (use * instead of +)
+! 29.11.2006	ggu	in copydepth do not set to 0 old depths
+! 07.11.2008	ggu	new helper routine make_new_depth()
+! 23.03.2010	ggu	changed v6.1.1
+! 16.12.2010	ggu	setdepth() changed for sigma levels
+! 25.10.2011	ggu	hlhv eliminated
+! 04.11.2011	ggu	adapted for hybrid coordinates
+! 08.11.2011	dbf&ggu	bug in setdepth(): 1 -> l
+! 11.11.2011	ggu	error message for negative last layer
+! 22.11.2011	ggu	changed VERS_6_1_37
+! 09.12.2011	ggu	changed VERS_6_1_38
+! 30.03.2012	ggu	changed VERS_6_1_51
+! 29.03.2013	ggu	avoid call to areaele -> ev(10,ie)
+! 13.06.2013	ggu	new helper functions make_old_depth and copy_depth
+! 12.09.2013	ggu	changed VERS_6_1_67
+! 29.11.2013	ggu	new subroutine masscont()
+! 05.12.2013	ggu	changed VERS_6_1_70
+! 18.06.2014	ggu	changed VERS_6_1_77
+! 13.10.2014	ggu	changed VERS_7_0_2
+! 23.12.2014	ggu	changed VERS_7_0_11
+! 19.01.2015	ggu	changed VERS_7_1_3
+! 05.06.2015	ggu	changed VERS_7_1_12
+! 10.07.2015	ggu	changed VERS_7_1_50
+! 17.07.2015	ggu	changed VERS_7_1_80
+! 20.07.2015	ggu	changed VERS_7_1_81
+! 24.07.2015	ggu	changed VERS_7_1_82
+! 23.09.2015	ggu	changed VERS_7_2_4
+! 05.11.2015	ggu	changed VERS_7_3_12
+! 18.12.2015	ggu	changed VERS_7_3_17
+! 05.12.2017	ggu	changed VERS_7_5_39
+! 03.02.2019	ggu	in setdepth check for zero layer thickness
+! 14.02.2019	ggu	changed VERS_7_5_56
+! 16.02.2019	ggu	changed VERS_7_5_60
+! 01.04.2021	ggu	dimension check in dep3dnod()
+! 02.06.2021	ggu	computing depth at node run over nkn_inner
+! 06.04.2022	ggu	area and depth routines adapted with ie_mpi
+! 11.10.2022	ggu	new routine initialize_layer_depth
+! 02.04.2023	ggu	to compute total mass only run over nkn_inner
+! 09.05.2023    lrp     introduce top layer index variable
+! 05.06.2023    lrp     introduce z-star
+!
+!****************************************************************
 
 	function depele(ie,mode)
 
-c computes total (average) depth of element ie
+! computes total (average) depth of element ie
 
 	use mod_hydro
 	use basin
@@ -169,11 +169,11 @@ c computes total (average) depth of element ie
 
 	end
 
-c****************************************************************
+!****************************************************************
 
 	subroutine dep3dele(ie,mode,nlev,h)
 
-c computes (average) depth of element ie for all layers
+! computes (average) depth of element ie for all layers
 
 	use mod_layer_thickness
 	use levels
@@ -203,11 +203,11 @@ c computes (average) depth of element ie for all layers
 
 	end
 
-c****************************************************************
+!****************************************************************
 
 	subroutine dep3dnod(k,mode,flev,nlev,h)
 
-c computes depth of node k for all layers
+! computes depth of node k for all layers
 
 	use mod_layer_thickness
 	use levels
@@ -248,11 +248,11 @@ c computes depth of node k for all layers
 	stop 'error stop dep3dnod: nlev>ndim'
 	end
 	
-c****************************************************************
+!****************************************************************
 
 	function zetaele(ie,mode)
 
-c computes (average) zeta of element ie
+! computes (average) zeta of element ie
 
 	use mod_hydro
 
@@ -286,11 +286,11 @@ c computes (average) zeta of element ie
 
 	end
 
-c****************************************************************
+!****************************************************************
 
 	function volele(ie,mode)
 
-c computes volume of element ie
+! computes volume of element ie
 
 	implicit none
 
@@ -308,11 +308,11 @@ c computes volume of element ie
 
 	end
 
-c****************************************************************
+!****************************************************************
 
 	function areaele(ie)
 
-c computes area of element ie
+! computes area of element ie
 
 	use evgeom
 
@@ -325,11 +325,11 @@ c computes area of element ie
 
 	end
 
-c****************************************************************
+!****************************************************************
 
 	subroutine nindex(ie,n,kn)
 
-c returns node index for one element
+! returns node index for one element
 
 	use basin
 
@@ -350,11 +350,11 @@ c returns node index for one element
 
 	end
 
-c****************************************************************
+!****************************************************************
 
 	subroutine setdepele(ie,h)
 
-c sets depth for element ie
+! sets depth for element ie
 
 	use basin
 
@@ -374,11 +374,11 @@ c sets depth for element ie
 
 	end
 
-c****************************************************************
+!****************************************************************
 
 	subroutine depvele(ie,mode,n,h)
 
-c computes depth of vertices in element ie
+! computes depth of vertices in element ie
 
 	use mod_hydro
 	use basin
@@ -411,11 +411,11 @@ c computes depth of vertices in element ie
 
 	end
 
-c****************************************************************
+!****************************************************************
 
 	function depfvol(ie,ii,mode)
 
-c computes total depth in vertex ii of element ie
+! computes total depth in vertex ii of element ie
 
 	use mod_hydro
 	use basin
@@ -445,13 +445,13 @@ c computes total depth in vertex ii of element ie
 
 	end
 
-c****************************************************************
-c****************************************************************
-c****************************************************************
+!****************************************************************
+!****************************************************************
+!****************************************************************
 
 	function scalele(ie,sev)
 
-c returns average of scalar sev in element ie
+! returns average of scalar sev in element ie
 
 	implicit none
 
@@ -471,11 +471,11 @@ c returns average of scalar sev in element ie
 
 	end
 
-c****************************************************************
+!****************************************************************
 
 	subroutine scalvele(ie,sv,n,s)
 
-c returns scalar value s of vertices in element ie
+! returns scalar value s of vertices in element ie
 
 	implicit none
 
@@ -493,13 +493,13 @@ c returns scalar value s of vertices in element ie
 
 	end
 
-c****************************************************************
-c****************************************************************
-c****************************************************************
+!****************************************************************
+!****************************************************************
+!****************************************************************
 
 	subroutine setsvele(ie,sev,s)
 
-c sets scalar values sev to s in element ie
+! sets scalar values sev to s in element ie
 
 	implicit none
 
@@ -515,11 +515,11 @@ c sets scalar values sev to s in element ie
 
 	end
 
-c****************************************************************
+!****************************************************************
 
 	subroutine addsvele(ie,sev,s)
 
-c adds scalar value s to sev in element ie
+! adds scalar value s to sev in element ie
 
 	implicit none
 
@@ -535,13 +535,13 @@ c adds scalar value s to sev in element ie
 
 	end
 
-c****************************************************************
+!****************************************************************
 
-c***********************************************************
+!***********************************************************
 
 	subroutine elenmax(text,nmax)
 
-c checks maximum of vertices of element
+! checks maximum of vertices of element
 
 	implicit none
 
@@ -556,11 +556,11 @@ c checks maximum of vertices of element
 
 	end
 
-c***********************************************************
+!***********************************************************
 
 	subroutine ele2node(sev,sv)
 
-c computes nodal values from element values (scalar)
+! computes nodal values from element values (scalar)
 
 	use mod_hydro
 	use basin
@@ -630,11 +630,11 @@ c computes nodal values from element values (scalar)
 
 	end
 
-c***********************************************************
+!***********************************************************
 
 	subroutine elebase(ie,n,ibase)
 
-c returns number of vertices and pointer into element array
+! returns number of vertices and pointer into element array
 
 	implicit none
 
@@ -647,13 +647,13 @@ c returns number of vertices and pointer into element array
 
 	end
 
-c***********************************************************
-c***********************************************************
-c***********************************************************
+!***********************************************************
+!***********************************************************
+!***********************************************************
 
 	subroutine set_area
 
-c sets up area for nodes
+! sets up area for nodes
 
 	use levels
 	use basin
@@ -696,11 +696,11 @@ c sets up area for nodes
 
 	end
 
-c***********************************************************
+!***********************************************************
 
 	subroutine dvanode(l,k,mode,dep,vol,area)
 
-c returns depth, volume and area of node k on level l
+! returns depth, volume and area of node k on level l
 
 	use mod_layer_thickness
 	use mod_area
@@ -728,11 +728,11 @@ c returns depth, volume and area of node k on level l
 
 	end
 
-c***********************************************************
+!***********************************************************
 
 	function depnode(l,k,mode)
 
-c returns depth of node k on level l
+! returns depth of node k on level l
 
 	use mod_layer_thickness
 
@@ -754,11 +754,11 @@ c returns depth of node k on level l
 
 	end
 
-c***********************************************************
+!***********************************************************
 
 	function volnode(l,k,mode)
 
-c returns volume of node k on level l
+! returns volume of node k on level l
 
 	implicit none
 
@@ -773,11 +773,11 @@ c returns volume of node k on level l
 
 	end
 
-c***********************************************************
+!***********************************************************
 
 	function areanode(l,k)
 
-c returns area of node k on level l
+! returns area of node k on level l
 
 	use mod_area
 
@@ -791,11 +791,11 @@ c returns area of node k on level l
 
 	end
 
-c***********************************************************
+!***********************************************************
 
 	subroutine copydepth(levdim,hdkn,hdko,hden,hdeo)
 
-c sets up depth array for nodes
+! sets up depth array for nodes
 
 	use basin, only : nkn,nel,ngr,mbw
 
@@ -825,11 +825,11 @@ c sets up depth array for nodes
 
 	end
 
-c***********************************************************
+!***********************************************************
 
 	subroutine copy_depth
 
-c shell (helper) for copydepth
+! shell (helper) for copydepth
 
 	use mod_layer_thickness
 	use levels, only : nlvdi,nlv
@@ -840,7 +840,7 @@ c shell (helper) for copydepth
 
 	end
 
-c***********************************************************
+!***********************************************************
 
 	subroutine initialize_layer_depth
 
@@ -851,11 +851,11 @@ c***********************************************************
 
 	end
 
-c***********************************************************
+!***********************************************************
 
 	subroutine make_new_depth
 
-c shell (helper) for setdepth
+! shell (helper) for setdepth
 
 	use mod_layer_thickness
 	use mod_area
@@ -868,11 +868,11 @@ c shell (helper) for setdepth
 
 	end
 
-c***********************************************************
+!***********************************************************
 
 	subroutine make_old_depth
 
-c shell (helper) for setdepth
+! shell (helper) for setdepth
 
 	use mod_layer_thickness
 	use mod_area
@@ -885,11 +885,11 @@ c shell (helper) for setdepth
 
 	end
 
-c***********************************************************
+!***********************************************************
 
 	subroutine check_diff_depth
 
-c checks differences between old and new depth values (debug)
+! checks differences between old and new depth values (debug)
 
 	use mod_layer_thickness
 	use levels, only : nlvdi,nlv
@@ -917,11 +917,11 @@ c checks differences between old and new depth values (debug)
 
 	end
 	  
-c***********************************************************
+!***********************************************************
 
 	subroutine setdepth(levdim,hdkn,hden,zenv,area)
 
-c sets up depth array for nodes
+! sets up depth array for nodes
 
 	use mod_depth
 	use evgeom
@@ -960,16 +960,16 @@ c sets up depth array for nodes
 	hmin = -99999.
 	hmin = 0.
 
-c----------------------------------------------------------------
-c initialize and copy
-c----------------------------------------------------------------
+!----------------------------------------------------------------
+! initialize and copy
+!----------------------------------------------------------------
 
 	hdkn = 0.
 	hden = 0.
 
-c----------------------------------------------------------------
-c compute volumes at node
-c----------------------------------------------------------------
+!----------------------------------------------------------------
+! compute volumes at node
+!----------------------------------------------------------------
 
 	call get_sigma_info(nlev,nsigma,hsigma)
 	bsigma = nsigma .gt. 0
@@ -993,13 +993,13 @@ c----------------------------------------------------------------
 	    lmin3v(ii) = jlhkv(k)
  	  end do	  
 
-          call compute_zadaptive_info(ie,nlv,lmin3v,lmax,
-     +		hlv,zenv(:,ie),hm3v(:,ie),nadapt,ladapt,hadapt,cadapt)
+          call compute_zadaptive_info(ie,nlv,lmin3v,lmax,            &
+      &		hlv,zenv(:,ie),hm3v(:,ie),nadapt,ladapt,hadapt,cadapt)
 	  call set_zadapt_info(ie,nadapt,hadapt)
 
-c	  -------------------------------------------------------
-c	  nodal values
-c	  -------------------------------------------------------
+!	  -------------------------------------------------------
+!	  nodal values
+!	  -------------------------------------------------------
 
 	  do ii=1,n
 
@@ -1059,9 +1059,9 @@ c	  -------------------------------------------------------
 !	  in hdkn is volume of finite volume around k
 !	  in sigma layers hdkn already contains nodal depth
 
-c	  -------------------------------------------------------
-c	  element values
-c	  -------------------------------------------------------
+!	  -------------------------------------------------------
+!	  element values
+!	  -------------------------------------------------------
 
 	  k = 0
 	  ii = 0
@@ -1117,9 +1117,9 @@ c	  -------------------------------------------------------
           call shympi_exchange_and_sum_3d_nodes(hdkn)
 	end if
 
-c----------------------------------------------------------------
-c compute depth at nodes
-c----------------------------------------------------------------
+!----------------------------------------------------------------
+! compute depth at nodes
+!----------------------------------------------------------------
 
 	do k=1,nkn_inner
 	  lmax = ilhkv(k)
@@ -1152,9 +1152,9 @@ c----------------------------------------------------------------
 	  end do
 	end do
 
-c----------------------------------------------------------------
-c echange nodal values
-c----------------------------------------------------------------
+!----------------------------------------------------------------
+! echange nodal values
+!----------------------------------------------------------------
 
 	if( shympi_partition_on_nodes() ) then
 	  !call shympi_comment('exchanging hdkn')
@@ -1162,9 +1162,9 @@ c----------------------------------------------------------------
 	  !call shympi_barrier
 	end if
 
-c----------------------------------------------------------------
-c end of routine
-c----------------------------------------------------------------
+!----------------------------------------------------------------
+! end of routine
+!----------------------------------------------------------------
 
 	return
    77	continue
@@ -1178,11 +1178,11 @@ c----------------------------------------------------------------
 	stop 'error stop setdepth: last layer negative'
 	end
 
-c***********************************************************
+!***********************************************************
 
 	function masscont(mode)
 
-c computes content of water mass in total domain
+! computes content of water mass in total domain
 
 	use levels
 	use basin, only : nkn,nel,ngr,mbw
@@ -1212,11 +1212,11 @@ c computes content of water mass in total domain
 
 	end
 
-c***********************************************************
+!***********************************************************
 
 	function scalcont(mode,scal)
 
-c computes content of scalar in total domain
+! computes content of scalar in total domain
 
 	use levels
 	use basin, only : nkn,nel,ngr,mbw
@@ -1251,11 +1251,11 @@ c computes content of scalar in total domain
 
 	end
 
-c***********************************************************
+!***********************************************************
 
 	function scalcontk(mode,scal,k)
  
-c computes content of scalar at node k
+! computes content of scalar at node k
  
 	use levels
 	use basin, only : nkn,nel,ngr,mbw
@@ -1282,11 +1282,11 @@ c computes content of scalar at node k
  
         end
  
-c***********************************************************
+!***********************************************************
 
 	function scalcontkh(scal,k,depth)
  
-c computes content of scalar at node k (with given depth)
+! computes content of scalar at node k (with given depth)
  
 	use levels
 	use basin, only : nkn,nel,ngr,mbw
@@ -1314,11 +1314,11 @@ c computes content of scalar at node k (with given depth)
  
         end
  
-c***********************************************************
+!***********************************************************
 
         subroutine scalmass(scal,depth,tstot)
 
-c this routine into another file... FIXME
+! this routine into another file... FIXME
 
 	use levels, only : nlvdi,nlv
 	use basin, only : nkn,nel,ngr,mbw
@@ -1343,5 +1343,5 @@ c this routine into another file... FIXME
 
         end
 
-c***********************************************************
+!***********************************************************
 

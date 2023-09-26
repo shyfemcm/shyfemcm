@@ -126,13 +126,13 @@
 
         !---------------------------------------------------
 
-        subroutine mfs_qfluxes(ddlon,ddlat, &
-     &                   days,ih,im, &
-     &                   sstk,uuw,vvw, &
-     &                   tairk,dew,cc, &
-     &                   uub,vvb,norspeed,pa, &
-     &                   qswa, &
-     &                   qsens,qlat,qlong,evap, &
+        subroutine mfs_qfluxes(ddlon,ddlat,        &
+     &                   days,ih,im,               &
+     &                   sstk,uuw,vvw,             &
+     &                   tairk,dew,cc,             &
+     &                   uub,vvb,norspeed,pa,      &
+     &                   qswa,                     &
+     &                   qsens,qlat,qlong,evap,    &
      &                   cd)
 
         implicit none
@@ -153,9 +153,9 @@
        real, parameter  :: stefan = 5.67e-8
        real, parameter  :: emic = 0.97
 
-       real,parameter, dimension(6) :: ahr = &
-     &           (/ 0.934e-3, 0.788e-4, 0.868e-4, &
-     &              -0.616e-6,-.120e-5,-.214e-5 / )
+       real,parameter, dimension(6) :: ahr =             &
+       &           (/ 0.934e-3, 0.788e-4, 0.868e-4,      &
+       &              -0.616e-6,-.120e-5,-.214e-5 /)
 
        real pa         
        real ea

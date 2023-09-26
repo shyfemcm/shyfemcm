@@ -48,24 +48,24 @@
 	integer, parameter :: nbvdim = 27	!total number of values
 	integer, parameter :: nbfdim = 17	!total number of files
 
-        character*6, save :: bnd_par_names(nbvdim) =
-     +			(/
-     +                   'iqual ','ibtyp ','kranf ','krend ','zval  '
-     +                  ,'ampli ','period','phase ','zref  ','ktilt '
-     +                  ,'intpol','levmax','igrad0','zfact '
-     +                  ,'conz  ','temp  ','salt  ','levmin','kref  '
-     +                  ,'ztilt ','tramp ','levflx','nad   ','lgrpps'
-     +                  ,'tnudge','kmanf ','kmend '
-     +                  /)
+        character*6, save :: bnd_par_names(nbvdim) =                    &
+      &			(/                                                       &
+      &                   'iqual ','ibtyp ','kranf ','krend ','zval  '  &
+      &                  ,'ampli ','period','phase ','zref  ','ktilt '  &
+      &                  ,'intpol','levmax','igrad0','zfact '           &
+      &                  ,'conz  ','temp  ','salt  ','levmin','kref  '  &
+      &                  ,'ztilt ','tramp ','levflx','nad   ','lgrpps'  &
+      &                  ,'tnudge','kmanf ','kmend '                    &
+      &                  /)
 
-	character*6, save :: bnd_file_names(nbfdim) =
-     +			(/
-     +                   'boundn','conzn ','saltn ','tempn '
-     +                  ,'bio2dn','tox3dn','mercn ','s4mern'
-     +                  ,'sed2dn','mud2dn','lam2dn','dmf2dn'
-     +                  ,'bfm1bc','bfm2bc','bfm3bc','bfmbcn'
-     +                  ,'vel3dn'
-     +                  /)
+	character*6, save :: bnd_file_names(nbfdim) =                        &
+      &			(/                                                       &
+      &                   'boundn','conzn ','saltn ','tempn '           &
+      &                  ,'bio2dn','tox3dn','mercn ','s4mern'           &
+      &                  ,'sed2dn','mud2dn','lam2dn','dmf2dn'           &
+      &                  ,'bfm1bc','bfm2bc','bfm3bc','bfmbcn'           &
+      &                  ,'vel3dn'                                      &
+      &                  /)
 
 	integer, save :: nbc = 0
 	integer, save :: nrb = 0

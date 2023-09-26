@@ -68,8 +68,7 @@
         integer  :: nel
         integer  :: nlv
 
-        if( nlv == nlv_waves .and. nel == nel_waves .and.
-     +      nkn == nkn_waves ) return
+        if( nlv == nlv_waves .and. nel == nel_waves .and. nkn == nkn_waves ) return
 
         if( nlv > 0 .or. nel > 0 .or. nkn > 0 ) then
           if( nlv == 0 .or. nel == 0 .or. nkn == 0 ) then

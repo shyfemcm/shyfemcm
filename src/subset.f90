@@ -24,25 +24,25 @@
 !
 !--------------------------------------------------------------------------
 
-c routines to create subsets for OMP
-c
-c contents :
-c
-c revision log :
-c
-c 01.09.2015	erp	code written from scratch
-c 18.09.2015	ggu	code integrated
-c 29.09.2015	ggu	new routine which is much faster
-c 30.09.2015	ggu	new routine domain_clusterization_dummy()
-c 05.10.2015	ggu	equilibrate subset filling
-c 12.10.2015	ggu	changed VERS_7_3_3
-c 16.11.2015	ggu	changed VERS_7_3_14
-c 16.02.2019	ggu	changed VERS_7_5_60
-c 13.03.2019	ggu	changed VERS_7_5_61
-c
-c***********************************************************
-c***********************************************************
-c***********************************************************
+! routines to create subsets for OMP
+!
+! contents :
+!
+! revision log :
+!
+! 01.09.2015	erp	code written from scratch
+! 18.09.2015	ggu	code integrated
+! 29.09.2015	ggu	new routine which is much faster
+! 30.09.2015	ggu	new routine domain_clusterization_dummy()
+! 05.10.2015	ggu	equilibrate subset filling
+! 12.10.2015	ggu	changed VERS_7_3_3
+! 16.11.2015	ggu	changed VERS_7_3_14
+! 16.02.2019	ggu	changed VERS_7_5_60
+! 13.03.2019	ggu	changed VERS_7_5_61
+!
+!***********************************************************
+!***********************************************************
+!***********************************************************
 
 !==================================================================
         module mod_subset
@@ -72,7 +72,7 @@ c***********************************************************
 
       end subroutine domain_clusterization
 
-c***********************************************************
+!***********************************************************
 
       subroutine domain_clusterization_eric
       
@@ -141,8 +141,7 @@ c***********************************************************
 	nodes_map(0,i) = i
 	do j=1,nel
 	  
-	  if(nen3v(1,j) .eq. i .OR. nen3v(2,j) .eq. i .OR.
-     +  	  nen3v(3,j) .eq. i) then
+	  if(nen3v(1,j) .eq. i .OR. nen3v(2,j) .eq. i .OR. nen3v(3,j) .eq. i) then
 	    nodes_map(n,i) = j
 	    n = n+1
 	  endif
@@ -175,8 +174,8 @@ c***********************************************************
       
       do while(stop_criterion)  
             
-      call greedy_subset(start,numsubset,subset_lenght,subset,
-     +                       nel,max_l,min_l)
+      call greedy_subset(start,numsubset,subset_lenght,subset,    &
+      &                       nel,max_l,min_l)
       
       print *,"  SUBSET = ",numsubset," LENGTH = ",subset_lenght
       
@@ -240,10 +239,10 @@ c***********************************************************
      
       end subroutine domain_clusterization_eric
 
-c***********************************************************
+!***********************************************************
       
-      subroutine greedy_subset(start,numsubset,subset_lenght,subset
-     +                           ,nel,max_l,min_l)
+      subroutine greedy_subset(start,numsubset,subset_lenght,subset     &
+      &                           ,nel,max_l,min_l)
       
       implicit none
       
@@ -299,7 +298,7 @@ c***********************************************************
       
       end subroutine greedy_subset
 
-c***********************************************************
+!***********************************************************
 
       logical function indipendent_element(i,j)
       
@@ -323,7 +322,7 @@ c***********************************************************
       
       end function indipendent_element
       
-c***********************************************************
+!***********************************************************
 
       subroutine check_subset(elem,max_subset_el,nel)
       
@@ -365,9 +364,9 @@ c***********************************************************
       
       end subroutine check_subset
 
-c***********************************************************
-c***********************************************************
-c***********************************************************
+!***********************************************************
+!***********************************************************
+!***********************************************************
 
 	subroutine domain_clusterization_ggu
 
@@ -711,7 +710,7 @@ c***********************************************************
 
 	end subroutine domain_clusterization_ggu
 
-c***********************************************************
+!***********************************************************
 
 	subroutine domain_clusterization_dummy
 

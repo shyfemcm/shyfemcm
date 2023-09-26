@@ -47,7 +47,7 @@
 
         contains
 
-*******************************************************************
+!*******************************************************************
 
 	subroutine mod_layer_thickness_init(nkn,nel,nlv)
 
@@ -55,14 +55,14 @@
         integer nel
         integer nlv
 
-        if( nkn == nkn_layer_thickness .and. nel == nel_layer_thickness
-     +  .and. nlv == nlv_layer_thickness ) return
+        if( nkn == nkn_layer_thickness .and. nel == nel_layer_thickness    &
+      &  .and. nlv == nlv_layer_thickness ) return
 
         if( nkn > 0 .or. nel > 0 .or. nlv > 0 ) then
           if( nkn == 0 .or. nel == 0 .or. nlv == 0 ) then
             write(6,*) 'nkn,nel,nlv: ',nkn,nel,nlv
-            stop 'error stop mod_layer_thickness_init: '//
-     +				'incompatible params'
+            stop 'error stop mod_layer_thickness_init: '//     &
+      &				'incompatible params'
           end if
         end if
 

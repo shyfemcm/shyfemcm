@@ -26,130 +26,130 @@
 !
 !--------------------------------------------------------------------------
 
-c bnd administration routines
-c
-c contents :
-c
-c subroutine inbnds
-c subroutine rdbnds(ibc)
-c subroutine ckbnds
-c subroutine prbnds
-c subroutine tsbnds
-c
-c function zvbnds(ibc)			 returns value of open boundary
-c subroutine stybnd(ibc,ibtyp)		 sets type of open boundary
-c subroutine infobnd(ibc,ibtype,...)	 returns important info on boundary ibc
-c function itybnd(ibc)			 returns type of open boundary
-c function nbnds			 returns total number of open b.
-c function nkbnds(ibc)			 returns total number of nodes of ibc
-c function kbnd(i)			 returns i th node of all b. nodes
-c subroutine kanfend(ibc,kranf,krend)    returns index of first and last bnode
-c function kbnds(ibc,i)			 returns i th node of boundary ibc
-c subroutine irbnds(ibc,ndim,idim,nodes) returns nodes of boundary ibc
-c subroutine setget_bnd_par(ibc,ientry,value,bset) sets/gets value at ientry
-c subroutine setbnd(ibc,value,barray)	 sets boundary ibc to value in barray
-c
-c subroutine setbc(value,array,flag)	 sets all open boundaries to value
-c subroutine chkibc(ibc,errtext)	 checks if ibc is in bounds
-c
-c notes :
-c
-c for scalars: -999. uses ambient value
-c
-c what to do when adding a new parameter to boundary section:
-c	add parameter in rdbnds() with description
-c	add parameter to array in mod_bnd.f
-c what to do when adding a new file name to boundary section:
-c	add file name in rdbnds() with description
-c	add file name to array in mod_bnd.f
-c	if needed add file name in get_boundary_file()
-c
-c revision log :
-c
-c 01.08.1997	ggu	$$1stnode - first boundary node was not registered
-c 23.09.1997	ggu	introduced conzn -> name of file for conz values
-c 30.09.1997	ggu	write error in prbnds
-c 03.12.1997	ggu	introduced tempn,saltn (see conzn)
-c 27.03.1998	ggu	new utility routines
-c 25.05.1998	ggu	documentation (DOCS)
-c 20.06.1998	ggu	documentation for momentum input
-c 13.07.1998	ggu	implemented ibtyp = 4
-c 23.07.1998	ggu	documentation
-c 24.08.1998	ggu	BC for concentration is bnd(20,..)
-c 24.08.1998	ggu	BC for maximum input level is bnd(12,..) -> levmax
-c 27.08.1998	ggu	accessor function levbnd for levmax
-c 22.01.1999	ggu	new subroutine setbnd
-c 08.07.1999	ggu	bug with iqual -> ibtyp not respected
-c 20.01.2000	ggu	call to rdbnds without dimension -> use getdim
-c 07.04.2000	ggu	new subroutine setbc
-c 07.05.2001	ggu	introduced new variable zfact
-c 25.09.2001	ggu	introduced bio2dn
-c 07.08.2003	ggu	check for nrb in rdbnds
-c 15.10.2004	ggu	new boundary types and sedin
-c 02.03.2005	ggu	new nbdim for 3D boundary values
-c 02.03.2005	ggu	some new helper functions
-c 07.11.2005	ccf	introduced sed2dn
-c 16.02.2006	ggu	introduced tox3dn
-c 07.04.2008	aac	introduced bfm1bc bfm2bc bfm3bc OB condition for ERSEM
-c 17.04.2008	ggu	deleted infobnd(), levbnd()
-c 28.04.2008	ggu	call to nrdpar in double precision
-c 29.04.2008	ggu&aac	new boundary arrays for ERSEM
-c 30.05.2008	ggu	eliminated numbers for parameters
-c 03.06.2008	ggu	new parameters levmin, kref
-c 06.06.2008	ggu	completely restructured
-c 02.04.2009	ggu	intpol default is 0, some unused routines deleted
-c 20.04.2009	ggu	new variable ztilt, ndim substituted with nbvdim
-c 23.03.2010	ggu	changed v6.1.1
-c 28.09.2010	ggu	changed VERS_6_1_11
-c 17.02.2011	ggu	changed VERS_6_1_18
-c 23.02.2011	ggu	new parameters tramp and levflx implemented
-c 01.03.2011	ggu	changed VERS_6_1_20
-c 21.06.2012	ggu&aar	new file names for mud module
-c 26.06.2012	ggu	changed VERS_6_1_55
-c 29.11.2013	ggu	allow for non continous boundary numbering
-c 05.12.2013	ggu	changed VERS_6_1_70
-c 28.01.2014	ggu	changed VERS_6_1_71
-c 28.03.2014	ggu	new parameter lgrpps
-c 05.05.2014	ggu	changed VERS_6_1_74
-c 16.06.2014	ggu	new include file bnd.h (with nbndim)
-c 25.06.2014	ggu	new routine exists_bnd_name()
-c 21.10.2014	ggu	changed VERS_7_0_3
-c 29.10.2014	ccf	include vel3dn boundary file
-c 03.11.2014	ggu	nbdim deleted
-c 23.12.2014	ggu	changed VERS_7_0_11
-c 19.01.2015	ggu	changed VERS_7_1_3
-c 23.06.2015	ggu	setbc() deleted, nrz,nrq eliminated
-c 10.07.2015	ggu	changed VERS_7_1_50
-c 17.07.2015	ggu	changed VERS_7_1_80
-c 20.07.2015	ggu	changed VERS_7_1_81
-c 30.07.2015	ggu	changed VERS_7_1_83
-c 05.11.2015	ggu	changed VERS_7_3_12
-c 18.12.2015	ggu	changed VERS_7_3_17
-c 14.01.2016	ggu	check of boundaries considers mpi subdomains
-c 15.02.2016	ggu	check if boundary is given twice
-c 19.02.2016	ggu	changed VERS_7_5_3
-c 22.02.2016	ggu	new files bfmbcn integrated
-c 01.04.2016	ggu	restructured - arrays transfered to mod_bnd.f
-c 15.04.2016	ggu	changed VERS_7_5_8
-c 07.06.2016	ggu	changed VERS_7_5_12
-c 30.09.2016	ggu	changed VERS_7_5_18
-c 31.03.2017	ggu	changed VERS_7_5_24
-c 13.04.2017	ggu	use array feature of para for kbound
-c 05.12.2017	ggu	changed VERS_7_5_39
-c 03.04.2018	ggu	changed VERS_7_5_43
-c 19.04.2018	ggu	changed VERS_7_5_45
-c 25.10.2018	ggu	changed VERS_7_5_51
-c 18.12.2018	ggu	changed VERS_7_5_52
-c 16.02.2019	ggu	changed VERS_7_5_60
-c 13.03.2019	ggu	changed VERS_7_5_61
-c 20.03.2023	ggu	relax condition of no holes for ibtyp == 3
-c 24.05.2023	ggu	in ckbnds() more debug, new boundary_debug()
-c
-c************************************************************************
+! bnd administration routines
+!
+! contents :
+!
+! subroutine inbnds
+! subroutine rdbnds(ibc)
+! subroutine ckbnds
+! subroutine prbnds
+! subroutine tsbnds
+!
+! function zvbnds(ibc)			 returns value of open boundary
+! subroutine stybnd(ibc,ibtyp)		 sets type of open boundary
+! subroutine infobnd(ibc,ibtype,...)	 returns important info on boundary ibc
+! function itybnd(ibc)			 returns type of open boundary
+! function nbnds			 returns total number of open b.
+! function nkbnds(ibc)			 returns total number of nodes of ibc
+! function kbnd(i)			 returns i th node of all b. nodes
+! subroutine kanfend(ibc,kranf,krend)    returns index of first and last bnode
+! function kbnds(ibc,i)			 returns i th node of boundary ibc
+! subroutine irbnds(ibc,ndim,idim,nodes) returns nodes of boundary ibc
+! subroutine setget_bnd_par(ibc,ientry,value,bset) sets/gets value at ientry
+! subroutine setbnd(ibc,value,barray)	 sets boundary ibc to value in barray
+!
+! subroutine setbc(value,array,flag)	 sets all open boundaries to value
+! subroutine chkibc(ibc,errtext)	 checks if ibc is in bounds
+!
+! notes :
+!
+! for scalars: -999. uses ambient value
+!
+! what to do when adding a new parameter to boundary section:
+!	add parameter in rdbnds() with description
+!	add parameter to array in mod_bnd.f
+! what to do when adding a new file name to boundary section:
+!	add file name in rdbnds() with description
+!	add file name to array in mod_bnd.f
+!	if needed add file name in get_boundary_file()
+!
+! revision log :
+!
+! 01.08.1997	ggu	$$1stnode - first boundary node was not registered
+! 23.09.1997	ggu	introduced conzn -> name of file for conz values
+! 30.09.1997	ggu	write error in prbnds
+! 03.12.1997	ggu	introduced tempn,saltn (see conzn)
+! 27.03.1998	ggu	new utility routines
+! 25.05.1998	ggu	documentation (DOCS)
+! 20.06.1998	ggu	documentation for momentum input
+! 13.07.1998	ggu	implemented ibtyp = 4
+! 23.07.1998	ggu	documentation
+! 24.08.1998	ggu	BC for concentration is bnd(20,..)
+! 24.08.1998	ggu	BC for maximum input level is bnd(12,..) -> levmax
+! 27.08.1998	ggu	accessor function levbnd for levmax
+! 22.01.1999	ggu	new subroutine setbnd
+! 08.07.1999	ggu	bug with iqual -> ibtyp not respected
+! 20.01.2000	ggu	call to rdbnds without dimension -> use getdim
+! 07.04.2000	ggu	new subroutine setbc
+! 07.05.2001	ggu	introduced new variable zfact
+! 25.09.2001	ggu	introduced bio2dn
+! 07.08.2003	ggu	check for nrb in rdbnds
+! 15.10.2004	ggu	new boundary types and sedin
+! 02.03.2005	ggu	new nbdim for 3D boundary values
+! 02.03.2005	ggu	some new helper functions
+! 07.11.2005	ccf	introduced sed2dn
+! 16.02.2006	ggu	introduced tox3dn
+! 07.04.2008	aac	introduced bfm1bc bfm2bc bfm3bc OB condition for ERSEM
+! 17.04.2008	ggu	deleted infobnd(), levbnd()
+! 28.04.2008	ggu	call to nrdpar in double precision
+! 29.04.2008	ggu&aac	new boundary arrays for ERSEM
+! 30.05.2008	ggu	eliminated numbers for parameters
+! 03.06.2008	ggu	new parameters levmin, kref
+! 06.06.2008	ggu	completely restructured
+! 02.04.2009	ggu	intpol default is 0, some unused routines deleted
+! 20.04.2009	ggu	new variable ztilt, ndim substituted with nbvdim
+! 23.03.2010	ggu	changed v6.1.1
+! 28.09.2010	ggu	changed VERS_6_1_11
+! 17.02.2011	ggu	changed VERS_6_1_18
+! 23.02.2011	ggu	new parameters tramp and levflx implemented
+! 01.03.2011	ggu	changed VERS_6_1_20
+! 21.06.2012	ggu&aar	new file names for mud module
+! 26.06.2012	ggu	changed VERS_6_1_55
+! 29.11.2013	ggu	allow for non continous boundary numbering
+! 05.12.2013	ggu	changed VERS_6_1_70
+! 28.01.2014	ggu	changed VERS_6_1_71
+! 28.03.2014	ggu	new parameter lgrpps
+! 05.05.2014	ggu	changed VERS_6_1_74
+! 16.06.2014	ggu	new include file bnd.h (with nbndim)
+! 25.06.2014	ggu	new routine exists_bnd_name()
+! 21.10.2014	ggu	changed VERS_7_0_3
+! 29.10.2014	ccf	include vel3dn boundary file
+! 03.11.2014	ggu	nbdim deleted
+! 23.12.2014	ggu	changed VERS_7_0_11
+! 19.01.2015	ggu	changed VERS_7_1_3
+! 23.06.2015	ggu	setbc() deleted, nrz,nrq eliminated
+! 10.07.2015	ggu	changed VERS_7_1_50
+! 17.07.2015	ggu	changed VERS_7_1_80
+! 20.07.2015	ggu	changed VERS_7_1_81
+! 30.07.2015	ggu	changed VERS_7_1_83
+! 05.11.2015	ggu	changed VERS_7_3_12
+! 18.12.2015	ggu	changed VERS_7_3_17
+! 14.01.2016	ggu	check of boundaries considers mpi subdomains
+! 15.02.2016	ggu	check if boundary is given twice
+! 19.02.2016	ggu	changed VERS_7_5_3
+! 22.02.2016	ggu	new files bfmbcn integrated
+! 01.04.2016	ggu	restructured - arrays transfered to mod_bnd.f
+! 15.04.2016	ggu	changed VERS_7_5_8
+! 07.06.2016	ggu	changed VERS_7_5_12
+! 30.09.2016	ggu	changed VERS_7_5_18
+! 31.03.2017	ggu	changed VERS_7_5_24
+! 13.04.2017	ggu	use array feature of para for kbound
+! 05.12.2017	ggu	changed VERS_7_5_39
+! 03.04.2018	ggu	changed VERS_7_5_43
+! 19.04.2018	ggu	changed VERS_7_5_45
+! 25.10.2018	ggu	changed VERS_7_5_51
+! 18.12.2018	ggu	changed VERS_7_5_52
+! 16.02.2019	ggu	changed VERS_7_5_60
+! 13.03.2019	ggu	changed VERS_7_5_61
+! 20.03.2023	ggu	relax condition of no holes for ibtyp == 3
+! 24.05.2023	ggu	in ckbnds() more debug, new boundary_debug()
+!
+!************************************************************************
 
 	subroutine inbnds
 
-c initializes boundary parameters
+! initializes boundary parameters
 
 	use mod_bnd
 
@@ -160,11 +160,11 @@ c initializes boundary parameters
 
 	end
 
-c************************************************************************
+!************************************************************************
 
 	subroutine rdbnds(ibc)
 
-c reads boundary info from STR file
+! reads boundary info from STR file
 
 	use mod_bnd
 	use mod_bound_geom
@@ -215,167 +215,167 @@ c reads boundary info from STR file
 	call sctpar('bound')
 	call sctfnm('bound')
 
-c DOCS	START	S_bound
-c
-c These parameters determine the open boundary nodes and the type
-c of the boundary: level or flux boundary. At the first the water levels
-c are imposed, on the second the fluxes are prescribed.
-c
-c There may be multiple sections |bound| in one parameter input file,
-c describing all open boundary conditions necessary. Every section
-c must therefore be supplied with a boundary number. The numbering
-c of the open boundaries must
-c be increasing. The number of the boundary must be specified
-c directly after the keyword |bound|, such as |bound1| or |bound 1|.
-c
-c |kbound|	Array containing the node numbers that are part of the
-c		open boundary. The node numbers must form one contiguous
-c		line with the domain (elements) to the left. This
-c		corresponds to an anti-clockwise sense. The type of
-c		boundary depends on the	value of |ibtyp|. In case this value
-c		is 1 or 2 at least two nodes must be given.
+! DOCS	START	S_bound
+!
+! These parameters determine the open boundary nodes and the type
+! of the boundary: level or flux boundary. At the first the water levels
+! are imposed, on the second the fluxes are prescribed.
+!
+! There may be multiple sections |bound| in one parameter input file,
+! describing all open boundary conditions necessary. Every section
+! must therefore be supplied with a boundary number. The numbering
+! of the open boundaries must
+! be increasing. The number of the boundary must be specified
+! directly after the keyword |bound|, such as |bound1| or |bound 1|.
+!
+! |kbound|	Array containing the node numbers that are part of the
+!		open boundary. The node numbers must form one contiguous
+!		line with the domain (elements) to the left. This
+!		corresponds to an anti-clockwise sense. The type of
+!		boundary depends on the	value of |ibtyp|. In case this value
+!		is 1 or 2 at least two nodes must be given.
 
 	call para_add_array_value('kbound',0.)
 
-c |ibtyp|	Type of open boundary. 
-c		\begin{description}
-c		\item[0] No boundary values specified
-c		\item[1] Level boundary. At this open boundary
-c			 the water level is imposed and the prescribed
-c			 values are interpreted as water levels in meters.
-c			 If no value for |ibtyp| is specified this
-c			 is the default.
-c		\item[2] Flux boundary. Here the discharge in \dischargeunit
-c			 has to be prescribed.
-c		\item[3] Internal flux boundary. As with |ibtyp = 2| a
-c			 discharge has to be imposed, but the node where
-c			 discharge is imposed can be an internal node
-c			 and need not be on the outer boundary of
-c			 the domain. For every node in |kbound| the
-c			 volume rate specified will be added to the
-c			 existing water volume. This behavior is different
-c			 from the |ibtyp = 2| where the whole boundary
-c			 received the discharge specified.
-c		\item[4] Momentum input. The node or nodes may be internal.
-c			 This feature can be used to describe local 
-c			 acceleration of the water column. 
-c			 The unit is force / density [\maccelunit].
-c			 In other words it is the rate of volume 
-c			 [\dischargeunit] times the velocity [m/s] 
-c			 to which the water is accelerated.
-c		\end{description}
-c |iqual|	If the boundary conditions for this open boundary
-c		are equal to the ones of boundary |i|, then
-c		setting |iqual = i| copies all the values of
-c		boundary |i| to the actual boundary. Note that the
-c		value of |iqual| must be smaller than the number
-c		of the actual boundary, i.e., boundary |i| must have
-c		been defined before. (This feature is temporarily
-c		not working; please do not use.)
+! |ibtyp|	Type of open boundary. 
+!		\begin{description}
+!		\item[0] No boundary values specified
+!		\item[1] Level boundary. At this open boundary
+!			 the water level is imposed and the prescribed
+!			 values are interpreted as water levels in meters.
+!			 If no value for |ibtyp| is specified this
+!			 is the default.
+!		\item[2] Flux boundary. Here the discharge in \dischargeunit
+!			 has to be prescribed.
+!		\item[3] Internal flux boundary. As with |ibtyp = 2| a
+!			 discharge has to be imposed, but the node where
+!			 discharge is imposed can be an internal node
+!			 and need not be on the outer boundary of
+!			 the domain. For every node in |kbound| the
+!			 volume rate specified will be added to the
+!			 existing water volume. This behavior is different
+!			 from the |ibtyp = 2| where the whole boundary
+!			 received the discharge specified.
+!		\item[4] Momentum input. The node or nodes may be internal.
+!			 This feature can be used to describe local 
+!			 acceleration of the water column. 
+!			 The unit is force / density [\maccelunit].
+!			 In other words it is the rate of volume 
+!			 [\dischargeunit] times the velocity [m/s] 
+!			 to which the water is accelerated.
+!		\end{description}
+! |iqual|	If the boundary conditions for this open boundary
+!		are equal to the ones of boundary |i|, then
+!		setting |iqual = i| copies all the values of
+!		boundary |i| to the actual boundary. Note that the
+!		value of |iqual| must be smaller than the number
+!		of the actual boundary, i.e., boundary |i| must have
+!		been defined before. (This feature is temporarily
+!		not working; please do not use.)
 
 	call addpar('ibtyp',1.)
 	call addpar('iqual',0.)
 
-c The next parameters give a possibility to specify the file name
-c of the various input files that are to be read by the model.
-c Values for the boundary condition can be given at any time step.
-c The model interpolates in between given time steps if needed. The
-c grade of interpolation can be given by |intpol|.
-c
-c All files are in ASCII and share a common format.
-c The file must contain two columns, the first giving the
-c time of simulation in seconds that refers to the value
-c given in the second column. The value in the second
-c column must be in the unit of the variable that is given.
-c The time values must be in increasing order.
-c There must be values for the whole simulation,
-c i.e., the time value of the first line must be smaller
-c or equal than the start of the simulation, and the time
-c value of the last line must be greater or equal than the
-c end of the simulation.
+! The next parameters give a possibility to specify the file name
+! of the various input files that are to be read by the model.
+! Values for the boundary condition can be given at any time step.
+! The model interpolates in between given time steps if needed. The
+! grade of interpolation can be given by |intpol|.
+!
+! All files are in ASCII and share a common format.
+! The file must contain two columns, the first giving the
+! time of simulation in seconds that refers to the value
+! given in the second column. The value in the second
+! column must be in the unit of the variable that is given.
+! The time values must be in increasing order.
+! There must be values for the whole simulation,
+! i.e., the time value of the first line must be smaller
+! or equal than the start of the simulation, and the time
+! value of the last line must be greater or equal than the
+! end of the simulation.
 
-c |boundn|	File name that contains values for the boundary condition.
-c		The value of the variable given in the second column
-c		must be in the unit determined by |ibtyp|, i.e.,
-c		in meters for a level boundary, in \dischargeunit for
-c		a flux boundary and in \maccelunit for a momentum
-c		input.
-c |zfact|	Factor with which the values from |boundn|
-c		are multiplied to form the final value of the
-c		boundary condition. E.g., this value can be used to
-c		set up a quick sensitivity run by multiplying
-c		all discharges by a factor without generating
-c		a new file. (Default 1)
+! |boundn|	File name that contains values for the boundary condition.
+!		The value of the variable given in the second column
+!		must be in the unit determined by |ibtyp|, i.e.,
+!		in meters for a level boundary, in \dischargeunit for
+!		a flux boundary and in \maccelunit for a momentum
+!		input.
+! |zfact|	Factor with which the values from |boundn|
+!		are multiplied to form the final value of the
+!		boundary condition. E.g., this value can be used to
+!		set up a quick sensitivity run by multiplying
+!		all discharges by a factor without generating
+!		a new file. (Default 1)
 
 	call addfnm('boundn',' ')
 	call addpar('zfact',1.)
 
-c |levmin, levmax|	A point discharge normally distributes its discharge
-c		over the whole water column. If it is important that in
-c		a 3D simulation the water mass discharge is concentrated 
-c		only in some levels, the parameters |levmin| and |levmax|
-c		can be used. They indicate the lowest and deepest level over
-c		which the discharge is distributed. Default values are 0, which
-c		indicate that the discharge is distributed over the
-c		whole water column. Setting only |levmax| distributes from
-c		the surface to this level, and setting only |levmin|
-c		distributes from the bottom to this level.
+! |levmin, levmax|	A point discharge normally distributes its discharge
+!		over the whole water column. If it is important that in
+!		a 3D simulation the water mass discharge is concentrated 
+!		only in some levels, the parameters |levmin| and |levmax|
+!		can be used. They indicate the lowest and deepest level over
+!		which the discharge is distributed. Default values are 0, which
+!		indicate that the discharge is distributed over the
+!		whole water column. Setting only |levmax| distributes from
+!		the surface to this level, and setting only |levmin|
+!		distributes from the bottom to this level.
 
 	call addpar('levmin',0.)
 	call addpar('levmax',0.)
 
-c |conzn, tempn, saltn|	File names that contain values for the respective
-c			boundary condition, i.e., for concentration,
-c			temperature and salinity. The format is the same
-c			as for file |boundn|. The unit of the values
-c			given in the second column must the ones of the
-c			variable, i.e., arbitrary unit for concentration,
-c			centigrade for temperature and psu (per mille)
-c			for salinity.
+! |conzn, tempn, saltn|	File names that contain values for the respective
+!			boundary condition, i.e., for concentration,
+!			temperature and salinity. The format is the same
+!			as for file |boundn|. The unit of the values
+!			given in the second column must the ones of the
+!			variable, i.e., arbitrary unit for concentration,
+!			centigrade for temperature and psu (per mille)
+!			for salinity.
 
 	call addfnm('conzn',' ')
 	call addfnm('tempn',' ')
 	call addfnm('saltn',' ')
 
-c |vel3dn|	File name that contains current velocity values for the 
-c		boundary condition.  The format is the same as for file 
-c		|tempn| but it has two variables: 
-c	 	current velocity in x and current velocity in y.
-c		Velocity can be nudged or imposed depending on the value 
-c		of |tnudge| (mandatory). The unit is [m/s].
+! |vel3dn|	File name that contains current velocity values for the 
+!		boundary condition.  The format is the same as for file 
+!		|tempn| but it has two variables: 
+!	 	current velocity in x and current velocity in y.
+!		Velocity can be nudged or imposed depending on the value 
+!		of |tnudge| (mandatory). The unit is [m/s].
 
 	call addfnm('vel3dn',' ')
 
-c |tnudge|	Relaxation time for nudging of boundary velocity.
-c		For |tnudge| = 0. velocities are imposed, for
-c		|tnudge| > 0. velocities are nudged. The
-c		default is -1 which means do nothing. Unit is [s].
-c		(Default -1)
+! |tnudge|	Relaxation time for nudging of boundary velocity.
+!		For |tnudge| = 0. velocities are imposed, for
+!		|tnudge| > 0. velocities are nudged. The
+!		default is -1 which means do nothing. Unit is [s].
+!		(Default -1)
 
         call addpar('tnudge',-1.)
 
-c The next variables specify the name of the boundary value file
-c for different modules. Please refer to the documentation of the
-c single modules for the units of the variables.
+! The next variables specify the name of the boundary value file
+! for different modules. Please refer to the documentation of the
+! single modules for the units of the variables.
 
-c |bio2dn|	File name that contains values for the ecological
-c		module (EUTRO-WASP).
-c |sed2dn|	File name that contains values for the sediment
-c		transport module.
-c		The unit of the values given
-c		in the second and following columns (equal to the 
-c		number of defined grainsize in parameter |sedgrs|).
+! |bio2dn|	File name that contains values for the ecological
+!		module (EUTRO-WASP).
+! |sed2dn|	File name that contains values for the sediment
+!		transport module.
+!		The unit of the values given
+!		in the second and following columns (equal to the 
+!		number of defined grainsize in parameter |sedgrs|).
 
-c |mud2dn|	File name that contains values for the fluid mud
-c		module.
-c |lam2dn|	File name that contains values for the fluid mud
-c		module (boundary condition for the structural parameter, 
-c		to be implemented).
-c |dmf2dn|	File name that contains values for the fluid mud
-c		module (boundary conditions for the advection of flocsizes,
-c		to be implemented).
-c |tox3dn|	File name that contains values for the toxicological
-c		module.
+! |mud2dn|	File name that contains values for the fluid mud
+!		module.
+! |lam2dn|	File name that contains values for the fluid mud
+!		module (boundary condition for the structural parameter, 
+!		to be implemented).
+! |dmf2dn|	File name that contains values for the fluid mud
+!		module (boundary conditions for the advection of flocsizes,
+!		to be implemented).
+! |tox3dn|	File name that contains values for the toxicological
+!		module.
 
 	call addfnm('bio2dn',' ')
 	call addfnm('sed2dn',' ')
@@ -384,171 +384,171 @@ c		module.
 	call addfnm('dmf2dn',' ')
 	call addfnm('tox3dn',' ')
 
-cc File name for OB condition in ERSEM MODULE - undocumented
-cc ... will be removed sooner or later ...
+!c File name for OB condition in ERSEM MODULE - undocumented
+!c ... will be removed sooner or later ...
 
 	call addfnm('bfm1bc',' ')
 	call addfnm('bfm2bc',' ')
 	call addfnm('bfm3bc',' ')
 
-c |bfmbcn|	File name that contains values for the bfm module.
+! |bfmbcn|	File name that contains values for the bfm module.
 
 	call addfnm('bfmbcn',' ')
 
-c |mercn|	File name that contains values for the mercury module.
+! |mercn|	File name that contains values for the mercury module.
 
 	call addfnm('mercn',' ')
 
-c |s4mern|      File name that contains values for the mercury module.
+! |s4mern|      File name that contains values for the mercury module.
 
         call addfnm('s4mern',' ')
 
 
-c |intpol|	Order of interpolation for the boundary values read
-c		in files. Use for 1 for stepwise (no) interpolation,
-c		2 for linear and 4 for cubic interpolation. 
-c		The default is linear interpolation, except for
-c		water level boundaries (|ibtyp=1|) where cubic
-c		interpolation is used.
+! |intpol|	Order of interpolation for the boundary values read
+!		in files. Use for 1 for stepwise (no) interpolation,
+!		2 for linear and 4 for cubic interpolation. 
+!		The default is linear interpolation, except for
+!		water level boundaries (|ibtyp=1|) where cubic
+!		interpolation is used.
 
 	call addpar('intpol',0.)
 
-c The next parameters can be used to impose a sinusoidal water level
-c (tide) or flux at the open boundary. These values are used if no
-c boundary file |boundn| has been given. The values must be in the unit
-c of the intended variable determined by |ibtyp|.
+! The next parameters can be used to impose a sinusoidal water level
+! (tide) or flux at the open boundary. These values are used if no
+! boundary file |boundn| has been given. The values must be in the unit
+! of the intended variable determined by |ibtyp|.
 
-c |ampli|	Amplitude of the sinus function imposed. (Default 0)
-c |period|	Period of the sinus function. (Default 43200, 12 hours)
-c |phase|	Phase shift of the sinus function imposed. A positive value
-c		of one quarter of the period reproduces a cosine
-c		function. (Default 0)
-c |zref|	Reference level of the sinus function imposed. If only
-c		|zref| is specified (|ampli = 0|) a constant value
-c		of |zref| is imposed on the open boundary.
+! |ampli|	Amplitude of the sinus function imposed. (Default 0)
+! |period|	Period of the sinus function. (Default 43200, 12 hours)
+! |phase|	Phase shift of the sinus function imposed. A positive value
+!		of one quarter of the period reproduces a cosine
+!		function. (Default 0)
+! |zref|	Reference level of the sinus function imposed. If only
+!		|zref| is specified (|ampli = 0|) a constant value
+!		of |zref| is imposed on the open boundary.
 
 	call addpar('ampli',0.)
 	call addpar('period',43200.)
 	call addpar('phase',0.)
 	call addpar('zref',0.)
 
-c With the next parameters a constant value can be imposed for the 
-c variables of concentration, temperature and salinity. In this case
-c no file with boundary values has to be supplied. The default for all
-c values is 0, i.e., if no file with boundary values is supplied and
-c no constant is set the value of 0 is imposed on the open boundary.
-c A special value of -999 is also allowed. In this case the value
-c imposed is the ambient value of the parameter close to the boundary.
+! With the next parameters a constant value can be imposed for the 
+! variables of concentration, temperature and salinity. In this case
+! no file with boundary values has to be supplied. The default for all
+! values is 0, i.e., if no file with boundary values is supplied and
+! no constant is set the value of 0 is imposed on the open boundary.
+! A special value of -999 is also allowed. In this case the value
+! imposed is the ambient value of the parameter close to the boundary.
 
-c |conz, temp, salt|	Constant boundary values for concentration,
-c			temperature and salinity respectively. If these
-c			values are set no boundary file has to be supplied.
-c			(Default 0)
+! |conz, temp, salt|	Constant boundary values for concentration,
+!			temperature and salinity respectively. If these
+!			values are set no boundary file has to be supplied.
+!			(Default 0)
 
 	call addpar('conz',0.)			!$$conz
 	call addpar('temp',0.)			!$$baroc
 	call addpar('salt',0.)			!$$baroc
 
-c The next two values are used for constant momentum input. 
-c This feature can be used to describe local acceleration of the
-c water column. The values give the input of momentum 
-c in x and y direction. The unit is force / density (\maccelunit).
-c In other words it is the rate of volume (\dischargeunit) times
-c the velocity (m/s) to which the water is accelerated.
-c
-c These values are used if 
-c boundary condition |ibtyp = 4| has been chosen and
-c no boundary input file has been given.
-c If the momentum input is varying then it may be specified with
-c the file |boundn|. In this case the file |boundn| must contain
-c three columns, the first for the time, and the other two for
-c the momentum input in $x,y$ direction.
-c
-c Please note that this feature is temporarily not available.
-c
-c |umom, vmom|		Constant values for momentum input. (Default 0)
+! The next two values are used for constant momentum input. 
+! This feature can be used to describe local acceleration of the
+! water column. The values give the input of momentum 
+! in x and y direction. The unit is force / density (\maccelunit).
+! In other words it is the rate of volume (\dischargeunit) times
+! the velocity (m/s) to which the water is accelerated.
+!
+! These values are used if 
+! boundary condition |ibtyp = 4| has been chosen and
+! no boundary input file has been given.
+! If the momentum input is varying then it may be specified with
+! the file |boundn|. In this case the file |boundn| must contain
+! three columns, the first for the time, and the other two for
+! the momentum input in $x,y$ direction.
+!
+! Please note that this feature is temporarily not available.
+!
+! |umom, vmom|		Constant values for momentum input. (Default 0)
 
 	call addpar('umom',0.)
 	call addpar('vmom',0.)
 
-c The next two values can be used
-c to achieve the tilting of the open boundary if only one water level value
-c is given. If only |ktilt| is given then the boundary values
-c are tilted to be in equilibrium with the Coriolis force. This may avoid
-c artificial currents along the boundary. |ktilt| must be a boundary node
-c on the boundary.
-c
-c If |ztilt| is given the tilting of the boundary is explicitly set
-c to this value. The tilting of the first node of the boundary is set 
-c to $-|ztilt|$
-c and the last one to $+|ztilt|$. The total amount of tilting is
-c therefore is $2 \cdot |ztilt|$. If |ktilt| is not specified
-c then a linear interpolation between the first and the last boundary
-c node will be carried out. If also |ktilt| is specified then
-c the boundary values are arranged that the water levels are 
-c tilted around |ktilt|, e.g., $-|ztilt|$ at the first boundary node,
-c 0 at |ktilt|, and $+|ztilt|$ at the last boundary node.
-c
-c |ktilt|		Node of boundary around which tilting should
-c			take place. (Default 0, i.e., no tilting)
-c |ztilt|		Explicit value for tilting (unit meters).
-c			(Default 0)
+! The next two values can be used
+! to achieve the tilting of the open boundary if only one water level value
+! is given. If only |ktilt| is given then the boundary values
+! are tilted to be in equilibrium with the Coriolis force. This may avoid
+! artificial currents along the boundary. |ktilt| must be a boundary node
+! on the boundary.
+!
+! If |ztilt| is given the tilting of the boundary is explicitly set
+! to this value. The tilting of the first node of the boundary is set 
+! to $-|ztilt|$
+! and the last one to $+|ztilt|$. The total amount of tilting is
+! therefore is $2 \cdot |ztilt|$. If |ktilt| is not specified
+! then a linear interpolation between the first and the last boundary
+! node will be carried out. If also |ktilt| is specified then
+! the boundary values are arranged that the water levels are 
+! tilted around |ktilt|, e.g., $-|ztilt|$ at the first boundary node,
+! 0 at |ktilt|, and $+|ztilt|$ at the last boundary node.
+!
+! |ktilt|		Node of boundary around which tilting should
+!			take place. (Default 0, i.e., no tilting)
+! |ztilt|		Explicit value for tilting (unit meters).
+!			(Default 0)
 
 	call addpar('ktilt',0.)
 	call addpar('ztilt',0.)
 
-c Other parameters:
+! Other parameters:
 
-c |igrad0|		If different from 0 a zero gradient boundary
-c			condition will be implemented. This is already the
-c			case for scalars under outflowing conditions. However,
-c			with |igrad0| different from 0 this conditions
-c			will be used also for inflow conditions. (Default 0)
+! |igrad0|		If different from 0 a zero gradient boundary
+!			condition will be implemented. This is already the
+!			case for scalars under outflowing conditions. However,
+!			with |igrad0| different from 0 this conditions
+!			will be used also for inflow conditions. (Default 0)
 
 	call addpar('igrad0',0.)	!use 0 gradient for scalars
 
-c |tramp|		Use this value to start smoothly a discharge
-c			boundary condition. If set it indicates the
-c			time (seconds) that will be used to increase
-c			a discharge from 0 to the desired value (Default 0)
+! |tramp|		Use this value to start smoothly a discharge
+!			boundary condition. If set it indicates the
+!			time (seconds) that will be used to increase
+!			a discharge from 0 to the desired value (Default 0)
 
 	call addpar('tramp',0.)		!start smoothly for discharge
 
-c |levflx|		If discharge is depending on the water level
-c			(e.g., lake outflow) then this parameter indicates to
-c			use one of the possible outflow curves. Please
-c			note that the flow dependence on the water level
-c			must be programmed in the routine $|level\_flux()|$.
-c			(Default 0)
+! |levflx|		If discharge is depending on the water level
+!			(e.g., lake outflow) then this parameter indicates to
+!			use one of the possible outflow curves. Please
+!			note that the flow dependence on the water level
+!			must be programmed in the routine $|level\_flux()|$.
+!			(Default 0)
 
 	call addpar('levflx',0.)	!use level-discharge relationship
 
-c |nad|			On the open boundaries it is sometimes convenient
-c			to not compute the non-linear terms in the momentum
-c			equation because instabilities may occur. Setting 
-c			the parameter |nad| to a value different from 0
-c			indicates that in the first |nad| nodes from the
-c			boundary the non linear terms are switched off.
-c			(Default 0)
+! |nad|			On the open boundaries it is sometimes convenient
+!			to not compute the non-linear terms in the momentum
+!			equation because instabilities may occur. Setting 
+!			the parameter |nad| to a value different from 0
+!			indicates that in the first |nad| nodes from the
+!			boundary the non linear terms are switched off.
+!			(Default 0)
 
 	call addpar('nad',-1.)		!no advective terms for this boundary
 
-c |lgrpps|		Indicates the number of particles released at
-c			the boundary for the lagrangian module. If positive
-c			it is the number of particles per second released
-c			along the boundary. If negative its absolute
-c			value indicates the particles per volume flux
-c			(unit \dischargeunit) released along the boundary.
-c			(Default 0)
+! |lgrpps|		Indicates the number of particles released at
+!			the boundary for the lagrangian module. If positive
+!			it is the number of particles per second released
+!			along the boundary. If negative its absolute
+!			value indicates the particles per volume flux
+!			(unit \dischargeunit) released along the boundary.
+!			(Default 0)
 
 	call addpar('lgrpps',0.)	!particles per second for lagrange
 					!if negative parts per volume flux
 
-c DOCS	END
+! DOCS	END
 
-cc undocumented
+!c undocumented
 	call addpar('kref',0.)		!not working...
-c here add dummy variables
+! here add dummy variables
 	call addpar('zval',0.)
 	call addpar('kmanf',0.)
 	call addpar('kmend',0.)
@@ -628,11 +628,11 @@ c here add dummy variables
         stop 'error stop : rdbnds'
 	end
 
-c********************************************************************
+!********************************************************************
 
 	subroutine ckbnds
 
-c checks boundary information read from STR
+! checks boundary information read from STR
 
 	use mod_bnd
 	use mod_bound_geom
@@ -775,11 +775,11 @@ c checks boundary information read from STR
          call set_bnd_ipar(ibc,'kmanf',kmanf)
          call set_bnd_ipar(ibc,'kmend',kmend)
 !         write(6,'(a,10i5)') 'boundary: ',my_id,ibc,istop
-!     +			,kranf,krend,kmanf,kmend
+!      &			,kranf,krend,kmanf,kmend
 
          if( istop > 0 ) then
-           write(6,'(a,10i5)') 'boundary: ',my_id,ibc,istop
-     +			,kranf,krend,kmanf,kmend
+           write(6,'(a,10i5)') 'boundary: ',my_id,ibc,istop          &
+      &			,kranf,krend,kmanf,kmend
            if( shympi_is_parallel() ) then
              if( istop == krtot ) then
                !write(6,*) 'boundary not in this domain... ok'
@@ -806,7 +806,7 @@ c checks boundary information read from STR
 
 	end
 
-c********************************************************************
+!********************************************************************
 
 	subroutine boundary_debug(ibc)
 
@@ -852,7 +852,7 @@ c********************************************************************
 
 	end
 
-c********************************************************************
+!********************************************************************
 
 	subroutine prbnds
 
@@ -894,7 +894,7 @@ c********************************************************************
 	return
 	end
 
-c********************************************************************
+!********************************************************************
 
 	subroutine tsbnds
 
@@ -921,17 +921,17 @@ c********************************************************************
 
 	end
 
-c********************************************************************
-c********************************************************************
-c********************************************************************
-c      utility routines
-c********************************************************************
-c********************************************************************
-c********************************************************************
+!********************************************************************
+!********************************************************************
+!********************************************************************
+!      utility routines
+!********************************************************************
+!********************************************************************
+!********************************************************************
 
 	function zvbnds(ibc)
 
-c returns value of open boundary
+! returns value of open boundary
 
 	implicit none
 
@@ -947,11 +947,11 @@ c returns value of open boundary
 
 	end
 
-c********************************************************************
+!********************************************************************
 
 	subroutine setbnds(ibc,zval)
 
-c sets value of open boundary
+! sets value of open boundary
 
 	implicit none
 
@@ -964,11 +964,11 @@ c sets value of open boundary
 
 	end
 
-c********************************************************************
+!********************************************************************
 
 	subroutine stybnd(ibc,ibtyp)
 
-c sets type of open boundary
+! sets type of open boundary
 
 	implicit none
 
@@ -981,11 +981,11 @@ c sets type of open boundary
 
 	end
 
-c********************************************************************
+!********************************************************************
 
 	function itybnd(ibc)
 
-c returns type of open boundary
+! returns type of open boundary
 
 	implicit none
 
@@ -1001,11 +1001,11 @@ c returns type of open boundary
 
 	end
 
-c********************************************************************
+!********************************************************************
 
 	function nbnds()
 
-c returns total number of open boundaries
+! returns total number of open boundaries
 
 	use mod_bnd
 
@@ -1018,11 +1018,11 @@ c returns total number of open boundaries
 
 	end
 
-c********************************************************************
+!********************************************************************
 
 	function nkbnd()
 
-c returns total number of open boundary nodes
+! returns total number of open boundary nodes
 
 	use mod_bnd
 
@@ -1035,11 +1035,11 @@ c returns total number of open boundary nodes
 
 	end
 
-c********************************************************************
+!********************************************************************
 
 	function nkbnds(ibc)
 
-c returns total number of nodes of boundary ibc
+! returns total number of nodes of boundary ibc
 
 	implicit none
 
@@ -1058,11 +1058,11 @@ c returns total number of nodes of boundary ibc
 
 	end
 
-c********************************************************************
+!********************************************************************
 
 	function kbnd(i)
 
-c returns i th node of all boundary nodes
+! returns i th node of all boundary nodes
 
 	use mod_bnd
 	use mod_bound_geom
@@ -1081,11 +1081,11 @@ c returns i th node of all boundary nodes
 
 	end
 
-c********************************************************************
+!********************************************************************
 
 	subroutine kanfend(ibc,kranf,krend)
 
-c returns index of first and last boundary node of boundary ibc
+! returns index of first and last boundary node of boundary ibc
 
 	implicit none
 
@@ -1099,12 +1099,12 @@ c returns index of first and last boundary node of boundary ibc
 
 	end
 
-c********************************************************************
+!********************************************************************
 
 	subroutine kmanfend(ibc,kmanf,kmend)
 
-c returns index of first and last boundary node of boundary ibc
-c mpi version
+! returns index of first and last boundary node of boundary ibc
+! mpi version
 
 	implicit none
 
@@ -1118,11 +1118,11 @@ c mpi version
 
 	end
 
-c********************************************************************
+!********************************************************************
 
 	function kbndind(ibc,i)
 
-c returns global index of i th node of boundary ibc
+! returns global index of i th node of boundary ibc
 
 	implicit none
 
@@ -1148,11 +1148,11 @@ c returns global index of i th node of boundary ibc
 
 	end
 
-c********************************************************************
+!********************************************************************
 
 	function kbnds(ibc,i)
 
-c returns i th node of boundary ibc
+! returns i th node of boundary ibc
 
 	use mod_bound_geom
 
@@ -1180,11 +1180,11 @@ c returns i th node of boundary ibc
 
 	end
 
-c********************************************************************
+!********************************************************************
 
 	subroutine irbnds(ibc,ndim,idim,nodes)
 
-c returns nodes of boundary ibc (maximum ndim)
+! returns nodes of boundary ibc (maximum ndim)
 
 	use mod_bound_geom
 
@@ -1213,7 +1213,7 @@ c returns nodes of boundary ibc (maximum ndim)
 
 	end
 
-c********************************************************************
+!********************************************************************
 
         subroutine ksinget(ibc,ampli,period,phase,zref)
         call chkibc(ibc,'ksinget:')
@@ -1223,11 +1223,11 @@ c********************************************************************
         call get_bnd_par(ibc,'zref',zref)
         end
 
-c********************************************************************
+!********************************************************************
 
 	subroutine setbnd(ibc,value,barray)
 
-c sets boundary ibc to value in barray (apparently not used)
+! sets boundary ibc to value in barray (apparently not used)
 
 	use mod_bound_geom
 
@@ -1251,11 +1251,11 @@ c sets boundary ibc to value in barray (apparently not used)
 
 	end
 
-c********************************************************************
+!********************************************************************
 
         subroutine chkibc(ibc,errtext)
  
-c checks if ibc is in bounds
+! checks if ibc is in bounds
  
 	use mod_bnd
 
@@ -1272,7 +1272,7 @@ c checks if ibc is in bounds
 
 	end
 
-c********************************************************************
+!********************************************************************
 
 	subroutine is_closed(ibc,nbc,icl)
 
@@ -1296,7 +1296,7 @@ c********************************************************************
 
 	end
 
-c********************************************************************
+!********************************************************************
 
 	subroutine get_oscil(ibc,dtime,zvalue)
 
@@ -1317,19 +1317,19 @@ c********************************************************************
 
 	end
 
-c********************************************************************
-c********************************************************************
-c********************************************************************
-c
-c routines dealing with parameter values
-c
-c********************************************************************
-c********************************************************************
-c********************************************************************
+!********************************************************************
+!********************************************************************
+!********************************************************************
+!
+! routines dealing with parameter values
+!
+!********************************************************************
+!********************************************************************
+!********************************************************************
 
 	subroutine init_bnd_par(ibc)
 
-c initializes boundary ibc
+! initializes boundary ibc
 
 	use mod_bnd
 
@@ -1341,11 +1341,11 @@ c initializes boundary ibc
 
 	end
 
-c********************************************************************
+!********************************************************************
 
         subroutine setget_bnd_par(ibc,ientry,name,value,bset)
 
-c sets/gets value at entry ientry
+! sets/gets value at entry ientry
 
 	use mod_bnd
 
@@ -1372,7 +1372,7 @@ c sets/gets value at entry ientry
 
         end
 
-c********************************************************************
+!********************************************************************
  
         subroutine set_bnd_par(ibc,name,value)
         character*(*) name
@@ -1400,11 +1400,11 @@ c********************************************************************
 	ivalue = nint(value)
         end
 
-c********************************************************************
+!********************************************************************
 
 	subroutine copy_bnd_par(ibc)
 
-c copies parameter values
+! copies parameter values
 
 	use mod_bnd
 
@@ -1426,7 +1426,7 @@ c copies parameter values
 
 	end
 
-c********************************************************************
+!********************************************************************
 
 	subroutine get_bnd_npar(nbnd)
 
@@ -1440,11 +1440,11 @@ c********************************************************************
 
 	end
 
-c********************************************************************
+!********************************************************************
 
         function exists_bnd_par(name)
 
-c tests if parameter name exists
+! tests if parameter name exists
 
         implicit none
 
@@ -1457,11 +1457,11 @@ c tests if parameter name exists
 
 	end
 
-c********************************************************************
+!********************************************************************
 
         function iget_bnd_par_id(name,berror)
 
-c gets id given a parameter name
+! gets id given a parameter name
 
 	use mod_bnd
 
@@ -1491,11 +1491,11 @@ c gets id given a parameter name
 
         end
 
-c********************************************************************
+!********************************************************************
 
 	subroutine get_bnd_par_name(id,name)
 
-c gets parameter name given id
+! gets parameter name given id
 
 	use mod_bnd
 
@@ -1512,11 +1512,11 @@ c gets parameter name given id
 
 	end
 
-c********************************************************************
+!********************************************************************
 
 	subroutine check_bnd_par_entries(ibc,ball)
 
-c writes parameter values for given boundary
+! writes parameter values for given boundary
 
 	use mod_bnd
 
@@ -1540,19 +1540,19 @@ c writes parameter values for given boundary
 
         end
 
-c********************************************************************
-c********************************************************************
-c********************************************************************
-c
-c routines dealing with file names
-c
-c********************************************************************
-c********************************************************************
-c********************************************************************
+!********************************************************************
+!********************************************************************
+!********************************************************************
+!
+! routines dealing with file names
+!
+!********************************************************************
+!********************************************************************
+!********************************************************************
 
 	subroutine init_bnd_file(ibc)
 
-c initializes boundary ibc
+! initializes boundary ibc
 
 	use mod_bnd
 
@@ -1564,11 +1564,11 @@ c initializes boundary ibc
 
 	end
 
-c********************************************************************
+!********************************************************************
 
         subroutine setget_bnd_file(ibc,ientry,name,file,bset)
 
-c sets/gets file at entry ientry
+! sets/gets file at entry ientry
 
 	use mod_bnd
 
@@ -1595,7 +1595,7 @@ c sets/gets file at entry ientry
 
         end
 
-c********************************************************************
+!********************************************************************
  
         subroutine set_bnd_file(ibc,name,file)
         character*(*) name,file
@@ -1609,11 +1609,11 @@ c********************************************************************
         call setget_bnd_file(ibc,id,name,file,.false.)
         end
 
-c********************************************************************
+!********************************************************************
 
 	subroutine copy_bnd_file(ibc)
 
-c copies file names
+! copies file names
 
 	use mod_bnd
 
@@ -1633,7 +1633,7 @@ c copies file names
 
 	end
 
-c********************************************************************
+!********************************************************************
 
 	subroutine get_bnd_nfile(nbnd)
 
@@ -1647,11 +1647,11 @@ c********************************************************************
 
 	end
 
-c********************************************************************
+!********************************************************************
 
         function exists_bnd_file(name)
 
-c tests if file name exists
+! tests if file name exists
 
         implicit none
 
@@ -1664,11 +1664,11 @@ c tests if file name exists
 
 	end
 
-c********************************************************************
+!********************************************************************
 
         function iget_bnd_file_id(name,berror)
 
-c gets id given a file name
+! gets id given a file name
 
 	use mod_bnd
 
@@ -1698,11 +1698,11 @@ c gets id given a file name
 
         end
 
-c********************************************************************
+!********************************************************************
 
 	subroutine get_bnd_file_name(id,name)
 
-c gets file name given id
+! gets file name given id
 
 	use mod_bnd
 
@@ -1719,11 +1719,11 @@ c gets file name given id
 
 	end
 
-c********************************************************************
+!********************************************************************
 
 	subroutine check_bnd_file_entries(ibc,ball)
 
-c writes file names for given boundary
+! writes file names for given boundary
 
 	use mod_bnd
 
@@ -1747,9 +1747,9 @@ c writes file names for given boundary
 
         end
 
-c********************************************************************
-c********************************************************************
-c********************************************************************
+!********************************************************************
+!********************************************************************
+!********************************************************************
 
 	subroutine get_boundary_file(ibc,what,file)
 
@@ -1805,7 +1805,7 @@ c********************************************************************
 
 	end
 
-c********************************************************************
-c********************************************************************
-c********************************************************************
+!********************************************************************
+!********************************************************************
+!********************************************************************
 

@@ -63,8 +63,8 @@
 
         integer nkn, nel, nlv
 
-        if( nkn == nkn_diff_visc_fric .and. nel == nel_diff_visc_fric
-     +      .and. nlv == nlv_diff_visc_fric ) return
+        if( nkn == nkn_diff_visc_fric .and. nel == nel_diff_visc_fric   &
+     &      .and. nlv == nlv_diff_visc_fric ) return
 
         if( nel > 0 .or. nkn > 0 .or. nlv > 0 ) then
           if( nel == 0 .or. nkn == 0 .or. nlv == 0 ) then

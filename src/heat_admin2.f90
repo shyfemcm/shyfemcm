@@ -25,100 +25,100 @@
 !
 !--------------------------------------------------------------------------
 
-c heat flux module (file administration)
-c
-c contents :
-c
-c subroutine qflux_init
-c		initializes routines
-c subroutine qflux3d(it,dt,nkn,nlvdi,temp,dq)
-c		computes new temperature (forced by heat flux) - 3d version
-c
-c revision log :
-c
-c 01.02.2002	ggu	new as administrative routines
-c 11.04.2003	ggu	albedo introduced in heat2t
-c 16.08.2004	ggu	some comments on usage, heat2t copied to subqfxu4.f
-c 22.02.2005	ggu	subroutine qflux2d deleted
-c 23.03.2006	ggu	changed time step to real
-c 20.08.2007	ggu	prepared for evaporation - salinity feedback
-c 17.04.2008	ggu	save evaporation in evapv for later use
-c 17.11.2008	ggu	new call to qfcheck_file() before opening
-c 10.03.2009	ggu	new qflux_read(), new call to meteo_get_values()
-c 11.03.2009	ggu	new routine qflux_compute()
-c 27.08.2009	ggu	new call to heatgill, new routine heatareg
-c 11.11.2009	ggu	handle abosrption of short rad in more than one layer
-c 23.03.2010	ggu	changed v6.1.1
-c 04.03.2011	ggu	new routine heatgotm
-c 23.03.2011	ggu	new routine check_heat() to check for Nan, new iheat
-c 25.03.2011	ggu	new parameters iheat,hdecay,botabs
-c 14.04.2011	ggu	changed VERS_6_1_22
-c 14.02.2012	ggu	changed VERS_6_1_44
-c 30.03.2012	ggu	changed VERS_6_1_51
-c 29.04.2014	ccf	read qsens, qlat, long from file
-c 16.06.2014	ccf	new routine heatcoare, which also update wind stress
-c 20.06.2014	ccf	new routine for computing sea surface skin temperature
-c 18.07.2014	ggu	changed VERS_7_0_1
-c 05.11.2014	ggu	changed VERS_7_0_5
-c 26.11.2014	ggu	changed VERS_7_0_7
-c 05.12.2014	ggu	changed VERS_7_0_8
-c 19.01.2015	ggu	changed VERS_7_1_3
-c 26.02.2015	ggu	changed VERS_7_1_5
-c 30.04.2015	ggu	changed VERS_7_1_9
-c 05.06.2015	ggu	changed VERS_7_1_12
-c 10.07.2015	ggu	changed VERS_7_1_50
-c 17.07.2015	ggu	changed VERS_7_1_80
-c 20.07.2015	ggu	changed VERS_7_1_81
-c 18.09.2015	ccf	do not compute heat fluxes in dry nodes
-c 18.09.2015	ccf	checks only for levdbg > 2
-c 26.10.2015	ggu	critical omp sections introduced (eliminated data race)
-c 18.12.2015	ggu	changed VERS_7_3_17
-c 07.04.2016	ggu	compute total evaporation
-c 15.04.2016	ggu	changed VERS_7_5_8
-c 04.05.2016	ccf	do not pass albedo into heat2t
-c 04.05.2016	ggu	include effect of ice cover
-c 25.05.2016	ggu	changed VERS_7_5_10
-c 21.07.2016	ivn	isolp = 1, 2 length scale solar penetration (Jerlov) 
-c 09.09.2016	ggu	changed VERS_7_5_17
-c 29.09.2016	ivn	bug fix for isolp = 1
-c 24.01.2018	ggu	changed VERS_7_5_41
-c 03.04.2018	ggu	changed VERS_7_5_43
-c 16.10.2018	ggu	changed VERS_7_5_50
-c 14.02.2019	ggu	changed VERS_7_5_56
-c 16.02.2019	ggu	changed VERS_7_5_60
-c 13.03.2019	ggu	changed VERS_7_5_61
-c 10.12.2019	ggu	ice cover introduced, handle ice-water sensible heat
-c 11.11.2020	ggu	new ice model integrated, cleaned, documented
-c 13.11.2020	ggu	bug fix: correct rain from [m/s] to [mm/d]
-c 14.11.2020	ggu	allow for ice and other heat fluxes to coexist
-c 29.04.2022	ggu	check impossible heat flux values
-c 09.07.2022	ggu	kspecial for special output
-c 05.09.2022	ggu	debug output and use ustar in ice computation
-c 09.05.2023    lrp     introduce top layer index variable
-c
-c notes :
-c
-c qflux_init is called in subn11.f
-c qflux_read is called in subn11.f
-c qflux3d is called in newbcl.f
-c qfget is called in qflux3d (here)
-c
-c to use heat flux module insert in section "name" of STR file:
-c
-c $name
-c     qflux = 'qflux.dat'
-c $end
-c
-c if such a file is given the heat flux module is used and works
-c   without any other intervention (ibarcl>0)
-c
-c other notes in subqfxf.f
-c
-c*****************************************************************************
+! heat flux module (file administration)
+!
+! contents :
+!
+! subroutine qflux_init
+!		initializes routines
+! subroutine qflux3d(it,dt,nkn,nlvdi,temp,dq)
+!		computes new temperature (forced by heat flux) - 3d version
+!
+! revision log :
+!
+! 01.02.2002	ggu	new as administrative routines
+! 11.04.2003	ggu	albedo introduced in heat2t
+! 16.08.2004	ggu	some comments on usage, heat2t copied to subqfxu4.f
+! 22.02.2005	ggu	subroutine qflux2d deleted
+! 23.03.2006	ggu	changed time step to real
+! 20.08.2007	ggu	prepared for evaporation - salinity feedback
+! 17.04.2008	ggu	save evaporation in evapv for later use
+! 17.11.2008	ggu	new call to qfcheck_file() before opening
+! 10.03.2009	ggu	new qflux_read(), new call to meteo_get_values()
+! 11.03.2009	ggu	new routine qflux_compute()
+! 27.08.2009	ggu	new call to heatgill, new routine heatareg
+! 11.11.2009	ggu	handle abosrption of short rad in more than one layer
+! 23.03.2010	ggu	changed v6.1.1
+! 04.03.2011	ggu	new routine heatgotm
+! 23.03.2011	ggu	new routine check_heat() to check for Nan, new iheat
+! 25.03.2011	ggu	new parameters iheat,hdecay,botabs
+! 14.04.2011	ggu	changed VERS_6_1_22
+! 14.02.2012	ggu	changed VERS_6_1_44
+! 30.03.2012	ggu	changed VERS_6_1_51
+! 29.04.2014	ccf	read qsens, qlat, long from file
+! 16.06.2014	ccf	new routine heatcoare, which also update wind stress
+! 20.06.2014	ccf	new routine for computing sea surface skin temperature
+! 18.07.2014	ggu	changed VERS_7_0_1
+! 05.11.2014	ggu	changed VERS_7_0_5
+! 26.11.2014	ggu	changed VERS_7_0_7
+! 05.12.2014	ggu	changed VERS_7_0_8
+! 19.01.2015	ggu	changed VERS_7_1_3
+! 26.02.2015	ggu	changed VERS_7_1_5
+! 30.04.2015	ggu	changed VERS_7_1_9
+! 05.06.2015	ggu	changed VERS_7_1_12
+! 10.07.2015	ggu	changed VERS_7_1_50
+! 17.07.2015	ggu	changed VERS_7_1_80
+! 20.07.2015	ggu	changed VERS_7_1_81
+! 18.09.2015	ccf	do not compute heat fluxes in dry nodes
+! 18.09.2015	ccf	checks only for levdbg > 2
+! 26.10.2015	ggu	critical omp sections introduced (eliminated data race)
+! 18.12.2015	ggu	changed VERS_7_3_17
+! 07.04.2016	ggu	compute total evaporation
+! 15.04.2016	ggu	changed VERS_7_5_8
+! 04.05.2016	ccf	do not pass albedo into heat2t
+! 04.05.2016	ggu	include effect of ice cover
+! 25.05.2016	ggu	changed VERS_7_5_10
+! 21.07.2016	ivn	isolp = 1, 2 length scale solar penetration (Jerlov) 
+! 09.09.2016	ggu	changed VERS_7_5_17
+! 29.09.2016	ivn	bug fix for isolp = 1
+! 24.01.2018	ggu	changed VERS_7_5_41
+! 03.04.2018	ggu	changed VERS_7_5_43
+! 16.10.2018	ggu	changed VERS_7_5_50
+! 14.02.2019	ggu	changed VERS_7_5_56
+! 16.02.2019	ggu	changed VERS_7_5_60
+! 13.03.2019	ggu	changed VERS_7_5_61
+! 10.12.2019	ggu	ice cover introduced, handle ice-water sensible heat
+! 11.11.2020	ggu	new ice model integrated, cleaned, documented
+! 13.11.2020	ggu	bug fix: correct rain from [m/s] to [mm/d]
+! 14.11.2020	ggu	allow for ice and other heat fluxes to coexist
+! 29.04.2022	ggu	check impossible heat flux values
+! 09.07.2022	ggu	kspecial for special output
+! 05.09.2022	ggu	debug output and use ustar in ice computation
+! 09.05.2023    lrp     introduce top layer index variable
+!
+! notes :
+!
+! qflux_init is called in subn11.f
+! qflux_read is called in subn11.f
+! qflux3d is called in newbcl.f
+! qfget is called in qflux3d (here)
+!
+! to use heat flux module insert in section "name" of STR file:
+!
+! $name
+!     qflux = 'qflux.dat'
+! $end
+!
+! if such a file is given the heat flux module is used and works
+!   without any other intervention (ibarcl>0)
+!
+! other notes in subqfxf.f
+!
+!*****************************************************************************
 
 	subroutine qflux_compute(byes)
 
-c returnes flag -> compute heat flux or not
+! returnes flag -> compute heat flux or not
 
 	implicit none
 
@@ -132,11 +132,11 @@ c returnes flag -> compute heat flux or not
 
 	end
 
-c*****************************************************************************
+!*****************************************************************************
 
 	subroutine qflux_init
 
-c initializes routines
+! initializes routines
 
 	implicit none
 
@@ -151,11 +151,11 @@ c initializes routines
 
 	end
 
-c*****************************************************************************
+!*****************************************************************************
 
 	subroutine qflux_read(it)
 
-c reads new meteo data
+! reads new meteo data
 
 	implicit none
 
@@ -165,11 +165,11 @@ c reads new meteo data
 
 	end
 
-c*****************************************************************************
+!*****************************************************************************
 
 	subroutine qflux3d(dtime,dt,nkn,nlvddi,temp,dq)
 
-c computes new temperature (forced by heat flux) - 3d version
+! computes new temperature (forced by heat flux) - 3d version
 
 	use mod_meteo
 	use mod_ts
@@ -226,25 +226,25 @@ c computes new temperature (forced by heat flux) - 3d version
 	real qss		!Net shortwave flux 
 	real cd			!wind drag coefficient
 
-c     coefficient after Paul e Simon (1977) up to type IV
-c     for coastal water (1-3-5-7-9) coefficient fitting data with Jerlov(1968)
-      real,parameter, dimension(10) :: Rt =
-     +          (/ 0.58, 0.62, 0.67, 0.77, 0.78,
-     +         0.605, 0.61, 0.37, 0.338, 0.277 /)
-      real,parameter, dimension(10) :: k1 =
-     +         (/ 0.35, 0.6,  1.0,  1.5,  1.4, 
-     +         0.387, 0.353, 2.395, 1.8, 1.505 /)
-      real,parameter, dimension(10) :: k2 =
-     +       (/ 23.0, 20.0, 17.0, 14.0, 7.9,
-     +          5.05, 3.55, 0.335, 0.329, 0.325 /)
+!     coefficient after Paul e Simon (1977) up to type IV
+!     for coastal water (1-3-5-7-9) coefficient fitting data with Jerlov(1968)
+      real,parameter, dimension(10) :: Rt =              &
+           &          (/ 0.58, 0.62, 0.67, 0.77, 0.78,   &
+           &         0.605, 0.61, 0.37, 0.338, 0.277 /)
+      real,parameter, dimension(10) :: k1 =              &
+           &         (/ 0.35, 0.6,  1.0,  1.5,  1.4,     &
+           &         0.387, 0.353, 2.395, 1.8, 1.505 /)
+      real,parameter, dimension(10) :: k2 =              &
+           &       (/ 23.0, 20.0, 17.0, 14.0, 7.9,       &
+           &          5.05, 3.55, 0.335, 0.329, 0.325 /)
 
 	integer itdrag
 
-c functions
+! functions
 	real depnode,areanode,getpar
 	integer ifemopa,ipext
 	logical is_dry_node
-c save
+! save
 	integer, save :: icall = 0
 	integer, save :: n93 = 0
 
@@ -266,32 +266,32 @@ c save
 	logical, save :: bheat = .false.
 	logical, save :: bqflux = .false.
 
-c---------------------------------------------------------
-c start of routine
-c---------------------------------------------------------
+!---------------------------------------------------------
+! start of routine
+!---------------------------------------------------------
 
 	dq = 0.
 	if( icall < 0 ) return
 
-c---------------------------------------------------------
-c iheat		1=areg  2=pom  3=gill  4=dejak  5=gotm  
-c		6=COARE 3.0
-c               7=read flux from file
-c		8=MFS routines (Pettenuzzo et al., 2010)
-c hdecay	depth of e-folding decay of radiation
-c		0. ->	everything is absorbed in first layer
-c botabs	1. ->	bottom absorbs remaining radiation
-c		0. ->	everything is absorbed in last layer
-c---------------------------------------------------------
-c format of heat file containing time series (4 data columns):
-c    time srad airt rhum cc
-c in case of iheat==7 the columns are:
-c    time srad qsens qlat qlong
-c---------------------------------------------------------
+!---------------------------------------------------------
+! iheat		1=areg  2=pom  3=gill  4=dejak  5=gotm  
+!		6=COARE 3.0
+!               7=read flux from file
+!		8=MFS routines (Pettenuzzo et al., 2010)
+! hdecay	depth of e-folding decay of radiation
+!		0. ->	everything is absorbed in first layer
+! botabs	1. ->	bottom absorbs remaining radiation
+!		0. ->	everything is absorbed in last layer
+!---------------------------------------------------------
+! format of heat file containing time series (4 data columns):
+!    time srad airt rhum cc
+! in case of iheat==7 the columns are:
+!    time srad qsens qlat qlong
+!---------------------------------------------------------
 
-c---------------------------------------------------------
-c initialize on first call
-c---------------------------------------------------------
+!---------------------------------------------------------
+! initialize on first call
+!---------------------------------------------------------
 
 	if( icall .eq. 0 ) then
 	  iheat = nint(getpar('iheat'))
@@ -311,10 +311,8 @@ c---------------------------------------------------------
 
 !$OMP CRITICAL
 	  write(6,*) 'qflux3d routines are active'
-	  write(6,*) 'qflux3d: bqflux,bheat,bice: '
-     +				,bqflux,bheat,bice
-	  write(6,*) 'qflux3d: iheat,hdecay,botabs: '
-     +				,iheat,hdecay,botabs  
+	  write(6,*) 'qflux3d: bqflux,bheat,bice: ',bqflux,bheat,bice
+	  write(6,*) 'qflux3d: iheat,hdecay,botabs: ',iheat,hdecay,botabs  
 !$OMP END CRITICAL
 
 	  allocate(dtw(nkn))
@@ -349,9 +347,9 @@ c---------------------------------------------------------
 
 	icall = icall + 1
 
-c---------------------------------------------------------
-c set other parameters
-c---------------------------------------------------------
+!---------------------------------------------------------
+! set other parameters
+!---------------------------------------------------------
 
 	mode = +1	!use new time step for depth
 
@@ -370,9 +368,9 @@ c---------------------------------------------------------
           ik2 = 1. / k2(iwtyp)
 	end if
 
-c---------------------------------------------------------
-c set date parameters
-c---------------------------------------------------------
+!---------------------------------------------------------
+! set date parameters
+!---------------------------------------------------------
 
 	call get_act_timeline(aline)
 	call get_absolute_act_time(atime)
@@ -382,9 +380,9 @@ c---------------------------------------------------------
 	im = ys(2)
 	ih = ys(4)
 
-c---------------------------------------------------------
-c loop over nodes
-c---------------------------------------------------------
+!---------------------------------------------------------
+! loop over nodes
+!---------------------------------------------------------
 
         ddq = 0.
 
@@ -443,8 +441,7 @@ c---------------------------------------------------------
 	    call heatgotm (ta,p,uw,ur,cc,tm,qsens,qlat,qlong,evap)
 	  else if( iheat .eq. 6 ) then
 	    call get_pe_values(k,r,ev,eeff)
-	    call heatcoare(ta,p,uw,ur,cc,tws(k),r,qss,qsens,qlat,
-     +                     qlong,evap,cd)
+	    call heatcoare(ta,p,uw,ur,cc,tws(k),r,qss,qsens,qlat,qlong,evap,cd)
 	    if ( bwind ) windcd(k) = cd
 	  else if( iheat .eq. 7 ) then
 	    qsens = ta
@@ -457,8 +454,8 @@ c---------------------------------------------------------
             uub = uprv(lmin,k)  
             vvb = vprv(lmin,k)  
 	    call meteo_get_heat_extra(k,dp,uuw,vvw)
-            call heatmfsbulk(days,im,ih,ddlon,ddlat,ta,p,uuw,vvw,dp,
-     +                   cc,tm,uub,vvb,qsens,qlat,qlong,evap,qswa,cd)   
+       call heatmfsbulk(days,im,ih,ddlon,ddlat,ta,p,uuw,vvw,dp,          &
+           &                   cc,tm,uub,vvb,qsens,qlat,qlong,evap,qswa,cd)   
             qss= fice_free*qswa  !albedo (monthly) already in qshort1 -> qswa  
             if ( bwind ) windcd(k) = cd   
           else
@@ -532,8 +529,8 @@ c---------------------------------------------------------
               end if
             else if (isolp == 1) then
               !Jerlov classification (1968) from Type I to 9
-               qsbottom = qss * (Rt(iwtyp) * exp(- ik1 * hm )
-     +                            +  (1-Rt(iwtyp)) * exp(- ik2 * hm))
+               qsbottom = qss * (Rt(iwtyp) * exp(- ik1 * hm )                 &
+           &                            +  (1-Rt(iwtyp)) * exp(- ik2 * hm))
               if( l .eq. lmax ) qsbottom = botabs * qsbottom
             else
               write(6,*) 'Erroneous value for isolp = ',isolp
@@ -542,8 +539,8 @@ c---------------------------------------------------------
             end if
 	    if( abs(qsurface) > 100000. ) goto 99
             call heat2t(dt,hm,qss-qsbottom,qsurface,tm,tnew)
-            if (bdebug) call check_heat2(k,l,qss,qsbottom,qsurface,
-     +                                   albedo,tm,tnew)
+            if (bdebug) call check_heat2(k,l,qss,qsbottom,qsurface,     &
+           &                                   albedo,tm,tnew)
             tnew = max(tnew,tfreeze)
             temp(l,k) = tnew
             albedo = 0.
@@ -555,18 +552,18 @@ c---------------------------------------------------------
 	    write(177,*) aline,qsolar,qrad,tnew
 	  end if
 
-c         ---------------------------------------------------------
-c         compute sea surface skin temperature
-c         ---------------------------------------------------------
+!         ---------------------------------------------------------
+!         compute sea surface skin temperature
+!         ---------------------------------------------------------
 
 	  tm   = temp(lmin,k)
 	  hb   = depnode(lmin,k,mode) * 0.5
           usw  = max(1.e-5, sqrt(sqrt(tauxnv(k)**2 + tauynv(k)**2)))
 	  call tw_skin(qss,qrad,tm,hb,usw,dt,dtw(k),tws(k))
 
-c         ---------------------------------------------------------
-c         handle ice model
-c         ---------------------------------------------------------
+!         ---------------------------------------------------------
+!         handle ice model
+!         ---------------------------------------------------------
 
 	  if( k == kdebug ) write(444,*) icall,bice,bicecover,buseice
 	  if( bice ) then
@@ -585,10 +582,10 @@ c         ---------------------------------------------------------
 	    end if
 	  end if
 
-c	  ---------------------------------------------------------
-c	  evap is in [kg/(m**2 s)] -> convert it to [m/s]
-c	  evap is normally positive -> we are loosing mass
-c	  ---------------------------------------------------------
+!	  ---------------------------------------------------------
+!	  evap is in [kg/(m**2 s)] -> convert it to [m/s]
+!	  evap is normally positive -> we are loosing mass
+!	  ---------------------------------------------------------
 
 	  evap = evap / rhow			!evaporation in m/s
 	  evapv(k) = evap			!positive if loosing mass
@@ -599,18 +596,18 @@ c	  ---------------------------------------------------------
 
 	dq = ddq
 
-c---------------------------------------------------------
-c compute total evaporation
-c---------------------------------------------------------
+!---------------------------------------------------------
+! compute total evaporation
+!---------------------------------------------------------
 
 	if( baverevap ) then
 	  call aver_nodal(evapv,evaver)	!in evaver is average of evaporation m/s
 	  write(678,*) dtime,evaver
 	end if
 
-c---------------------------------------------------------
-c special output
-c---------------------------------------------------------
+!---------------------------------------------------------
+! special output
+!---------------------------------------------------------
 
 	call shyice_write_output
 
@@ -623,9 +620,9 @@ c---------------------------------------------------------
 	  write(n93,*) 'qflux3d: ',dtime,temp(1,k)
 	end if
 
-c---------------------------------------------------------
-c end of routine
-c---------------------------------------------------------
+!---------------------------------------------------------
+! end of routine
+!---------------------------------------------------------
 
 	return
    99	continue
@@ -642,7 +639,7 @@ c---------------------------------------------------------
 	stop 'error stop qflux3d: impossible heat flux'
 	end
 
-c*****************************************************************************
+!*****************************************************************************
 
 	subroutine ice_water_exchange(tw,ti,uv,qice)
 
@@ -685,7 +682,7 @@ c*****************************************************************************
 
 	end
 
-c*****************************************************************************
+!*****************************************************************************
 
 	subroutine check_heat(k,tm,qsens,qlat,qlong,evap)
 
@@ -708,7 +705,7 @@ c*****************************************************************************
 	stop 'error stop check_heat: Nan found'
 	end
 
-c*****************************************************************************
+!*****************************************************************************
 
 	subroutine check_heat2(k,l,qs,qsbottom,qrad,albedo,tm,tnew)
 
@@ -738,5 +735,5 @@ c*****************************************************************************
 	stop 'error stop check_heat2: Nan found'
 	end
 
-c*****************************************************************************
+!*****************************************************************************
 

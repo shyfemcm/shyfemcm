@@ -24,57 +24,57 @@
 !
 !--------------------------------------------------------------------------
 
-c utility routines for fem model
-c
-c contents :
-c
-c subroutine baric(ie,x,y)		finds baricentre of element
-c subroutine coord(k,x,y)		returns coordinates of node k (internal)
-c function area_element(ie)		area for element ie (internal)
-c
-c function ipext(k)             returns extern node number
-c function ieext(k)             returns extern element number
-c function ipint(k)             returns intern node number
-c function ieint(k)             returns intern element number
-c
-c subroutine n2int(n,nnodes,berror)	converts external nodes to internal
-c subroutine e2int(n,nelems,berror)	converts external elements to internal
-c
-c revision log :
-c
-c 02.06.1997	ggu	eliminated extint,extinw,exinel (not needed)
-c 24.02.1999	ggu	new subroutine n2int
-c 19.11.1999	ggu	new subroutine e2int
-c 27.01.2009	ggu	new subroutine coord
-c 23.03.2010	ggu	changed v6.1.1
-c 07.07.2011	ggu	new subroutine area_element()
-c 14.07.2011	ggu	changed VERS_6_1_27
-c 23.12.2014	ggu	changed VERS_7_0_11
-c 19.01.2015	ggu	changed VERS_7_1_3
-c 05.05.2015	ggu	changed VERS_7_1_10
-c 17.07.2015	ggu	changed VERS_7_1_80
-c 20.07.2015	ggu	changed VERS_7_1_81
-c 28.04.2016	ggu	changed VERS_7_5_9
-c 06.07.2018	ggu	changed VERS_7_5_48
-c 16.02.2019	ggu	changed VERS_7_5_60
-c
-c*******************************************************
+! utility routines for fem model
+!
+! contents :
+!
+! subroutine baric(ie,x,y)		finds baricentre of element
+! subroutine coord(k,x,y)		returns coordinates of node k (internal)
+! function area_element(ie)		area for element ie (internal)
+!
+! function ipext(k)             returns extern node number
+! function ieext(k)             returns extern element number
+! function ipint(k)             returns intern node number
+! function ieint(k)             returns intern element number
+!
+! subroutine n2int(n,nnodes,berror)	converts external nodes to internal
+! subroutine e2int(n,nelems,berror)	converts external elements to internal
+!
+! revision log :
+!
+! 02.06.1997	ggu	eliminated extint,extinw,exinel (not needed)
+! 24.02.1999	ggu	new subroutine n2int
+! 19.11.1999	ggu	new subroutine e2int
+! 27.01.2009	ggu	new subroutine coord
+! 23.03.2010	ggu	changed v6.1.1
+! 07.07.2011	ggu	new subroutine area_element()
+! 14.07.2011	ggu	changed VERS_6_1_27
+! 23.12.2014	ggu	changed VERS_7_0_11
+! 19.01.2015	ggu	changed VERS_7_1_3
+! 05.05.2015	ggu	changed VERS_7_1_10
+! 17.07.2015	ggu	changed VERS_7_1_80
+! 20.07.2015	ggu	changed VERS_7_1_81
+! 28.04.2016	ggu	changed VERS_7_5_9
+! 06.07.2018	ggu	changed VERS_7_5_48
+! 16.02.2019	ggu	changed VERS_7_5_60
+!
+!*******************************************************
 
 	subroutine baric(ie,x,y)
 
-c finds baricentre of element
-c
-c ie		number of element
-c x,y		coordinates of baricentre (return value)
+! finds baricentre of element
+!
+! ie		number of element
+! x,y		coordinates of baricentre (return value)
 
 	use basin
 
 	implicit none
 
-c arguments
+! arguments
 	integer ie
 	real x,y
-c local variables
+! local variables
 	integer i,kkk
 	real xb,yb
 
@@ -91,20 +91,20 @@ c local variables
 
 	end
 
-c***************************************************************
+!***************************************************************
 
         function area_element(ie)
 
-c area for element ie
+! area for element ie
 
 	use basin
 
         implicit none
 
-c arguments
+! arguments
         real area_element
         integer ie
-c local
+! local
         integer kn1,kn2,kn3
         real*8 x1,x2,x3,y1,y2,y3
         real*8 half
@@ -126,11 +126,11 @@ c local
 
         end
 
-c***************************************************************
+!***************************************************************
 
 	subroutine coord(k,x,y)
 
-c returns coordinates of node k (internal)
+! returns coordinates of node k (internal)
 
 	use basin
 
@@ -144,15 +144,15 @@ c returns coordinates of node k (internal)
 
 	end
 
-c***************************************************************
-c
+!***************************************************************
+!
 	function ipext(k)
-c
-c returns external node number
-c
-c k     internal node number
-c ipext external node number, 0 if error
-c
+!
+! returns external node number
+!
+! k     internal node number
+! ipext external node number, 0 if error
+!
 	use basin
 
 	implicit none
@@ -164,89 +164,89 @@ c
 	else
 		ipext=ipv(k)
 	end if
-c
+!
 	return
 	end
-c
-c***************************************************************
-c
+!
+!***************************************************************
+!
 	function ieext(k)
-c
-c returns external element number
-c
-c k     internal element number
-c ieext external element number, 0 if error
-c
+!
+! returns external element number
+!
+! k     internal element number
+! ieext external element number, 0 if error
+!
 	use basin
 
 	implicit none
 	integer ieext
 	integer k
-c
+!
 	if(k.lt.1.or.k.gt.nel) then
 		ieext=0
 	else
 		ieext=ipev(k)
 	end if
-c
+!
 	return
 	end
-c
-c***************************************************************
-c
+!
+!***************************************************************
+!
 	function ipint(k)
-c
-c returns internal node number
-c
-c k     external node number
-c ipint internal node number, 0 if error
-c
+!
+! returns internal node number
+!
+! k     external node number
+! ipint internal node number, 0 if error
+!
 	use basin
 
 	implicit none
 	integer ipint
 	integer k,i
-c
+!
 	do i=1,nkn
 	if(ipv(i).eq.k) goto 1
 	end do
 	i=0
     1   continue
 	ipint=i
-c
+!
 	return
 	end
-c
-c***************************************************************
-c
+!
+!***************************************************************
+!
 	function ieint(k)
-c
-c returns internal element number
-c
-c k     external element number
-c ieint internal element number, 0 if error
-c
+!
+! returns internal element number
+!
+! k     external element number
+! ieint internal element number, 0 if error
+!
 	use basin
 
 	implicit none
 	integer ieint
 	integer k,i
-c
+!
 	do i=1,nel
 	if(ipev(i).eq.k) goto 1
 	end do
 	i=0
     1   continue
 	ieint=i
-c
+!
 	return
 	end
 
-c***************************************************************
+!***************************************************************
 
 	subroutine n2int(n,nnodes,berror)
 
-c converts external nodes numbers to internal ones
+! converts external nodes numbers to internal ones
 
 	implicit none
 
@@ -276,11 +276,11 @@ c converts external nodes numbers to internal ones
 
 	end
 
-c***************************************************************
+!***************************************************************
 
 	subroutine e2int(n,nelems,berror)
 
-c converts external element numbers to internal ones
+! converts external element numbers to internal ones
 
 	implicit none
 
@@ -305,5 +305,5 @@ c converts external element numbers to internal ones
 
 	end
 
-c***************************************************************
+!***************************************************************
 

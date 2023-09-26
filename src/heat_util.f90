@@ -24,40 +24,40 @@
 !
 !--------------------------------------------------------------------------
 
-c heat flux module (utility 1)
-c
-c contents :
-c
-c subroutine rh2twb(db,rh,wb)           computes wb from db and rh
-c subroutine twb2rh(db,wb,rh)		computes rh from db and wb
-c subroutine psy(isel,db,rh,wb,dp)      convert between values
-c ...                                   others
-c subroutine wbt(t,rh,td,tw)		computes td, wb from ta, rh
-c
-c revision log :
-c
-c 01.02.2002	ggu	new import into file
-c 09.12.2002	ggu	radiation routines taken out
-c 28.03.2003	ggu	new routine wbt substituted in rh2twb
-c 30.07.2003	ggu	new routine test_wbt added
-c 01.02.2006	ggu	new routine twb2rh(db,wb,rh)
-c 21.08.2007	ggu	bug fix for wbt -> account for rh = 0
-c 18.02.2009	ggu	dew point introduced into psy()
-c 23.03.2010	ggu	changed v6.1.1
-c 16.02.2011	ggu	conversion from specific humidity (not working)
-c 18.02.2011	ggu	changed VERS_6_1_19
-c 07.06.2011	ggu	changed VERS_6_1_25
-c 09.09.2016	ggu	new routine convert_vapor_content()
-c 24.01.2018	ggu	changed VERS_7_5_41
-c 06.07.2018	ggu	changed VERS_7_5_48
-c 16.02.2019	ggu	changed VERS_7_5_60
-c 09.11.2021	ggu	eliminated arithmetic if
-c
-c*****************************************************************************
+! heat flux module (utility 1)
+!
+! contents :
+!
+! subroutine rh2twb(db,rh,wb)           computes wb from db and rh
+! subroutine twb2rh(db,wb,rh)		computes rh from db and wb
+! subroutine psy(isel,db,rh,wb,dp)      convert between values
+! ...                                   others
+! subroutine wbt(t,rh,td,tw)		computes td, wb from ta, rh
+!
+! revision log :
+!
+! 01.02.2002	ggu	new import into file
+! 09.12.2002	ggu	radiation routines taken out
+! 28.03.2003	ggu	new routine wbt substituted in rh2twb
+! 30.07.2003	ggu	new routine test_wbt added
+! 01.02.2006	ggu	new routine twb2rh(db,wb,rh)
+! 21.08.2007	ggu	bug fix for wbt -> account for rh = 0
+! 18.02.2009	ggu	dew point introduced into psy()
+! 23.03.2010	ggu	changed v6.1.1
+! 16.02.2011	ggu	conversion from specific humidity (not working)
+! 18.02.2011	ggu	changed VERS_6_1_19
+! 07.06.2011	ggu	changed VERS_6_1_25
+! 09.09.2016	ggu	new routine convert_vapor_content()
+! 24.01.2018	ggu	changed VERS_7_5_41
+! 06.07.2018	ggu	changed VERS_7_5_48
+! 16.02.2019	ggu	changed VERS_7_5_60
+! 09.11.2021	ggu	eliminated arithmetic if
+!
+!*****************************************************************************
 
         subroutine rh2twb(db,rh,wb)
 
-c computes wet bulb temperature from temperature and relative humidity
+! computes wet bulb temperature from temperature and relative humidity
 
 	implicit none
 
@@ -75,11 +75,11 @@ c computes wet bulb temperature from temperature and relative humidity
 
 	end
 
-c*****************************************************************************
+!*****************************************************************************
 
         subroutine twb2rh(db,wb,rh)
 
-c computes relative humidity from temperature and wet bulb temperature
+! computes relative humidity from temperature and wet bulb temperature
 
 	implicit none
 
@@ -95,23 +95,23 @@ c computes relative humidity from temperature and wet bulb temperature
 
 	end
 
-c*****************************************************************************
+!*****************************************************************************
 
       subroutine psy(isel,db,rh,wb,dp)
 
-c grandezze psicrometriche 
-c
-c temperatures in Celsius, pressure in Pascal
-c
-C     DB Temp. a bulbo asciutto 0C
-C     WB Temp. a bulbo umido 0C,
-C     DP Temp. di rugiada 0C
-C     PB Press. atmosferica N/m2,
-C     PV Press. parz. di vapore N/m2
-C     W Umidita' specifica Kg/Kg,
-C     H Entalpia KJ/Kg
-C     V Volume specifico m3/Kg
-C     RH Umidita' relativa % [0-100]
+! grandezze psicrometriche 
+!
+! temperatures in Celsius, pressure in Pascal
+!
+!     DB Temp. a bulbo asciutto 0C
+!     WB Temp. a bulbo umido 0C,
+!     DP Temp. di rugiada 0C
+!     PB Press. atmosferica N/m2,
+!     PV Press. parz. di vapore N/m2
+!     W Umidita' specifica Kg/Kg,
+!     H Entalpia KJ/Kg
+!     V Volume specifico m3/Kg
+!     RH Umidita' relativa % [0-100]
 
       REAL H
   
@@ -147,11 +147,11 @@ C     RH Umidita' relativa % [0-100]
       
       END
        
-c*****************************************************************************
+!*****************************************************************************
 
-c the next routine compute a series of values from two input values (and PB)
-c
-c example: PSDBWB uses DB and WB to compute DP,PV,W,H,V,RH
+! the next routine compute a series of values from two input values (and PB)
+!
+! example: PSDBWB uses DB and WB to compute DP,PV,W,H,V,RH
 
       SUBROUTINE PSDBWB(DB,WB,DP,PB,PV,W,H,V,RH)
       PVP=PVSF(WB)
@@ -165,15 +165,13 @@ c example: PSDBWB uses DB and WB to compute DP,PV,W,H,V,RH
 	      goto 7
 	  END IF
     1 WRITE(*,10)DB,WB
-   10 FORMAT(5X,'ERROR IN PSDBWB : DB=',F6.2,'  WB=',F6.2
-     *                  ,'   WB greater than DB')
+   10 FORMAT(5X,'ERROR IN PSDBWB : DB=',F6.2,'  WB=',F6.2,'   WB greater than DB')
       STOP
     7 HDB0=1.006*DB
       WB1=WBFF(0.0,DB)
       IF (WB .GE. WB1) GO TO 5
       WRITE(*,11)DB,WB
-   11 FORMAT(5X,'ERROR IN PSDBWB : DB=',F6.2,'  WB=',F6.2
-     *                  ,'   temperatures not compatible')
+   11 FORMAT(5X,'ERROR IN PSDBWB : DB=',F6.2,'  WB=',F6.2,'   temperatures not compatible')
       STOP
     4 PV=PVP
       GO TO 3
@@ -193,8 +191,7 @@ c example: PSDBWB uses DB and WB to compute DP,PV,W,H,V,RH
       SUBROUTINE PSDBDP(DB,WB,DP,PB,PV,W,H,V,RH)
       IF(DP .LE. DB) GO TO 1
       WRITE(*,10)DB,DP
-   10 FORMAT(5X,'ERROR IN PSDBDP : DB=',F6.2,'  DP=',F6.2
-     *                  ,'   DP greater than DB')
+   10 FORMAT(5X,'ERROR IN PSDBDP : DB=',F6.2,'  DP=',F6.2,'   DP greater than DB')
       STOP
     1 PV=PVSF(DP)
       PVS=PVSF(DB)
@@ -210,8 +207,7 @@ c example: PSDBWB uses DB and WB to compute DP,PV,W,H,V,RH
       IF (RH .EQ. 0.0)RH=0.001
       IF (RH .GE. 0.001 .AND. RH .LE. 100) GO TO 1
       WRITE(*,11)DB,RH
-   11 FORMAT(5X,'ERROR IN PSDBRH : DB=',F6.2,'  RH=',F6.2
-     *                  ,'   relative humidity not compatible')
+   11 FORMAT(5X,'ERROR IN PSDBRH : DB=',F6.2,'  RH=',F6.2,'   relative humidity not compatible')
       STOP
     1 PVS=PVSF(DB)
       X=RH-100.
@@ -240,8 +236,7 @@ c example: PSDBWB uses DB and WB to compute DP,PV,W,H,V,RH
       H2=(1.006*DP+(2501.+1.83*DP)*W)-0.0001
       IF(H .GE. H2)GO TO 1
       WRITE(*,10)DP,H
-   10 FORMAT(5X,'ERROR IN PSDPH : DP=',F6.2,'  H=',F6.3
-     *                  ,'   data not compatible')
+   10 FORMAT(5X,'ERROR IN PSDPH : DP=',F6.2,'  H=',F6.3,'   data not compatible')
       STOP
     1 DB=(H-2501*W)/(1.006+1.83*W)
       WB=WBFF(W,DB)
@@ -255,8 +250,7 @@ c example: PSDBWB uses DB and WB to compute DP,PV,W,H,V,RH
       IF(W .EQ. 0.0)W=1.E-07
       IF(W .GE. 1.E-07)GO TO 2
       WRITE(*,11)DB,W
-   11 FORMAT(5X,'ERROR IN PSDBW : DB=',F6.2,' W=',E10.3
-     *                  ,'   specific humidity not compatible')
+   11 FORMAT(5X,'ERROR IN PSDBW : DB=',F6.2,' W=',E10.3,'   specific humidity not compatible')
       STOP
     2 XS=0.62198*PVSF(DB)/(PB-PVSF(DB))
       IF (W .LE. XS)GO TO 3
@@ -374,8 +368,8 @@ c example: PSDBWB uses DB and WB to compute DP,PV,W,H,V,RH
       
       FUNCTION XSAT(TEMP)
       DIMENSION C(8)
-      DATA C/0.15036368E-02,0.87755907E-04,0.17497041E-04,-0.11118891E-5
-     *,0.56661491E-07,-0.13317505E-08,0.16671702E-10,-0.80607734E-13/
+      DATA C/0.15036368E-02,0.87755907E-04,0.17497041E-04,-0.11118891E-5     &
+     &      ,0.56661491E-07,-0.13317505E-08,0.16671702E-10,-0.80607734E-13/
       TEMP=TEMP+11.
       SUM=0.0
       DO 10 II=1,8
@@ -387,17 +381,17 @@ c example: PSDBWB uses DB and WB to compute DP,PV,W,H,V,RH
       RETURN
       END
 
-c***********************************************************************
-c***********************************************************************
-c***********************************************************************
+!***********************************************************************
+!***********************************************************************
+!***********************************************************************
 ! these are the new routines used
-c***********************************************************************
-c***********************************************************************
-c***********************************************************************
+!***********************************************************************
+!***********************************************************************
+!***********************************************************************
 
         subroutine rh2wb(t,pp,rh,tw)
 
-c computes wet bulb temperature from rel. hum.
+! computes wet bulb temperature from rel. hum.
 
         implicit none
 
@@ -418,9 +412,9 @@ c computes wet bulb temperature from rel. hum.
         es = es0 * exp(17.27*t/(t+t0))	  !es in kPa
         e = 0.01 * rh * es      	  !e in kPa
 
-c	--------------------------------------------------------
-c	next if to handle rh = 0.
-c	--------------------------------------------------------
+!	--------------------------------------------------------
+!	next if to handle rh = 0.
+!	--------------------------------------------------------
 
 	if( e .lt. 1.e-2 ) then
 	  tw = t
@@ -445,7 +439,7 @@ c	--------------------------------------------------------
 	stop 'error stop rh2wb: erroneous pressure'
         end
 
-c***********************************************************************
+!***********************************************************************
 
 	subroutine wb2rh(t,pp,tw,rh)
 
@@ -485,7 +479,7 @@ c***********************************************************************
 
 	end
 
-c***********************************************************************
+!***********************************************************************
 
 	subroutine dp2rh(t,pp,td,rh)
 
@@ -510,11 +504,11 @@ c***********************************************************************
 
 	end
 
-c***********************************************************************
+!***********************************************************************
 
         subroutine rh2dp(t,pp,rh,td)
 
-c computes dew point from rel. hum.
+! computes dew point from rel. hum.
 
         implicit none
 
@@ -536,9 +530,9 @@ c computes dew point from rel. hum.
         es = es0 * exp(17.27*t/(t+t0))	  !es in kPa
         e = 0.01 * rh * es      	  !e in kPa
 
-c	--------------------------------------------------------
-c	next if to handle rh = 0.
-c	--------------------------------------------------------
+!	--------------------------------------------------------
+!	next if to handle rh = 0.
+!	--------------------------------------------------------
 
 	if( e .lt. 1.e-2 ) then
 	  td = -t0
@@ -551,7 +545,7 @@ c	--------------------------------------------------------
 
 	end
 
-c***********************************************************************
+!***********************************************************************
 
 	subroutine sh2rh(t,pp,sh,rh)
 
@@ -581,7 +575,7 @@ c***********************************************************************
 
 	end
 
-c***********************************************************************
+!***********************************************************************
 
 	subroutine rh2sh(t,pp,rh,sh)
 
@@ -612,17 +606,17 @@ c***********************************************************************
 
 	end
 
-c***********************************************************************
-c***********************************************************************
-c***********************************************************************
+!***********************************************************************
+!***********************************************************************
+!***********************************************************************
 ! older routines
-c***********************************************************************
-c***********************************************************************
-c***********************************************************************
+!***********************************************************************
+!***********************************************************************
+!***********************************************************************
 
         subroutine wbt(t,rh,td,tw)
 
-c computes dew point and wet bulb temperature from dry temp and rel. hum.
+! computes dew point and wet bulb temperature from dry temp and rel. hum.
 
         implicit none
 
@@ -641,9 +635,9 @@ c computes dew point and wet bulb temperature from dry temp and rel. hum.
         es = es0 * exp(17.27*t/(t+t0))	  !es in kPa
         e = 0.01 * rh * es      	  !e in kPa
 
-c	--------------------------------------------------------
-c	next if to handle rh = 0.
-c	--------------------------------------------------------
+!	--------------------------------------------------------
+!	next if to handle rh = 0.
+!	--------------------------------------------------------
 
 	if( e .lt. 1.e-2 ) then
 	  td = -t0
@@ -666,7 +660,7 @@ c	--------------------------------------------------------
 
         end
 
-c***********************************************************************
+!***********************************************************************
 
 	subroutine dprh(t,rh,td,tw)
 
@@ -707,7 +701,7 @@ c***********************************************************************
 
 	end
 
-c***********************************************************************
+!***********************************************************************
 
 	subroutine wbrh(t,rh,td,tw)
 
@@ -744,11 +738,11 @@ c***********************************************************************
 
 	end
 
-c***********************************************************************
-c***********************************************************************
-c***********************************************************************
-c***********************************************************************
-c***********************************************************************
+!***********************************************************************
+!***********************************************************************
+!***********************************************************************
+!***********************************************************************
+!***********************************************************************
 
 	subroutine get_rand(rmin,rmax,r)
 
@@ -758,7 +752,7 @@ c***********************************************************************
 
 	end
 
-c***********************************************************************
+!***********************************************************************
 
 	subroutine test_relative
 
@@ -790,7 +784,7 @@ c***********************************************************************
 
 	end
 
-c***********************************************************************
+!***********************************************************************
 
 	subroutine test_vapor
 

@@ -23,69 +23,69 @@
 !
 !--------------------------------------------------------------------------
 
-c namelist read routines
-c
-c contents :
-c
-c revision log :
-c
-c 01.06.1997	ggu	restructured (localizing nrd functions)
-c 17.06.1997	ggu	nlsh, nlsa out of file
-c 07.05.1998	ggu	nrdveci, nrdvecr return -1 on error
-c 06.08.1998	ggu	nrdtst changed due to compiler warning of AIX
-c 01.02.2000	ggu	new routine setsec
-c 06.11.2000	ggu	bug found in reading sections ($NRDLIN)
-c 05.08.2003	ggu	accept string enclosed in '..' and ".."
-c 11.03.2005	ggu	work in double precision in nrdnum()
-c 07.11.2005	ggu	better debugging output in nrdpar
-c 28.04.2008	ggu	all routines changed to double precision
-c 03.09.2008	ggu	nrdvecr slightly changed return value
-c 02.12.2008	ggu	bug in nrdnum: kexp was double precision
-c 09.03.2009	ggu	bug in nrdsec: use local name to manipolate string
-c 26.08.2009	ggu	allow '_' for names (USE_)
-c 23.03.2010	ggu	changed v6.1.1
-c 09.04.2010	ggu	changed v6.1.3
-c 28.09.2010	ggu	changed VERS_6_1_11
-c 09.12.2011	ggu	changed VERS_6_1_38
-c 30.03.2012	ggu	changed VERS_6_1_51
-c 26.06.2012	ggu	changed VERS_6_1_55
-c 17.12.2012	ggu	changed VERS_6_1_61a
-c 27.02.2013	ggu	handle extra information on section line
-c 03.05.2013	ggu	changed VERS_6_1_63
-c 20.01.2014	ggu	new routine nrdtable()
-c 28.01.2014	ggu	changed VERS_6_1_71
-c 26.11.2014	ggu	changed VERS_7_0_7
-c 08.01.2015	ggu	new version for nrdvec*()
-c 23.01.2015	ggu	changed VERS_7_1_4
-c 05.02.2015	ggu	program completely rewritten (modules introduced)
-c 08.02.2015	ggu	accept also '!' and '#' for end comment on line
-c 26.02.2015	ggu	changed VERS_7_1_5
-c 12.05.2015	ggu	new char table
-c 21.05.2015	ggu	changed VERS_7_1_11
-c 05.06.2015	ggu	changed VERS_7_1_12
-c 17.07.2015	ggu	changed VERS_7_1_52
-c 01.02.2016	ggu	bug in nls_insert_variable() -> new char variable
-c 19.02.2016	ggu	changed VERS_7_5_2
-c 25.05.2016	ggu	changed VERS_7_5_10
-c 31.03.2017	ggu	changed VERS_7_5_24
-c 13.04.2017	ggu	changed VERS_7_5_25
-c 26.10.2017	ggu	new isctable read (multiple numbers + description)
-c 04.11.2017	ggu	changed VERS_7_5_34
-c 14.11.2017	ggu	changed VERS_7_5_36
-c 03.04.2018	ggu	changed VERS_7_5_43
-c 13.05.2018	ggu	bug fix in nls_copy_isctable()
-c 06.07.2018	ggu	changed VERS_7_5_48
-c 18.12.2018	ggu	changed VERS_7_5_52
-c 16.02.2019	ggu	changed VERS_7_5_60
-c 12.03.2019	ggu	before namelist read clean arrays
-c
-c notes :
-c
-c structure of calls ----------------------------------
-c
-c******************************************************************
-c******************************************************************
-c******************************************************************
+! namelist read routines
+!
+! contents :
+!
+! revision log :
+!
+! 01.06.1997	ggu	restructured (localizing nrd functions)
+! 17.06.1997	ggu	nlsh, nlsa out of file
+! 07.05.1998	ggu	nrdveci, nrdvecr return -1 on error
+! 06.08.1998	ggu	nrdtst changed due to compiler warning of AIX
+! 01.02.2000	ggu	new routine setsec
+! 06.11.2000	ggu	bug found in reading sections ($NRDLIN)
+! 05.08.2003	ggu	accept string enclosed in '..' and ".."
+! 11.03.2005	ggu	work in double precision in nrdnum()
+! 07.11.2005	ggu	better debugging output in nrdpar
+! 28.04.2008	ggu	all routines changed to double precision
+! 03.09.2008	ggu	nrdvecr slightly changed return value
+! 02.12.2008	ggu	bug in nrdnum: kexp was double precision
+! 09.03.2009	ggu	bug in nrdsec: use local name to manipolate string
+! 26.08.2009	ggu	allow '_' for names (USE_)
+! 23.03.2010	ggu	changed v6.1.1
+! 09.04.2010	ggu	changed v6.1.3
+! 28.09.2010	ggu	changed VERS_6_1_11
+! 09.12.2011	ggu	changed VERS_6_1_38
+! 30.03.2012	ggu	changed VERS_6_1_51
+! 26.06.2012	ggu	changed VERS_6_1_55
+! 17.12.2012	ggu	changed VERS_6_1_61a
+! 27.02.2013	ggu	handle extra information on section line
+! 03.05.2013	ggu	changed VERS_6_1_63
+! 20.01.2014	ggu	new routine nrdtable()
+! 28.01.2014	ggu	changed VERS_6_1_71
+! 26.11.2014	ggu	changed VERS_7_0_7
+! 08.01.2015	ggu	new version for nrdvec*()
+! 23.01.2015	ggu	changed VERS_7_1_4
+! 05.02.2015	ggu	program completely rewritten (modules introduced)
+! 08.02.2015	ggu	accept also '!' and '#' for end comment on line
+! 26.02.2015	ggu	changed VERS_7_1_5
+! 12.05.2015	ggu	new char table
+! 21.05.2015	ggu	changed VERS_7_1_11
+! 05.06.2015	ggu	changed VERS_7_1_12
+! 17.07.2015	ggu	changed VERS_7_1_52
+! 01.02.2016	ggu	bug in nls_insert_variable() -> new char variable
+! 19.02.2016	ggu	changed VERS_7_5_2
+! 25.05.2016	ggu	changed VERS_7_5_10
+! 31.03.2017	ggu	changed VERS_7_5_24
+! 13.04.2017	ggu	changed VERS_7_5_25
+! 26.10.2017	ggu	new isctable read (multiple numbers + description)
+! 04.11.2017	ggu	changed VERS_7_5_34
+! 14.11.2017	ggu	changed VERS_7_5_36
+! 03.04.2018	ggu	changed VERS_7_5_43
+! 13.05.2018	ggu	bug fix in nls_copy_isctable()
+! 06.07.2018	ggu	changed VERS_7_5_48
+! 18.12.2018	ggu	changed VERS_7_5_52
+! 16.02.2019	ggu	changed VERS_7_5_60
+! 12.03.2019	ggu	before namelist read clean arrays
+!
+! notes :
+!
+! structure of calls ----------------------------------
+!
+!******************************************************************
+!******************************************************************
+!******************************************************************
 
 !==================================================================
         module nls
@@ -116,7 +116,7 @@ c******************************************************************
 
 	subroutine nls_set_section(name,num)
 
-c memorizes section name
+! memorizes section name
 
 	character*(*) name	!section name
 	integer num		!number of section
@@ -127,11 +127,11 @@ c memorizes section name
 
 	end subroutine nls_set_section
 
-c******************************************
+!******************************************
 
 	subroutine nls_get_section(name,num)
 
-c gets section name
+! gets section name
 
 	character*(*) name	!section name
 	integer num		!number of section
@@ -142,11 +142,11 @@ c gets section name
 
 	end subroutine nls_get_section
 
-c******************************************
+!******************************************
 
 	function nls_handle_section(name)
 
-c checks if can handle section name
+! checks if can handle section name
 
 	logical nls_handle_section	!true if can handle section
 	character*(*) name	!section name
@@ -160,11 +160,11 @@ c checks if can handle section name
 
 	end function nls_handle_section
 
-c******************************************
+!******************************************
 
 	function nls_has_read_section()
 
-c actual section has been read ?
+! actual section has been read ?
 
 	logical nls_has_read_section	!true if section has been read
 
@@ -172,9 +172,9 @@ c actual section has been read ?
 
 	end function nls_has_read_section
 
-c******************************************************************
-c******************************************************************
-c******************************************************************
+!******************************************************************
+!******************************************************************
+!******************************************************************
 
 	subroutine nls_alloc
 
@@ -203,7 +203,7 @@ c******************************************************************
 
 	end subroutine nls_alloc
 
-c******************************************************************
+!******************************************************************
 
 	subroutine nls_test_alloc(n)
 
@@ -213,7 +213,7 @@ c******************************************************************
 
 	end subroutine nls_test_alloc
 
-c******************************************************************
+!******************************************************************
 
 	subroutine nls_init_section
 
@@ -221,7 +221,7 @@ c******************************************************************
 
 	end subroutine nls_init_section
 
-c******************************************************************
+!******************************************************************
 
 	subroutine nls_finish_section
 
@@ -234,7 +234,7 @@ c******************************************************************
 
 	end subroutine nls_finish_section
 
-c******************************************************************
+!******************************************************************
 
 	subroutine nls_return_line(aline,iline)
 
@@ -246,9 +246,9 @@ c******************************************************************
 
 	end subroutine nls_return_line
 
-c******************************************************************
-c******************************************************************
-c******************************************************************
+!******************************************************************
+!******************************************************************
+!******************************************************************
 
 	function nls_is_nls_file(file)
 
@@ -280,13 +280,13 @@ c******************************************************************
 
 	end function nls_is_nls_file
 
-c******************************************************************
-c******************************************************************
-c******************************************************************
+!******************************************************************
+!******************************************************************
+!******************************************************************
 
 	subroutine nls_init(iunit)
 
-c initializes unit number for name list read
+! initializes unit number for name list read
 
 	integer iunit
 
@@ -296,13 +296,13 @@ c initializes unit number for name list read
 
 	end subroutine nls_init
 
-c******************************************************************
+!******************************************************************
 
 	function nls_next_line(bcomma)
 
-c reads next line with some information on it
-c
-c .true. if new line found, else .false.
+! reads next line with some information on it
+!
+! .true. if new line found, else .false.
 
 	logical nls_next_line
 	logical bcomma
@@ -340,11 +340,11 @@ c .true. if new line found, else .false.
 	stop 'error stop nls_next_line: read error'
 	end function nls_next_line
 
-c******************************************************************
+!******************************************************************
 
 	function nls_next_data_line(lineout,bcomma)
 
-c reads next data line and returns it
+! reads next data line and returns it
 
 	logical nls_next_data_line
 	character*(*) lineout
@@ -372,11 +372,11 @@ c reads next data line and returns it
 
 	end function nls_next_data_line
 
-c******************************************************************
+!******************************************************************
 
 	function nls_skip_whitespace_on_line(bcomma)
 
-c true if something found on line
+! true if something found on line
 
 	logical nls_skip_whitespace_on_line
 	logical bcomma				!also skip commas
@@ -405,7 +405,7 @@ c true if something found on line
 
 	end function nls_skip_whitespace_on_line
 
-c******************************************************************
+!******************************************************************
 
 	function nls_skip_whitespace(bcomma)
 
@@ -420,7 +420,7 @@ c******************************************************************
 
 	end function nls_skip_whitespace
 
-c******************************************************************
+!******************************************************************
 
 	subroutine nls_show_line_position(line_opt,ioff_opt)
 
@@ -442,24 +442,24 @@ c******************************************************************
 
 	end subroutine nls_show_line_position
 
-c******************************************************************
-c******************************************************************
-c******************************************************************
+!******************************************************************
+!******************************************************************
+!******************************************************************
 
 	function nls_next_section(section,num,extra)
 
-c finds next section
-c
-c	finds next section and returns name and number of section
-c	if section is not numbered, num = 0
-c	if section is found return .true., else .false.
+! finds next section
+!
+!	finds next section and returns name and number of section
+!	if section is not numbered, num = 0
+!	if section is found return .true., else .false.
 
 	logical nls_next_section
 	integer num
 	character*(*) section		!section name
 	character*(*) extra		!extra information
 
-c read until '&' or '$' as first non white space char of line found
+! read until '&' or '$' as first non white space char of line found
 
 	section = ' '
 	nls_next_section = .false.
@@ -481,15 +481,15 @@ c read until '&' or '$' as first non white space char of line found
 
 	end function nls_next_section
 
-c******************************************************************
+!******************************************************************
 
 	function nls_is_section(section,num_opt,extra_opt)
 
-c checks if we are on a new section definition
-c
-c	returns name and number of section
-c	.true. if section is found, else .false.
-c	if section is not numbered, num = 0
+! checks if we are on a new section definition
+!
+!	returns name and number of section
+!	.true. if section is found, else .false.
+!	if section is not numbered, num = 0
 
 	logical nls_is_section
 	character*(*) section			!section name
@@ -514,7 +514,7 @@ c	if section is not numbered, num = 0
 	c = line(ioff:ioff)
 	if( c .ne. '&' .and. c .ne. '$' ) return
 
-c start of section found -> find name and number
+! start of section found -> find name and number
 
 	ioff=ioff+1
 	istart = ioff
@@ -523,7 +523,7 @@ c start of section found -> find name and number
 	call to_lower(name)
 	iend = len(trim(name))
 
-c name found -> look if there is a number at end of name
+! name found -> look if there is a number at end of name
 
 	i = iend
 	do while( i .gt. 0 .and. is_digit(name(i:i)) )	!number
@@ -531,7 +531,7 @@ c name found -> look if there is a number at end of name
 	end do
 	i = i + 1
 
-c if there is a number, strip it and put it in num
+! if there is a number, strip it and put it in num
 
 	if( i .le. iend ) then			!number to read
 	  ianz = iscanf(name(i:iend),f,1)  	!$IREAD
@@ -540,21 +540,21 @@ c if there is a number, strip it and put it in num
 	  name(i:iend) = ' '
 	end if
 
-c ok, new section found
+! ok, new section found
 
 	nls_is_section = .true.
 	section = name
 
-c now look for extra information
+! now look for extra information
 
 	if( nls_read_name(name) ) extra = name
 
-c copy optional arguments
+! copy optional arguments
 
 	if( present(num_opt) ) num_opt = num
 	if( present(extra_opt) ) extra_opt = extra
 
-c end of routine
+! end of routine
 
 	return
    97	continue
@@ -570,11 +570,11 @@ c end of routine
 	stop 'error stop nls_is_section: read error'
 	end function nls_is_section
 
-c******************************************************************
+!******************************************************************
 
 	subroutine nls_skip_section
 
-c skips over data in section
+! skips over data in section
 
 	integer num
 	character*10 section,extra,old_section
@@ -593,18 +593,18 @@ c skips over data in section
 
 	end subroutine nls_skip_section
 
-c******************************************************************
+!******************************************************************
 
 	function nls_next_item(name,value,text)
 
-c returns next item in current section
-c
-c > 0	type of item found
-c	 1 : number variable with name
-c	 2 : number variable without name
-c	 3 : character variable with name
-c	 4 : character variable without name
-c = 0	end of section
+! returns next item in current section
+!
+! > 0	type of item found
+!	 1 : number variable with name
+!	 2 : number variable without name
+!	 3 : character variable with name
+!	 4 : character variable without name
+! = 0	end of section
 
 	integer nls_next_item
 	character*(*) name	!name of item read
@@ -671,7 +671,7 @@ c = 0	end of section
 
 	end function nls_next_item
 
-c******************************************************************
+!******************************************************************
 
 	function nls_read_name(name)
 
@@ -703,7 +703,7 @@ c******************************************************************
 
 	end function nls_read_name
 
-c******************************************************************
+!******************************************************************
 
 	subroutine nls_read_assignment(name)
 
@@ -729,11 +729,11 @@ c******************************************************************
 	stop 'error stop nls_read_assignment: no assignement'
 	end subroutine nls_read_assignment
 
-c******************************************************************
+!******************************************************************
 
 	subroutine nls_read_text(name,text)
 
-c reads text (must be delimited by with ' ' or " ") 
+! reads text (must be delimited by with ' ' or " ") 
 
 	character*(*) name
 	character*(*) text	!text of item
@@ -752,11 +752,11 @@ c reads text (must be delimited by with ' ' or " ")
 
 	end subroutine nls_read_text
 
-c******************************************************************
+!******************************************************************
 
 	subroutine nls_read_number(name,value)
 
-c reads number
+! reads number
 
 	character*(*) name
 	double precision value
@@ -773,15 +773,15 @@ c reads number
 
 	end subroutine nls_read_number
 
-c******************************************************************
-c******************************************************************
-c******************************************************************
+!******************************************************************
+!******************************************************************
+!******************************************************************
 
 	function nls_insert_variable(sect,name,value,text)
 
-c reads and inserts values automatically
-c
-c does not handle vectors (yet)
+! reads and inserts values automatically
+!
+! does not handle vectors (yet)
 
 	use para
 
@@ -841,13 +841,13 @@ c does not handle vectors (yet)
         stop 'error stop nls_insert_variable: variable is not an array'
 	end function nls_insert_variable
 
-c******************************************************************
+!******************************************************************
 
 	subroutine nls_read_namelist(sect)
 
-c reads parameter section and inserts values automatically
-c
-c does not handle vectors (yet)
+! reads parameter section and inserts values automatically
+!
+! does not handle vectors (yet)
 
 	use para
 
@@ -880,14 +880,14 @@ c does not handle vectors (yet)
 	stop 'error stop nls_namelist_read: no array'
 	end subroutine nls_read_namelist
 
-c******************************************************************
+!******************************************************************
 
 	function nls_read_vector()
 
-c reads number section, stores numbers in internal array
-c
-c returns total number of values read
-c returns -1 in case of dimension or read error
+! reads number section, stores numbers in internal array
+!
+! returns total number of values read
+! returns -1 in case of dimension or read error
 
 	integer nls_read_vector		!total number of elements read
 
@@ -923,11 +923,11 @@ c returns -1 in case of dimension or read error
 	return
 	end function nls_read_vector
 
-c******************************************************************
+!******************************************************************
 
 	subroutine nls_copy_int_vect(n,ivect)
 
-c copies values read from internal storage to vector ivect
+! copies values read from internal storage to vector ivect
 
 	integer n
 	integer ivect(n)
@@ -940,11 +940,11 @@ c copies values read from internal storage to vector ivect
 
 	end subroutine nls_copy_int_vect
 
-c******************************************************************
+!******************************************************************
 
 	subroutine nls_copy_real_vect(n,rvect)
 
-c copies values read from internal storage to vector rvect
+! copies values read from internal storage to vector rvect
 
 	integer n
 	real rvect(n)
@@ -957,11 +957,11 @@ c copies values read from internal storage to vector rvect
 
 	end subroutine nls_copy_real_vect
 
-c******************************************************************
+!******************************************************************
 
 	subroutine nls_copy_char_vect(n,cvect)
 
-c copies values read from internal storage to vector cvect
+! copies values read from internal storage to vector cvect
 
 	integer n
 	character*(*) cvect(n)
@@ -974,21 +974,21 @@ c copies values read from internal storage to vector cvect
 
 	end subroutine nls_copy_char_vect
 
-c******************************************************************
+!******************************************************************
 
 	function nls_read_table()
 
-c reads table in section
-c
-c every line is read as character
-c
-c	string1
-c	string2
-c	etc..
-c
-c returns total number of lines read
-c returns -1 in case of dimension error
-c returns -2 in case of read error
+! reads table in section
+!
+! every line is read as character
+!
+!	string1
+!	string2
+!	etc..
+!
+! returns total number of lines read
+! returns -1 in case of dimension error
+! returns -2 in case of read error
 
 	integer nls_read_table	!total number of lines read
 
@@ -1016,9 +1016,9 @@ c returns -2 in case of read error
 
 	nls_read_table = n
 
-c--------------------------------------------------------
-c end of routine
-c--------------------------------------------------------
+!--------------------------------------------------------
+! end of routine
+!--------------------------------------------------------
 
 	return
    97	continue
@@ -1028,28 +1028,28 @@ c--------------------------------------------------------
 	stop 'error stop nls_read_table'
 	end function nls_read_table
 
-c******************************************************************
+!******************************************************************
 
 	function nls_read_ictable()
 
-c reads table in section
-c
-c table must have following structure (empty lines are allowed)
-c
-c	ivalue1 'string1'
-c	ivalue2 'string2'
-c	etc..
-c
-c an alternative is also possible, where only numbers are given
-c
-c	ivalue1 ivalue2 ...
-c	etc..
-c
-c in this case the variable string gets a default value
-c
-c returns total number of values read
-c returns -1 in case of dimension error
-c returns -2 in case of read error
+! reads table in section
+!
+! table must have following structure (empty lines are allowed)
+!
+!	ivalue1 'string1'
+!	ivalue2 'string2'
+!	etc..
+!
+! an alternative is also possible, where only numbers are given
+!
+!	ivalue1 ivalue2 ...
+!	etc..
+!
+! in this case the variable string gets a default value
+!
+! returns total number of values read
+! returns -1 in case of dimension error
+! returns -2 in case of read error
 
 
 	integer nls_read_ictable	!total number of elements read
@@ -1061,9 +1061,9 @@ c returns -2 in case of read error
 	character*10 sect
 	character*1 c
 
-c--------------------------------------------------------
-c find out what table it is - 1: only numbers  2:number with text
-c--------------------------------------------------------
+!--------------------------------------------------------
+! find out what table it is - 1: only numbers  2:number with text
+!--------------------------------------------------------
 
 	call nls_read_number(sname,value)
 	if( .not. nls_skip_whitespace_on_line(.true.) ) then
@@ -1080,9 +1080,9 @@ c--------------------------------------------------------
 	ioff = 1
 	if( .not. nls_skip_whitespace_on_line(.true.) ) goto 95
 
-c--------------------------------------------------------
-c now read the table
-c--------------------------------------------------------
+!--------------------------------------------------------
+! now read the table
+!--------------------------------------------------------
 
 	nls_read_ictable = -1
 	n = 0
@@ -1110,9 +1110,9 @@ c--------------------------------------------------------
 
 	nls_read_ictable = n
 
-c--------------------------------------------------------
-c end of routine
-c--------------------------------------------------------
+!--------------------------------------------------------
+! end of routine
+!--------------------------------------------------------
 
 	return
    95	continue
@@ -1126,11 +1126,11 @@ c--------------------------------------------------------
 	return
 	end function nls_read_ictable
 
-c******************************************************************
+!******************************************************************
 
 	subroutine nls_copy_ictable(n,ivect,cvect)
 
-c copies values read from internal storage to vector rvect
+! copies values read from internal storage to vector rvect
 
 	integer n
 	integer ivect(n)
@@ -1141,28 +1141,28 @@ c copies values read from internal storage to vector rvect
 
 	end subroutine nls_copy_ictable
 
-c******************************************************************
+!******************************************************************
 
 	subroutine nls_read_isctable(n,ns)
 
-c reads general table with more numerical values per section
-c
-c table must have following structure (empty lines are allowed)
-c
-c	iv11 iv12 ... 'string1'
-c	iv21 iv22 iv23 ... 'string2'
-c	etc..
-c
-c an alternative is also possible, where only numbers are given
-c
-c	iv11 iv12 0 iv21 iv22 iv23 0 0 iv31
-c	etc..
-c
-c here the zeros separate one section from the next
-c in this case string gets a default value
-c
-c for both formats, line breaks can be at any point
-c
+! reads general table with more numerical values per section
+!
+! table must have following structure (empty lines are allowed)
+!
+!	iv11 iv12 ... 'string1'
+!	iv21 iv22 iv23 ... 'string2'
+!	etc..
+!
+! an alternative is also possible, where only numbers are given
+!
+!	iv11 iv12 0 iv21 iv22 iv23 0 0 iv31
+!	etc..
+!
+! here the zeros separate one section from the next
+! in this case string gets a default value
+!
+! for both formats, line breaks can be at any point
+!
 
 	integer n,ns
 
@@ -1173,9 +1173,9 @@ c
 	double precision value
 	character*80 name,text,sect
 
-c--------------------------------------------------------
-c initialize before looping
-c--------------------------------------------------------
+!--------------------------------------------------------
+! initialize before looping
+!--------------------------------------------------------
 
 	binsertzero = .true.	!insert zero to divide sections
 
@@ -1187,9 +1187,9 @@ c--------------------------------------------------------
 	bdebug = .true.
 	bdebug = .false.
 
-c--------------------------------------------------------
-c loop on input
-c--------------------------------------------------------
+!--------------------------------------------------------
+! loop on input
+!--------------------------------------------------------
 
 	do
 	  itype = nls_next_item(name,value,text)
@@ -1230,9 +1230,9 @@ c--------------------------------------------------------
 	  end if
 	end do
 
-c--------------------------------------------------------
-c clean up stuff
-c--------------------------------------------------------
+!--------------------------------------------------------
+! clean up stuff
+!--------------------------------------------------------
 
         if( nls_is_section(sect) ) then
           if( sect /= 'end' ) goto 97
@@ -1247,9 +1247,9 @@ c--------------------------------------------------------
 	end if
 	ns = is
 
-c--------------------------------------------------------
-c debug
-c--------------------------------------------------------
+!--------------------------------------------------------
+! debug
+!--------------------------------------------------------
 
 	if( .not. bdebug ) return
 
@@ -1270,9 +1270,9 @@ c--------------------------------------------------------
 	write(6,*) 'all nodes: ',n
 	write(6,*) (nint(nls_val(i)),i=1,n)
 
-c--------------------------------------------------------
-c end of routine
-c--------------------------------------------------------
+!--------------------------------------------------------
+! end of routine
+!--------------------------------------------------------
 
 	return
    97	continue
@@ -1300,11 +1300,11 @@ c--------------------------------------------------------
 	stop 'error stop nls_read_isctable: names on line'
 	end subroutine nls_read_isctable
 
-c******************************************************************
+!******************************************************************
 
 	subroutine nls_copy_isctable(n,ns,ivect,itable,cvect)
 
-c copies values read from internal storage to vector rvect
+! copies values read from internal storage to vector rvect
 
 	integer n,ns
 	integer ivect(n)
@@ -1317,28 +1317,28 @@ c copies values read from internal storage to vector rvect
 
 	end subroutine nls_copy_isctable
 
-c******************************************************************
+!******************************************************************
 
 !==================================================================
         end module nls
 !==================================================================
 
-c******************************************************************
-c******************************************************************
-c******************************************************************
+!******************************************************************
+!******************************************************************
+!******************************************************************
 
 
-c******************************************************************
-c******************************************************************
-c******************************************************************
-c compatibility routines
-c******************************************************************
-c******************************************************************
-c******************************************************************
+!******************************************************************
+!******************************************************************
+!******************************************************************
+! compatibility routines
+!******************************************************************
+!******************************************************************
+!******************************************************************
 
 	function nrdveci(ivect,ndim)
 
-c reads integer vector in section (compatibility)
+! reads integer vector in section (compatibility)
 
 	use nls
 
@@ -1357,11 +1357,11 @@ c reads integer vector in section (compatibility)
 
 	end
 
-c******************************************************************
+!******************************************************************
 
 	function nrdvecr(rvect,ndim)
 
-c reads real vector in section (compatibility)
+! reads real vector in section (compatibility)
 
 	use nls
 
@@ -1380,11 +1380,11 @@ c reads real vector in section (compatibility)
 
 	end
 
-c******************************************************************
+!******************************************************************
 
 	function nrdictable(ivect,cvect,ndim)
 
-c reads table in section
+! reads table in section
 
 	use nls
 
@@ -1404,7 +1404,7 @@ c reads table in section
 
 	end
 
-c******************************************************************
+!******************************************************************
 
 	subroutine setsec(name,num)
 	use nls
@@ -1462,7 +1462,7 @@ c******************************************************************
 	if( nls_next_data_line(line,.false.) ) nrdlin = 1
 	end
 
-c***********************
+!***********************
 
         subroutine nrdins(sect)
 	use nls
@@ -1489,27 +1489,27 @@ c***********************
 	nrdnxt = nls_next_item(name,value,text)
 	end
 
-c******************************************************************
-c******************************************************************
-c******************************************************************
+!******************************************************************
+!******************************************************************
+!******************************************************************
 
 	subroutine nrdtst
 
-c subroutine to test nrd... routines
-c
-c to use write main as follows :
-c
-c--------------------------
-c	call nrdtst
-c	end
-c--------------------------
+! subroutine to test nrd... routines
+!
+! to use write main as follows :
+!
+!--------------------------
+!	call nrdtst
+!	end
+!--------------------------
 
 	implicit none
 
 
 	end
 
-c*******************************************************
+!*******************************************************
 
 	subroutine petras_read
 
@@ -1529,11 +1529,11 @@ c*******************************************************
 
 	end
 
-c*******************************************************
+!*******************************************************
 
-c	program nls_test_main
-c	call petras_read
-c	end
+!	program nls_test_main
+!	call petras_read
+!	end
 
-c*******************************************************
+!*******************************************************
 

@@ -24,32 +24,31 @@
 !
 !--------------------------------------------------------------------------
 
-c heat flux module (GOTM)
-c
-c contents :
-c
-c subroutine heatgotm(t,p,w,ur,cc,ts,qsens,qlat,qlong,evap,cdd)
-c       computes heat fluxes from GOTM heat module
-c subroutine heatgotm_exchange_coeff(w,cdd,chd,ced)
-c	computes exchange coefficients
-c subroutine tempgotm(dt,dh,qsol,t,p,w,ur,cc,ts,tsnew,rtot,evap)
-c       computes heat fluxes from formulas in GOTM and adjusts water temp
-c
-c revision log :
-c
-c 04.03.2011	ggu	heat module from gotm extracted
-c 23.03.2011	ggu	bug in heatgotm() -> avoid wind speed == 0
-c 29.03.2011	ggu	bug in heatgotm() -> convert pressure to Pascal
-c 14.04.2011	ggu	changed VERS_6_1_22
-c 16.06.2014	ccf	bug in heatgotm() -> airt instead of sst in qb
-c 05.11.2014	ggu	changed VERS_7_0_5
-c 24.01.2018	ggu	changed VERS_7_5_41
-c 16.02.2019	ggu	changed VERS_7_5_60
-c
-c***********************************************************************
+! heat flux module (GOTM)
+!
+! contents :
+!
+! subroutine heatgotm(t,p,w,ur,cc,ts,qsens,qlat,qlong,evap,cdd)
+!       computes heat fluxes from GOTM heat module
+! subroutine heatgotm_exchange_coeff(w,cdd,chd,ced)
+!	computes exchange coefficients
+! subroutine tempgotm(dt,dh,qsol,t,p,w,ur,cc,ts,tsnew,rtot,evap)
+!       computes heat fluxes from formulas in GOTM and adjusts water temp
+!
+! revision log :
+!
+! 04.03.2011	ggu	heat module from gotm extracted
+! 23.03.2011	ggu	bug in heatgotm() -> avoid wind speed == 0
+! 29.03.2011	ggu	bug in heatgotm() -> convert pressure to Pascal
+! 14.04.2011	ggu	changed VERS_6_1_22
+! 16.06.2014	ccf	bug in heatgotm() -> airt instead of sst in qb
+! 05.11.2014	ggu	changed VERS_7_0_5
+! 24.01.2018	ggu	changed VERS_7_5_41
+! 16.02.2019	ggu	changed VERS_7_5_60
+!
+!***********************************************************************
 
-	subroutine heatgotm(airt,airp,ws,rh,cloud,sst
-     +					,qh,qe,qb,evap)
+	subroutine heatgotm(airt,airp,ws,rh,cloud,sst,qh,qe,qb,evap)
 
 	implicit none
 
@@ -87,9 +86,9 @@ c***********************************************************************
 	w = max(ws,0.01)
 	airppa = 100. * airp	!pressure in Pascal
 
-c------------------------------------------------------------
-c compute exchange coefficients
-c------------------------------------------------------------
+!------------------------------------------------------------
+! compute exchange coefficients
+!------------------------------------------------------------
 
 	!w = sqrt(wx*wx+wy*wy)
 	L = (2.5-0.00234*sst)*1.e6
@@ -97,8 +96,8 @@ c------------------------------------------------------------
 	es = es * 100.0 ! Conversion millibar --> Pascal
 	qs = const06*es/(airppa-0.377*es) ! specific humidity at sea surface
 
-        ea = a1 +airt*(a2+airt*(a3+airt*(a4+airt*
-     +					(a5+airt*(a6+airt*a7)))))
+        ea = a1 +airt*(a2+airt*(a3+airt*(a4+airt*     &    
+      &					(a5+airt*(a6+airt*a7)))))
         ea = rh*ea ! millibar --> Pascal and saturation --> actual vap. press.
         qa = const06*ea/(airppa-0.377*ea) ! specific humidity at 2m
 
@@ -113,9 +112,9 @@ c------------------------------------------------------------
 	  write(6,*) 'heatgotm 1: ',es,qs,ea,qa,tvirt,s0,s
 	end if
 
-c------------------------------------------------------------
-c compute transfer coefficients
-c------------------------------------------------------------
+!------------------------------------------------------------
+! compute transfer coefficients
+!------------------------------------------------------------
 
 	call heatgotm_exchange_coeff(w,cdd,chd,ced)
 
@@ -138,22 +137,22 @@ c------------------------------------------------------------
 	  write(6,*) 'heatgotm 2: ',cdd,chd,ced
 	end if
 
-c------------------------------------------------------------
-c compute heat fluxes
-c------------------------------------------------------------
+!------------------------------------------------------------
+! compute heat fluxes
+!------------------------------------------------------------
 
 	qe=ced*L*rho_air*w*(qs-qa)            ! latent
 	qh=chd*cpa*rho_air*w*(sst-airt)       ! sensible
 
 	tmp=airt+kelv
 	if( ihback .eq. 1 ) then		!clark
-	  qb=(1.0-.8*cloud*cloud)
-     +            *emiss*bolz*(tmp**4)*(0.39-0.05*sqrt(ea/100.0))
-     +            +4.0*emiss*bolz*(tmp**3)*(sst-airt)
+	  qb=(1.0-.8*cloud*cloud)                                           &    
+      &            *emiss*bolz*(tmp**4)*(0.39-0.05*sqrt(ea/100.0))     &    
+      &            +4.0*emiss*bolz*(tmp**3)*(sst-airt)
 	else if(ihback .eq. 2 ) then		!hastenrath
-          qb=(1.0-.8*cloud*cloud)
-     +            *emiss*bolz*(tmp**4)*(0.39-0.056*sqrt(1000*qa))
-     +            +4.0*emiss*bolz*(tmp**3)*(sst-airt)
+          qb=(1.0-.8*cloud*cloud)                                      &    
+      &            *emiss*bolz*(tmp**4)*(0.39-0.056*sqrt(1000*qa))     &    
+      &            +4.0*emiss*bolz*(tmp**3)*(sst-airt)
 	else
 	  stop 'error stop: ihback not allowed'
 	end if
@@ -169,7 +168,7 @@ c------------------------------------------------------------
 
 	end
 
-c***********************************************************************
+!***********************************************************************
 
 	subroutine heatgotm_exchange_coeff(w,cdd,chd,ced)
 
@@ -272,13 +271,13 @@ c***********************************************************************
 
 	end
 
-c***********************************************************************
+!***********************************************************************
 
         subroutine tempgotm(dt,dh,qsol,t,p,w,ur,cc,ts,tsnew,rtot,evap)
 
-c computes heat fluxes from formulas in Gill and adjusts water temperature
-c
-c heat fluxes are positive upward (from sea to atmosphere)
+! computes heat fluxes from formulas in Gill and adjusts water temperature
+!
+! heat fluxes are positive upward (from sea to atmosphere)
 
         implicit none
 
@@ -299,34 +298,34 @@ c heat fluxes are positive upward (from sea to atmosphere)
         real qsens,qlat,qlong
 	real cddrag	!drag coefficient computed by heat module
 
-c       ------------------------------------------------
-c       constants
-c       ------------------------------------------------
+!       ------------------------------------------------
+!       constants
+!       ------------------------------------------------
 
         cw   = 3991.            !heat capacity of water
         rhow = 1026.            !density of water
         ct   = cw * rhow * dh   !heat capacity / area
 
-c       ------------------------------------------------
-c       compute total radiation - positive if into water
-c       ------------------------------------------------
+!       ------------------------------------------------
+!       compute total radiation - positive if into water
+!       ------------------------------------------------
 
         call heatgotm(t,p,w,ur,cc,ts,qsens,qlat,qlong,evap)
         write(67,*) qsol,-qsens,-qlat,-qlong
 
         rtot = qsol - ( qsens + qlat + qlong )
 
-c       ------------------------------------------------
-c       compute new temperature: dQ = dT * rho * cw * dh / dt
-c       ------------------------------------------------
+!       ------------------------------------------------
+!       compute new temperature: dQ = dT * rho * cw * dh / dt
+!       ------------------------------------------------
 
         tsnew = ts + rtot * dt / ct
 
-c       ------------------------------------------------
-c       end of routine
-c       ------------------------------------------------
+!       ------------------------------------------------
+!       end of routine
+!       ------------------------------------------------
 
         end
 
-c***********************************************************************
+!***********************************************************************
 

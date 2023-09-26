@@ -23,25 +23,25 @@
 !
 !--------------------------------------------------------------------------
 
-c routines for vertical interpolation
-c
-c contents :
-c
-c revision log :
-c
-c 04.10.2012	ggu	copied from newbsig.f
-c 25.10.2012	ggu	changed VERS_6_1_59
-c 04.06.2013	ggu	bug fix: restore altered values zb1_save,var1_save
-c 13.06.2013	ggu	changed VERS_6_1_65
-c 28.06.2016	ggu	bug fix: handel situation with dh == 0
-c 09.09.2016	ggu	changed VERS_7_5_17
-c 16.02.2019	ggu	changed VERS_7_5_60
-c
-c*****************************************************************
+! routines for vertical interpolation
+!
+! contents :
+!
+! revision log :
+!
+! 04.10.2012	ggu	copied from newbsig.f
+! 25.10.2012	ggu	changed VERS_6_1_59
+! 04.06.2013	ggu	bug fix: restore altered values zb1_save,var1_save
+! 13.06.2013	ggu	changed VERS_6_1_65
+! 28.06.2016	ggu	bug fix: handel situation with dh == 0
+! 09.09.2016	ggu	changed VERS_7_5_17
+! 16.02.2019	ggu	changed VERS_7_5_60
+!
+!*****************************************************************
 
 	subroutine intp_vert(bcons,nl1,zb1,var1,nl2,zb2,var2)
 
-c vertical interpolation of variables from one grid to another
+! vertical interpolation of variables from one grid to another
 
 	implicit none
 
@@ -53,18 +53,18 @@ c vertical interpolation of variables from one grid to another
 	real zb2(0:nl2)		!depth of bottom of vertical boxes
 	real var2(nl2)		!value of variable at center of box (out)
 
-c values are interpolated from first grid to second grid
-c z levels refer to bottom of each grid (zb1(nl1) is total depth of column)
-c zb(0) is surface ... normally 0
-c variables are considered at center of box
-c values are considered to be constant for every box
-c bcons controlls if total quantity is conserved or not
-c
-c ATTENTION: arrays zb1, var1 MUST be dimensioned one element bigger
-c	then the available data. The last element is accessed and altered 
-c	by this subroutine, but at return is restored to its original value
-c
-c output is var2, all other variables are input values
+! values are interpolated from first grid to second grid
+! z levels refer to bottom of each grid (zb1(nl1) is total depth of column)
+! zb(0) is surface ... normally 0
+! variables are considered at center of box
+! values are considered to be constant for every box
+! bcons controlls if total quantity is conserved or not
+!
+! ATTENTION: arrays zb1, var1 MUST be dimensioned one element bigger
+!	then the available data. The last element is accessed and altered 
+!	by this subroutine, but at return is restored to its original value
+!
+! output is var2, all other variables are input values
 
 	logical bmiss,bdebug
 	integer l,j,ltop1,lbot1
@@ -75,9 +75,9 @@ c output is var2, all other variables are input values
 	real zb1_save,var1_save
 	real dz,dh
 
-c---------------------------------------------------------
-c handle special situations
-c---------------------------------------------------------
+!---------------------------------------------------------
+! handle special situations
+!---------------------------------------------------------
 
 	if( nl1 < 1 .or. nl2 < 1 ) then
 	  write(6,*) 'nl1,nl2: ',nl1,nl2
@@ -87,9 +87,9 @@ c---------------------------------------------------------
 	  return
 	end if
 
-c---------------------------------------------------------
-c initialize variables
-c---------------------------------------------------------
+!---------------------------------------------------------
+! initialize variables
+!---------------------------------------------------------
 
 	zb1_save = zb1(nl1+1)
 	var1_save = var1(nl1+1)
@@ -102,9 +102,9 @@ c---------------------------------------------------------
 
 	bdebug = .false.
 
-c---------------------------------------------------------
-c loop over second array and interpolate onto it
-c---------------------------------------------------------
+!---------------------------------------------------------
+! loop over second array and interpolate onto it
+!---------------------------------------------------------
 
 	if( bdebug ) write(66,*) '----------------------------------'
 
@@ -161,16 +161,16 @@ c---------------------------------------------------------
 
 	if( bdebug ) write(66,*) '----------------------------------'
 
-c---------------------------------------------------------
-c reset modified values
-c---------------------------------------------------------
+!---------------------------------------------------------
+! reset modified values
+!---------------------------------------------------------
 
 	zb1(nl1+1) = zb1_save
 	var1(nl1+1) = var1_save
 
-c---------------------------------------------------------
-c if bcons we have to adapt the interpolated values to conserve total value
-c---------------------------------------------------------
+!---------------------------------------------------------
+! if bcons we have to adapt the interpolated values to conserve total value
+!---------------------------------------------------------
 
 	if( bcons ) then	!must conserve total content of scalar
 	  vint1 = 0.
@@ -188,9 +188,9 @@ c---------------------------------------------------------
 	  end do
 	end if
 
-c---------------------------------------------------------
-c end of routine
-c---------------------------------------------------------
+!---------------------------------------------------------
+! end of routine
+!---------------------------------------------------------
 
 	return
    98	continue
@@ -201,7 +201,7 @@ c---------------------------------------------------------
 	stop 'error stop intp_vert: interval in (1) must include (2)'
 	end
 
-c*****************************************************************
+!*****************************************************************
 
         subroutine intp_aver(n,horig,vorig,femval)
 
@@ -227,7 +227,7 @@ c*****************************************************************
 
         end
 
-c*****************************************************************
+!*****************************************************************
 
 	subroutine intp_vert_test
 
@@ -274,11 +274,11 @@ c*****************************************************************
 
 	end
 
-c*****************************************************************
+!*****************************************************************
 
 	!program main_intp_vert_test
 	!call intp_vert_test
 	!end
 
-c*****************************************************************
+!*****************************************************************
 

@@ -198,16 +198,14 @@
         end module fem_file
 !==================================================================
 
-c************************************************************
-c************************************************************
-c************************************************************
+!************************************************************
+!************************************************************
+!************************************************************
 
-	subroutine fem_file_write_header(iformat,iunit,dtime
-     +				,nvers,np,lmax
-     +				,nvar,ntype
-     +				,nlvddi,hlv,datetime,regpar)
+	subroutine fem_file_write_header( iformat, iunit, dtime ,nvers, np, lmax,   &
+              &                 nvar, ntype, nlvddi, hlv,  datetime,regpar )
 
-c writes header of fem file
+! writes header of fem file
 
         implicit none
 
@@ -224,22 +222,19 @@ c writes header of fem file
 	integer datetime(2)	!date and time parameters
 	real regpar(7)		!parameters for regular field
 
-	call fem_file_write_params(iformat,iunit,dtime
-     +				,nvers,np,lmax
-     +				,nvar,ntype,datetime)
+	call fem_file_write_params( iformat, iunit, dtime, nvers, np, lmax   &
+         &                                       ,nvar,ntype,datetime)
 
-	call fem_file_write_2header(iformat,iunit,ntype,lmax
-     +			,hlv,regpar)
+	call fem_file_write_2header( iformat, iunit, ntype, lmax, hlv, regpar )
 
 	end
 
-c************************************************************
+!************************************************************
 
-	subroutine fem_file_write_params(iformat,iunit,dtime
-     +				,nvers,np,lmax
-     +				,nvar,ntype,datetime)
+	subroutine fem_file_write_params( iformat, iunit, dtime,    &
+               &        nvers,np,lmax, nvar, ntype, datetime)
 
-c writes first header of fem file
+! writes first header of fem file
 
 	use fem_file
 
@@ -291,10 +286,9 @@ c writes first header of fem file
 	stop 'error stop fem_file_write_header: nvers'
 	end
 
-c************************************************************
+!************************************************************
 
-	subroutine fem_file_write_2header(iformat,iunit,ntype,lmax
-     +			,hlv,regpar)
+	subroutine fem_file_write_2header( iformat, iunit, ntype, lmax, hlv, regpar )
 
 	implicit none
 
@@ -330,15 +324,12 @@ c************************************************************
  1000	format(5g14.6)
 	end
 
-c************************************************************
+!************************************************************
 
-	subroutine fem_file_write_data(iformat,iunit
-     +				,nvers,np,lmax
-     +				,string
-     +				,ilhkv,hd
-     +				,nlvddi,data)
+	subroutine fem_file_write_data( iformat, iunit, nvers, np, lmax, string    &
+               &                    , ilhkv, hd, nlvddi, data)
 
-c writes data of the file
+! writes data of the file
 
 	use fem_file
 
@@ -396,13 +387,13 @@ c writes data of the file
  1010	format(i8,(5g14.6))
 	end
 
-c************************************************************
-c************************************************************
-c************************************************************
+!************************************************************
+!************************************************************
+!************************************************************
 
 	function fem_file_is_fem_file(file)
 
-c checks if file is fem file
+! checks if file is fem file
 
 	implicit none
 
@@ -419,13 +410,13 @@ c checks if file is fem file
 
 	end
 
-c************************************************************
+!************************************************************
 
 	subroutine fem_file_test_fem_file(file,iformat)
 
-c tries to open fem file for read
-c
-c returns -1 in iformat if no fem file, else iformat indicates format
+! tries to open fem file for read
+!
+! returns -1 in iformat if no fem file, else iformat indicates format
 
 	implicit none
 
@@ -446,11 +437,11 @@ c returns -1 in iformat if no fem file, else iformat indicates format
 
 	end
 
-c************************************************************
+!************************************************************
 
 	subroutine fem_file_write_open(file,iformat,iunit)
 
-c opens fem file for write
+! opens fem file for write
 
 	implicit none
 
@@ -471,11 +462,11 @@ c opens fem file for write
 
 	end
 
-c************************************************************
+!************************************************************
 
 	subroutine fem_file_read_open(file,nexp,iformat,iunit)
 
-c opens fem file for read
+! opens fem file for read
 
 	implicit none
 
@@ -523,11 +514,11 @@ c opens fem file for read
 
 	end
 
-c************************************************************
+!************************************************************
 
 	subroutine fem_file_write_info(file,iformat)
 
-c writes information on file from header
+! writes information on file from header
 
 	use fem_file
 
@@ -578,11 +569,11 @@ c writes information on file from header
 
 	end
 
-c************************************************************
+!************************************************************
 
 	subroutine fem_file_test_formatted(file,np,nvar,ntype,iformat)
 
-c checks if file is readable and formatted or unformatted
+! checks if file is readable and formatted or unformatted
 
 	implicit none
 
@@ -599,9 +590,9 @@ c checks if file is readable and formatted or unformatted
 	integer ierr
 	logical bdebug,bopen,bexist
 
-c------------------------------------------------------
-c initialize parameters
-c------------------------------------------------------
+!------------------------------------------------------
+! initialize parameters
+!------------------------------------------------------
 
 	bdebug = .true.
 	bdebug = .false.
@@ -613,9 +604,9 @@ c------------------------------------------------------
 	nvar = 0
 	ntype = 0
 
-c------------------------------------------------------
-c find unit to open file
-c------------------------------------------------------
+!------------------------------------------------------
+! find unit to open file
+!------------------------------------------------------
 
 	iunit = 90
 	call find_unit(iunit)
@@ -627,16 +618,16 @@ c------------------------------------------------------
 	!write(6,*) 'try to open file on unit ',iunit
 	!write(6,*) 'file name: ',trim(file)
 
-c------------------------------------------------------
-c first try unformatted
-c------------------------------------------------------
+!------------------------------------------------------
+! first try unformatted
+!------------------------------------------------------
 
 	ierr = 77
 	open(iunit,file=file,form='unformatted',status='old',err=2)
 
 	iformat = 0
-	call fem_file_read_params(iformat,iunit,dtime
-     +				,nvers,np,lmax,nvar,ntype,datetime,ierr)
+	call fem_file_read_params(iformat,iunit,dtime         &
+         &     ,nvers,np,lmax,nvar,ntype,datetime,ierr)
 
 	close(iunit)
 	!write(6,*) 'ierrrr ',ierr
@@ -651,16 +642,16 @@ c------------------------------------------------------
 	!inquire(iunit,opened=bopen)
 	!write(6,*) 'unformatted open error...',bopen,ierr
 
-c------------------------------------------------------
-c now try formatted
-c------------------------------------------------------
+!------------------------------------------------------
+! now try formatted
+!------------------------------------------------------
 
 	ierr = 77
 	open(iunit,file=file,form='formatted',status='old',err=8)
 
 	iformat = 1
-	call fem_file_read_params(iformat,iunit,dtime
-     +				,nvers,np,lmax,nvar,ntype,datetime,ierr)
+	call fem_file_read_params(iformat,iunit,dtime            &
+            &     ,nvers,np,lmax,nvar,ntype,datetime,ierr)
 
 	close(iunit)
 	!write(6,*) 'formatted ierr = ',ierr
@@ -675,9 +666,9 @@ c------------------------------------------------------
 	!inquire(iunit,opened=bopen)
 	!write(6,*) 'formatted open error...',bopen,ierr
 
-c------------------------------------------------------
-c no successful opening
-c------------------------------------------------------
+!------------------------------------------------------
+! no successful opening
+!------------------------------------------------------
 
     9	continue
 
@@ -687,18 +678,17 @@ c------------------------------------------------------
 	iformat = -1
 	if( ierr == 77 ) iformat = -77
 
-c------------------------------------------------------
-c end of routine
-c------------------------------------------------------
+!------------------------------------------------------
+! end of routine
+!------------------------------------------------------
 
 	end
 
-c************************************************************
+!************************************************************
 
-	subroutine fem_file_get_data_description(file
-     +			,strings,ierr)
+	subroutine fem_file_get_data_description( file, strings, ierr )
 
-c returns data description for first record
+! returns data description for first record
 
 	implicit none
 
@@ -720,19 +710,15 @@ c returns data description for first record
 	call fem_file_read_open(file,np0,iformat,iunit)
 	if( iunit .le. 0 ) return
 
-	call fem_file_read_params(iformat,iunit,dtime
-     +				,nvers,np,lmax
-     +				,nvar,ntype,datetime,ierr)
+	call fem_file_read_params(iformat,iunit,dtime,nvers,np,lmax    &
+                        &           ,nvar,ntype,datetime,ierr)
 	if( ierr .ne. 0 ) return
 
-	call fem_file_skip_2header(iformat,iunit
-     +				,ntype,lmax,regpar,ierr)
+	call fem_file_skip_2header(iformat,iunit,ntype,lmax,regpar,ierr)
 	if( ierr .ne. 0 ) return
 
 	do i=1,nvar
-	  call fem_file_skip_data(iformat,iunit
-     +				,nvers,np,lmax
-     +				,string,ierr)
+	  call fem_file_skip_data(iformat,iunit,nvers,np,lmax,string,ierr)
 	  if( ierr .ne. 0 ) return
 	  strings(i) = adjustl(string)
 	end do
@@ -742,15 +728,14 @@ c returns data description for first record
 
 	end
 
-c************************************************************
-c************************************************************
-c************************************************************
+!************************************************************
+!************************************************************
+!************************************************************
 
-	subroutine fem_file_read_params(iformat,iunit,dtime
-     +				,nvers,np,lmax
-     +				,nvar,ntype,datetime,ierr)
+	subroutine fem_file_read_params(iformat,iunit,dtime,nvers,np,lmax    &
+                           &              ,nvar,ntype,datetime,ierr)
 
-c reads and checks params of next header
+! reads and checks params of next header
 
         implicit none
 
@@ -823,12 +808,12 @@ c reads and checks params of next header
 	stop 'error stop fem_file_read_params: iunit'
 	end
 
-c************************************************************
+!************************************************************
 
-	subroutine fem_file_peek_params(iformat,iunit,dtime
-     +				,nvers,np,lmax,nvar,ntype,datetime,ierr)
+	subroutine fem_file_peek_params(iformat,iunit,dtime         &
+                  &  ,nvers,np,lmax,nvar,ntype,datetime,ierr)
 
-c reads and checks params of next header (non advancing read)
+! reads and checks params of next header (non advancing read)
 
         implicit none
 
@@ -843,8 +828,8 @@ c reads and checks params of next header (non advancing read)
 	integer datetime(2)	!date and time information
 	integer ierr		!return error code
 
-	call fem_file_read_params(iformat,iunit,dtime
-     +				,nvers,np,lmax,nvar,ntype,datetime,ierr)
+	call fem_file_read_params(iformat,iunit,dtime            &
+            &     ,nvers,np,lmax,nvar,ntype,datetime,ierr)
 
 	if( ierr .ne. 0 ) return
 
@@ -852,7 +837,7 @@ c reads and checks params of next header (non advancing read)
 
 	end
 
-c************************************************************
+!************************************************************
 
 	subroutine fem_file_back_params(iunit,nvers,ntype)
 
@@ -870,11 +855,11 @@ c************************************************************
 	
 	end
 
-c************************************************************
+!************************************************************
 
 	subroutine fem_file_check_params(nvers,id,np,lmax,nvar,ntype,ierr)
 
-c reads and checks params of next header
+! reads and checks params of next header
 
 	use fem_file
 
@@ -909,12 +894,11 @@ c reads and checks params of next header
 	return
 	end
 
-c************************************************************
+!************************************************************
 
-	subroutine fem_file_read_2header(iformat,iunit,ntype,lmax
-     +			,hlv,regpar,ierr)
+	subroutine fem_file_read_2header(iformat,iunit,ntype,lmax,hlv,regpar,ierr)
 
-c reads hlv of header
+! reads hlv of header
 
 	use fem_file
 
@@ -961,12 +945,11 @@ c reads hlv of header
     1	continue
 	end
 
-c************************************************************
+!************************************************************
 
-	subroutine fem_file_skip_2header(iformat,iunit
-     +				,ntype,lmax,regpar,ierr)
+	subroutine fem_file_skip_2header(iformat,iunit,ntype,lmax,regpar,ierr)
 
-c skips additional headers in fem file
+! skips additional headers in fem file
 
         implicit none
 
@@ -1008,18 +991,14 @@ c skips additional headers in fem file
     1	continue
 	end
 
-c************************************************************
-c************************************************************
-c************************************************************
+!************************************************************
+!************************************************************
+!************************************************************
 
-	subroutine fem_file_read_data(iformat,iunit
-     +				,nvers,np,lmax
-     +				,string
-     +				,ilhkv,hd
-     +				,nlvddi,data
-     +				,ierr)
+	subroutine fem_file_read_data(iformat,iunit,nvers,np,lmax   &
+                  &        ,string,ilhkv,hd,nlvddi,data,ierr)
 
-c reads data of the file
+! reads data of the file
 
 	use fem_file
 
@@ -1119,13 +1098,11 @@ c reads data of the file
 	return
 	end
 
-c************************************************************
+!************************************************************
 
-	subroutine fem_file_skip_data(iformat,iunit
-     +				,nvers,np,lmax
-     +				,string,ierr)
+	subroutine fem_file_skip_data(iformat,iunit,nvers,np,lmax,string,ierr)
 
-c skips one record of data of the file
+! skips one record of data of the file
 
         implicit none
 
@@ -1200,7 +1177,7 @@ c skips one record of data of the file
 	return
 	end
 
-c************************************************************
+!************************************************************
 
 	subroutine fem_file_skip_record(iformat,iunit,atime,ierr)
 
@@ -1223,30 +1200,25 @@ c************************************************************
 
 	integer iv
 
-	call fem_file_read_params(iformat,iunit,dtime
-     +				,nvers,np,lmax
-     +				,nvar,ntype,datetime,ierr)
+	call fem_file_read_params(iformat,iunit,dtime,nvers,np,lmax    &
+                  &                 ,nvar,ntype,datetime,ierr)
 	if( ierr /= 0 ) return
 
 	call fem_file_convert_time0(datetime,dtime,atime)
 
-	call fem_file_skip_2header(iformat,iunit
-     +				,ntype,lmax,regpar,ierr)
+	call fem_file_skip_2header(iformat,iunit,ntype,lmax,regpar,ierr)
 	if( ierr /= 0 ) return
 
 	do iv=1,nvar
-	  call fem_file_skip_data(iformat,iunit
-     +				,nvers,np,lmax
-     +				,string,ierr)
+	  call fem_file_skip_data(iformat,iunit,nvers,np,lmax,string,ierr)
 	  if( ierr /= 0 ) return
 	end do
 
 	end
 
-c************************************************************
+!************************************************************
 
-	subroutine fem_get_first_and_last(iformat,iunit
-     +						,nrec,afirst,alast)
+	subroutine fem_get_first_and_last(iformat,iunit,nrec,afirst,alast)
 
 	implicit none
 
@@ -1277,11 +1249,11 @@ c************************************************************
 
 	end
 
-c************************************************************
+!************************************************************
 
-	subroutine fem_clean_data(nlvddi,np,ilhkv,data)	
+	subroutine fem_clean_data(nlvddi,np,ilhkv,data)
 
-c delete nans etc..
+! delete nans etc..
 
 	implicit none
 
@@ -1302,11 +1274,11 @@ c delete nans etc..
 
 	end
 
-c************************************************************
+!************************************************************
 
         function fem_is_nan(val)
 
-c tests val for NaN
+! tests val for NaN
 
         implicit none
 
@@ -1324,20 +1296,20 @@ c tests val for NaN
 
 	end
 
-c************************************************************
-c************************************************************
-c************************************************************
-c next three routines should be deleted 	FIXME
-c************************************************************
-c************************************************************
-c************************************************************
+!************************************************************
+!************************************************************
+!************************************************************
+! next three routines should be deleted 	FIXME
+!************************************************************
+!************************************************************
+!************************************************************
 
 	subroutine fem_file_string2time0(string,atime)
 
-c converts string to time stamp
-c
-c string can be an absolute date (YYYY-MM-DD[::hh:mm:ss])
-c or a relative time (integer)
+! converts string to time stamp
+!
+! string can be an absolute date (YYYY-MM-DD[::hh:mm:ss])
+! or a relative time (integer)
 
 	implicit none
 
@@ -1368,7 +1340,7 @@ c or a relative time (integer)
 	stop 'error stop fem_file_string2time: conversion error'
 	end
 
-c************************************************************
+!************************************************************
 
 	subroutine fem_file_convert_time0(datetime,dtime,atime)
 
@@ -1389,11 +1361,11 @@ c************************************************************
 
 	end
 
-c************************************************************
+!************************************************************
 
 	subroutine fem_file_convert_atime0(datetime,dtime,atime)
 
-c converts from atime to datetime and dtime (only if in atime is real date)
+! converts from atime to datetime and dtime (only if in atime is real date)
 
 	implicit none
 
@@ -1414,20 +1386,20 @@ c converts from atime to datetime and dtime (only if in atime is real date)
 
 	end
 
-c************************************************************
-c************************************************************
-c************************************************************
+!************************************************************
+!************************************************************
+!************************************************************
 
 	subroutine fem_file_make_type(ntype,imax,itype)
         integer ntype,imax,itype(imax)
         call fem_file_to_itype(ntype,imax,itype)
         end
 
-c************************************************************
+!************************************************************
 
 	subroutine fem_file_to_itype(ntype,imax,itype)
 
-c ntype to itype
+! ntype to itype
 
 	implicit none
 
@@ -1445,11 +1417,11 @@ c ntype to itype
 
 	end
 
-c************************************************************
+!************************************************************
 
 	subroutine fem_file_from_itype(ntype,imax,itype)
 
-c itype to ntype
+! itype to ntype
 
 	implicit none
 
@@ -1468,7 +1440,7 @@ c itype to ntype
 
 	end
 
-c************************************************************
+!************************************************************
 
         subroutine fem_file_set_ntype(ntype,ipos,ival)
 
@@ -1488,7 +1460,7 @@ c************************************************************
 
         end
 
-c************************************************************
+!************************************************************
 
 	function fem_file_regular(ntype)
 
@@ -1505,7 +1477,7 @@ c************************************************************
 
 	end
 
-c************************************************************
+!************************************************************
 
 	subroutine fem_file_get_format_description(iformat,line)
 
@@ -1528,9 +1500,9 @@ c************************************************************
 
 	end
 
-c************************************************************
-c************************************************************
-c************************************************************
+!************************************************************
+!************************************************************
+!************************************************************
 
 	subroutine test_type
 
@@ -1546,9 +1518,9 @@ c************************************************************
 	write(6,*) ntype,itype
 	end
 
-c************************************************************
-c	program subfile_main
-c	call test_type
-c	end
-c************************************************************
+!************************************************************
+!	program subfile_main
+!	call test_type
+!	end
+!************************************************************
 

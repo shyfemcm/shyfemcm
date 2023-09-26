@@ -56,14 +56,12 @@
 	integer nkn
 	integer nel
 
-	if( nkn == nkn_geom_dynamic .and. 
-     +  nel == nel_geom_dynamic ) return 
+	if( nkn == nkn_geom_dynamic .and. nel == nel_geom_dynamic ) return 
 
 	if( nkn > 0 .or. nel > 0 ) then
           if( nkn == 0 .or. nel == 0 ) then
             write(6,*) 'nkn,nel: ',nkn,nel
-            stop 'error stop mod_geom_dynamic_init: 
-     +            incompatible parameters'
+            stop 'error stop mod_geom_dynamic_init: incompatible parameters'
           end if
         end if
 

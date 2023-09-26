@@ -986,12 +986,12 @@
 
 	call strings_get_ivar(name,ivar)
 
-	has_direction = ( &
-     &			  ivar == 2 		!velocity &
-     &		     .or. ivar == 3 		!transport &
-     &		     .or. ivar == 21		!wind &
-     &		     .or. ivar == 42		!wind stress &
-     &			)
+	has_direction = (       &
+      &			  ivar == 2          &		!velocity &
+      &		     .or. ivar == 3     &		!transport &
+      &		     .or. ivar == 21    &		!wind &
+      &		     .or. ivar == 42    &		!wind stress &
+      &			)
 
 	end
 

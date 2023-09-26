@@ -24,100 +24,100 @@
 !
 !--------------------------------------------------------------------------
 
-c time management routines
-c
-c contents :
-c
-c
-c revision log :
-c
-c 23.09.1997	ggu	boundn deleted -> no access to data structure
-c 20.03.1998	ggu	minor changes to priout
-c 29.04.1998	ggu	new module for semi-implicit time-step
-c 07.05.1998	ggu	check for error on return of nrdvecr
-c 19.06.1998	ggu	version number is character
-c 22.01.1999	ggu	oxygen section added
-c 26.01.1999	ggu	new comp3d added
-c 11.08.1999	ggu	new compatibility array hlhv initialized
-c 19.11.1999	ggu	new routines for section vol
-c 20.01.2000	ggu	common block /dimdim/ eliminated
-c 04.02.2000	ggu	no priout, dobefor/after, pritime, endtime
-c 15.05.2000	ggu	hm3v substituted
-c 26.05.2000	ggu	copright statement adjourned
-c 21.11.2001	ggu	routines to handle advective index (aix)
-c 27.11.2001	ggu	routine to handle info file (getinfo)
-c 11.10.2002	ggu	aix routines deleted
-c 07.02.2003	ggu	routine added: changeimp, getaz; deleted getaza
-c 10.08.2003	ggu	call adjust_chezy instead sp135r
-c 14.08.2003	ggu	femver transfered to subver, not called in nlsh2d
-c 20.08.2003	ggu	tsmed substituted by ts_shell
-c 01.09.2003	ggu	call wrousa
-c 03.09.2004	ggu	call admrst, comp3d renamed to init_3d (not used)
-c 03.09.2004	ggu	nlv, hlv initialized in nlsh2d (FIXME)
-c 28.09.2004	ggu	read lagrangian section
-c 01.12.2004	ggu	new routine set_timestep for variable time step
-c 17.01.2005	ggu	get_stab_index to newcon.f, error stop in set_timestep
-c 14.03.2005	ggu	syncronize idt with end of simulation (set_timestep)
-c 07.11.2005	ggu	handle new section sedtr for sediments
-c 23.03.2006	ggu	changed time step to real
-c 23.05.2007	ggu	recall variable time step pars at every time step
-c 02.10.2007	ggu	bug fix in set_timestep for very small rindex
-c 10.04.2008	ccf	output in netcdf format
-c 28.04.2008	ggu	in set_timestep new call to advect_stability()
-c 03.09.2008	ggu	in nlsh2d different error message
-c 20.11.2008	ggu	init_3d deleted, nlv initialized to 0
-c 18.11.2009	ggu	new format in pritime (write also time step)
-c 22.02.2010	ggu	new call to hydro_stability to compute time step
-c 22.02.2010	ccf	new routine for tidal pot. (tideforc), locaus deleted
-c 26.02.2010	ggu	in set_timestep compute and write ri with old dt
-c 22.03.2010	ggu	some comments for better readability
-c 29.04.2010	ggu	new routine set_output_frequency() ... not finished
-c 04.05.2010	ggu	shell to compute energy
-c 22.02.2011	ggu	in pritime() new write to terminal
-c 20.05.2011	ggu	changes in set_timestep(), element removal, idtmin
-c 31.05.2011	ggu	changes for BFM
-c 01.06.2011	ggu	idtmin introduced
-c 12.07.2011	ggu	new routine next_output(), revised set_output_frequency
-c 14.07.2011	ggu	new routines for original time step
-c 13.09.2011	ggu	better error check, rdtitl() more robust
-c 23.01.2012	ggu	new section "proj"
-c 24.01.2012	ggu	new routine setup_parallel()
-c 10.02.2012	ggu	new routines to initialize and access time common block
-c 05.03.2014	ggu	code prepared to repeat time step (irepeat) - not ready
-c 05.03.2014	ggu	new routines get_last/first_time()
-c 10.04.2014	ccf	new section "wrt" for water renewal time
-c 29.10.2014	ggu	do_() routines transfered from newpri.f
-c 10.11.2014	ggu	time management routines transfered to this file
-c 23.09.2015	ggu	new routine convert_time_d() for double
-c 24.09.2015	ggu	routines re-written for double precision
-c 20.10.2015	ggu	new routines to set/get id
-c 04.11.2015	ggu	allow for initial output in adjust_itmidt()
-c 11.10.2016	ggu	changed VERS_7_5_20
-c 04.11.2017	ggu	new routine init_output_i()
-c 03.04.2018	ggu	changed VERS_7_5_43
-c 06.07.2018	ggu	changed VERS_7_5_48
-c 03.10.2018	ggu	some instances of itanf and itend eliminated
-c 16.10.2018	ggu	changed VERS_7_5_50
-c 16.02.2019	ggu	changed VERS_7_5_60
-c 06.02.2020	ggu	new function function is_first_output_d()
-c 22.04.2020    ggu     write text for info_output
-c 30.03.2021    ggu     bug fix in info_output_d()
-c 18.03.2022    ggu     bug fix in increase_output_d() itend -> dtend
-c
-c info :
-c
-c       da_out(1) = idtout      ! time step of output
-c       da_out(2) = itmout      ! first output
-c       da_out(3) = itout       ! next output
-c       da_out(4) = 0           ! unit or shyfem file id (optional)
-c
-c**********************************************************************
-c**********************************************************************
-c**********************************************************************
+! time management routines
+!
+! contents :
+!
+!
+! revision log :
+!
+! 23.09.1997	ggu	boundn deleted -> no access to data structure
+! 20.03.1998	ggu	minor changes to priout
+! 29.04.1998	ggu	new module for semi-implicit time-step
+! 07.05.1998	ggu	check for error on return of nrdvecr
+! 19.06.1998	ggu	version number is character
+! 22.01.1999	ggu	oxygen section added
+! 26.01.1999	ggu	new comp3d added
+! 11.08.1999	ggu	new compatibility array hlhv initialized
+! 19.11.1999	ggu	new routines for section vol
+! 20.01.2000	ggu	common block /dimdim/ eliminated
+! 04.02.2000	ggu	no priout, dobefor/after, pritime, endtime
+! 15.05.2000	ggu	hm3v substituted
+! 26.05.2000	ggu	copright statement adjourned
+! 21.11.2001	ggu	routines to handle advective index (aix)
+! 27.11.2001	ggu	routine to handle info file (getinfo)
+! 11.10.2002	ggu	aix routines deleted
+! 07.02.2003	ggu	routine added: changeimp, getaz; deleted getaza
+! 10.08.2003	ggu	call adjust_chezy instead sp135r
+! 14.08.2003	ggu	femver transfered to subver, not called in nlsh2d
+! 20.08.2003	ggu	tsmed substituted by ts_shell
+! 01.09.2003	ggu	call wrousa
+! 03.09.2004	ggu	call admrst, comp3d renamed to init_3d (not used)
+! 03.09.2004	ggu	nlv, hlv initialized in nlsh2d (FIXME)
+! 28.09.2004	ggu	read lagrangian section
+! 01.12.2004	ggu	new routine set_timestep for variable time step
+! 17.01.2005	ggu	get_stab_index to newcon.f, error stop in set_timestep
+! 14.03.2005	ggu	syncronize idt with end of simulation (set_timestep)
+! 07.11.2005	ggu	handle new section sedtr for sediments
+! 23.03.2006	ggu	changed time step to real
+! 23.05.2007	ggu	recall variable time step pars at every time step
+! 02.10.2007	ggu	bug fix in set_timestep for very small rindex
+! 10.04.2008	ccf	output in netcdf format
+! 28.04.2008	ggu	in set_timestep new call to advect_stability()
+! 03.09.2008	ggu	in nlsh2d different error message
+! 20.11.2008	ggu	init_3d deleted, nlv initialized to 0
+! 18.11.2009	ggu	new format in pritime (write also time step)
+! 22.02.2010	ggu	new call to hydro_stability to compute time step
+! 22.02.2010	ccf	new routine for tidal pot. (tideforc), locaus deleted
+! 26.02.2010	ggu	in set_timestep compute and write ri with old dt
+! 22.03.2010	ggu	some comments for better readability
+! 29.04.2010	ggu	new routine set_output_frequency() ... not finished
+! 04.05.2010	ggu	shell to compute energy
+! 22.02.2011	ggu	in pritime() new write to terminal
+! 20.05.2011	ggu	changes in set_timestep(), element removal, idtmin
+! 31.05.2011	ggu	changes for BFM
+! 01.06.2011	ggu	idtmin introduced
+! 12.07.2011	ggu	new routine next_output(), revised set_output_frequency
+! 14.07.2011	ggu	new routines for original time step
+! 13.09.2011	ggu	better error check, rdtitl() more robust
+! 23.01.2012	ggu	new section "proj"
+! 24.01.2012	ggu	new routine setup_parallel()
+! 10.02.2012	ggu	new routines to initialize and access time common block
+! 05.03.2014	ggu	code prepared to repeat time step (irepeat) - not ready
+! 05.03.2014	ggu	new routines get_last/first_time()
+! 10.04.2014	ccf	new section "wrt" for water renewal time
+! 29.10.2014	ggu	do_() routines transfered from newpri.f
+! 10.11.2014	ggu	time management routines transfered to this file
+! 23.09.2015	ggu	new routine convert_time_d() for double
+! 24.09.2015	ggu	routines re-written for double precision
+! 20.10.2015	ggu	new routines to set/get id
+! 04.11.2015	ggu	allow for initial output in adjust_itmidt()
+! 11.10.2016	ggu	changed VERS_7_5_20
+! 04.11.2017	ggu	new routine init_output_i()
+! 03.04.2018	ggu	changed VERS_7_5_43
+! 06.07.2018	ggu	changed VERS_7_5_48
+! 03.10.2018	ggu	some instances of itanf and itend eliminated
+! 16.10.2018	ggu	changed VERS_7_5_50
+! 16.02.2019	ggu	changed VERS_7_5_60
+! 06.02.2020	ggu	new function function is_first_output_d()
+! 22.04.2020    ggu     write text for info_output
+! 30.03.2021    ggu     bug fix in info_output_d()
+! 18.03.2022    ggu     bug fix in increase_output_d() itend -> dtend
+!
+! info :
+!
+!       da_out(1) = idtout      ! time step of output
+!       da_out(2) = itmout      ! first output
+!       da_out(3) = itout       ! next output
+!       da_out(4) = 0           ! unit or shyfem file id (optional)
+!
+!**********************************************************************
+!**********************************************************************
+!**********************************************************************
 
 	subroutine adjust_itmidt_d(itmout,idtout,itout)
 
-c sets-up output frequency and first output
+! sets-up output frequency and first output
 
 	implicit none
 
@@ -140,11 +140,11 @@ c sets-up output frequency and first output
 
 	end
 
-c********************************************************************
+!********************************************************************
 
 	subroutine set_output_frequency_d(itmout,idtout,da_out)
 
-c sets-up array for output frequency
+! sets-up array for output frequency
 
 	implicit none
 
@@ -163,11 +163,11 @@ c sets-up array for output frequency
 
 	end
 
-c********************************************************************
+!********************************************************************
 
 	subroutine assure_initial_output_d(da_out)
 
-c makes sure that output will be done also for itmout (first time step)
+! makes sure that output will be done also for itmout (first time step)
 
 	implicit none
 
@@ -184,11 +184,11 @@ c makes sure that output will be done also for itmout (first time step)
 
 	end
 
-c********************************************************************
+!********************************************************************
 
 	subroutine increase_output_d(da_out)
 
-c makes sure that itout > itmout
+! makes sure that itout > itmout
 
 	implicit none
 
@@ -212,11 +212,11 @@ c makes sure that itout > itmout
 
 	end
 
-c********************************************************************
+!********************************************************************
 
 	function is_over_output_d(da_out)
 
-c checks if output phase has started (it > itmout)
+! checks if output phase has started (it > itmout)
 
 	implicit none
 
@@ -229,11 +229,11 @@ c checks if output phase has started (it > itmout)
 
 	end
 
-c********************************************************************
+!********************************************************************
 
 	function is_first_output_d(da_out)
 
-c checks if we are at starting of output (it == itmout)
+! checks if we are at starting of output (it == itmout)
 
 	implicit none
 
@@ -246,11 +246,11 @@ c checks if we are at starting of output (it == itmout)
 
 	end
 
-c********************************************************************
+!********************************************************************
 
 	function is_in_output_d(da_out)
 
-c checks if we arrived at output phase (it >= itmout)
+! checks if we arrived at output phase (it >= itmout)
 
 	implicit none
 
@@ -263,11 +263,11 @@ c checks if we arrived at output phase (it >= itmout)
 
 	end
 
-c********************************************************************
+!********************************************************************
 
 	function has_output_d(da_out)
 
-c checks if variable has any output at all
+! checks if variable has any output at all
 
 	implicit none
 
@@ -278,11 +278,11 @@ c checks if variable has any output at all
 
 	end
 
-c********************************************************************
+!********************************************************************
 
 	function next_output_d(da_out)
 
-c checks if time has come for output
+! checks if time has come for output
 
 	implicit none
 
@@ -309,11 +309,11 @@ c checks if time has come for output
 
 	end
 
-c********************************************************************
+!********************************************************************
 
 	subroutine info_output_d(text,da_out)
 
-c writes info on da_output
+! writes info on da_output
 
 	implicit none
 
@@ -347,7 +347,7 @@ c writes info on da_output
 
 	end
 
-c********************************************************************
+!********************************************************************
 
         subroutine set_id_output_d(da_out,id)
 
@@ -360,7 +360,7 @@ c********************************************************************
 
         end
 
-c********************************************************************
+!********************************************************************
 
         subroutine get_id_output_d(da_out,id)
 
@@ -373,11 +373,11 @@ c********************************************************************
 
         end
 
-c********************************************************************
+!********************************************************************
 
 	subroutine init_output_d(itmname,idtname,da_out)
 
-c gets time values and transforms them
+! gets time values and transforms them
 
 	implicit none
 
@@ -393,11 +393,11 @@ c gets time values and transforms them
 
 	end
 
-c********************************************************************
+!********************************************************************
 
 	subroutine convert_date_d(name,dit)
 
-c converts date to relative time
+! converts date to relative time
 
 	implicit none
 
@@ -448,11 +448,11 @@ c converts date to relative time
 	stop 'error stop convert_date: cannot parse'
 	end
 
-c********************************************************************
+!********************************************************************
 
 	subroutine convert_time_d(name,didt)
 
-c converts time period to relative time difference
+! converts time period to relative time difference
 
 	implicit none
 
@@ -494,5 +494,5 @@ c converts time period to relative time difference
 	stop 'error stop convert_time: cannot parse'
 	end
 
-c********************************************************************
+!********************************************************************
 

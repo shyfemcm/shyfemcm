@@ -65,8 +65,8 @@
 !
 !***********************************************************************
 
-	subroutine heatcoare(airt,airp,ws,rh,cloud,sst,prec,rad,
-     +			qsens,qlat,qlong,evap,cd)
+	subroutine heatcoare(airt,airp,ws,rh,cloud,sst,prec,rad,    &
+      &			qsens,qlat,qlong,evap,cd)
 
 	implicit none
 
@@ -274,7 +274,7 @@
 	if (ZoL .lt. 0.0) then
 	  chik=(1.0-16.0*ZoL)**0.25
 	  if (iflag .eq. 1) then
-	     psik=2.0*LOG(0.5*(1.0+chik))+LOG(0.5*(1.0+chik*chik))-
+	     psik=2.0*LOG(0.5*(1.0+chik))+LOG(0.5*(1.0+chik*chik))-    &
      &	          2.0*ATAN(chik)+ 0.5*pi
 	  else if (iflag .eq. 2) then
 	        psik=2.0*LOG(0.5*(1.0+chik*chik))
@@ -285,7 +285,7 @@
 !	  ------------------------------------------------
 !
 	  chic=(1.0-12.87*ZoL)**r3
-	  psic=1.5*LOG(r3*(1.0+chic+chic*chic))-
+	  psic=1.5*LOG(r3*(1.0+chic+chic*chic))-     &
      &	        sqr3*ATAN((1.0+2.0*chic)/sqr3)+ pi/sqr3
 !
 !	  ------------------------------------------------
@@ -344,25 +344,25 @@
 	integer, parameter   :: bignami=3    ! Bignami et al., 1995 - Medsea
 	integer, parameter   :: berliand=4   ! Berliand and Berliand, 1952 - ROMS
 
-	real, parameter, dimension(91)  :: cloud_correction_factor = (/ 
-     &    0.497202,  0.501885,  0.506568,  0.511250,  0.515933, 
-     &    0.520616,  0.525299,  0.529982,  0.534665,  0.539348, 
-     &    0.544031,  0.548714,  0.553397,  0.558080,  0.562763, 
-     &    0.567446,  0.572129,  0.576812,  0.581495,  0.586178, 
-     &    0.590861,  0.595544,  0.600227,  0.604910,  0.609593, 
-     &    0.614276,  0.618959,  0.623641,  0.628324,  0.633007, 
-     &    0.637690,  0.642373,  0.647056,  0.651739,  0.656422, 
-     &    0.661105,  0.665788,  0.670471,  0.675154,  0.679837, 
-     &    0.684520,  0.689203,  0.693886,  0.698569,  0.703252, 
-     &    0.707935,  0.712618,  0.717301,  0.721984,  0.726667, 
-     &    0.731350,  0.736032,  0.740715,  0.745398,  0.750081, 
-     &    0.754764,  0.759447,  0.764130,  0.768813,  0.773496, 
-     &    0.778179,  0.782862,  0.787545,  0.792228,  0.796911, 
-     &    0.801594,  0.806277,  0.810960,  0.815643,  0.820326, 
-     &    0.825009,  0.829692,  0.834375,  0.839058,  0.843741, 
-     &    0.848423,  0.853106,  0.857789,  0.862472,  0.867155, 
-     &    0.871838,  0.876521,  0.881204,  0.885887,  0.890570, 
-     &    0.895253,  0.899936,  0.904619,  0.909302,  0.913985, 
+	real, parameter, dimension(91)  :: cloud_correction_factor = (/   & 
+     &    0.497202,  0.501885,  0.506568,  0.511250,  0.515933,      &
+     &    0.520616,  0.525299,  0.529982,  0.534665,  0.539348,      & 
+     &    0.544031,  0.548714,  0.553397,  0.558080,  0.562763,      &  
+     &    0.567446,  0.572129,  0.576812,  0.581495,  0.586178,      &  
+     &    0.590861,  0.595544,  0.600227,  0.604910,  0.609593,      &  
+     &    0.614276,  0.618959,  0.623641,  0.628324,  0.633007,      &  
+     &    0.637690,  0.642373,  0.647056,  0.651739,  0.656422,      &  
+     &    0.661105,  0.665788,  0.670471,  0.675154,  0.679837,      &  
+     &    0.684520,  0.689203,  0.693886,  0.698569,  0.703252,      &  
+     &    0.707935,  0.712618,  0.717301,  0.721984,  0.726667,      &  
+     &    0.731350,  0.736032,  0.740715,  0.745398,  0.750081,      &  
+     &    0.754764,  0.759447,  0.764130,  0.768813,  0.773496,      &  
+     &    0.778179,  0.782862,  0.787545,  0.792228,  0.796911,      &  
+     &    0.801594,  0.806277,  0.810960,  0.815643,  0.820326,      &  
+     &    0.825009,  0.829692,  0.834375,  0.839058,  0.843741,      &  
+     &    0.848423,  0.853106,  0.857789,  0.862472,  0.867155,      &  
+     &    0.871838,  0.876521,  0.881204,  0.885887,  0.890570,      &  
+     &    0.895253,  0.899936,  0.904619,  0.909302,  0.913985,      &  
      &    0.918668 /)
 
 ! local
@@ -483,23 +483,23 @@
 !       rt = Liu_a(:,1) * Rr   ** Liu_b(:,1)    temperature
 !       rq = Liu_a(:,2) * Rr   ** Liu_b(:,2)    moisture
 !
-	real,parameter, dimension(8,2) :: Liu_a = reshape ( 
-     &           (/ 0.177,  1.376,    1.026,      1.625,   
-     &              4.661, 34.904, 1667.190, 588000.0,     
-     &              0.292,  1.808,    1.393,      1.956,   
-     &              4.994, 30.709, 1448.680, 298000.0 /),  
+	real,parameter, dimension(8,2) :: Liu_a = reshape (       & 
+     &           (/ 0.177,  1.376,    1.026,      1.625,     &   
+     &              4.661, 34.904, 1667.190, 588000.0,       &   
+     &              0.292,  1.808,    1.393,      1.956,     &    
+     &              4.994, 30.709, 1448.680, 298000.0 /),    &   
      &           (/ 8, 2 /) )
 
-	real,parameter, dimension(8,2) :: Liu_b = reshape (
-     &           (/  0.0,    0.929, -0.599, -1.018,        
-     &              -1.475, -2.067, -2.907, -3.935,        
-     &               0.0,    0.826, -0.528, -0.870,        
-     &              -1.297, -1.845, -2.682, -3.616 /),     
+	real,parameter, dimension(8,2) :: Liu_b = reshape (     &     
+     &           (/  0.0,    0.929, -0.599, -1.018,        &         
+     &              -1.475, -2.067, -2.907, -3.935,        &        
+     &               0.0,    0.826, -0.528, -0.870,        &         
+     &              -1.297, -1.845, -2.682, -3.616 /),     &         
      &           (/ 8, 2 /) )
 
-	real,parameter, dimension(9) :: Liu_Rr = 
-     &           (/    0.0,  0.11,   0.825,   3.0,         
-     &                10.0, 30.0,  100.0,   300.0,        
+	real,parameter, dimension(9) :: Liu_Rr =            &     
+     &           (/    0.0,  0.11,   0.825,   3.0,     &             
+     &                10.0, 30.0,  100.0,   300.0,     &            
      &              1000.0 /)
 
         real, parameter	      :: charn= 0.011        !Charnock
@@ -543,7 +543,7 @@
 !	------------------------------------------------
 !	Kinematic viscosity of dry air (m2/s), Andreas (1989).
 !	------------------------------------------------
-	vis_air=1.326e-5*(1.0+ta*(6.542e-3+ta*
+	vis_air=1.326e-5*(1.0+ta*(6.542e-3+ta*     &    
      &	      (8.301e-6-4.84e-9*ta)))
 
 !	------------------------------------------------
@@ -691,8 +691,7 @@
 ! considered by computing SST from model temperature in the 
 ! first layer (see tw_skin)
 
-	subroutine coare30(sst,airt,ws,rain,Rns,Rnl,Qs,Q,rhoa,
-     +			   evap,qsens,qlat,Cd)
+	subroutine coare30(sst,airt,ws,rain,Rns,Rnl,Qs,Q,rhoa,evap,qsens,qlat,Cd)
 
 	implicit none
 
@@ -772,8 +771,8 @@
 	cwave = grav/2/pi*twave 
 
 	Le   = (2.501-.00237*sst)*1.e6 
-	visa = 1.326e-5*(1+6.542e-3*airt+8.301e-6*airt*airt - 
-     +		4.84e-9*airt*airt*airt) 
+	visa = 1.326e-5*(1+6.542e-3*airt+8.301e-6*airt*airt -      &    
+      &		4.84e-9*airt*airt*airt) 
 	aux = sst+3.2
 	if( aux < 0. ) aux = 0.
 	Al   = 2.1e-5*(aux)**0.79 	!GGUZ0 FIXME
@@ -837,8 +836,7 @@
 	endif 
 	usr=ut*von/(log(zu/zo10)-psi(1,zu/L10))
 	tsr=-(dt-dter*jcool)*von*fdg/(log(zt/zot10)-psi(2,zt/L10)) 
-	qsr=-(dq-wetc*dter*jcool)*von*fdg/(log(zq/zot10)-
-     +	    psi(2,zq/L10)) 
+	qsr=-(dq-wetc*dter*jcool)*von*fdg/(log(zq/zot10)-psi(2,zq/L10)) 
 	tkt=.001
 	charn=0.011 
 	if (ut .GT. 10) then
@@ -854,14 +852,13 @@
 
 	do i=1, nits 
 
-          zet=von*grav*zu/ta*(tsr*(1+0.61*Q)+.61*ta*qsr)/(usr*usr)/
-     &        (1+0.61*Q) 
+          zet=von*grav*zu/ta*(tsr*(1+0.61*Q)+.61*ta*qsr)/(usr*usr)/(1+0.61*Q) 
 	  !disp(usr)
 	  !disp(zet) 
 	  if (jwave .EQ. 0) zo=charn*usr*usr/grav+0.11*visa/usr  
-	  if (jwave .EQ. 1) zo=50/2/pi*lwave*(usr/cwave)**4.5+0.11*
+	  if (jwave .EQ. 1) zo=50/2/pi*lwave*(usr/cwave)**4.5+0.11*     &    
      &                         visa/usr 	!Oost et al
-	  if (jwave .EQ. 2) zo=1200*hwave*(hwave/lwave)**4.5+0.11*
+	  if (jwave .EQ. 2) zo=1200*hwave*(hwave/lwave)**4.5+0.11*     &    
      &                         visa/usr 	!Taylor and Yelland
 	  rr=zo*usr/visa 
 
@@ -927,10 +924,10 @@
 !	------------------------------------------------
      
 	dwat=2.11e-5*((airt+kelv)/kelv)**1.94 		!water vapour diffusivity
-	dtmp=(1.+3.309e-3*airt-1.44e-6*airt*airt)*	!heat diffusivity
+	dtmp=(1.+3.309e-3*airt-1.44e-6*airt*airt)*     &    	!heat diffusivity
      &        0.02411/(rhoa*cpa)
 	alfac= 1./(1.+(wetc*Le*dwat)/(cpa*dtmp))    	!wet bulb factor
-	RF= rain*alfac*cpw*((sst-airt-dter*jcool)+
+	RF= rain*alfac*cpw*((sst-airt-dter*jcool)+     &    
      &	    (Qs-Q-dqer*jcool)*Le/cpa)
 
 !	------------------------------------------------
@@ -962,8 +959,7 @@
 !-----------------------------------------------------------------------
 ! Compute momentum fluxes due to rainfall
 
-	subroutine wcstress(ws,rhoa,rhow,rain,
-     +			    wx,wy,taux,tauy)
+	subroutine wcstress(ws,rhoa,rhow,rain,wx,wy,taux,tauy)
 
 	implicit none
 
@@ -1050,7 +1046,7 @@
                                                 ! between zs and fs (impact <0.03C)
         ds = 6./(1.+(cff5*q2)**0.75)**0.333     ! sublayer thickness (m)
         ds = ds*visw/usw                        ! --> eq 6 of Z&B-2005
-        fs = 0.065+11.*ds-(6.6e-5/ds)           ! fract. of solar rad. absorbed 
+        fs = 0.065+11.*ds-(6.6e-5/ds)     &     ! fract. of solar rad. absorbed 
      &            *(1.-exp(-ds/8.e-4))          ! in sublayer
         fs = max(fs,0.01)
         dtc = ds*(q+sw*fs)/diff                 ! cool skin temp. diff
@@ -1099,7 +1095,7 @@
 !	dtw(n+1)-dtw(n) = dt*RHS(dtw(n+1))
 !	------------------------------------------------
 
-        dtw = (dtwo + (nu+1.)/nu*(q+sw*f1)*dt/hb)
+        dtw = (dtwo + (nu+1.)/nu*(q+sw*f1)*dt/hb)     &
      &                      /(1.+(nu+1.)*cff3*dt)
         dtw = max(0.,dtw)
 

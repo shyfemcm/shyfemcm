@@ -25,80 +25,80 @@
 !
 !--------------------------------------------------------------------------
 
-c heat flux module
-c
-c contents :
-c
-c subroutine subtem(dt,dh,qs,uw,cc,ta,tb,ts,tsnew,rtot)
-c			compute water temperature in element of depth dh
-c subroutine subtem0(dt,dh,qs,uw,cc,ta,tb,ts,tsnew,evap)
-c			same as subtem, but use heatlucia
-c subroutine heatlucia(t,p,w,tb,cc,ts,qsens,qlat,qlong,evap)
-c			computes heat fluxes from Lucia modules
-c subroutine longwave(ts,ta,tb,cc,rb)
-c			long-wave radiation
-c subroutine evcon(ts,ta,tb,uw,p,re,rc)
-c			latent heat and convective heat
-c
-c revision log :
-c
-c 01.06.1998	ggu&lcz	written from scratch (nearly)
-c 24.06.1998	ggu&lcz	subroutines from lucia integrated
-c 30.04.2001	ggu	new routine qtotal_tb
-c 09.12.2002	ggu	cleaned and re-arranged
-c 23.03.2006	ggu	changed time step to real
-c 23.03.2010	ggu	changed v6.1.1
-c 08.10.2010	ggu	changed VERS_6_1_13
-c 16.02.2011	ggu	pstd introduced
-c 05.11.2014	ggu	changed VERS_7_0_5
-c 24.01.2018	ggu	changed VERS_7_5_41
-c 16.02.2019	ggu	changed VERS_7_5_60
-c 13.03.2019	ggu	changed VERS_7_5_61
-c
-c notes :
-c
-c qs	net solar radiation (reflection already subtracted)
-c ta	air temperature
-c tb	wet bulb temperature
-c uw	wind speed
-c cc	cloud cover (0 clear sky, 1 totally covered)
-c
-c*****************************************************************************
+! heat flux module
+!
+! contents :
+!
+! subroutine subtem(dt,dh,qs,uw,cc,ta,tb,ts,tsnew,rtot)
+!			compute water temperature in element of depth dh
+! subroutine subtem0(dt,dh,qs,uw,cc,ta,tb,ts,tsnew,evap)
+!			same as subtem, but use heatlucia
+! subroutine heatlucia(t,p,w,tb,cc,ts,qsens,qlat,qlong,evap)
+!			computes heat fluxes from Lucia modules
+! subroutine longwave(ts,ta,tb,cc,rb)
+!			long-wave radiation
+! subroutine evcon(ts,ta,tb,uw,p,re,rc)
+!			latent heat and convective heat
+!
+! revision log :
+!
+! 01.06.1998	ggu&lcz	written from scratch (nearly)
+! 24.06.1998	ggu&lcz	subroutines from lucia integrated
+! 30.04.2001	ggu	new routine qtotal_tb
+! 09.12.2002	ggu	cleaned and re-arranged
+! 23.03.2006	ggu	changed time step to real
+! 23.03.2010	ggu	changed v6.1.1
+! 08.10.2010	ggu	changed VERS_6_1_13
+! 16.02.2011	ggu	pstd introduced
+! 05.11.2014	ggu	changed VERS_7_0_5
+! 24.01.2018	ggu	changed VERS_7_5_41
+! 16.02.2019	ggu	changed VERS_7_5_60
+! 13.03.2019	ggu	changed VERS_7_5_61
+!
+! notes :
+!
+! qs	net solar radiation (reflection already subtracted)
+! ta	air temperature
+! tb	wet bulb temperature
+! uw	wind speed
+! cc	cloud cover (0 clear sky, 1 totally covered)
+!
+!*****************************************************************************
 
       subroutine subtem(dt,dh,qs,uw,cc,ta,tb,ts,tsnew,evap)
 
-c  Calcola la temperatura dell'acqua in un bacino di profondita' dh,
-c  risolvendo l'equazione del bilancio termico all'interfaccia acqua-aria.
-c
-c  dt = timestep del modello FEM
-c  dh = profondita' dello strato
-c  qs = radiazione solare (short wave radiation) entrante nella superficie 
-c       dell'acqua (radiazione incidente al netto della riflessione)
-c  uw = velocita' del vento
-c  cc = copertura nuvolosa (tra 0 e 1)
-c  ts,ta,tb = temperatura dell'acqua, dell'aria, temp. dell'aria a bulbo
-c             bagnato
-c  tsnew = nuova temperatura dell'acqua
-c
-c  pa = pressione atmosferica in mbar in subroutine evcon 
-c	(!!!!! verificare la sensibilita' a pa)
-c
-c  cpw = calore specifico dell'acqua di mare (J/kg C) da Gill, per ts=16 C
-c  rhow = densita' dell'acqua di mare (kg/m3) da Gill, per ts=16 C
-c
-c  rtot = total radiation
-c  qs = solar radiation (short wave)
-c  rb = long wave radiation
-c  re = evaporation term
-c  rc = convection term 
-c
-c  Formulazione del bilancio termico da:
-c  Mariotti M. e C. Dejak, 1982: 'Valutazione dei flussi energetici
-c  all'interfaccia acqua-aria nella Laguna di Venezia', Ambiente Risorse 10.
-c
-c  Vengono usate le unita' SI.
-c
-c  L. Zampato - Dicembre 1997
+!  Calcola la temperatura dell'acqua in un bacino di profondita' dh,
+!  risolvendo l'equazione del bilancio termico all'interfaccia acqua-aria.
+!
+!  dt = timestep del modello FEM
+!  dh = profondita' dello strato
+!  qs = radiazione solare (short wave radiation) entrante nella superficie 
+!       dell'acqua (radiazione incidente al netto della riflessione)
+!  uw = velocita' del vento
+!  cc = copertura nuvolosa (tra 0 e 1)
+!  ts,ta,tb = temperatura dell'acqua, dell'aria, temp. dell'aria a bulbo
+!             bagnato
+!  tsnew = nuova temperatura dell'acqua
+!
+!  pa = pressione atmosferica in mbar in subroutine evcon 
+!	(!!!!! verificare la sensibilita' a pa)
+!
+!  cpw = calore specifico dell'acqua di mare (J/kg C) da Gill, per ts=16 C
+!  rhow = densita' dell'acqua di mare (kg/m3) da Gill, per ts=16 C
+!
+!  rtot = total radiation
+!  qs = solar radiation (short wave)
+!  rb = long wave radiation
+!  re = evaporation term
+!  rc = convection term 
+!
+!  Formulazione del bilancio termico da:
+!  Mariotti M. e C. Dejak, 1982: 'Valutazione dei flussi energetici
+!  all'interfaccia acqua-aria nella Laguna di Venezia', Ambiente Risorse 10.
+!
+!  Vengono usate le unita' SI.
+!
+!  L. Zampato - Dicembre 1997
 
       implicit none
 
@@ -117,47 +117,47 @@ c  L. Zampato - Dicembre 1997
       real rb, re, rc, rtot
       real ct
 
-c constants
+! constants
 
       p = pstd
 
-c  long-wave term
-c   input: ts,ta,tb,cc
-c   output: rb = long wave radiation
+!  long-wave term
+!   input: ts,ta,tb,cc
+!   output: rb = long wave radiation
 
       call longwave(ts,ta,tb,cc,rb)
 
-c  evaporation and convection terms
-c   input: ts,ta,tb,uw
-c   output: re,rc = evaporation and convection terms
+!  evaporation and convection terms
+!   input: ts,ta,tb,uw
+!   output: re,rc = evaporation and convection terms
 
       call evcon(ts,ta,tb,uw,p,re,rc)
 
-c  total radiation: rtot (W/m2) (positive if into water)
+!  total radiation: rtot (W/m2) (positive if into water)
 
       rtot = qs+rb+re+rc
 
-c  evaporation [kg/(m**2 s)]
+!  evaporation [kg/(m**2 s)]
 
       evap = re / 2.5e+6                !divide by latent heat of evaporation
       evap = evap / rhow                 !in [m/s]
       evap = evap * 1000. * 86400.      !in [mm/day]
 
-c  heat capacity/area
+!  heat capacity/area
 
       ct = cpw*rhow*dh
 
-c  new temperature      formula:  dQ = dT * rho * cpw * dh / dt
+!  new temperature      formula:  dQ = dT * rho * cpw * dh / dt
 
       tsnew = ts + rtot*dt/ct
 
       end
 
-c*****************************************************************************
+!*****************************************************************************
 
       subroutine subtem0(dt,dh,qs,uw,cc,ta,tb,ts,tsnew,evap)
 
-c same as subtem, but use heatlucia
+! same as subtem, but use heatlucia
 
       implicit none
 
@@ -176,7 +176,7 @@ c same as subtem, but use heatlucia
       real qsens,qlat,qlong
       real ct, p
 
-c constants
+! constants
 
       ct = cpw*rhow*dh	!heat capacity	[ J / (m**2 K) ]
       p = pstd
@@ -185,7 +185,7 @@ c constants
 
       rtot = qs - ( qlong + qlat + qsens )
 
-c  new temperature      formula:  dQ = dT * rho * cpw * dh / dt
+!  new temperature      formula:  dQ = dT * rho * cpw * dh / dt
 
       tsnew = ts + rtot*dt/ct
 
@@ -195,13 +195,13 @@ c  new temperature      formula:  dQ = dT * rho * cpw * dh / dt
 
       end
 
-c*****************************************************************************
+!*****************************************************************************
 
         subroutine heatlucia(t,p,w,tb,cc,ts,qsens,qlat,qlong,evap)
 
-c computes heat fluxes from Lucia modules
-c
-c heat fluxes are positive upward (from sea to atmosphere)
+! computes heat fluxes from Lucia modules
+!
+! heat fluxes are positive upward (from sea to atmosphere)
 
         implicit none
 
@@ -234,31 +234,31 @@ c heat fluxes are positive upward (from sea to atmosphere)
 
 	end
 
-c*****************************************************************************
+!*****************************************************************************
 
       subroutine longwave(ts,ta,tb,cc,rb)
 
-c  termine di radiazione long-wave nel bilancio termico atmosfera-mare
-c
-c  es, ea = emissivita' del mare e dell'aria
-c  v = tensione di vapore alla temperatura t
-c  ra, rb = radiazione emessa dall'atmosfera e dal mare
-c  rb = termine long-wave in W/m2 da inserire nel bilancio termico
-c  rbkj = termine long-wave in kJ/(m2 ora)
-c
+!  termine di radiazione long-wave nel bilancio termico atmosfera-mare
+!
+!  es, ea = emissivita' del mare e dell'aria
+!  v = tensione di vapore alla temperatura t
+!  ra, rb = radiazione emessa dall'atmosfera e dal mare
+!  rb = termine long-wave in W/m2 da inserire nel bilancio termico
+!  rbkj = termine long-wave in kJ/(m2 ora)
+!
       implicit none
-c
+!
       real ts, ta, tb
       real cc
       real sigma, es, ea
       real alpha, beta
       real va, vd, psi, rr
       real ra, rs, rbkj, rb
-c
+!
       sigma=5.67/(10**(8))
       es=0.97
       ea=0.92
-c     
+!     
       if (ta.ge.0.) then
          alpha=17.27
          beta=237.3
@@ -270,25 +270,25 @@ c
       vd=6.11*exp(17.27*tb/(tb+237.3))
       psi=0.707 + vd/158.
       rr=1 + (0.25-0.005*(va-vd))*cc**2
-c
+!
       ra=ea*sigma*rr*psi*(ta+273)**4
       rs=es*sigma*(ts+273)**4
       rb=ra-rs
       rbkj=rb*3.6
-c
+!
       end
 
-c*****************************************************************************
+!*****************************************************************************
 
       subroutine evcon(ts,ta,tb,uw,p,re,rc)
 
-c  termini di evaporazione-convezione nel bilancio termico atmosfera-mare
-c
-c  gam = costante psicrometrica in mbar/K
-c  fu = funzione della velocita' del vento in W/(m2 mbar)
-c  vpa = pressione parziale di vapore nell'aria  in mbar
-c  re, rc = termini di evaporazione e convezione in W/m2
-c  rekj, rckj = termine di evaporazione e convezione in kj/(m2 ora)
+!  termini di evaporazione-convezione nel bilancio termico atmosfera-mare
+!
+!  gam = costante psicrometrica in mbar/K
+!  fu = funzione della velocita' del vento in W/(m2 mbar)
+!  vpa = pressione parziale di vapore nell'aria  in mbar
+!  re, rc = termini di evaporazione e convezione in W/m2
+!  rekj, rckj = termine di evaporazione e convezione in kj/(m2 ora)
 
       implicit none
 
@@ -316,5 +316,5 @@ c  rekj, rckj = termine di evaporazione e convezione in kj/(m2 ora)
 
       end
 
-c*****************************************************************************
+!*****************************************************************************
 

@@ -162,16 +162,16 @@
 	integer, save :: imerc_rst  = 0
 	integer, save :: iturb_rst  = 0
 
-	character*20, save :: descript_rst(nidmax) = (/
-     +		 'hydrodynamics       '
-     +		,'depth               '
-     +		,'T/S/rho             '
-     +		,'tracer concentration'
-     +		,'vertical velocities '
-     +		,'ecological model    '
-     +		,'mercury model       '
-     +		,'gotm turb model     '
-     +						/)
+	character*20, save :: descript_rst(nidmax) = (/    &
+     &		 'hydrodynamics       '    &
+     &		,'depth               '    &
+     &		,'T/S/rho             '    &
+     &		,'tracer concentration'    &
+     &		,'vertical velocities '    &
+     &		,'ecological model    '    &
+     &		,'mercury model       '    &
+     &		,'gotm turb model     '    &
+     &						/)
 
 	real, save, allocatable :: hlvrst(:)
 	integer, save, allocatable :: ilhrst(:)
@@ -180,20 +180,20 @@
 	logical, save :: bmaster = .false.
 
         INTERFACE restart_write_value
-        MODULE PROCEDURE   restart_write_value_scalar_i
-     +                    ,restart_write_value_2d_i
-     +                    ,restart_write_value_2d_r
-     +                    ,restart_write_value_3d_r
-     +                    ,restart_write_value_3d_d
-     +                    ,restart_write_value_fix_r
+        MODULE PROCEDURE   restart_write_value_scalar_i  &
+     &                    ,restart_write_value_2d_i      &
+     &                    ,restart_write_value_2d_r      &
+     &                    ,restart_write_value_3d_r      &
+     &                    ,restart_write_value_3d_d      &
+     &                    ,restart_write_value_fix_r
         END INTERFACE
 
         INTERFACE restart_read_value
-        MODULE PROCEDURE   restart_read_value_2d_i
-     +                    ,restart_read_value_2d_r
-     +                    ,restart_read_value_3d_r
-     +                    ,restart_read_value_3d_d
-     +                    ,restart_read_value_fix_r
+        MODULE PROCEDURE   restart_read_value_2d_i    &
+     &                    ,restart_read_value_2d_r    &
+     &                    ,restart_read_value_3d_r    &
+     &                    ,restart_read_value_3d_d    &
+     &                    ,restart_read_value_fix_r
         END INTERFACE
 
 !=====================================================================
@@ -645,8 +645,7 @@
 	  bwant = rst_is_set(id,iflag_want_rst)
 	  bavail = rst_is_set(id,iflag_avail_rst)
 	  buse = bwant .and. bavail
-	  write(6,*) id,'   ',bwant,'   ',bavail,'   ',buse
-     +				,'  ',descript_rst(id)
+	  write(6,*) id,'   ',bwant,'   ',bavail,'   ', buse, '  ',descript_rst(id)
 	end do
 	call dts_format_abs_time(atime0+dtanf,aline)
         write(6,*) ' itanf = ',aline
@@ -821,8 +820,7 @@
 
 	logical rst_has_restart,rst_want_restart
 
-	rst_use_restart =
-     +		rst_has_restart(id) .and. rst_want_restart(id)
+	rst_use_restart = rst_has_restart(id) .and. rst_want_restart(id)
 
 	end
 
@@ -1046,8 +1044,7 @@
 
 !*******************************************************************
 
-	subroutine rst_skip_record(iunit,atime,nvers,nrec
-     +				,nkn,nel,nlv,iflag,ierr)
+	subroutine rst_skip_record(iunit,atime,nvers,nrec,nkn,nel,nlv,iflag,ierr)
 
 ! returns info on record in restart file and skips data records
 !
@@ -1430,8 +1427,7 @@
 
         return
     7	continue
-	write(6,*) 'rst_read_record: error in idfrst... '
-     +			//'no restart format'
+	write(6,*) 'rst_read_record: error in idfrst... ' // 'no restart format'
 	ierr = 7
 	return
    97   continue

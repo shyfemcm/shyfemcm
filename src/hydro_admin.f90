@@ -59,8 +59,7 @@
         
         integer nkn, nel, nlv
         
-        if( nkn == nkn_hydro .and. nel == nel_hydro .and.
-     +      nlv == nlv_hydro ) return
+        if( nkn == nkn_hydro .and. nel == nel_hydro .and. nlv == nlv_hydro ) return
 
         if( nel > 0 .or. nkn > 0 .or. nlv > 0 ) then
           if( nel == 0 .or. nkn == 0 .or. nlv == 0 ) then

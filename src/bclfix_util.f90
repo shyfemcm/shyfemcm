@@ -55,8 +55,7 @@
         integer  :: nel
         integer  :: nlv
 
-        if( nlv == nlv_bclfix .and. nel == nel_bclfix .and. 
-     +      nkn == nkn_bclfix ) return
+        if( nlv == nlv_bclfix .and. nel == nel_bclfix .and. nkn == nkn_bclfix ) return
 
         if( nlv > 0 .or. nel > 0 .or. nkn > 0 ) then
           if( nlv == 0 .or. nel == 0 .or. nkn == 0 ) then

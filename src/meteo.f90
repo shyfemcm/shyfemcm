@@ -38,8 +38,8 @@
 
         implicit none
 
-c metrain and evapv are in [m/s]
-c metrain is read from file in [mm/day] and converted to [m/s]
+! metrain and evapv are in [m/s]
+! metrain is read from file in [mm/day] and converted to [m/s]
 
 
         integer, private, save  :: nkn_meteo = 0

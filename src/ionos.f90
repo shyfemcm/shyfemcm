@@ -942,7 +942,7 @@
 
 	call getnos(iunit,nvers,nkn,nel,nlv,nvar)
 
-	if( .not .bdata ) then	!do not read arrays
+	if( .not. bdata ) then	!do not read arrays
 	  nkn = 0
 	  nel = 0
 	  nlv = 0

@@ -24,34 +24,34 @@
 !
 !--------------------------------------------------------------------------
 
-c heat flux module (temperature module)
-c
-c contents :
-c
-c subroutine heat2t(dt,dh,qs,qrad,albedo,ts,tsnew)
-c               computes new sea temperature
-c
-c revision log :
-c
-c 16.08.2004	ggu	heat2t copied from subqfxt.f
-c 23.03.2006	ggu	changed time step to real
-c 11.11.2009	ggu	new routine make_albedo(), pass albedo to heat2t
-c 23.03.2010	ggu	changed v6.1.1
-c 01.06.2011	ggu	use constant albedo
-c 05.11.2014	ggu	changed VERS_7_0_5
-c 05.12.2014	ggu	changed VERS_7_0_8
-c 26.02.2015	ggu	changed VERS_7_1_5
-c 04.05.2016	ccf	do not pass albedo into heat2t
-c 25.05.2016	ggu	changed VERS_7_5_10
-c 16.02.2019	ggu	changed VERS_7_5_60
-c
-c*****************************************************************************
+! heat flux module (temperature module)
+!
+! contents :
+!
+! subroutine heat2t(dt,dh,qs,qrad,albedo,ts,tsnew)
+!               computes new sea temperature
+!
+! revision log :
+!
+! 16.08.2004	ggu	heat2t copied from subqfxt.f
+! 23.03.2006	ggu	changed time step to real
+! 11.11.2009	ggu	new routine make_albedo(), pass albedo to heat2t
+! 23.03.2010	ggu	changed v6.1.1
+! 01.06.2011	ggu	use constant albedo
+! 05.11.2014	ggu	changed VERS_7_0_5
+! 05.12.2014	ggu	changed VERS_7_0_8
+! 26.02.2015	ggu	changed VERS_7_1_5
+! 04.05.2016	ccf	do not pass albedo into heat2t
+! 25.05.2016	ggu	changed VERS_7_5_10
+! 16.02.2019	ggu	changed VERS_7_5_60
+!
+!*****************************************************************************
 
         subroutine heat2t(dt,dh,qs,qrad,ts,tsnew)
 
-c computes new sea temperature
-c
-c radiation is positive if into the water
+! computes new sea temperature
+!
+! radiation is positive if into the water
 
         implicit none
 
@@ -67,25 +67,25 @@ c radiation is positive if into the water
         real ct
         real qseff
 
-c--------------------------------------------------
-c general constants
-c--------------------------------------------------
+!--------------------------------------------------
+! general constants
+!--------------------------------------------------
 
         ct = cpw*rhow*dh          !heat capacity
 
-c--------------------------------------------------
-c new temperature
-c--------------------------------------------------
+!--------------------------------------------------
+! new temperature
+!--------------------------------------------------
 
         tsnew = ts + (qs+qrad)*dt/ct
 
-c--------------------------------------------------
-c end of routine
-c--------------------------------------------------
+!--------------------------------------------------
+! end of routine
+!--------------------------------------------------
 
         end
 
-c*****************************************************************************
+!*****************************************************************************
 
         subroutine make_albedo(temp,albedo)
 
@@ -119,5 +119,5 @@ c*****************************************************************************
 
         end
 
-c*****************************************************************************
+!*****************************************************************************
 

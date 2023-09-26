@@ -26,197 +26,197 @@
 !
 !--------------------------------------------------------------------------
 
-c handle meteo files with new fem format
-c
-c revision log :
-c
-c 10.03.2009	ggu	finished coding
-c 24.03.2009	ggu	use metrain instead rqdsv
-c 07.05.2009	ggu	new call to init_coords()
-c 18.06.2009	ggu&dbf	bug fix -> wind speed not interpolated on metws
-c 23.02.2010	ggu	call to wstress changed (new wxv,wyv)
-c 26.01.2011	ggu	write wind field to debug output (iumetw)
-c 05.02.2011	ggu	changed order of records in dfile (actual is first)
-c 16.02.2011	ggu	pass idata to files, use geo info from files
-c 18.11.2011	ggu	deleted projection code from subroutines
-c 10.02.2012	ggu	limit cc and rh to acceptable range
-c 16.02.2012	ggu	new routine meteo_get_solar_radiation()
-c 22.02.2012	ggu	new routines for regular and ts reading of meteo
-c 23.02.2012	ggu&ccf	bug fix meteo_copy_to_old and meteo_interpolate_in_time
-c 20.05.2014	ggu	new routines for new file format
-c 30.05.2014	ggu	changed VERS_6_1_76
-c 18.06.2014	ggu	changed VERS_6_1_77
-c 27.06.2014	ggu	changed VERS_6_1_78
-c 07.07.2014	ggu	changed VERS_6_1_79
-c 18.07.2014	ggu	changed VERS_7_0_1
-c 30.10.2014	ggu	changed VERS_7_0_4
-c 05.11.2014	ggu	changed VERS_7_0_5
-c 07.11.2014	ggu	changed VERS_7_0_6
-c 19.12.2014	ggu	changed VERS_7_0_10
-c 23.12.2014	ggu	changed VERS_7_0_11
-c 09.01.2015	ggu	changed VERS_7_0_12
-c 19.01.2015	ggu	changed VERS_7_1_3
-c 26.02.2015	ggu	changed VERS_7_1_5
-c 30.04.2015	ggu	ice integrated
-c 04.05.2015	ggu	bug in ice eliminated
-c 12.05.2015	ggu	introduced ia_icefree for icefree elements
-c 21.05.2015	ggu	changed VERS_7_1_11
-c 05.06.2015	ggu	changed VERS_7_1_12
-c 17.07.2015	ggu	changed VERS_7_1_80
-c 20.07.2015	ggu	changed VERS_7_1_81
-c 29.09.2015	ggu	changed VERS_7_2_5
-c 08.01.2016	ggu	bug fix in meteo_convert_wind_data() - no wind bug
-c 19.02.2016	ggu	changed VERS_7_5_2
-c 10.03.2016	ggu	check for pressure to be in reasonable bounds
-c 01.04.2016	ggu	changed VERS_7_5_7
-c 15.04.2016	ggu	changed VERS_7_5_8
-c 10.06.2016	ggu	changed VERS_7_5_13
-c 17.06.2016	ggu	changed VERS_7_5_15
-c 27.06.2016	ggu	changed VERS_7_5_16
-c 23.07.2016	ivn	new heat formulation for iheat==8
-c 09.09.2016	ggu	new variable ihtype to choose between rh, wbt, dpt
-c 16.09.2016	ggu	allow for Pa and mbar in pressure
-c 30.09.2016	ggu	changed VERS_7_5_18
-c 12.01.2017	ccf	bug fix in determining pressure units
-c 13.06.2017	ggu	changed VERS_7_5_29
-c 02.09.2017	ggu	changed VERS_7_5_31
-c 05.12.2017	ggu	changed VERS_7_5_39
-c 24.01.2018	ggu	changed VERS_7_5_41
-c 22.02.2018	ggu	changed VERS_7_5_42
-c 03.04.2018	ggu	changed VERS_7_5_43
-c 06.07.2018	ggu	changed VERS_7_5_48
-c 31.08.2018	ggu	changed VERS_7_5_49
-c 03.10.2018	ggu	better output of meteo variables (output_meteo_data)
-c 16.10.2018	ggu	changed VERS_7_5_50
-c 27.12.2018	ggu	changed VERS_7_5_54
-c 16.02.2019	ggu	changed VERS_7_5_60
-c 13.03.2019	ggu	changed VERS_7_5_61
-c 17.10.2019	ggu	check number of meteo variables written
-c 09.12.2019	ggu	more documentation
-c 27.01.2020	ggu	code to use full ice cover (ballcover)
-c 17.04.2020	ggu	wind conversion routines out of this file
-c 11.11.2020	ggu	new routine meteo_has_ice_file()
-c 03.06.2021	mbj	added Hersbach wind stress formulation
-c 26.01.2022	ggu	bug in short name of icecover fixed
-c 01.02.2022	ggu	automatically convert cloudcover from % to fraction
-c 21.03.2022	ggu	new calls for write in debug mode
-c 03.06.2022	ggu	in meteo_convert_heat_data() save read vapor to array
-c 08.07.2022	ggu	avoid divide by zero when computing dice
-c 06.12.2022	ggu	rfact for rain introduced
-c 02.04.2023    ggu     only master writes to iuinfo
-c
-c notes :
-c
-c info on file format can be found in subfemfile.f
-c
-c contents :
-c
-c meteo_set_wind_data
-c meteo_convert_wind_data
-c meteo_set_rain_data
-c meteo_convert_rain_data
-c meteo_set_ice_data
-c meteo_convert_ice_data
-c meteo_set_heat_data
-c meteo_convert_heat_data
-c
-c*********************************************************************
-c
-c DOCS  START   S_wind
-c
-c In this section the wind data can be given directly without
-c the creation of an external file. Note, however, that
-c a wind file specified in the |name| section takes precedence
-c over this section. E.g., if both a section |wind| and a
-c wind file in |name| is given, the wind data from the file is used.
-c
-c The format of the wind data in this section is the same as the
-c format in the ASCII wind file, i.e., three columns, with
-c the first specifying the time in seconds and the other two columns
-c giving the wind data. The interpretation of the wind data
-c depends on the value of |iwtype|. For more information please
-c see the description of |iwtype| in section |para|.
-c
-c DOCS  END
+! handle meteo files with new fem format
+!
+! revision log :
+!
+! 10.03.2009	ggu	finished coding
+! 24.03.2009	ggu	use metrain instead rqdsv
+! 07.05.2009	ggu	new call to init_coords()
+! 18.06.2009	ggu&dbf	bug fix -> wind speed not interpolated on metws
+! 23.02.2010	ggu	call to wstress changed (new wxv,wyv)
+! 26.01.2011	ggu	write wind field to debug output (iumetw)
+! 05.02.2011	ggu	changed order of records in dfile (actual is first)
+! 16.02.2011	ggu	pass idata to files, use geo info from files
+! 18.11.2011	ggu	deleted projection code from subroutines
+! 10.02.2012	ggu	limit cc and rh to acceptable range
+! 16.02.2012	ggu	new routine meteo_get_solar_radiation()
+! 22.02.2012	ggu	new routines for regular and ts reading of meteo
+! 23.02.2012	ggu&ccf	bug fix meteo_copy_to_old and meteo_interpolate_in_time
+! 20.05.2014	ggu	new routines for new file format
+! 30.05.2014	ggu	changed VERS_6_1_76
+! 18.06.2014	ggu	changed VERS_6_1_77
+! 27.06.2014	ggu	changed VERS_6_1_78
+! 07.07.2014	ggu	changed VERS_6_1_79
+! 18.07.2014	ggu	changed VERS_7_0_1
+! 30.10.2014	ggu	changed VERS_7_0_4
+! 05.11.2014	ggu	changed VERS_7_0_5
+! 07.11.2014	ggu	changed VERS_7_0_6
+! 19.12.2014	ggu	changed VERS_7_0_10
+! 23.12.2014	ggu	changed VERS_7_0_11
+! 09.01.2015	ggu	changed VERS_7_0_12
+! 19.01.2015	ggu	changed VERS_7_1_3
+! 26.02.2015	ggu	changed VERS_7_1_5
+! 30.04.2015	ggu	ice integrated
+! 04.05.2015	ggu	bug in ice eliminated
+! 12.05.2015	ggu	introduced ia_icefree for icefree elements
+! 21.05.2015	ggu	changed VERS_7_1_11
+! 05.06.2015	ggu	changed VERS_7_1_12
+! 17.07.2015	ggu	changed VERS_7_1_80
+! 20.07.2015	ggu	changed VERS_7_1_81
+! 29.09.2015	ggu	changed VERS_7_2_5
+! 08.01.2016	ggu	bug fix in meteo_convert_wind_data() - no wind bug
+! 19.02.2016	ggu	changed VERS_7_5_2
+! 10.03.2016	ggu	check for pressure to be in reasonable bounds
+! 01.04.2016	ggu	changed VERS_7_5_7
+! 15.04.2016	ggu	changed VERS_7_5_8
+! 10.06.2016	ggu	changed VERS_7_5_13
+! 17.06.2016	ggu	changed VERS_7_5_15
+! 27.06.2016	ggu	changed VERS_7_5_16
+! 23.07.2016	ivn	new heat formulation for iheat==8
+! 09.09.2016	ggu	new variable ihtype to choose between rh, wbt, dpt
+! 16.09.2016	ggu	allow for Pa and mbar in pressure
+! 30.09.2016	ggu	changed VERS_7_5_18
+! 12.01.2017	ccf	bug fix in determining pressure units
+! 13.06.2017	ggu	changed VERS_7_5_29
+! 02.09.2017	ggu	changed VERS_7_5_31
+! 05.12.2017	ggu	changed VERS_7_5_39
+! 24.01.2018	ggu	changed VERS_7_5_41
+! 22.02.2018	ggu	changed VERS_7_5_42
+! 03.04.2018	ggu	changed VERS_7_5_43
+! 06.07.2018	ggu	changed VERS_7_5_48
+! 31.08.2018	ggu	changed VERS_7_5_49
+! 03.10.2018	ggu	better output of meteo variables (output_meteo_data)
+! 16.10.2018	ggu	changed VERS_7_5_50
+! 27.12.2018	ggu	changed VERS_7_5_54
+! 16.02.2019	ggu	changed VERS_7_5_60
+! 13.03.2019	ggu	changed VERS_7_5_61
+! 17.10.2019	ggu	check number of meteo variables written
+! 09.12.2019	ggu	more documentation
+! 27.01.2020	ggu	code to use full ice cover (ballcover)
+! 17.04.2020	ggu	wind conversion routines out of this file
+! 11.11.2020	ggu	new routine meteo_has_ice_file()
+! 03.06.2021	mbj	added Hersbach wind stress formulation
+! 26.01.2022	ggu	bug in short name of icecover fixed
+! 01.02.2022	ggu	automatically convert cloudcover from % to fraction
+! 21.03.2022	ggu	new calls for write in debug mode
+! 03.06.2022	ggu	in meteo_convert_heat_data() save read vapor to array
+! 08.07.2022	ggu	avoid divide by zero when computing dice
+! 06.12.2022	ggu	rfact for rain introduced
+! 02.04.2023    ggu     only master writes to iuinfo
+!
+! notes :
+!
+! info on file format can be found in subfemfile.f
+!
+! contents :
+!
+! meteo_set_wind_data
+! meteo_convert_wind_data
+! meteo_set_rain_data
+! meteo_convert_rain_data
+! meteo_set_ice_data
+! meteo_convert_ice_data
+! meteo_set_heat_data
+! meteo_convert_heat_data
+!
+!*********************************************************************
+!
+! DOCS  START   S_wind
+!
+! In this section the wind data can be given directly without
+! the creation of an external file. Note, however, that
+! a wind file specified in the |name| section takes precedence
+! over this section. E.g., if both a section |wind| and a
+! wind file in |name| is given, the wind data from the file is used.
+!
+! The format of the wind data in this section is the same as the
+! format in the ASCII wind file, i.e., three columns, with
+! the first specifying the time in seconds and the other two columns
+! giving the wind data. The interpretation of the wind data
+! depends on the value of |iwtype|. For more information please
+! see the description of |iwtype| in section |para|.
+!
+! DOCS  END
 
-c DOCS  START   P_wind
-c
-c DOCS  WIND            Wind parameters
-c
-c The next two parameters deal with the wind stress to be
-c prescribed at the surface of the basin.
-c
-c The wind data can either be specified in an external file (ASCII
-c or binary) or directly in the parameter file in section |wind|.
-c The ASCII file or the wind section contain three columns, the first
-c giving the time in seconds, and the others the components of
-c the wind speed. Please see below how the last two columns are
-c interpreted depending on the value of |iwtype|. For the format
-c of the binary file please see the relative section.
-c If both a wind file and section |wind| are given, data from the
-c file is used.
-c
-c The wind stress is normally computed with the following formula
-c \beq
-c \tau^x = \rho_a c_D \vert u \vert u^x \quad
-c \tau^y = \rho_a c_D \vert u \vert u^y
-c \eeq
-c where $\rho_a,\rho_0$ is the density of air and water respectively,
-c $u$ the modulus of wind speed and $u^x,u^y$ the components of
-c wind speed in $x,y$ direction. In this formulation $c_D$ is a
-c dimensionless drag coefficient that varies between 1.5 \ten{-3} and
-c 3.2 \ten{-3}. The wind speed is normally the wind speed measured
-c at a height of 10 m.
-c
-c |iwtype|      The type of wind data given (default 1):
-c               \begin{description}
-c               \item[0] No wind data is processed
-c               \item[1] The components of the wind is given in [m/s]
-c               \item[2] The stress ($\tau^x,\tau^y$) is directly specified
-c               \item[3] The wind is given in speed [m/s] and direction
-c                        [degrees]. A direction of 0\degrees{} specifies
-c                        a wind from the north, 90\degrees{} a wind
-c                        from the east etc.
-c               \item[4] As in 3 but the speed is given in knots
-c               \end{description}
-c |itdrag|	Formula to compute the drag coefficient. 
-c		\begin{description}
-c		\item[0] constant value given in |dragco|. 
-c		\item[1] Smith and Banke (1975) formula
-c		\item[2] Large and Pond (1981) formula
-c		\item[3] Spatial/temporal varying in function of wave. Need
-c		the coupling with WWMIII.
-c		\item[4] Spatial/temporal varying in function of heat flux. 
-c		Only for |iheat| = 6. 
-c		\item[5] Hersbach (2011) formula. This is a fit of kinematic
-c		viscosity for light wind and a Charnock coefficient for strong 
-c		wind. Neutral wind should be used (small differences).
-c		See the paper and/or the ECMWF report.
-c		\end{description}
-c		(Default 0)
-c |dragco|	Drag coefficient used in the above formula. (Default 2.5E-3). 
-c		If |itdrag| = 5 this is the Charnock parameter and you should 
-c		use values from 0.01 (swell) to 0.04 (steep young waves). (Default 0.025).
-c		Please note that in case of |iwtype| = 2 this parameter
-c		is of no interest, since the
-c		stress is specified directly.
-c
-c |wsmax|	Maximum wind speed allowed in [m/s]. This is in order to avoid
-c		errors if the wind data is given in a different format
-c		from the one specified by |iwtype|. (Default 50)
-c
-c |wslim|	Limit maximum wind speed to this value [m/s]. This provides
-c		an easy way to exclude strong wind gusts that might
-c		blow up the simulation. Use with caution. 
-c		(Default -1, no limitation)
-c
-c |rfact|	Precipitation (rain) has to be given in mm/day. If the
-c		input data is in a different unit, |rfact| specifies 
-c		the conversion factor. E.g., if the data is in mm/hour,
-c		|rfact = 24| converts it to mm/day.
-c		(Default 1)
-c
-c DOCS  END
+! DOCS  START   P_wind
+!
+! DOCS  WIND            Wind parameters
+!
+! The next two parameters deal with the wind stress to be
+! prescribed at the surface of the basin.
+!
+! The wind data can either be specified in an external file (ASCII
+! or binary) or directly in the parameter file in section |wind|.
+! The ASCII file or the wind section contain three columns, the first
+! giving the time in seconds, and the others the components of
+! the wind speed. Please see below how the last two columns are
+! interpreted depending on the value of |iwtype|. For the format
+! of the binary file please see the relative section.
+! If both a wind file and section |wind| are given, data from the
+! file is used.
+!
+! The wind stress is normally computed with the following formula
+! \beq
+! \tau^x = \rho_a c_D \vert u \vert u^x \quad
+! \tau^y = \rho_a c_D \vert u \vert u^y
+! \eeq
+! where $\rho_a,\rho_0$ is the density of air and water respectively,
+! $u$ the modulus of wind speed and $u^x,u^y$ the components of
+! wind speed in $x,y$ direction. In this formulation $c_D$ is a
+! dimensionless drag coefficient that varies between 1.5 \ten{-3} and
+! 3.2 \ten{-3}. The wind speed is normally the wind speed measured
+! at a height of 10 m.
+!
+! |iwtype|      The type of wind data given (default 1):
+!               \begin{description}
+!               \item[0] No wind data is processed
+!               \item[1] The components of the wind is given in [m/s]
+!               \item[2] The stress ($\tau^x,\tau^y$) is directly specified
+!               \item[3] The wind is given in speed [m/s] and direction
+!                        [degrees]. A direction of 0\degrees{} specifies
+!                        a wind from the north, 90\degrees{} a wind
+!                        from the east etc.
+!               \item[4] As in 3 but the speed is given in knots
+!               \end{description}
+! |itdrag|	Formula to compute the drag coefficient. 
+!		\begin{description}
+!		\item[0] constant value given in |dragco|. 
+!		\item[1] Smith and Banke (1975) formula
+!		\item[2] Large and Pond (1981) formula
+!		\item[3] Spatial/temporal varying in function of wave. Need
+!		the coupling with WWMIII.
+!		\item[4] Spatial/temporal varying in function of heat flux. 
+!		Only for |iheat| = 6. 
+!		\item[5] Hersbach (2011) formula. This is a fit of kinematic
+!		viscosity for light wind and a Charnock coefficient for strong 
+!		wind. Neutral wind should be used (small differences).
+!		See the paper and/or the ECMWF report.
+!		\end{description}
+!		(Default 0)
+! |dragco|	Drag coefficient used in the above formula. (Default 2.5E-3). 
+!		If |itdrag| = 5 this is the Charnock parameter and you should 
+!		use values from 0.01 (swell) to 0.04 (steep young waves). (Default 0.025).
+!		Please note that in case of |iwtype| = 2 this parameter
+!		is of no interest, since the
+!		stress is specified directly.
+!
+! |wsmax|	Maximum wind speed allowed in [m/s]. This is in order to avoid
+!		errors if the wind data is given in a different format
+!		from the one specified by |iwtype|. (Default 50)
+!
+! |wslim|	Limit maximum wind speed to this value [m/s]. This provides
+!		an easy way to exclude strong wind gusts that might
+!		blow up the simulation. Use with caution. 
+!		(Default -1, no limitation)
+!
+! |rfact|	Precipitation (rain) has to be given in mm/day. If the
+!		input data is in a different unit, |rfact| specifies 
+!		the conversion factor. E.g., if the data is in mm/hour,
+!		|rfact = 24| converts it to mm/day.
+!		(Default 1)
+!
+! DOCS  END
 
 !================================================================
         module meteo_forcing_module
@@ -346,8 +346,7 @@ c DOCS  END
           nintp = 2
           what = 'wind'
           vconst = (/ 0., 0., pstd, 0. /)
-	  call iff_init(dtime0,windfile,nvar,nkn,0,nintp
-     +				,nodes,vconst,idwind)
+	  call iff_init(dtime0,windfile,nvar,nkn,0,nintp,nodes,vconst,idwind)
 	  call iff_set_description(idwind,0,'meteo wind')
 
 	  call meteo_set_wind_data(idwind,nvar)
@@ -362,8 +361,7 @@ c DOCS  END
 	  what = 'ice'
 	  vconst = (/ 0., 0., 0., 0. /)
 	  dtime = -1.
-	  call iff_init(dtime,icefile,nvar,nkn,0,nintp
-     +				,nodes,vconst,idice)
+	  call iff_init(dtime,icefile,nvar,nkn,0,nintp,nodes,vconst,idice)
 	  call iff_set_description(idice,0,'meteo ice')
 	  call iff_flag_ok(idice)	!we do not need all ice data
 	  if( iff_has_file(idice) ) then
@@ -381,8 +379,7 @@ c DOCS  END
 	  nintp = 2
 	  what = 'rain'
 	  vconst = (/ 0., 0., 0., 0. /)
-	  call iff_init(dtime0,rainfile,nvar,nkn,0,nintp
-     +				,nodes,vconst,idrain)
+	  call iff_init(dtime0,rainfile,nvar,nkn,0,nintp,nodes,vconst,idrain)
 	  call iff_set_description(idrain,0,'meteo rain')
 
 	  call meteo_set_rain_data(idrain,nvar)
@@ -396,8 +393,7 @@ c DOCS  END
 	  nintp = 2
 	  what = 'heat'
 	  vconst = (/ 0., 0., 50., 0. /)
-	  call iff_init(dtime0,heatfile,nvar,nkn,0,nintp
-     +				,nodes,vconst,idheat)
+	  call iff_init(dtime0,heatfile,nvar,nkn,0,nintp,nodes,vconst,idheat)
 	  call iff_set_description(idheat,0,'meteo heat')
 
 	  call meteo_set_heat_data(idheat,nvar)
@@ -480,8 +476,8 @@ c DOCS  END
 !	---------------------------------------------------------
 
 	if( .not. iff_is_constant(idwind) .or. icall == 1 ) then
-	  call meteo_convert_wind_data(idwind,nkn,wxv,wyv
-     +			,windcd,tauxnv,tauynv,metws,ppv,metice)
+	  call meteo_convert_wind_data(idwind,nkn,wxv,wyv     &
+      &			,windcd,tauxnv,tauynv,metws,ppv,metice)
 	end if
 
 !	---------------------------------------------------------
@@ -489,8 +485,8 @@ c DOCS  END
 !	---------------------------------------------------------
 
         if( .not. iff_is_constant(idheat) .or. icall == 1 ) then
-          call meteo_convert_heat_data(idheat,nkn
-     +                       ,metaux,mettair,metcc,ppv,methum)
+          call meteo_convert_heat_data(idheat,nkn                 &
+      &                       ,metaux,mettair,metcc,ppv,methum)
         end if
 
 !	---------------------------------------------------------
@@ -678,14 +674,14 @@ c DOCS  END
 
 	else	!description given -> check and set iwtype
 
-          if( string_is_this_short('wind',string1) .and.
-     +		string_is_this_short('wind',string2) ) then
+          if( string_is_this_short('wind',string1) .and.             &
+      &		string_is_this_short('wind',string2) ) then
 	    iwtype = 1
-          else if( string_is_this_short('wstress',string1) .and.
-     +		string_is_this_short('wstress',string2) ) then
+          else if( string_is_this_short('wstress',string1) .and.     &
+      &		string_is_this_short('wstress',string2) ) then
 	    iwtype = 2
-          else if( string_is_this_short('windspeed',string1) .and.
-     +		string_is_this_short('winddir',string2) ) then
+          else if( string_is_this_short('windspeed',string1) .and.   &
+      &		string_is_this_short('winddir',string2) ) then
 	    iwtype = 3
 	  else
 	    write(6,*) 'description string for wind not recognized: '
@@ -764,8 +760,7 @@ c DOCS  END
 
 !*********************************************************************
 
-	subroutine meteo_convert_wind_data(id,n,wx,wy,cdv,tx,ty,ws
-     +						,pp,cice)
+	subroutine meteo_convert_wind_data(id,n,wx,wy,cdv,tx,ty,ws,pp,cice)
 
 	integer id
 	integer n
@@ -835,8 +830,8 @@ c DOCS  END
             wspeed = ws(k)
             wxymax = max(wxymax,wspeed)
 	    cd = cdv(k)
-            if( itdrag .gt. 0 .and. ( itdrag == 1 
-     +          .or. itdrag == 2 .or. itdrag == 5 )) then
+            if( itdrag .gt. 0 .and. ( itdrag == 1           & 
+      &          .or. itdrag == 2 .or. itdrag == 5 )) then
 		call get_drag(itdrag,wspeed,cd,ach)
 	    end if
             tx(k) = fice * wfact * cd * wspeed * wx(k)
@@ -859,8 +854,8 @@ c DOCS  END
 	    wy(k) = fact*wy(k)
             wspeed = ws(k)
 	    cd = cdv(k)
-            if( itdrag .gt. 0 .and. ( itdrag == 1 
-     +          .or. itdrag == 2 .or. itdrag == 5 )) then
+            if( itdrag .gt. 0 .and. ( itdrag == 1           &
+      &          .or. itdrag == 2 .or. itdrag == 5 )) then
 		call get_drag(itdrag,wspeed,cd,ach)
 	    end if
             tx(k) = fice * wfact * cd * wspeed * wx(k)
@@ -998,7 +993,7 @@ c DOCS  END
 
 	subroutine meteo_convert_rain_data(id,n,r)
 
-c convert rain from mm/day to m/s
+! convert rain from mm/day to m/s
 
 	integer id
 	integer n
@@ -1105,7 +1100,7 @@ c convert rain from mm/day to m/s
 
 	subroutine meteo_convert_ice_data(id,n,r)
 
-c convert ice data (delete ice in ice free areas, compute statistics)
+! convert ice data (delete ice in ice free areas, compute statistics)
 
 	use evgeom
 	use basin
@@ -1311,8 +1306,7 @@ c convert ice data (delete ice in ice free areas, compute statistics)
 	end subroutine adjust_humidity_string
 !*********************************************************************
 
-        subroutine meteo_convert_heat_data(id,n
-     +                  ,metaux,mettair,metcc,ppv,methum)
+        subroutine meteo_convert_heat_data(id,n,metaux,mettair,metcc,ppv,methum)
 
 	integer id
 	integer n
@@ -1331,8 +1325,7 @@ c convert ice data (delete ice in ice free areas, compute statistics)
         else
 	  call meteo_convert_temperature(n,mettair)
 	  call meteo_convert_cloudcover(n,metcc)
-	  call meteo_convert_vapor(ihtype,n
-     +			,metaux,mettair,ppv,methum)
+	  call meteo_convert_vapor(ihtype,n,metaux,mettair,ppv,methum)
 
 	  !if( ihtype == 1 ) methum = metaux	!done in meteo_convert_vapor()
 	  !if( ihtype == 2 ) metwbt = metaux
@@ -1367,8 +1360,7 @@ c convert ice data (delete ice in ice free areas, compute statistics)
 	  icall = icall + 1
 	  if( mod(icall,ncall) == 0 ) then
 	    ncall = ncall * 2
-	    write(6,*) 'cloudcover in %... must convert to fraction'
-     +			,maxcc
+	    write(6,*) 'cloudcover in %... must convert to fraction',maxcc
 	  end if
 	end if
 
@@ -1492,8 +1484,7 @@ c convert ice data (delete ice in ice free areas, compute statistics)
 	double precision :: R,A
 
 	if ( ach < 0.0001 .or. ach > 0.5 ) then
-	  write(6,*) 
-     +       'Strange value of the Charnock parameter = ',ach
+	  write(6,*) 'Strange value of the Charnock parameter = ',ach
 	  write(6,*) 'Try values from 0.01 to 0.04.'
           stop 'error stop hersbach_cd: dragco'
 	end if
@@ -1578,9 +1569,9 @@ c convert ice data (delete ice in ice free areas, compute statistics)
 
 	subroutine get_pe_values(k,r,e,eeff)
 
-c returns precipitation and evaporation values
-c
-c eeff is evaporation used in model, if ievap==0 => eeff==0.
+! returns precipitation and evaporation values
+!
+! eeff is evaporation used in model, if ievap==0 => eeff==0.
 
 	use mod_meteo
 
@@ -1609,7 +1600,7 @@ c eeff is evaporation used in model, if ievap==0 => eeff==0.
 
 	subroutine set_evap(k,e)
 
-c sets evaporation
+! sets evaporation
 
 	use mod_meteo
 
@@ -1659,7 +1650,7 @@ c sets evaporation
 
         subroutine meteo_set_matrix(qs,ta,rh,uw,cc)
 
-c interpolates files spatially - to be deleted
+! interpolates files spatially - to be deleted
 
 	use mod_meteo
 	use basin, only : nkn,nel,ngr,mbw

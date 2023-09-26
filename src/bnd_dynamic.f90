@@ -59,8 +59,7 @@
         integer nkn
         integer nlv
 
-        if( nkn == nkn_bound_dynamic .and. 
-     +		nlv == nlv_bound_dynamic ) return
+        if( nkn == nkn_bound_dynamic .and. nlv == nlv_bound_dynamic ) return
 
         if( nkn > 0 .or. nlv > 0 ) then
           if( nkn == 0 .or. nlv == 0 ) then

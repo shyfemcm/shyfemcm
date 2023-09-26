@@ -24,58 +24,58 @@
 !
 !--------------------------------------------------------------------------
 
-c sigma utilities for output files
-c
-c revision log :
-c
-c 07.11.2011	ggu	layer thickness for hybrid coordinates
-c 14.11.2011	ggu	new sigma routines copied to this file
-c 22.11.2011	ggu	changed VERS_6_1_37
-c 02.12.2011	ggu	bug fix in init_sigma_info() for nlv == 1
-c 09.12.2011	ggu	changed VERS_6_1_38
-c 16.12.2011	ggu	check for non-initialized data structure (blockdata)
-c 19.12.2011	ggu	bug fix in init_sigma_info(): call set_sigma_info()
-c 24.01.2012	ggu	changed VERS_6_1_41
-c 27.01.2012	dbf&ggu	changes to get_layer_thickness()
-c 27.01.2012	dbf&ggu	new routine compute_sigma_info()
-c 30.03.2012	ggu	changed VERS_6_1_51
-c 25.01.2013	ggu	changed VERS_6_1_62
-c 03.05.2013	ggu	changed VERS_6_1_63
-c 17.05.2013	ggu	layer_thickness for elem and node, general routine
-c 17.05.2013	ggu	new routine get_bottom_of_layer()
-c 13.06.2013	ggu	changed VERS_6_1_65
-c 05.09.2013	ggu	new call interface to get_layer_thickness()
-c 12.09.2013	ggu	changed VERS_6_1_67
-c 15.05.2014	ggu	changed VERS_6_1_75
-c 25.06.2014	ggu	error stop if computed layer thickness is <= 0
-c 07.07.2014	ggu	changed VERS_6_1_79
-c 23.12.2014	ggu	changed VERS_7_0_11
-c 19.01.2015	ggu	changed VERS_7_1_3
-c 15.02.2015	ggu	in get_layer_thickness() handle last layer correctly
-c 31.07.2015	ggu	changed VERS_7_1_84
-c 18.12.2015	ggu	changed VERS_7_3_17
-c 19.02.2016	ggu	changed VERS_7_5_2
-c 01.05.2016	ggu	changes in get_layer_thickness(): exit from loop
-c 14.05.2016	ggu	substitute blockdata/common with module
-c 25.05.2016	ggu	changed VERS_7_5_10
-c 07.10.2017	ggu	substitute get_bottom_of_layer with get_depth_of_layer
-c 16.02.2019	ggu	changed VERS_7_5_60
-c 13.03.2019	ggu	changed VERS_7_5_61
-c 29.04.2022	ggu	in compute_sigma_info() check for nlv<1
-c 09.05.2023    lrp     introduce top layer index variable
-c 05.06.2023    lrp     introduce z-star
-c
-c notes :
-c
-c this file is used also in femplot
-c
-c	get_sigma_info (supdep.f,suplin.f)
-c	get_layer_thickness (supdep.f,suplin.f)
-c	init_sigma_info (supout.f)
-c
-c******************************************************************
-c******************************************************************
-c******************************************************************
+! sigma utilities for output files
+!
+! revision log :
+!
+! 07.11.2011	ggu	layer thickness for hybrid coordinates
+! 14.11.2011	ggu	new sigma routines copied to this file
+! 22.11.2011	ggu	changed VERS_6_1_37
+! 02.12.2011	ggu	bug fix in init_sigma_info() for nlv == 1
+! 09.12.2011	ggu	changed VERS_6_1_38
+! 16.12.2011	ggu	check for non-initialized data structure (blockdata)
+! 19.12.2011	ggu	bug fix in init_sigma_info(): call set_sigma_info()
+! 24.01.2012	ggu	changed VERS_6_1_41
+! 27.01.2012	dbf&ggu	changes to get_layer_thickness()
+! 27.01.2012	dbf&ggu	new routine compute_sigma_info()
+! 30.03.2012	ggu	changed VERS_6_1_51
+! 25.01.2013	ggu	changed VERS_6_1_62
+! 03.05.2013	ggu	changed VERS_6_1_63
+! 17.05.2013	ggu	layer_thickness for elem and node, general routine
+! 17.05.2013	ggu	new routine get_bottom_of_layer()
+! 13.06.2013	ggu	changed VERS_6_1_65
+! 05.09.2013	ggu	new call interface to get_layer_thickness()
+! 12.09.2013	ggu	changed VERS_6_1_67
+! 15.05.2014	ggu	changed VERS_6_1_75
+! 25.06.2014	ggu	error stop if computed layer thickness is <= 0
+! 07.07.2014	ggu	changed VERS_6_1_79
+! 23.12.2014	ggu	changed VERS_7_0_11
+! 19.01.2015	ggu	changed VERS_7_1_3
+! 15.02.2015	ggu	in get_layer_thickness() handle last layer correctly
+! 31.07.2015	ggu	changed VERS_7_1_84
+! 18.12.2015	ggu	changed VERS_7_3_17
+! 19.02.2016	ggu	changed VERS_7_5_2
+! 01.05.2016	ggu	changes in get_layer_thickness(): exit from loop
+! 14.05.2016	ggu	substitute blockdata/common with module
+! 25.05.2016	ggu	changed VERS_7_5_10
+! 07.10.2017	ggu	substitute get_bottom_of_layer with get_depth_of_layer
+! 16.02.2019	ggu	changed VERS_7_5_60
+! 13.03.2019	ggu	changed VERS_7_5_61
+! 29.04.2022	ggu	in compute_sigma_info() check for nlv<1
+! 09.05.2023    lrp     introduce top layer index variable
+! 05.06.2023    lrp     introduce z-star
+!
+! notes :
+!
+! this file is used also in femplot
+!
+!	get_sigma_info (supdep.f,suplin.f)
+!	get_layer_thickness (supdep.f,suplin.f)
+!	init_sigma_info (supout.f)
+!
+!******************************************************************
+!******************************************************************
+!******************************************************************
 
 !==================================================================
         module sigma
@@ -91,7 +91,7 @@ c******************************************************************
         end module sigma
 !==================================================================
 
-c******************************************************************
+!******************************************************************
 
 	subroutine check_sigma_initialized
 
@@ -106,7 +106,7 @@ c******************************************************************
 
 	end
 
-c******************************************************************
+!******************************************************************
 
 	subroutine get_sigma_info(nlv,nsigma,hsigma)
 
@@ -126,7 +126,7 @@ c******************************************************************
 
 	end
 
-c******************************************************************
+!******************************************************************
 
 	subroutine set_sigma_info(nlv,nsigma,hsigma)
 
@@ -144,7 +144,7 @@ c******************************************************************
 
 	end
 
-c******************************************************************
+!******************************************************************
 
 	subroutine init_sigma_info(nlv,hlv)
 
@@ -161,13 +161,13 @@ c******************************************************************
 
 	end
 
-c******************************************************************
-c******************************************************************
-c******************************************************************
-c next routines can be used without using routines above (common)
-c******************************************************************
-c******************************************************************
-c******************************************************************
+!******************************************************************
+!******************************************************************
+!******************************************************************
+! next routines can be used without using routines above (common)
+!******************************************************************
+!******************************************************************
+!******************************************************************
 
 	subroutine compute_sigma_info(nlv,hlv,nsigma,hsigma)
 
@@ -180,9 +180,9 @@ c******************************************************************
 
 	integer l
 
-c---------------------------------------------------------
-c scan depth structure
-c---------------------------------------------------------
+!---------------------------------------------------------
+! scan depth structure
+!---------------------------------------------------------
 
 	if( nlv < 1 ) then
 	  write(6,*) 'nlv = ',nlv
@@ -197,9 +197,9 @@ c---------------------------------------------------------
 	  if( hlv(l) .gt. hlv(l-1) ) goto 1
 	end do
 
-c---------------------------------------------------------
-c only sigma layers found
-c---------------------------------------------------------
+!---------------------------------------------------------
+! only sigma layers found
+!---------------------------------------------------------
 
 	if( hlv(nlv) .ne. -1 ) then
           write(6,*) 'nlv,hlv(nlv): ',nlv,hlv(nlv)
@@ -209,11 +209,11 @@ c---------------------------------------------------------
 	nsigma = nlv
 	return
 
-c---------------------------------------------------------
-c zeta or hybrid levels found
-c
-c this algorithm cannot handle hybrid levels with only 2 sigma layers
-c---------------------------------------------------------
+!---------------------------------------------------------
+! zeta or hybrid levels found
+!
+! this algorithm cannot handle hybrid levels with only 2 sigma layers
+!---------------------------------------------------------
 
     1	continue
 	if( l .eq. 2 ) then	!only zeta levels
@@ -223,21 +223,21 @@ c---------------------------------------------------------
 	  hsigma = hlv(l)
 	end if
 
-c---------------------------------------------------------
-c end of routine
-c---------------------------------------------------------
+!---------------------------------------------------------
+! end of routine
+!---------------------------------------------------------
 
 	end
 
-c******************************************************************
+!******************************************************************
 
-	subroutine get_layer_thickness(lmax,lmin,nsigma,nadapt,
-     +				       hsigma,hadapt,z,h,hlv,hdl)
+	subroutine get_layer_thickness(lmax,lmin,nsigma,nadapt,     &
+      &				       hsigma,hadapt,z,h,hlv,hdl)
 
-c returns layer thickness - works also for lmax higher than actual layers
-c
-c works also for lmax higher than actual layers
-c in this case the last values for hl are 0
+! returns layer thickness - works also for lmax higher than actual layers
+!
+! works also for lmax higher than actual layers
+! in this case the last values for hl are 0
 
 	implicit none
 
@@ -265,9 +265,9 @@ c in this case the last values for hl are 0
 	htot = h
 	hdl = 0.
 
-c---------------------------------------------------------
-c compute level structure of sigma levels
-c---------------------------------------------------------
+!---------------------------------------------------------
+! compute level structure of sigma levels
+!---------------------------------------------------------
 
 	hsig = min(htot,hsigma) + zmed
 
@@ -279,9 +279,9 @@ c---------------------------------------------------------
 	  hdl(l) = -hsig * (hbot-htop)
 	end do
 
-c---------------------------------------------------------
-c compute level structure of z-surface-adaptive levels
-c---------------------------------------------------------
+!---------------------------------------------------------
+! compute level structure of z-surface-adaptive levels
+!---------------------------------------------------------
 
         hzad = hadapt + zmed
 	den  = hadapt - hlv(lmin-1)		!zstar def
@@ -301,9 +301,9 @@ c---------------------------------------------------------
 	if( bdebug ) write(6,*) l,hsig,hzad,lmax,nsigma,nadapt
 	if( bdebug ) write(6,*) 'hdl: ',hdl
 
-c---------------------------------------------------------
-c compute level structure of zeta and/or hybrid levels
-c---------------------------------------------------------
+!---------------------------------------------------------
+! compute level structure of zeta and/or hybrid levels
+!---------------------------------------------------------
 
 	if( lmax .gt. (nsigma+nadapt) ) then	!also zeta coordinates
 	  if( lmax .eq. lmin ) then		!just one layer
@@ -329,9 +329,9 @@ c---------------------------------------------------------
 
 	!if( berror ) goto 99
 
-c---------------------------------------------------------
-c end of routine
-c---------------------------------------------------------
+!---------------------------------------------------------
+! end of routine
+!---------------------------------------------------------
 
 	return
    99	continue
@@ -345,11 +345,11 @@ c---------------------------------------------------------
 	stop 'error stop get_layer_thickness: 0 thickness'
 	end
 
-c******************************************************************
+!******************************************************************
 
 	subroutine get_depth_of_layer(bcenter,lmax,z,hl,hz)
 
-c computes depth of layer (center if bcenter == .true., else bottom)
+! computes depth of layer (center if bcenter == .true., else bottom)
 
 	implicit none
 
@@ -373,7 +373,7 @@ c computes depth of layer (center if bcenter == .true., else bottom)
 
 	end
 
-c******************************************************************
+!******************************************************************
 
 	subroutine adjust_layer_index(nel,nlv,hev,hlv,ilhv)
 
@@ -401,13 +401,13 @@ c******************************************************************
 
 	end
 
-c******************************************************************
-c******************************************************************
-c******************************************************************
+!******************************************************************
+!******************************************************************
+!******************************************************************
 
 	subroutine compute_iztype(iztype)
 
-c computes type of vertical coordinates
+! computes type of vertical coordinates
 
 	implicit none
 
@@ -428,7 +428,7 @@ c computes type of vertical coordinates
 
 	end
 	
-c******************************************************************
+!******************************************************************
 
 	subroutine sigma_test
 
@@ -455,9 +455,9 @@ c******************************************************************
 
 	end
 
-c******************************************************************
-c	program sigma_main
-c	call sigma_test
-c	end
-c******************************************************************
+!******************************************************************
+!	program sigma_main
+!	call sigma_test
+!	end
+!******************************************************************
 

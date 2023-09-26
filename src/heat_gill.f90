@@ -23,30 +23,30 @@
 !
 !--------------------------------------------------------------------------
 
-c heat flux module (Gill)
-c
-c contents :
-c
-c subroutine heatgill(t,p,w,ur,cc,ts,qsens,qlat,qlong,evap)
-c	computes heat fluxes from formulas in Gill
-c subroutine tempgill(dt,dh,qsol,t,p,w,ur,cc,ts,tsnew,rtot,evap)
-c	computes heat fluxes from formulas in Gill and adjusts water temp
-c
-c revision log :
-c
-c 27.08.2009	ggu	call to heatgill changed (pass ur, and not e,q)
-c 23.03.2010	ggu	changed v6.1.1
-c 05.11.2014	ggu	changed VERS_7_0_5
-c 24.01.2018	ggu	changed VERS_7_5_41
-c 16.02.2019	ggu	changed VERS_7_5_60
-c
-c*******************************************************************
+! heat flux module (Gill)
+!
+! contents :
+!
+! subroutine heatgill(t,p,w,ur,cc,ts,qsens,qlat,qlong,evap)
+!	computes heat fluxes from formulas in Gill
+! subroutine tempgill(dt,dh,qsol,t,p,w,ur,cc,ts,tsnew,rtot,evap)
+!	computes heat fluxes from formulas in Gill and adjusts water temp
+!
+! revision log :
+!
+! 27.08.2009	ggu	call to heatgill changed (pass ur, and not e,q)
+! 23.03.2010	ggu	changed v6.1.1
+! 05.11.2014	ggu	changed VERS_7_0_5
+! 24.01.2018	ggu	changed VERS_7_5_41
+! 16.02.2019	ggu	changed VERS_7_5_60
+!
+!*******************************************************************
 
 	subroutine heatgill(t,p,w,ur,cc,ts,qsens,qlat,qlong,evap)
 
-c computes heat fluxes from formulas in Gill
-c
-c heat fluxes are positive upward (from sea to atmosphere)
+! computes heat fluxes from formulas in Gill
+!
+! heat fluxes are positive upward (from sea to atmosphere)
 
 	implicit none
 
@@ -63,11 +63,11 @@ c heat fluxes are positive upward (from sea to atmosphere)
 	real qlong	!long wave radiation [W/m**2]		- out
 	real evap	!evaporation [kg/m**2/s]		- out
 
-c other variables:
-c
-c	real q		!specific humidity [0-1]
-c	real e		!vapor pressure [mb]
-c	real r		!mixing ratio [0-1]
+! other variables:
+!
+!	real q		!specific humidity [0-1]
+!	real e		!vapor pressure [mb]
+!	real r		!mixing ratio [0-1]
 
 	real rdry,lv0,pascal
 	parameter(rdry=287.04,lv0=2.5008e6,pascal=100.)
@@ -83,9 +83,9 @@ c	real r		!mixing ratio [0-1]
 
         if( p > 10000 ) stop 'error stop heatgill: p not in mbar'
 
-c	------------------------------------------------
-c	initialization
-c	------------------------------------------------
+!	------------------------------------------------
+!	initialization
+!	------------------------------------------------
 
 	call vapor(t,p,ur,e,r,q)	!compute e,r,q
 
@@ -96,9 +96,9 @@ c	------------------------------------------------
 
 	call satur(ts,p,es,rs,qs)	!compute saturation values for sea
 
-c	------------------------------------------------
-c	sensible heat flux
-c	------------------------------------------------
+!	------------------------------------------------
+!	sensible heat flux
+!	------------------------------------------------
 
 	dt = ts - t
 	if( dt .lt. 0 ) then	!stable
@@ -109,18 +109,18 @@ c	------------------------------------------------
 
 	qsens = rho * cp * ch * w * dt
 
-c	------------------------------------------------
-c	latent heat flux
-c	------------------------------------------------
+!	------------------------------------------------
+!	latent heat flux
+!	------------------------------------------------
 
 	ce = 1.5e-3
 
 	evap  = rho * ce * w * ( qs - q )
 	qlat = lv * evap
 
-c	------------------------------------------------
-c	long wave radiation
-c	------------------------------------------------
+!	------------------------------------------------
+!	long wave radiation
+!	------------------------------------------------
 
 	theta = ts + 273.15
 	theta2 = theta * theta
@@ -129,9 +129,9 @@ c	------------------------------------------------
 
 	qlong = sigma0 * theta4 * ( 0.39 - 0.05 * sqrt(e) ) * cloud
 
-c	------------------------------------------------
-c	end of routine
-c	------------------------------------------------
+!	------------------------------------------------
+!	end of routine
+!	------------------------------------------------
 
         if( qlong .le. 0. ) then
           write(6,*) qsens,qlat,qlong
@@ -144,13 +144,13 @@ c	------------------------------------------------
 
 	end
 
-c*******************************************************************
+!*******************************************************************
 
 	subroutine tempgill(dt,dh,qsol,t,p,w,ur,cc,ts,tsnew,rtot,evap)
 
-c computes heat fluxes from formulas in Gill and adjusts water temperature
-c
-c heat fluxes are positive upward (from sea to atmosphere)
+! computes heat fluxes from formulas in Gill and adjusts water temperature
+!
+! heat fluxes are positive upward (from sea to atmosphere)
 
 	implicit none
 
@@ -172,34 +172,34 @@ c heat fluxes are positive upward (from sea to atmosphere)
         real ct
         real qsens,qlat,qlong
 
-c	------------------------------------------------
-c	constants
-c	------------------------------------------------
+!	------------------------------------------------
+!	constants
+!	------------------------------------------------
 
 	ct   = cpw * rhow * dh	!heat capacity / area
 
-c	------------------------------------------------
-c	compute total radiation - positive if into water
-c	------------------------------------------------
+!	------------------------------------------------
+!	compute total radiation - positive if into water
+!	------------------------------------------------
 
 	call heatgill(t,p,w,ur,cc,ts,qsens,qlat,qlong,evap)
         write(67,*) qsol,-qsens,-qlat,-qlong
 
 	rtot = qsol - ( qsens + qlat + qlong )
 
-c	------------------------------------------------
-c	compute new temperature: dQ = dT * rho * cpw * dh / dt
-c	------------------------------------------------
+!	------------------------------------------------
+!	compute new temperature: dQ = dT * rho * cpw * dh / dt
+!	------------------------------------------------
 
 	tsnew = ts + rtot * dt / ct
 
-c	------------------------------------------------
-c	end of routine
-c	------------------------------------------------
+!	------------------------------------------------
+!	end of routine
+!	------------------------------------------------
 
 	end
 
-c*******************************************************************
-c*******************************************************************
-c*******************************************************************
+!*******************************************************************
+!*******************************************************************
+!*******************************************************************
 

@@ -23,46 +23,46 @@
 !
 !--------------------------------------------------------------------------
 
-c topological set up routines
-c
-c contents :
-c
-c subroutine setnod
-c			 sets array inodv
-c
-c revision log :
-c
-c 01.08.2003	ggu	created from sublnk.f
-c 13.08.2003	ggu	in update_geom do not call setweg and setnod
-c 06.11.2008	ggu	better error handling
-c 06.04.2009	ggu	nlidim -> nlkdim
-c 23.03.2010	ggu	changed v6.1.1
-c 02.12.2011	ggu	print_bound_nodes() for writing out boundary nodes
-c 09.12.2011	ggu	changed VERS_6_1_38
-c 30.03.2012	ggu	changed VERS_6_1_51
-c 12.09.2013	ggu	changed VERS_6_1_67
-c 18.06.2014	ggu	changed VERS_6_1_77
-c 23.12.2014	ggu	changed VERS_7_0_11
-c 19.01.2015	ggu	changed VERS_7_1_2
-c 19.01.2015	ggu	changed VERS_7_1_3
-c 04.05.2015	ggu	remove equivalence - use winkv as local array
-c 20.05.2015	ggu	new call to mklenkii to set up lenkiiv
-c 10.07.2015	ggu	changed VERS_7_1_50
-c 17.07.2015	ggu	changed VERS_7_1_80
-c 20.07.2015	ggu	changed VERS_7_1_81
-c 24.07.2015	ggu	changed VERS_7_1_82
-c 10.10.2015	ggu	changed VERS_7_3_2
-c 16.12.2015	ggu	changed VERS_7_3_16
-c 16.02.2019	ggu	changed VERS_7_5_60
-c 20.05.2020	ggu	new way to compute link structure (still experimental)
-c 28.05.2020	ggu	some more changes in constructing link structure
-c 13.04.2022	ggu	new call to make_links (ibound)
-c
-c*****************************************************************
+! topological set up routines
+!
+! contents :
+!
+! subroutine setnod
+!			 sets array inodv
+!
+! revision log :
+!
+! 01.08.2003	ggu	created from sublnk.f
+! 13.08.2003	ggu	in update_geom do not call setweg and setnod
+! 06.11.2008	ggu	better error handling
+! 06.04.2009	ggu	nlidim -> nlkdim
+! 23.03.2010	ggu	changed v6.1.1
+! 02.12.2011	ggu	print_bound_nodes() for writing out boundary nodes
+! 09.12.2011	ggu	changed VERS_6_1_38
+! 30.03.2012	ggu	changed VERS_6_1_51
+! 12.09.2013	ggu	changed VERS_6_1_67
+! 18.06.2014	ggu	changed VERS_6_1_77
+! 23.12.2014	ggu	changed VERS_7_0_11
+! 19.01.2015	ggu	changed VERS_7_1_2
+! 19.01.2015	ggu	changed VERS_7_1_3
+! 04.05.2015	ggu	remove equivalence - use winkv as local array
+! 20.05.2015	ggu	new call to mklenkii to set up lenkiiv
+! 10.07.2015	ggu	changed VERS_7_1_50
+! 17.07.2015	ggu	changed VERS_7_1_80
+! 20.07.2015	ggu	changed VERS_7_1_81
+! 24.07.2015	ggu	changed VERS_7_1_82
+! 10.10.2015	ggu	changed VERS_7_3_2
+! 16.12.2015	ggu	changed VERS_7_3_16
+! 16.02.2019	ggu	changed VERS_7_5_60
+! 20.05.2020	ggu	new way to compute link structure (still experimental)
+! 28.05.2020	ggu	some more changes in constructing link structure
+! 13.04.2022	ggu	new call to make_links (ibound)
+!
+!*****************************************************************
 
 	subroutine set_geom
 
-c sets up geometrical arrays
+! sets up geometrical arrays
 
 	use mod_geom
 	use basin
@@ -78,22 +78,22 @@ c sets up geometrical arrays
 	bverbose = .true.
 	bverbose = .false.
 
-c-------------------------------------------------------------
-c check maxlnk
-c-------------------------------------------------------------
+!-------------------------------------------------------------
+! check maxlnk
+!-------------------------------------------------------------
 
 	if( ngr .gt. maxlnk ) goto 98
 
-c-------------------------------------------------------------
-c make static arrays
-c-------------------------------------------------------------
+!-------------------------------------------------------------
+! make static arrays
+!-------------------------------------------------------------
 
 	call make_links_old(nkn,nel,nen3v)
 	call make_links(nkn,nel,nen3v,ibound,kerr)
 
-c-------------------------------------------------------------
-c write some statistics
-c-------------------------------------------------------------
+!-------------------------------------------------------------
+! write some statistics
+!-------------------------------------------------------------
 
         ngrd=ilinkv(nkn+1)
         n=0
@@ -127,9 +127,9 @@ c-------------------------------------------------------------
 	if( ngrd .ne. ngrd1 ) goto 99
 	if( ngrd .ne. ngrd2 ) goto 99
 
-c-------------------------------------------------------------
-c end of routine
-c-------------------------------------------------------------
+!-------------------------------------------------------------
+! end of routine
+!-------------------------------------------------------------
 
 	return
    98	continue
@@ -139,20 +139,20 @@ c-------------------------------------------------------------
 	stop 'error stop set_geom: ngrade'
 	end
 
-c*****************************************************************
+!*****************************************************************
 
 	subroutine check_geom
 
-c checks geometrical arrays
+! checks geometrical arrays
 
 	use mod_geom
 	use basin
 
         implicit none
 
-c-------------------------------------------------------------
-c check static arrays
-c-------------------------------------------------------------
+!-------------------------------------------------------------
+! check static arrays
+!-------------------------------------------------------------
 
         call checklenk(nkn,ilinkv,lenkv,nen3v)
         call checklink(nkn,ilinkv,linkv)
@@ -162,17 +162,17 @@ c-------------------------------------------------------------
 
 	call check_subs
 
-c-------------------------------------------------------------
-c end of routine
-c-------------------------------------------------------------
+!-------------------------------------------------------------
+! end of routine
+!-------------------------------------------------------------
 
 	end
 
-c*****************************************************************
+!*****************************************************************
 
         subroutine check_subs
 
-c checks various subroutines
+! checks various subroutines
 
 	use mod_geom
 	use basin, only : nkn,nel,ngr,mbw
@@ -184,9 +184,9 @@ c checks various subroutines
 	integer nodes(maxlnk)
 	integer elems(maxlnk)
 
-c-------------------------------------------------------------
-c check element index
-c-------------------------------------------------------------
+!-------------------------------------------------------------
+! check element index
+!-------------------------------------------------------------
 
 	do k=1,nkn
 	  call get_elem_linkp(k,ipf,ipl)
@@ -205,9 +205,9 @@ c-------------------------------------------------------------
 	  end do
 	end do
 
-c-------------------------------------------------------------
-c check node index
-c-------------------------------------------------------------
+!-------------------------------------------------------------
+! check node index
+!-------------------------------------------------------------
 
 	do k=1,nkn
 	  call get_node_linkp(k,ipf,ipl)
@@ -226,9 +226,9 @@ c-------------------------------------------------------------
 	  end do
 	end do
 
-c-------------------------------------------------------------
-c end of routine
-c-------------------------------------------------------------
+!-------------------------------------------------------------
+! end of routine
+!-------------------------------------------------------------
 
 	return
    86	continue
@@ -265,9 +265,9 @@ c-------------------------------------------------------------
 	stop 'error stop check_subs: total number of elements'
 	end
 
-c****************************************************************
-c****************************************************************
-c****************************************************************
+!****************************************************************
+!****************************************************************
+!****************************************************************
 
         subroutine print_bound_nodes(nkn,aux)
 
@@ -310,5 +310,5 @@ c****************************************************************
 
         end 
 
-c****************************************************************
+!****************************************************************
 

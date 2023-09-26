@@ -24,60 +24,60 @@
 !
 !--------------------------------------------------------------------------
 
-c heat flux module (file administration)
-c
-c contents :
-c
-c subroutine qfinit(file)                       initializes heat flux module
-c subroutine qfget(qs,ta,tb,uw,cc,ur,p,e,r,q)   gets actual values for air
-c subroutine qfunit(iu)                         gets unit of heat flux file
-c subroutine qfmake(it)                         reads from heat flux file
-c subroutine qfnext(it,qs,ta,tb,uw,cc,ur,p,e,r,q,ier) reads next record
-c subroutine qfcheck(it,qs,ta,tb,ur,uw,cc,p)	checks for unrealistic values
-c subroutine qfcheck_file(file)			checks whole file
-c subroutine qfperiodic(itp)			sets itperiod
-c subroutine qfrhumid(irh)			sets irhumid
-c subroutine qftest                             test drives qfxf routines
-c
-c revision log :
-c
-c 01.06.1998	ggu&lcz	written from scratch (nearly)
-c 24.06.1998	ggu&lcz	subroutines from lucia integrated
-c 24.05.2000	ggu	no details in element treatment, 3D algorithm
-c 01.02.2002	ggu	only file handling routines here
-c 01.02.2006	ggu	distinguish between humidity and wet bulb temp - bhumid
-c 20.05.2007	ggu	itperiod may be 0 -> no periodic BC
-c 12.11.2008	ggu	checks for unrealistic values in qfcheck
-c 10.03.2009	ggu	call to meteo_set_matrix() for 2D arrays
-c 27.08.2009	ggu	set itperiod and irhumid from outside
-c 23.03.2010	ggu	changed v6.1.1
-c 08.10.2010	ggu	changed VERS_6_1_13
-c 17.02.2011	ggu	changed VERS_6_1_18
-c 01.03.2011	ggu	changed VERS_6_1_20
-c 17.05.2011	ggu	compiler warnings in qfcheck()
-c 31.05.2011	ggu	changed VERS_6_1_23
-c 24.01.2018	ggu	changed VERS_7_5_41
-c 16.02.2019	ggu	changed VERS_7_5_60
-c 13.03.2019	ggu	changed VERS_7_5_61
-c
-c notes :
-c
-c qs	net solar radiation (reflection already subtracted)
-c ta	air temperature
-c tb	wet bulb temperature
-c uw	wind speed
-c cc	cloud cover (0 clear sky, 1 totally covered)
-c
-c to initialize call qfinit
-c at every time step call qfmake -> reads if necessary new record
-c to get data call qfget
-c to see if a file is opened call qfunit
-c
-c***********************************************************
+! heat flux module (file administration)
+!
+! contents :
+!
+! subroutine qfinit(file)                       initializes heat flux module
+! subroutine qfget(qs,ta,tb,uw,cc,ur,p,e,r,q)   gets actual values for air
+! subroutine qfunit(iu)                         gets unit of heat flux file
+! subroutine qfmake(it)                         reads from heat flux file
+! subroutine qfnext(it,qs,ta,tb,uw,cc,ur,p,e,r,q,ier) reads next record
+! subroutine qfcheck(it,qs,ta,tb,ur,uw,cc,p)	checks for unrealistic values
+! subroutine qfcheck_file(file)			checks whole file
+! subroutine qfperiodic(itp)			sets itperiod
+! subroutine qfrhumid(irh)			sets irhumid
+! subroutine qftest                             test drives qfxf routines
+!
+! revision log :
+!
+! 01.06.1998	ggu&lcz	written from scratch (nearly)
+! 24.06.1998	ggu&lcz	subroutines from lucia integrated
+! 24.05.2000	ggu	no details in element treatment, 3D algorithm
+! 01.02.2002	ggu	only file handling routines here
+! 01.02.2006	ggu	distinguish between humidity and wet bulb temp - bhumid
+! 20.05.2007	ggu	itperiod may be 0 -> no periodic BC
+! 12.11.2008	ggu	checks for unrealistic values in qfcheck
+! 10.03.2009	ggu	call to meteo_set_matrix() for 2D arrays
+! 27.08.2009	ggu	set itperiod and irhumid from outside
+! 23.03.2010	ggu	changed v6.1.1
+! 08.10.2010	ggu	changed VERS_6_1_13
+! 17.02.2011	ggu	changed VERS_6_1_18
+! 01.03.2011	ggu	changed VERS_6_1_20
+! 17.05.2011	ggu	compiler warnings in qfcheck()
+! 31.05.2011	ggu	changed VERS_6_1_23
+! 24.01.2018	ggu	changed VERS_7_5_41
+! 16.02.2019	ggu	changed VERS_7_5_60
+! 13.03.2019	ggu	changed VERS_7_5_61
+!
+! notes :
+!
+! qs	net solar radiation (reflection already subtracted)
+! ta	air temperature
+! tb	wet bulb temperature
+! uw	wind speed
+! cc	cloud cover (0 clear sky, 1 totally covered)
+!
+! to initialize call qfinit
+! at every time step call qfmake -> reads if necessary new record
+! to get data call qfget
+! to see if a file is opened call qfunit
+!
+!***********************************************************
 
 	subroutine qfinit(file)
 
-c initializes heat flux module
+! initializes heat flux module
 
 	implicit none
 
@@ -108,14 +108,12 @@ c initializes heat flux module
 	write(6,*) 'heat flux file opened (version 2.0): '
 	write(6,*) file
 
-	call qfnext(itfold,qsold,taold,tbold,uwold,ccold
-     +                  ,urold,pold,eold,rold,qold                              
-     +                  ,ier)
+	call qfnext(itfold,qsold,taold,tbold,uwold,ccold      &
+      &                  ,urold,pold,eold,rold,qold,ier)
 	if( ier .ne. 0 ) goto 99
 
-	call qfnext(itfnew,qsnew,tanew,tbnew,uwnew,ccnew
-     +                  ,urnew,pnew,enew,rnew,qold                              
-     +                  ,ier)
+	call qfnext(itfnew,qsnew,tanew,tbnew,uwnew,ccnew         &
+      &                  ,urnew,pnew,enew,rnew,qold,ier)
 	if( ier .ne. 0 ) goto 99
 
 	return
@@ -124,11 +122,11 @@ c initializes heat flux module
 	stop 'error stop qfinit: error reading file'
 	end
 
-c***********************************************************
+!***********************************************************
 
 	subroutine qfinit_internal
 
-c internal initialization routine
+! internal initialization routine
 
 	implicit none
 
@@ -147,22 +145,22 @@ c internal initialization routine
 
 	end
 
-c***********************************************************
+!***********************************************************
 
 	subroutine qfget(qs,ta,tb,uw,cc,ur,p,e,r,q)
 
-c gets actual values for air
+! gets actual values for air
 
-c qs	solar radiation [W/m**2]
-c ta	air temperature [C]
-c tb	wet bulb temperature [C]
-c ur	relative humidity [%], ([0-100])
-c uw	wind speed [m/s]
-c cc	cloud cover [0-1], 0 no clouds
-c p     pressure [mb]
-c e     vapor pressure [mb]
-c r     mixing ratio [0-1]
-c q     specific humidity [0-1]
+! qs	solar radiation [W/m**2]
+! ta	air temperature [C]
+! tb	wet bulb temperature [C]
+! ur	relative humidity [%], ([0-100])
+! uw	wind speed [m/s]
+! cc	cloud cover [0-1], 0 no clouds
+! p     pressure [mb]
+! e     vapor pressure [mb]
+! r     mixing ratio [0-1]
+! q     specific humidity [0-1]
 
         implicit none
 
@@ -183,11 +181,11 @@ c q     specific humidity [0-1]
 
 	end
 
-c***********************************************************
+!***********************************************************
 
         subroutine qfunit(iu)
 
-c gets unit of heat flux file
+! gets unit of heat flux file
 
         implicit none
 
@@ -199,11 +197,11 @@ c gets unit of heat flux file
 
         end
 
-c***********************************************************
+!***********************************************************
 
 	subroutine qfmake(it)
 
-c reads from heat flux file and makes vars
+! reads from heat flux file and makes vars
 
 	implicit none
 
@@ -221,14 +219,14 @@ c reads from heat flux file and makes vars
 	save    itmany
 	data    itmany / 0 /
 
-c itperiod - periodic radiation conditions - see subqfx.h
-c
-c the file must contain values for time 0 and itperiod
-c these records should be equal
-c
-c year : 31536000      day : 86400
-c
-c set itperiod to 0 if no periodic conditions are needed
+! itperiod - periodic radiation conditions - see subqfx.h
+!
+! the file must contain values for time 0 and itperiod
+! these records should be equal
+!
+! year : 31536000      day : 86400
+!
+! set itperiod to 0 if no periodic conditions are needed
 
 	if( ifunit .le. 0 ) return
 
@@ -236,7 +234,7 @@ c set itperiod to 0 if no periodic conditions are needed
 	bdebug = .false.
 	bwrite = .true.
 
-c handle periodic conditions
+! handle periodic conditions
 
 	itact = it - itmany * itperiod
 
@@ -249,7 +247,7 @@ c handle periodic conditions
 	  write(6,*) 'period in qflux: ',it,itact,itfold,itfnew
 	end if
 
-c iterate until new record has time greater than actual time
+! iterate until new record has time greater than actual time
 
 	do while( itact .gt. itfnew )
 
@@ -265,15 +263,14 @@ c iterate until new record has time greater than actual time
 	  rold  = rnew
 	  qold  = qnew
 
-	  call qfnext(itfnew,qsnew,tanew,tbnew,uwnew,ccnew
-     +                  ,urnew,pnew,enew,rnew,qnew                              
-     +                  ,ier)
+	  call qfnext(itfnew,qsnew,tanew,tbnew,uwnew,ccnew    &
+      &                  ,urnew,pnew,enew,rnew,qnew,ier)
 
 	  if( ier .ne. 0 ) goto 99
 
 	end do
 
-c do interpolation
+! do interpolation
 
 	rt = (itact-itfold) / float(itfnew-itfold)
         rtt = 1. - rt
@@ -291,8 +288,8 @@ c do interpolation
 	  qact = rt * qnew  + rtt * qold
 
 	if( bdebug ) then
-	  write(6,'(a,i10,5f12.2)') 'qfmake: ',itact,qsact,taact
-     +                  ,tbact,uwact,ccact
+	  write(6,'(a,i10,5f12.2)') 'qfmake: ',itact,qsact,taact    &
+      &                  ,tbact,uwact,ccact
 	end if
 
 	return
@@ -301,29 +298,29 @@ c do interpolation
 	stop 'error stop qfmake: error reading file'
 	end
 
-c***********************************************************
+!***********************************************************
 
 	subroutine qfnext(it,qs,ta,tb,uw,cc,ur,p,e,r,q,ier)
 
-c reads next record of flux file
-c
-c it	time [s]
-c qs	solar radiation [W/m**2]
-c ta	air temperature [C]
-c tb	wet bulb temperature [C]
-c ur	relative humidity [%], ([0-100])
-c uw	wind speed [m/s]
-c cc	cloud cover [0-1], 0 no clouds
-c p     pressure [mb]
-c e     vapor pressure [mb]
-c r     mixing ratio [0-1]
-c q     specific humidity [0-1]
-c ier   error code
-c
-c format is one of the two following:
-c
-c it qs ta tb uw cc
-c it qs ta ur uw cc
+! reads next record of flux file
+!
+! it	time [s]
+! qs	solar radiation [W/m**2]
+! ta	air temperature [C]
+! tb	wet bulb temperature [C]
+! ur	relative humidity [%], ([0-100])
+! uw	wind speed [m/s]
+! cc	cloud cover [0-1], 0 no clouds
+! p     pressure [mb]
+! e     vapor pressure [mb]
+! r     mixing ratio [0-1]
+! q     specific humidity [0-1]
+! ier   error code
+!
+! format is one of the two following:
+!
+! it qs ta tb uw cc
+! it qs ta ur uw cc
 
 	implicit none
 
@@ -355,18 +352,18 @@ c it qs ta ur uw cc
 
 	ier = 0
 
-c-------------------------------------------------------
-c read next record
-c-------------------------------------------------------
+!-------------------------------------------------------
+! read next record
+!-------------------------------------------------------
 
         call qfunit(iunit)
 	if( iunit .le. 0 ) return
 
 	read(iunit,*,iostat=ios) it,qs,ta,raux,uw,cc
 
-c-------------------------------------------------------
-c error handling and debug
-c-------------------------------------------------------
+!-------------------------------------------------------
+! error handling and debug
+!-------------------------------------------------------
 
 	if( ios .ne. 0 ) then
 	  if( ios .gt. 0 ) then
@@ -381,9 +378,9 @@ c-------------------------------------------------------
 	  end if
 	end if
 
-c-------------------------------------------------------
-c convert relative humidity or wet bulb temperature to each other
-c-------------------------------------------------------
+!-------------------------------------------------------
+! convert relative humidity or wet bulb temperature to each other
+!-------------------------------------------------------
 
 	if( bhumid ) then		!compute wet bulb temperature
 	  ur = raux
@@ -398,9 +395,9 @@ c-------------------------------------------------------
 
 	call meteo_set_matrix(qs,ta,ur,uw,cc)	!set 2D matrices
 
-c-------------------------------------------------------
-c check data
-c-------------------------------------------------------
+!-------------------------------------------------------
+! check data
+!-------------------------------------------------------
 
 	if( bdebug ) then
 	  write(6,1000) 'qfnext: ',it,qs,ta,tb,uw,cc,ur,p,e,r,q
@@ -410,19 +407,19 @@ c-------------------------------------------------------
 
 	itold = it
 
-c-------------------------------------------------------
-c end of routine
-c-------------------------------------------------------
+!-------------------------------------------------------
+! end of routine
+!-------------------------------------------------------
 
         return
  1000   format(a,i10,f7.1,2f6.1,f5.1,f5.2,f6.1,f7.1,f5.1,2f6.3)
 	end
 
-c*****************************************************************************
+!*****************************************************************************
 
 	subroutine qfcheck(it,qs,ta,tb,ur,uw,cc,p)
 
-c checks heat flux values for unrealistic values
+! checks heat flux values for unrealistic values
 
 	implicit none
 
@@ -445,11 +442,11 @@ c checks heat flux values for unrealistic values
 	stop 'error stop qfcheck: unrealistic values'
 	end
 
-c*****************************************************************************
+!*****************************************************************************
 
 	subroutine qfcheck_file(file)
 
-c checks whole heat flux file for unusual values
+! checks whole heat flux file for unusual values
 
 	implicit none
 
@@ -471,11 +468,11 @@ c checks whole heat flux file for unusual values
 
 	end
 
-c*****************************************************************************
+!*****************************************************************************
 
 	subroutine qfperiodic(itp)
 
-c sets itperiod - can be called at any time
+! sets itperiod - can be called at any time
 
 	implicit none
 
@@ -488,13 +485,13 @@ c sets itperiod - can be called at any time
 
 	end
 
-c*****************************************************************************
+!*****************************************************************************
 
 	subroutine qfrhumid(irh)
 
-c sets irhumid - can be called at any time
-c
-c irh==1  =>  relative humidity is given (default)
+! sets irhumid - can be called at any time
+!
+! irh==1  =>  relative humidity is given (default)
 
 	implicit none
 
@@ -507,13 +504,13 @@ c irh==1  =>  relative humidity is given (default)
 
 	end
 	
-c*****************************************************************************
-c*****************************************************************************
-c*****************************************************************************
+!*****************************************************************************
+!*****************************************************************************
+!*****************************************************************************
 
 	subroutine qftest
 
-c test drives qfxf routines
+! test drives qfxf routines
 
 	implicit none
 
@@ -543,14 +540,14 @@ c test drives qfxf routines
 
 	end
 
-c*****************************************************************************
-c*****************************************************************************
-c*****************************************************************************
+!*****************************************************************************
+!*****************************************************************************
+!*****************************************************************************
 
-c        call qftest
-c        end
+!        call qftest
+!        end
 
-c*****************************************************************************
-c*****************************************************************************
-c*****************************************************************************
+!*****************************************************************************
+!*****************************************************************************
+!*****************************************************************************
 

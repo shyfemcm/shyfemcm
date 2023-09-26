@@ -202,12 +202,12 @@
 !==================================================================
 
 
-c
-c***********************************************************************
+!
+!***********************************************************************
 
 	subroutine bndo_init
 
-c sets up bndo data structure
+! sets up bndo data structure
 
 	use mod_bndo
 	use mod_bound_geom
@@ -232,9 +232,9 @@ c sets up bndo data structure
 	integer nkbnds,itybnd,kbnds,ipext,ipint,nbnds
 	real areaele
 
-c----------------------------------------------------------
-c set up array iopbnd
-c----------------------------------------------------------
+!----------------------------------------------------------
+! set up array iopbnd
+!----------------------------------------------------------
 
 	iopbnd(:) = 0
 
@@ -248,8 +248,8 @@ c----------------------------------------------------------
 	  itype = itybnd(ibc)
 
 	  ngood = 0
-	  bexternal = ( itype .ge. 1 .and. itype .le. 2 
-     +      		    .or. itype .ge. 31 .and. itype .le. 39 )
+	  bexternal = ( itype .ge. 1 .and. itype .le. 2                & 
+      &      		    .or. itype .ge. 31 .and. itype .le. 39 )
 
 	  do i=1,nodes
 	    k = kbnds(ibc,i)
@@ -278,9 +278,9 @@ c----------------------------------------------------------
 	  end if
 	end do
 
-c----------------------------------------------------------
-c set up normal direction
-c----------------------------------------------------------
+!----------------------------------------------------------
+! set up normal direction
+!----------------------------------------------------------
 
 	do i=1,nbndo
 	  k = kbcnod(i)
@@ -299,9 +299,9 @@ c----------------------------------------------------------
 	  if( knext > 0 ) inext = iopbnd(knext)
 	  if( klast > 0 ) ilast = iopbnd(klast)
 
-c	  -------------------------------
-c	  internal consistency check
-c	  -------------------------------
+!	  -------------------------------
+!	  internal consistency check
+!	  -------------------------------
 
 	  if( iopbnd(k) .ne. i ) then
 	    stop 'error stop bndo_init: internal error (0)'
@@ -317,9 +317,9 @@ c	  -------------------------------
 	   end if
 	  end if
 
-c	  -------------------------------
-c	  adjacent boundary nodes must be of same boundary
-c	  -------------------------------
+!	  -------------------------------
+!	  adjacent boundary nodes must be of same boundary
+!	  -------------------------------
 
 	  if( inext .gt. 0 ) then
 	    if( ibcnod(inext) .ne. ibc ) goto 98
@@ -328,9 +328,9 @@ c	  -------------------------------
 	    if( ibcnod(ilast) .ne. ibc ) goto 98
 	  end if
 
-c	  -------------------------------
-c	  get normal direction (might be wrong in case of domain border)
-c	  -------------------------------
+!	  -------------------------------
+!	  get normal direction (might be wrong in case of domain border)
+!	  -------------------------------
 
 	  if( inext .gt. 0 .and. ilast .gt. 0 ) then	!inner node in OB
 	    dx = xgv(knext) - xgv(klast)
@@ -360,9 +360,9 @@ c	  -------------------------------
 	  xynorm(2,i) = dx			!y-component
 	end do
   
-c----------------------------------------------------------
-c set up weights and node list
-c----------------------------------------------------------
+!----------------------------------------------------------
+! set up weights and node list
+!----------------------------------------------------------
 
 	do i=1,nbndo
 	  nopnod(i) = 0
@@ -392,9 +392,9 @@ c----------------------------------------------------------
 
 	end do
 
-c----------------------------------------------------------
-c scale weights to unit
-c----------------------------------------------------------
+!----------------------------------------------------------
+! scale weights to unit
+!----------------------------------------------------------
 
 	iunit = 730 + my_id
 	kext = 6651
@@ -442,9 +442,9 @@ c----------------------------------------------------------
 
 	write(6,*) 'finished setting up bndo_init, nbndo = ',nbndo
 
-c----------------------------------------------------------
-c end of routine
-c----------------------------------------------------------
+!----------------------------------------------------------
+! end of routine
+!----------------------------------------------------------
 
 	return
    98	continue
@@ -455,11 +455,11 @@ c----------------------------------------------------------
 	stop 'error stop bndo'
 	end
 
-c***********************************************************************
+!***********************************************************************
 
 	subroutine bndinsert(ib,area,kn)
 
-c inserts node kn with weight area into list (internal routine)
+! inserts node kn with weight area into list (internal routine)
 
 	use mod_bndo
 
@@ -494,11 +494,11 @@ c inserts node kn with weight area into list (internal routine)
 
 	end
 
-c***********************************************************************
+!***********************************************************************
 
 	subroutine bndo_info_file(file)
 
-c writes bndo info to file
+! writes bndo info to file
 
 	use shympi
 
@@ -516,11 +516,11 @@ c writes bndo info to file
 
 	end
 
-c***********************************************************************
+!***********************************************************************
 
 	subroutine bndo_info(iunit)
 
-c writes info on open boundary nodes to terminal
+! writes info on open boundary nodes to terminal
 
 	use mod_bndo
 	use mod_bound_geom
@@ -563,11 +563,11 @@ c writes info on open boundary nodes to terminal
 
 	end
 
-c***********************************************************************
+!***********************************************************************
 
 	function is_zeta_bound(k)
 
-c checks if node k is a zeta boundary
+! checks if node k is a zeta boundary
 
 	use mod_bndo
 	use mod_bound_geom
@@ -590,15 +590,15 @@ c checks if node k is a zeta boundary
 	
 	end
 
-c***********************************************************************
-c***********************************************************************
-c***********************************************************************
+!***********************************************************************
+!***********************************************************************
+!***********************************************************************
 
         subroutine bndo_setbc(what,nlvddi,cv,rbc,uprv,vprv)
 
-c sets open boundary condition for level boundaries
-c
-c simply calls bndo_impbc() and bndo_adjbc()
+! sets open boundary condition for level boundaries
+!
+! simply calls bndo_impbc() and bndo_adjbc()
 
 	use basin
 	use shympi
@@ -622,9 +622,9 @@ c simply calls bndo_impbc() and bndo_adjbc()
 	k = ipint(kext)
 	bdebug = ( k > 0 )
 
-c----------------------------------------------------------
-c simply imposes whatever is in rbc
-c----------------------------------------------------------
+!----------------------------------------------------------
+! simply imposes whatever is in rbc
+!----------------------------------------------------------
 
 	if( bdebug ) then
 	write(iunit,*) '------------ bndo_setbc 1 -------'
@@ -634,9 +634,9 @@ c----------------------------------------------------------
 	
         call bndo_impbc(what,nlvddi,cv,rbc)
 
-c----------------------------------------------------------
-c adjusts for ambient value, no gradient or outgoing flow
-c----------------------------------------------------------
+!----------------------------------------------------------
+! adjusts for ambient value, no gradient or outgoing flow
+!----------------------------------------------------------
 
 	if( bdebug ) then
 	write(iunit,*) '------------ bndo_setbc 2 -------'
@@ -652,17 +652,17 @@ c----------------------------------------------------------
 	write(iunit,*) rbc(:,k)
 	end if
 	
-c----------------------------------------------------------
-c end of routine
-c----------------------------------------------------------
+!----------------------------------------------------------
+! end of routine
+!----------------------------------------------------------
 
 	end
 
-c***********************************************************************
+!***********************************************************************
 
         subroutine bndo_impbc(what,nlvddi,cv,rbc)
 
-c imposes boundary conditions on open boundary
+! imposes boundary conditions on open boundary
 
 	use mod_bndo
 	use mod_bound_geom
@@ -723,15 +723,15 @@ c imposes boundary conditions on open boundary
 
         end
 
-c***********************************************************************
+!***********************************************************************
 
 	subroutine bndo_adjbc(what,nlvddi,cv,uprv,vprv)
 
-c adjusts boundary conditions on open boundary (values on bnd already set)
-c
-c adjusts for ambient value, no gradient or outgoing flow
-c
-c this is only done on level boundaries ( ibtyp == 1 )
+! adjusts boundary conditions on open boundary (values on bnd already set)
+!
+! adjusts for ambient value, no gradient or outgoing flow
+!
+! this is only done on level boundaries ( ibtyp == 1 )
 
 	use mod_bndo
 	use mod_bound_geom
@@ -864,11 +864,11 @@ c this is only done on level boundaries ( ibtyp == 1 )
 
 	end
 
-c***********************************************************************
+!***********************************************************************
 
 	subroutine bndo_radiat(it,rzv)
 
-c imposes radiation condition for levels
+! imposes radiation condition for levels
 
 	use mod_bndo
 	use mod_bound_geom
@@ -944,5 +944,5 @@ c imposes radiation condition for levels
 
 	end
 
-c***********************************************************************
+!***********************************************************************
 

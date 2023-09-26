@@ -958,12 +958,12 @@
 
         k1 = M * k0
         k2 = k0 * nu * sin(2.*phi)/4.
-        k3 = k0 * nu * sin(phi)*((cos(phi)**3)/24.) 
-     +       * (5. - tan(phi)**2 + 9.*ep2*cos(phi)**2 
-     +       + 4.*ep2*ep2*cos(phi)**4)
+        k3 = k0 * nu * sin(phi)*((cos(phi)**3)/24.)         & 
+      &       * (5. - tan(phi)**2 + 9.*ep2*cos(phi)**2      &
+      &       + 4.*ep2*ep2*cos(phi)**4)
         k4 = k0 * nu * cos(phi)
-        k5 = k0 * nu * ((cos(phi)**3)/6.) 
-     +       * (1. - tan(phi)**2 + ep2*cos(phi)**2)
+        k5 = k0 * nu * ((cos(phi)**3)/6.)                   & 
+      &       * (1. - tan(phi)**2 + ep2*cos(phi)**2)
 
         y = k1 + k2*p**2 + k3*p**4
         x = k4*p + k5*p**3
@@ -1011,8 +1011,8 @@
         M = yy / k0
         mu = M / (aearth * z1)
 
-        fp = mu + j1*sin(2.*mu) + j2*sin(4.*mu) +
-     +       j3*sin(6.*mu) + j4*sin(8.*mu)
+        fp = mu + j1*sin(2.*mu) + j2*sin(4.*mu) +     &
+      &       j3*sin(6.*mu) + j4*sin(8.*mu)
 
         c1 = ep2 * cos(fp)**2
         t1 = tan(fp)**2
@@ -1027,12 +1027,12 @@
         q1 = n1 * tan(fp) / r1
         q2 = d2/2.
         q3 = (5. + 3.*t1 + 10.*c1 - 4.*c1*c1 - 9.*ep2)*d4/24.
-        q4 = (61. + 90.*t1 + 298.*c1 + 45.*t1*t1 -
-     +       3.*c1*c1 - 252.*ep2) * d6 / 720.
+        q4 = (61. + 90.*t1 + 298.*c1 + 45.*t1*t1 -             &
+      &       3.*c1*c1 - 252.*ep2) * d6 / 720.
         q5 = d
         q6 = (1. + 2.*t1 + c1) * d2*d / 6.
-        q7 = (5. - 2.*c1 + 28.*t1 - 3.*c1*c1 +
-     +       8.*ep2 + 24.*t1*t1) * d4 * d / 120.
+        q7 = (5. - 2.*c1 + 28.*t1 - 3.*c1*c1 +                 &
+      &       8.*ep2 + 24.*t1*t1) * d4 * d / 120.
 
         lat = rrad * (fp - q1*(q2-q3+q4))
         lon = lambda0 + rrad * (q5-q6+q7)/cos(fp)

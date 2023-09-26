@@ -24,87 +24,87 @@
 !
 !--------------------------------------------------------------------------
 
-c ev routines
-c
-c contents :
-c
-c subroutine set_ev				set up ev vector
-c subroutine check_ev				tests if ev is set up
-c subroutine cpp(x,y,rlambda,phi,rlambda0,phi0)	transforms (lon,lat) to cart
-c subroutine adjust_bc(v1,v2,v3)		adjusts b/c so that sum = 0
-c function area_elem(ie)			returns area of element ie
-c function aomega_elem(ie)			returns aomega of element ie
-c
-c revision log :
-c
-c 31.08.1988	ggu	(czv containes real chezy)
-c 25.11.1988	ggu	(czv eliminated)
-c 28.01.1992	ggu	(double precision, implicit none)
-c 31.05.1997	ggu	unnecessary routines deleted
-c 27.06.1997	ggu	ev routines into own file
-c 12.11.2001	ggu	cosmetic changes
-c 10.08.2003	ggu	new routine check_ev
-c 14.08.2003	ggu	sp110a -> set_ev
-c 27.08.2007	ccf	isphe for spherical coordinate system
-c 24.06.2008	ggu	compute and store also distances beteween nodes
-c 18.11.2008	ggu	new routine adjust_bc() to adjust sum to 0
-c 19.11.2008	ggu	helper routines to compute area/aomega
-c 22.05.2009	ggu	new routine set_coords_ev() and ev_blockdata
-c 12.06.2009	ggu	more stable computation of area (bug_f_64bit)
-c 05.02.2010	ggu	bug fix for aj (division with 24 too early)
-c 23.03.2010	ggu	changed v6.1.1
-c 14.04.2010	ggu	new routines get_coords_ev() and check_spheric_ev()
-c 07.05.2010	ggu	initialization of ev routines
-c 22.07.2010	ggu	changed VERS_6_1_9
-c 25.01.2011	ggu	default to lat/lon if small coordinates are given
-c 28.01.2011	ggu	new entry in ev for distance of nodes (17-19)
-c 17.02.2011	ggu	changed VERS_6_1_18
-c 23.03.2011	ggu	better set-up for isphe_ev
-c 14.07.2011	ggu	changed VERS_6_1_27
-c 24.11.2011	ggu	better routines to handle spherical coordinates
-c 09.12.2011	ggu	changed VERS_6_1_38
-c 24.01.2012	ggu	changed VERS_6_1_41
-c 30.08.2012	ggu	new routine is_spherical()
-c 12.09.2012	ggu	changed VERS_6_1_57
-c 30.09.2013	ggu	new routines gradient_normal/tangent
-c 25.10.2013	ggu	changed VERS_6_1_68
-c 30.10.2014	ggu	new routine compute_distance()
-c 05.11.2014	ggu	changed VERS_7_0_5
-c 23.12.2014	ggu	changed VERS_7_0_11
-c 19.01.2015	ggu	changed VERS_7_1_3
-c 21.01.2015	ggu	new routine compute_cartesian_coords()
-c 26.02.2015	ggu	changed VERS_7_1_5
-c 31.03.2015	ggu	new routines for internal coordinates
-c 01.04.2015	ggu	changed VERS_7_1_7
-c 19.04.2015	ggu	new routines for internal coordinates (distance)
-c 22.04.2015	ggu	bug fix in xi2xy - x/y were exchanged
-c 05.05.2015	ggu	changed VERS_7_1_10
-c 05.06.2015	ggu	changed VERS_7_1_12
-c 17.07.2015	ggu	changed VERS_7_1_80
-c 20.07.2015	ggu	changed VERS_7_1_81
-c 10.10.2015	ggu	bug fix in adjust_bc() - brown paper bag bug
-c 16.11.2015	ggu	new routine adjust_xi()
-c 15.02.2016	ggu	more debug code, assure xi is in bounds
-c 25.05.2016	ggu	changed VERS_7_5_10
-c 29.03.2017	ggu	xi2xy changed to correct for small det
-c 16.05.2017	ggu	changed VERS_7_5_27
-c 25.05.2017	ggu	changed VERS_7_5_28
-c 05.10.2017	ggu	verbose flag introduced
-c 05.12.2017	ggu	changed VERS_7_5_39
-c 24.01.2018	ggu	changed VERS_7_5_41
-c 19.04.2018	ggu	changed VERS_7_5_45
-c 31.08.2018	ggu	changed VERS_7_5_49
-c 16.02.2019	ggu	changed VERS_7_5_60
-c 13.03.2019	ggu	changed VERS_7_5_61
-c 21.05.2019	ggu	changed VERS_7_5_62
-c
-c***********************************************************
+! ev routines
+!
+! contents :
+!
+! subroutine set_ev				set up ev vector
+! subroutine check_ev				tests if ev is set up
+! subroutine cpp(x,y,rlambda,phi,rlambda0,phi0)	transforms (lon,lat) to cart
+! subroutine adjust_bc(v1,v2,v3)		adjusts b/c so that sum = 0
+! function area_elem(ie)			returns area of element ie
+! function aomega_elem(ie)			returns aomega of element ie
+!
+! revision log :
+!
+! 31.08.1988	ggu	(czv containes real chezy)
+! 25.11.1988	ggu	(czv eliminated)
+! 28.01.1992	ggu	(double precision, implicit none)
+! 31.05.1997	ggu	unnecessary routines deleted
+! 27.06.1997	ggu	ev routines into own file
+! 12.11.2001	ggu	cosmetic changes
+! 10.08.2003	ggu	new routine check_ev
+! 14.08.2003	ggu	sp110a -> set_ev
+! 27.08.2007	ccf	isphe for spherical coordinate system
+! 24.06.2008	ggu	compute and store also distances beteween nodes
+! 18.11.2008	ggu	new routine adjust_bc() to adjust sum to 0
+! 19.11.2008	ggu	helper routines to compute area/aomega
+! 22.05.2009	ggu	new routine set_coords_ev() and ev_blockdata
+! 12.06.2009	ggu	more stable computation of area (bug_f_64bit)
+! 05.02.2010	ggu	bug fix for aj (division with 24 too early)
+! 23.03.2010	ggu	changed v6.1.1
+! 14.04.2010	ggu	new routines get_coords_ev() and check_spheric_ev()
+! 07.05.2010	ggu	initialization of ev routines
+! 22.07.2010	ggu	changed VERS_6_1_9
+! 25.01.2011	ggu	default to lat/lon if small coordinates are given
+! 28.01.2011	ggu	new entry in ev for distance of nodes (17-19)
+! 17.02.2011	ggu	changed VERS_6_1_18
+! 23.03.2011	ggu	better set-up for isphe_ev
+! 14.07.2011	ggu	changed VERS_6_1_27
+! 24.11.2011	ggu	better routines to handle spherical coordinates
+! 09.12.2011	ggu	changed VERS_6_1_38
+! 24.01.2012	ggu	changed VERS_6_1_41
+! 30.08.2012	ggu	new routine is_spherical()
+! 12.09.2012	ggu	changed VERS_6_1_57
+! 30.09.2013	ggu	new routines gradient_normal/tangent
+! 25.10.2013	ggu	changed VERS_6_1_68
+! 30.10.2014	ggu	new routine compute_distance()
+! 05.11.2014	ggu	changed VERS_7_0_5
+! 23.12.2014	ggu	changed VERS_7_0_11
+! 19.01.2015	ggu	changed VERS_7_1_3
+! 21.01.2015	ggu	new routine compute_cartesian_coords()
+! 26.02.2015	ggu	changed VERS_7_1_5
+! 31.03.2015	ggu	new routines for internal coordinates
+! 01.04.2015	ggu	changed VERS_7_1_7
+! 19.04.2015	ggu	new routines for internal coordinates (distance)
+! 22.04.2015	ggu	bug fix in xi2xy - x/y were exchanged
+! 05.05.2015	ggu	changed VERS_7_1_10
+! 05.06.2015	ggu	changed VERS_7_1_12
+! 17.07.2015	ggu	changed VERS_7_1_80
+! 20.07.2015	ggu	changed VERS_7_1_81
+! 10.10.2015	ggu	bug fix in adjust_bc() - brown paper bag bug
+! 16.11.2015	ggu	new routine adjust_xi()
+! 15.02.2016	ggu	more debug code, assure xi is in bounds
+! 25.05.2016	ggu	changed VERS_7_5_10
+! 29.03.2017	ggu	xi2xy changed to correct for small det
+! 16.05.2017	ggu	changed VERS_7_5_27
+! 25.05.2017	ggu	changed VERS_7_5_28
+! 05.10.2017	ggu	verbose flag introduced
+! 05.12.2017	ggu	changed VERS_7_5_39
+! 24.01.2018	ggu	changed VERS_7_5_41
+! 19.04.2018	ggu	changed VERS_7_5_45
+! 31.08.2018	ggu	changed VERS_7_5_49
+! 16.02.2019	ggu	changed VERS_7_5_60
+! 13.03.2019	ggu	changed VERS_7_5_61
+! 21.05.2019	ggu	changed VERS_7_5_62
+!
+!***********************************************************
 
-c isphe_ev:
-c
-c -1	value not given -> try to determine automatically
-c  0	cartesian
-c  1	spherical (lat/lon)
+! isphe_ev:
+!
+! -1	value not given -> try to determine automatically
+!  0	cartesian
+!  1	spherical (lat/lon)
 
 !==================================================================
         module evgeom
@@ -147,7 +147,7 @@ c  1	spherical (lat/lon)
 
 	end subroutine ev_init
 
-c****************************************************************
+!****************************************************************
 
 	subroutine ev_set_verbose(bverb)
 
@@ -163,9 +163,9 @@ c****************************************************************
 
 	subroutine set_ev
 
-c set up ev vector
-c
-c double precision version
+! set up ev vector
+!
+! double precision version
 
 	use basin
 	use evgeom
@@ -268,7 +268,7 @@ c double precision version
 	  write(6,*) c1,c2,c3
 	end if
 
-c natural coordinates in triangle:   xi(i) = a(i) + b(i)*x + c(i)*y    i=1,3
+! natural coordinates in triangle:   xi(i) = a(i) + b(i)*x + c(i)*y    i=1,3
 
 	call adjust_bc(b1,b2,b3)
 	call adjust_bc(c1,c2,c3)
@@ -341,13 +341,13 @@ c natural coordinates in triangle:   xi(i) = a(i) + b(i)*x + c(i)*y    i=1,3
 	stop 'error stop set_ev: clockwise'
 	end
 
-c****************************************************************
-c****************************************************************
-c****************************************************************
+!****************************************************************
+!****************************************************************
+!****************************************************************
 
 	subroutine is_init_ev(binit)
 
-c checks if ev module has been initialized
+! checks if ev module has been initialized
 
 	use evgeom
 
@@ -359,11 +359,11 @@ c checks if ev module has been initialized
 
 	end
 
-c****************************************************************
+!****************************************************************
 
 	subroutine set_coords_ev(isphe)
 
-c sets type of coordinates to use with ev module
+! sets type of coordinates to use with ev module
 
 	use evgeom
 
@@ -375,11 +375,11 @@ c sets type of coordinates to use with ev module
 
 	end
 
-c****************************************************************
+!****************************************************************
 
 	subroutine get_coords_ev(isphe)
 
-c gets type of coordinates that is used with ev module
+! gets type of coordinates that is used with ev module
 
 	use evgeom
 
@@ -391,11 +391,11 @@ c gets type of coordinates that is used with ev module
 
 	end
 
-c****************************************************************
+!****************************************************************
 
 	function is_spherical()
 
-c checks if coordinates are spherical (lat/lon)
+! checks if coordinates are spherical (lat/lon)
 
 	use evgeom
 
@@ -407,11 +407,11 @@ c checks if coordinates are spherical (lat/lon)
 
 	end
 
-c****************************************************************
+!****************************************************************
 
 	subroutine check_spheric_ev
 
-c checks if coordinates are lat/lon
+! checks if coordinates are lat/lon
 
 	use basin
 	use evgeom
@@ -511,7 +511,7 @@ c checks if coordinates are lat/lon
 
 	end
 
-c****************************************************************
+!****************************************************************
 
 	function is_geographical(n,x,y)
 
@@ -537,13 +537,13 @@ c****************************************************************
 
 	end
 
-c****************************************************************
-c****************************************************************
-c****************************************************************
+!****************************************************************
+!****************************************************************
+!****************************************************************
 
 	subroutine check_ev
 
-c tests if ev is set up correctly
+! tests if ev is set up correctly
 
 	use basin, only : nkn,nel,ngr,mbw
 	use evgeom
@@ -602,17 +602,17 @@ c tests if ev is set up correctly
 	stop 'error stop check_ev: errors in array ev'
 	end
 
-c***********************************************************
-c***********************************************************
-c***********************************************************
-c internal coordinates
-c***********************************************************
-c***********************************************************
-c***********************************************************
+!***********************************************************
+!***********************************************************
+!***********************************************************
+! internal coordinates
+!***********************************************************
+!***********************************************************
+!***********************************************************
 
 	subroutine xy2xi(ie,x,y,xi)
 
-c given x/y returns internal coordinates xi
+! given x/y returns internal coordinates xi
 
 	implicit none
 
@@ -633,11 +633,11 @@ c given x/y returns internal coordinates xi
 
 	end
 	
-c***********************************************************
+!***********************************************************
 
 	subroutine adjust_xi(xi)
 
-c adjusts internal coodinates xi
+! adjusts internal coodinates xi
 
 	use evgeom
 
@@ -718,11 +718,11 @@ c adjusts internal coodinates xi
 
 	end
 
-c***********************************************************
+!***********************************************************
 
 	subroutine xi2xy(ie,x,y,xi)
 
-c given internal coordinates xi returns x/y
+! given internal coordinates xi returns x/y
 
 	implicit none
 
@@ -772,13 +772,13 @@ c given internal coordinates xi returns x/y
 	stop 'error stop xi2xy: det == 0'
 	end
 	
-c***********************************************************
+!***********************************************************
 
 	subroutine xi_dist(ie,xia,xib,l)
 
-c computes distance between two points given in internal coordinates
-c
-c the two points must be lying on the sides of the triangle
+! computes distance between two points given in internal coordinates
+!
+! the two points must be lying on the sides of the triangle
 
 	use evgeom
 
@@ -886,13 +886,13 @@ c the two points must be lying on the sides of the triangle
 	stop 'error stop xi_dist: generic error'
 	end
 
-c***********************************************************
+!***********************************************************
 
 	subroutine xi_abc(ie,a,b,c)
 
-c returns a,b,c to compute xi
-c
-c natural coordinates in triangle:   xi(i) = a(i) + b(i)*x + c(i)*y    i=1,3
+! returns a,b,c to compute xi
+!
+! natural coordinates in triangle:   xi(i) = a(i) + b(i)*x + c(i)*y    i=1,3
 
 	use basin
 	use evgeom
@@ -948,13 +948,13 @@ c natural coordinates in triangle:   xi(i) = a(i) + b(i)*x + c(i)*y    i=1,3
 
 	end
 
-c***********************************************************
-c***********************************************************
-c***********************************************************
+!***********************************************************
+!***********************************************************
+!***********************************************************
 
         subroutine cpp(x,y,rlambda,phi,rlambda0,phi0)
 
-c transforms (lon,lat) into cartesian coordinates (x,y) (lon,lat in radians)
+! transforms (lon,lat) into cartesian coordinates (x,y) (lon,lat in radians)
 
         implicit none
 
@@ -971,7 +971,7 @@ c transforms (lon,lat) into cartesian coordinates (x,y) (lon,lat in radians)
 
         end
 
-c***********************************************************
+!***********************************************************
 
 	subroutine ev_make_center(ie,xm,ym)
 
@@ -996,13 +996,13 @@ c***********************************************************
 
 	end
 
-c***********************************************************
+!***********************************************************
 
         subroutine ev_g2c(x,y,lambda,phi,lambda0,phi0)
 
-c transforms geographical (lon,lat) into cartesian (x,y) coordinates 
-c
-c (lon,lat in degrees)
+! transforms geographical (lon,lat) into cartesian (x,y) coordinates 
+!
+! (lon,lat in degrees)
 
         implicit none
 
@@ -1028,13 +1028,13 @@ c (lon,lat in degrees)
 
         end
 
-c***********************************************************
+!***********************************************************
 
         subroutine ev_c2g(x,y,lambda,phi,lambda0,phi0)
 
-c transforms cartesian (x,y) into geographical (lon,lat) coordinates 
-c
-c (lon,lat in degrees)
+! transforms cartesian (x,y) into geographical (lon,lat) coordinates 
+!
+! (lon,lat in degrees)
 
         implicit none
 
@@ -1055,13 +1055,13 @@ c (lon,lat in degrees)
 
         end
 
-c***********************************************************
-c***********************************************************
-c***********************************************************
+!***********************************************************
+!***********************************************************
+!***********************************************************
 
 	subroutine adjust_bc(v1,v2,v3)
 
-c adjusts b/c so that sum = 0
+! adjusts b/c so that sum = 0
 
 	implicit none
 
@@ -1099,13 +1099,13 @@ c adjusts b/c so that sum = 0
 	stop 'error stop adjust_bc: internal error'
 	end
 
-c***********************************************************
-c***********************************************************
-c***********************************************************
+!***********************************************************
+!***********************************************************
+!***********************************************************
 
 	function area_elem(ie)
 
-c returns area of element ie
+! returns area of element ie
 
 	use evgeom
 
@@ -1122,11 +1122,11 @@ c returns area of element ie
 
 	end
 
-c***********************************************************
+!***********************************************************
 
 	function aomega_elem(ie)
 
-c returns aomega of element ie
+! returns aomega of element ie
 
 	use evgeom
 
@@ -1143,11 +1143,11 @@ c returns aomega of element ie
 
 	end
 
-c***********************************************************
+!***********************************************************
 
 	function weight_elem(ie)
 
-c returns weight for element ie - if ev is not setup, return 1
+! returns weight for element ie - if ev is not setup, return 1
 
 	use evgeom
 
@@ -1164,15 +1164,15 @@ c returns weight for element ie - if ev is not setup, return 1
 
 	end
 
-c***********************************************************
-c***********************************************************
-c***********************************************************
+!***********************************************************
+!***********************************************************
+!***********************************************************
 
 	subroutine gradient_normal(ie,ii,gx,gy,gxn,gyn)
 
-c computes gradient normal to given direction
-c
-c direction is given by the two nodes not identified by ii
+! computes gradient normal to given direction
+!
+! direction is given by the two nodes not identified by ii
 
 	use evgeom
 
@@ -1195,13 +1195,13 @@ c direction is given by the two nodes not identified by ii
 
 	end
 
-c***********************************************************
+!***********************************************************
 
 	subroutine gradient_tangent(ie,ii,gx,gy,gxt,gyt)
 
-c computes gradient tangent to given direction
-c
-c direction is given by the two nodes not identified by ii
+! computes gradient tangent to given direction
+!
+! direction is given by the two nodes not identified by ii
 
 	use evgeom
 
@@ -1224,13 +1224,13 @@ c direction is given by the two nodes not identified by ii
 
 	end
 
-c***********************************************************
+!***********************************************************
 
 	subroutine gradient_normal_d(ie,ii,gx,gy,gxn,gyn)
 
-c computes gradient normal to given direction
-c
-c direction is given by the two nodes not identified by ii
+! computes gradient normal to given direction
+!
+! direction is given by the two nodes not identified by ii
 
 	use evgeom
 
@@ -1253,13 +1253,13 @@ c direction is given by the two nodes not identified by ii
 
 	end
 
-c***********************************************************
+!***********************************************************
 
 	subroutine gradient_tangent_d(ie,ii,gx,gy,gxt,gyt)
 
-c computes gradient tangent to given direction
-c
-c direction is given by the two nodes not identified by ii
+! computes gradient tangent to given direction
+!
+! direction is given by the two nodes not identified by ii
 
 	use evgeom
 
@@ -1282,13 +1282,13 @@ c direction is given by the two nodes not identified by ii
 
 	end
 
-c***********************************************************
+!***********************************************************
 
 	subroutine compute_distance(xin1,yin1,xin2,yin2,dx,dy)
 
-c computes distance between (x1,y1) and (x2,y2)
-c
-c takes care of lat/lon coordinates
+! computes distance between (x1,y1) and (x2,y2)
+!
+! takes care of lat/lon coordinates
 
 	use evgeom
 
@@ -1323,7 +1323,7 @@ c takes care of lat/lon coordinates
 
 	end
 
-c***********************************************************
+!***********************************************************
 
         subroutine compute_cartesian_coords(n,lon,lat,x,y)
 
@@ -1340,9 +1340,9 @@ c***********************************************************
 	double precision lambda,phi
 	double precision xx,yy
 
-c---------------------------------------------------------
-c see if spherical coordinates
-c---------------------------------------------------------
+!---------------------------------------------------------
+! see if spherical coordinates
+!---------------------------------------------------------
 
 	if ( isphe_ev .eq. 0 ) then		!already cartesian
 	  do i=1,n
@@ -1352,9 +1352,9 @@ c---------------------------------------------------------
 	  return
 	end if
 
-c---------------------------------------------------------
-c compute reference point
-c---------------------------------------------------------
+!---------------------------------------------------------
+! compute reference point
+!---------------------------------------------------------
 
 	lambda0 = 0.
 	phi0 = 0.
@@ -1365,9 +1365,9 @@ c---------------------------------------------------------
 	lambda0 = lambda0 / n
 	phi0 = phi0 / n
 	
-c---------------------------------------------------------
-c do conversion
-c---------------------------------------------------------
+!---------------------------------------------------------
+! do conversion
+!---------------------------------------------------------
 
 	do i=1,n
 	  lambda = lon(i)
@@ -1377,13 +1377,13 @@ c---------------------------------------------------------
 	  y(i) = yy
 	end do
 
-c---------------------------------------------------------
-c end of routine
-c---------------------------------------------------------
+!---------------------------------------------------------
+! end of routine
+!---------------------------------------------------------
 
 	end
 
-c***********************************************************
+!***********************************************************
 
 	subroutine ev_set_debug(bdebug)
 
@@ -1395,16 +1395,16 @@ c***********************************************************
 
 	end
 
-c***********************************************************
+!***********************************************************
 
         subroutine femintp(ie,z,xp,yp,zp)
 
-c interpolation in element (with ev)
-c
-c interpolates in element ie from nodal values z to point xp,yp
-c result is in zp
-c
-c needs array ev
+! interpolation in element (with ev)
+!
+! interpolates in element ie from nodal values z to point xp,yp
+! result is in zp
+!
+! needs array ev
 
         use evgeom
 
@@ -1429,5 +1429,5 @@ c needs array ev
 
         end
 
-c***********************************************************
+!***********************************************************
 

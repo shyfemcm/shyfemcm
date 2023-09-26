@@ -90,8 +90,8 @@
 	integer, parameter, private :: double_type = 3
 
         INTERFACE is_nan
-        MODULE PROCEDURE is_d_nan, is_r_nan, is_i_nan
-     +			,is_d_array1_nan
+        MODULE PROCEDURE is_d_nan, is_r_nan, is_i_nan    &
+           &			,is_d_array1_nan
         END INTERFACE
 
         INTERFACE is_inf
@@ -103,11 +103,11 @@
         END INTERFACE
 
         INTERFACE write_debug_record
-        MODULE PROCEDURE write_debug_record_i1
-     +			,write_debug_record_r1
-     +			,write_debug_record_d1
-     +			,write_debug_record_r2
-     +			,write_debug_record_d2
+        MODULE PROCEDURE write_debug_record_i1  &
+           &			,write_debug_record_r1     &
+           &			,write_debug_record_d1     &
+           &			,write_debug_record_r2     &
+           &			,write_debug_record_d2  
         END INTERFACE
 
         INTERFACE write_debug_time

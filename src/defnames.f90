@@ -24,68 +24,68 @@
 !
 !--------------------------------------------------------------------------
 
-c create default names
-c
-c contents :
-c
-c subroutine mkname(dir,name,ext,file)            makes file name
-c subroutine defmak(defdir,defnam,ext,file)	  makes file with defaults
-c function ideffi(defdir,defnam,ext,form,status)  opens file in default dir
-c function ifemop(ext,form,status)		  opens file with default name
-c function ifemopa(text,ext,form,status)	  opens file with default name
-c function ifem_open_file(ext,status)		  opens unformated file
-c function ifem_test_file(ext,status)		  tries to open unformated file
-c
-c revision log :
-c
-c 23.05.1997	ggu	$$EXTENS - default extension may be overwritten
-c 18.06.1997	ggu	restructured - idefna,idefop,idefts,idefun deleted
-c 16.01.1998	ggu	idefop reintroduced -> to avoid link error
-c 21.01.1998	ggu	in mkname: give extension with or without dot
-c 08.08.2000	ggu	new routine ifemop
-c 27.11.2001	ggu	error message rewritten
-c 11.10.2002	ggu	new subroutine deffile
-c 07.03.2007	ggu	new routine ifem_open_file
-c 23.03.2010	ggu	changed v6.1.1
-c 29.04.2010	ggu	new routine ifem_open_file
-c 03.05.2010	ggu	new routine ifem_choose_file() and add_extension()
-c 02.07.2011	ggu	idefna,idefop finally deleted
-c 13.07.2011	ggu	cleaned from old structures
-c 18.08.2011	ggu	bug fix in idefbas -> use status passed in
-c 01.06.2012	ggu	changed VERS_6_1_53
-c 18.06.2014	ggu	changed VERS_6_1_77
-c 09.05.2017	ggu	add_extension -> to subst_extension, new add_extension
-c 05.12.2017	ggu	changed VERS_7_5_39
-c 07.12.2017	ggu	changed VERS_7_5_40
-c 05.10.2018	ggu	avoid run time error in subst_extension()
-c 16.10.2018	ggu	changed VERS_7_5_50
-c 16.02.2019	ggu	changed VERS_7_5_60
-c 03.05.2019	ggu	new routines to get extension and name
-c 21.05.2019	ggu	changed VERS_7_5_62
-c
-c notes :
-c
-c exchange ideffi with ifemop (many apperances)
-c eliminate call to getpar/getfnm
-c
-c**************************************************************
+! create default names
+!
+! contents :
+!
+! subroutine mkname(dir,name,ext,file)            makes file name
+! subroutine defmak(defdir,defnam,ext,file)	  makes file with defaults
+! function ideffi(defdir,defnam,ext,form,status)  opens file in default dir
+! function ifemop(ext,form,status)		  opens file with default name
+! function ifemopa(text,ext,form,status)	  opens file with default name
+! function ifem_open_file(ext,status)		  opens unformated file
+! function ifem_test_file(ext,status)		  tries to open unformated file
+!
+! revision log :
+!
+! 23.05.1997	ggu	$$EXTENS - default extension may be overwritten
+! 18.06.1997	ggu	restructured - idefna,idefop,idefts,idefun deleted
+! 16.01.1998	ggu	idefop reintroduced -> to avoid link error
+! 21.01.1998	ggu	in mkname: give extension with or without dot
+! 08.08.2000	ggu	new routine ifemop
+! 27.11.2001	ggu	error message rewritten
+! 11.10.2002	ggu	new subroutine deffile
+! 07.03.2007	ggu	new routine ifem_open_file
+! 23.03.2010	ggu	changed v6.1.1
+! 29.04.2010	ggu	new routine ifem_open_file
+! 03.05.2010	ggu	new routine ifem_choose_file() and add_extension()
+! 02.07.2011	ggu	idefna,idefop finally deleted
+! 13.07.2011	ggu	cleaned from old structures
+! 18.08.2011	ggu	bug fix in idefbas -> use status passed in
+! 01.06.2012	ggu	changed VERS_6_1_53
+! 18.06.2014	ggu	changed VERS_6_1_77
+! 09.05.2017	ggu	add_extension -> to subst_extension, new add_extension
+! 05.12.2017	ggu	changed VERS_7_5_39
+! 07.12.2017	ggu	changed VERS_7_5_40
+! 05.10.2018	ggu	avoid run time error in subst_extension()
+! 16.10.2018	ggu	changed VERS_7_5_50
+! 16.02.2019	ggu	changed VERS_7_5_60
+! 03.05.2019	ggu	new routines to get extension and name
+! 21.05.2019	ggu	changed VERS_7_5_62
+!
+! notes :
+!
+! exchange ideffi with ifemop (many apperances)
+! eliminate call to getpar/getfnm
+!
+!**************************************************************
 
         subroutine mkname(dir,name,ext,file)
 
-c makes file name given its constituents
-c
-c dir   directory
-c name  name
-c ext   extension (with or without dot)
-c file  created file name (return)
+! makes file name given its constituents
+!
+! dir   directory
+! name  name
+! ext   extension (with or without dot)
+! file  created file name (return)
 
         implicit none
 
-c arguments
+! arguments
         character*(*) dir,name,ext,file
-c local
+! local
         integer nall,nstart,nend,naux
-c function
+! function
         integer ichafs,ichanm
 
         nall=1
@@ -111,9 +111,9 @@ c function
 
 	end
 
-c**************************************************************
-c**************************************************************
-c**************************************************************
+!**************************************************************
+!**************************************************************
+!**************************************************************
 
 	module default_names
 
@@ -122,13 +122,13 @@ c**************************************************************
 
 	end module default_names
 
-c**************************************************************
+!**************************************************************
 
 	subroutine set_default_names(defbas,defnam)
 
-c sets default names to be used with def routines
-c
-c must be called before any other routine in subdef can be used
+! sets default names to be used with def routines
+!
+! must be called before any other routine in subdef can be used
 
 	use default_names
 
@@ -141,11 +141,11 @@ c must be called before any other routine in subdef can be used
 
 	end
 
-c**************************************************************
+!**************************************************************
 
 	subroutine get_default_names(defbas,defnam)
 
-c gets default names to be used with def routines
+! gets default names to be used with def routines
 
 	use default_names
 
@@ -158,16 +158,16 @@ c gets default names to be used with def routines
 
 	end
 	
-c**************************************************************
-c**************************************************************
-c**************************************************************
+!**************************************************************
+!**************************************************************
+!**************************************************************
 
         subroutine def_make(ext,file)
 
-c makes file with defaults supplied
-c
-c ext   extension (with dot)
-c file  created file name (return)
+! makes file with defaults supplied
+!
+! ext   extension (with dot)
+! file  created file name (return)
 
 	use default_names
 
@@ -186,18 +186,18 @@ c file  created file name (return)
 
 	end
 
-c**************************************************************
+!**************************************************************
 
         subroutine defmak(defdir,defnam,ext,file)
 
-c FIXME -> take defdir,defnam from common block
+! FIXME -> take defdir,defnam from common block
 
-c makes file with defaults supplied
-c
-c defdir   directory
-c defnam  name
-c ext   extension (with dot)
-c file  created file name (return)
+! makes file with defaults supplied
+!
+! defdir   directory
+! defnam  name
+! ext   extension (with dot)
+! file  created file name (return)
 
         implicit none
 
@@ -212,19 +212,19 @@ c file  created file name (return)
 
 	end
 
-c**************************************************************
+!**************************************************************
 
         function ideffi(defdir,defnam,ext,form,status)
 
-c FIXME -> substitute with ifemop (many appearances)
+! FIXME -> substitute with ifemop (many appearances)
 
-c opens file in default dir
+! opens file in default dir
 
-c defdir   directory
-c defnam  name
-c ext   extension (with dot)
-c form  formatted ?
-c status open status
+! defdir   directory
+! defnam  name
+! ext   extension (with dot)
+! form  formatted ?
+! status open status
 
         implicit none
 
@@ -239,7 +239,7 @@ c status open status
 
 	end
 
-c**************************************************************
+!**************************************************************
 
 	function idefbas(basnam,status)
 
@@ -259,22 +259,22 @@ c**************************************************************
 
 	end
 
-c**************************************************************
-c**************************************************************
-c**************************************************************
-c opening of default simulation
-c**************************************************************
-c**************************************************************
-c**************************************************************
+!**************************************************************
+!**************************************************************
+!**************************************************************
+! opening of default simulation
+!**************************************************************
+!**************************************************************
+!**************************************************************
 
         function ifemop(ext,form,status)
 
-c opens file with default name (run) and extension given for fem model
-c returns with error code
+! opens file with default name (run) and extension given for fem model
+! returns with error code
 
-c ext   extension (with dot)
-c form  formatted ?
-c status open status
+! ext   extension (with dot)
+! form  formatted ?
+! status open status
 
         implicit none
 
@@ -289,17 +289,17 @@ c status open status
 
 	end
 
-c**************************************************************
+!**************************************************************
 
         function ifemopa(text,ext,form,status)
 
-c opens file with default name (run) and extension given for fem model
-c in case of error exits with error message text
+! opens file with default name (run) and extension given for fem model
+! in case of error exits with error message text
 
-c text  error message
-c ext   extension (with dot)
-c form  formatted ?
-c status open status
+! text  error message
+! ext   extension (with dot)
+! form  formatted ?
+! status open status
 
         implicit none
 
@@ -320,21 +320,21 @@ c status open status
 
 	end
 
-c**************************************************************
-c**************************************************************
-c**************************************************************
-c unformatted opening of default simulation
-c**************************************************************
-c**************************************************************
-c**************************************************************
+!**************************************************************
+!**************************************************************
+!**************************************************************
+! unformatted opening of default simulation
+!**************************************************************
+!**************************************************************
+!**************************************************************
 
         function ifem_open_file(ext,status)
 
-c opens unformated file with default name (run) and extension given
-c in case of error exits 
+! opens unformated file with default name (run) and extension given
+! in case of error exits 
 
-c ext		extension (with dot)
-c status	open status
+! ext		extension (with dot)
+! status	open status
 
         implicit none
 
@@ -351,14 +351,14 @@ c status	open status
 
 	end
 
-c**************************************************************
+!**************************************************************
 
         function ifem_test_file(ext,status)
 
-c tries to open unformated file with default name (run) and extension given
+! tries to open unformated file with default name (run) and extension given
 
-c ext		extension (with dot)
-c status	open status
+! ext		extension (with dot)
+! status	open status
 
         implicit none
 
@@ -380,15 +380,15 @@ c status	open status
 
 	end
 
-c**************************************************************
+!**************************************************************
 
         function ifem_choose_file(ext,status)
 
-c tries to open unformated file with default name (run) and extension given
-c insists on extension -> if name has extension substitute it with ext
+! tries to open unformated file with default name (run) and extension given
+! insists on extension -> if name has extension substitute it with ext
 
-c ext		extension (with dot)
-c status	open status
+! ext		extension (with dot)
+! status	open status
 
         implicit none
 
@@ -411,15 +411,15 @@ c status	open status
 
 	end
 
-c**************************************************************
-c**************************************************************
-c**************************************************************
+!**************************************************************
+!**************************************************************
+!**************************************************************
 
 	subroutine add_extension(name,ext)
 
-c adds extension to file name if not already there
-c
-c ext should have .
+! adds extension to file name if not already there
+!
+! ext should have .
 
 	implicit none
 
@@ -451,13 +451,13 @@ c ext should have .
 
 	end
 
-c**************************************************************
+!**************************************************************
 
 	subroutine delete_extension(name,ext)
 
-c deletes extension from file
-c
-c ext should have .
+! deletes extension from file
+!
+! ext should have .
 
 	implicit none
 
@@ -485,13 +485,13 @@ c ext should have .
 
 	end
 
-c**************************************************************
+!**************************************************************
 
 	subroutine change_extension(name,extold,extnew)
 
-c changes extension with new one
-c
-c ext should have .
+! changes extension with new one
+!
+! ext should have .
 
 	implicit none
 
@@ -520,20 +520,20 @@ c ext should have .
 
 	end
 
-c**************************************************************
+!**************************************************************
 
 	subroutine subst_extension(name,ext,bforce)
 
-c substitutes extension with given one
-c
-c if bforce is true substitutes given extension
-c otherwise only adds if not already there
-c
-c extension must have 3 chars
-c
-c name		file name (with or without extension)
-c ext		extension (with or without dot)
-c bforce	force substitution of extension, even if already there
+! substitutes extension with given one
+!
+! if bforce is true substitutes given extension
+! otherwise only adds if not already there
+!
+! extension must have 3 chars
+!
+! name		file name (with or without extension)
+! ext		extension (with or without dot)
+! bforce	force substitution of extension, even if already there
 
 	implicit none
 
@@ -571,11 +571,11 @@ c bforce	force substitution of extension, even if already there
 
 	end
 
-c**************************************************************
+!**************************************************************
 
 	subroutine check_extension(file,ext)
 
-c finds extension of file and returns it
+! finds extension of file and returns it
 
 	implicit none
 
@@ -593,11 +593,11 @@ c finds extension of file and returns it
 
 	end
 
-c**************************************************************
+!**************************************************************
 
 	subroutine check_name_and_extension(file,name,ext)
 
-c finds name and extension of file and returns it
+! finds name and extension of file and returns it
 
 	implicit none
 
@@ -617,5 +617,5 @@ c finds name and extension of file and returns it
 
 	end
 
-c**************************************************************
+!**************************************************************
 
