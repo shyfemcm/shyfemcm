@@ -23,44 +23,44 @@
 !
 !--------------------------------------------------------------------------
 
-c geometric routines (static)
-c
-c contents :
-c
-c revision log :
-c
-c 10.08.2003	ggu	new routines for ieltv, kantv
-c 18.10.2005	ggu	more debug output, new routines get_link, get_lenk
-c 06.04.2009	ggu	changed nlidim to nlkddi
-c 23.03.2010	ggu	changed v6.1.1
-c 30.03.2011	ggu	bverbose introduced
-c 14.04.2011	ggu	changed VERS_6_1_22
-c 30.03.2012	ggu	changed VERS_6_1_51
-c 25.10.2013	ggu	changed VERS_6_1_68
-c 21.05.2015	ggu	changed VERS_7_1_11
-c 30.05.2015	ggu	new subroutine mklenkii to compute lenkiiv
-c 10.07.2015	ggu	changed VERS_7_1_50
-c 24.07.2015	ggu	changed VERS_7_1_82
-c 02.12.2015	ggu	routines get_link() and get_lenk() deleted
-c 16.12.2015	ggu	changed VERS_7_3_16
-c 18.12.2015	ggu	changed VERS_7_3_17
-c 05.12.2017	ggu	changed VERS_7_5_39
-c 19.04.2018	ggu	changed VERS_7_5_45
-c 26.04.2018	ggu	changed VERS_7_5_46
-c 16.02.2019	ggu	changed VERS_7_5_60
-c 20.05.2020	ggu	bstop implemented
-c 21.05.2020	ggu	module implemented
-c 28.05.2020	ggu	new checks implemented
-c 22.11.2020	ggu	bug fix: elem_list was too small dimensioned
-c 13.04.2022    ggu     new call to make_links (ibound)
-c 13.04.2022    ggu     debug code inserted ... not yet finished
-c 22.04.2022    ggu     locator functions substituted with save version
-c 26.04.2022    ggu     mkdxy eliminated
-c 29.04.2022    ggu     in checkkant do not stop for nmpi>0
-c
-c****************************************************************
-c****************************************************************
-c****************************************************************
+! geometric routines (static)
+!
+! contents :
+!
+! revision log :
+!
+! 10.08.2003	ggu	new routines for ieltv, kantv
+! 18.10.2005	ggu	more debug output, new routines get_link, get_lenk
+! 06.04.2009	ggu	changed nlidim to nlkddi
+! 23.03.2010	ggu	changed v6.1.1
+! 30.03.2011	ggu	bverbose introduced
+! 14.04.2011	ggu	changed VERS_6_1_22
+! 30.03.2012	ggu	changed VERS_6_1_51
+! 25.10.2013	ggu	changed VERS_6_1_68
+! 21.05.2015	ggu	changed VERS_7_1_11
+! 30.05.2015	ggu	new subroutine mklenkii to compute lenkiiv
+! 10.07.2015	ggu	changed VERS_7_1_50
+! 24.07.2015	ggu	changed VERS_7_1_82
+! 02.12.2015	ggu	routines get_link() and get_lenk() deleted
+! 16.12.2015	ggu	changed VERS_7_3_16
+! 18.12.2015	ggu	changed VERS_7_3_17
+! 05.12.2017	ggu	changed VERS_7_5_39
+! 19.04.2018	ggu	changed VERS_7_5_45
+! 26.04.2018	ggu	changed VERS_7_5_46
+! 16.02.2019	ggu	changed VERS_7_5_60
+! 20.05.2020	ggu	bstop implemented
+! 21.05.2020	ggu	module implemented
+! 28.05.2020	ggu	new checks implemented
+! 22.11.2020	ggu	bug fix: elem_list was too small dimensioned
+! 13.04.2022    ggu     new call to make_links (ibound)
+! 13.04.2022    ggu     debug code inserted ... not yet finished
+! 22.04.2022    ggu     locator functions substituted with save version
+! 26.04.2022    ggu     mkdxy eliminated
+! 29.04.2022    ggu     in checkkant do not stop for nmpi>0
+!
+!****************************************************************
+!****************************************************************
+!****************************************************************
 
 !===========================================================
 	module link_structure
@@ -77,9 +77,9 @@ c****************************************************************
 	end module link_structure
 !===========================================================
 
-c****************************************************************
-c****************************************************************
-c****************************************************************
+!****************************************************************
+!****************************************************************
+!****************************************************************
 
 	subroutine link_set_verbose(bset)
 	use link_structure
@@ -109,9 +109,9 @@ c****************************************************************
 	bwmpi = bset
 	end
 
-c****************************************************************
-c****************************************************************
-c****************************************************************
+!****************************************************************
+!****************************************************************
+!****************************************************************
 
 	subroutine estimate_max_grade(nkn,nel,nen3v,ngrm)
 
@@ -137,7 +137,7 @@ c****************************************************************
 
 	end
 	
-c****************************************************************
+!****************************************************************
 
 	subroutine nn_insert(ngrm,k,nnode,node_list)
 
@@ -168,7 +168,7 @@ c****************************************************************
 	stop 'error stop nn_insert: nnode > 2*ngrm'
 	end
 
-c****************************************************************
+!****************************************************************
 
 	subroutine nn_clean(nnode,node_list)
 
@@ -193,7 +193,7 @@ c****************************************************************
 	    
 	end
 
-c****************************************************************
+!****************************************************************
 
 	function finditem(n,list,item)
 
@@ -215,7 +215,7 @@ c****************************************************************
 
 	end
 
-c****************************************************************
+!****************************************************************
 
 	subroutine iswap(i1,i2)
 
@@ -230,7 +230,7 @@ c****************************************************************
 
 	end
 
-c****************************************************************
+!****************************************************************
 
 	subroutine element_list_info(k,n,elist)
 
@@ -254,7 +254,7 @@ c****************************************************************
 	
 	end
 
-c****************************************************************
+!****************************************************************
 
 	subroutine find_elem_from_nodes(k1,k2,n,elist,nen3v,iep)
 
@@ -278,7 +278,7 @@ c****************************************************************
 
 	end
 
-c****************************************************************
+!****************************************************************
 
 	subroutine sort_elem_list(k,n,elist,nen3v)
 
@@ -705,8 +705,7 @@ c****************************************************************
 	    if( bwrite ) then
 	      write(6,*) '    fixing kant list:    ',k,ipext(k),nn,ne
 	    end if
-	    call fix_kant(k,nkn,nn,ne
-     +			,node_list(:,k),elem_list(:,k),kant)
+	    call fix_kant( k, nkn, nn, ne ,node_list(:,k), elem_list(:,k), kant )
 	  end if
 	end do
 	
@@ -997,42 +996,42 @@ c****************************************************************
 
         subroutine mklenk(nlkddi,nkn,nel,nen3v,ilinkv,lenkv)
 
-c sets up vector with element links and a pointer to it
-c
-c only array nen3v is needed, no aux array is needed
-c
-c ilinkv    pointer to links
-c lenkv     link to element numbers
-c
-c number of links of node n : nl = ilinkv(n+1)-ilinkv(n)
-c links of node n           : ( lenkv ( ilinkv(n)+i ), i=1,nl )
+! sets up vector with element links and a pointer to it
+!
+! only array nen3v is needed, no aux array is needed
+!
+! ilinkv    pointer to links
+! lenkv     link to element numbers
+!
+! number of links of node n : nl = ilinkv(n+1)-ilinkv(n)
+! links of node n           : ( lenkv ( ilinkv(n)+i ), i=1,nl )
 
         implicit none
 
-c arguments
+! arguments
         integer nlkddi
         integer nkn
         integer nel
         integer nen3v(3,nel)
         integer ilinkv(nkn+1)
         integer lenkv(*)
-c local
+! local
         logical binside
         integer nloop
         integer ie,i,n,k
         integer ip,ip0,ip1,ipe
         integer ie0,ie1,k0,k1
         integer nfill
-c functions
+! functions
         integer knext,kbhnd
 	integer ipext,ieext
 
 	ip = 0
 	ip1 = 0
 
-c-------------------------------------------------------------------
-c first the total number of elements (links) for each node is established
-c-------------------------------------------------------------------
+!-------------------------------------------------------------------
+! first the total number of elements (links) for each node is established
+!-------------------------------------------------------------------
 
         do k=1,nkn
           ilinkv(k)=1           !one more link -> will be corrected later
@@ -1045,9 +1044,9 @@ c-------------------------------------------------------------------
           end do
         end do
 
-c-------------------------------------------------------------------
-c now create pointer into array
-c-------------------------------------------------------------------
+!-------------------------------------------------------------------
+! now create pointer into array
+!-------------------------------------------------------------------
 
         n=0
         do k=1,nkn
@@ -1059,9 +1058,9 @@ c-------------------------------------------------------------------
 
         if( n .gt. nlkddi ) goto 98
 
-c-------------------------------------------------------------------
-c now enter the element numbers of the links
-c-------------------------------------------------------------------
+!-------------------------------------------------------------------
+! now enter the element numbers of the links
+!-------------------------------------------------------------------
 
         do i=1,ilinkv(nkn+1)
           lenkv(i)=0
@@ -1081,18 +1080,18 @@ c-------------------------------------------------------------------
           end do
         end do
 
-c-------------------------------------------------------------------
-c sort element entries
-c-------------------------------------------------------------------
+!-------------------------------------------------------------------
+! sort element entries
+!-------------------------------------------------------------------
 
         do k=1,nkn
 
           ip0=ilinkv(k)+1
           ip1=ilinkv(k+1)
 
-c         ----------------------------------------------------------
-c         if k is boundary node, find first element (go clockwise)
-c         ----------------------------------------------------------
+!         ----------------------------------------------------------
+!         if k is boundary node, find first element (go clockwise)
+!         ----------------------------------------------------------
 
           binside = .true.
           nloop = 0
@@ -1111,9 +1110,9 @@ c         ----------------------------------------------------------
             nloop = nloop + 1
           end do
 
-c         --------------------------------------------------------
-c         at ipe is first element --> now swap
-c         --------------------------------------------------------
+!         --------------------------------------------------------
+!         at ipe is first element --> now swap
+!         --------------------------------------------------------
 
           if( .not. binside ) then      !boundary element
             ie=lenkv(ip0)
@@ -1121,9 +1120,9 @@ c         --------------------------------------------------------
             lenkv(ipe)=ie
           end if
 
-c         ----------------------------------------------------------
-c         sort next elements - anti-clockwise sense
-c         ----------------------------------------------------------
+!         ----------------------------------------------------------
+!         sort next elements - anti-clockwise sense
+!         ----------------------------------------------------------
 
           do while(ip0.le.ip1-1.and.lenkv(ip0).ne.0)
             k1=kbhnd(k,lenkv(ip0))
@@ -1145,13 +1144,13 @@ c         ----------------------------------------------------------
 
         end do  !loop over all nodes
 
-c-------------------------------------------------------------------
-c compact structure of non boundary nodes
-c
-c for elements we could theoretically compact all entries,
-c but we want to reuse ilinkv also for the node pointer,
-c and therefore we need one more entry for boundary nodes
-c-------------------------------------------------------------------
+!-------------------------------------------------------------------
+! compact structure of non boundary nodes
+!
+! for elements we could theoretically compact all entries,
+! but we want to reuse ilinkv also for the node pointer,
+! and therefore we need one more entry for boundary nodes
+!-------------------------------------------------------------------
 
         nfill = 0
 
@@ -1177,15 +1176,15 @@ c-------------------------------------------------------------------
 
         ilinkv(nkn+1) = nfill
 
-c-------------------------------------------------------------------
-c check structure
-c-------------------------------------------------------------------
+!-------------------------------------------------------------------
+! check structure
+!-------------------------------------------------------------------
 
 	call checklenk(nkn,ilinkv,lenkv,nen3v)
 
-c-------------------------------------------------------------------
-c end of routine
-c-------------------------------------------------------------------
+!-------------------------------------------------------------------
+! end of routine
+!-------------------------------------------------------------------
 
         return
    97   continue
@@ -1207,22 +1206,22 @@ c-------------------------------------------------------------------
         stop 'error stop mklenk : internal error (1)'
         end
 
-c****************************************************************
+!****************************************************************
 
         subroutine checklenk(nkn,ilinkv,lenkv,nen3v)
 
-c checks structure of lenkv
+! checks structure of lenkv
 
 	use link_structure
 
         implicit none
 
-c arguments
+! arguments
         integer nkn
         integer ilinkv(nkn+1)
         integer lenkv(*)
 	integer nen3v(3,*)
-c local
+! local
 	integer nbnd,nnull
 	integer k,k0,k1,ie,ie0,ie1
 	integer ip,ip0,ip1
@@ -1238,9 +1237,9 @@ c local
         nbnd = 0        !total number of boundary nodes
         nnull = 0       !total number of 0 entries
 
-c-------------------------------------------------------------------
-c loop over nodes
-c-------------------------------------------------------------------
+!-------------------------------------------------------------------
+! loop over nodes
+!-------------------------------------------------------------------
 
         do k=1,nkn
 
@@ -1305,31 +1304,31 @@ c-------------------------------------------------------------------
 	  stop 'error stop checklenk: internal errors'
 	end if
 
-c-------------------------------------------------------------------
-c end of routine
-c-------------------------------------------------------------------
+!-------------------------------------------------------------------
+! end of routine
+!-------------------------------------------------------------------
 
         end
 
-c****************************************************************
-c****************************************************************
-c****************************************************************
+!****************************************************************
+!****************************************************************
+!****************************************************************
 
         subroutine mklenkii(nlkddi,nkn,nel,nen3v,ilinkv,lenkv,lenkiiv)
 
-c sets up vector lenkiiv
-c
-c only array nen3v is needed, no aux array is needed
-c
-c ilinkv    pointer to links
-c lenkv     link to element numbers
-c
-c number of links of node n : nl = ilinkv(n+1)-ilinkv(n)
-c links of node n           : ( lenkv ( ilinkv(n)+i ), i=1,nl )
+! sets up vector lenkiiv
+!
+! only array nen3v is needed, no aux array is needed
+!
+! ilinkv    pointer to links
+! lenkv     link to element numbers
+!
+! number of links of node n : nl = ilinkv(n+1)-ilinkv(n)
+! links of node n           : ( lenkv ( ilinkv(n)+i ), i=1,nl )
 
         implicit none
 
-c arguments
+! arguments
         integer nlkddi
         integer nkn
         integer nel
@@ -1337,12 +1336,12 @@ c arguments
         integer ilinkv(nkn+1)
         integer lenkv(*)
         integer lenkiiv(*)
-c local
+! local
         integer ie,i,n,k,ii,ibase
 
-c-------------------------------------------------------------------
-c compute the vertex number for elements connected to node k
-c-------------------------------------------------------------------
+!-------------------------------------------------------------------
+! compute the vertex number for elements connected to node k
+!-------------------------------------------------------------------
 
 	do i=1,nlkddi
 	  lenkiiv(i) = 0
@@ -1362,9 +1361,9 @@ c-------------------------------------------------------------------
 	  end do
         end do
 
-c-------------------------------------------------------------------
-c end of routine
-c-------------------------------------------------------------------
+!-------------------------------------------------------------------
+! end of routine
+!-------------------------------------------------------------------
 
 	return
    99	continue
@@ -1373,38 +1372,38 @@ c-------------------------------------------------------------------
 	stop 'error stop mklenkii: internal error (1)'
 	end
 
-c****************************************************************
-c****************************************************************
-c****************************************************************
+!****************************************************************
+!****************************************************************
+!****************************************************************
 
         subroutine mklink(nkn,ilinkv,lenkv,linkv)
 
-c sets up vector with node links
-c
-c ilinkv and lenkv must have already been set up
-c
-c only array nen3v is needed, no aux array is needed
-c
-c ilinkv    pointer to links
-c lenkv     link to element numbers
-c linkv     link to node numbers
+! sets up vector with node links
+!
+! ilinkv and lenkv must have already been set up
+!
+! only array nen3v is needed, no aux array is needed
+!
+! ilinkv    pointer to links
+! lenkv     link to element numbers
+! linkv     link to node numbers
 
         implicit none
 
-c arguments
+! arguments
         integer nkn
         integer ilinkv(nkn+1)
         integer lenkv(*)
         integer linkv(*)
-c local
+! local
         integer ie,k
         integer ip,ip0,ip1
-c functions
+! functions
         integer knext,kbhnd
 
-c-------------------------------------------------------------------
-c loop over nodes
-c-------------------------------------------------------------------
+!-------------------------------------------------------------------
+! loop over nodes
+!-------------------------------------------------------------------
 
         do k=1,nkn
 
@@ -1417,9 +1416,9 @@ c-------------------------------------------------------------------
             linkv(ip) = knext(k,ie)
           end do
 
-c         ----------------------------------------------------------
-c         if boundary node insert last node
-c         ----------------------------------------------------------
+!         ----------------------------------------------------------
+!         if boundary node insert last node
+!         ----------------------------------------------------------
 
           ip=ilinkv(k+1)
           if( lenkv(ip) .eq. 0 ) then
@@ -1428,33 +1427,33 @@ c         ----------------------------------------------------------
 
         end do
 
-c-------------------------------------------------------------------
-c check structure
-c-------------------------------------------------------------------
+!-------------------------------------------------------------------
+! check structure
+!-------------------------------------------------------------------
 
 	call checklink(nkn,ilinkv,linkv)
 
-c-------------------------------------------------------------------
-c end of routine
-c-------------------------------------------------------------------
+!-------------------------------------------------------------------
+! end of routine
+!-------------------------------------------------------------------
 
         end
 
-c****************************************************************
+!****************************************************************
 
         subroutine checklink(nkn,ilinkv,linkv)
 
-c checks structure of lenkv
+! checks structure of lenkv
 
 	use link_structure
 
         implicit none
 
-c arguments
+! arguments
         integer nkn
         integer ilinkv(nkn+1)
         integer linkv(*)
-c local
+! local
 	integer k,k1,i
 	integer ip,ip0,ip1
 	integer ipk,ipk0,ipk1
@@ -1465,9 +1464,9 @@ c local
 	ipk0 = 0
 	ipk1 = 0
 
-c-------------------------------------------------------------------
-c loop over nodes
-c-------------------------------------------------------------------
+!-------------------------------------------------------------------
+! loop over nodes
+!-------------------------------------------------------------------
 
         do k=1,nkn
 
@@ -1511,30 +1510,30 @@ c-------------------------------------------------------------------
           write(6,*) 'checklink: ',nkn
 	end if
 
-c-------------------------------------------------------------------
-c end of routine
-c-------------------------------------------------------------------
+!-------------------------------------------------------------------
+! end of routine
+!-------------------------------------------------------------------
 
         end
 
-c****************************************************************
-c****************************************************************
-c****************************************************************
+!****************************************************************
+!****************************************************************
+!****************************************************************
 
         subroutine mkkant(nkn,ilinkv,lenkv,linkv,kantv,iboundv)
 
-c makes vector kantv
+! makes vector kantv
 
         implicit none
 
-c arguments
+! arguments
         integer nkn
         integer ilinkv(nkn+1)
         integer lenkv(*)
         integer linkv(*)
         integer kantv(2,nkn)
         integer iboundv(nkn)
-c local
+! local
 	integer k
 	integer ip,ip0,ip1
 
@@ -1551,32 +1550,32 @@ c local
           end if
         end do
 
-c-------------------------------------------------------------------
-c check structure
-c-------------------------------------------------------------------
+!-------------------------------------------------------------------
+! check structure
+!-------------------------------------------------------------------
 
 	call checkkant(nkn,kantv)
 
-c-------------------------------------------------------------------
-c end of routine
-c-------------------------------------------------------------------
+!-------------------------------------------------------------------
+! end of routine
+!-------------------------------------------------------------------
 
         end
 
-c****************************************************************
+!****************************************************************
 
         subroutine checkkant(nkn,kantv)
 
-c checks structure of kantv
+! checks structure of kantv
 
 	use link_structure
 
         implicit none
 
-c arguments
+! arguments
         integer nkn
         integer kantv(2,nkn)
-c local
+! local
 	integer k,k1,k2
 	integer nbnd,nint,nmpi
 
@@ -1586,9 +1585,9 @@ c local
 	nint = 0
 	nmpi = 0
 
-c-------------------------------------------------------------------
-c loop over nodes
-c-------------------------------------------------------------------
+!-------------------------------------------------------------------
+! loop over nodes
+!-------------------------------------------------------------------
 
         do k=1,nkn
 	  k1 = kantv(1,k)
@@ -1624,37 +1623,37 @@ c-------------------------------------------------------------------
 	  write(6,*) 'checkkant: ',nkn,nint,nbnd,nmpi
 	end if
 
-c-------------------------------------------------------------------
-c end of routine
-c-------------------------------------------------------------------
+!-------------------------------------------------------------------
+! end of routine
+!-------------------------------------------------------------------
 
         end
 
-c****************************************************************
-c****************************************************************
-c****************************************************************
+!****************************************************************
+!****************************************************************
+!****************************************************************
 
         subroutine mkielt(nkn,nel,ilinkv,lenkv,linkv,nen3v,ieltv)
 
-c makes vector ieltv (without open boundary nodes)
+! makes vector ieltv (without open boundary nodes)
 
         implicit none
 
-c arguments
+! arguments
         integer nkn,nel
         integer ilinkv(nkn+1)
         integer lenkv(*)
         integer linkv(*)
         integer nen3v(3,nel)
         integer ieltv(3,nel)
-c local
+! local
 	integer k,ie,ii,next
 	integer ip,ip0,ip1
 	integer isnext
 
-c-------------------------------------------------------------------
-c initialize
-c-------------------------------------------------------------------
+!-------------------------------------------------------------------
+! initialize
+!-------------------------------------------------------------------
 
         do ie=1,nel
           do ii=1,3
@@ -1662,9 +1661,9 @@ c-------------------------------------------------------------------
           end do
         end do
 
-c-------------------------------------------------------------------
-c loop over links
-c-------------------------------------------------------------------
+!-------------------------------------------------------------------
+! loop over links
+!-------------------------------------------------------------------
 
         do k=1,nkn
           ip0=ilinkv(k)+1
@@ -1676,9 +1675,9 @@ c-------------------------------------------------------------------
             ieltv(next,ie)=lenkv(ip+1)
           end do
 
-c	  -------------------------------------------------------------------
-c	  last element
-c	  -------------------------------------------------------------------
+!	  -------------------------------------------------------------------
+!	  last element
+!	  -------------------------------------------------------------------
 
           ie=lenkv(ip1+1)
           if(ie.gt.0) then                              !is internal node
@@ -1688,51 +1687,51 @@ c	  -------------------------------------------------------------------
 
         end do
 
-c-------------------------------------------------------------------
-c check structure
-c-------------------------------------------------------------------
+!-------------------------------------------------------------------
+! check structure
+!-------------------------------------------------------------------
 
 	call checkielt(nel,ieltv,nen3v)
 
-c-------------------------------------------------------------------
-c end of routine
-c-------------------------------------------------------------------
+!-------------------------------------------------------------------
+! end of routine
+!-------------------------------------------------------------------
 
 	end
 
-c****************************************************************
+!****************************************************************
 
         subroutine checkielt(nel,ieltv,nen3v)
 
-c checks structure of ieltv
+! checks structure of ieltv
 
 	use link_structure
 
         implicit none
 
-c arguments
+! arguments
         integer nel
         integer ieltv(3,nel)
         integer nen3v(3,nel)
-c local
+! local
 	integer k,ie,ii
 	integer kn,inn,ien,ienn
         integer nbnd,nobnd,nintern,nmpi
 
 	integer isnext,ksnext,ksthis
 
-c-------------------------------------------------------------------
-c initialize
-c-------------------------------------------------------------------
+!-------------------------------------------------------------------
+! initialize
+!-------------------------------------------------------------------
 
         nbnd = 0
         nobnd = 0
 	nmpi = 0		!other domain
         nintern = 0
 
-c-------------------------------------------------------------------
-c loop over elements
-c-------------------------------------------------------------------
+!-------------------------------------------------------------------
+! loop over elements
+!-------------------------------------------------------------------
 
         do ie=1,nel
           do ii=1,3
@@ -1766,9 +1765,9 @@ c-------------------------------------------------------------------
           write(6,*) '  total sides =         ',nintern+nbnd+nobnd+nmpi
 	end if
 
-c-------------------------------------------------------------------
-c end of routine
-c-------------------------------------------------------------------
+!-------------------------------------------------------------------
+! end of routine
+!-------------------------------------------------------------------
 
         return
    98   continue
@@ -1792,27 +1791,27 @@ c-------------------------------------------------------------------
         if(bstop) stop 'error stop checkielt: internal error (2)'
 	end
 
-c****************************************************************
+!****************************************************************
 
         subroutine update_ielt(nel,ibound,ieltv,nen3v)
 
-c updates vector ieltv with open boundary nodes
+! updates vector ieltv with open boundary nodes
 
         implicit none
 
-c arguments
+! arguments
         integer nel
         integer ibound(*)	! >0 => open boundary node
         integer ieltv(3,nel)
         integer nen3v(3,nel)
-c local
+! local
 	integer k,ie,ii,i
 	integer ip,ip0,ip1
 	integer knext,ibhnd,kthis
 
-c-------------------------------------------------------------------
-c loop over elements
-c-------------------------------------------------------------------
+!-------------------------------------------------------------------
+! loop over elements
+!-------------------------------------------------------------------
 
         do ie=1,nel
           do ii=1,3
@@ -1824,19 +1823,19 @@ c-------------------------------------------------------------------
           end do
         end do
 
-c-------------------------------------------------------------------
-c check structure
-c-------------------------------------------------------------------
+!-------------------------------------------------------------------
+! check structure
+!-------------------------------------------------------------------
 
 	call checkielt(nel,ieltv,nen3v)
 
-c-------------------------------------------------------------------
-c end of routine
-c-------------------------------------------------------------------
+!-------------------------------------------------------------------
+! end of routine
+!-------------------------------------------------------------------
 
 	end
 
-c****************************************************************
-c****************************************************************
-c****************************************************************
+!****************************************************************
+!****************************************************************
+!****************************************************************
 

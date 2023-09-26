@@ -23,62 +23,62 @@
 !
 !--------------------------------------------------------------------------
 
-c initialization routines
-c
-c contents :
-c
-c revision log :
-c
-c 31.05.1997	ggu	unnecessary routines deleted
-c 27.06.1997	ggu	bas routines into own file
-c 02.04.2009	ggu	error messages changed
-c 23.03.2010	ggu	changed v6.1.1
-c 12.01.2011	ggu	debug routine introduced (basin_test)
-c 27.01.2011	ggu	changed VERS_6_1_17
-c 01.03.2011	ggu	changed VERS_6_1_20
-c 18.06.2014	ggu	changed VERS_6_1_77
-c 23.10.2014	ggu	introduced ftype and nvers = 4
-c 30.10.2014	ggu	changed VERS_7_0_4
-c 23.12.2014	ggu	changed VERS_7_0_11
-c 04.01.2015	ggu	new routine basin_get_par()
-c 26.02.2015	ggu	changed VERS_7_1_5
-c 31.03.2015	ggu	set iarnv on read
-c 01.04.2015	ggu	changed VERS_7_1_7
-c 25.05.2015	ggu	module introduced
-c 05.06.2015	ggu	changed VERS_7_1_12
-c 10.07.2015	ggu	changed VERS_7_1_50
-c 17.07.2015	ggu	changed VERS_7_1_53
-c 17.07.2015	ggu	changed VERS_7_1_80
-c 20.07.2015	ggu	changed VERS_7_1_81
-c 24.07.2015	ggu	changed VERS_7_1_82
-c 30.07.2015	ggu	changed VERS_7_1_83
-c 02.10.2015	ggu	in basin_open_file eliminated double read (bug)
-c 02.10.2015	ggu	new routines is_depth_unique(), estimate_ngr()
-c 10.10.2015	ggu	changed VERS_7_3_2
-c 12.10.2015	ggu	changed VERS_7_3_3
-c 19.10.2015	ggu	changed VERS_7_3_6
-c 01.05.2016	ggu	new routines basin_has_basin()
-c 20.05.2016	ggu	estimate_ngr() returns exact ngr
-c 10.06.2016	ggu	new routine for inserting regular grid
-c 14.06.2016	ggu	changed VERS_7_5_14
-c 23.09.2016	ggu	new routines to check if basin has been read
-c 30.09.2016	ggu	changed VERS_7_5_18
-c 13.02.2017	ggu	changed VERS_7_5_23
-c 09.05.2017	ggu	changed VERS_7_5_26
-c 25.05.2017	ggu	changed VERS_7_5_28
-c 13.06.2017	ggu	changed VERS_7_5_29
-c 11.07.2017	ggu	changed VERS_7_5_30
-c 14.11.2017	ggu	changed VERS_7_5_36
-c 24.01.2018	ggu	changed VERS_7_5_41
-c 22.02.2018	ggu	changed VERS_7_5_42
-c 16.02.2019	ggu	changed VERS_7_5_60
-c 18.05.2020	ggu	new routine basin_info_partition()
-c 17.04.2021	ggu	some better error handling
-c 16.06.2022    ggu     bug fix in bas_get_special_coordinates() -> np
-c
-c***********************************************************
-c***********************************************************
-c***********************************************************
+! initialization routines
+!
+! contents :
+!
+! revision log :
+!
+! 31.05.1997	ggu	unnecessary routines deleted
+! 27.06.1997	ggu	bas routines into own file
+! 02.04.2009	ggu	error messages changed
+! 23.03.2010	ggu	changed v6.1.1
+! 12.01.2011	ggu	debug routine introduced (basin_test)
+! 27.01.2011	ggu	changed VERS_6_1_17
+! 01.03.2011	ggu	changed VERS_6_1_20
+! 18.06.2014	ggu	changed VERS_6_1_77
+! 23.10.2014	ggu	introduced ftype and nvers = 4
+! 30.10.2014	ggu	changed VERS_7_0_4
+! 23.12.2014	ggu	changed VERS_7_0_11
+! 04.01.2015	ggu	new routine basin_get_par()
+! 26.02.2015	ggu	changed VERS_7_1_5
+! 31.03.2015	ggu	set iarnv on read
+! 01.04.2015	ggu	changed VERS_7_1_7
+! 25.05.2015	ggu	module introduced
+! 05.06.2015	ggu	changed VERS_7_1_12
+! 10.07.2015	ggu	changed VERS_7_1_50
+! 17.07.2015	ggu	changed VERS_7_1_53
+! 17.07.2015	ggu	changed VERS_7_1_80
+! 20.07.2015	ggu	changed VERS_7_1_81
+! 24.07.2015	ggu	changed VERS_7_1_82
+! 30.07.2015	ggu	changed VERS_7_1_83
+! 02.10.2015	ggu	in basin_open_file eliminated double read (bug)
+! 02.10.2015	ggu	new routines is_depth_unique(), estimate_ngr()
+! 10.10.2015	ggu	changed VERS_7_3_2
+! 12.10.2015	ggu	changed VERS_7_3_3
+! 19.10.2015	ggu	changed VERS_7_3_6
+! 01.05.2016	ggu	new routines basin_has_basin()
+! 20.05.2016	ggu	estimate_ngr() returns exact ngr
+! 10.06.2016	ggu	new routine for inserting regular grid
+! 14.06.2016	ggu	changed VERS_7_5_14
+! 23.09.2016	ggu	new routines to check if basin has been read
+! 30.09.2016	ggu	changed VERS_7_5_18
+! 13.02.2017	ggu	changed VERS_7_5_23
+! 09.05.2017	ggu	changed VERS_7_5_26
+! 25.05.2017	ggu	changed VERS_7_5_28
+! 13.06.2017	ggu	changed VERS_7_5_29
+! 11.07.2017	ggu	changed VERS_7_5_30
+! 14.11.2017	ggu	changed VERS_7_5_36
+! 24.01.2018	ggu	changed VERS_7_5_41
+! 22.02.2018	ggu	changed VERS_7_5_42
+! 16.02.2019	ggu	changed VERS_7_5_60
+! 18.05.2020	ggu	new routine basin_info_partition()
+! 17.04.2021	ggu	some better error handling
+! 16.06.2022    ggu     bug fix in bas_get_special_coordinates() -> np
+!
+!***********************************************************
+!***********************************************************
+!***********************************************************
 
 !==================================================================
         module basin
@@ -191,7 +191,7 @@ c***********************************************************
 
 	end subroutine basin_init
 
-c***********************************************************
+!***********************************************************
 
 	function basin_open_file(file,status)
 
@@ -217,7 +217,7 @@ c***********************************************************
 
 	end function basin_open_file
 
-c***********************************************************
+!***********************************************************
 
 	subroutine basin_read_by_file(file)
 
@@ -242,7 +242,7 @@ c***********************************************************
 
 	end subroutine basin_read_by_file
 
-c***********************************************************
+!***********************************************************
 
 	subroutine basin_read_by_unit(iunit)
 
@@ -260,7 +260,7 @@ c***********************************************************
 
 	end subroutine basin_read_by_unit
 
-c***********************************************************
+!***********************************************************
 
 	subroutine basin_write_by_file(file)
 
@@ -283,7 +283,7 @@ c***********************************************************
 
 	end subroutine basin_write_by_file
 
-c***********************************************************
+!***********************************************************
 
 	subroutine basin_write_by_unit(iunit)
 
@@ -295,7 +295,7 @@ c***********************************************************
 
 	end subroutine basin_write_by_unit
 
-c***********************************************************
+!***********************************************************
 
 	subroutine basin_set_read_basin(bread)
 
@@ -307,7 +307,7 @@ c***********************************************************
 
 	end subroutine basin_set_read_basin
 
-c***********************************************************
+!***********************************************************
 
 	function basin_has_read_basin()
 
@@ -319,7 +319,7 @@ c***********************************************************
 
 	end function basin_has_read_basin
 
-c***********************************************************
+!***********************************************************
 
 	function basin_has_basin()
 
@@ -331,7 +331,7 @@ c***********************************************************
 
 	end function basin_has_basin
 
-c***********************************************************
+!***********************************************************
 
 	subroutine basin_get_dimension(nk,ne)
 
@@ -344,7 +344,7 @@ c***********************************************************
 
 	end subroutine basin_get_dimension
 
-c***********************************************************
+!***********************************************************
 
 	function basin_is_basin_by_unit(iunit)
 
@@ -359,7 +359,7 @@ c***********************************************************
 
 	end function basin_is_basin_by_unit
 
-c***********************************************************
+!***********************************************************
 
 	function basin_is_basin_by_file(file)
 
@@ -379,13 +379,13 @@ c***********************************************************
 
 	end function basin_is_basin_by_file
 
-c***********************************************************
+!***********************************************************
 
 	subroutine basin_read_internal(nb,nknddi,nelddi)
 
-c unformatted read from lagoon file
-c
-c iunit		unit number of file to be read
+! unformatted read from lagoon file
+!
+! iunit		unit number of file to be read
 
 	integer nb,nknddi,nelddi
 
@@ -438,13 +438,13 @@ c iunit		unit number of file to be read
 	stop 'error stop basin_read_internal: dimension error'
 	end subroutine basin_read_internal
 
-c***********************************************************
+!***********************************************************
 
 	subroutine basin_write_internal(nb)
 
-c unformatted write to lagoon file
-c
-c nb		unit number for write
+! unformatted write to lagoon file
+!
+! nb		unit number for write
 
 	integer nb
 
@@ -481,7 +481,7 @@ c nb		unit number for write
 	stop 'error stop : basin_write_internal'
 	end subroutine basin_write_internal
 
-c***********************************************************
+!***********************************************************
 
 	subroutine basin_get_part_info(nn,ne)
 
@@ -492,7 +492,7 @@ c***********************************************************
 
 	end subroutine basin_get_part_info
 
-c***********************************************************
+!***********************************************************
 
 	subroutine basin_get_partition(nn,ne,nnp,nep,area_node,area_elem)
 
@@ -508,7 +508,7 @@ c***********************************************************
 
 	end subroutine basin_get_partition
 
-c***********************************************************
+!***********************************************************
 
 	subroutine basin_set_partition(nn,ne,nnp,nep,area_node,area_elem)
 
@@ -526,7 +526,7 @@ c***********************************************************
 
 	end subroutine basin_set_partition
 
-c***********************************************************
+!***********************************************************
 
         subroutine basin_check(text)
 
@@ -558,13 +558,13 @@ c***********************************************************
 
         end subroutine basin_check
 
-c***********************************************************
+!***********************************************************
 
 	subroutine basin_test(nb,nvers)
 
-c tests if file is BAS file
-c
-c nvers > 0 if file is BAS file
+! tests if file is BAS file
+!
+! nvers > 0 if file is BAS file
 
 	implicit none
 
@@ -577,9 +577,9 @@ c nvers > 0 if file is BAS file
 
 	if(nb.le.0) return
 
-c-----------------------------------------------------------
-c try new format with ftype information
-c-----------------------------------------------------------
+!-----------------------------------------------------------
+! try new format with ftype information
+!-----------------------------------------------------------
 
 	rewind(nb)
 	read(nb,err=1,end=1) ntype,nversa
@@ -589,9 +589,9 @@ c-----------------------------------------------------------
 	nvers = nversa
 	return
 
-c-----------------------------------------------------------
-c try old format without ftype information - nvers must be 3
-c-----------------------------------------------------------
+!-----------------------------------------------------------
+! try old format without ftype information - nvers must be 3
+!-----------------------------------------------------------
 
     1	continue
 	rewind(nb)
@@ -601,21 +601,21 @@ c-----------------------------------------------------------
 	nvers = nversa
 	return
 
-c-----------------------------------------------------------
-c definitely no BAS file
-c-----------------------------------------------------------
+!-----------------------------------------------------------
+! definitely no BAS file
+!-----------------------------------------------------------
 
     2	continue
 	return
 	end subroutine
 
-c***********************************************************
+!***********************************************************
 
 	subroutine basin_get_par(nb,nkn,nel,ngr,mbw)
 
-c unformatted read from lagoon file
-c
-c iunit		unit number of file to be read
+! unformatted read from lagoon file
+!
+! iunit		unit number of file to be read
 
 	integer nb
 	integer nkn,nel,ngr,mbw
@@ -648,7 +648,7 @@ c iunit		unit number of file to be read
 
 	end subroutine
 
-c***********************************************************
+!***********************************************************
 
 	subroutine basin_info_partition
 
@@ -705,7 +705,7 @@ c***********************************************************
         end module basin
 !==================================================================
 
-c***********************************************************
+!***********************************************************
 
 	subroutine bas_info
 
@@ -729,7 +729,7 @@ c***********************************************************
 
 	end
 
-c*************************************************
+!*************************************************
 
 	subroutine bas_get_geom(dcor,dirn)
 
@@ -744,7 +744,7 @@ c*************************************************
 
 	end
 
-c*************************************************
+!*************************************************
 
 	subroutine bas_get_para(nkna,nela,ngra,mbwa)
 
@@ -761,7 +761,7 @@ c*************************************************
 
 	end
 
-c*************************************************
+!*************************************************
 
 	subroutine bas_get_minmax(xmin,ymin,xmax,ymax)
 
@@ -787,7 +787,7 @@ c*************************************************
 
 	end
 
-c*************************************************
+!*************************************************
 
         function is_depth_unique()
 
@@ -818,15 +818,15 @@ c*************************************************
 
         end function is_depth_unique
 
-c*************************************************
-c*************************************************
-c*************************************************
+!*************************************************
+!*************************************************
+!*************************************************
 
 	subroutine bas_insert_irregular(nx,ny,xx,yy)
 
 	use basin
 
-c inserts irregular (but structured) basin (boxes) into basin structure
+! inserts irregular (but structured) basin (boxes) into basin structure
 
 	implicit none
 
@@ -867,13 +867,13 @@ c inserts irregular (but structured) basin (boxes) into basin structure
 
 	end
 
-c*************************************************
+!*************************************************
 
 	subroutine bas_insert_regular(regpar)
 
 	use basin
 
-c inserts regular basin (boxes) into basin structure
+! inserts regular basin (boxes) into basin structure
 
 	implicit none
 
@@ -975,13 +975,13 @@ c inserts regular basin (boxes) into basin structure
 
 	end
 
-c*************************************************
-c*************************************************
-c*************************************************
+!*************************************************
+!*************************************************
+!*************************************************
 
         subroutine estimate_ngr(ngrade)
 
-c estimates grade of basin - estimate is exact
+! estimates grade of basin - estimate is exact
 
 	use basin
 
@@ -995,11 +995,11 @@ c estimates grade of basin - estimate is exact
 
 	end
 
-c*************************************************
+!*************************************************
 
         subroutine compute_ng(ngrade,ng)
 
-c computes grade of basin and nuber of grades per node
+! computes grade of basin and nuber of grades per node
 
 	use basin
 
@@ -1064,7 +1064,7 @@ c computes grade of basin and nuber of grades per node
 	stop 'error stop compute_ng: corrupt node index'
         end
 
-c*************************************************
+!*************************************************
 
 	subroutine ng_insert(k1,k2,ng,nkn,ngv)
 
@@ -1092,9 +1092,9 @@ c*************************************************
 
         end
 
-c*************************************************
-c*************************************************
-c*************************************************
+!*************************************************
+!*************************************************
+!*************************************************
 
 	subroutine bas_get_node_coordinates(xp,yp)
 
@@ -1110,7 +1110,7 @@ c*************************************************
 
 	end
 
-c*************************************************
+!*************************************************
 
 	subroutine bas_get_elem_coordinates(xp,yp)
 
@@ -1137,7 +1137,7 @@ c*************************************************
 
         end
 
-c*************************************************
+!*************************************************
 
 	subroutine bas_get_special_coordinates(np,nodes,xp,yp)
 
@@ -1165,5 +1165,5 @@ c*************************************************
 
 	end
 
-c*************************************************
+!*************************************************
 

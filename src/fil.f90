@@ -24,54 +24,54 @@
 !
 !--------------------------------------------------------------------------
 
-c file opening routines
-c
-c contents :
-c
-c function ifileq(iunit,quest,format,status)	asks for filename and opens file
-c function ifileo(iunit,file,format,status)	opens file
-c
-c subroutine useunit(iumax)                     writes usage of units and file
-c subroutine filna(iunit,name)			inquires file name of iunit
-c function filex(name)				inquires if file name exists
-c function ifilun(name)				inquires unit of file name
-c subroutine filext(file,ext)			appends file extension
-c
-c revision log :
-c
-c 02.05.1998	ggu	new format binary for ifileo
-c 07.05.1998	ggu	new subroutine filext
-c 21.05.1998	ggu	unit 0 is ok in ifileo()
-c 29.06.1998	ggu	filna revisited
-c 10.12.2001	ggu	filna still revisited, new routine useunit
-c 31.03.2008	ggu	in ifileo remember last unit number
-c 09.01.2009	ggu	re-formatted, safeguard units 5 and 6
-c 23.03.2010	ggu	changed v6.1.1
-c 26.03.2012	ggu	if opening already open file -> better error message
-c 25.10.2012	ggu	changed VERS_6_1_59
-c 28.04.2014	ggu	if iunit < 0 -> does not complain
-c 30.10.2014	ggu	changed VERS_7_0_4
-c 30.04.2015	ggu	changed VERS_7_1_9
-c 26.04.2018	ggu	changed VERS_7_5_46
-c 16.10.2018	ggu	changed VERS_7_5_50
-c 16.02.2019	ggu	changed VERS_7_5_60
-c 03.03.2020	ggu	better error messaging, if error return -1
-c 30.03.2021	ggu	simplified find_unit()
-c 20.04.2021	ggu	new routines for flushing and syncing
-c 21.04.2021	clr	calling compiler-specific file descriptor function
-c
-c********************************************************
+! file opening routines
+!
+! contents :
+!
+! function ifileq(iunit,quest,format,status)	asks for filename and opens file
+! function ifileo(iunit,file,format,status)	opens file
+!
+! subroutine useunit(iumax)                     writes usage of units and file
+! subroutine filna(iunit,name)			inquires file name of iunit
+! function filex(name)				inquires if file name exists
+! function ifilun(name)				inquires unit of file name
+! subroutine filext(file,ext)			appends file extension
+!
+! revision log :
+!
+! 02.05.1998	ggu	new format binary for ifileo
+! 07.05.1998	ggu	new subroutine filext
+! 21.05.1998	ggu	unit 0 is ok in ifileo()
+! 29.06.1998	ggu	filna revisited
+! 10.12.2001	ggu	filna still revisited, new routine useunit
+! 31.03.2008	ggu	in ifileo remember last unit number
+! 09.01.2009	ggu	re-formatted, safeguard units 5 and 6
+! 23.03.2010	ggu	changed v6.1.1
+! 26.03.2012	ggu	if opening already open file -> better error message
+! 25.10.2012	ggu	changed VERS_6_1_59
+! 28.04.2014	ggu	if iunit < 0 -> does not complain
+! 30.10.2014	ggu	changed VERS_7_0_4
+! 30.04.2015	ggu	changed VERS_7_1_9
+! 26.04.2018	ggu	changed VERS_7_5_46
+! 16.10.2018	ggu	changed VERS_7_5_50
+! 16.02.2019	ggu	changed VERS_7_5_60
+! 03.03.2020	ggu	better error messaging, if error return -1
+! 30.03.2021	ggu	simplified find_unit()
+! 20.04.2021	ggu	new routines for flushing and syncing
+! 21.04.2021	clr	calling compiler-specific file descriptor function
+!
+!********************************************************
 
 	function ifileq(iunit,quest,format,status)
 
-c asks for filename and opens file
-c
-c iunit		unit number to be opened
-c quest		text to be written to terminal
-c format	f*ormatted or u*nformatted
-c status	o*ld, n*ew, s*cratch  or u*nknown
-c ifileq	effective unit number the file is opened
-c		-1 if no file is opened, 0 if no name is given
+! asks for filename and opens file
+!
+! iunit		unit number to be opened
+! quest		text to be written to terminal
+! format	f*ormatted or u*nformatted
+! status	o*ld, n*ew, s*cratch  or u*nknown
+! ifileq	effective unit number the file is opened
+!		-1 if no file is opened, 0 if no name is given
 
 	implicit none
 
@@ -95,24 +95,24 @@ c		-1 if no file is opened, 0 if no name is given
 
 	end
 
-c***************************************************************
+!***************************************************************
 
 	function ifileo(iunit,file,format,status)
 
-c opens file
-c
-c iunit		unit number to be opened
-c file		file name to be opened
-c format	f*ormatted, u*nformatted or b*inary
-c status	o*ld, n*ew, s*cratch  or u*nknown
-c ifileo	effective unit number the file is opened
-c
-c routine tries to open file at iunit. If this is not possible
-c ...higher unit numbers are tested and the file is eventually
-c ...opened at one of these units. The effective unit number
-c ...is passed back in ifileo. -1 is returned if no file is opened.
-c use iunit <= 0 to use standard unit number
-c iunit < 0 does not complain if not existing
+! opens file
+!
+! iunit		unit number to be opened
+! file		file name to be opened
+! format	f*ormatted, u*nformatted or b*inary
+! status	o*ld, n*ew, s*cratch  or u*nknown
+! ifileo	effective unit number the file is opened
+!
+! routine tries to open file at iunit. If this is not possible
+! ...higher unit numbers are tested and the file is eventually
+! ...opened at one of these units. The effective unit number
+! ...is passed back in ifileo. -1 is returned if no file is opened.
+! use iunit <= 0 to use standard unit number
+! iunit < 0 does not complain if not existing
 
 	implicit none
 
@@ -132,18 +132,18 @@ c iunit < 0 does not complain if not existing
         save iustd
         data iustd / 20 /
 
-c----------------------------------------------------------------
-c initialize basic things
-c----------------------------------------------------------------
+!----------------------------------------------------------------
+! initialize basic things
+!----------------------------------------------------------------
 
 	ifileo=-1
 	iu=iunit
 	bquiet = ( iu < 0 )		!if unit negative do not complain
 	if( iu .le. 0 ) iu = iustd
 
-c----------------------------------------------------------------
-c check key words
-c----------------------------------------------------------------
+!----------------------------------------------------------------
+! check key words
+!----------------------------------------------------------------
 
 	cf=format(1:1)
 	cs=status(1:1)
@@ -156,7 +156,7 @@ c----------------------------------------------------------------
 		form='unformatted'
 	else if( cf .eq. 'b' .or. cf .eq. 'B' ) then
 		form='unformatted'
-clahey#		access = 'transparent'
+!lahey#		access = 'transparent'
 	else
 		write(6,*) 'format keyword not recognized :',format
 		return
@@ -165,9 +165,9 @@ clahey#		access = 'transparent'
 	if( cs .eq. 'o' .or. cs .eq. 'O' ) then
 		stat='old'
 	else if( cs .eq. 'n' .or. cs .eq. 'N' ) then
-c for VAX      change to	stat='new'
-c for DOS/UNIX change to	stat='unknown'
-c		stat='new'
+! for VAX      change to	stat='new'
+! for DOS/UNIX change to	stat='unknown'
+!		stat='new'
 		stat='unknown'
 	else if( cs .eq. 's' .or. cs .eq. 'S' ) then
 		stat='scratch'
@@ -178,9 +178,9 @@ c		stat='new'
 		return
 	end if
 
-c----------------------------------------------------------------
-c check if file exists (in case of status=old)
-c----------------------------------------------------------------
+!----------------------------------------------------------------
+! check if file exists (in case of status=old)
+!----------------------------------------------------------------
 
 	inquire(file=file,exist=ex)
 	if(.not.ex.and.stat.eq.'old') then
@@ -190,31 +190,24 @@ c----------------------------------------------------------------
 	  return
 	end if
 
-c----------------------------------------------------------------
-c find unit where to open file
-c----------------------------------------------------------------
+!----------------------------------------------------------------
+! find unit where to open file
+!----------------------------------------------------------------
 
 	call find_unit(iu)
 	found=iu.gt.0
 
-c----------------------------------------------------------------
-c open file and check error
-c----------------------------------------------------------------
+!----------------------------------------------------------------
+! open file and check error
+!----------------------------------------------------------------
 
 	if(found) then
 	  !write(6,*) iu,file,form,stat,access
-          open(	 unit=iu
-     +			,file=file
-     +			,form=form
-     +			,status=stat
-     +			,access=access
-     +			,iostat=ios
-     +	            )
+      open( unit=iu , file=file, form=form , status=stat, access=access, iostat=ios )
 	  if(ios.ne.0) then
 	    nfile=ichanm0(file)
 	    if(nfile.le.0) nfile=1
-	    write(6,*) 'error opening file : '
-     +				,file(1:nfile)
+	    write(6,*) 'error opening file : ',file(1:nfile)
 	    write(6,*) 'unit : ',iu,'  iostat : ',ios
 	    write(6,*) 'error : ',mod(ios,256)
 	    inquire(file=file,opened=opened)
@@ -237,19 +230,19 @@ c----------------------------------------------------------------
 	  end if
 	end if
 
-c----------------------------------------------------------------
-c end of routine
-c----------------------------------------------------------------
+!----------------------------------------------------------------
+! end of routine
+!----------------------------------------------------------------
 
 	end
 
-c*******************************************************
+!*******************************************************
 
 	subroutine useunit(iumax)
 
-c writes usage of units and file names to stdout
-c
-c iumax		maximum unit number to try
+! writes usage of units and file names to stdout
+!
+! iumax		maximum unit number to try
 
 	implicit none
 
@@ -271,14 +264,14 @@ c iumax		maximum unit number to try
 
 	end
 
-c*******************************************************
+!*******************************************************
 
 	subroutine filna(iunit,name)
 
-c inquires file name of unit number iunit
-c
-c iunit		unit number
-c name		file name (return value)
+! inquires file name of unit number iunit
+!
+! iunit		unit number
+! name		file name (return value)
 
 	implicit none
 
@@ -301,14 +294,14 @@ c name		file name (return value)
 
 	end
 
-c*******************************************************
+!*******************************************************
 
 	function filex(name)
 
-c inquires if file name exists
-c
-c name		file name
-c filex		.true. if file exists
+! inquires if file name exists
+!
+! name		file name
+! filex		.true. if file exists
 
 	implicit none
 
@@ -319,14 +312,14 @@ c filex		.true. if file exists
 
 	end
 
-c*******************************************************
+!*******************************************************
 
 	function ifilun(name)
-c
-c inquires unit of file name if opened
-c
-c name		file name
-c ifilun	unit if file is opened, else 0
+!
+! inquires unit of file name if opened
+!
+! name		file name
+! ifilun	unit if file is opened, else 0
 
 	implicit none
 
@@ -347,11 +340,11 @@ c ifilun	unit if file is opened, else 0
 
 	end
 
-c*******************************************************
+!*******************************************************
 
 	subroutine filext(file,ext)
 
-c appends file extension if not there
+! appends file extension if not there
 
 	implicit none
 
@@ -376,7 +369,7 @@ c appends file extension if not there
 	if( ne .le. 0 ) return
 	if( nf+ne+1 .gt. length ) return
 
-c	now we know that there is enough room for extension
+!	now we know that there is enough room for extension
 
 	nff = nf - ne + 1
 	nfl = nf
@@ -387,13 +380,13 @@ c	now we know that there is enough room for extension
 
 	end
 
-c*******************************************************
+!*******************************************************
 
 	subroutine find_unit(iunit)
 
-c finds unit to open file - starts to search from iunit
-c on return iunit is either the next unit available
-c or it is 0 which means there was an error
+! finds unit to open file - starts to search from iunit
+! on return iunit is either the next unit available
+! or it is 0 which means there was an error
 
 	implicit none
 
@@ -424,7 +417,7 @@ c or it is 0 which means there was an error
 
 	end
 
-c*******************************************************
+!*******************************************************
 
 	subroutine file_flush(iu)
 
@@ -436,7 +429,7 @@ c*******************************************************
 
 	end
 
-c*******************************************************
+!*******************************************************
 
 	subroutine file_sync(iu)
 
@@ -481,21 +474,21 @@ c*******************************************************
 
 	end
 
-c*******************************************************
-c*******************************************************
-c*******************************************************
-c stub in order to be independent of subsss.f
-c*******************************************************
-c*******************************************************
-c*******************************************************
+!*******************************************************
+!*******************************************************
+!*******************************************************
+! stub in order to be independent of subsss.f
+!*******************************************************
+!*******************************************************
+!*******************************************************
 
         function ichanm0(line)
 
-c computes length of line without trailing blanks
-c
-c line          line of text
-c ichanm0       length of line (return value)
-c               ... 0 : line is all blank
+! computes length of line without trailing blanks
+!
+! line          line of text
+! ichanm0       length of line (return value)
+!               ... 0 : line is all blank
 
 	implicit none
 
@@ -521,5 +514,5 @@ c               ... 0 : line is all blank
 
         end
 
-c*******************************************************
+!*******************************************************
 

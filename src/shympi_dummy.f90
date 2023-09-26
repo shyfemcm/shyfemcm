@@ -173,8 +173,8 @@
 !-------------------------------------------------------
 
         INTERFACE shympi_receive
-        MODULE PROCEDURE   shympi_receive_i
-     +                   , shympi_receive_r
+        MODULE PROCEDURE   shympi_receive_i  &
+     &                   , shympi_receive_r
         END INTERFACE
 
 !-------------------------------------------------------
@@ -182,9 +182,9 @@
 !-------------------------------------------------------
 
         INTERFACE shympi_exchange_3d_node
-        MODULE PROCEDURE  shympi_exchange_3d_node_r
-     +                   ,shympi_exchange_3d_node_d
-     +                   ,shympi_exchange_3d_node_i
+        MODULE PROCEDURE  shympi_exchange_3d_node_r &
+     &                   ,shympi_exchange_3d_node_d &
+     &                   ,shympi_exchange_3d_node_i
         END INTERFACE
 
         INTERFACE shympi_exchange_3d0_node
@@ -194,9 +194,9 @@
         END INTERFACE
 
         INTERFACE shympi_exchange_2d_node
-        MODULE PROCEDURE  shympi_exchange_2d_node_r
-     +                   ,shympi_exchange_2d_node_d
-     +                   ,shympi_exchange_2d_node_i
+        MODULE PROCEDURE  shympi_exchange_2d_node_r &
+     &                   ,shympi_exchange_2d_node_d &
+     &                   ,shympi_exchange_2d_node_i
         END INTERFACE
 
         INTERFACE shympi_exchange_3d_elem
@@ -206,9 +206,9 @@
         END INTERFACE
 
         INTERFACE shympi_exchange_2d_elem
-        MODULE PROCEDURE  shympi_exchange_2d_elem_r
-     +                   ,shympi_exchange_2d_elem_d
-     +                   ,shympi_exchange_2d_elem_i
+        MODULE PROCEDURE  shympi_exchange_2d_elem_r &
+     &                   ,shympi_exchange_2d_elem_d &
+     &                   ,shympi_exchange_2d_elem_i
         END INTERFACE
 
 !-------------------------------------------------------
@@ -216,33 +216,33 @@
 !-------------------------------------------------------
 
         INTERFACE shympi_check_elem
-        MODULE PROCEDURE  shympi_check_2d_elem_r
-     +                   ,shympi_check_2d_elem_d
-     +                   ,shympi_check_2d_elem_i
-     +			 ,shympi_check_3d_elem_r
+        MODULE PROCEDURE  shympi_check_2d_elem_r &
+     &                   ,shympi_check_2d_elem_d &
+     &                   ,shympi_check_2d_elem_i &
+     &			 ,shympi_check_3d_elem_r
 !     +                   ,shympi_check_3d_elem_d
 !     +                   ,shympi_check_3d_elem_i
         END INTERFACE
 
         INTERFACE shympi_check_node
-        MODULE PROCEDURE  shympi_check_2d_node_r
-     +                   ,shympi_check_2d_node_d
-     +                   ,shympi_check_2d_node_i
-     +			 ,shympi_check_3d_node_r
+        MODULE PROCEDURE  shympi_check_2d_node_r &
+     &                   ,shympi_check_2d_node_d &
+     &                   ,shympi_check_2d_node_i &
+     &			 ,shympi_check_3d_node_r
 !     +                   ,shympi_check_3d_node_d
 !     +                   ,shympi_check_3d_node_i
         END INTERFACE
 
         INTERFACE shympi_check_2d_node
-        MODULE PROCEDURE  shympi_check_2d_node_r
-     +                   ,shympi_check_2d_node_d
-     +                   ,shympi_check_2d_node_i
+        MODULE PROCEDURE  shympi_check_2d_node_r &
+     &                   ,shympi_check_2d_node_d &
+     &                   ,shympi_check_2d_node_i
         END INTERFACE
 
         INTERFACE shympi_check_2d_elem
-        MODULE PROCEDURE  shympi_check_2d_elem_r
-     +                   ,shympi_check_2d_elem_d
-     +                   ,shympi_check_2d_elem_i
+        MODULE PROCEDURE  shympi_check_2d_elem_r &
+     &                   ,shympi_check_2d_elem_d &
+     &                   ,shympi_check_2d_elem_i
         END INTERFACE
 
         INTERFACE shympi_check_3d_node
@@ -264,9 +264,9 @@
         END INTERFACE
 
         INTERFACE shympi_check_array
-        MODULE PROCEDURE  shympi_check_array_i
-     +                   ,shympi_check_array_r
-     +                   ,shympi_check_array_d
+        MODULE PROCEDURE  shympi_check_array_i &
+     &                   ,shympi_check_array_r &
+     &                   ,shympi_check_array_d
         END INTERFACE
 
 !-------------------------------------------------------
@@ -274,15 +274,15 @@
 !-------------------------------------------------------
 
         INTERFACE shympi_gather
-        MODULE PROCEDURE  shympi_gather_scalar_i
-     +                   ,shympi_gather_array_2d_i
-     +                   ,shympi_gather_array_2d_r
-     +                   ,shympi_gather_array_2d_d
-     +                   ,shympi_gather_array_3d_i
-     +                   ,shympi_gather_array_3d_r
-     +                   ,shympi_gather_array_3d_d
-     +                   ,shympi_gather_array_fix_i
-     +                   ,shympi_gather_array_fix_r
+        MODULE PROCEDURE  shympi_gather_scalar_i &
+     &                   ,shympi_gather_array_2d_i &
+     &                   ,shympi_gather_array_2d_r &
+     &                   ,shympi_gather_array_2d_d &
+     &                   ,shympi_gather_array_3d_i &
+     &                   ,shympi_gather_array_3d_r &
+     &                   ,shympi_gather_array_3d_d &
+     &                   ,shympi_gather_array_fix_i &
+     &                   ,shympi_gather_array_fix_r
         END INTERFACE
 
         INTERFACE shympi_gather_root
@@ -294,9 +294,9 @@
 !-------------------------------------------------------
 
         INTERFACE shympi_gather_and_sum
-        MODULE PROCEDURE  shympi_gather_and_sum_i
-     +                   ,shympi_gather_and_sum_r
-     +                   ,shympi_gather_and_sum_d
+        MODULE PROCEDURE  shympi_gather_and_sum_i &
+     &                   ,shympi_gather_and_sum_r &
+     &                   ,shympi_gather_and_sum_d
         END INTERFACE
 
 !-------------------------------------------------------
@@ -304,9 +304,9 @@
 !-------------------------------------------------------
 
         INTERFACE shympi_bcast
-        MODULE PROCEDURE  shympi_bcast_scalar_i
-     +                   ,shympi_bcast_array_r
-     +                   ,shympi_bcast_array_d
+        MODULE PROCEDURE  shympi_bcast_scalar_i &
+     &                   ,shympi_bcast_array_r &
+     &                   ,shympi_bcast_array_d
         END INTERFACE
 
 !-------------------------------------------------------
@@ -314,9 +314,9 @@
 !-------------------------------------------------------
 
         INTERFACE shympi_collect_node_value
-        MODULE PROCEDURE   shympi_collect_node_value_2d_i
-     +                    ,shympi_collect_node_value_2d_r
-     +                    ,shympi_collect_node_value_3d_r
+        MODULE PROCEDURE   shympi_collect_node_value_2d_i &
+     &                    ,shympi_collect_node_value_2d_r &
+     &                    ,shympi_collect_node_value_3d_r
 !     +                    ,shympi_collect_node_value_3d_i
         END INTERFACE
 
@@ -330,30 +330,30 @@
         END INTERFACE
 
         INTERFACE shympi_min
-        MODULE PROCEDURE   shympi_min_r
-     +			  ,shympi_min_i
-     +			  ,shympi_min_d
-     +			  ,shympi_min_0_r
-     +			  ,shympi_min_0_i
-     +			  ,shympi_min_0_d
+        MODULE PROCEDURE   shympi_min_r  & 
+     &			  ,shympi_min_i            &
+     &			  ,shympi_min_d            &
+     &			  ,shympi_min_0_r          &
+     &			  ,shympi_min_0_i          &
+     &			  ,shympi_min_0_d          
         END INTERFACE
 
         INTERFACE shympi_max
-        MODULE PROCEDURE   shympi_max_r
-     +			  ,shympi_max_i
+        MODULE PROCEDURE   shympi_max_r &
+      &			  ,shympi_max_i         &
 !     +			  ,shympi_max_d
-     +			  ,shympi_max_0_r
-     +			  ,shympi_max_0_i
+      &			  ,shympi_max_0_r       &
+      &			  ,shympi_max_0_i
 !     +			  ,shympi_max_0_d
         END INTERFACE
 
         INTERFACE shympi_sum
-        MODULE PROCEDURE   shympi_sum_r
-     +			  ,shympi_sum_i
-     +			  ,shympi_sum_d
-     +			  ,shympi_sum_0_r
-     +			  ,shympi_sum_0_i
-     +			  ,shympi_sum_0_d
+        MODULE PROCEDURE   shympi_sum_r  &
+      &		  ,shympi_sum_i         &
+      &			  ,shympi_sum_d      &
+      &			  ,shympi_sum_0_r    &
+      &			  ,shympi_sum_0_i    &
+      &			  ,shympi_sum_0_d    
         END INTERFACE
 
 !-------------------------------------------------------
@@ -361,29 +361,29 @@
 !-------------------------------------------------------
 
         INTERFACE shympi_exchange_array                 !old name - do not use
-        MODULE PROCEDURE   shympi_l2g_array_2d_r
-     +                    ,shympi_l2g_array_2d_i
-     +                    ,shympi_l2g_array_3d_r
-     +                    ,shympi_l2g_array_3d_i
-     +                    ,shympi_l2g_array_3d_d
+        MODULE PROCEDURE   shympi_l2g_array_2d_r &
+     &                    ,shympi_l2g_array_2d_i &
+     &                    ,shympi_l2g_array_3d_r &
+     &                    ,shympi_l2g_array_3d_i &
+     &                    ,shympi_l2g_array_3d_d
         END INTERFACE
 
         INTERFACE shympi_l2g_array
-        MODULE PROCEDURE   shympi_l2g_array_2d_r
-     +                    ,shympi_l2g_array_2d_i
-     +                    ,shympi_l2g_array_3d_r
-     +                    ,shympi_l2g_array_3d_i
-     +                    ,shympi_l2g_array_3d_d
-     +                    ,shympi_l2g_array_fix_i
-     +                    ,shympi_l2g_array_fix_r
+        MODULE PROCEDURE   shympi_l2g_array_2d_r &
+     &                    ,shympi_l2g_array_2d_i &
+     &                    ,shympi_l2g_array_3d_r &
+     &                    ,shympi_l2g_array_3d_i &
+     &                    ,shympi_l2g_array_3d_d &
+     &                    ,shympi_l2g_array_fix_i &
+     &                    ,shympi_l2g_array_fix_r
         END INTERFACE
 
         INTERFACE shympi_g2l_array
-        MODULE PROCEDURE   shympi_g2l_array_2d_r
-     +                    ,shympi_g2l_array_2d_i
-     +                    ,shympi_g2l_array_3d_r
-     +                    ,shympi_g2l_array_3d_i
-     +                    ,shympi_g2l_array_3d_d
+        MODULE PROCEDURE   shympi_g2l_array_2d_r &
+     &                    ,shympi_g2l_array_2d_i &
+     &                    ,shympi_g2l_array_3d_r &
+     &                    ,shympi_g2l_array_3d_i &
+     &                    ,shympi_g2l_array_3d_d
         END INTERFACE
 
 !-------------------------------------------------------
@@ -391,17 +391,17 @@
 !-------------------------------------------------------
 
         INTERFACE shympi_get_array
-        MODULE PROCEDURE   shympi_get_array_2d_r
-     +			  ,shympi_get_array_2d_i
+        MODULE PROCEDURE   shympi_get_array_2d_r   &
+     &			  ,shympi_get_array_2d_i
 !     +			  ,shympi_get_array_3d_r
 !     +			  ,shympi_get_array_3d_i
         END INTERFACE
 
         INTERFACE shympi_getvals
-        MODULE PROCEDURE   shympi_getvals_2d_node_r
-     +			  ,shympi_getvals_2d_node_i
-     +			  ,shympi_getvals_3d_node_r
-     +			  ,shympi_getvals_3d_node_i
+        MODULE PROCEDURE   shympi_getvals_2d_node_r   &
+     &			  ,shympi_getvals_2d_node_i            &
+     &			  ,shympi_getvals_3d_node_r            &
+     &			  ,shympi_getvals_3d_node_i
         END INTERFACE
 
 !-------------------------------------------------------
@@ -409,23 +409,23 @@
 !-------------------------------------------------------
 
         INTERFACE shympi_exchange_and_sum_3d_nodes
-        MODULE PROCEDURE   shympi_exchange_and_sum_3d_nodes_r
-     +			  ,shympi_exchange_and_sum_3d_nodes_d
+        MODULE PROCEDURE   shympi_exchange_and_sum_3d_nodes_r  &
+     &			  ,shympi_exchange_and_sum_3d_nodes_d
         END INTERFACE
 
         INTERFACE shympi_exchange_and_sum_2d_nodes
-        MODULE PROCEDURE   shympi_exchange_and_sum_2d_nodes_r
-     +			  ,shympi_exchange_and_sum_2d_nodes_d
+        MODULE PROCEDURE   shympi_exchange_and_sum_2d_nodes_r  &
+     &			  ,shympi_exchange_and_sum_2d_nodes_d
         END INTERFACE
 
         INTERFACE shympi_exchange_2d_nodes_min
-        MODULE PROCEDURE  shympi_exchange_2d_nodes_min_i
-     +			  ,shympi_exchange_2d_nodes_min_r
+        MODULE PROCEDURE  shympi_exchange_2d_nodes_min_i       &
+     &			  ,shympi_exchange_2d_nodes_min_r
         END INTERFACE
 
         INTERFACE shympi_exchange_2d_nodes_max
-        MODULE PROCEDURE   shympi_exchange_2d_nodes_max_i
-     +			  ,shympi_exchange_2d_nodes_max_r
+        MODULE PROCEDURE   shympi_exchange_2d_nodes_max_i      &
+     &			  ,shympi_exchange_2d_nodes_max_r
         END INTERFACE
 
 !-------------------------------------------------------
@@ -433,9 +433,9 @@
 !-------------------------------------------------------
 
         INTERFACE error_stop
-        MODULE PROCEDURE  error_stop_2
-     +                  , error_stop_1
-     +                  , error_stop_0
+        MODULE PROCEDURE  error_stop_2 &
+     &                  , error_stop_1 &
+     &                  , error_stop_0
         END INTERFACE
 
 !-------------------------------------------------------
@@ -469,8 +469,7 @@
 	if( .not. basin_has_read_basin() ) then
 	  write(6,*) 'grd file has been read: ',nkn,nel,ngr
 	  if( nkn == 0 ) then
-	    stop 'error stop shympi_init: ' //
-     +			'basin has not been initialized'
+	    stop 'error stop shympi_init: ' //			'basin has not been initialized'
 	  end if
 	end if
 
@@ -941,8 +940,7 @@
 !******************************************************************
 !******************************************************************
 
-	subroutine shympi_receive_i(id_from,id_to
-     +					,n,val_in,val_out)
+	subroutine shympi_receive_i( id_from, id_to, n,val_in, val_out )
 
 	integer id_from,id_to,n
         integer val_in(n)
@@ -954,8 +952,7 @@
 
 !*******************************
 
-	subroutine shympi_receive_r(id_from,id_to
-     +					,n,val_in,val_out)
+	subroutine shympi_receive_r( id_from, id_to , n, val_in, val_out )
 
 	integer id_from,id_to,n
         real val_in(n)
@@ -2098,8 +2095,8 @@
 
         write(6,*) filename,what
 
-        open(unit=108, file=filename, form="formatted"
-     +   , iostat=control, status="old", action="read")
+        open(unit=108, file=filename, form="formatted" &
+     &   , iostat=control, status="old", action="read")
         
         if(control .ne. 0) then
           if(my_id .eq. 0) then
@@ -2109,17 +2106,16 @@
         stop
         end if
 
-        read(unit=108, fmt="(i12,i12,i12,A12)") pnkn,pnel,pn_threads
-     +                  ,pwhat
+        read( unit=108, fmt="(i12,i12,i12,A12)" ) pnkn, pnel, pn_threads, pwhat
 
-        if(pnkn .ne. nkndi .or. pnel .ne. neldi .or. pn_threads
-     &          .ne. n_threads .or. pwhat .ne. what) then
+        if(pnkn .ne. nkndi .or. pnel .ne. neldi .or. pn_threads         &
+     &     .ne. n_threads .or. pwhat .ne. what) then
          if(my_id .eq. 0) then
           write(6,*)'basin file does not match'
-          write(6,*)'partitioning file:nkn,nel,n_threads,partitioning'
-     +          ,pnkn,pnel,pn_threads,pwhat
-          write(6,*)'basin in str file:nkn,nel,n_threads,partitioning'
-     +          ,nkndi,neldi,n_threads,what
+          write(6,*)'partitioning file:nkn,nel,n_threads,partitioning'  &
+     &          ,pnkn,pnel,pn_threads,pwhat
+          write(6,*)'basin in str file:nkn,nel,n_threads,partitioning'  &
+     &          ,nkndi,neldi,n_threads,what
          end if
          call shympi_barrier
          stop
@@ -2127,8 +2123,8 @@
 
         if(what .eq. 'nodes') then
           allocate(allPartAssign(nkndi))
-          read(unit=108,fmt="(i12,i12,i12,i12,i12,i12)")
-     +          (allPartAssign(i),i=1,nkndi)
+          read(unit=108,fmt="(i12,i12,i12,i12,i12,i12)") &
+     &          (allPartAssign(i),i=1,nkndi)
         else 
           write(6,*)'error partitioning file on nodes'
           stop

@@ -24,62 +24,62 @@
 !
 !--------------------------------------------------------------------------
 
-c parameter management routines
-c
-c contents :
-c
-c function manpar(name,value,id,what)   internal routine to access par data
-c function getpar(name)                 gets parameter name in value
-c function itspar(name)                 tests if name is available
-c function iscpar(name,sect)            tests if name is in section
-c subroutine get_sect_of(name,sect)	returns section of parameter name
-c subroutine sctpar(sect)               sets default name of section
-c subroutine putpar(name,value)         puts parameter value in name
-c subroutine addpar(name,value)         adds parameter value to name
-c function infpar(type)                 info about parameters
-c subroutine lstpar(name,value,id)      lists entry id in name and value
-c function intpar(name)                 tests if name is integer
-c subroutine chapar                     changes parameters interactively
-c subroutine pripar                     prints parameter values
-c
-c revision log :
-c
-c 01.03.1988	ggu	written
-c 30.08.1988	ggu	(default values in rdpar..a/h)
-c 08.11.1988	ggu	(addpar,setpar,ittpar,ipadim...)
-c 05.12.1988	ggu	(rdpara/h substituted by nlsa/h)
-c 30.09.1989	ggu	(putpar,pripar,intpar)
-c 26.05.1990	ggu	(newly structured -> manpar)
-c 04.02.1991	ggu	(included iar..., far...)
-c 15.05.1997	ggu	(nnamdi set to 200)
-c 12.06.1997	ggu	(iar..., far... moved to subiar.f)
-c 12.06.1997	ggu	(section introduced)
-c 18.03.1998	ggu	introduced undocumented feature -> c
-c 18.03.1998	ggu	save secpar (bug uncovered by g77)
-c 07.11.2005	ggu	helper routine get_sect_of()
-c 11.09.2006	ggu	routine chapar removed
-c 16.04.2008	ggu	bugfix in pripar (character*79 -> *80)
-c 28.04.2008	ggu	all routines changed to double precision
-c 28.04.2008	ggu	three new routines: dgetpar, dputpar, daddpar
-c 28.07.2010	ggu	new routines (par and fnm together) -> subst. old ones
-c 25.06.2012	ggu	debugged
-c 26.11.2014	ggu	changed VERS_7_0_7
-c 12.12.2014	ggu	changed VERS_7_0_9
-c 13.02.2015	ggu	limit of string raised from 6 to 10
-c 26.02.2015	ggu	changed VERS_7_1_5
-c 05.11.2015	ggu	changed VERS_7_3_12
-c 19.02.2016	ggu	changed VERS_7_5_2
-c 30.05.2016	ggu	changed VERS_7_5_11
-c 13.04.2017	ggu	new array feature
-c 14.11.2017	ggu	changed VERS_7_5_36
-c 07.12.2017	ggu	changed VERS_7_5_40
-c 14.02.2019	ggu	changed VERS_7_5_56
-c 16.02.2019	ggu	changed VERS_7_5_60
-c 12.03.2019	ggu	new routine para_clean_section(()
-c
-c**************************************************************
-c**************************************************************
-c**************************************************************
+! parameter management routines
+!
+! contents :
+!
+! function manpar(name,value,id,what)   internal routine to access par data
+! function getpar(name)                 gets parameter name in value
+! function itspar(name)                 tests if name is available
+! function iscpar(name,sect)            tests if name is in section
+! subroutine get_sect_of(name,sect)	returns section of parameter name
+! subroutine sctpar(sect)               sets default name of section
+! subroutine putpar(name,value)         puts parameter value in name
+! subroutine addpar(name,value)         adds parameter value to name
+! function infpar(type)                 info about parameters
+! subroutine lstpar(name,value,id)      lists entry id in name and value
+! function intpar(name)                 tests if name is integer
+! subroutine chapar                     changes parameters interactively
+! subroutine pripar                     prints parameter values
+!
+! revision log :
+!
+! 01.03.1988	ggu	written
+! 30.08.1988	ggu	(default values in rdpar..a/h)
+! 08.11.1988	ggu	(addpar,setpar,ittpar,ipadim...)
+! 05.12.1988	ggu	(rdpara/h substituted by nlsa/h)
+! 30.09.1989	ggu	(putpar,pripar,intpar)
+! 26.05.1990	ggu	(newly structured -> manpar)
+! 04.02.1991	ggu	(included iar..., far...)
+! 15.05.1997	ggu	(nnamdi set to 200)
+! 12.06.1997	ggu	(iar..., far... moved to subiar.f)
+! 12.06.1997	ggu	(section introduced)
+! 18.03.1998	ggu	introduced undocumented feature -> c
+! 18.03.1998	ggu	save secpar (bug uncovered by g77)
+! 07.11.2005	ggu	helper routine get_sect_of()
+! 11.09.2006	ggu	routine chapar removed
+! 16.04.2008	ggu	bugfix in pripar (character*79 -> *80)
+! 28.04.2008	ggu	all routines changed to double precision
+! 28.04.2008	ggu	three new routines: dgetpar, dputpar, daddpar
+! 28.07.2010	ggu	new routines (par and fnm together) -> subst. old ones
+! 25.06.2012	ggu	debugged
+! 26.11.2014	ggu	changed VERS_7_0_7
+! 12.12.2014	ggu	changed VERS_7_0_9
+! 13.02.2015	ggu	limit of string raised from 6 to 10
+! 26.02.2015	ggu	changed VERS_7_1_5
+! 05.11.2015	ggu	changed VERS_7_3_12
+! 19.02.2016	ggu	changed VERS_7_5_2
+! 30.05.2016	ggu	changed VERS_7_5_11
+! 13.04.2017	ggu	new array feature
+! 14.11.2017	ggu	changed VERS_7_5_36
+! 07.12.2017	ggu	changed VERS_7_5_40
+! 14.02.2019	ggu	changed VERS_7_5_56
+! 16.02.2019	ggu	changed VERS_7_5_60
+! 12.03.2019	ggu	new routine para_clean_section(()
+!
+!**************************************************************
+!**************************************************************
+!**************************************************************
 
 !==================================================================
 	module para
@@ -118,15 +118,15 @@ c**************************************************************
 	character*(charlen_para), save, private :: def_section = ' '
 
         INTERFACE para_get_array_value
-        MODULE PROCEDURE	 para_get_array_value_d
-     +				,para_get_array_value_r
-     +				,para_get_array_value_i
+        MODULE PROCEDURE	 para_get_array_value_d    &
+     &				,para_get_array_value_r             &
+     &				,para_get_array_value_i
         END INTERFACE
 
         INTERFACE para_add_array_value
-        MODULE PROCEDURE	 para_add_array_value_d
-     +				,para_add_array_value_r
-     +				,para_add_array_value_i
+        MODULE PROCEDURE	 para_add_array_value_d    &
+     &				,para_add_array_value_r             &
+     &				,para_add_array_value_i
         END INTERFACE
 
 !==================================================================
@@ -207,8 +207,7 @@ c**************************************************************
 	    else
 	      write(6,*) 'Parameter is deprecated: ',trim(name)
 	      write(6,*) 'A new parameter might have substituted it.'
-	      write(6,*) 'Please have a look at this parameter: '
-     +				,trim(string)
+	      write(6,*) 'Please have a look at this parameter: ',trim(string)
 	    end if
 	  stop 'error stop para_get_id_with_error: parameter deprecated'
 	  end if
@@ -484,8 +483,7 @@ c**************************************************************
 	string = pentry(id)%string
 
 	if( isize == 0 ) then
-	  write(6,1000) id,itype,isize,trim(section),trim(name)
-     +			,value,trim(string)
+	  write(6,1000) id,itype,isize,trim(section),trim(name) ,value,trim(string)
  1000     format(2i4,i5,2(1x,a),g14.6,1x,a)
 	else
 	  write(6,1100) id,itype,trim(section),trim(name),isize
@@ -904,14 +902,14 @@ c**************************************************************
 !==================================================================
 
 
-c**************************************************************
-c**************************************************************
-c**************************************************************
+!**************************************************************
+!**************************************************************
+!**************************************************************
 
 
-c***********************************************************
-c***********************************************************
-c***********************************************************
+!***********************************************************
+!***********************************************************
+!***********************************************************
 
 	function getpar(name)
 	use para
@@ -940,7 +938,7 @@ c***********************************************************
 	call para_get_string(name,string)
 	end
 
-c**************************************************************
+!**************************************************************
 
 	subroutine putpar(name,value)
 	use para
@@ -967,7 +965,7 @@ c**************************************************************
 	call para_put_string(name,string)
 	end
 
-c**************************************************************
+!**************************************************************
 
 	subroutine addpar(name,value)
 	use para
@@ -994,14 +992,14 @@ c**************************************************************
 	call para_add_string(name,string)
 	end
 
-c**************************************************************
-c**************************************************************
-c**************************************************************
+!**************************************************************
+!**************************************************************
+!**************************************************************
 
 
-c**************************************************************
-c**************************************************************
-c**************************************************************
+!**************************************************************
+!**************************************************************
+!**************************************************************
 
 	subroutine delete_section(section)
 	use para
@@ -1010,9 +1008,9 @@ c**************************************************************
 	call para_delete_section(section)
 	end
 
-c**************************************************************
-c**************************************************************
-c**************************************************************
+!**************************************************************
+!**************************************************************
+!**************************************************************
 
 	function haspar(name)
 	use para
@@ -1054,7 +1052,7 @@ c**************************************************************
 	iscfnm = para_get_id(name,section)
 	end
 
-c***********************************************************
+!***********************************************************
 
 	subroutine sctpar(section)
 	use para
@@ -1070,7 +1068,7 @@ c***********************************************************
 	call para_set_default_section(section)
 	end
 
-c**************************************************************
+!**************************************************************
 
 	subroutine get_sect_of(name,section)
 	use para
@@ -1079,18 +1077,18 @@ c**************************************************************
 	call para_find_section_to_name(name,section)
 	end
 
-c**************************************************************
-c**************************************************************
-c**************************************************************
-c**************************************************************
-c**************************************************************
-c**************************************************************
-c**************************************************************
-c**************************************************************
+!**************************************************************
+!**************************************************************
+!**************************************************************
+!**************************************************************
+!**************************************************************
+!**************************************************************
+!**************************************************************
+!**************************************************************
 
 	subroutine parinfo(iunit)
 
-c prints info on parameter values
+! prints info on parameter values
 
 	use para
 
@@ -1123,7 +1121,7 @@ c prints info on parameter values
 
 	end
 
-c**************************************************************
+!**************************************************************
 
         subroutine pripar(iunit)
 
@@ -1137,11 +1135,11 @@ c**************************************************************
 
         end
 
-c*****************************************************
+!*****************************************************
 
         subroutine pripar1(iunit)
 
-c prints parameter values (1 column)
+! prints parameter values (1 column)
 
 	use para
 
@@ -1167,11 +1165,11 @@ c prints parameter values (1 column)
 
 	end
 
-c*****************************************************
+!*****************************************************
 
         subroutine pripar3(iunit)
 
-c prints parameter values (3 columns)
+! prints parameter values (3 columns)
 
 	use para
 
@@ -1208,11 +1206,11 @@ c prints parameter values (3 columns)
  1000	format(3(a8,a3,g14.6,2x))
 	end
 
-c**************************************************************
+!**************************************************************
 
 	subroutine pripar4(iunit)
 
-c prints parameter values (4 columns)
+! prints parameter values (4 columns)
 
 	use para
 
@@ -1251,12 +1249,10 @@ c prints parameter values (4 columns)
 	  iend=20*imod
 	  absval=abs(value)
 	  if(intpar(name).eq.1) then
-            write(line(ianf:iend),2345)
-     +                  name,' =',nint(value),'  '
+            write(line(ianf:iend),2345) name,' =',nint(value),'  '
 
 	  else
-	    if(absval.lt.1000.and.absval.ge.0.01
-     +                        .or.absval.eq.0.) then
+	    if( absval .lt. 1000 .and. absval .ge. 0.01 .or. absval .eq. 0. ) then
 	      write(line(ianf:iend),2347) name,' =',value,'  '
 	    else
 	      write(line(ianf:iend),2346) name,' =',value,'  '
@@ -1278,11 +1274,11 @@ c prints parameter values (4 columns)
  2347   format(a6,a2,f10.3,a2)
 	end
 
-c**********************************************************
+!**********************************************************
 
         subroutine prifnm(iunit)
 
-c prints parameter values
+! prints parameter values
 
 	use para
 
@@ -1312,7 +1308,7 @@ c prints parameter values
  2345   format(1x,2i4,2(1x,a6,1x),3x,a)
         end
  
-c**********************************************************
+!**********************************************************
 
 	subroutine chkparam(iunit)
 
@@ -1352,7 +1348,7 @@ c**********************************************************
  2346   format(1x,i4,2(1x,a6,1x),i4,a)
 	end
 
-c**********************************************************
+!**********************************************************
 
 	subroutine check_parameter_values(text)
 
@@ -1384,14 +1380,14 @@ c**********************************************************
 
 	end
 
-c**********************************************************
+!**********************************************************
 
         function intpar(name)
 
-c tests if name is integer
-c
-c name          name to test
-c intpar        1 if name is integer, 0 if not
+! tests if name is integer
+!
+! name          name to test
+! intpar        1 if name is integer, 0 if not
 
         implicit none
 
@@ -1413,9 +1409,9 @@ c intpar        1 if name is integer, 0 if not
 
         end
 
-c*****************************************************
-c	program para_main
-c	call test_par
-c	end
-c*****************************************************
+!*****************************************************
+!	program para_main
+!	call test_par
+!	end
+!*****************************************************
 

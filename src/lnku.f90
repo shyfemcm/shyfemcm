@@ -24,78 +24,78 @@
 !
 !--------------------------------------------------------------------------
 
-c topological set up routines
-c
-c contents :
-c
-c function kthis(i,ie)	        	gets node at position i in ie
-c function knext(k,ie) 	        	gets node after k in ie
-c function kbhnd(k,ie)          	gets node before k in ie
-c function ithis(k,ie) 	        	gets i of k in ie
-c function inext(k,ie) 	        	gets i after k in ie
-c function ibhnd(k,ie)	        	gets i before k in ie
-c
-c function ksthis(i,ie,nen3v)	        gets node at position i in ie
-c function ksnext(k,ie,nen3v) 	        gets node after k in ie
-c function ksbhnd(k,ie,nen3v)           gets node before k in ie
-c function isthis(k,ie,nen3v) 	        gets position of k in ie
-c function isnext(k,ie,nen3v) 	        gets position after k in ie
-c function isbhnd(k,ie,nen3v)	        gets position before k in ie
-c
-c subroutine link_fill(n)       returns filling of linkv
-c
-c subroutine get_elem_linkp(k,ipf,ipl)	gets pointer to elements around k
-c subroutine get_node_linkp(k,ipf,ipl)	gets pointer to nodes around k
-c subroutine get_elem_links(k,n,ibase)	gets pointer to elements around k
-c subroutine get_node_links(k,n,ibase)	gets pointer to nodes around k
-c
-c subroutine get_elems_around(k,ndim,n,elems) returns all elems around node k
-c subroutine get_nodes_around(k,ndim,n,nodes) returns all nodes around node k
-c
-c subroutine find_elems_to_segment(k1,k2,ie1,ie2) finds elements to segment
-c
-c notes :
-c
-c the preferred way to get nodes/elems around node k is through
-c	get_elems_around()
-c	get_nodes_around()
-c 
-c revision log :
-c
-c 01.08.2003	ggu	created from sublnk.f
-c 16.03.2004	ggu	new routine node_links() and link_fill()
-c 10.11.2007	ggu	new routine line_elems
-c 28.08.2009	ggu	routine line_elems renamed to find_elems_to_segment
-c 28.08.2009	ggu	new routines get_elems_around, get_nodes_around
-c 09.09.2009	ggu	bug fix in find_elems_to_segment (BUGip2)
-c 23.03.2010	ggu	changed v6.1.1
-c 20.10.2011	ggu	check dimension in set_elem_links(), set_node_links()
-c 16.12.2011	ggu	in lnk_elems at boundary set last value to 0
-c 24.01.2012	ggu	changed VERS_6_1_41
-c 23.12.2014	ggu	changed VERS_7_0_11
-c 19.01.2015	ggu	changed VERS_7_1_2
-c 19.01.2015	ggu	changed VERS_7_1_3
-c 05.05.2015	ggu	changed VERS_7_1_10
-c 17.07.2015	ggu	changed VERS_7_1_80
-c 20.07.2015	ggu	changed VERS_7_1_81
-c 02.12.2015	ggu	lnk_elems and lnk_nodes eliminated
-c 16.12.2015	ggu	changed VERS_7_3_16
-c 28.04.2016	ggu	changed VERS_7_5_9
-c 16.02.2019	ggu	changed VERS_7_5_60
-c 29.09.2020	ggu	added dimension check in get_nodes/elems_around()
-c 22.04.2022	ggu	new locator functions using passed nen3v
-c
-c****************************************************************
-c****************************************************************
-c****************************************************************
-c next are locator functions using global nen3v from basin
-c****************************************************************
-c****************************************************************
-c****************************************************************
+! topological set up routines
+!
+! contents :
+!
+! function kthis(i,ie)	        	gets node at position i in ie
+! function knext(k,ie) 	        	gets node after k in ie
+! function kbhnd(k,ie)          	gets node before k in ie
+! function ithis(k,ie) 	        	gets i of k in ie
+! function inext(k,ie) 	        	gets i after k in ie
+! function ibhnd(k,ie)	        	gets i before k in ie
+!
+! function ksthis(i,ie,nen3v)	        gets node at position i in ie
+! function ksnext(k,ie,nen3v) 	        gets node after k in ie
+! function ksbhnd(k,ie,nen3v)           gets node before k in ie
+! function isthis(k,ie,nen3v) 	        gets position of k in ie
+! function isnext(k,ie,nen3v) 	        gets position after k in ie
+! function isbhnd(k,ie,nen3v)	        gets position before k in ie
+!
+! subroutine link_fill(n)       returns filling of linkv
+!
+! subroutine get_elem_linkp(k,ipf,ipl)	gets pointer to elements around k
+! subroutine get_node_linkp(k,ipf,ipl)	gets pointer to nodes around k
+! subroutine get_elem_links(k,n,ibase)	gets pointer to elements around k
+! subroutine get_node_links(k,n,ibase)	gets pointer to nodes around k
+!
+! subroutine get_elems_around(k,ndim,n,elems) returns all elems around node k
+! subroutine get_nodes_around(k,ndim,n,nodes) returns all nodes around node k
+!
+! subroutine find_elems_to_segment(k1,k2,ie1,ie2) finds elements to segment
+!
+! notes :
+!
+! the preferred way to get nodes/elems around node k is through
+!	get_elems_around()
+!	get_nodes_around()
+! 
+! revision log :
+!
+! 01.08.2003	ggu	created from sublnk.f
+! 16.03.2004	ggu	new routine node_links() and link_fill()
+! 10.11.2007	ggu	new routine line_elems
+! 28.08.2009	ggu	routine line_elems renamed to find_elems_to_segment
+! 28.08.2009	ggu	new routines get_elems_around, get_nodes_around
+! 09.09.2009	ggu	bug fix in find_elems_to_segment (BUGip2)
+! 23.03.2010	ggu	changed v6.1.1
+! 20.10.2011	ggu	check dimension in set_elem_links(), set_node_links()
+! 16.12.2011	ggu	in lnk_elems at boundary set last value to 0
+! 24.01.2012	ggu	changed VERS_6_1_41
+! 23.12.2014	ggu	changed VERS_7_0_11
+! 19.01.2015	ggu	changed VERS_7_1_2
+! 19.01.2015	ggu	changed VERS_7_1_3
+! 05.05.2015	ggu	changed VERS_7_1_10
+! 17.07.2015	ggu	changed VERS_7_1_80
+! 20.07.2015	ggu	changed VERS_7_1_81
+! 02.12.2015	ggu	lnk_elems and lnk_nodes eliminated
+! 16.12.2015	ggu	changed VERS_7_3_16
+! 28.04.2016	ggu	changed VERS_7_5_9
+! 16.02.2019	ggu	changed VERS_7_5_60
+! 29.09.2020	ggu	added dimension check in get_nodes/elems_around()
+! 22.04.2022	ggu	new locator functions using passed nen3v
+!
+!****************************************************************
+!****************************************************************
+!****************************************************************
+! next are locator functions using global nen3v from basin
+!****************************************************************
+!****************************************************************
+!****************************************************************
 
         function kthis(i,ie)
 
-c gets node at position i in ie
+! gets node at position i in ie
 
 	use basin
 
@@ -109,11 +109,11 @@ c gets node at position i in ie
 
 	end
 
-c****************************************************************
+!****************************************************************
 
         function knext(k,ie)
 
-c gets node after k in ie
+! gets node after k in ie
 
 	use basin
 
@@ -136,11 +136,11 @@ c gets node after k in ie
 
         end
 
-c****************************************************************
+!****************************************************************
 
         function kbhnd(k,ie)
 
-c gets node before k in ie
+! gets node before k in ie
 
 	use basin
 
@@ -163,11 +163,11 @@ c gets node before k in ie
 
         end
 
-c****************************************************************
+!****************************************************************
 
         function ithis(k,ie)
 
-c gets position of k in ie (might also use lenkiiv for this)
+! gets position of k in ie (might also use lenkiiv for this)
 
 	use basin
 
@@ -190,11 +190,11 @@ c gets position of k in ie (might also use lenkiiv for this)
 
         end
 
-c****************************************************************
+!****************************************************************
 
         function inext(k,ie)
 
-c gets position after k in ie
+! gets position after k in ie
 
 	use basin
 
@@ -217,11 +217,11 @@ c gets position after k in ie
 
         end
 
-c****************************************************************
+!****************************************************************
 
         function ibhnd(k,ie)
 
-c gets position before k in ie
+! gets position before k in ie
 
 	use basin
 
@@ -244,17 +244,17 @@ c gets position before k in ie
 
         end
 
-c****************************************************************
-c****************************************************************
-c****************************************************************
-c next are locator functions using passed in nen3v
-c****************************************************************
-c****************************************************************
-c****************************************************************
+!****************************************************************
+!****************************************************************
+!****************************************************************
+! next are locator functions using passed in nen3v
+!****************************************************************
+!****************************************************************
+!****************************************************************
 
         function ksthis(i,ie,nen3v)
 
-c gets node at position i in ie
+! gets node at position i in ie
 
         implicit none
 
@@ -267,11 +267,11 @@ c gets node at position i in ie
 
 	end
 
-c****************************************************************
+!****************************************************************
 
         function ksnext(k,ie,nen3v)
 
-c gets node after k in ie
+! gets node after k in ie
 
         implicit none
 
@@ -293,11 +293,11 @@ c gets node after k in ie
 
         end
 
-c****************************************************************
+!****************************************************************
 
         function ksbhnd(k,ie,nen3v)
 
-c gets node before k in ie
+! gets node before k in ie
 
         implicit none
 
@@ -319,11 +319,11 @@ c gets node before k in ie
 
         end
 
-c****************************************************************
+!****************************************************************
 
         function isthis(k,ie,nen3v)
 
-c gets position of k in ie (might also use lenkiiv for this)
+! gets position of k in ie (might also use lenkiiv for this)
 
         implicit none
 
@@ -345,12 +345,12 @@ c gets position of k in ie (might also use lenkiiv for this)
 
         end
 
-c****************************************************************
+!****************************************************************
 
 
         function isnext(k,ie,nen3v)
 
-c gets position after k in ie
+! gets position after k in ie
 
         implicit none
 
@@ -372,11 +372,11 @@ c gets position after k in ie
 
         end
 
-c****************************************************************
+!****************************************************************
 
         function isbhnd(k,ie,nen3v)
 
-c gets position before k in ie
+! gets position before k in ie
 
         implicit none
 
@@ -398,40 +398,40 @@ c gets position before k in ie
 
         end
 
-c****************************************************************
-c****************************************************************
-c****************************************************************
+!****************************************************************
+!****************************************************************
+!****************************************************************
 
         subroutine link_fill(n)
 
-c returns filling of linkv
+! returns filling of linkv
 
 	use mod_geom
 	use basin, only : nkn,nel,ngr,mbw
 
         implicit none
 
-c arguments
+! arguments
         integer n       !filling of linkv (return)
 
         n = ilinkv(nkn+1)
 
         end
 
-c****************************************************************
-c****************************************************************
-c****************************************************************
+!****************************************************************
+!****************************************************************
+!****************************************************************
 
 	subroutine get_elem_linkp(k,ipf,ipl)
 
-c gets pointer to first and last element around k
-c
-c to loop over the neibor elements, use similar:
-c
-c       call get_elem_linkp(k,ipf,ipl)
-c       do ip=ipf,ipl
-c         ien = lenkv(ip)          !ien is number of neibor element
-c       end do
+! gets pointer to first and last element around k
+!
+! to loop over the neibor elements, use similar:
+!
+!       call get_elem_linkp(k,ipf,ipl)
+!       do ip=ipf,ipl
+!         ien = lenkv(ip)          !ien is number of neibor element
+!       end do
 
 	use mod_geom
 
@@ -446,18 +446,18 @@ c       end do
 
 	end
 
-c****************************************************************
+!****************************************************************
 
 	subroutine get_node_linkp(k,ipf,ipl)
 
-c gets pointer to first and last node around k
-c
-c to loop over the neibor nodes, use similar:
-c
-c       call get_node_linkp(k,ipf,ipl)
-c       do ip=ipf,ipl
-c         kn = linkv(ip)          !kn is number of neibor node
-c       end do
+! gets pointer to first and last node around k
+!
+! to loop over the neibor nodes, use similar:
+!
+!       call get_node_linkp(k,ipf,ipl)
+!       do ip=ipf,ipl
+!         kn = linkv(ip)          !kn is number of neibor node
+!       end do
 
 	use mod_geom
 
@@ -470,18 +470,18 @@ c       end do
 
 	end
 
-c****************************************************************
+!****************************************************************
 
 	subroutine get_elem_links(k,n,ibase)
 
-c gets pointer and total number of elements around k
-c
-c to loop over the neibor elements, use similar:
-c
-c       call get_elem_links(k,n,ibase)
-c       do i=1,n
-c         ien = lenkv(ibase+i)          !ien is number of neibor element
-c       end do
+! gets pointer and total number of elements around k
+!
+! to loop over the neibor elements, use similar:
+!
+!       call get_elem_links(k,n,ibase)
+!       do i=1,n
+!         ien = lenkv(ibase+i)          !ien is number of neibor element
+!       end do
 
 	use mod_geom
 
@@ -496,18 +496,18 @@ c       end do
 
         end
 
-c****************************************************************
+!****************************************************************
 
 	subroutine get_node_links(k,n,ibase)
 
-c gets pointer and total number of nodes around k
-c
-c to loop over the neibor nodes, use similar:
-c
-c       call get_node_links(k,n,ibase)
-c       do i=1,n
-c         kn = linkv(ibase+i)          !kn is number of neibor node
-c       end do
+! gets pointer and total number of nodes around k
+!
+! to loop over the neibor nodes, use similar:
+!
+!       call get_node_links(k,n,ibase)
+!       do i=1,n
+!         kn = linkv(ibase+i)          !kn is number of neibor node
+!       end do
 
 	use mod_geom
 
@@ -520,11 +520,11 @@ c       end do
 
         end
 
-c****************************************************************
+!****************************************************************
 
         subroutine get_elems_around(k,ndim,n,elems)
 
-c returns all elems around node k
+! returns all elems around node k
 
 	use mod_geom
 
@@ -550,11 +550,11 @@ c returns all elems around node k
 
 	end
 
-c****************************************************************
+!****************************************************************
 
         subroutine get_nodes_around(k,ndim,n,nodes)
 
-c returns all nodes around node k
+! returns all nodes around node k
 
 	use mod_geom
 
@@ -578,25 +578,25 @@ c returns all nodes around node k
 
 	end
 
-c****************************************************************
-c****************************************************************
-c****************************************************************
+!****************************************************************
+!****************************************************************
+!****************************************************************
 
 	subroutine find_elems_to_segment(k1,k2,ie1,ie2)
 
-c finds elements to segment between nodes k1 and k2
-c
-c returns elements in ie1 and ie2
-c
-c ie1 is to the left of segment k1-k2, ie2 to the right
-c if boundary segment only one ie is set, the other is zero
-c if no such segment, both ie are zero
+! finds elements to segment between nodes k1 and k2
+!
+! returns elements in ie1 and ie2
+!
+! ie1 is to the left of segment k1-k2, ie2 to the right
+! if boundary segment only one ie is set, the other is zero
+! if no such segment, both ie are zero
 
 	use mod_geom
 
 	implicit none
 
-c arguments
+! arguments
         integer k1,k2,ie1,ie2
 
         integer k,ipf,ipl,ip,ip2
@@ -624,5 +624,5 @@ c arguments
 
 	end
 
-c****************************************************************
+!****************************************************************
 

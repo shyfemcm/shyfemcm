@@ -189,7 +189,7 @@ SOLVER = SPARSKIT
 
 # PETSC_DIR it the path to the PETSc installation folder, it is 
 # needed for both the PETSc and the PETSc_AmgX solvers
-PETSC_DIR =
+PETSC_DIR =  /zeus/opt/impi19.5/petsc/3.7.5/
 
 # The next 4 paths must be filled in for the PETSc_AmgX solver only.
 
@@ -358,8 +358,10 @@ DISTRIBUTION_TYPE = experimental
 # DEFINE DIRECTORIES
 ##############################################
 
+FEMBIN = ../bin
 DEFDIR  = $(HOME)
-DIRLIB  = $(FEMDIR)/femlib
+FEMDIR  = ..
+DIRLIB  = $(FEMDIR)/lib
 MODDIR  = 
 MODDIR  = $(DIRLIB)/mod
 

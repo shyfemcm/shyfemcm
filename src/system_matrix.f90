@@ -165,10 +165,8 @@
 	integer n2max
 	integer n3max
 
-        if( mbw == matrix%mbw_system .and. 
-     +		nel == matrix%nel_system .and.
-     +		nkn == matrix%nkn_system .and. 
-     +		ngr == matrix%ngr_system ) return
+        if( mbw == matrix%mbw_system .and. nel == matrix%nel_system .and.  &
+     &      nkn == matrix%nkn_system .and. ngr == matrix%ngr_system ) return
 
         if( mbw > 0 .or. nel > 0 .or. nkn > 0 .or. ngr > 0) then
           if( mbw == 0 .or. nel == 0 .or. nkn == 0 .or. ngr == 0) then

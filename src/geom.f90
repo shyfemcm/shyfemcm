@@ -74,8 +74,7 @@
 
 	integer nlk
 
-        if( ngr == ngr_geom .and. nel == nel_geom .and.
-     +      nkn == nkn_geom ) return
+        if( ngr == ngr_geom .and. nel == nel_geom .and. nkn == nkn_geom ) return
 
         if( ngr > 0 .or. nel > 0 .or. nkn > 0 ) then
           if( ngr == 0 .or. nel == 0 .or. nkn == 0 ) then
