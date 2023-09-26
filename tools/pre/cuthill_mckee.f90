@@ -23,41 +23,41 @@
 !
 !--------------------------------------------------------------------------
 
-c cuthill-mckee algorithm for optimization of bandwidth
-c
-c revision log :
-c
-c 20.03.1998	ggu	reorganized, automatic procedure introduced
-c 05.06.1998	ggu	avoid write to terminal
-c 23.03.2010	ggu	changed v6.1.1
-c 14.04.2011	ggu	changed VERS_6_1_22
-c 25.10.2013	ggu	changed VERS_6_1_68
-c 10.07.2015	ggu	changed VERS_7_1_50
-c 17.07.2015	ggu	changed VERS_7_1_53
-c 18.12.2015	ggu	changed VERS_7_3_17
-c 14.11.2017	ggu	changed VERS_7_5_36
-c 03.04.2018	ggu	changed VERS_7_5_43
-c 16.02.2019	ggu	changed VERS_7_5_60
-c
-c*******************************************************************
+! cuthill-mckee algorithm for optimization of bandwidth
+!
+! revision log :
+!
+! 20.03.1998	ggu	reorganized, automatic procedure introduced
+! 05.06.1998	ggu	avoid write to terminal
+! 23.03.2010	ggu	changed v6.1.1
+! 14.04.2011	ggu	changed VERS_6_1_22
+! 25.10.2013	ggu	changed VERS_6_1_68
+! 10.07.2015	ggu	changed VERS_7_1_50
+! 17.07.2015	ggu	changed VERS_7_1_53
+! 18.12.2015	ggu	changed VERS_7_3_17
+! 14.11.2017	ggu	changed VERS_7_5_36
+! 03.04.2018	ggu	changed VERS_7_5_43
+! 16.02.2019	ggu	changed VERS_7_5_60
+!
+!*******************************************************************
 
 	subroutine cmv(nkn,ngrddi,ipv,iphv,kphv,ng,iknot,bwrite)
 
-c cuthill-mckee algorithmus
-c
-c k..		neue knotennummern
-c i..		alte knotennummern
-c ng		grad des knoten
-c iknot		kantenverzeichnis des knotens
-c		...iknot(n,k) --> iknot(ngr*(k-1)+n)
-c		...( n <= ng(k) )
-c iphv		pointer fuer knotennummern : neu --> alt
-c kphv		pointer fuer knotennummern : alt --> neu
-c ikanf		anfangsknoten (erste stufe)
-c ikmer		anfangsknoten fuer minimale bandbreite
-c mmin		bandbreite fuer anfangsknoten ikmer
-c knum		anzahl der bereits nummerierten knoten
-c kanf,kend	neue knotennummern der alten stufe
+! cuthill-mckee algorithmus
+!
+! k..		neue knotennummern
+! i..		alte knotennummern
+! ng		grad des knoten
+! iknot		kantenverzeichnis des knotens
+!		...iknot(n,k) --> iknot(ngr*(k-1)+n)
+!		...( n <= ng(k) )
+! iphv		pointer fuer knotennummern : neu --> alt
+! kphv		pointer fuer knotennummern : alt --> neu
+! ikanf		anfangsknoten (erste stufe)
+! ikmer		anfangsknoten fuer minimale bandbreite
+! mmin		bandbreite fuer anfangsknoten ikmer
+! knum		anzahl der bereits nummerierten knoten
+! kanf,kend	neue knotennummern der alten stufe
 
         implicit none
 
@@ -71,7 +71,7 @@ c kanf,kend	neue knotennummern der alten stufe
         integer jgrmin,jgrmax
         integer knum,m
 
-c get switch iwei %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+! get switch iwei %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
 	iwei = 1
 
@@ -81,8 +81,8 @@ c get switch iwei %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
           if(iwei.eq.1) then				!grades
 	    call getgrds(ngrddi,nkn,ng,jgrmin,jgrmax)
-	    call cmgrade(nkn,ngrddi,ipv,iphv,kphv,ng,iknot
-     +				,jgrmin,jgrmax,bwrite)
+	    call cmgrade(nkn,ngrddi,ipv,iphv,kphv,ng,iknot &
+     &				,jgrmin,jgrmax,bwrite)
 	  else if(iwei.eq.2) then			!give first level
 	    call getfstl(nkn,iphv,kphv,knum)
 	    if( knum .gt. 0 ) then
@@ -97,18 +97,18 @@ c get switch iwei %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
 	end
 
-c********************************************************************
+!********************************************************************
 
         subroutine cmalg(nkn,ngrddi,knum,m,iphv,kphv,ng,iknot)
 
-c cm-algorithmus
-c
-c knum		anzahl der vorgegebenen knoten der ersten stufe
-c kanf,kend	neue knotennummern der alten stufe
-c		(...knum=kend-kanf+1)
-c 		iphv,kphv muss fuer erste stufe schon
-c		...besetzt sein (der rest null)
-c m		enthaelt am ende gefundene bandbreite
+! cm-algorithmus
+!
+! knum		anzahl der vorgegebenen knoten der ersten stufe
+! kanf,kend	neue knotennummern der alten stufe
+!		(...knum=kend-kanf+1)
+! 		iphv,kphv muss fuer erste stufe schon
+!		...besetzt sein (der rest null)
+! m		enthaelt am ende gefundene bandbreite
 
         implicit none
 
@@ -161,11 +161,11 @@ c m		enthaelt am ende gefundene bandbreite
         return
 	end
 
-c****************************************************************
+!****************************************************************
 
 	subroutine cmvwhat(iwei)
 
-c asks about what to do (CMV algorithm)
+! asks about what to do (CMV algorithm)
 
 	implicit none
 
@@ -190,11 +190,11 @@ c asks about what to do (CMV algorithm)
 
 	end
 
-c****************************************************************
+!****************************************************************
 
 	subroutine getgrds(ngr,nkn,ng,jgrmin,jgrmax)
 
-c gets min/max grades to use for a starting point minimization
+! gets min/max grades to use for a starting point minimization
 
 	implicit none
 
@@ -236,11 +236,11 @@ c gets min/max grades to use for a starting point minimization
 
 	end
 
-c****************************************************************
+!****************************************************************
 
 	subroutine getfstl(nkn,iphv,kphv,knum)
 
-c gets first level interactively
+! gets first level interactively
 
 	implicit none
 
@@ -284,11 +284,11 @@ c gets first level interactively
 
 	end
 
-c****************************************************************
+!****************************************************************
 
         subroutine nodnum(nkn,iphv,kphv,node,knum)
 
-c initializes numbering of nodes for first node
+! initializes numbering of nodes for first node
 
         implicit none
 
@@ -309,12 +309,12 @@ c initializes numbering of nodes for first node
 
 	end
 
-c****************************************************************
+!****************************************************************
 
-	subroutine cmgrade(nkn,ngrddi,ipv,iphv,kphv,ng,iknot,
-     +				jgrmin,jgrmax,bwrite)
+	subroutine cmgrade(nkn,ngrddi,ipv,iphv,kphv,ng,iknot, &
+     &				jgrmin,jgrmax,bwrite)
 
-c cuthill-mckee algorithm for grades
+! cuthill-mckee algorithm for grades
 
         implicit none
 
@@ -342,7 +342,7 @@ c cuthill-mckee algorithm for grades
               call cmalg(nkn,ngrddi,knum,m,iphv,kphv,ng,iknot)
 	      !write(6,*) i,ipv(i),ng(i),m,mmin
 	      call optest('inside cmgrade',nkn,ipv,iphv,kphv)
-c              write(6,'(8x,3i12)') ipv(i),ng(i),m
+!              write(6,'(8x,3i12)') ipv(i),ng(i),m
               if(m.lt.mmin) then
                 mmin=m
                 ikmer=i
@@ -362,5 +362,5 @@ c              write(6,'(8x,3i12)') ipv(i),ng(i),m
 
 	end
 
-c****************************************************************
+!****************************************************************
 

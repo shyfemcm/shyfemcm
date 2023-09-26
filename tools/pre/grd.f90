@@ -25,100 +25,100 @@
 !
 !--------------------------------------------------------------------------
 
-c rdgrd routines - read GRD files
-c
-c contents :
-c
-c       subroutine rdgrd(...)
-c				reads grd file
-c       subroutine rdcom(...)
-c				reads comment from .grd file
-c       subroutine rdnode(...)
-c				reads node from .grd file
-c       subroutine rdelem(...)
-c				reads element from .grd file
-c       subroutine rdline(...)
-c				reads line from .grd file
-c	subroutine read_node_list(...)
-c				reads node list
-c	subroutine rdunknown(iwhat,berr)
-c				handles unknown type
-c
-c       function ifstch(line)
-c				finds first char of line that is not blank
-c       subroutine fempar(line)
-c				read parameters for fem model
-c
-c	subroutine ex2in(nkn,ne,nl,ipnv,ipaux,nen3v,inodlv,berr)
-c				changing extern with intern node numbers
-c	subroutine chex2in(nkn,n,nodes,ipnv,index,berr)
-c				changing extern with intern node numbers (list)
-c
-c	internal routines:
-c
-c	subroutine grd_internal_init(file)
-c	function grd_next_line()
-c	subroutine grd_nvals(nvals)
-c	subroutine grd_vals(nvals,vals)
-c	subroutine grd_ival(ival,val)
-c	subroutine grd_line_info(iline_grd,line_grd)
-c	subroutine grd_write_line_info
-c
-c	writing routines
-c
-c	subroutine grd_write_grid(
-c				writes grd file
-c	subroutine grd_write_node_list(nout,n,nodes,ipnv,depth)
-c				writes out node list
-c
-c revision log :
-c
-c 20.03.1998	ggu	declare f(6) in subroutines to avoid compiler warnings
-c 20.05.1998	ggu	open file with ifileo()
-c 22.05.1998	ggu	bug fix (ifileo not declared)
-c 27.03.2001	ggu	assign depth -999. to depth not set
-c 09.10.2001	ggu	read from stdin
-c 09.10.2001	ggu	read node type (ianv)
-c 18.10.2005	ggu	error messages slightly changed
-c 22.04.2009	ggu	changes from spline integrated (read lines)
-c 24.04.2009	ggu	newly restructured
-c 23.03.2010	ggu	changed v6.1.1
-c 14.02.2012	ggu	changed VERS_6_1_44
-c 09.03.2012	ggu	handle dimension error more gracefully
-c 16.03.2012	ggu	changed VERS_6_1_48
-c 23.12.2014	ggu	changed VERS_7_0_11
-c 08.01.2015	ggu	common blocks in include file
-c 05.05.2015	ggu	changed VERS_7_1_10
-c 10.07.2015	ggu	changed VERS_7_1_50
-c 13.07.2015	ggu	changed VERS_7_1_51
-c 17.07.2015	ggu	changed VERS_7_1_80
-c 20.07.2015	ggu	changed VERS_7_1_81
-c 24.07.2015	ggu	changed VERS_7_1_82
-c 30.07.2015	ggu	changed VERS_7_1_83
-c 02.10.2015	ggu	new routine is_grd_file()
-c 02.10.2015	ggu	now stopping on first error
-c 10.10.2015	ggu	changed VERS_7_3_2
-c 18.12.2015	ggu	changed VERS_7_3_17
-c 25.05.2016	ggu	changed VERS_7_5_10
-c 06.06.2016	ggu	bstop substituted with berr, new accessor routines
-c 14.06.2016	ggu	changed VERS_7_5_14
-c 09.09.2016	ggu	changed VERS_7_5_17
-c 10.02.2017	ggu	bug fix: do not allocate at least 1 array element
-c 14.11.2017	ggu	changed VERS_7_5_36
-c 24.01.2018	ggu	changed VERS_7_5_41
-c 22.02.2018	ggu	changed VERS_7_5_42
-c 03.04.2018	ggu	changed VERS_7_5_43
-c 06.07.2018	ggu	new handling of line reading routines: read_all_lines()
-c 25.10.2018	ccf	grid output in gr3 and msh formats
-c 16.02.2019	ggu	changed VERS_7_5_60
-c 28.05.2020	ggu	bgrdwrite and grd_set_write() implemented
-c 12.02.2022	ggu	new variable bcdepth
-c 09.03.2022	ggu	new routine grd_write_node()
-c 08.06.2022	ggu	new calling sequence in grd_write_item()
-c 16.06.2022	ggu	new routine write_grd_file() for simplified writing
-c 13.12.2022	ggu	new routine write_grd_file_with_depth()
-c
-c**********************************************************
+! rdgrd routines - read GRD files
+!
+! contents :
+!
+!       subroutine rdgrd(...)
+!				reads grd file
+!       subroutine rdcom(...)
+!				reads comment from .grd file
+!       subroutine rdnode(...)
+!				reads node from .grd file
+!       subroutine rdelem(...)
+!				reads element from .grd file
+!       subroutine rdline(...)
+!				reads line from .grd file
+!	subroutine read_node_list(...)
+!				reads node list
+!	subroutine rdunknown(iwhat,berr)
+!				handles unknown type
+!
+!       function ifstch(line)
+!				finds first char of line that is not blank
+!       subroutine fempar(line)
+!				read parameters for fem model
+!
+!	subroutine ex2in(nkn,ne,nl,ipnv,ipaux,nen3v,inodlv,berr)
+!				changing extern with intern node numbers
+!	subroutine chex2in(nkn,n,nodes,ipnv,index,berr)
+!				changing extern with intern node numbers (list)
+!
+!	internal routines:
+!
+!	subroutine grd_internal_init(file)
+!	function grd_next_line()
+!	subroutine grd_nvals(nvals)
+!	subroutine grd_vals(nvals,vals)
+!	subroutine grd_ival(ival,val)
+!	subroutine grd_line_info(iline_grd,line_grd)
+!	subroutine grd_write_line_info
+!
+!	writing routines
+!
+!	subroutine grd_write_grid(
+!				writes grd file
+!	subroutine grd_write_node_list(nout,n,nodes,ipnv,depth)
+!				writes out node list
+!
+! revision log :
+!
+! 20.03.1998	ggu	declare f(6) in subroutines to avoid compiler warnings
+! 20.05.1998	ggu	open file with ifileo()
+! 22.05.1998	ggu	bug fix (ifileo not declared)
+! 27.03.2001	ggu	assign depth -999. to depth not set
+! 09.10.2001	ggu	read from stdin
+! 09.10.2001	ggu	read node type (ianv)
+! 18.10.2005	ggu	error messages slightly changed
+! 22.04.2009	ggu	changes from spline integrated (read lines)
+! 24.04.2009	ggu	newly restructured
+! 23.03.2010	ggu	changed v6.1.1
+! 14.02.2012	ggu	changed VERS_6_1_44
+! 09.03.2012	ggu	handle dimension error more gracefully
+! 16.03.2012	ggu	changed VERS_6_1_48
+! 23.12.2014	ggu	changed VERS_7_0_11
+! 08.01.2015	ggu	common blocks in include file
+! 05.05.2015	ggu	changed VERS_7_1_10
+! 10.07.2015	ggu	changed VERS_7_1_50
+! 13.07.2015	ggu	changed VERS_7_1_51
+! 17.07.2015	ggu	changed VERS_7_1_80
+! 20.07.2015	ggu	changed VERS_7_1_81
+! 24.07.2015	ggu	changed VERS_7_1_82
+! 30.07.2015	ggu	changed VERS_7_1_83
+! 02.10.2015	ggu	new routine is_grd_file()
+! 02.10.2015	ggu	now stopping on first error
+! 10.10.2015	ggu	changed VERS_7_3_2
+! 18.12.2015	ggu	changed VERS_7_3_17
+! 25.05.2016	ggu	changed VERS_7_5_10
+! 06.06.2016	ggu	bstop substituted with berr, new accessor routines
+! 14.06.2016	ggu	changed VERS_7_5_14
+! 09.09.2016	ggu	changed VERS_7_5_17
+! 10.02.2017	ggu	bug fix: do not allocate at least 1 array element
+! 14.11.2017	ggu	changed VERS_7_5_36
+! 24.01.2018	ggu	changed VERS_7_5_41
+! 22.02.2018	ggu	changed VERS_7_5_42
+! 03.04.2018	ggu	changed VERS_7_5_43
+! 06.07.2018	ggu	new handling of line reading routines: read_all_lines()
+! 25.10.2018	ccf	grid output in gr3 and msh formats
+! 16.02.2019	ggu	changed VERS_7_5_60
+! 28.05.2020	ggu	bgrdwrite and grd_set_write() implemented
+! 12.02.2022	ggu	new variable bcdepth
+! 09.03.2022	ggu	new routine grd_write_node()
+! 08.06.2022	ggu	new calling sequence in grd_write_item()
+! 16.06.2022	ggu	new routine write_grd_file() for simplified writing
+! 13.12.2022	ggu	new routine write_grd_file_with_depth()
+!
+!**********************************************************
 
 !==============================================================
 	module grd
@@ -175,8 +175,8 @@ c**********************************************************
 	logical :: bdebug = .false.
 	logical :: balloc
 
-	if( nkk == 0 .and. nee == 0 .and. nll == 0 .and.
-     +				nnee == 0 .and. nnll == 0 ) then
+	if( nkk == 0 .and. nee == 0 .and. nll == 0 .and. &
+     &				nnee == 0 .and. nnll == 0 ) then
 	  balloc = .false.
 	else
 	  balloc = .true.
@@ -265,7 +265,7 @@ c**********************************************************
 	end module grd
 !==============================================================
 
-c*****************************************************************
+!*****************************************************************
 
 	subroutine grd_set_write(bset)
 
@@ -279,7 +279,7 @@ c*****************************************************************
 
 	end subroutine grd_set_write
 
-c*****************************************************************
+!*****************************************************************
 
 	subroutine grd_set_error(berr)
 
@@ -293,7 +293,7 @@ c*****************************************************************
 
 	end subroutine grd_set_error
 
-c*****************************************************************
+!*****************************************************************
 
 	function grd_write_error()
 
@@ -307,7 +307,7 @@ c*****************************************************************
 
 	end function grd_write_error
 
-c*****************************************************************
+!*****************************************************************
 
 	subroutine grd_init_fake
 
@@ -319,9 +319,9 @@ c*****************************************************************
 
 	end
 
-c*****************************************************************
-c*****************************************************************
-c*****************************************************************
+!*****************************************************************
+!*****************************************************************
+!*****************************************************************
 
 	subroutine grd_get_params(nk,ne,nl,nne,nnl)
 
@@ -337,9 +337,9 @@ c*****************************************************************
 
 	end subroutine grd_get_params
 
-c*****************************************************************
-c*****************************************************************
-c*****************************************************************
+!*****************************************************************
+!*****************************************************************
+!*****************************************************************
 
 	subroutine grd_read(file)
 
@@ -370,18 +370,18 @@ c*****************************************************************
 
 	call grd_init(nkndi,neldi,nlidi,nendi,nlndi)
 
-	call rdgrd(
-     +			 file
-     +			,berr
-     +			,nco,nk,ne,nl,nne,nnl
-     +			,nkndi,neldi,nlidi,nendi,nlndi
-     +			,ippnv,ippev,ipplv
-     +			,ianv,iaev,ialv
-     +			,hhnv,hhev,hhlv
-     +			,xv,yv
-     +                  ,ipntev,inodev
-     +                  ,ipntlv,inodlv
-     +			)
+	call rdgrd( &
+     &			 file &
+     &			,berr &
+     &			,nco,nk,ne,nl,nne,nnl &
+     &			,nkndi,neldi,nlidi,nendi,nlndi &
+     &			,ippnv,ippev,ipplv &
+     &			,ianv,iaev,ialv &
+     &			,hhnv,hhev,hhlv &
+     &			,xv,yv &
+     &                  ,ipntev,inodev &
+     &                  ,ipntlv,inodlv &
+     &			)
 	if( berr ) goto 99
 
 	call ex2in(nk,nne,nnl,ippnv,inodev,inodlv,berr)
@@ -396,11 +396,11 @@ c*****************************************************************
 	stop 'error stop grd_read: error reading grd file'
 	end
 
-c*****************************************************************
+!*****************************************************************
 
         subroutine grd_info(gfile,nk,ne,nl,nne,nnl,berr)
 
-c reads grd file to obtain basic parameters
+! reads grd file to obtain basic parameters
 
         implicit none
 
@@ -423,9 +423,9 @@ c reads grd file to obtain basic parameters
         integer ipntev0(0:0),inodev(1)
         integer ipntlv0(0:0),inodlv(1)
 
-c-----------------------------------------------------------------
-c initialize parameters
-c-----------------------------------------------------------------
+!-----------------------------------------------------------------
+! initialize parameters
+!-----------------------------------------------------------------
 
         ner = 6
         berr = .false.
@@ -438,26 +438,26 @@ c-----------------------------------------------------------------
 
 	call grd_init_fake
 
-c-----------------------------------------------------------------
-c read grd file
-c-----------------------------------------------------------------
+!-----------------------------------------------------------------
+! read grd file
+!-----------------------------------------------------------------
 
-        call rdgrd(
-     +                   gfile
-     +                  ,berr
-     +                  ,nco,nk,ne,nl,nne,nnl
-     +                  ,nkndi0,neldi0,nlidi0,nendi0,nlndi0
-     +                  ,ippnv,ippev,ipplv
-     +                  ,ianv,iaev,ialv
-     +                  ,hhnv,hhev,hhlv
-     +                  ,xv,yv
-     +                  ,ipntev0,inodev
-     +                  ,ipntlv0,inodlv
-     +                  )
+        call rdgrd( &
+     &                   gfile &
+     &                  ,berr &
+     &                  ,nco,nk,ne,nl,nne,nnl &
+     &                  ,nkndi0,neldi0,nlidi0,nendi0,nlndi0 &
+     &                  ,ippnv,ippev,ipplv &
+     &                  ,ianv,iaev,ialv &
+     &                  ,hhnv,hhev,hhlv &
+     &                  ,xv,yv &
+     &                  ,ipntev0,inodev &
+     &                  ,ipntlv0,inodlv &
+     &                  )
 
         end
 
-c**********************************************************
+!**********************************************************
 
 	function is_grd_file(gfile)
 
@@ -479,9 +479,9 @@ c**********************************************************
         integer ipntev0(0:0),inodev(1)
         integer ipntlv0(0:0),inodlv(1)
 
-c-----------------------------------------------------------------
-c initialize parameters
-c-----------------------------------------------------------------
+!-----------------------------------------------------------------
+! initialize parameters
+!-----------------------------------------------------------------
 
         ner = 6
         berr = .false.
@@ -496,22 +496,22 @@ c-----------------------------------------------------------------
 
 	call grd_init_fake
 
-c-----------------------------------------------------------------
-c read grd file
-c-----------------------------------------------------------------
+!-----------------------------------------------------------------
+! read grd file
+!-----------------------------------------------------------------
 
-        call rdgrd(
-     +                   gfile
-     +                  ,berr
-     +                  ,nco,nk,ne,nl,nne,nnl
-     +                  ,nkndi0,neldi0,nlidi0,nendi0,nlndi0
-     +                  ,ippnv,ippev,ipplv
-     +                  ,ianv,iaev,ialv
-     +                  ,hhnv,hhev,hhlv
-     +                  ,xv,yv
-     +                  ,ipntev0,inodev
-     +                  ,ipntlv0,inodlv
-     +                  )
+        call rdgrd( &
+     &                   gfile &
+     &                  ,berr &
+     &                  ,nco,nk,ne,nl,nne,nnl &
+     &                  ,nkndi0,neldi0,nlidi0,nendi0,nlndi0 &
+     &                  ,ippnv,ippev,ipplv &
+     &                  ,ianv,iaev,ialv &
+     &                  ,hhnv,hhev,hhlv &
+     &                  ,xv,yv &
+     &                  ,ipntev0,inodev &
+     &                  ,ipntlv0,inodlv &
+     &                  )
 
 	call grd_set_error(.true.)	!original behavior
 
@@ -519,7 +519,7 @@ c-----------------------------------------------------------------
 
         end
 
-c**********************************************************
+!**********************************************************
 
 	subroutine grd_close
 
@@ -531,7 +531,7 @@ c**********************************************************
 
 	end
 
-c**********************************************************
+!**********************************************************
 
 	subroutine grd_write(file)
 
@@ -569,20 +569,20 @@ c**********************************************************
 	write(iu,*) '========================================'
 	end if
 
-	call grd_write_grid(
-     +			 file
-     +			,nco,nk,ne,nl,nne,nnl
-     +			,ippnv,ippev,ipplv
-     +			,ianv,iaev,ialv
-     +			,hhnv,hhev,hhlv
-     +			,xv,yv
-     +                  ,ipntev,inodev
-     +                  ,ipntlv,inodlv
-     +			)
+	call grd_write_grid( &
+     &			 file &
+     &			,nco,nk,ne,nl,nne,nnl &
+     &			,ippnv,ippev,ipplv &
+     &			,ianv,iaev,ialv &
+     &			,hhnv,hhev,hhlv &
+     &			,xv,yv &
+     &                  ,ipntev,inodev &
+     &                  ,ipntlv,inodlv &
+     &			)
 
 	end
 
-c**********************************************************
+!**********************************************************
 
 	subroutine gr3_write(file)
 
@@ -620,20 +620,20 @@ c**********************************************************
 	write(iu,*) '========================================'
 	end if
 
-	call gr3_write_grid(
-     +			 file
-     +			,nco,nk,ne,nl,nne,nnl
-     +			,ippnv,ippev,ipplv
-     +			,ianv,iaev,ialv
-     +			,hhnv,hhev,hhlv
-     +			,xv,yv
-     +                  ,ipntev,inodev
-     +                  ,ipntlv,inodlv
-     +			)
+	call gr3_write_grid( &
+     &			 file &
+     &			,nco,nk,ne,nl,nne,nnl &
+     &			,ippnv,ippev,ipplv &
+     &			,ianv,iaev,ialv &
+     &			,hhnv,hhev,hhlv &
+     &			,xv,yv &
+     &                  ,ipntev,inodev &
+     &                  ,ipntlv,inodlv &
+     &			)
 
 	end
 
-c**********************************************************
+!**********************************************************
 
 	subroutine msh_write(file)
 
@@ -671,42 +671,42 @@ c**********************************************************
 	write(iu,*) '========================================'
 	end if
 
-	call msh_write_grid(
-     +			 file
-     +			,nco,nk,ne,nl,nne,nnl
-     +			,ippnv,ippev,ipplv
-     +			,ianv,iaev,ialv
-     +			,hhnv,hhev,hhlv
-     +			,xv,yv
-     +                  ,ipntev,inodev
-     +                  ,ipntlv,inodlv
-     +			)
+	call msh_write_grid( &
+     &			 file &
+     &			,nco,nk,ne,nl,nne,nnl &
+     &			,ippnv,ippev,ipplv &
+     &			,ianv,iaev,ialv &
+     &			,hhnv,hhev,hhlv &
+     &			,xv,yv &
+     &                  ,ipntev,inodev &
+     &                  ,ipntlv,inodlv &
+     &			)
 
 	end
 
-c**********************************************************
-c**********************************************************
-c**********************************************************
+!**********************************************************
+!**********************************************************
+!**********************************************************
 
-	subroutine rdgrd(
-     +			 file
-     +			,berr
-     +			,nco,nkn,nel,nli,nne,nnl
-     +			,nknddi,nelddi,nliddi,nenddi,nlnddi
-     +			,ipnv,ipev,iplv
-     +			,ianv,iaev,ialv
-     +			,hnv,hev,hlv
-     +			,xgv,ygv
-     +                  ,ipntev,inodev
-     +                  ,ipntlv,inodlv
-     +			)
+	subroutine rdgrd( &
+     &			 file &
+     &			,berr &
+     &			,nco,nkn,nel,nli,nne,nnl &
+     &			,nknddi,nelddi,nliddi,nenddi,nlnddi &
+     &			,ipnv,ipev,iplv &
+     &			,ianv,iaev,ialv &
+     &			,hnv,hev,hlv &
+     &			,xgv,ygv &
+     &                  ,ipntev,inodev &
+     &                  ,ipntlv,inodlv &
+     &			)
 
-c reads grd file
-c
-c after read nen3v and inodlv contain still external node numbers
-c use ex2in to convert external to internal node numbers
-c
-c works only with triangles as elements
+! reads grd file
+!
+! after read nen3v and inodlv contain still external node numbers
+! use ex2in to convert external to internal node numbers
+!
+! works only with triangles as elements
 
 	!use grd
 
@@ -755,9 +755,9 @@ c works only with triangles as elements
 
 	logical grd_next_line
 
-c--------------------------------------------------------------------
-c initialize variables
-c--------------------------------------------------------------------
+!--------------------------------------------------------------------
+! initialize variables
+!--------------------------------------------------------------------
 
 	
 	berrwrite = berr	!write read errors to terminal
@@ -774,15 +774,15 @@ c--------------------------------------------------------------------
 	ipntev(0) = 0
 	ipntlv(0) = 0
 
-c--------------------------------------------------------------------
-c open file or STDIN
-c--------------------------------------------------------------------
+!--------------------------------------------------------------------
+! open file or STDIN
+!--------------------------------------------------------------------
 
 	call grd_internal_init(file)
 
-c--------------------------------------------------------------------
-c loop on lines and read
-c--------------------------------------------------------------------
+!--------------------------------------------------------------------
+! loop on lines and read
+!--------------------------------------------------------------------
 
         do while( grd_next_line() )
 
@@ -793,14 +793,14 @@ c--------------------------------------------------------------------
           if( iwhat.eq.0 ) then  !comment or error
 		call rdcom(nco,berr)
           else if(iwhat.eq.1) then              !node
-        	call rdnode(nkn,nknddi,berr
-     +				,ipnv,ianv,xgv,ygv,hnv)
+        	call rdnode(nkn,nknddi,berr &
+     &				,ipnv,ianv,xgv,ygv,hnv)
           else if(iwhat.eq.2) then              !element
-        	call rdelem(nel,nne,nelddi,nenddi,berr
-     +				,ipev,iaev,ipntev,inodev,hev)
+        	call rdelem(nel,nne,nelddi,nenddi,berr &
+     &				,ipev,iaev,ipntev,inodev,hev)
           else if(iwhat.eq.3) then              !line
-        	call rdline(nli,nnl,nliddi,nlnddi,berr
-     +				,iplv,ialv,ipntlv,inodlv,hlv)
+        	call rdline(nli,nnl,nliddi,nlnddi,berr &
+     &				,iplv,ialv,ipntlv,inodlv,hlv)
           else
 	  	call rdunknown(iwhat,berr)
           end if
@@ -812,17 +812,17 @@ c--------------------------------------------------------------------
 
 	if( nkn == 0 ) berr = .true.	!we must really read something
 
-c--------------------------------------------------------------------
-c end of routine
-c--------------------------------------------------------------------
+!--------------------------------------------------------------------
+! end of routine
+!--------------------------------------------------------------------
 
 	end
 
-c**********************************************************
+!**********************************************************
 
 	subroutine rdcom(nco,berr)
 
-c reads comment
+! reads comment
 
 	implicit none
 
@@ -860,12 +860,12 @@ c reads comment
 
 	end
 
-c**********************************************************
+!**********************************************************
 
-        subroutine rdnode(nkn,nknddi,berr
-     +				,ipnv,ianv,xgv,ygv,hnv)
+        subroutine rdnode(nkn,nknddi,berr &
+     &				,ipnv,ianv,xgv,ygv,hnv)
 
-c reads nodes from .grd file
+! reads nodes from .grd file
 
 	use grd, only : xscale_grd,yscale_grd,zscale_grd
 
@@ -929,12 +929,12 @@ c reads nodes from .grd file
 	stop 'error stop rdnode: nknddi'
         end
 
-c**********************************************************
+!**********************************************************
 
-        subroutine rdelem(nel,nne,nelddi,nenddi,berr
-     +				,ipev,iaev,ipntev,inodev,hev)
+        subroutine rdelem(nel,nne,nelddi,nenddi,berr &
+     &				,ipev,iaev,ipntev,inodev,hev)
 
-c reads elements from .grd file
+! reads elements from .grd file
 
         implicit none
 
@@ -1027,12 +1027,12 @@ c reads elements from .grd file
 	stop 'error stop rdelem: nelddi'
 	end
 
-c**********************************************************
+!**********************************************************
 
-        subroutine rdline(nli,nnl,nliddi,nlnddi,berr
-     +				,iplv,ialv,ipntlv,inodlv,hlv)
+        subroutine rdline(nli,nnl,nliddi,nlnddi,berr &
+     &				,iplv,ialv,ipntlv,inodlv,hlv)
 
-c reads lines from .grd file
+! reads lines from .grd file
 
         implicit none
 
@@ -1105,11 +1105,11 @@ c reads lines from .grd file
 	stop 'error stop rdline: nliddi'
 	end
 
-c**********************************************************
+!**********************************************************
 
 	subroutine read_node_list(nvert,istart,nodes,depth)
 
-c reads node list
+! reads node list
 
 	use grd, only : zscale_grd
 
@@ -1160,11 +1160,11 @@ c reads node list
 
 	end
 
-c******************************************************************************
+!******************************************************************************
 
         subroutine rdunknown(iwhat,berr)
 
-c handles unknown type
+! handles unknown type
 
 	logical berr
 
@@ -1186,11 +1186,11 @@ c handles unknown type
 
 	end
 
-c******************************************************************************
+!******************************************************************************
 
 	function ifstch(line)
 
-c finds first char of line that is not blank or tab
+! finds first char of line that is not blank or tab
 
         implicit none
 
@@ -1213,28 +1213,28 @@ c finds first char of line that is not blank or tab
 	return
 	end
 
-c******************************************************************************
+!******************************************************************************
 
 	subroutine fempar(gline)
 
-c read parameters for fem model 
-c
-c the following special symbols are recognized on a comment line :
-c
-c (FEM-TITLE)	title for basin			default: first comment line
-c (FEM-SCALE)	scale in x/y/z for basin	default: 1.,1.,1.
-c (FEM-LATID)	latitude of basin (degrees)	default: 0.
-c (FEM-NORTH)	true north of basin (degrees) 	default: 0.
-c
-c all entries are optional
-c
-c example (c of fortran comment must be deleted, line starts with 0) :
-c
-c 0 (FEM-TITLE) test basin
-c 0 (FEM-SCALE) 0.5 0.5 2.
-c 0 (FEM-LATID) 45.0
-c 0 (FEM-NORTH) 90.0
-c
+! read parameters for fem model 
+!
+! the following special symbols are recognized on a comment line :
+!
+! (FEM-TITLE)	title for basin			default: first comment line
+! (FEM-SCALE)	scale in x/y/z for basin	default: 1.,1.,1.
+! (FEM-LATID)	latitude of basin (degrees)	default: 0.
+! (FEM-NORTH)	true north of basin (degrees) 	default: 0.
+!
+! all entries are optional
+!
+! example (c of fortran comment must be deleted, line starts with 0) :
+!
+! 0 (FEM-TITLE) test basin
+! 0 (FEM-SCALE) 0.5 0.5 2.
+! 0 (FEM-LATID) 45.0
+! 0 (FEM-NORTH) 90.0
+!
 	use grd
 	!use basin
 
@@ -1286,7 +1286,7 @@ c
 	  end if
 	end if
 
-c use first comment as title
+! use first comment as title
 
 	if( i.gt.0 .and. .not.btitle ) then
 		title_grd=gline(i:)
@@ -1295,15 +1295,15 @@ c use first comment as title
 
 	end
 
-c******************************************************************************
-c******************************************************************************
-c******************************************************************************
+!******************************************************************************
+!******************************************************************************
+!******************************************************************************
 
 	subroutine ex2in(nkn,ne,nl,ippnv,inodev,inodlv,berr)
 
-c changing extern with intern node numbers in elements and lines
-c
-c if no elements or lines are given, set ne or nl to 0
+! changing extern with intern node numbers in elements and lines
+!
+! if no elements or lines are given, set ne or nl to 0
 
 	implicit none
 
@@ -1321,11 +1321,11 @@ c if no elements or lines are given, set ne or nl to 0
 
 	end
 
-c*****************************************************************
+!*****************************************************************
  
         subroutine chex2in(nkn,n,nodes,ipnv,index,berr)
  
-c changing extern with intern node numbers node list
+! changing extern with intern node numbers node list
  
         implicit none
  
@@ -1354,13 +1354,13 @@ c changing extern with intern node numbers node list
  
         end
 
-c*****************************************************************
-c*****************************************************************
-c*****************************************************************
+!*****************************************************************
+!*****************************************************************
+!*****************************************************************
 
 	subroutine grd_internal_init(file)
 
-c initializes reading from grid file
+! initializes reading from grid file
 
 	use grd
 
@@ -1396,7 +1396,7 @@ c initializes reading from grid file
 
 	end
 
-c*****************************************************************
+!*****************************************************************
 
 	subroutine grd_internal_close
 
@@ -1409,11 +1409,11 @@ c*****************************************************************
 
 	end
 
-c*****************************************************************
+!*****************************************************************
 
 	function grd_next_line()
 
-c reads next line from file
+! reads next line from file
 
 	use grd
 
@@ -1451,11 +1451,11 @@ c reads next line from file
 	stop 'error stop grd_next_line: ianz_grd'
 	end
 
-c*****************************************************************
+!*****************************************************************
 
 	subroutine grd_nvals(nvals)
 
-c returns number of values on line
+! returns number of values on line
 
 	use grd
 
@@ -1467,11 +1467,11 @@ c returns number of values on line
 
 	end
 
-c*****************************************************************
+!*****************************************************************
 
 	subroutine grd_vals(nvals,vals)
 
-c returns nvals in vals
+! returns nvals in vals
 
 	use grd
 
@@ -1488,7 +1488,7 @@ c returns nvals in vals
 	  vals(i) = f_grd(i)
 	end do
 
-c	if nvals is greater than ianz_grd return zero
+!	if nvals is greater than ianz_grd return zero
 
 	nmin = max(1,n+1)
 	nmax = min(80,nvals)
@@ -1499,11 +1499,11 @@ c	if nvals is greater than ianz_grd return zero
 
 	end
 
-c*****************************************************************
+!*****************************************************************
 
 	subroutine grd_ival(ival,val)
 
-c returns value at position ival
+! returns value at position ival
 
 	use grd
 
@@ -1517,11 +1517,11 @@ c returns value at position ival
 
 	end
 
-c*****************************************************************
+!*****************************************************************
 
 	subroutine grd_line_info(iline_gr,line_gr)
 
-c returns info on line
+! returns info on line
 
 	use grd
 
@@ -1535,11 +1535,11 @@ c returns info on line
 
 	end
 
-c*****************************************************************
+!*****************************************************************
 
 	subroutine grd_write_line_info
 
-c write info on line
+! write info on line
 
 	use grd
 
@@ -1554,22 +1554,22 @@ c write info on line
 
 	end
 
-c*****************************************************************
-c*****************************************************************
-c*****************************************************************
+!*****************************************************************
+!*****************************************************************
+!*****************************************************************
 
-	subroutine grd_write_grid(
-     +			 file
-     +			,nco,nk,ne,nl,nne,nnl
-     +			,ippnv,ippev,ipplv
-     +			,ianv,iaev,ialv
-     +			,hhnv,hhev,hhlv
-     +			,xv,yv
-     +                  ,ipntev,inodev
-     +                  ,ipntlv,inodlv
-     +			)
+	subroutine grd_write_grid( &
+     &			 file &
+     &			,nco,nk,ne,nl,nne,nnl &
+     &			,ippnv,ippev,ipplv &
+     &			,ianv,iaev,ialv &
+     &			,hhnv,hhev,hhlv &
+     &			,xv,yv &
+     &                  ,ipntev,inodev &
+     &                  ,ipntlv,inodlv &
+     &			)
 
-c writes grd file
+! writes grd file
 
 	implicit none
 
@@ -1705,7 +1705,7 @@ c writes grd file
 	stop 'error stop grd_write_grid: cannot open file'
 	end
 
-c*****************************************************************
+!*****************************************************************
 
 	subroutine grd_write_node(nout,number,itype,x,y,depth)
 
@@ -1729,10 +1729,10 @@ c*****************************************************************
  1000	format(i1,2i10,3e16.8)
 	end
 
-c*****************************************************************
+!*****************************************************************
 
-	subroutine grd_write_item(nout,iwhat,number,itype,n,
-     +				nodes,depth)
+	subroutine grd_write_item(nout,iwhat,number,itype,n, &
+     &				nodes,depth)
 
 	implicit none
 
@@ -1751,15 +1751,15 @@ c*****************************************************************
 	  write(nout,3000) iwhat,number,itype,n
 	  call grd_write_node_list(nout,n,nodes,depth)
 	else if( depth == flag ) then
-	  write(nout,2000) iwhat,number,itype,n,
-     +			(nodes(i),i=1,n)
+	  write(nout,2000) iwhat,number,itype,n, &
+     &			(nodes(i),i=1,n)
 	else
 	  if( n == 2 ) then
-	    write(nout,2002) iwhat,number,itype,n,
-     +			(nodes(i),i=1,n),depth
+	    write(nout,2002) iwhat,number,itype,n, &
+     &			(nodes(i),i=1,n),depth
 	  else
-	    write(nout,2000) iwhat,number,itype,n,
-     +			(nodes(i),i=1,n),depth
+	    write(nout,2000) iwhat,number,itype,n, &
+     &			(nodes(i),i=1,n),depth
 	  end if
 	end if
 
@@ -1769,11 +1769,11 @@ c*****************************************************************
  3000	format(i1,3i10)
 	end
 
-c*****************************************************************
+!*****************************************************************
 
 	subroutine grd_write_node_list(nout,n,nodes,depth)
 
-c writes out node list
+! writes out node list
 
 	implicit none
 
@@ -1805,7 +1805,7 @@ c writes out node list
  3001	format(1x,6i10)
 	end
 
-c*****************************************************************
+!*****************************************************************
 
 	subroutine grd_get_depth(nk,ne,hkv,hev)
 
@@ -1835,7 +1835,7 @@ c*****************************************************************
 
 	end
 
-c*****************************************************************
+!*****************************************************************
 
 	subroutine grd_get_nodes(np,xp,yp,hp)
 
@@ -1860,20 +1860,20 @@ c*****************************************************************
 
 	end
 
-c*****************************************************************
+!*****************************************************************
 
-	subroutine gr3_write_grid(
-     +			 file
-     +			,nco,nk,ne,nl,nne,nnl
-     +			,ippnv,ippev,ipplv
-     +			,ianv,iaev,ialv
-     +			,hhnv,hhev,hhlv
-     +			,xv,yv
-     +                  ,ipntev,inodev
-     +                  ,ipntlv,inodlv
-     +			)
+	subroutine gr3_write_grid( &
+     &			 file &
+     &			,nco,nk,ne,nl,nne,nnl &
+     &			,ippnv,ippev,ipplv &
+     &			,ianv,iaev,ialv &
+     &			,hhnv,hhev,hhlv &
+     &			,xv,yv &
+     &                  ,ipntev,inodev &
+     &                  ,ipntlv,inodlv &
+     &			)
 
-c writes grd file
+! writes grd file
 
 	implicit none
 
@@ -1989,20 +1989,20 @@ c writes grd file
 	stop 'error stop gr3_write_grid: cannot open file'
 	end
 
-c*****************************************************************
+!*****************************************************************
 
-	subroutine msh_write_grid(
-     +			 file
-     +			,nco,nk,ne,nl,nne,nnl
-     +			,ippnv,ippev,ipplv
-     +			,ianv,iaev,ialv
-     +			,hhnv,hhev,hhlv
-     +			,xv,yv
-     +                  ,ipntev,inodev
-     +                  ,ipntlv,inodlv
-     +			)
+	subroutine msh_write_grid( &
+     &			 file &
+     &			,nco,nk,ne,nl,nne,nnl &
+     &			,ippnv,ippev,ipplv &
+     &			,ianv,iaev,ialv &
+     &			,hhnv,hhev,hhlv &
+     &			,xv,yv &
+     &                  ,ipntev,inodev &
+     &                  ,ipntlv,inodlv &
+     &			)
 
-c writes grd file in msh format (gmsh 2.2)
+! writes grd file in msh format (gmsh 2.2)
 
         use mod_geom_dynamic
 
@@ -2138,9 +2138,9 @@ c writes grd file in msh format (gmsh 2.2)
 	stop 'error stop msh_write_grid: cannot open file'
 	end
 
-c*****************************************************************
-c*****************************************************************
-c*****************************************************************
+!*****************************************************************
+!*****************************************************************
+!*****************************************************************
 
 	subroutine grd_get_total_lines(nl)
 
@@ -2154,7 +2154,7 @@ c*****************************************************************
 
 	end
 
-c*****************************************************************
+!*****************************************************************
 
 	subroutine grd_get_line_params(il,inum,itype,nvert,depth)
 
@@ -2175,7 +2175,7 @@ c*****************************************************************
 
 	end
 
-c*****************************************************************
+!*****************************************************************
 
 	subroutine grd_get_line_array(il,nvert,nodes,x,y)
 
@@ -2203,7 +2203,7 @@ c*****************************************************************
 
 	end
 
-c*****************************************************************
+!*****************************************************************
 
 	subroutine grd_get_total_nodes(nk)
 
@@ -2217,7 +2217,7 @@ c*****************************************************************
 
 	end
 
-c*****************************************************************
+!*****************************************************************
 
 	subroutine grd_get_node_params(ik,inum,itype,x,y,depth)
 
@@ -2239,9 +2239,9 @@ c*****************************************************************
 
 	end
 
-c*****************************************************************
-c*****************************************************************
-c*****************************************************************
+!*****************************************************************
+!*****************************************************************
+!*****************************************************************
 
 	subroutine grd_get_node_arrays(n,ipv,iav,hv,x,y)
 
@@ -2263,7 +2263,7 @@ c*****************************************************************
 
 	end 
 
-c*****************************************************************
+!*****************************************************************
 
 	subroutine grd_get_elem_arrays(n,ipv,iav,hv)
 
@@ -2283,28 +2283,28 @@ c*****************************************************************
 
 	end 
 
-c*****************************************************************
-c*****************************************************************
-c*****************************************************************
-c line routines
-c*****************************************************************
-c*****************************************************************
-c*****************************************************************
-c
-c all following routines read lines from GRD, BND or XY format
-c they return n,x,y,ifl
-c if n == 0 on entry only counting of x/y points
-c if n == 0 on return an error has occured
-c ifl == 1 for start of line and 0 for following points
-c XY format can read only one line
-c
-c*****************************************************************
-c*****************************************************************
-c*****************************************************************
+!*****************************************************************
+!*****************************************************************
+!*****************************************************************
+! line routines
+!*****************************************************************
+!*****************************************************************
+!*****************************************************************
+!
+! all following routines read lines from GRD, BND or XY format
+! they return n,x,y,ifl
+! if n == 0 on entry only counting of x/y points
+! if n == 0 on return an error has occured
+! ifl == 1 for start of line and 0 for following points
+! XY format can read only one line
+!
+!*****************************************************************
+!*****************************************************************
+!*****************************************************************
 
 	subroutine read_all_lines(file,n,x,y,ifl)
 
-c reads file with lines and general format (grd,bnd,xy)
+! reads file with lines and general format (grd,bnd,xy)
 
 	implicit none
 
@@ -2328,13 +2328,13 @@ c reads file with lines and general format (grd,bnd,xy)
 
 	end
 
-c*****************************************************************
-c*****************************************************************
-c*****************************************************************
+!*****************************************************************
+!*****************************************************************
+!*****************************************************************
 
 	subroutine read_grd_lines(grdfile,n,x,y,ifl)
 
-c reads grd file for lines to be treated (plot or particle release)
+! reads grd file for lines to be treated (plot or particle release)
 
 	implicit none
 
@@ -2390,11 +2390,11 @@ c reads grd file for lines to be treated (plot or particle release)
 	stop 'error stop read_grd_lines: ndim'
 	end
 
-c*****************************************************************
+!*****************************************************************
 
 	subroutine read_bnd_lines(bndfile,n,x,y,ifl)
 
-c reads old bnd file format
+! reads old bnd file format
 
 	implicit none
 
@@ -2434,11 +2434,11 @@ c reads old bnd file format
 	stop 'error stop read_bnd_lines: ndim'
 	end
 
-c*****************************************************************
+!*****************************************************************
 
 	subroutine read_xy_lines(xyfile,n,x,y,ifl)
 
-c reads xy file format - only one line allowed
+! reads xy file format - only one line allowed
 
 	implicit none
 
@@ -2480,9 +2480,9 @@ c reads xy file format - only one line allowed
 	stop 'error stop read_xy_lines: ndim'
 	end
 
-c*****************************************************************
-c*****************************************************************
-c*****************************************************************
+!*****************************************************************
+!*****************************************************************
+!*****************************************************************
 
 	function is_bnd_file(file)
 
@@ -2512,7 +2512,7 @@ c*****************************************************************
 
 	end
 
-c*****************************************************************
+!*****************************************************************
 
 	function is_xy_file(file)
 
@@ -2549,8 +2549,8 @@ c*****************************************************************
 !*****************************************************************
 !*****************************************************************
 
-	subroutine write_grd_file(file,text,nk,ne,xg,yg,index
-     +			,inext,ieext,intype,ietype)
+	subroutine write_grd_file(file,text,nk,ne,xg,yg,index &
+     &			,inext,ieext,intype,ietype)
 
 ! writes grd file with no depth information
 
@@ -2606,10 +2606,10 @@ c*****************************************************************
 
 !*****************************************************************
 
-	subroutine write_grd_file_with_depth(file
-     +			,text,nk,ne,xg,yg,index
-     +			,inext,ieext,intype,ietype
-     +			,rndepth,redepth)
+	subroutine write_grd_file_with_depth(file &
+     &			,text,nk,ne,xg,yg,index &
+     &			,inext,ieext,intype,ietype &
+     &			,rndepth,redepth)
 
 ! writes grd file with depth information
 

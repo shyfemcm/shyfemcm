@@ -23,52 +23,52 @@
 !
 !--------------------------------------------------------------------------
 
-c Rosen bandwidth optimization algorithm
-c
-c revision log :
-c
-c 05.06.1998	ggu	avoid write to terminal
-c 23.03.2010	ggu	changed v6.1.1
-c 30.03.2012	ggu	changed VERS_6_1_51
-c 10.07.2015	ggu	changed VERS_7_1_50
-c 17.07.2015	ggu	changed VERS_7_1_53
-c 18.12.2015	ggu	changed VERS_7_3_17
-c 14.11.2017	ggu	changed VERS_7_5_36
-c 16.02.2019	ggu	changed VERS_7_5_60
-c
-c*********************************************************************
+! Rosen bandwidth optimization algorithm
+!
+! revision log :
+!
+! 05.06.1998	ggu	avoid write to terminal
+! 23.03.2010	ggu	changed v6.1.1
+! 30.03.2012	ggu	changed VERS_6_1_51
+! 10.07.2015	ggu	changed VERS_7_1_50
+! 17.07.2015	ggu	changed VERS_7_1_53
+! 18.12.2015	ggu	changed VERS_7_3_17
+! 14.11.2017	ggu	changed VERS_7_5_36
+! 16.02.2019	ggu	changed VERS_7_5_60
+!
+!*********************************************************************
 
 	subroutine rosen(nkn,ngrddi,iphv,kphv,ng,iknot,kvert,bwrite)
-c
-c rosen algorithmus
-c
-c k..		neue knotennummern
-c i..		alte knotennummern
-c ng		!grad des knotens
-c iknot		!kantenverzeichnis des knotens
-c 		...iknot(n,k) --> iknot(ngr*(k-1)+n)
-c		...( n <= ng(k) )
-c iphv		pointer fuer knotennummern : neu --> alt
-c kphv		pointer fuer knotennummern : alt --> neu
-c ipaar		indexpaare die die maximale bandbreite bestimmen
-c nppar   anzahl der indexpaare auf ipaar (max. ndim)
-c npaara	gesammtanzahl der indexpaare die die
-c		...maximale bandbreite bestimmen
-c khil		indexpaare die bei vertauschung die bandbreite
-c		...unveraendert lassen
-c nhil    anzahl der indexpaare auf khil (max. ndim)
-c kvert		indexpaare die bereits miteinander
-c		...vertauscht worden sind
-c nvert		anzahl der indexpaare auf kvert (max. nkn)
-c		...wird auf 0 gesetzt wenn es gelingt zwei
-c		...indizes zu vertauschen bei denen die
-c		...bandbreite erniedrigt wird
-c lvert		=1 ==> es ist gelungen, ein indexpaar zu
-c		...vertauschen. dabei ist nicht notwendigerweise
-c		...die bandweite erniedrigt worden. das program
-c		...wird beendet wenn in do-90-loop kein index-
-c		...paar mehr vertauscht werden kann.
-c
+!
+! rosen algorithmus
+!
+! k..		neue knotennummern
+! i..		alte knotennummern
+! ng		!grad des knotens
+! iknot		!kantenverzeichnis des knotens
+! 		...iknot(n,k) --> iknot(ngr*(k-1)+n)
+!		...( n <= ng(k) )
+! iphv		pointer fuer knotennummern : neu --> alt
+! kphv		pointer fuer knotennummern : alt --> neu
+! ipaar		indexpaare die die maximale bandbreite bestimmen
+! nppar   anzahl der indexpaare auf ipaar (max. ndim)
+! npaara	gesammtanzahl der indexpaare die die
+!		...maximale bandbreite bestimmen
+! khil		indexpaare die bei vertauschung die bandbreite
+!		...unveraendert lassen
+! nhil    anzahl der indexpaare auf khil (max. ndim)
+! kvert		indexpaare die bereits miteinander
+!		...vertauscht worden sind
+! nvert		anzahl der indexpaare auf kvert (max. nkn)
+!		...wird auf 0 gesetzt wenn es gelingt zwei
+!		...indizes zu vertauschen bei denen die
+!		...bandbreite erniedrigt wird
+! lvert		=1 ==> es ist gelungen, ein indexpaar zu
+!		...vertauschen. dabei ist nicht notwendigerweise
+!		...die bandweite erniedrigt worden. das program
+!		...wird beendet wenn in do-90-loop kein index-
+!		...paar mehr vertauscht werden kann.
+!
         integer ndim
         parameter (ndim=10)
 
@@ -93,7 +93,7 @@ c
         save true,msmax
         data true  / .true. /
         data msmax /  100   /
-c
+!
 	if( bwrite ) write(6,*) 'Applying Rosen algorithm...'
 
 	msloop=0
@@ -102,13 +102,13 @@ c
         ms=nkn+1
 	ngr=ngrddi
 	kmerk = 0
-c
+!
         do while (true)
-c
-c bestimmung der indexpaare die maximale
-c ...bandbreite m haben und ablegen auf %%%%%%%%%%%%%%%%%%
-c ...ipaar (max. ndim)
-c
+!
+! bestimmung der indexpaare die maximale
+! ...bandbreite m haben und ablegen auf %%%%%%%%%%%%%%%%%%
+! ...ipaar (max. ndim)
+!
 	m=0
 	npaar=0
 	npaara=0
@@ -137,13 +137,13 @@ c
 	end do
 	end do
 
-c        write(6,'(a,i4,a,i4,a,i4,a,i4)')
-c     +       ' m = '            ,m
-c     +      ,' pairs = '        ,npaara
-c     +      ,' yet exchanged = ',nvert
-c     +      ,' tries = '        ,msloop
+!        write(6,'(a,i4,a,i4,a,i4,a,i4)')
+!     +       ' m = '            ,m
+!     +      ,' pairs = '        ,npaara
+!     +      ,' yet exchanged = ',nvert
+!     +      ,' tries = '        ,msloop
 
-c new on may 93 t stop loop
+! new on may 93 t stop loop
 
         if(m.lt.ms) then
           ms=m
@@ -153,11 +153,11 @@ c new on may 93 t stop loop
         else
           msloop=msloop-1
         end if
-c
-c schleife ueber paare die erniedrigt werden muessen %%%%%%%%%%%%
-c
+!
+! schleife ueber paare die erniedrigt werden muessen %%%%%%%%%%%%
+!
 	do ipp=1,npaar
-c
+!
 	ipa1=ipaar(1,ipp)
 	ipa2=ipaar(2,ipp)
 	kn1=kphv(ipa1)			!kleinerer index
@@ -169,15 +169,15 @@ c
 	mh=kn2-kn1			!bandbreite
 	if(mh.lt.m) goto 90		!naechstes paar
 	if(mh.gt.m) stop'error stop : m to big'
-c
-c groesseren index kn2 mit einem kleineren vertauschen
-c
+!
+! groesseren index kn2 mit einem kleineren vertauschen
+!
 	kmax=kn1			!maximale knoten-
 	do ii=1,ng(ipa2)		!...nummer bestimmen
           kk=kphv(iknot(ngr*(ipa2-1)+ii)) !...die mit kn2
           if(kk.gt.kmax) kmax=kk    !...verbunden ist
 	end do
-c
+!
 	kanf=kmax-m
         if(kanf.lt.1) kanf=1
 	mmin=m				!minimale bandbreite
@@ -203,21 +203,21 @@ c
 	end if
    10	continue
 	end do
-c
+!
 	if(mmin.lt.m) then		!kleinere bandbreite gefunden
 		nvert=0			!...--> vertausche
 		call vertau(nkn,kmerk,kn2,iphv,kphv,lvert,nhil)
 		goto 90
 	end if
-c
-c kleineren index kn1 mit einem groesseren vertauschen
-c
+!
+! kleineren index kn1 mit einem groesseren vertauschen
+!
 	kmin=kn2			!minimale knoten-
 	do ii=1,ng(ipa1)		!...nummer bestimmen
 	kk=kphv(iknot(ngr*(ipa1-1)+ii))	!...die mit kn1
 	if(kk.lt.kmin) kmin=kk		!...verbunden ist
 	end do
-c
+!
 	kend=kmin+m
         if(kend.gt.nkn) kend=nkn
 	mmin=m
@@ -243,17 +243,17 @@ c
 	end if
    11	continue
 	end do
-c
+!
 	if(mmin.lt.m) then
 		nvert=0
 		call vertau(nkn,kn1,kmerk,iphv,kphv,lvert,nhil)
 		goto 90
 	end if
-c
-c bandbreite kann nicht erniedrigt werden
-c
+!
+! bandbreite kann nicht erniedrigt werden
+!
 	if(nvert.ge.nkn) stop 'error stop :dimension kvert'
-c
+!
 	do i=1,nhil		!ueberpruefen ob es noch
 	do ii=1,nvert		!...indizes gibt auf nhil
 	if(khil(1,i).eq.kvert(1,ii)) then!...die noch nicht
@@ -269,16 +269,16 @@ c
 	goto 90
    21	continue
 	end do
-c
-c keine vertauschung moeglich
-c
+!
+! keine vertauschung moeglich
+!
    90	continue
 	end do
-c
+!
 	if(lvert.eq.0) exit	!keine vertauschung mehr moegl.
-c
+!
 	end do	!do while
-c
+!
 	if( bwrite ) then
 		write(6,*) 'minimal bandwidth found =',m
 		write(6,*) 'total number of pairs =',npaara
@@ -287,11 +287,11 @@ c
 	return
 	end
 
-c*****************************************************************
+!*****************************************************************
 
 	subroutine vertau(nkn,k1,k2,iphv,kphv,lvert,nhil)
 
-c exchanges indices
+! exchanges indices
 
 	implicit none
 
@@ -314,11 +314,11 @@ c exchanges indices
 	return
 	end
 
-c******************************************************************
+!******************************************************************
 
         subroutine iswap(a,b)
 
-c swaps two integers
+! swaps two integers
 
         integer a,b,c
 

@@ -24,64 +24,64 @@
 !
 !--------------------------------------------------------------------------
 
-c pre-processing routine
-c
-c revision log :
-c
-c 30.08.1988	ggu	(itief in common, no rdpara)
-c 22.11.1988	ggu	(new version 3, itief passed as actual param)
-c 24.11.1988	ggu	(sp13f., descrr...)
-c 30.11.1988	ggu	(back to sp13u.)
-c 31.07.1990	ggu	(open all files explicitly)
-c 08.10.1994	ggu	(newly designed -> use subroutines)
-c 09.10.1994	ggu	(read from .grd files)
-c 16.03.1995	ggu	(double precision in clockw)
-c 06.03.1996	ggu	renumber also iarv in renel
-c 08.09.1997	ggu	introduce raux,neaux for compiler warnings
-c 20.03.1998	ggu	automatic optimization of bandwidth introduced
-c 08.05.1998	ggu	always process whole file (idepth = 0)
-c 18.05.1998	ggu	always process depths elementwise
-c 18.05.1998	ggu	dont ask for description anymore
-c 17.10.2001	ggu	accept also grd files with some missing data
-c 18.10.2005	ggu	some error messages slightly changed
-c 06.04.2009	ggu	read param.h
-c 24.04.2009	ggu	new call to rdgrd()
-c 04.03.2011	ggu	new routine estimate_grade()
-c 30.03.2011	ggu	new routine check_sidei(), text in optest()
-c 15.07.2011	ggu	calls to ideffi substituted
-c 15.11.2011	ggu	new routines for mixed depth (node and elem), hflag
-c 09.03.2012	ggu	delete useless error messages, handle nkn/nel better
-c 29.03.2012	ggu	use ngr1 to avoid too small dimension for ngr
-c 04.10.2013	ggu	in optest better error handling
-c 30.07.2015	ggu	vp renamed to shypre
-c 18.12.2015	ggu	changed VERS_7_3_17
-c 09.09.2016	ggu	changed VERS_7_5_17
-c 09.05.2017	ggu	changed VERS_7_5_26
-c 09.10.2017	ggu	changed VERS_7_5_33
-c 14.11.2017	ggu	changed VERS_7_5_36
-c 17.11.2017	ggu	implement output switches (quiet,silent,etc..)
-c 24.01.2018	ggu	changed VERS_7_5_41
-c 13.04.2018	ggu	accepts partition to write bas file with node partition
-c 16.10.2018	ggu	changed VERS_7_5_50
-c 16.02.2019	ggu	changed VERS_7_5_60
-c 13.03.2019	ggu	changed VERS_7_5_61
-c 21.05.2020    ggu     better handle copyright notice
-c 13.07.2020    ggu     honor noopti flag, stack poisoning eliminated
-c 06.05.2023    ggu     some enhancements and better error handeling
-c 22.05.2023    ggu     locate is defined in module
-c
-c notes :
-c
-c could eliminate scrambling of iknot ->
-c       no knscr()
-c       pass ngr1 to bandop
-c       change cmv,rosen
-c
-c**********************************************************
+! pre-processing routine
+!
+! revision log :
+!
+! 30.08.1988	ggu	(itief in common, no rdpara)
+! 22.11.1988	ggu	(new version 3, itief passed as actual param)
+! 24.11.1988	ggu	(sp13f., descrr...)
+! 30.11.1988	ggu	(back to sp13u.)
+! 31.07.1990	ggu	(open all files explicitly)
+! 08.10.1994	ggu	(newly designed -> use subroutines)
+! 09.10.1994	ggu	(read from .grd files)
+! 16.03.1995	ggu	(double precision in clockw)
+! 06.03.1996	ggu	renumber also iarv in renel
+! 08.09.1997	ggu	introduce raux,neaux for compiler warnings
+! 20.03.1998	ggu	automatic optimization of bandwidth introduced
+! 08.05.1998	ggu	always process whole file (idepth = 0)
+! 18.05.1998	ggu	always process depths elementwise
+! 18.05.1998	ggu	dont ask for description anymore
+! 17.10.2001	ggu	accept also grd files with some missing data
+! 18.10.2005	ggu	some error messages slightly changed
+! 06.04.2009	ggu	read param.h
+! 24.04.2009	ggu	new call to rdgrd()
+! 04.03.2011	ggu	new routine estimate_grade()
+! 30.03.2011	ggu	new routine check_sidei(), text in optest()
+! 15.07.2011	ggu	calls to ideffi substituted
+! 15.11.2011	ggu	new routines for mixed depth (node and elem), hflag
+! 09.03.2012	ggu	delete useless error messages, handle nkn/nel better
+! 29.03.2012	ggu	use ngr1 to avoid too small dimension for ngr
+! 04.10.2013	ggu	in optest better error handling
+! 30.07.2015	ggu	vp renamed to shypre
+! 18.12.2015	ggu	changed VERS_7_3_17
+! 09.09.2016	ggu	changed VERS_7_5_17
+! 09.05.2017	ggu	changed VERS_7_5_26
+! 09.10.2017	ggu	changed VERS_7_5_33
+! 14.11.2017	ggu	changed VERS_7_5_36
+! 17.11.2017	ggu	implement output switches (quiet,silent,etc..)
+! 24.01.2018	ggu	changed VERS_7_5_41
+! 13.04.2018	ggu	accepts partition to write bas file with node partition
+! 16.10.2018	ggu	changed VERS_7_5_50
+! 16.02.2019	ggu	changed VERS_7_5_60
+! 13.03.2019	ggu	changed VERS_7_5_61
+! 21.05.2020    ggu     better handle copyright notice
+! 13.07.2020    ggu     honor noopti flag, stack poisoning eliminated
+! 06.05.2023    ggu     some enhancements and better error handeling
+! 22.05.2023    ggu     locate is defined in module
+!
+! notes :
+!
+! could eliminate scrambling of iknot ->
+!       no knscr()
+!       pass ngr1 to bandop
+!       change cmv,rosen
+!
+!**********************************************************
 
-c==========================================================
+!==========================================================
 	module mod_shypre
-c==========================================================
+!==========================================================
 
 	logical, save :: bopti
 	logical, save :: bauto
@@ -94,11 +94,11 @@ c==========================================================
 
 	real, save :: eps_area = 1.e-4
 
-c==========================================================
+!==========================================================
 	end module mod_shypre
-c==========================================================
+!==========================================================
 
-c**********************************************************
+!**********************************************************
 
         program shypre
 
@@ -151,7 +151,7 @@ c**********************************************************
         descrg=' '
         descrr=' '
         descra=' '
-c
+!
 	nb1=1
 	nb2=2
 	nb3=3
@@ -164,15 +164,15 @@ c
 
 	itief=0		!0=read by element  1=read by node
 
-c--------------------------------------------------------
-c get name of basin
-c--------------------------------------------------------
+!--------------------------------------------------------
+! get name of basin
+!--------------------------------------------------------
 
 	call shypre_init(grdfile)
 
-c--------------------------------------------------------
-c set parameters
-c--------------------------------------------------------
+!--------------------------------------------------------
+! set parameters
+!--------------------------------------------------------
 
 	bwrite = .not. bquiet
 	bww = .not. bsilent
@@ -182,15 +182,15 @@ c--------------------------------------------------------
 	call delete_extension(basnam,'.grd')
 	call putfnm('basnam',grdfile)
 
-c--------------------------------------------------------
-c always process whole file
-c--------------------------------------------------------
+!--------------------------------------------------------
+! always process whole file
+!--------------------------------------------------------
 
 	idepth = 0
 
-c--------------------------------------------------------
-c read grid
-c--------------------------------------------------------
+!--------------------------------------------------------
+! read grid
+!--------------------------------------------------------
 
 	if( bww ) write(6,*) 'grdfile: ',trim(grdfile)
 	call grd_read(grdfile)
@@ -205,9 +205,9 @@ c--------------------------------------------------------
 
 	call grd_to_basin
 
-c--------------------------------------------------------
-c allocate arrays
-c--------------------------------------------------------
+!--------------------------------------------------------
+! allocate arrays
+!--------------------------------------------------------
 
 	allocate(ipdex(nk), iedex(ne))
 	allocate(iphv(nk), kphv(nk))
@@ -220,9 +220,9 @@ c--------------------------------------------------------
 	allocate(ng(nk))
 	allocate(kvert(2,nk))
 
-c--------------------------------------------------------
-c handle depth
-c--------------------------------------------------------
+!--------------------------------------------------------
+! handle depth
+!--------------------------------------------------------
 
 	call grd_get_depth(nk,ne,hkv,hev)
 
@@ -279,16 +279,16 @@ c--------------------------------------------------------
 
 	if( binfo ) stop
 
-c--------------------------------------------------------
-c open files
-c--------------------------------------------------------
+!--------------------------------------------------------
+! open files
+!--------------------------------------------------------
 
 	nb2=idefbas(basnam,'new')
         if(nb2.le.0) stop
 
-c--------------------------------------------------------
-c start processing
-c--------------------------------------------------------
+!--------------------------------------------------------
+! start processing
+!--------------------------------------------------------
 
 	nknddi = nkn
 	nelddi = nel
@@ -392,9 +392,9 @@ c--------------------------------------------------------
 
 	if( bww ) write(nat,*) 'Maximum grade of nodes is ',ngr
 
-c--------------------------------------------------------
-c bandwidth optimization
-c--------------------------------------------------------
+!--------------------------------------------------------
+! bandwidth optimization
+!--------------------------------------------------------
 
 	if( bdebug ) then
 	call gtest('bandwidth',nelddi,nkn,nel,nen3v)
@@ -409,8 +409,8 @@ c--------------------------------------------------------
 	end if
 	if( bww ) write(nat,*) 'Bandwidth is ',mbw
 
-        call bandop(nkn,ngr,ipv,iphv,kphv,ng,iknot,kvert
-     +			,bopti,bauto,bww)
+        call bandop(nkn,ngr,ipv,iphv,kphv,ng,iknot,kvert &
+     &			,bopti,bauto,bww)
 
 	if( bdebug ) then
 	call gtest('bandwidth 2',nelddi,nkn,nel,nen3v)
@@ -428,9 +428,9 @@ c--------------------------------------------------------
 	  if( bww ) write(nat,*) 'Optimized bandwidth is ',mbw
 	end if
 
-c--------------------------------------------------------
-c renumber elements
-c--------------------------------------------------------
+!--------------------------------------------------------
+! renumber elements
+!--------------------------------------------------------
 
 	call ketest(nel,nen3v)
 	if( bdebug ) then
@@ -441,9 +441,9 @@ c--------------------------------------------------------
 
         call renel(nel,nen3v,ipev,iarv,hev,ierank)	!ierank is element rank
 
-c--------------------------------------------------------
-c save pointers for depth
-c--------------------------------------------------------
+!--------------------------------------------------------
+! save pointers for depth
+!--------------------------------------------------------
 
         if( bwrite ) write(nat,*) ' ...saving pointers'
 
@@ -460,9 +460,9 @@ c--------------------------------------------------------
 	call gtest('write',nelddi,nkn,nel,nen3v)
 	end if
 
-c--------------------------------------------------------
-c process depths
-c--------------------------------------------------------
+!--------------------------------------------------------
+! process depths
+!--------------------------------------------------------
 
         if( bwrite ) write(nat,*) ' ...processing depths'
 
@@ -470,19 +470,19 @@ c--------------------------------------------------------
 
 	if(itief.eq.0) then
           if( bwrite ) write(nat,*) ' ...................elementwise'
-          call helem(nel,nelh,iphev,iaux,iedex,ipev
-     +				,hm3v,hev,bstop)
+          call helem(nel,nelh,iphev,iaux,iedex,ipev &
+     &				,hm3v,hev,bstop)
 	else if( itief .eq. 1 ) then
           if( bwrite ) write(nat,*) ' ......................nodewise'
-          call hnode(nkn,nel,nknh,nen3v,iphv,iaux,ipdex,ipv
-     +                      ,hm3v,hkv,bstop)
+          call hnode(nkn,nel,nknh,nen3v,iphv,iaux,ipdex,ipv &
+     &                      ,hm3v,hkv,bstop)
 	else
           if( bwrite ) write(nat,*) ' .............first elementwise'
-          call helem(nel,nelh,iphev,iaux,iedex,ipev
-     +				,hm3v,hev,bstop)
+          call helem(nel,nelh,iphev,iaux,iedex,ipev &
+     &				,hm3v,hev,bstop)
           if( bwrite ) write(nat,*) ' .................then nodewise'
-          call hnode(nkn,nel,nknh,nen3v,iphv,iaux,ipdex,ipv
-     +                      ,hm3v,hkv,bstop)
+          call hnode(nkn,nel,nknh,nen3v,iphv,iaux,ipdex,ipv &
+     &                      ,hm3v,hkv,bstop)
 	end if
 
 	if( bstop ) goto 99932
@@ -492,22 +492,22 @@ c--------------------------------------------------------
 
 	descrr=descrg
 
-c--------------------------------------------------------
-c process partitions
-c--------------------------------------------------------
+!--------------------------------------------------------
+! process partitions
+!--------------------------------------------------------
 
 	if( bwrite ) write(6,*) 'handle_partition: ',nkn,nel
 	call handle_partition(nkn,nel,kphv,ierank)
 
-c--------------------------------------------------------
-c final error check
-c--------------------------------------------------------
+!--------------------------------------------------------
+! final error check
+!--------------------------------------------------------
 
 	if( bstopall ) goto 99940
 
-c--------------------------------------------------------
-c write to file
-c--------------------------------------------------------
+!--------------------------------------------------------
+! write to file
+!--------------------------------------------------------
 
 	if( bwrite ) write(nat,*) ' ...writing file '
 
@@ -517,9 +517,9 @@ c--------------------------------------------------------
 
 	if( bww ) call bas_info
 
-c--------------------------------------------------------
-c end of routine
-c--------------------------------------------------------
+!--------------------------------------------------------
+! end of routine
+!--------------------------------------------------------
 
 	stop
 99909	write(nat,*)' (09) error: no unique definition of nodes'
@@ -551,11 +551,11 @@ c--------------------------------------------------------
 	stop ' error stop shypre'
  	end
 
-c*****************************************************************
+!*****************************************************************
 
         subroutine uniqn(n,iv,index,bstop)
 
-c controlls uniqueness of numbers in iv
+! controlls uniqueness of numbers in iv
 
         implicit none
 
@@ -579,11 +579,11 @@ c controlls uniqueness of numbers in iv
         return
         end
 
-c*****************************************************************
+!*****************************************************************
 
         subroutine uniqe(nel,nen3v,ipev,bstop)
 
-c controlls uniqueness of elements (shell for equale)
+! controlls uniqueness of elements (shell for equale)
 
 	use mod_shypre
 	use mod_sort
@@ -665,7 +665,7 @@ c controlls uniqueness of elements (shell for equale)
         return
         end
 
-c*****************************************************************
+!*****************************************************************
 
 	subroutine elime(ne,elist,nel,nen3v,ipev)
 
@@ -688,11 +688,11 @@ c*****************************************************************
 
 	end
 
-c*****************************************************************
+!*****************************************************************
 
 	subroutine equale(nel,ip1,ip2,nen3v,index,ipev,ne,elist)
 
-c controlls uniqueness of listed elements
+! controlls uniqueness of listed elements
 
         implicit none
 
@@ -718,10 +718,10 @@ c controlls uniqueness of listed elements
                 i3=mod(i2,3)+1
                 kn2=nen3v(2,ie1)
                 kn3=nen3v(3,ie1)
-                if(nen3v(i2,ie2).eq.kn2 .and.
-     +                  nen3v(i3,ie2).eq.kn3) then
-                  write(6,*)' error: element',ipev(ie1)
-     +                  ,'  and',ipev(ie2),'  are identical'
+                if(nen3v(i2,ie2).eq.kn2 .and. &
+     &                  nen3v(i3,ie2).eq.kn3) then
+                  write(6,*)' error: element',ipev(ie1) &
+     &                  ,'  and',ipev(ie2),'  are identical'
 		  ne = ne + 1
 		  elist(1,ne) = ie1
 		  elist(2,ne) = ie2
@@ -734,11 +734,11 @@ c controlls uniqueness of listed elements
         return
         end
 
-c*****************************************************************
+!*****************************************************************
 
         subroutine needn(nkn,nel,nen3v,ipv,iaux,bstop)
 
-c controlls if all nodes are needed (use nen3v as one-dim array)
+! controlls if all nodes are needed (use nen3v as one-dim array)
 
         implicit none
 
@@ -770,11 +770,11 @@ c controlls if all nodes are needed (use nen3v as one-dim array)
         return
         end
 
-c*****************************************************************
+!*****************************************************************
 
         subroutine chexin(nkn,nel,nen3v,ipv,index,bstop)
 
-c changing extern with intern node numbers in element index
+! changing extern with intern node numbers in element index
 
 	use mod_sort
 
@@ -805,11 +805,11 @@ c changing extern with intern node numbers in element index
         return
         end
 
-c*****************************************************************
+!*****************************************************************
 
         subroutine areaz(nkn,nel,nen3v,ipev,xgv,ygv,bstop)
 
-c test for zero area elements
+! test for zero area elements
 
 	use mod_shypre
 	use mod_sort
@@ -871,12 +871,12 @@ c test for zero area elements
 	  p = a / amax
 	  ke = ipev(ie)
           if(a.eq.0.) then
-            write(6,*)' error: area in element ',ipev(ie)
-     +                     ,' is zero'
+            write(6,*)' error: area in element ',ipev(ie) &
+     &                     ,' is zero'
             bstop=.true.
           else if(p.lt.eps) then
-            write(6,1000)' warning: element ',ipev(ie)
-     +                     ,' seems too small:',a,p
+            write(6,1000)' warning: element ',ipev(ie) &
+     &                     ,' seems too small:',a,p
             bwarn=.true.
           end if
 	end do
@@ -889,11 +889,11 @@ c test for zero area elements
  1000	format(1x,a,i10,a,2g14.5)
         end
 
-c*****************************************************************
+!*****************************************************************
 
         subroutine clockw(nkn,nel,nen3v,ipev,xgv,ygv,bstop)
 
-c test for anti-clockwise sense of nodes
+! test for anti-clockwise sense of nodes
 
         implicit none
 
@@ -919,8 +919,8 @@ c test for anti-clockwise sense of nodes
             a=a+x1*y2-x2*y1
           end do
           if(a.lt.0.) then
-            write(6,*)' error: nodes in element ',ipev(ie)
-     +                     ,' are in clockwise sense... adjusting'
+            write(6,*)' error: nodes in element ',ipev(ie) &
+     &                     ,' are in clockwise sense... adjusting'
             bstop=.true.
 	    ieaux = nen3v(1,ie)
 	    nen3v(1,ie) = nen3v(2,ie)
@@ -931,11 +931,11 @@ c test for anti-clockwise sense of nodes
         return
         end
 
-c*****************************************************************
+!*****************************************************************
 
         subroutine estimate_grade(nkn,nel,nen3v,ng,ngr)
 
-c estimates ngr
+! estimates ngr
 
         implicit none
 
@@ -964,11 +964,11 @@ c estimates ngr
 
 	end
 
-c*****************************************************************
+!*****************************************************************
 
         subroutine check_sidei(nkn,nel,nen3v,ipv,ng,iknot,ngr1,bstop)
 
-c set up side index and find grade
+! set up side index and find grade
 
         implicit none
 
@@ -999,8 +999,8 @@ c set up side index and find grade
 	  igr = ng(k)
 	  iel = iaux(k)
 	  if( igr .gt. iel + 1 .or. igr .lt. iel ) then
-	    write(6,*) ' error: irregular connection of node: '
-     +				,ipv(k),igr,iel
+	    write(6,*) ' error: irregular connection of node: ' &
+     &				,ipv(k),igr,iel
 	    bstop = .true.
 	  end if
 	end do
@@ -1011,11 +1011,11 @@ c set up side index and find grade
 
 	end
 
-c*****************************************************************
+!*****************************************************************
 
         subroutine sidei(nkn,nel,nen3v,ng,iknot,ngr1,ngr,bstop)
 
-c set up side index and find grade ngr
+! set up side index and find grade ngr
 
         implicit none
 
@@ -1064,13 +1064,13 @@ c set up side index and find grade ngr
 	write(6,*) ' error: dimension of ngr1 is too low: ',ngr1
         end
 
-c**********************************************************
+!**********************************************************
 
 	subroutine knscr(nkn,ngr,ngr1,iknot)
 
-c scrambles side index for cmv and rosen
+! scrambles side index for cmv and rosen
 
-c -> please eliminate need for this
+! -> please eliminate need for this
 
 	implicit none
 
@@ -1088,11 +1088,11 @@ c -> please eliminate need for this
 	return
 	end
 
-c**********************************************************
+!**********************************************************
 
         subroutine bandw(nel,nen3v,mbw)
 
-c determine bandwidth mbw
+! determine bandwidth mbw
 
         implicit none
 
@@ -1120,12 +1120,12 @@ c determine bandwidth mbw
 	return
 	end
 
-c**********************************************************
+!**********************************************************
 
-        subroutine bandop(nkn,ngr1,ipv,iphv,kphv,ng,iknot,kvert
-     +				,bopti,bauto,bwrite)
+        subroutine bandop(nkn,ngr1,ipv,iphv,kphv,ng,iknot,kvert &
+     &				,bopti,bauto,bwrite)
 
-c optimize band width
+! optimize band width
 
         implicit none
 
@@ -1161,7 +1161,7 @@ c optimize band width
         do while( bloop )
 	  call ininum(nkn,iphv,kphv)
 
-c	  call anneal(nkn,ngr1,kphv,ng,iknot,iphv,kvert)
+!	  call anneal(nkn,ngr1,kphv,ng,iknot,iphv,kvert)
 
           if( iantw(' Cuthill McKee algorithm ?') .gt. 0 ) then
             call cmv(nkn,ngr1,ipv,iphv,kphv,ng,iknot,bwrite)
@@ -1182,11 +1182,11 @@ c	  call anneal(nkn,ngr1,kphv,ng,iknot,iphv,kvert)
 
         end
 
-c**********************************************************
+!**********************************************************
 
 	subroutine revnum(nkn,iphv,kphv,bwrite)
 
-c reverses numbering of nodes
+! reverses numbering of nodes
 
 	implicit none
 
@@ -1205,11 +1205,11 @@ c reverses numbering of nodes
 
 	end
 
-c**********************************************************
+!**********************************************************
 
 	subroutine ininum(nkn,iphv,kphv)
 
-c initializes numbering of nodes
+! initializes numbering of nodes
 
 	implicit none
 
@@ -1225,11 +1225,11 @@ c initializes numbering of nodes
 
 	end
 
-c**********************************************************
+!**********************************************************
 
 	subroutine zernum(nkn,iphv,kphv)
 
-c zeros numbering of nodes
+! zeros numbering of nodes
 
 	implicit none
 
@@ -1245,12 +1245,12 @@ c zeros numbering of nodes
 
 	end
 
-c**********************************************************
+!**********************************************************
 
-        subroutine bandex(nkn,nel,nen3v,kphv
-     +                      ,ipv,iarnv,xgv,ygv,hkv)
+        subroutine bandex(nkn,nel,nen3v,kphv &
+     &                      ,ipv,iarnv,xgv,ygv,hkv)
 
-c exchange nodes after optimization
+! exchange nodes after optimization
 
         implicit none
 
@@ -1277,7 +1277,7 @@ c exchange nodes after optimization
           end do
         end do
 
-c       copy arrays with kphv as rank table
+!       copy arrays with kphv as rank table
 
         call icopy(nkn,ipv,kphv)
         call icopy(nkn,iarnv,kphv)
@@ -1288,11 +1288,11 @@ c       copy arrays with kphv as rank table
         return
         end
 
-c**********************************************************
+!**********************************************************
 
         subroutine icopy(n,iv,irank)
 
-c copy one array to itself exchanging elements as in irank
+! copy one array to itself exchanging elements as in irank
 
         implicit none
 
@@ -1316,11 +1316,11 @@ c copy one array to itself exchanging elements as in irank
         return
         end
 
-c**********************************************************
+!**********************************************************
 
         subroutine rcopy(n,rv,irank)
 
-c copy one array to itself exchanging elements as in irank
+! copy one array to itself exchanging elements as in irank
 
         implicit none
 
@@ -1344,15 +1344,15 @@ c copy one array to itself exchanging elements as in irank
         return
         end
 
-c**********************************************************
+!**********************************************************
 
         subroutine renel(nel,nen3v,ipev,iarv,hev,ierank)
 
-c renumbering of elements
+! renumbering of elements
 
-c we construct iedex newly and use iaux,iedex as aux arrays
-c iedex is also used as a real aux array for rcopy	-> changed
-c neaux is probably he3v (real) used as an aux array	-> changed
+! we construct iedex newly and use iaux,iedex as aux arrays
+! iedex is also used as a real aux array for rcopy	-> changed
+! neaux is probably he3v (real) used as an aux array	-> changed
 
 	use mod_sort
 
@@ -1396,11 +1396,11 @@ c neaux is probably he3v (real) used as an aux array	-> changed
         return
         end
 
-c**********************************************************
+!**********************************************************
 
         subroutine rank(n,index,irank)
 
-c builds rank table from index table
+! builds rank table from index table
 
         implicit none
 
@@ -1416,7 +1416,7 @@ c builds rank table from index table
         return
         end
 
-c**********************************************************
+!**********************************************************
 
 	subroutine init_hm3v(nel,hm3v,hinit)
 
@@ -1436,7 +1436,7 @@ c**********************************************************
 
 	end
 
-c**********************************************************
+!**********************************************************
 
 	subroutine check_hm3v(nel,hm3v,hflag)
 
@@ -1476,12 +1476,12 @@ c**********************************************************
 
 	end
 
-c**********************************************************
+!**********************************************************
 
-        subroutine helem(nel,nhd,iphev,iaux,iedex
-     +                    ,ipev,hm3v,hev,bstop)
+        subroutine helem(nel,nhd,iphev,iaux,iedex &
+     &                    ,ipev,hm3v,hev,bstop)
 
-c depth by elements
+! depth by elements
 
 	use mod_sort
 
@@ -1505,7 +1505,7 @@ c depth by elements
 
         call sort(nel,ipev,iedex)
 
-c it is : ipev(ie) == iphev(i)
+! it is : ipev(ie) == iphev(i)
 
         !do i=1,nhd
         do i=1,nel
@@ -1516,8 +1516,8 @@ c it is : ipev(ie) == iphev(i)
             bstop=.true.
           else
             if(iaux(ie).ne.0) then
-              write(6,*)' for element ',ipev(ie)
-     +                        ,' depth data not unique'
+              write(6,*)' for element ',ipev(ie) &
+     &                        ,' depth data not unique'
               bstop=.true.
             else
               iaux(ie)=i
@@ -1527,8 +1527,8 @@ c it is : ipev(ie) == iphev(i)
 
         do  ie=1,nel
           if(iaux(ie).eq.0) then
-            write(6,*)' for element ',ipev(ie)
-     +                        ,' no depth data found'
+            write(6,*)' for element ',ipev(ie) &
+     &                        ,' no depth data found'
             bstop=.true.
 	  else
             do ii=1,3
@@ -1540,12 +1540,12 @@ c it is : ipev(ie) == iphev(i)
         return
         end
 
-c**********************************************************
+!**********************************************************
 
-        subroutine hnode(nkn,nel,nhd,nen3v,iphv,iaux,ipdex,ipv
-     +                      ,hm3v,hkv,bstop)
+        subroutine hnode(nkn,nel,nhd,nen3v,iphv,iaux,ipdex,ipv &
+     &                      ,hm3v,hkv,bstop)
 
-c depth by nodes
+! depth by nodes
 
 	use mod_sort
 
@@ -1579,8 +1579,8 @@ c depth by nodes
             bstop=.true.
           else
             if(iaux(k).ne.0) then
-              write(6,*)' for node ',ipv(k)
-     +                        ,' depth data not unique'
+              write(6,*)' for node ',ipv(k) &
+     &                        ,' depth data not unique'
               bstop=.true.
             else
               iaux(k)=i
@@ -1590,8 +1590,8 @@ c depth by nodes
 
         do  k=1,nkn
           if(iaux(k).eq.0) then
-            write(6,*)' for node ',ipv(k)
-     +                        ,' no depth data found'
+            write(6,*)' for node ',ipv(k) &
+     &                        ,' no depth data found'
             bstop=.true.
 	  end if
 	end do
@@ -1609,7 +1609,7 @@ c depth by nodes
         return
         end
 
-c**********************************************************
+!**********************************************************
 
 	subroutine gtest(text,nelddi,nkn,nel,nen3v)
 
@@ -1645,7 +1645,7 @@ c**********************************************************
 	end if
 	end
 
-c**********************************************************
+!**********************************************************
 
 	subroutine optest(text,nkn,ipv,iphv,kphv)
 
@@ -1680,11 +1680,11 @@ c**********************************************************
 	stop 'error stop optest: pointers'
 	end
 
-c**********************************************************
+!**********************************************************
 
 	subroutine ketest(nel,nen3v)
 
-c checks uniquness of nodes in elements
+! checks uniquness of nodes in elements
 
 	implicit none
 
@@ -1712,11 +1712,11 @@ c checks uniquness of nodes in elements
 	return
 	end
 
-c**********************************************************
+!**********************************************************
 
         function get_area(x1,y1,x2,y2,x3,y3)
 
-c computes area of triangle
+! computes area of triangle
 
         implicit none
 
@@ -1727,9 +1727,9 @@ c computes area of triangle
 
         end
 
-c**********************************************************
-c**********************************************************
-c**********************************************************
+!**********************************************************
+!**********************************************************
+!**********************************************************
 
 	subroutine handle_partition(nn,ne,knrank,ierank)
 
@@ -1794,7 +1794,7 @@ c**********************************************************
 	stop 'error stop handle_partition: incompatibility'
 	end
 
-c**********************************************************
+!**********************************************************
 
 	subroutine renumber_partition(n,area,npart)
 
@@ -1848,9 +1848,9 @@ c**********************************************************
 
 	end
 
-c**********************************************************
-c**********************************************************
-c**********************************************************
+!**********************************************************
+!**********************************************************
+!**********************************************************
 
 	subroutine shypre_init(grdfile)
 
@@ -1875,10 +1875,10 @@ c**********************************************************
         call clo_add_option('manual',.false.,'manual optimization')
 
 	call clo_add_sep('options for partitioning')
-	call clo_add_option('partition file',' '
-     +		,'use file containing partitioning')
-	call clo_add_option('nepart',.false.
-     +		,'use node and elem type in file for partitioning')
+	call clo_add_option('partition file',' ' &
+     &		,'use file containing partitioning')
+	call clo_add_option('nepart',.false. &
+     &		,'use node and elem type in file for partitioning')
 
 	call clo_parse_options
 
@@ -1903,7 +1903,7 @@ c**********************************************************
 
 	end
 
-c**********************************************************
+!**********************************************************
 
 	subroutine histo_area(n,array)
 
@@ -1968,5 +1968,5 @@ c**********************************************************
 
 	end
 
-c**********************************************************
+!**********************************************************
 
