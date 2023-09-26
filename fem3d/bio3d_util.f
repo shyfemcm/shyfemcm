@@ -23,31 +23,31 @@
 !
 !--------------------------------------------------------------------------
 
-c bio3d_util - utility routines for bio3d
-c
-c revision log :
-c
-c 18.04.2008	ggu	copied from weutro_sedim.f
-c 09.10.2008	ggu	new call to confop
-c 23.03.2010	ggu	changed v6.1.1
-c 09.03.2012	ggu	bug fix: ilhkv was real
-c 23.12.2014	ggu	changed VERS_7_0_11
-c 19.01.2015	ggu	changed VERS_7_1_2
-c 19.01.2015	ggu	changed VERS_7_1_3
-c 17.07.2015	ggu	changed VERS_7_1_53
-c 17.07.2015	ggu	changed VERS_7_1_80
-c 20.07.2015	ggu	changed VERS_7_1_81
-c 03.04.2018	ggu	changed VERS_7_5_43
-c 16.02.2019	ggu	changed VERS_7_5_60
-c 22.03.2022    ggu     upgraded to da_out and new cmed
-c
-c********************************************************************
+! bio3d_util - utility routines for bio3d
+!
+! revision log :
+!
+! 18.04.2008	ggu	copied from weutro_sedim.f
+! 09.10.2008	ggu	new call to confop
+! 23.03.2010	ggu	changed v6.1.1
+! 09.03.2012	ggu	bug fix: ilhkv was real
+! 23.12.2014	ggu	changed VERS_7_0_11
+! 19.01.2015	ggu	changed VERS_7_1_2
+! 19.01.2015	ggu	changed VERS_7_1_3
+! 17.07.2015	ggu	changed VERS_7_1_53
+! 17.07.2015	ggu	changed VERS_7_1_80
+! 20.07.2015	ggu	changed VERS_7_1_81
+! 03.04.2018	ggu	changed VERS_7_5_43
+! 16.02.2019	ggu	changed VERS_7_5_60
+! 22.03.2022    ggu     upgraded to da_out and new cmed
+!
+!********************************************************************
 
 	subroutine loicz1(knode,vol,depth)
 
-c EUTRO 0-D (LOICZ BUdgeting Procedure)
-c
-c new version -> does everything: initializes, accumulates, writes
+! EUTRO 0-D (LOICZ BUdgeting Procedure)
+!
+! new version -> does everything: initializes, accumulates, writes
 
 	use basin
 
@@ -77,9 +77,9 @@ c new version -> does everything: initializes, accumulates, writes
         integer, save :: icall = 0
 	double precision, save :: da_out(4)
 
-c-----------------------------------------------------------
-c see if routine has to be executed
-c-----------------------------------------------------------
+!-----------------------------------------------------------
+! see if routine has to be executed
+!-----------------------------------------------------------
 
         bloicz = .true.
 
@@ -90,9 +90,9 @@ c-----------------------------------------------------------
           return
         end if
 
-c-----------------------------------------------------------
-c initialization
-c-----------------------------------------------------------
+!-----------------------------------------------------------
+! initialization
+!-----------------------------------------------------------
 
         if( icall .eq. 0 ) then
 
@@ -112,9 +112,9 @@ c-----------------------------------------------------------
 
         end if 
 
-c-----------------------------------------------------------
-c accumulation of results
-c-----------------------------------------------------------
+!-----------------------------------------------------------
+! accumulation of results
+!-----------------------------------------------------------
 
         if( knode .gt. 0 ) then
           elzaux(1) = (prod - cons)*vol       !nem
@@ -128,9 +128,9 @@ c-----------------------------------------------------------
           return
         end if
 
-c-----------------------------------------------------------
-c diagnostics and write
-c-----------------------------------------------------------
+!-----------------------------------------------------------
+! diagnostics and write
+!-----------------------------------------------------------
 
         do i=1,nlzstate
           call scalmass(elz(1,i),depth,tlztot(i))   !mass ctrl loicz
@@ -148,48 +148,48 @@ c-----------------------------------------------------------
 
         call lcz_av_shell(elz)          !aver/min/max of nem and ddin
 
-c-----------------------------------------------------------
-c end of routine
-c-----------------------------------------------------------
+!-----------------------------------------------------------
+! end of routine
+!-----------------------------------------------------------
 
         return
    99   continue
         stop 'error stop loicz1: error opening file'
 	end
 
-c********************************************************************
+!********************************************************************
 
 	subroutine sed_av_shell(es)
 
-c computes and writes average/min/max of sed variables
-c
-c id = 360
-c
-c es1) average	== 361
-c es1) min	== 362
-c es1) max	== 363
-c es2) average	== 364
-c ...
+! computes and writes average/min/max of sed variables
+!
+! id = 360
+!
+! es1) average	== 361
+! es1) min	== 362
+! es1) max	== 363
+! es2) average	== 364
+! ...
 
 	use basin
 
 	implicit none
 
-c parameter
+! parameter
 
 	integer nsstate
 	parameter( nsstate = 2 )
 
 	real es(nkn,nsstate)	!state vector
 
-c local
+! local
 	integer idtc,itmc,itsmed
 	integer id,nvar,idc,is,nstate
 	double precision :: dtime,rr
-c function
+! function
 	real getpar
         logical has_output_d,is_over_output_d,next_output_d
-c save
+! save
 	double precision, save :: da_out(4)
 	double precision, save, allocatable :: sedacu(:,:)
 	real, save, allocatable :: sedmin(:,:)
@@ -225,8 +225,8 @@ c save
 	  allocate(raux(nkn))
 
           do is=1,nstate
-            call cmed_reset_2d(nr,sedacu(:,is)
-     +                  ,sedmin(:,is),sedmax(:,is))
+            call cmed_reset_2d(nr,sedacu(:,is) &
+     &                  ,sedmin(:,is),sedmax(:,is))
           end do
 
           write (6,*) 'cmed bio sediments inizializzato'
@@ -240,8 +240,8 @@ c save
 
         nr = nr + 1
         do is=1,nstate
-          call cmed_accum_2d(es(:,is),sedacu(:,is)
-     +                  ,sedmin(:,is),sedmax(:,is))
+          call cmed_accum_2d(es(:,is),sedacu(:,is) &
+     &                  ,sedmin(:,is),sedmax(:,is))
         end do
 
         if( .not. next_output_d(da_out) ) return
@@ -262,45 +262,45 @@ c save
         end do
 
         do is=1,nstate
-          call cmed_reset_2d(nr,sedacu(:,is)
-     +                  ,sedmin(:,is),sedmax(:,is))
+          call cmed_reset_2d(nr,sedacu(:,is) &
+     &                  ,sedmin(:,is),sedmax(:,is))
         end do
 
 	end
 
-c********************************************************************
+!********************************************************************
 
 	subroutine lcz_av_shell(elz)
 
-c computes and writes average/min/max of bio variables
-c
-c id = 460
-c
-c elz) average	== 461
-c elz) min	== 462
-c elz) max	== 463
-c elz) average	== 464
-c ...
+! computes and writes average/min/max of bio variables
+!
+! id = 460
+!
+! elz) average	== 461
+! elz) min	== 462
+! elz) max	== 463
+! elz) average	== 464
+! ...
 
 	use basin
 
 	implicit none
 
-c parameter
+! parameter
 
 	integer nlzstate
 	parameter( nlzstate = 3 )
 
 	real elz(nkndi,nlzstate)	!state vector
 
-c local
+! local
 	integer idtc,itmc,itsmed
 	integer id,nvar,nstate,is,idc
 	double precision :: dtime,rr
-c function
+! function
 	real getpar
 	logical has_output_d,is_over_output_d,next_output_d
-c save
+! save
 	double precision, save :: da_out(4)
 	double precision, save, allocatable :: lczacu(:,:)
 	real, save, allocatable :: lczmin(:,:)
@@ -336,8 +336,8 @@ c save
 	  allocate(raux(nkn))
 
           do is=1,nstate
-            call cmed_reset_2d(nr,lczacu(:,is)
-     +                  ,lczmin(:,is),lczmax(:,is))
+            call cmed_reset_2d(nr,lczacu(:,is) &
+     &                  ,lczmin(:,is),lczmax(:,is))
           end do
 
 	  write (6,*) 'cmed loicz inizializzato'
@@ -351,8 +351,8 @@ c save
 
         nr = nr + 1
         do is=1,nstate
-          call cmed_accum_2d(elz(:,is),lczacu(:,is)
-     +                  ,lczmin(:,is),lczmax(:,is))
+          call cmed_accum_2d(elz(:,is),lczacu(:,is) &
+     &                  ,lczmin(:,is),lczmax(:,is))
         end do
 
         if( .not. next_output_d(da_out) ) return
@@ -373,17 +373,17 @@ c save
         end do
 
         do is=1,nstate
-          call cmed_reset_2d(nr,lczacu(:,is)
-     +                  ,lczmin(:,is),lczmax(:,is))
+          call cmed_reset_2d(nr,lczacu(:,is) &
+     &                  ,lczmin(:,is),lczmax(:,is))
         end do
 
 	end
 
-c********************************************************************
+!********************************************************************
 
         subroutine setsedload(nlvddi,nknddi,nstate,eload,elini)
 
-c sets up sediment loading
+! sets up sediment loading
 
 	use levels
 	use basin, only : nkn,nel,ngr,mbw
@@ -414,7 +414,7 @@ c sets up sediment loading
 
         end
 
-c********************************************************************
+!********************************************************************
 
         subroutine check_es(es)
 
@@ -439,5 +439,5 @@ c********************************************************************
 
         end
 
-c********************************************************************
+!********************************************************************
 

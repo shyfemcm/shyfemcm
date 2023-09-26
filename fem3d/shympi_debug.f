@@ -62,20 +62,20 @@
 !        END INTERFACE
 
         INTERFACE shympi_write_debug_node
-       	MODULE PROCEDURE shympi_write_debug_node_2d_i
-     +			,shympi_write_debug_node_2d_r
-     +			,shympi_write_debug_node_3d_i
-     +			,shympi_write_debug_node_3d_r
-     +			,shympi_write_debug_node_3d_d
+       	MODULE PROCEDURE shympi_write_debug_node_2d_i &
+     &			,shympi_write_debug_node_2d_r &
+     &			,shympi_write_debug_node_3d_i &
+     &			,shympi_write_debug_node_3d_r &
+     &			,shympi_write_debug_node_3d_d
         END INTERFACE
 
         INTERFACE shympi_write_debug_elem
-       	MODULE PROCEDURE shympi_write_debug_elem_2d_i
-     +			,shympi_write_debug_elem_2d_r
-     +			,shympi_write_debug_elem_3d_i
-     +			,shympi_write_debug_elem_3d_r
-     +			,shympi_write_debug_elem_3d_d
-     +			,shympi_write_debug_elem_fix_r
+       	MODULE PROCEDURE shympi_write_debug_elem_2d_i &
+     &			,shympi_write_debug_elem_2d_r &
+     &			,shympi_write_debug_elem_3d_i &
+     &			,shympi_write_debug_elem_3d_r &
+     &			,shympi_write_debug_elem_3d_d &
+     &			,shympi_write_debug_elem_fix_r
         END INTERFACE
 
 !==================================================================
@@ -251,8 +251,8 @@
 	if( .not. shympi_is_master() ) return
 
 	if( binfo ) then
-	  write(6,*) 'writing record: ',trim(text)
-     +			,nn_global,lmax,record_type
+	  write(6,*) 'writing record: ',trim(text) &
+     &			,nn_global,lmax,record_type
 	end if
 
 	write(iu_debug) nn_global,lmax,record_type
@@ -293,8 +293,8 @@
 	if( .not. shympi_is_master() ) return
 
 	if( binfo ) then
-	  write(6,*) 'writing record: ',trim(text)
-     +			,nn_global,lmax,record_type
+	  write(6,*) 'writing record: ',trim(text) &
+     &			,nn_global,lmax,record_type
 	end if
 
 	write(iu_debug) nn_global,lmax,record_type
@@ -344,8 +344,8 @@
 	if( .not. shympi_is_master() ) return
 
 	if( binfo ) then
-	  write(6,*) 'writing record: ',trim(text)
-     +			,nn_global,lmax,record_type
+	  write(6,*) 'writing record: ',trim(text) &
+     &			,nn_global,lmax,record_type
 	end if
 
 	write(iu_debug) nn_global,lmax,record_type
@@ -395,8 +395,8 @@
 	if( .not. shympi_is_master() ) return
 
 	if( binfo ) then
-	  write(6,*) 'writing record: ',trim(text)
-     +			,nn_global,lmax,record_type
+	  write(6,*) 'writing record: ',trim(text) &
+     &			,nn_global,lmax,record_type
 	end if
 
 	write(iu_debug) nn_global,lmax,record_type
@@ -446,8 +446,8 @@
 	if( .not. shympi_is_master() ) return
 
 	if( binfo ) then
-	  write(6,*) 'writing record: ',trim(text)
-     +			,nn_global,lmax,record_type
+	  write(6,*) 'writing record: ',trim(text) &
+     &			,nn_global,lmax,record_type
 	end if
 
 	write(iu_debug) nn_global,lmax,record_type
@@ -494,8 +494,8 @@
 	if( .not. shympi_is_master() ) return
 
 	if( binfo ) then
-	  write(6,*) 'writing record: ',trim(text)
-     +			,nn_global,lmax,record_type
+	  write(6,*) 'writing record: ',trim(text) &
+     &			,nn_global,lmax,record_type
 	end if
 
 	write(iu_debug) nn_global,lmax,record_type

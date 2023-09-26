@@ -24,180 +24,180 @@
 !
 !--------------------------------------------------------------------------
 
-c utility routines to read/write NOS file - file type 161
-c
-c contents :
-c
-c	 subroutine ininos
-c	 subroutine setnos(iunit,nvers,nkn,nel,nlv,nvar)
-c	 subroutine getnos(iunit,nvers,nkn,nel,nlv,nvar)
-c	 subroutine delnos(iunit)
-c	 subroutine dimnos(iunit,nknddi,nelddi,nlvddi)
-c
-c        subroutine errnos(iunit,routine,text)
-c        subroutine findnos_err(iunit,routine,text,n)
-c        function findnos(iunit)
-c        subroutine infonos(iunit,iout)
-c
-c        subroutine nos_init(iunit,nversion)
-c        subroutine nos_close(iunit)
-c        subroutine nos_check_dimension(iunit,nknddi,nelddi,nlvddi)
-c
-c        subroutine nos_get_date(iunit,date,time)
-c        subroutine nos_set_date(iunit,date,time)
-c        subroutine nos_get_title(iunit,title)
-c        subroutine nos_set_title(iunit,title)
-c        subroutine nos_get_femver(iunit,femver)
-c        subroutine nos_set_femver(iunit,femver)
-c        subroutine nos_get_params(iunit,nkn,nel,nlv,nvar)
-c        subroutine nos_set_params(iunit,nkn,nel,nlv,nvar)
-c        subroutine nos_clone_params(iu_from,iu_to)
-c        subroutine nos_check_compatibility(iu1,iu2)
-c
-c	 subroutine nos_is_nos_file(iunit,nvers)
-c
-c        subroutine nos_read_header(iunit,nkn,nel,nlv,nvar,ierr)
-c        subroutine nos_write_header(iunit,nkn,nel,nlv,nvar,ierr)
-c        subroutine nos_read_header2(iu,ilhkv,hlv,hev,ierr)
-c        subroutine nos_write_header2(iunit,ilhkv,hlv,hev,ierr)
-c        subroutine nos_read_record(iu,it,ivar,nlvddi,ilhkv,c,ierr)
-c        subroutine nos_write_record(iunit,it,ivar,nlvddi,ilhkv,c,ierr)
-c
-c        subroutine nos_back_record(iunit)
-c        subroutine nos_skip_header(iunit,nvar,ierr)
-c        subroutine nos_skip_record(iunit,it,ivar,ierr)
-c
-c revision log :
-c
-c 19.08.1998	ggu	version 3 implemented
-c 18.11.1998	ggu	subroutines setnos, getnos, dimnos added
-c 26.01.1999	ggu	some comments
-c 10.03.2004	ggu	in wfnos make title 80 chars long
-c 28.09.2006	ggu	new routine delnos to close nos file explicitly
-c 28.09.2006	ggu	check if nos file is already open
-c 07.03.2007	ggu	new routines rhnos, whnos
-c 23.03.2010	ggu	changed v6.1.1
-c 20.12.2010	ggu	changed VERS_6_1_16
-c 08.06.2011	ggu	changed VERS_6_1_26
-c 10.02.2012	ggu	new routines to skip records
-c 29.08.2012	ggu	changed VERS_6_1_56
-c 25.10.2012	ggu	changed VERS_6_1_59
-c 30.10.2012	ggu	new format for date and time (new accessor routines)
-c 05.11.2012	ggu	changed VERS_6_1_60
-c 16.11.2012	ggu	in wrnos bugfix - call setnos first
-c 02.12.2012	ggu	restructured
-c 17.12.2012	ggu	changed VERS_6_1_61a
-c 21.01.2013	ggu	code for next and back record
-c 18.01.2014	ggu	restructured, new date,time,femver (version 4+5)
-c 28.01.2014	ggu	changed VERS_6_1_71
-c 07.07.2014	ggu	changed VERS_6_1_79
-c 29.10.2014	ggu	new routine nos_is_nos_file()
-c 26.02.2015	ggu	changed VERS_7_1_5
-c 10.07.2015	ggu	changed VERS_7_1_50
-c 30.07.2015	ggu	changed VERS_7_1_83
-c 14.09.2015	ggu	changed VERS_7_2_2
-c 22.09.2015	ggu	new routine nos_check_compatibility()
-c 18.12.2015	ggu	changed VERS_7_3_17
-c 04.11.2017	ggu	changed VERS_7_5_34
-c 14.11.2017	ggu	changed VERS_7_5_36
-c 18.12.2018	ggu	changed VERS_7_5_52
-c 16.02.2019	ggu	changed VERS_7_5_60
-c
-c notes :
-c
-c Usage writing:
-c
-c	open file
-c	call nos_init
-c	call nos_set_title	(not obligatory)
-c	call nos_set_date	(not obligatory)
-c	call nos_set_femver	(not obligatory)
-c	call nos_write_header
-c	call nos_write_header2
-c	call nos_write_record
-c	...
-c	call nos_close
-c
-c Usage reading:
-c
-c	open file
-c	call nos_init
-c	call nos_read_header
-c	call dimnos
-c	call nos_get_title	(not obligatory)
-c	call nos_get_date	(not obligatory)
-c	call nos_get_femver	(not obligatory)
-c	call nos_read_header2
-c	call nos_read_record
-c	...
-c	call nos_close
-c
-c format of file:
-c
-c version 3 and greater
-c
-c	ftype,nvers
-c	nkn,nel,nlv,nvar
-c	title
-c	date,time				(version 4)
-c	femver					(version 5)
-c
-c	(ilhkv(k),k=1,nkn)			empty if nlv <= 1
-c	(hlv(k),k=1,nlv)			empty if nlv <= 1
-c	(hev(k),k=1,nel)
-c	
-c	it,ivar					(version <= 3)
-c	it,ivar,lmax				(version >= 4)
-c	(c(1,k),k=1,nkn)			if nlv <= 1 or lmax <= 1
-c	((c(l,k),l=1,ilhkv(k)),k=1,nkn)		if nlv > 1
-c
-c version 2
-c
-c	ftype,nvers
-c	nkn,nlv,nvar
-c	title
-c
-c	(ilhkv(k),k=1,nkn)			only if nlv > 1
-c	
-c	it,ivar
-c	((c(l,k),l=1,ilhkv(k)),k=1,nkn)		if nlv > 1
-c	(c(1,k),k=1,nkn)			if nlv <= 1
-c
-c version 1
-c
-c	ftype,nvers
-c	title
-c	nkn,nvar
-c
-c	it
-c	(c(i),i=1,nkn*nvar)
-c
-c variable types:
-c
-c	10	conz
-c	11	salt
-c	12	temp
-c	15	oxygen
-c	18	rms
-c
-c todo :
-c
-c - routine to close file (read and write) -> clnos()
-c - remove data structure from nosvar when closed -> iunit=0
-c - in setnos look for first available iunit
-c - in setnos check if iunit is already open
-c
-c************************************************************
-c************************************************************
-c************************************************************
-c internal routines
-c************************************************************
-c************************************************************
-c************************************************************
+! utility routines to read/write NOS file - file type 161
+!
+! contents :
+!
+!	 subroutine ininos
+!	 subroutine setnos(iunit,nvers,nkn,nel,nlv,nvar)
+!	 subroutine getnos(iunit,nvers,nkn,nel,nlv,nvar)
+!	 subroutine delnos(iunit)
+!	 subroutine dimnos(iunit,nknddi,nelddi,nlvddi)
+!
+!        subroutine errnos(iunit,routine,text)
+!        subroutine findnos_err(iunit,routine,text,n)
+!        function findnos(iunit)
+!        subroutine infonos(iunit,iout)
+!
+!        subroutine nos_init(iunit,nversion)
+!        subroutine nos_close(iunit)
+!        subroutine nos_check_dimension(iunit,nknddi,nelddi,nlvddi)
+!
+!        subroutine nos_get_date(iunit,date,time)
+!        subroutine nos_set_date(iunit,date,time)
+!        subroutine nos_get_title(iunit,title)
+!        subroutine nos_set_title(iunit,title)
+!        subroutine nos_get_femver(iunit,femver)
+!        subroutine nos_set_femver(iunit,femver)
+!        subroutine nos_get_params(iunit,nkn,nel,nlv,nvar)
+!        subroutine nos_set_params(iunit,nkn,nel,nlv,nvar)
+!        subroutine nos_clone_params(iu_from,iu_to)
+!        subroutine nos_check_compatibility(iu1,iu2)
+!
+!	 subroutine nos_is_nos_file(iunit,nvers)
+!
+!        subroutine nos_read_header(iunit,nkn,nel,nlv,nvar,ierr)
+!        subroutine nos_write_header(iunit,nkn,nel,nlv,nvar,ierr)
+!        subroutine nos_read_header2(iu,ilhkv,hlv,hev,ierr)
+!        subroutine nos_write_header2(iunit,ilhkv,hlv,hev,ierr)
+!        subroutine nos_read_record(iu,it,ivar,nlvddi,ilhkv,c,ierr)
+!        subroutine nos_write_record(iunit,it,ivar,nlvddi,ilhkv,c,ierr)
+!
+!        subroutine nos_back_record(iunit)
+!        subroutine nos_skip_header(iunit,nvar,ierr)
+!        subroutine nos_skip_record(iunit,it,ivar,ierr)
+!
+! revision log :
+!
+! 19.08.1998	ggu	version 3 implemented
+! 18.11.1998	ggu	subroutines setnos, getnos, dimnos added
+! 26.01.1999	ggu	some comments
+! 10.03.2004	ggu	in wfnos make title 80 chars long
+! 28.09.2006	ggu	new routine delnos to close nos file explicitly
+! 28.09.2006	ggu	check if nos file is already open
+! 07.03.2007	ggu	new routines rhnos, whnos
+! 23.03.2010	ggu	changed v6.1.1
+! 20.12.2010	ggu	changed VERS_6_1_16
+! 08.06.2011	ggu	changed VERS_6_1_26
+! 10.02.2012	ggu	new routines to skip records
+! 29.08.2012	ggu	changed VERS_6_1_56
+! 25.10.2012	ggu	changed VERS_6_1_59
+! 30.10.2012	ggu	new format for date and time (new accessor routines)
+! 05.11.2012	ggu	changed VERS_6_1_60
+! 16.11.2012	ggu	in wrnos bugfix - call setnos first
+! 02.12.2012	ggu	restructured
+! 17.12.2012	ggu	changed VERS_6_1_61a
+! 21.01.2013	ggu	code for next and back record
+! 18.01.2014	ggu	restructured, new date,time,femver (version 4+5)
+! 28.01.2014	ggu	changed VERS_6_1_71
+! 07.07.2014	ggu	changed VERS_6_1_79
+! 29.10.2014	ggu	new routine nos_is_nos_file()
+! 26.02.2015	ggu	changed VERS_7_1_5
+! 10.07.2015	ggu	changed VERS_7_1_50
+! 30.07.2015	ggu	changed VERS_7_1_83
+! 14.09.2015	ggu	changed VERS_7_2_2
+! 22.09.2015	ggu	new routine nos_check_compatibility()
+! 18.12.2015	ggu	changed VERS_7_3_17
+! 04.11.2017	ggu	changed VERS_7_5_34
+! 14.11.2017	ggu	changed VERS_7_5_36
+! 18.12.2018	ggu	changed VERS_7_5_52
+! 16.02.2019	ggu	changed VERS_7_5_60
+!
+! notes :
+!
+! Usage writing:
+!
+!	open file
+!	call nos_init
+!	call nos_set_title	(not obligatory)
+!	call nos_set_date	(not obligatory)
+!	call nos_set_femver	(not obligatory)
+!	call nos_write_header
+!	call nos_write_header2
+!	call nos_write_record
+!	...
+!	call nos_close
+!
+! Usage reading:
+!
+!	open file
+!	call nos_init
+!	call nos_read_header
+!	call dimnos
+!	call nos_get_title	(not obligatory)
+!	call nos_get_date	(not obligatory)
+!	call nos_get_femver	(not obligatory)
+!	call nos_read_header2
+!	call nos_read_record
+!	...
+!	call nos_close
+!
+! format of file:
+!
+! version 3 and greater
+!
+!	ftype,nvers
+!	nkn,nel,nlv,nvar
+!	title
+!	date,time				(version 4)
+!	femver					(version 5)
+!
+!	(ilhkv(k),k=1,nkn)			empty if nlv <= 1
+!	(hlv(k),k=1,nlv)			empty if nlv <= 1
+!	(hev(k),k=1,nel)
+!	
+!	it,ivar					(version <= 3)
+!	it,ivar,lmax				(version >= 4)
+!	(c(1,k),k=1,nkn)			if nlv <= 1 or lmax <= 1
+!	((c(l,k),l=1,ilhkv(k)),k=1,nkn)		if nlv > 1
+!
+! version 2
+!
+!	ftype,nvers
+!	nkn,nlv,nvar
+!	title
+!
+!	(ilhkv(k),k=1,nkn)			only if nlv > 1
+!	
+!	it,ivar
+!	((c(l,k),l=1,ilhkv(k)),k=1,nkn)		if nlv > 1
+!	(c(1,k),k=1,nkn)			if nlv <= 1
+!
+! version 1
+!
+!	ftype,nvers
+!	title
+!	nkn,nvar
+!
+!	it
+!	(c(i),i=1,nkn*nvar)
+!
+! variable types:
+!
+!	10	conz
+!	11	salt
+!	12	temp
+!	15	oxygen
+!	18	rms
+!
+! todo :
+!
+! - routine to close file (read and write) -> clnos()
+! - remove data structure from nosvar when closed -> iunit=0
+! - in setnos look for first available iunit
+! - in setnos check if iunit is already open
+!
+!************************************************************
+!************************************************************
+!************************************************************
+! internal routines
+!************************************************************
+!************************************************************
+!************************************************************
 
 	subroutine ininos
 
-c sets up initial common block - internal routine
+! sets up initial common block - internal routine
 
 	implicit none
 
@@ -226,11 +226,11 @@ c sets up initial common block - internal routine
 
 	end
 
-c************************************************************
+!************************************************************
 
 	subroutine setnos(iunit,nvers,nkn,nel,nlv,nvar)
 
-c sets up parameter common block - internal routine
+! sets up parameter common block - internal routine
 
 	implicit none
 
@@ -241,8 +241,8 @@ c sets up parameter common block - internal routine
 	integer n
 	integer findnos
 
-c we do not check if unit has already been opened -> open with ifileo
-c changed -> before calling this nos_init has to be called
+! we do not check if unit has already been opened -> open with ifileo
+! changed -> before calling this nos_init has to be called
 
 	n = findnos(iunit)
 	!if( n .eq. 0 ) then
@@ -262,11 +262,11 @@ c changed -> before calling this nos_init has to be called
 
 	end
 
-c************************************************************
+!************************************************************
 
 	subroutine getnos(iunit,nvers,nkn,nel,nlv,nvar)
 
-c gets parameter common block - internal routine
+! gets parameter common block - internal routine
 
 	implicit none
 
@@ -290,13 +290,13 @@ c gets parameter common block - internal routine
 
 	end
 
-c************************************************************
+!************************************************************
 
 	subroutine delnos(iunit)
 
-c closes nos file internal structure - internal routine
-c
-c please note that the file has still to be closed manually
+! closes nos file internal structure - internal routine
+!
+! please note that the file has still to be closed manually
 
 	implicit none
 
@@ -306,8 +306,8 @@ c please note that the file has still to be closed manually
 
 	integer n,i
 
-	call findnos_err(iunit,'delnos'
-     +			,'File is not open, cannot close.',n)
+	call findnos_err(iunit,'delnos' &
+     &			,'File is not open, cannot close.',n)
 
 	do i=0,nitdim
 	  nosvar(i,n) = 0
@@ -318,11 +318,11 @@ c please note that the file has still to be closed manually
 
 	end
 
-c************************************************************
+!************************************************************
 
 	subroutine dimnos(iunit,nknddi,nelddi,nlvddi)
 
-c checks dimension of arrays - internal routine
+! checks dimension of arrays - internal routine
 
 	implicit none
 
@@ -344,13 +344,13 @@ c checks dimension of arrays - internal routine
         stop 'error stop dimnos: dimension error'
 	end
 
-c************************************************************
-c************************************************************
-c************************************************************
+!************************************************************
+!************************************************************
+!************************************************************
 
 	subroutine errnos(iunit,routine,text)
 
-c error routine for nos - internal routine
+! error routine for nos - internal routine
 
 	implicit none
 
@@ -363,11 +363,11 @@ c error routine for nos - internal routine
 
 	end
 
-c************************************************************
+!************************************************************
 
 	subroutine findnos_err(iunit,routine,text,n)
 
-c finds entry for iunit -> returns it in n or stops with error
+! finds entry for iunit -> returns it in n or stops with error
 
 	implicit none
 
@@ -387,11 +387,11 @@ c finds entry for iunit -> returns it in n or stops with error
 
 	end
 
-c************************************************************
+!************************************************************
 
 	function findnos(iunit)
 
-c finds entry for iunit - internal routine
+! finds entry for iunit - internal routine
 
 	implicit none
 
@@ -413,11 +413,11 @@ c finds entry for iunit - internal routine
 
 	end
 
-c************************************************************
+!************************************************************
 
 	subroutine infonos(iunit,iout)
 
-c writes info for unit - internal routine
+! writes info for unit - internal routine
 
 	implicit none
 
@@ -437,13 +437,13 @@ c writes info for unit - internal routine
 
 	end
 
-c************************************************************
-c************************************************************
-c************************************************************
-c public routines
-c************************************************************
-c************************************************************
-c************************************************************
+!************************************************************
+!************************************************************
+!************************************************************
+! public routines
+!************************************************************
+!************************************************************
+!************************************************************
 
 	subroutine nos_init(iunit,nversion)
 
@@ -499,7 +499,7 @@ c************************************************************
 
 	end
 
-c************************************************************
+!************************************************************
 
 	subroutine nos_close(iunit)
 
@@ -511,7 +511,7 @@ c************************************************************
 
 	end
 
-c************************************************************
+!************************************************************
 
 	subroutine nos_check_dimension(iunit,nknddi,nelddi,nlvddi)
 
@@ -523,9 +523,9 @@ c************************************************************
 
 	end
 
-c************************************************************
-c************************************************************
-c************************************************************
+!************************************************************
+!************************************************************
+!************************************************************
 
 	subroutine nos_get_date(iunit,date,time)
 
@@ -545,7 +545,7 @@ c************************************************************
 
 	end
 
-c************************************************************
+!************************************************************
 
 	subroutine nos_set_date(iunit,date,time)
 
@@ -565,7 +565,7 @@ c************************************************************
 
 	end
 
-c************************************************************
+!************************************************************
 
 	subroutine nos_get_title(iunit,title)
 
@@ -584,7 +584,7 @@ c************************************************************
 
 	end
 
-c************************************************************
+!************************************************************
 
 	subroutine nos_set_title(iunit,title)
 
@@ -603,7 +603,7 @@ c************************************************************
 
 	end
 
-c************************************************************
+!************************************************************
 
 	subroutine nos_get_femver(iunit,femver)
 
@@ -622,7 +622,7 @@ c************************************************************
 
 	end
 
-c************************************************************
+!************************************************************
 
 	subroutine nos_set_femver(iunit,femver)
 
@@ -641,7 +641,7 @@ c************************************************************
 
 	end
 
-c************************************************************
+!************************************************************
 
 	subroutine nos_get_params(iunit,nkn,nel,nlv,nvar)
 
@@ -658,7 +658,7 @@ c************************************************************
 
 	end
 
-c************************************************************
+!************************************************************
 
 	subroutine nos_set_params(iunit,nkn,nel,nlv,nvar)
 
@@ -673,14 +673,14 @@ c************************************************************
 
 	end
 
-c************************************************************
+!************************************************************
 
 	subroutine nos_clone_params(iu_from,iu_to)
 
-c clones data from one to other file 
-c
-c second file must have already been opened and initialized with nos_init
-c should be only used to write file -> nvers should be max version
+! clones data from one to other file 
+!
+! second file must have already been opened and initialized with nos_init
+! should be only used to write file -> nvers should be max version
 
 	implicit none
 
@@ -691,10 +691,10 @@ c should be only used to write file -> nvers should be max version
 
 	integer i,nf,nt
 
-	call findnos_err(iu_from,'nos_clone_params'
-     +				,'Cannot find entry.',nf)
-	call findnos_err(iu_to,'nos_clone_params'
-     +				,'Cannot find entry.',nt)
+	call findnos_err(iu_from,'nos_clone_params' &
+     &				,'Cannot find entry.',nf)
+	call findnos_err(iu_to,'nos_clone_params' &
+     &				,'Cannot find entry.',nt)
 
 	do i=2,nitdim		!unit and version are not cloned
 	  nosvar(i,nt) = nosvar(i,nf)
@@ -705,14 +705,14 @@ c should be only used to write file -> nvers should be max version
 
 	end
 
-c************************************************************
+!************************************************************
 
 	subroutine nos_check_compatibility(iu1,iu2)
 
-c checks compatibility between two nos files
-c
-c second file must have already been opened and initialized with nos_init
-c should be only used to write file -> nvers should be max version
+! checks compatibility between two nos files
+!
+! second file must have already been opened and initialized with nos_init
+! should be only used to write file -> nvers should be max version
 
 	implicit none
 
@@ -722,10 +722,10 @@ c should be only used to write file -> nvers should be max version
 
 	integer i,n1,n2
 
-	call findnos_err(iu1,'nos_check_compatibility'
-     +				,'Cannot find entry.',n1)
-	call findnos_err(iu2,'nos_check_compatibility'
-     +				,'Cannot find entry.',n2)
+	call findnos_err(iu1,'nos_check_compatibility' &
+     &				,'Cannot find entry.',n1)
+	call findnos_err(iu2,'nos_check_compatibility' &
+     &				,'Cannot find entry.',n2)
 
 	!unit and version are not checked (0,1)
 	!neither are date and time (6,7)
@@ -745,17 +745,17 @@ c should be only used to write file -> nvers should be max version
 
 	end
 
-c************************************************************
-c************************************************************
-c************************************************************
+!************************************************************
+!************************************************************
+!************************************************************
 
 	subroutine nos_is_nos_file(iunit,nvers)
 
-c checks if iunit is open on nos file - returns nvers
-c
-c nvers == 0	no nos file (ntype is different) or read error
-c nvers < 0	version number is wrong
-c nvers > 0	good nos file
+! checks if iunit is open on nos file - returns nvers
+!
+! nvers == 0	no nos file (ntype is different) or read error
+! nvers < 0	version number is wrong
+! nvers > 0	good nos file
 
 	implicit none
 
@@ -781,13 +781,13 @@ c nvers > 0	good nos file
 
 	end
 
-c************************************************************
-c************************************************************
-c************************************************************
+!************************************************************
+!************************************************************
+!************************************************************
 
 	subroutine nos_read_header(iunit,nkn,nel,nlv,nvar,ierr)
 
-c before this nos_init has to be called
+! before this nos_init has to be called
 
 	implicit none
 
@@ -806,17 +806,17 @@ c before this nos_init has to be called
 
 	call findnos_err(iunit,'nos_read_header','Cannot find entry.',n)
 
-c first record - find out what version
+! first record - find out what version
 
 	irec = 1
 	read(iunit,end=91,err=99) ntype,nvers
 
-c control version number and type of file
+! control version number and type of file
 
 	if( ntype .ne. ftype ) goto 97
 	if( nvers .le. 0 .or. nvers .gt. maxvers ) goto 98
 
-c next records
+! next records
 
 	date = 0
 	time = 0
@@ -879,11 +879,11 @@ c next records
 	return
 	end
 
-c********************************************************************
+!********************************************************************
 
 	subroutine nos_write_header(iunit,nkn,nel,nlv,nvar,ierr)
 
-c writes first header of NOS file
+! writes first header of NOS file
 
 	implicit none
 
@@ -918,11 +918,11 @@ c writes first header of NOS file
 
 	end
 
-c************************************************************
+!************************************************************
 
 	subroutine nos_read_header2(iu,ilhkv,hlv,hev,ierr)
 
-c reads second record of NOS file
+! reads second record of NOS file
 
 	implicit none
 
@@ -956,10 +956,10 @@ c reads second record of NOS file
 	  nlv = 0
 	end if
 
-c read records
+! read records
 
 	if( nvers .eq. 1 ) then
-c	  no second header for version 1
+!	  no second header for version 1
 	else if( nvers .eq. 2 ) then
 	  if( nlv .ne. 0 ) then
 	    read(iunit,err=99) (ilhkv(k),k=1,nkn)
@@ -982,11 +982,11 @@ c	  no second header for version 1
 	return
 	end
 
-c************************************************************
+!************************************************************
 
 	subroutine nos_write_header2(iunit,ilhkv,hlv,hev,ierr)
 
-c writes second record of NOS file
+! writes second record of NOS file
 
 	implicit none
 
@@ -1001,14 +1001,14 @@ c writes second record of NOS file
 
 	call getnos(iunit,nvers,nkn,nel,nlv,nvar)
 
-c only one layer
+! only one layer
 
 	if( nlv .le. 1 ) then
 	  nlv = 0
 	  nkn = 0
 	end if
 
-c write records
+! write records
 
 	write(iunit) (ilhkv(k),k=1,nkn)
 	write(iunit) (hlv(l),l=1,nlv)
@@ -1018,21 +1018,21 @@ c write records
 
 	end
 
-c************************************************************
+!************************************************************
 
 	subroutine nos_read_record(iu,it,ivar,nlvddi,ilhkv,c,ierr)
 
-c reads data record of NOS file
+! reads data record of NOS file
 
 	implicit none
 
-c arguments
+! arguments
 	integer iu,it,ivar
 	integer nlvddi
 	integer ilhkv(*)
 	real c(nlvddi,*)
 	integer ierr
-c local
+! local
 	integer l,k,lmax
 	integer nvers,nkn,nel,nlv,nvar
 	integer iunit
@@ -1098,21 +1098,21 @@ c local
 	return
 	end
 
-c************************************************************
+!************************************************************
 
 	subroutine nos_write_record(iunit,it,ivar,nlvddi,ilhkv,c,ierr)
 
-c writes data record of NOS file
+! writes data record of NOS file
 
 	implicit none
 
-c arguments
+! arguments
 	integer iunit,it,ivar
 	integer nlvddi
 	integer ilhkv(*)
 	real c(nlvddi,*)
 	integer ierr
-c local
+! local
 	integer l,k,lmax
 	integer nvers,nkn,nel,nlv,nvar
 
@@ -1135,18 +1135,18 @@ c local
 	return
 	end
 
-c************************************************************
+!************************************************************
 
 	subroutine nos_peek_record(iu,it,ivar,ierr)
 
-c peeks into data record of NOS file
+! peeks into data record of NOS file
 
 	implicit none
 
-c arguments
+! arguments
 	integer iu,it,ivar
 	integer ierr
-c local
+! local
 	integer l,k,lmax
 	integer nvers,nkn,nel,nlv,nvar
 	integer iunit,ios
@@ -1188,13 +1188,13 @@ c local
 
 	end
 
-c************************************************************
-c************************************************************
-c************************************************************
+!************************************************************
+!************************************************************
+!************************************************************
 
 	subroutine nos_back_record(iunit)
 
-c skips back one data record (contains two reads)
+! skips back one data record (contains two reads)
 
 	implicit none
 
@@ -1205,7 +1205,7 @@ c skips back one data record (contains two reads)
 
 	end
 
-c************************************************************
+!************************************************************
 
 	subroutine nos_skip_header(iunit,nvar,ierr)
 
@@ -1224,7 +1224,7 @@ c************************************************************
 
 	end
 
-c************************************************************
+!************************************************************
 
 	subroutine nos_skip_record(iunit,it,ivar,ierr)
 
@@ -1241,31 +1241,31 @@ c************************************************************
 
 	end
 
-c************************************************************
-c************************************************************
-c************************************************************
-c old routines
-c************************************************************
-c************************************************************
-c************************************************************
+!************************************************************
+!************************************************************
+!************************************************************
+! old routines
+!************************************************************
+!************************************************************
+!************************************************************
 
-	subroutine rhnos	(iunit,nvers
-     +				,nknddi,nelddi,nlvddi
-     +				,nkn,nel,nlv,nvar
-     +				,ilhkv,hlv,hev
-     +				,title
-     +				)
+	subroutine rhnos	(iunit,nvers &
+     &				,nknddi,nelddi,nlvddi &
+     &				,nkn,nel,nlv,nvar &
+     &				,ilhkv,hlv,hev &
+     &				,title &
+     &				)
 
-c reads all headers of NOS file
-c
-c nvers		on entry maximal version that can be read
-c		-> must be an input, used to check the corectness
-c		.. of the call parameters
-c		on return actual version read
+! reads all headers of NOS file
+!
+! nvers		on entry maximal version that can be read
+!		-> must be an input, used to check the corectness
+!		.. of the call parameters
+!		on return actual version read
 
 	implicit none
 
-c arguments
+! arguments
 	integer iunit,nvers
 	integer nknddi,nelddi,nlvddi
 	integer nkn,nel,nlv,nvar
@@ -1274,7 +1274,7 @@ c arguments
 	real hlv(*)
 	real hev(*)
 	character*(*) title
-c local
+! local
 	integer ierr,l
 
         call rfnos(iunit,nvers,nkn,nel,nlv,nvar,title,ierr)
@@ -1305,23 +1305,23 @@ c local
 	stop 'error stop rhnos: error reading first header'
 	end
 
-c************************************************************
+!************************************************************
 
-        subroutine whnos        (iunit,nvers
-     +                          ,nkn,nel,nlv,nvar
-     +				,ilhkv,hlv,hev
-     +                          ,title
-     +                          )
+        subroutine whnos        (iunit,nvers &
+     &                          ,nkn,nel,nlv,nvar &
+     &				,ilhkv,hlv,hev &
+     &                          ,title &
+     &                          )
 
-c writes all headers of NOS file
-c
-c nvers         on entry maximal version
-c               -> must be an input, used to check the corectness
-c               .. of the call parameters
+! writes all headers of NOS file
+!
+! nvers         on entry maximal version
+!               -> must be an input, used to check the corectness
+!               .. of the call parameters
 
         implicit none
 
-c arguments
+! arguments
         integer iunit,nvers
         integer nkn,nel,nlv,nvar
 	integer ilhkv(*)
@@ -1343,19 +1343,19 @@ c arguments
 	stop 'error stop whnos'
 	end
 
-c************************************************************
-c************************************************************
-c************************************************************
-c compatibility
-c************************************************************
-c************************************************************
-c************************************************************
+!************************************************************
+!************************************************************
+!************************************************************
+! compatibility
+!************************************************************
+!************************************************************
+!************************************************************
 
-	subroutine rfnos	(iunit,nvers
-     +				,nkn,nel,nlv,nvar
-     +				,title
-     +				,ierr
-     +				)
+	subroutine rfnos	(iunit,nvers &
+     &				,nkn,nel,nlv,nvar &
+     &				,title &
+     &				,ierr &
+     &				)
 
 	implicit none
 
@@ -1371,13 +1371,13 @@ c************************************************************
 
 	end
 
-c************************************************************
+!************************************************************
 
-	subroutine wfnos	(iunit,nvers
-     +				,nkn,nel,nlv,nvar
-     +				,title
-     +				,ierr
-     +				)
+	subroutine wfnos	(iunit,nvers &
+     &				,nkn,nel,nlv,nvar &
+     &				,title &
+     &				,ierr &
+     &				)
 
 	implicit none
 
@@ -1392,7 +1392,7 @@ c************************************************************
 
 	end
 
-c************************************************************
+!************************************************************
 
 	subroutine rsnos(iunit,ilhkv,hlv,hev,ierr)
 
@@ -1408,7 +1408,7 @@ c************************************************************
 
 	end
 
-c************************************************************
+!************************************************************
 
 	subroutine wsnos(iunit,ilhkv,hlv,hev,ierr)
 
@@ -1424,7 +1424,7 @@ c************************************************************
 
 	end
 
-c************************************************************
+!************************************************************
 
 	subroutine rdnos(iunit,it,ivar,nlvddi,ilhkv,c,ierr)
 
@@ -1440,7 +1440,7 @@ c************************************************************
 
 	end
 
-c************************************************************
+!************************************************************
 
 	subroutine wrnos(iunit,it,ivar,nlvddi,ilhkv,c,ierr)
 
@@ -1456,13 +1456,13 @@ c************************************************************
 
 	end
 
-c************************************************************
-c************************************************************
-c************************************************************
+!************************************************************
+!************************************************************
+!************************************************************
 
 	subroutine infnos(ivar,name)
 
-c returns description of variable id
+! returns description of variable id
 
 	implicit none
 
@@ -1483,5 +1483,5 @@ c returns description of variable id
 
 	end
 
-c************************************************************
+!************************************************************
 

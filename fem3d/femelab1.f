@@ -73,13 +73,13 @@
 !
 !******************************************************************
 
-c*****************************************************************
-c*****************************************************************
-c*****************************************************************
+!*****************************************************************
+!*****************************************************************
+!*****************************************************************
 
 	subroutine femelab
 
-c writes info on fem file
+! writes info on fem file
 
 	use clo
 	use elabutil
@@ -145,8 +145,8 @@ c writes info on fem file
 
 !--------------------------------------------------------------------
 	INTERFACE
-	subroutine allocate_vars(nvar,np,lmax,hlv,hd,ilhkv
-     +			,data_profile,d3dext,data)
+	subroutine allocate_vars(nvar,np,lmax,hlv,hd,ilhkv &
+     &			,data_profile,d3dext,data)
 	integer nvar,np,lmax
 	real, allocatable :: hlv(:)
 	real, allocatable :: hd(:)
@@ -172,9 +172,9 @@ c writes info on fem file
         nrec = 0
 	regpar = 0.
 
-c--------------------------------------------------------------
-c initialization
-c--------------------------------------------------------------
+!--------------------------------------------------------------
+! initialization
+!--------------------------------------------------------------
 
 	call elabutil_init('FEM','femelab')
 
@@ -185,9 +185,9 @@ c--------------------------------------------------------------
 	if( bout ) bskip = .false.
 	bextract = ( snode /= ' ' .or. scoord /= ' ' )
 
-c--------------------------------------------------------------
-c open file
-c--------------------------------------------------------------
+!--------------------------------------------------------------
+! open file
+!--------------------------------------------------------------
 
         call clo_reset_files
         call clo_get_next_file(infile)
@@ -218,9 +218,9 @@ c--------------------------------------------------------------
 	  end if
 	end if
 
-c--------------------------------------------------------------
-c prepare for output if needed
-c--------------------------------------------------------------
+!--------------------------------------------------------------
+! prepare for output if needed
+!--------------------------------------------------------------
 
         iout = 0
 	iformout = iformat
@@ -252,12 +252,12 @@ c--------------------------------------------------------------
 
 	call elabtime_set_inclusive(binclusive)
 
-c--------------------------------------------------------------
-c read first record
-c--------------------------------------------------------------
+!--------------------------------------------------------------
+! read first record
+!--------------------------------------------------------------
 
-        call fem_file_read_params(iformat,iunit,dtime
-     +                          ,nvers,np,lmax,nvar,ntype,datetime,ierr)
+        call fem_file_read_params(iformat,iunit,dtime &
+     &                          ,nvers,np,lmax,nvar,ntype,datetime,ierr)
 
 	if( ierr .ne. 0 ) goto 99
 
@@ -275,8 +275,8 @@ c--------------------------------------------------------------
 	nlvdi = lmax
 	np0 = np
 
-	call allocate_vars(nvar,np,lmax,hlv,hd,ilhkv
-     +			,data_profile,d3dext,data)
+	call allocate_vars(nvar,np,lmax,hlv,hd,ilhkv &
+     &			,data_profile,d3dext,data)
 
 	allocate(ius(nvar))
 	allocate(ius_sd(nvar))
@@ -290,8 +290,8 @@ c--------------------------------------------------------------
 
 	call fem_file_make_type(ntype,2,itype)
 
-	call fem_file_read_2header(iformat,iunit,ntype,lmax
-     +			,hlv,regpar,ierr)
+	call fem_file_read_2header(iformat,iunit,ntype,lmax &
+     &			,hlv,regpar,ierr)
 	if( ierr .ne. 0 ) goto 98
 	call correct_regpar(regpar)
 	regpar0 = regpar
@@ -330,8 +330,8 @@ c--------------------------------------------------------------
 	  end if
 	  nx = nint(regpar(1))
 	  ny = nint(regpar(2))
-	  call fem_resample_parse(rbounds,regpar
-     +                          ,regpar_out,nxn,nyn,idx0,idy0)
+	  call fem_resample_parse(rbounds,regpar &
+     &                          ,regpar_out,nxn,nyn,idx0,idy0)
 	  np_out = nxn*nyn
 	  call fem_resample_check(np_out,regpar)
           allocate(hd_out(np_out))
@@ -345,9 +345,9 @@ c--------------------------------------------------------------
 	ius = 0
 	ius_sd = 0
 
-c--------------------------------------------------------------
-c write info to terminal
-c--------------------------------------------------------------
+!--------------------------------------------------------------
+! write info to terminal
+!--------------------------------------------------------------
 
 	if( .not. bquiet ) then
           write(6,*) 'available variables contained in file: '
@@ -356,8 +356,8 @@ c--------------------------------------------------------------
 	end if
 
 	do iv=1,nvar
-	  call fem_file_skip_data(iformat,iunit
-     +                          ,nvers,np,lmax,string,ierr)
+	  call fem_file_skip_data(iformat,iunit &
+     &                          ,nvers,np,lmax,string,ierr)
 	  if( ierr .ne. 0 ) goto 97
 	  !string = adjustl(string)
 	  call string2ivar(string,ivar)
@@ -382,9 +382,9 @@ c--------------------------------------------------------------
 
 	if( binfo .or. bgrdcoord ) return
 
-c--------------------------------------------------------------
-c close and re-open file
-c--------------------------------------------------------------
+!--------------------------------------------------------------
+! close and re-open file
+!--------------------------------------------------------------
 
 	close(iunit)
 
@@ -392,9 +392,9 @@ c--------------------------------------------------------------
 	call fem_file_read_open(infile,np,iformat,iunit)
 	if( iunit .le. 0 ) stop
 
-c--------------------------------------------------------------
-c loop on all records
-c--------------------------------------------------------------
+!--------------------------------------------------------------
+! loop on all records
+!--------------------------------------------------------------
 
 	bread = bwrite .or. bextract .or. boutput
 	bread = bread .or. bsplit .or. bgrd .or. bcheck
@@ -407,8 +407,8 @@ c--------------------------------------------------------------
 
 	do 
 	  atold = atime
-          call fem_file_read_params(iformat,iunit,dtime
-     +                          ,nvers,np,lmax,nvar,ntype,datetime,ierr)
+          call fem_file_read_params(iformat,iunit,dtime &
+     &                          ,nvers,np,lmax,nvar,ntype,datetime,ierr)
 	  if( ierr .lt. 0 ) exit
 	  if( ierr .gt. 0 ) goto 99
 	  if( nvar .ne. nvar0 ) goto 96
@@ -439,12 +439,12 @@ c--------------------------------------------------------------
 	    lmax0 = lmax
 	    nlvdi = lmax
 	    np0 = np
-	    call allocate_vars(nvar,np,lmax,hlv,hd,ilhkv
-     +			,data_profile,d3dext,data)
+	    call allocate_vars(nvar,np,lmax,hlv,hd,ilhkv &
+     &			,data_profile,d3dext,data)
 	  end if
 
-	  call fem_file_read_2header(iformat,iunit,ntype,lmax
-     +			,hlv,regpar,ierr)
+	  call fem_file_read_2header(iformat,iunit,ntype,lmax &
+     &			,hlv,regpar,ierr)
 	  if( ierr .ne. 0 ) goto 98
 	  
 	  call fem_file_make_type(ntype,2,itype)
@@ -467,15 +467,15 @@ c--------------------------------------------------------------
 
 	  do iv=1,nvar
 	    if( bskip ) then
-	      call fem_file_skip_data(iformat,iunit
-     +                          ,nvers,np,lmax,string,ierr)
+	      call fem_file_skip_data(iformat,iunit &
+     &                          ,nvers,np,lmax,string,ierr)
 	    else
-              call fem_file_read_data(iformat,iunit
-     +                          ,nvers,np,llmax(iv)
-     +                          ,string
-     +                          ,ilhkv,hd
-     +                          ,nlvdi,data(1,1,iv)
-     +                          ,ierr)
+              call fem_file_read_data(iformat,iunit &
+     &                          ,nvers,np,llmax(iv) &
+     &                          ,string &
+     &                          ,ilhkv,hd &
+     &                          ,nlvdi,data(1,1,iv) &
+     &                          ,ierr)
 	    end if
 	    if( ierr .ne. 0 ) goto 97
 	    !call custom_elab(nlvdi,np,string,iv,flag,data(1,1,iv))
@@ -498,8 +498,8 @@ c--------------------------------------------------------------
 	  end do
 
 	  if( bcustom ) then
-	    call custom_elab_all(nlvdi,np,strings_out,nvar
-     +			,ivars,bnewstring,flag,data)
+	    call custom_elab_all(nlvdi,np,strings_out,nvar &
+     &			,ivars,bnewstring,flag,data)
 	  end if
 
 	  call fem_get_new_atime(iformat,iunit,atnew,ierr)	!peeking
@@ -536,9 +536,9 @@ c--------------------------------------------------------------
 	      hdp = flag
               bcondense_txt = ( nvar == 1 .or. lmax == 1 )
             end if
-            call fem_file_write_header(iformout,iout,dtime
-     +                          ,0,np_out,lmax,nvar,ntype_out,lmax
-     +                          ,hlv,datetime,regpar_out)
+            call fem_file_write_header(iformout,iout,dtime &
+     &                          ,0,np_out,lmax,nvar,ntype_out,lmax &
+     &                          ,hlv,datetime,regpar_out)
           end if
 
 	  do iv=1,nvar
@@ -549,41 +549,41 @@ c--------------------------------------------------------------
 	      !call custom_elab(nlvdi,np,string,iv,flag,data(1,1,iv))
 	      if( breg .and. bexpand .and. .not. bresample ) then
 		call reg_set_flag(nlvdi,np,ilhkv,regpar,data(1,1,iv))
-		call reg_expand_shell(nlvdi,np,llmax(iv),regexpand
-     +					,regpar,ilhkv,data(1,1,iv))
+		call reg_expand_shell(nlvdi,np,llmax(iv),regexpand &
+     &					,regpar,ilhkv,data(1,1,iv))
 	      end if
 	      if( bcondense ) then
 		lmax_prof = llmax(iv)
-		call fem_condense(np,lmax_prof,data(1,1,iv),flag,
-     +				data_profile)
-                call fem_file_write_data(iformout,iout
-     +                          ,0,np_out,lmax_prof
-     +                          ,string
-     +                          ,ilhkp,hdp
-     +                          ,nlvdi,data_profile)
+		call fem_condense(np,lmax_prof,data(1,1,iv),flag, &
+     &				data_profile)
+                call fem_file_write_data(iformout,iout &
+     &                          ,0,np_out,lmax_prof &
+     &                          ,string &
+     &                          ,ilhkp,hdp &
+     &                          ,nlvdi,data_profile)
                 d3dext(:,iv) = data_profile
 	      else if( bresample ) then
-                call resample_data(flag,nlvdi,nx,ny
-     +				,ilhkv,hd,data(1,1,iv)
-     +				,nxn,nyn,idx0,idy0
-     +				,il_out,hd_out,data_out)
+                call resample_data(flag,nlvdi,nx,ny &
+     &				,ilhkv,hd,data(1,1,iv) &
+     &				,nxn,nyn,idx0,idy0 &
+     &				,il_out,hd_out,data_out)
 	        if( bexpand ) then
-		  call reg_set_flag(nlvdi,np_out,il_out
-     +				,regpar_out,data_out)
-		  call reg_expand_shell(nlvdi,np_out,llmax(iv),regexpand
-     +				,regpar_out,il_out,data_out)
+		  call reg_set_flag(nlvdi,np_out,il_out &
+     &				,regpar_out,data_out)
+		  call reg_expand_shell(nlvdi,np_out,llmax(iv),regexpand &
+     &				,regpar_out,il_out,data_out)
 	        end if
-                call fem_file_write_data(iformout,iout
-     +                          ,0,np_out,llmax(iv)
-     +                          ,string
-     +                          ,il_out,hd_out
-     +                          ,nlvdi,data_out)
+                call fem_file_write_data(iformout,iout &
+     &                          ,0,np_out,llmax(iv) &
+     &                          ,string &
+     &                          ,il_out,hd_out &
+     &                          ,nlvdi,data_out)
 	      else
-                call fem_file_write_data(iformout,iout
-     +                          ,0,np_out,llmax(iv)
-     +                          ,string
-     +                          ,ilhkv,hd
-     +                          ,nlvdi,data(1,1,iv))
+                call fem_file_write_data(iformout,iout &
+     &                          ,0,np_out,llmax(iv) &
+     &                          ,string &
+     &                          ,ilhkv,hd &
+     &                          ,nlvdi,data(1,1,iv))
 	      end if
             end if
 	    if( bextract ) then
@@ -591,26 +591,26 @@ c--------------------------------------------------------------
 	      d3dext(:,iv) = data(:,iextract,iv)
 	    end if
 	    if( bsplit ) then
-	      call femsplit(iformout,ius(iv),dtime,nvers,np
-     +			,llmax(iv),nlvdi,ntype
-     +			,hlv,datetime,regpar,string
-     +			,ilhkv,hd,data(:,:,iv))
-	      call femsplit_sd(iformout,ius_sd(iv),dtime,nvers,np
-     +			,llmax(iv),nlvdi,ntype
-     +			,hlv,datetime,regpar,string
-     +			,ilhkv,hd,data(:,:,iv))
+	      call femsplit(iformout,ius(iv),dtime,nvers,np &
+     &			,llmax(iv),nlvdi,ntype &
+     &			,hlv,datetime,regpar,string &
+     &			,ilhkv,hd,data(:,:,iv))
+	      call femsplit_sd(iformout,ius_sd(iv),dtime,nvers,np &
+     &			,llmax(iv),nlvdi,ntype &
+     &			,hlv,datetime,regpar,string &
+     &			,ilhkv,hd,data(:,:,iv))
 	    end if
 	  end do	!do iv
 
 	  if( bwrite ) then
-	    call write_minmax(atime,nrec,nvar,lmax,np,ivars,strings
-     +			,llmax,flag,ilhkv,data)
+	    call write_minmax(atime,nrec,nvar,lmax,np,ivars,strings &
+     &			,llmax,flag,ilhkv,data)
 	  end if
 	  if( bextract ) then
 	    lextr = ilhkv(iextract)
 	    depth = hd(iextract)
-	    call write_extract(atime,nvar,lmax,strings
-     +			,lextr,hlv,depth,dext,d3dext)
+	    call write_extract(atime,nvar,lmax,strings &
+     &			,lextr,hlv,depth,dext,d3dext)
 	  end if
 
 	  if( bcondense_txt ) then
@@ -618,8 +618,8 @@ c--------------------------------------------------------------
           end if
 
 	  if( bcheck ) then
-	    call fem_check(atime,np,lmax,nvar,data,flag
-     +				,strings,scheck,bquiet)
+	    call fem_check(atime,np,lmax,nvar,data,flag &
+     &				,strings,scheck,bquiet)
 	  end if
 
 	  if( bgrd ) then
@@ -628,8 +628,8 @@ c--------------------------------------------------------------
 	    end if
 	    do iv=1,nvar
 	      write(6,*) 'writing grd file: ',iv,nrec
-	      call make_grd_from_data(iv,nrec,nlvdi,np
-     +			,regpar,data(:,:,iv))
+	      call make_grd_from_data(iv,nrec,nlvdi,np &
+     &			,regpar,data(:,:,iv))
 	    end do
 	  end if
 
@@ -641,13 +641,13 @@ c--------------------------------------------------------------
 
 	if( bcheck ) then	!write final data
 	  atime = -1.
-	  call fem_check(atime,np,lmax,nvar,data,flag
-     +				,strings,scheck,bquiet)
+	  call fem_check(atime,np,lmax,nvar,data,flag &
+     &				,strings,scheck,bquiet)
 	end if
 
-c--------------------------------------------------------------
-c finish loop - info on time records
-c--------------------------------------------------------------
+!--------------------------------------------------------------
+! finish loop - info on time records
+!--------------------------------------------------------------
 
         if( .not. bsilent ) then
           write(6,*)
@@ -670,8 +670,8 @@ c--------------------------------------------------------------
 
 	if( bcheck ) then	!write final message
 	  atime = -2.
-	  call fem_check(atime,np,lmax,nvar,data,flag
-     +				,strings,scheck,bsilent)
+	  call fem_check(atime,np,lmax,nvar,data,flag &
+     &				,strings,scheck,bsilent)
 	end if
 
 	if( boutput .and. .not. bquiet ) then
@@ -690,9 +690,9 @@ c--------------------------------------------------------------
 	  write(6,*) 'data written to out.fem and out.txt'
 	end if
 
-c--------------------------------------------------------------
-c end of routine
-c--------------------------------------------------------------
+!--------------------------------------------------------------
+! end of routine
+!--------------------------------------------------------------
 
 	return
    91	continue
@@ -728,12 +728,12 @@ c--------------------------------------------------------------
 	stop 'error stop femelab'
 	end
 
-c*****************************************************************
-c*****************************************************************
-c*****************************************************************
+!*****************************************************************
+!*****************************************************************
+!*****************************************************************
 
-        subroutine minmax_data(level,nlvddi,np,flag,ilhkv,data
-     +				,vmin,vmax,vmed)
+        subroutine minmax_data(level,nlvddi,np,flag,ilhkv,data &
+     &				,vmin,vmax,vmed)
 
         implicit none
 
@@ -782,7 +782,7 @@ c*****************************************************************
 
         end
 
-c*****************************************************************
+!*****************************************************************
 
         subroutine write_ts(atime,nvar,lmax,strings,data)
 
@@ -831,10 +831,10 @@ c*****************************************************************
           
         end
 
-c*****************************************************************
+!*****************************************************************
 
-	subroutine write_minmax(atime,nrec,nvar,lmax,np,ivars,strings
-     +			,llmax,flag,ilhkv,data)
+	subroutine write_minmax(atime,nrec,nvar,lmax,np,ivars,strings &
+     &			,llmax,flag,ilhkv,data)
 
 	implicit none
 
@@ -861,8 +861,8 @@ c*****************************************************************
 	integer, save, allocatable :: ius(:)
 	integer, save :: iusd(2) = 0
         character*20, save :: time_date = '#          date_time'
-        character*80, save :: minmax = '         min       ' //
-     +					'     aver             max'
+        character*80, save :: minmax = '         min       ' // &
+     &					'     aver             max'
         character*2, save :: xy(2) = (/'-x','.y'/)
         character*80, save :: stringd
 
@@ -906,10 +906,10 @@ c*****************************************************************
 	  iu = ius(iv)
 	  write(6,*) nrec,iv,ivars(iv),trim(strings(iv))
 	  do l=1,llmax(iv)
-            call minmax_data(l,llmax(iv),np,flag,ilhkv,data(1,1,iv)
-     +					,dmin,dmax,dmed)
-	    write(6,1001) 'ivar,l,min,aver,max : '
-     +				,ivar,l,dmin,dmed,dmax
+            call minmax_data(l,llmax(iv),np,flag,ilhkv,data(1,1,iv) &
+     &					,dmin,dmax,dmed)
+	    write(6,1001) 'ivar,l,min,aver,max : ' &
+     &				,ivar,l,dmin,dmed,dmax
 	    if( l == 1 ) write(iu,1002) aline,dmin,dmed,dmax
 	  end do
 	end do
@@ -928,10 +928,10 @@ c*****************************************************************
 	      uv = sqrt(u*u+v*v)
 	      datas(i) = uv
 	    end do
-            call minmax_data(1,1,np,flag,ilhkv,datas
-     +					,dmin,dmax,dmed)
-	    write(6,1001) 'ivar,l,min,aver,max : '
-     +				,ivar,l,dmin,dmed,dmax
+            call minmax_data(1,1,np,flag,ilhkv,datas &
+     &					,dmin,dmax,dmed)
+	    write(6,1001) 'ivar,l,min,aver,max : ' &
+     &				,ivar,l,dmin,dmed,dmax
 	    if( l == 1 ) write(iu,1002) aline,dmin,dmed,dmax
 	  end do
 	end if
@@ -942,10 +942,10 @@ c*****************************************************************
  1002	format(a20,3g16.6)
 	end
 
-c*****************************************************************
+!*****************************************************************
 
-        subroutine write_extract(atime,nvar,nlvddi,strings
-     +                  ,lextr_in,hlv,depth,dext,d3dext)
+        subroutine write_extract(atime,nvar,nlvddi,strings &
+     &                  ,lextr_in,hlv,depth,dext,d3dext)
 
 	use iso8601
 
@@ -1033,16 +1033,16 @@ c*****************************************************************
 	call string2date(aline,datetime,ierr)
 	if( ierr /= 0 ) stop 'error stop write_extract: converting time'
 
-        call fem_file_write_header(iformat,iu3d,dtime
-     +                          ,nvers,np,lextr
-     +                          ,nvar,ntype
-     +                          ,lmax,hlv,datetime,regpar)
+        call fem_file_write_header(iformat,iu3d,dtime &
+     &                          ,nvers,np,lextr &
+     &                          ,nvar,ntype &
+     &                          ,lmax,hlv,datetime,regpar)
 	do ivar=1,nvar
-          call fem_file_write_data(iformat,iu3d
-     +                          ,nvers,np,lmax
-     +                          ,strings(ivar)
-     +                          ,ilhkv,hd
-     +                          ,lmax,d3dext(1:lmax,ivar))
+          call fem_file_write_data(iformat,iu3d &
+     &                          ,nvers,np,lmax &
+     &                          ,strings(ivar) &
+     &                          ,ilhkv,hd &
+     &                          ,lmax,d3dext(1:lmax,ivar))
 	end do
 
 !	------------------------------------------------------------
@@ -1051,7 +1051,7 @@ c*****************************************************************
 
 	end
 
-c*****************************************************************
+!*****************************************************************
 
 	subroutine make_varline(nvar,strings,varline)
 
@@ -1089,12 +1089,12 @@ c*****************************************************************
 
 	end
 
-c*****************************************************************
+!*****************************************************************
 
-	subroutine femsplit(iformout,ius,dtime,nvers,np
-     +			,lmax,nlvddi,ntype
-     +			,hlv,datetime,regpar,string
-     +			,ilhkv,hd,data)
+	subroutine femsplit(iformout,ius,dtime,nvers,np &
+     &			,lmax,nlvddi,ntype &
+     &			,hlv,datetime,regpar,string &
+     &			,ilhkv,hd,data)
 
 ! splits fem file into single variables - directional vars are kept in one file
 
@@ -1138,17 +1138,17 @@ c*****************************************************************
 	if( dir /= ' ' ) nvar = 2
 
 	if( dir /= 'y' ) then
-          call fem_file_write_header(iformout,ius,dtime
-     +                          ,nvers,np,lmax
-     +                          ,nvar,ntype
-     +                          ,nlvddi,hlv,datetime,regpar)
+          call fem_file_write_header(iformout,ius,dtime &
+     &                          ,nvers,np,lmax &
+     &                          ,nvar,ntype &
+     &                          ,nlvddi,hlv,datetime,regpar)
 	end if
 
-        call fem_file_write_data(iformout,ius
-     +                          ,nvers,np,lmax
-     +                          ,string
-     +                          ,ilhkv,hd
-     +                          ,nlvddi,data)
+        call fem_file_write_data(iformout,ius &
+     &                          ,nvers,np,lmax &
+     &                          ,string &
+     &                          ,ilhkv,hd &
+     &                          ,nlvddi,data)
 
 	return
    99	continue
@@ -1156,12 +1156,12 @@ c*****************************************************************
 	stop 'error stop femsplit: cannot open output file'
 	end
 
-c*****************************************************************
+!*****************************************************************
 
-	subroutine femsplit_sd(iformout,ius,dtime,nvers,np
-     +			,lmax,nlvddi,ntype
-     +			,hlv,datetime,regpar,string
-     +			,ilhkv,hd,data)
+	subroutine femsplit_sd(iformout,ius,dtime,nvers,np &
+     &			,lmax,nlvddi,ntype &
+     &			,hlv,datetime,regpar,string &
+     &			,ilhkv,hd,data)
 
 ! splits directional variables in fem file into speed and direction
 
@@ -1251,30 +1251,30 @@ c*****************************************************************
 	ius = iuss
 	string = strings
 
-        call fem_file_write_header(iformout,ius,dtime
-     +                          ,nvers,np,lmax
-     +                          ,nvar,ntype
-     +                          ,nlvddi,hlv,datetime,regpar)
+        call fem_file_write_header(iformout,ius,dtime &
+     &                          ,nvers,np,lmax &
+     &                          ,nvar,ntype &
+     &                          ,nlvddi,hlv,datetime,regpar)
 
-        call fem_file_write_data(iformout,ius
-     +                          ,nvers,np,lmax
-     +                          ,string
-     +                          ,ilhkv,hd
-     +                          ,nlvddi,datas)
+        call fem_file_write_data(iformout,ius &
+     &                          ,nvers,np,lmax &
+     &                          ,string &
+     &                          ,ilhkv,hd &
+     &                          ,nlvddi,datas)
 
 	ius = iusd
 	string = stringd
 
-        call fem_file_write_header(iformout,ius,dtime
-     +                          ,nvers,np,lmax
-     +                          ,nvar,ntype
-     +                          ,nlvddi,hlv,datetime,regpar)
+        call fem_file_write_header(iformout,ius,dtime &
+     &                          ,nvers,np,lmax &
+     &                          ,nvar,ntype &
+     &                          ,nlvddi,hlv,datetime,regpar)
 
-        call fem_file_write_data(iformout,ius
-     +                          ,nvers,np,lmax
-     +                          ,string
-     +                          ,ilhkv,hd
-     +                          ,nlvddi,datad)
+        call fem_file_write_data(iformout,ius &
+     &                          ,nvers,np,lmax &
+     &                          ,string &
+     &                          ,ilhkv,hd &
+     &                          ,nlvddi,datad)
 
 	return
    99	continue
@@ -1282,12 +1282,12 @@ c*****************************************************************
 	stop 'error stop femsplit_sd: cannot open output file'
 	end
 
-c*****************************************************************
+!*****************************************************************
 
-	subroutine reg_expand_shell(nlvddi,np,lmax,regexpand
-     +					,regpar,il,data)
+	subroutine reg_expand_shell(nlvddi,np,lmax,regexpand &
+     &					,regpar,il,data)
 
-c shell to call expansion routine
+! shell to call expansion routine
 
 	implicit none
 
@@ -1316,7 +1316,7 @@ c shell to call expansion routine
 
 	end
 
-c*****************************************************************
+!*****************************************************************
 
 	subroutine reg_set_flag(nlvddi,np,il,regpar,data)
 
@@ -1339,7 +1339,7 @@ c*****************************************************************
 
 	end
 
-c*****************************************************************
+!*****************************************************************
 
 	subroutine fem_condense(np,lmax,data,flag,data_profile)
 
@@ -1378,7 +1378,7 @@ c*****************************************************************
 
 	end
 
-c*****************************************************************
+!*****************************************************************
 
 	subroutine handle_extract(breg,bquiet,np,regpar,iextract)
 
@@ -1515,10 +1515,10 @@ c*****************************************************************
 
 	end
 
-c*****************************************************************
+!*****************************************************************
 
-	subroutine make_grd_from_data(iv,nrec,nlvdi,np
-     +			,regpar,data)
+	subroutine make_grd_from_data(iv,nrec,nlvdi,np &
+     &			,regpar,data)
 
 	implicit none
 
@@ -1562,7 +1562,7 @@ c*****************************************************************
 
 	end
 
-c*****************************************************************
+!*****************************************************************
 
 	subroutine make_name(iv,nrec,name)
 
@@ -1581,7 +1581,7 @@ c*****************************************************************
 
 	end
 
-c*****************************************************************
+!*****************************************************************
 
 	subroutine fem_get_new_atime(iformat,iunit,atime,ierr)
 
@@ -1597,8 +1597,8 @@ c*****************************************************************
 
 	atime = -1
 
-	call fem_file_peek_params(iformat,iunit,dtime
-     +                          ,nvers,np,lmax,nvar,ntype,datetime,ierr)
+	call fem_file_peek_params(iformat,iunit,dtime &
+     &                          ,nvers,np,lmax,nvar,ntype,datetime,ierr)
 
 	if( ierr /= 0 ) return
 
@@ -1606,7 +1606,7 @@ c*****************************************************************
 
 	end
 
-c*****************************************************************
+!*****************************************************************
 
 	subroutine set_facts(nvar,default,facts,factstring)
 
@@ -1635,7 +1635,7 @@ c*****************************************************************
 
 	end
 
-c*****************************************************************
+!*****************************************************************
 
 	subroutine change_strings(nvar,strings_out,newstring)
 
@@ -1677,7 +1677,7 @@ c*****************************************************************
 
 	end
 
-c*****************************************************************
+!*****************************************************************
 
 	subroutine determine_dir_vars(nvar,ivars,ivarsd,ivd)
 
@@ -1718,10 +1718,10 @@ c*****************************************************************
 
 	end
 
-c*****************************************************************
+!*****************************************************************
 
-	subroutine allocate_vars(nvar,np,lmax,hlv,hd,ilhkv
-     +			,data_profile,d3dext,data)
+	subroutine allocate_vars(nvar,np,lmax,hlv,hd,ilhkv &
+     &			,data_profile,d3dext,data)
 
 	implicit none
 
@@ -1746,7 +1746,7 @@ c*****************************************************************
 
 	end
 
-c*****************************************************************
+!*****************************************************************
 
 	subroutine correct_regpar(regpar)
 
@@ -1760,7 +1760,7 @@ c*****************************************************************
 
 	end
 
-c*****************************************************************
+!*****************************************************************
 
 	subroutine check_regpar(aline,np,regpar,regpar0)
 
@@ -1791,7 +1791,7 @@ c*****************************************************************
  1000	format(a,7f10.2)
 	end
 
-c*****************************************************************
+!*****************************************************************
 
 	subroutine rain_elab(npi,atime,string,regpar,flag,data)
 
@@ -1889,8 +1889,8 @@ c*****************************************************************
             write(6,1001) year,ny,tdays,tot,totyear
  1001	    format(2i8,3f14.2)
 	  else
-            write(6,*) '   year   nrecs          days' //
-     +			'   accumulated        yearly'
+            write(6,*) '   year   nrecs          days' // &
+     &			'   accumulated        yearly'
 	  end if
           ny = 0
 	  tstart = atime
@@ -1928,14 +1928,14 @@ c*****************************************************************
 	  hd = 10000.
 	  ilhkv = 1
 	  call dts_from_abs_time(datetime(1),datetime(2),atime)
-          call fem_file_write_header(iformat,iout,dtime
-     +                          ,0,np,lmax,nvar,ntype,lmax
-     +                          ,hlv,datetime,regpar)
-          call fem_file_write_data(iformat,iout
-     +                          ,0,np,lmax
-     +                          ,string
-     +                          ,ilhkv,hd
-     +                          ,lmax,rain)
+          call fem_file_write_header(iformat,iout,dtime &
+     &                          ,0,np,lmax,nvar,ntype,lmax &
+     &                          ,hlv,datetime,regpar)
+          call fem_file_write_data(iformat,iout &
+     &                          ,0,np,lmax &
+     &                          ,string &
+     &                          ,ilhkv,hd &
+     &                          ,lmax,rain)
 	  day = ys(3)
 	  ralloc = 0.
 	  nralloc = 0
@@ -1943,7 +1943,7 @@ c*****************************************************************
 
 	end
 
-c*****************************************************************
+!*****************************************************************
 
         subroutine handle_open_output_file(ius,file)
 
@@ -1972,13 +1972,13 @@ c*****************************************************************
 
         end
 
-c*****************************************************************
-c*****************************************************************
-c*****************************************************************
-c custom routines
-c*****************************************************************
-c*****************************************************************
-c*****************************************************************
+!*****************************************************************
+!*****************************************************************
+!*****************************************************************
+! custom routines
+!*****************************************************************
+!*****************************************************************
+!*****************************************************************
 
 	subroutine custom_elab(nlvdi,np,string,iv,flag,data)
 
@@ -2024,10 +2024,10 @@ c*****************************************************************
 
 	end
 
-c*****************************************************************
+!*****************************************************************
 
-	subroutine custom_elab_all(nlvdi,np,strings,nvar
-     +				,ivars,bnewstring,flag,data)
+	subroutine custom_elab_all(nlvdi,np,strings,nvar &
+     &				,ivars,bnewstring,flag,data)
 
 	implicit none
 
@@ -2091,5 +2091,5 @@ c*****************************************************************
 
 	end
 
-c*****************************************************************
+!*****************************************************************
 

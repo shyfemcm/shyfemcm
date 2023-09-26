@@ -63,18 +63,18 @@
         PetscInt, allocatable :: ghosts(:) 
         logical,allocatable :: node_is_ghost(:)
 
-        public :: 
-     +            petsc_global_initialize,
-     +            petsc_global_create_setup,        
-     +            petsc_global_close_setup        
+        public ::  &
+     &            petsc_global_initialize, &
+     &            petsc_global_create_setup,         &
+     &            petsc_global_close_setup        
       contains
      
       subroutine petsc_global_initialize
 #include "petsc/finclude/petsc.h"
 
-         call PetscInitialize(
-     +                  PETSC_NULL_CHARACTER,
-     +                  perr)
+         call PetscInitialize( &
+     &                  PETSC_NULL_CHARACTER, &
+     &                  perr)
          if (perr .ne. 0) then
             write(6,*)'Unable to initialize PETSc'
             stop
@@ -194,9 +194,9 @@
             if(nodes_by_ranks(kk,id)>0) then
               nodes_glob2block(nodes_by_ranks(kk,id))=k
 #ifdef Verbose
-              write(6,'(4(a,i8))')'PETSc rank',my_id,
-     +              ' take node from id',id,' node glob_int index=',
-     +              nodes_by_ranks(kk,id),' -> block index -1 =',k-1
+              write(6,'(4(a,i8))')'PETSc rank',my_id, &
+     &              ' take node from id',id,' node glob_int index=', &
+     &              nodes_by_ranks(kk,id),' -> block index -1 =',k-1
 #endif
               k=k+1
             else
@@ -207,8 +207,8 @@
         if(bmpi)then
            do k=1,nkn_local
 #ifdef Verbose
-              write(6,'(3(a,i8),a)')'rank,',my_id,' shynode ',k,
-     +                  ' (ext ',ip_int_node(k),')'
+              write(6,'(3(a,i8),a)')'rank,',my_id,' shynode ',k, &
+     &                  ' (ext ',ip_int_node(k),')'
               flush(6)
 #endif
               nodes_shy2block(k)=nodes_glob2block(ip_int_node(k))-1	!CLR24
@@ -231,8 +231,8 @@
          endif
         enddo
 #ifdef Verbose
-        write(*,*)'PETSc computed nodes rowStart,rowEnd=',
-     +             rowStart,rowEnd,' rank',my_id
+        write(*,*)'PETSc computed nodes rowStart,rowEnd=', &
+     &             rowStart,rowEnd,' rank',my_id
 #endif
         deallocate(nodes_glob2block)
         deallocate(inner_nodes_list)
@@ -257,14 +257,14 @@
         integer,allocatable :: numlocnod_per_row(:) 
 #ifdef Verbose
         call shympi_barrier
-        write(*,'(3(2(a,i10),a,i6))')
-     +    ' before working  d_nnz+o_nnz has min=',
-     +        minval(d_nnz+o_nnz),' max=',maxval(d_nnz+o_nnz),
-     +    ', sum=',sum(d_nnz+o_nnz),
-     +    ' ; d_nnz has min=',minval(d_nnz),' max=',maxval(d_nnz),
-     +    ' sum=',sum(d_nnz),
-     +    ' ; o_nnz has min=',minval(o_nnz),' max=',maxval(o_nnz),
-     +    ' sum=',sum(o_nnz)
+        write(*,'(3(2(a,i10),a,i6))') &
+     &    ' before working  d_nnz+o_nnz has min=', &
+     &        minval(d_nnz+o_nnz),' max=',maxval(d_nnz+o_nnz), &
+     &    ', sum=',sum(d_nnz+o_nnz), &
+     &    ' ; d_nnz has min=',minval(d_nnz),' max=',maxval(d_nnz), &
+     &    ' sum=',sum(d_nnz), &
+     &    ' ; o_nnz has min=',minval(o_nnz),' max=',maxval(o_nnz), &
+     &    ' sum=',sum(o_nnz)
 #endif
         max_nlocnod=12
         allocate(local_nodes(max_nlocnod,rowStart:rowEnd-1))
@@ -286,9 +286,9 @@
                   col=nodes_eleshy2block(j,ie)
                   if(numlocnod_per_row(row)+1>=max_nlocnod)then
                       max_nlocnod=max_nlocnod+2
-                      call resize_2darray(local_nodes,
-     +                                  max_nlocnod,rowEnd-rowStart,   ! new sizes of dim 1 and 2
-     +                                  -1) ! default value
+                      call resize_2darray(local_nodes, &
+     &                                  max_nlocnod,rowEnd-rowStart,   ! new sizes of dim 1 and 2 &
+     &                                  -1) ! default value
                   endif
                   if( any(local_nodes(:,row)==col) )then
                         continue
@@ -319,28 +319,28 @@
         deallocate(local_nodes)
         deallocate(numlocnod_per_row)
 
-        write(*,'(a,i3,4(a,i6),3(2(a,i10),a,i6))')'PETSc rank=',my_id,
-     +    ' has a number of inner nodes (nrows)=',rowEnd-rowStart-1,
-     +    ' (rows ',rowStart,
-     +    ' to',rowEnd-1,') and ',nghosts,
-     +    ' ghost nodes ; d_nnz+o_nnz has min=',
-     +        minval(d_nnz+o_nnz),' max=',maxval(d_nnz+o_nnz),
-     +    ', sum=',sum(d_nnz+o_nnz),
-     +    ' ; d_nnz has min=',minval(d_nnz),' max=',maxval(d_nnz),
-     +    ' sum=',sum(d_nnz),
-     +    ' ; o_nnz has min=',minval(o_nnz),' max=',maxval(o_nnz),
-     +    ' sum=',sum(o_nnz)
+        write(*,'(a,i3,4(a,i6),3(2(a,i10),a,i6))')'PETSc rank=',my_id, &
+     &    ' has a number of inner nodes (nrows)=',rowEnd-rowStart-1, &
+     &    ' (rows ',rowStart, &
+     &    ' to',rowEnd-1,') and ',nghosts, &
+     &    ' ghost nodes ; d_nnz+o_nnz has min=', &
+     &        minval(d_nnz+o_nnz),' max=',maxval(d_nnz+o_nnz), &
+     &    ', sum=',sum(d_nnz+o_nnz), &
+     &    ' ; d_nnz has min=',minval(d_nnz),' max=',maxval(d_nnz), &
+     &    ' sum=',sum(d_nnz), &
+     &    ' ; o_nnz has min=',minval(o_nnz),' max=',maxval(o_nnz), &
+     &    ' sum=',sum(o_nnz)
 #ifdef Verbose
-        write(*,'(a,i4)')
-     +  'PETSc done identifying non-zero and ghosts, rank',my_id
+        write(*,'(a,i4)') &
+     &  'PETSc done identifying non-zero and ghosts, rank',my_id
         call shympi_barrier
 #endif
       end subroutine petsc_identify_non_zeros_and_ghosts
 
 !******************************************************************
 
-        subroutine resize_2darray(array,
-     +                                news1,news2,default_val)
+        subroutine resize_2darray(array, &
+     &                                news1,news2,default_val)
          implicit none
           integer, intent(in):: news1,news2
           integer, intent(in):: default_val
@@ -351,17 +351,17 @@
           lbound2=lbound(array,2)
           olds1=ubound(array,1)-lbound1
           olds2=ubound(array,2)-lbound2
-          allocate(tmparray( lbound1 : lbound1+olds1 ,
-     +                       lbound2 : lbound2+olds2 ))
+          allocate(tmparray( lbound1 : lbound1+olds1 , &
+     &                       lbound2 : lbound2+olds2 ))
           tmparray(:,:)=array(:,:)
           deallocate(array)
-          allocate(array( lbound1 : lbound1+news1 ,
-     +                       lbound2 : lbound2+news2 ))
+          allocate(array( lbound1 : lbound1+news1 , &
+     &                       lbound2 : lbound2+news2 ))
           array(:,:)=default_val
           mins1=min(olds1,news1)
           mins2=min(olds2,news2)
-          array(lbound1:lbound1+mins1,lbound2:lbound2+mins2)=
-     +         tmparray(lbound1:lbound1+mins1,lbound2:lbound2+mins2)
+          array(lbound1:lbound1+mins1,lbound2:lbound2+mins2)= &
+     &         tmparray(lbound1:lbound1+mins1,lbound2:lbound2+mins2)
           deallocate(tmparray)
         end subroutine resize_2darray
 

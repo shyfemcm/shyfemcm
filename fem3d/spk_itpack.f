@@ -8075,7 +8075,7 @@ C
       EXTERNAL ETIME
       DIMENSION TARRAY(2)
       REAL ETIME, TIMER
-c      TOTAL = ETIME (TARRAY)	!ggu
+!      TOTAL = ETIME (TARRAY)	!ggu
       TOTAL = 0
       TIMER = TOTAL
 C

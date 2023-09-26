@@ -23,29 +23,29 @@
 !
 !--------------------------------------------------------------------------
 
-c revision log :
-c
-c 20.08.2003	ggu	new laplacian interpolation
-c 02.09.2003	ggu	some comments, write to .dat file
-c 30.10.2003	ggu	subroutine prepare_bc_l included in this file
-c 04.03.2004	ggu	writes also number of variables (1)
-c 11.03.2009	ggu	bug fix -> declare hev() here
-c 10.02.2014	ggu	finished optimal interpolation
-c 26.02.2015	ggu	changed VERS_7_1_5
-c 26.03.2018	ggu	some parameters are now arrays (sigma,rr)
-c 03.04.2018	ggu	changed VERS_7_5_43
-c 16.02.2019	ggu	changed VERS_7_5_60
-c 22.11.2020	ggu	some more comments
-c
-c notes :
-c
-c****************************************************************
+! revision log :
+!
+! 20.08.2003	ggu	new laplacian interpolation
+! 02.09.2003	ggu	some comments, write to .dat file
+! 30.10.2003	ggu	subroutine prepare_bc_l included in this file
+! 04.03.2004	ggu	writes also number of variables (1)
+! 11.03.2009	ggu	bug fix -> declare hev() here
+! 10.02.2014	ggu	finished optimal interpolation
+! 26.02.2015	ggu	changed VERS_7_1_5
+! 26.03.2018	ggu	some parameters are now arrays (sigma,rr)
+! 03.04.2018	ggu	changed VERS_7_5_43
+! 16.02.2019	ggu	changed VERS_7_5_60
+! 22.11.2020	ggu	some more comments
+!
+! notes :
+!
+!****************************************************************
 
-	subroutine opt_intp(nobs,xobs,yobs,zobs,bobs
-     +			,nback,bback,xback,yback,zback
-     +			,rl,rlmax,sigma,rr,zanal)
+	subroutine opt_intp(nobs,xobs,yobs,zobs,bobs &
+     &			,nback,bback,xback,yback,zback &
+     &			,rl,rlmax,sigma,rr,zanal)
 
-c computes optimal interpolation
+! computes optimal interpolation
 
 	implicit none
 
@@ -82,9 +82,9 @@ c computes optimal interpolation
 	double precision xi,yi,xj,yj,xk,yk
 	double precision dist2,r,acu
 
-c	------------------------------------------
-c	set some parameters
-c	------------------------------------------
+!	------------------------------------------
+!	set some parameters
+!	------------------------------------------
 
 	bverbose = .true.		!writes infomation to terminal
 	bcheck = .true.			!computes and writes some checks
@@ -95,9 +95,9 @@ c	------------------------------------------
 	sigma2(:) = sigma(:)**2
 	rr2(:) = rr(:)**2				!this is a vector
 
-c	------------------------------------------
-c	if background not given create it
-c	------------------------------------------
+!	------------------------------------------
+!	if background not given create it
+!	------------------------------------------
 
 	if( .not. bback ) then
 
@@ -115,15 +115,15 @@ c	------------------------------------------
 
 	end if
 
-c	------------------------------------------
-c	create observational innovation vector
-c	------------------------------------------
+!	------------------------------------------
+!	create observational innovation vector
+!	------------------------------------------
 
 	dobs = zobs - bobs
 
-c	------------------------------------------
-c	set up covariance matrix H P^b H^T
-c	------------------------------------------
+!	------------------------------------------
+!	set up covariance matrix H P^b H^T
+!	------------------------------------------
 
 	if( bverbose ) then
 	  write(6,*) 'setting up covariance matrix'
@@ -145,9 +145,9 @@ c	------------------------------------------
 	!write(6,*) 'obs cor'
 	!write(6,*) rmat
 
-c	------------------------------------------
-c	add observation error matrix
-c	------------------------------------------
+!	------------------------------------------
+!	add observation error matrix
+!	------------------------------------------
 
 	do j=1,n
 	  rmat(j,j) = rmat(j,j) + rr2(j)
@@ -156,9 +156,9 @@ c	------------------------------------------
 	!write(6,*) 'obs + err cor'
 	!write(6,*) rmat
 
-c	------------------------------------------
-c	invert matrix
-c	------------------------------------------
+!	------------------------------------------
+!	invert matrix
+!	------------------------------------------
 
 	if( bverbose ) then
 	  write(6,*) 'inverting covariance matrix'
@@ -182,9 +182,9 @@ c	------------------------------------------
 	  !write(6,'(a,3f12.4,e12.4)') 'cond: ',ano,ani,cond,anr
 	end if
 
-c	------------------------------------------
-c	multiply inverted matrix with observational innovation
-c	------------------------------------------
+!	------------------------------------------
+!	multiply inverted matrix with observational innovation
+!	------------------------------------------
 
 	do i=1,n
 	  acu = 0.
@@ -194,9 +194,9 @@ c	------------------------------------------
 	  rvec(i) = acu
 	end do
 
-c	------------------------------------------
-c	multiply P^b H^T with vector and add to background to obtain analysis
-c	------------------------------------------
+!	------------------------------------------
+!	multiply P^b H^T with vector and add to background to obtain analysis
+!	------------------------------------------
 
 	do k=1,nback
 	  xk = xback(k)
@@ -218,9 +218,9 @@ c	------------------------------------------
 	  zanal(k) = zback(k) + acu
 	end do
 
-c	------------------------------------------
-c	end of routine
-c	------------------------------------------
+!	------------------------------------------
+!	end of routine
+!	------------------------------------------
 
 	return
    99	continue
@@ -229,9 +229,9 @@ c	------------------------------------------
 	stop 'error stop opt_intp: rlmax'
 	end
 
-c****************************************************************
-c****************************************************************
-c****************************************************************
+!****************************************************************
+!****************************************************************
+!****************************************************************
 
 	subroutine opt_intp_test_1_obs
 
@@ -288,9 +288,9 @@ c****************************************************************
 	write(6,*) nb,nback,ib
 	if( ib .ne. nback ) stop 'error stop: ib .ne. nback'
 
-	call opt_intp(nobs,xobs,yobs,zobs,bobs
-     +			,nback,bback,xback,yback,zback
-     +			,rl,rlmax,sigma,rr,zanal)
+	call opt_intp(nobs,xobs,yobs,zobs,bobs &
+     &			,nback,bback,xback,yback,zback &
+     &			,rl,rlmax,sigma,rr,zanal)
 
 	write(6,*) nobs
 	do i=1,nobs
@@ -303,7 +303,7 @@ c****************************************************************
 
 	end
 
-c****************************************************************
+!****************************************************************
 
 	subroutine opt_intp_test_sin_cos
 
@@ -370,9 +370,9 @@ c****************************************************************
 	write(6,*) nb,nback,ib
 	if( ib .ne. nback ) stop 'error stop: ib .ne. nback'
 
-	call opt_intp(nobs,xobs,yobs,zobs,bobs
-     +			,nback,bback,xback,yback,zback
-     +			,rl,rlmax,sigma,rr,zanal)
+	call opt_intp(nobs,xobs,yobs,zobs,bobs &
+     &			,nback,bback,xback,yback,zback &
+     &			,rl,rlmax,sigma,rr,zanal)
 
 	write(6,*) nobs
 	do i=1,nobs
@@ -389,18 +389,18 @@ c****************************************************************
 
 	end
 
-c******************************************************************
-c******************************************************************
-c******************************************************************
+!******************************************************************
+!******************************************************************
+!******************************************************************
 
 	subroutine opt_intp_test
 	call opt_intp_test_1_obs
 	call opt_intp_test_sin_cos
 	end
 
-c	program opt_intp_main
-c	call opt_intp_test
-c	end
+!	program opt_intp_main
+!	call opt_intp_test
+!	end
 
-c******************************************************************
+!******************************************************************
 

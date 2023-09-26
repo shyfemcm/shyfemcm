@@ -32,31 +32,31 @@
 !**************************************************************************
 
 	subroutine intsha(x,y,z,icolor,rlev,ncol,itrat)
-c
-c interpolation in triangle and area plot of colors
-c
+!
+! interpolation in triangle and area plot of colors
+!
 	dimension x(3),y(3),z(3)
 	dimension icolor(1),rlev(1)
-c
+!
 	logical btypa
 	dimension xp(7),yp(7)
 	dimension xph(7),yph(7) !only because qareac changes vector
 				!-->change  qareac
-c
+!
 	save eps
 	data eps /1.e-5/
-c
-c find min/max %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-c
+!
+! find min/max %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+!
 	call mima(z,3,zmin,zmax)
-c
-c put nodes in order %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-c
-c a is first node, b is last node
-c 1 is first free node, 2 (only if btypa=.false.) is second free node
-c
-c find first and last node
-c
+!
+! put nodes in order %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+!
+! a is first node, b is last node
+! 1 is first free node, 2 (only if btypa=.false.) is second free node
+!
+! find first and last node
+!
 	icont=0
 	ieck=0
 	do ii=3,1,-1
@@ -78,9 +78,9 @@ c
 	    end if
 	end if
 	end do
-c
-c find free nodes
-c
+!
+! find free nodes
+!
 	if(icont.eq.1) then
 		xb=xa
 		yb=ya
@@ -107,32 +107,32 @@ c
 		z1=z(ii)
 		btypa=.true.
 	end if
-c
-c find first level .ge. nodes a and b %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-c
+!
+! find first level .ge. nodes a and b %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+!
 	do icol=1,ncol-1
 	if(rlev(icol).ge.zmin) goto 2
 	end do
     2   continue
-c
-c start plotting %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-c
+!
+! start plotting %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+!
 	do while(icol.le.ncol)
-c
-c zr is actual level (last level must be always true)
-c
+!
+! zr is actual level (last level must be always true)
+!
 	if(icol.lt.ncol) then
 		zr=rlev(icol)
 	else
 		zr=zmax+1.
 	end if
-c
-c two cases
-c
+!
+! two cases
+!
 	if(btypa) then
-c
-c case a (one free node)
-c
+!
+! case a (one free node)
+!
 		if(z1.le.zr) then
 			xp(1)=xa
 			yp(1)=ya
@@ -178,9 +178,9 @@ c
 			zb=zr
 		end if
 	else
-c
-c case b (two free nodes)
-c
+!
+! case b (two free nodes)
+!
 		xp(1)=xa
 		yp(1)=ya
 		ip=1
@@ -251,14 +251,14 @@ c
 		ip=ip+1
 		xp(ip)=xb
 		yp(ip)=yb
-c
+!
 		do i=1,ip
 		xph(i)=xp(i)
 		yph(i)=yp(i)
 		end do
-c
+!
 		call qareac(xp,yp,ip,icolor(icol),itrat)
-c
+!
 		if(ieck.eq.0) then
 			goto 99
 		else
@@ -278,12 +278,12 @@ c
 			end if
 		end if
 	end if
-c
+!
 	icol=icol+1
-c
+!
 	end do
-c
+!
    99   continue
-c
+!
 	return
 	end

@@ -23,48 +23,48 @@
 !
 !--------------------------------------------------------------------------
 
-c revision log :
-c
-c 20.08.2003	ggu	new laplacian interpolation
-c 02.09.2003	ggu	some comments, write to .dat file
-c 30.10.2003	ggu	subroutine prepare_bc included in this file
-c 04.03.2004	ggu	writes also number of variables (1)
-c 27.01.2009	ggu	new routine scal_intp from laplap
-c 23.03.2010	ggu	changed v6.1.1
-c 23.12.2014	ggu	changed VERS_7_0_11
-c 17.07.2015	ggu	changed VERS_7_1_53
-c 17.07.2015	ggu	changed VERS_7_1_80
-c 20.07.2015	ggu	changed VERS_7_1_81
-c 16.02.2019	ggu	changed VERS_7_5_60
-c
-c notes :
-c
-c please prepare file input.dat like this:
-c
-c----------------- start
-c k1	val1
-c k2	val2
-c ...
-c kn	valn
-c----------------- end
-c
-c or
-c
-c----------------- start
-c x1 y1	val1
-c x2 y2	val2
-c ...
-c xn yn	valn
-c----------------- end
-c
-c run memory and set the basin ( memory -b venlag62 )
-c run laplap with input file ( laplap < input.dat )
-c
-c****************************************************************
+! revision log :
+!
+! 20.08.2003	ggu	new laplacian interpolation
+! 02.09.2003	ggu	some comments, write to .dat file
+! 30.10.2003	ggu	subroutine prepare_bc included in this file
+! 04.03.2004	ggu	writes also number of variables (1)
+! 27.01.2009	ggu	new routine scal_intp from laplap
+! 23.03.2010	ggu	changed v6.1.1
+! 23.12.2014	ggu	changed VERS_7_0_11
+! 17.07.2015	ggu	changed VERS_7_1_53
+! 17.07.2015	ggu	changed VERS_7_1_80
+! 20.07.2015	ggu	changed VERS_7_1_81
+! 16.02.2019	ggu	changed VERS_7_5_60
+!
+! notes :
+!
+! please prepare file input.dat like this:
+!
+!----------------- start
+! k1	val1
+! k2	val2
+! ...
+! kn	valn
+!----------------- end
+!
+! or
+!
+!----------------- start
+! x1 y1	val1
+! x2 y2	val2
+! ...
+! xn yn	valn
+!----------------- end
+!
+! run memory and set the basin ( memory -b venlag62 )
+! run laplap with input file ( laplap < input.dat )
+!
+!****************************************************************
 
         program scal_intp
 
-c optimal interpolation
+! optimal interpolation
 
 	use evgeom
 	use basin
@@ -90,48 +90,48 @@ c optimal interpolation
 
 	flag = 1.23456e+23
 
-c-----------------------------------------------------------------
-c read in basin
-c-----------------------------------------------------------------
+!-----------------------------------------------------------------
+! read in basin
+!-----------------------------------------------------------------
 
         if( iapini(1,0,0,0) .le. 0 ) stop
 
 	call bas_info
 
-c-----------------------------------------------------------------
-c set up ev
-c-----------------------------------------------------------------
+!-----------------------------------------------------------------
+! set up ev
+!-----------------------------------------------------------------
 
 	call set_ev
 	call check_ev
 
 	allocate(zv(nkn))
 
-c-----------------------------------------------------------------
-c read BC and interpolate
-c-----------------------------------------------------------------
+!-----------------------------------------------------------------
+! read BC and interpolate
+!-----------------------------------------------------------------
 
 	call get_input(mode,afact)
 	call read_data(mode,ndim,np,xp,yp,zp)
 
 	call interpol_e(afact,np,xp,yp,zp,zv)
 
-c-----------------------------------------------------------------
-c min/max of interpolated values
-c-----------------------------------------------------------------
+!-----------------------------------------------------------------
+! min/max of interpolated values
+!-----------------------------------------------------------------
 
 	call mima(zv,nkn,zmin,zmax)
 	write(6,*) 'min/max: ',zmin,zmax
 
-c-----------------------------------------------------------------
-c write to NOS file laplace.nos
-c-----------------------------------------------------------------
+!-----------------------------------------------------------------
+! write to NOS file laplace.nos
+!-----------------------------------------------------------------
 
 	call wrnos2d('scalar','laplace interpolation',zv)
 
-c-----------------------------------------------------------------
-c write to DAT file laplace.dat
-c-----------------------------------------------------------------
+!-----------------------------------------------------------------
+! write to DAT file laplace.dat
+!-----------------------------------------------------------------
 
 	it = 0
         ilev = 0
@@ -142,13 +142,13 @@ c-----------------------------------------------------------------
 	write(1) (zv(k),k=1,nkn)
 	close(1)
 
-c-----------------------------------------------------------------
-c end of routine
-c-----------------------------------------------------------------
+!-----------------------------------------------------------------
+! end of routine
+!-----------------------------------------------------------------
 
 	end
 
-c****************************************************************
+!****************************************************************
 
 	subroutine get_input(mode,afact)
 
@@ -192,7 +192,7 @@ c****************************************************************
 
 	end
 
-c******************************************************************
+!******************************************************************
 
 	subroutine read_data(mode,ndim,np,xp,yp,zp)
 
@@ -244,13 +244,13 @@ c******************************************************************
         stop 'error stop read_data: no such file'
 	end
 
-c******************************************************************
+!******************************************************************
 
 	subroutine interpol_e(afact,np,xp,yp,zp,zv)
 
-c interpolates depth values
-c
-c exponential interpolation with max radius
+! interpolates depth values
+!
+! exponential interpolation with max radius
 
 	use evgeom
 	use basin
@@ -284,9 +284,9 @@ c exponential interpolation with max radius
 
         write(6,*) 'starting exponential interpolation with max radius'
 
-c-----------------------------------------------------------------
-c initialize
-c-----------------------------------------------------------------
+!-----------------------------------------------------------------
+! initialize
+!-----------------------------------------------------------------
 
 	atot = 0.
 	do ie=1,nel
@@ -300,9 +300,9 @@ c-----------------------------------------------------------------
 
 	write(6,*) 'total area: ',atot,area,sqrt(area)
 
-c-----------------------------------------------------------------
-c initial interpolation -> point in element
-c-----------------------------------------------------------------
+!-----------------------------------------------------------------
+! initial interpolation -> point in element
+!-----------------------------------------------------------------
 
 	fact = 2.
 	nktot = 0
@@ -356,11 +356,11 @@ c-----------------------------------------------------------------
 
 	end do
 
-c-----------------------------------------------------------------
-c end of routine
-c-----------------------------------------------------------------
+!-----------------------------------------------------------------
+! end of routine
+!-----------------------------------------------------------------
 
 	end
 
-c*******************************************************************
+!*******************************************************************
 

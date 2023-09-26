@@ -32,11 +32,11 @@
 
 !**************************************************************************
 
-c********************************************************************
+!********************************************************************
 
         subroutine haka0d(time,dt,vol,h,temp,aI,e,eload)
 
-c box ecological model for hakata bay
+! box ecological model for hakata bay
 
         implicit none
 
@@ -59,20 +59,20 @@ c box ecological model for hakata bay
 
         end
 
-c********************************************************************
+!********************************************************************
 
         subroutine hakaeco(time,vol,h,temp,aI,e,el,es)
 
-c handles biochemical reactor
-c
-c state variables are in g/m**3
-c source term is in g/sec
-c
-c new concentration has to be computed as:
-c
-c ( (CV)_new - (CV)_old ) / dt = source
-c
-c =>  C_new = ( C_old V_old + dt * source ) / V_new
+! handles biochemical reactor
+!
+! state variables are in g/m**3
+! source term is in g/sec
+!
+! new concentration has to be computed as:
+!
+! ( (CV)_new - (CV)_old ) / dt = source
+!
+! =>  C_new = ( C_old V_old + dt * source ) / V_new
 
         implicit none
 
@@ -89,11 +89,11 @@ c =>  C_new = ( C_old V_old + dt * source ) / V_new
         real es(nstate) !source for equation [g/sec]
 
         real Kx,Kz,Ks,Iopt,L,Kzp,kmp,kmz,kg,kk
-        parameter(Kx=140,Kz=0.0002,Ks=0.03,
-     +             Iopt=6,
-     +             L=10000,Kzp=0.00001, kmp=0.069,
-     +             kmz=0.0693, kg=0.0693,kk=0.063)
-c     +             Iopt=500000,
+        parameter(Kx=140,Kz=0.0002,Ks=0.03, &
+     &             Iopt=6, &
+     &             L=10000,Kzp=0.00001, kmp=0.069, &
+     &             kmz=0.0693, kg=0.0693,kk=0.063)
+!     +             Iopt=500000,
       
         real A1,A2,A1A2,A3,B1,B2,B3,B4,C1,C2,D1
         real aIr,T
@@ -105,50 +105,50 @@ c     +             Iopt=500000,
         real sec
         real cmp,cmz,vpio,vpit,vpdo,vpdt,vdio,vdit
 
-c----------------------------------------------------------------  
+!----------------------------------------------------------------  
 
       cmp=1.67e-4
-c       mortarity of phytoplankton at 0 degree ; /sec
+!       mortarity of phytoplankton at 0 degree ; /sec
       cmz=3.5e-4
-c       mortarity of zooplankton at 0 degree ; /sec
-c     kmp=0.069
-c       temperature dependency of mortarity of phytoplankton 
-c       ; /degreee 
-c     kmz=0.0693
-c       temperature dependency of mortarity of zooplankton 
-c       ; /degreee 
+!       mortarity of zooplankton at 0 degree ; /sec
+!     kmp=0.069
+!       temperature dependency of mortarity of phytoplankton 
+!       ; /degreee 
+!     kmz=0.0693
+!       temperature dependency of mortarity of zooplankton 
+!       ; /degreee 
       vpio=3.47e-7
-c       decomposition speed of detritus to DIP at 0 degree
-c       ; /sec      
+!       decomposition speed of detritus to DIP at 0 degree
+!       ; /sec      
       vpit=0.0693
-c       temperature dependency of decomposition of detritus to DIP
-c       ; /degree
+!       temperature dependency of decomposition of detritus to DIP
+!       ; /degree
       vpdo=2.89e-7
-c       decomposition speed of detritus to DOP at 0 degree
-c       ; /sec      
+!       decomposition speed of detritus to DOP at 0 degree
+!       ; /sec      
       vpdt=0.0693
-c       temperature dependency of decomposition of detritus to DOP
-c       ; /degree
+!       temperature dependency of decomposition of detritus to DOP
+!       ; /degree
       vdio=3.47e-7
-c       decomposition speed of DOP to DIP at 0 degree
-c       ; /sec      
+!       decomposition speed of DOP to DIP at 0 degree
+!       ; /sec      
       vdit=0.0693
-c       temperature dependency of decomposition of DOP to DIP
-c       ; /degree
+!       temperature dependency of decomposition of DOP to DIP
+!       ; /degree
       b=0.3
-c       constant for fecal pellet generation ; 
+!       constant for fecal pellet generation ; 
       GR=0.2
-c       maximum grazing rate of zooplankton ; /day
-c      kg=0.0693
-c       temperature dependency of grazing ; /degree       
+!       maximum grazing rate of zooplankton ; /day
+!      kg=0.0693
+!       temperature dependency of grazing ; /degree       
       f=1.05
-c       sedimentation of detritus ; mg/sec
-c      Iopt=500000.
-c       optimum light intensity ; cal*day/m**2
-c      Ks=0.03
-c       half saturation concentration ; 
-c      I1=313000.    
-c       average light intensity ;
+!       sedimentation of detritus ; mg/sec
+!      Iopt=500000.
+!       optimum light intensity ; cal*day/m**2
+!      Ks=0.03
+!       half saturation concentration ; 
+!      I1=313000.    
+!       average light intensity ;
 
        ram=723.
        th=8.33e-5
@@ -157,7 +157,7 @@ c       average light intensity ;
        sec=86400.
        A2=0.135
        
-c----------------------------------------------------------------  
+!----------------------------------------------------------------  
   
         T = temp
 
@@ -170,7 +170,7 @@ c----------------------------------------------------------------
         PHP2 = PHP*PHP
         ZOO2 = ZOO*ZOO
       
-c----------------------------------------------------------------  
+!----------------------------------------------------------------  
 
         aIr = (aI/Iopt)**2
       
@@ -189,7 +189,7 @@ c----------------------------------------------------------------
         
         D1=vdio*exp(vdit*T)
         
-c----------------------------------------------------------------  
+!----------------------------------------------------------------  
 
         dPHP = vol * ( A1*PHP - B1*ZOO  - A1A2*PHP - A3*PHP2 )
         dZOO = vol * ( B1*ZOO - B2*ZOO  - B3*ZOO - B4*ZOO2 )
@@ -197,7 +197,7 @@ c----------------------------------------------------------------
         dDOP = vol * ( A1A2*PHP + C2*DET - D1*DOP )
         dDIP = vol * ( -A1*PHP + B2*ZOO  + C1*DET + D1*DOP )
 
-c----------------------------------------------------------------  
+!----------------------------------------------------------------  
 
         es(1) = el(1) + dPHP
         es(2) = el(2) + dZOO
@@ -205,11 +205,11 @@ c----------------------------------------------------------------
         es(4) = el(4) + dDOP
         es(5) = el(5) + dDIP
 
-c----------------------------------------------------------------  
+!----------------------------------------------------------------  
 
         end
 
-c********************************************************************
+!********************************************************************
 
 	subroutine euler(dt,vol,c,cds)
 
@@ -231,5 +231,5 @@ c********************************************************************
 
 	end
 	
-c********************************************************************
+!********************************************************************
 

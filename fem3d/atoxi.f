@@ -24,28 +24,28 @@
 !
 !--------------------------------------------------------------------------
 
-c atoxi - Toxical routines from ARPAV
-c
-c contents :
-c
-c revision log :
-c
-c 15.02.2006	ggu&fdp	new routine atoxi for ARPAV (from scratch)
-c 23.03.2010	ggu	changed v6.1.1
-c 30.03.2012	ggu	changed VERS_6_1_51
-c 01.04.2016	ggu	changed VERS_7_5_7
-c 16.02.2019	ggu	changed VERS_7_5_60
-c
-c*************************************************************
+! atoxi - Toxical routines from ARPAV
+!
+! contents :
+!
+! revision log :
+!
+! 15.02.2006	ggu&fdp	new routine atoxi for ARPAV (from scratch)
+! 23.03.2010	ggu	changed v6.1.1
+! 30.03.2012	ggu	changed VERS_6_1_51
+! 01.04.2016	ggu	changed VERS_7_5_7
+! 16.02.2019	ggu	changed VERS_7_5_60
+!
+!*************************************************************
 
 	subroutine atoxi_ini
 	end
 
-c*************************************************************
+!*************************************************************
 
 	subroutine atoxi(id,tsec,dt,d,t,e)
 
-c computes reactions
+! computes reactions
 
 	implicit none
 
@@ -82,11 +82,11 @@ c computes reactions
 
 	end
 
-c*************************************************************
+!*************************************************************
 
 	subroutine diffres(dt,c,a1,a2)
 
-c resolves differential equation dc/dt = -a1*c + a2
+! resolves differential equation dc/dt = -a1*c + a2
 
 	implicit none
 
@@ -101,7 +101,7 @@ c resolves differential equation dc/dt = -a1*c + a2
 
 	end
 
-c*************************************************************
+!*************************************************************
 
 
         subroutine kvolat (T,kol,caux)
@@ -229,8 +229,8 @@ c*************************************************************
 
 !********************************************
 
-c        call test_atoxi
-c        end
+!        call test_atoxi
+!        end
 
 !********************************************
 

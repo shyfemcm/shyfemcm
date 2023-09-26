@@ -310,8 +310,8 @@
         logical bises0
         integer year
 
-        if(  ( mod(year,4) .eq. 0 .and. mod(year,100) .ne. 0 )
-     +                  .or. mod(year,400) .eq. 0 ) then
+        if(  ( mod(year,4) .eq. 0 .and. mod(year,100) .ne. 0 ) &
+     &                  .or. mod(year,400) .eq. 0 ) then
                 bises0 = .true.
         else
                 bises0 = .false.

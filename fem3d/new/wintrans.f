@@ -60,8 +60,8 @@
 	  write(6,*) it,nkn,nrec,irecl
 
 	  if( nrec .eq. 1 ) then
-	    open(2,file='windout.win',status='unknown',form='unformatted'
-     +		,access='direct',recl=irecl)
+	    open(2,file='windout.win',status='unknown',form='unformatted' &
+     &		,access='direct',recl=irecl)
 	  end if
 
 
@@ -84,7 +84,7 @@
 
 	end
 
-c*******************************************************************
+!*******************************************************************
 
 	subroutine test_wind(irecl,nkndim,wx,wy,p)
 
@@ -99,8 +99,8 @@ c*******************************************************************
 
 	write(6,*) 're-reading direct file...'
 
-	open(2,file='windout.win',status='old',form='unformatted'
-     +          ,access='direct',recl=irecl)
+	open(2,file='windout.win',status='old',form='unformatted' &
+     &          ,access='direct',recl=irecl)
 
 	read(2,rec=5) it,nkn,(wx(i),wy(i),i=1,nkn),(p(i),i=1,nkn)
 	write(6,*) it,nkn
@@ -112,5 +112,5 @@ c*******************************************************************
 
 	end
 	 
-c*******************************************************************
+!*******************************************************************
 

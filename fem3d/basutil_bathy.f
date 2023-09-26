@@ -23,40 +23,40 @@
 !
 !--------------------------------------------------------------------------
 
-c revision log :
-c
-c 06.04.1999	ggu	completely restructured
-c 04.06.1999	ggu	new statistics are computed
-c 08.09.2003	ggu	mode 5 -> write depth values from elements
-c 23.09.2004	ggu	interpolq() changed for bathy interpolation
-c 02.10.2004	ggu	interpole() for exponential interpolation
-c 12.05.2005	ggu	pass hmin to interpolation functions
-c 06.04.2009	ggu	read param.h
-c 24.04.2009	ggu	new call to rdgrd()
-c 21.05.2009	ggu	restructured to allow for nodal interpolation
-c 16.12.2010	ggu	bug fix in transfer_depth()
-c 02.12.2011	ggu	introduction of nminimum - hardcoded for now
-c 16.03.2012	ggu	autoregression introduced (make_auto_corr,interpola)
-c 16.03.2012	ggu	default value for umfact set to 3, new mode = 3
-c 01.06.2012	ggu	some more changes
-c 13.06.2013	ggu	copy_depth() renamed to transfer_depth()
-c 13.02.2014	ggu	new data written, can read also bas file
-c 05.03.2014	ggu	subroutines copied to other routine
-c 10.10.2015	ggu	changed VERS_7_3_2
-c 16.12.2015	ggu	depth ht is now passed in for square interpol
-c 11.04.2016	ggu	meaning of ufact has changed
-c 25.05.2017	ggu	changed VERS_7_5_28
-c 16.02.2019	ggu	changed VERS_7_5_60
-c 14.02.2022	ggu	revisted, some bug fixes
-c
-c****************************************************************
+! revision log :
+!
+! 06.04.1999	ggu	completely restructured
+! 04.06.1999	ggu	new statistics are computed
+! 08.09.2003	ggu	mode 5 -> write depth values from elements
+! 23.09.2004	ggu	interpolq() changed for bathy interpolation
+! 02.10.2004	ggu	interpole() for exponential interpolation
+! 12.05.2005	ggu	pass hmin to interpolation functions
+! 06.04.2009	ggu	read param.h
+! 24.04.2009	ggu	new call to rdgrd()
+! 21.05.2009	ggu	restructured to allow for nodal interpolation
+! 16.12.2010	ggu	bug fix in transfer_depth()
+! 02.12.2011	ggu	introduction of nminimum - hardcoded for now
+! 16.03.2012	ggu	autoregression introduced (make_auto_corr,interpola)
+! 16.03.2012	ggu	default value for umfact set to 3, new mode = 3
+! 01.06.2012	ggu	some more changes
+! 13.06.2013	ggu	copy_depth() renamed to transfer_depth()
+! 13.02.2014	ggu	new data written, can read also bas file
+! 05.03.2014	ggu	subroutines copied to other routine
+! 10.10.2015	ggu	changed VERS_7_3_2
+! 16.12.2015	ggu	depth ht is now passed in for square interpol
+! 11.04.2016	ggu	meaning of ufact has changed
+! 25.05.2017	ggu	changed VERS_7_5_28
+! 16.02.2019	ggu	changed VERS_7_5_60
+! 14.02.2022	ggu	revisted, some bug fixes
+!
+!****************************************************************
 
         subroutine basbathy
 
-c performs bathymetry interpolation in basin
-c
-c takes care of lat/lon coordinates
-c grd has already been copied to basin
+! performs bathymetry interpolation in basin
+!
+! takes care of lat/lon coordinates
+! grd has already been copied to basin
 
 	use mod_depth
 	use evgeom
@@ -93,9 +93,9 @@ c grd has already been copied to basin
         real, allocatable :: hk(:)
         real, allocatable :: he(:)
 
-c-----------------------------------------------------------------
-c general check
-c-----------------------------------------------------------------
+!-----------------------------------------------------------------
+! general check
+!-----------------------------------------------------------------
 
 	allocate(hk(nkn),he(nel))
 
@@ -138,9 +138,9 @@ c-----------------------------------------------------------------
 	  stop 'error stop basbathy: incompatible parameters'
 	end if
 
-c-----------------------------------------------------------------
-c what to do
-c-----------------------------------------------------------------
+!-----------------------------------------------------------------
+! what to do
+!-----------------------------------------------------------------
 
 	mode = bmode
 	ufact = usfact		!factor for standard deviation (abs if negative)
@@ -148,9 +148,9 @@ c-----------------------------------------------------------------
 
 	nminimum = 1	!minimum number of points to be used for interpolation
 
-c-----------------------------------------------------------------
-c read in bathymetry file
-c-----------------------------------------------------------------
+!-----------------------------------------------------------------
+! read in bathymetry file
+!-----------------------------------------------------------------
 
 	write(6,*) 'reading bathymetry file : ',trim(bfile)
 
@@ -165,16 +165,16 @@ c-----------------------------------------------------------------
 
 	write(6,*) 'finished reading bathymetry file : ',trim(bfile)
 
-c-----------------------------------------------------------------
-c allocate arrays for basin
-c-----------------------------------------------------------------
+!-----------------------------------------------------------------
+! allocate arrays for basin
+!-----------------------------------------------------------------
 
 	nn = max(nk,ne)
 	allocate(xt(nn),yt(nn),at(nn),ht(nn))
 
-c-----------------------------------------------------------------
-c handling of depth and coordinates
-c-----------------------------------------------------------------
+!-----------------------------------------------------------------
+! handling of depth and coordinates
+!-----------------------------------------------------------------
 
 	call get_coords_ev(isphe)
 	call set_dist(isphe)
@@ -184,9 +184,9 @@ c-----------------------------------------------------------------
 	hev = he
 	hkv = hk
 
-c-----------------------------------------------------------------
-c node_test
-c-----------------------------------------------------------------
+!-----------------------------------------------------------------
+! node_test
+!-----------------------------------------------------------------
 
 	call node_test	!just for coherence
 
@@ -201,9 +201,9 @@ c-----------------------------------------------------------------
 	nh = count( ht(1:nt) /= flag )
 	write(6,*) 'items with/without depth: ',nh,nt-nh
 
-c-----------------------------------------------------------------
-c interpolate
-c-----------------------------------------------------------------
+!-----------------------------------------------------------------
+! interpolate
+!-----------------------------------------------------------------
 
 	write(6,*) 'starting interpolation...'
 
@@ -221,9 +221,9 @@ c-----------------------------------------------------------------
 
 	write(6,*) 'finished interpolation...'
 
-c-----------------------------------------------------------------
-c transfer depth
-c-----------------------------------------------------------------
+!-----------------------------------------------------------------
+! transfer depth
+!-----------------------------------------------------------------
 
 	if( bnode ) then
 	  hkv(1:nkn) = ht(1:nkn)
@@ -233,23 +233,23 @@ c-----------------------------------------------------------------
 
 	call transfer_depth(bnode)	!copy to nodes/elems (also sets hm3v)
 
-c-----------------------------------------------------------------
-c write
-c-----------------------------------------------------------------
+!-----------------------------------------------------------------
+! write
+!-----------------------------------------------------------------
 
         call basin_to_grd
 
         call grd_write('basbathy.grd')
         write(6,*) 'The basin has been written to basbathy.grd'
 
-c-----------------------------------------------------------------
-c end of routine
-c-----------------------------------------------------------------
+!-----------------------------------------------------------------
+! end of routine
+!-----------------------------------------------------------------
 
 	return
 	end
 
-c*******************************************************************
-c*******************************************************************
-c*******************************************************************
+!*******************************************************************
+!*******************************************************************
+!*******************************************************************
 

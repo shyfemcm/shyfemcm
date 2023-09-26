@@ -379,11 +379,11 @@
 
 		implicit none
 
-c common
+! common
 		include 'param.h'
 		include 'pkonst.h'
 
-c local
+! local
 		logical, intent(in) :: lfirst 
 		integer k,l, ie
 		real wtau,taux,tauy   !wave and wind stresses
@@ -467,12 +467,12 @@ c local
 !         radiation stress ...
 
 	do ilev = 1, nlv_global
-		call fill_local_array_shyfem(SXX3DLSHYFEM(ilev,:)
-     +			,SXX3DGL(ilev,:))
-		call fill_local_array_shyfem(SXY3DLSHYFEM(ilev,:)
-     +			,SXY3DGL(ilev,:))
-		call fill_local_array_shyfem(SYY3DLSHYFEM(ilev,:)
-     +			,SYY3DGL(ilev,:))
+		call fill_local_array_shyfem(SXX3DLSHYFEM(ilev,:) &
+     &			,SXX3DGL(ilev,:))
+		call fill_local_array_shyfem(SXY3DLSHYFEM(ilev,:) &
+     &			,SXY3DGL(ilev,:))
+		call fill_local_array_shyfem(SYY3DLSHYFEM(ilev,:) &
+     &			,SYY3DGL(ilev,:))
 	enddo
 			call mpi_barrier(mpicomm,ierr) 
 
@@ -482,8 +482,8 @@ c local
 !         integral wave parameter ... 
 
 	do ivar = 1, nvarsww3
-		call fill_local_array_shyfem(outvarshyfem(ivar,:),
-     +           outvargl(ivar,:))
+		call fill_local_array_shyfem(outvarshyfem(ivar,:), &
+     &           outvargl(ivar,:))
 	enddo
 			call mpi_barrier(mpicomm,ierr) 
 			waveh = outvarshyfem(1,:)
@@ -508,8 +508,8 @@ c local
 !           Radiation stress formulation
 !           -----------------------------------------------
 
-				call diffxy(sxx3dlshyfem,sxy3dlshyfem
-     +					,syy3dlshyfem,wavefx,wavefy)
+				call diffxy(sxx3dlshyfem,sxy3dlshyfem &
+     &					,syy3dlshyfem,wavefx,wavefy)
 				!write(*,*) 'sum rad', sum(sxx3dlshyfem), sum(sxy3dlshyfem)
 				!write(*,*) 'sum wave fx', sum(wavefx), sum(wavefy) 
 
@@ -601,11 +601,11 @@ c local
 
 		implicit none
 
-c common
+! common
 		include 'param.h'
 		include 'pkonst.h'
 
-c local
+! local
 
 		logical, intent(in) :: lfirst
 		integer k,l, ie

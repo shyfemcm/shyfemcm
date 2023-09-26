@@ -24,37 +24,37 @@
 !
 !--------------------------------------------------------------------------
 
-c mercury routines
-c
-c contents :
-c
-c revision log :
-c
-c 15.05.2016    ggu     started mercury from bio3d
-c 17.05.2017    dmc     updated with merc_water
-c 17.05.2017    dmc     and volatilization routine wind dependent
-c 02.08.2018    dmc     add solids in water and at the bottom
-c 05.09.2018    dmc	Hg0atm è immesso cost in mercury_react,
-c ...                   da inserire come file esterno attraverso main
-c 24.02.2020    dmc     tcek reads from subroutine init_crit_thre_erosio
-c ...                   according to element type--> node
-c 22.11.2020    ggu     some more on restart
-c 21.03.2023    ggu     cleaning code
-c
-c********************************************************************
-c
-c notes :
-c
-c State variables used: (mercury) 
-c
-c State variables used: (mercury)
-c Hg0           81      1
-c Hg2           82      2
-c Hg3           83      3
-c msed1         84      4
-c msed2         85      5 
-c
-c********************************************************************
+! mercury routines
+!
+! contents :
+!
+! revision log :
+!
+! 15.05.2016    ggu     started mercury from bio3d
+! 17.05.2017    dmc     updated with merc_water
+! 17.05.2017    dmc     and volatilization routine wind dependent
+! 02.08.2018    dmc     add solids in water and at the bottom
+! 05.09.2018    dmc	Hg0atm è immesso cost in mercury_react,
+! ...                   da inserire come file esterno attraverso main
+! 24.02.2020    dmc     tcek reads from subroutine init_crit_thre_erosio
+! ...                   according to element type--> node
+! 22.11.2020    ggu     some more on restart
+! 21.03.2023    ggu     cleaning code
+!
+!********************************************************************
+!
+! notes :
+!
+! State variables used: (mercury) 
+!
+! State variables used: (mercury)
+! Hg0           81      1
+! Hg2           82      2
+! Hg3           83      3
+! msed1         84      4
+! msed2         85      5 
+!
+!********************************************************************
 
 !====================================================================
       module mercury
@@ -91,7 +91,7 @@ c********************************************************************
 
         subroutine mercury_module
 
-c general interface to mercury module
+! general interface to mercury module
 
         implicit none
 
@@ -105,11 +105,11 @@ c general interface to mercury module
 
         end
 
-c********************************************************************
+!********************************************************************
 
 	subroutine mercury3d(dt)
 
-c eco-model cosimo
+! eco-model cosimo
 
 	use mod_diff_visc_fric
 	use levels
@@ -154,8 +154,8 @@ c eco-model cosimo
       real, save :: esolbound(nsolwst) = (/5.0,0.1/)   !default bound cond.solids in water  !grosati-OGS:calibration 
       real, save :: esolwinit(nsolwst) = (/3.0,1./)       !default in. cond. solids in water
       real, save :: esolsinit(nsolsst) = (/3.,0./)       !initial OC%, dummy var.  
-c       esolsinit: initial value is the OC% in sediment. From this value
-c       we compute the % of POM and weighted particle density
+!       esolsinit: initial value is the OC% in sediment. From this value
+!       we compute the % of POM and weighted particle density
 
         real tpstot(npstate)              !for mass test
         real tsstot(nsstate)
@@ -236,19 +236,19 @@ c       we compute the % of POM and weighted particle density
 
         include 'femtime.h'
 
-c------------------------------------------------------------------
-c	initial and boundary conditions  [mg/l]			??
-c	initial loadings                 [g/m**2/sec]		??
-c------------------------------------------------------------------
+!------------------------------------------------------------------
+!	initial and boundary conditions  [mg/l]			??
+!	initial loadings                 [g/m**2/sec]		??
+!------------------------------------------------------------------
 
 	breact = .true.		!use reactor
 
         what = 'mercury'
         what2 = 's4mercury'
 
-c-------------------------------------------------------------------
-c initialization
-c-------------------------------------------------------------------
+!-------------------------------------------------------------------
+! initialization
+!-------------------------------------------------------------------
 
 	if( icall .le. -1 ) return
 
@@ -261,10 +261,10 @@ c-------------------------------------------------------------------
            call get_first_dtime(dtime0)
         dtime0=itanf
 
-c       ___________________________________________________
-c        initialization data transformed to variables units
-c       ----------------------------------------------------
-c       solids in sediment initialization
+!       ___________________________________________________
+!        initialization data transformed to variables units
+!       ----------------------------------------------------
+!       solids in sediment initialization
 
         p_poc=esolsinit(1)
         p_pom=p_poc*1.7
@@ -284,10 +284,10 @@ c       solids in sediment initialization
 
        write(*,*) 'esols', esolsinit
 
-c       mercury in sediment initialization
+!       mercury in sediment initialization
 
         k1tp=10.**5. !FIXME parametro che deriva dalla kd, mettere 
-c                   una routine unica per settare tutti i parametri        
+!                   una routine unica per settare tutti i parametri        
         k2tp=14590.  !FIXME
 
         Hg2sed=esinit(1)   !ug(hg)/g(sed)
@@ -305,21 +305,21 @@ c                   una routine unica per settare tutti i parametri
         mehgd = (MeHgsed*(por/k2tp))*10.**6.
 
 
-c ------------- total hg and mehg -----------------------
+! ------------- total hg and mehg -----------------------
 
       hgit =  hgp + hgd      ! [ug m-3]or [ng(hg) l(w+s)-1]  Hg in particulate AND dissolved
       mehgt = mehgd + mehgp  ! [ug m-3]or [ng(hg) l(w+s)-1] MeHg in particulate AND dissolved
         
-c      write(*,*) 'hgit',hgit, k, 'mercury.f'  
-c      write(*,*) 'mehgt',mehgt,  'mercury.f'         
+!      write(*,*) 'hgit',hgit, k, 'mercury.f'  
+!      write(*,*) 'mehgt',mehgt,  'mercury.f'         
      
  
         esinit(1)=hgit
         esinit(2)=mehgt
 
-c         --------------------------------------------------
-c	  initialize state variables
-c         --------------------------------------------------
+!         --------------------------------------------------
+!	  initialize state variables
+!         --------------------------------------------------
 
 	  allocate(emp(nlvdi,nkndi,npstate))
 	  allocate(ems(nkndi,nsstate))
@@ -349,19 +349,19 @@ c         --------------------------------------------------
           etau(:)=0.0                  !claurent-OGS: created to produce outputs fields
           dZbed(:)=0.0    ! [meters]   !claurent-OGS: created to produce outputs fields
           dZactiv(:)=0.05 ! [meters]   !claurent-OGS: created to produce outputs fields 
-c         --------------------------------------------------
-c	  initial conditions from file (only for pelagic part)
-c         --------------------------------------------------
+!         --------------------------------------------------
+!	  initial conditions from file (only for pelagic part)
+!         --------------------------------------------------
 
-c this is still not working FIXME
-c	  nvar = npstate
-c	  call mercury_init_file(dtime0,nvar,nlvdi,nlv,nkn,epinit,emp)
-c	  nvar = nsolw
-c	  call mercury_init_file(dtime0,nvar,nlvdi,nlv,nkn,esolwinit,esolw)
+! this is still not working FIXME
+!	  nvar = npstate
+!	  call mercury_init_file(dtime0,nvar,nlvdi,nlv,nkn,epinit,emp)
+!	  nvar = nsolw
+!	  call mercury_init_file(dtime0,nvar,nlvdi,nlv,nkn,esolwinit,esolw)
 
-c         --------------------------------------------------
-c	  set boundary conditions for all state variables
-c         --------------------------------------------------
+!         --------------------------------------------------
+!	  set boundary conditions for all state variables
+!         --------------------------------------------------
 
           nbc = nbnds()
           allocate(idmerc(nbc))
@@ -370,8 +370,8 @@ c         --------------------------------------------------
           nintp = 2
 	  nvar = npstate
         !write(6,*) 'npstate', nvar,epbound,idmerc
-          call bnds_init_new(what,dtime0,nintp,nvar,nkn,nlv
-     +                          ,epbound,idmerc)
+          call bnds_init_new(what,dtime0,nintp,nvar,nkn,nlv &
+     &                          ,epbound,idmerc)
 
           nbc = nbnds()
           allocate(ids4merc(nbc))
@@ -379,24 +379,24 @@ c         --------------------------------------------------
 	  call get_first_dtime(dtime0)
           nintp = 2
 	  nvar = nsolwst
-          call bnds_init_new(what2,dtime0,nintp,nvar,nkn,nlv
-     +                          ,esolbound,ids4merc)
-c         --------------------------------------------------
-c	  initialize eco model
-c         --------------------------------------------------
+          call bnds_init_new(what2,dtime0,nintp,nvar,nkn,nlv &
+     &                          ,esolbound,ids4merc)
+!         --------------------------------------------------
+!	  initialize eco model
+!         --------------------------------------------------
 
 	  call mercury_init
 
-c         --------------------------------------------------
-c	  parameters for transport/diffusion resolution
-c         --------------------------------------------------
+!         --------------------------------------------------
+!	  parameters for transport/diffusion resolution
+!         --------------------------------------------------
 
           rkpar=getpar('chpar')
           difmol=getpar('difmol')
 
-c         --------------------------------------------------
-c	  initialize output 
-c         --------------------------------------------------
+!         --------------------------------------------------
+!	  initialize output 
+!         --------------------------------------------------
 
 	  call mercury_init_file_output
 	  call mercury_write_file_output(dtime0)
@@ -405,9 +405,9 @@ c         --------------------------------------------------
 
 	end if
 
-c-------------------------------------------------------------------
-c normal call
-c-------------------------------------------------------------------
+!-------------------------------------------------------------------
+! normal call
+!-------------------------------------------------------------------
 
 	wsink = 0.
         Shgsil=0
@@ -419,7 +419,7 @@ c-------------------------------------------------------------------
         ds_gm2s=0
         dp_gm2s=0
 
-c       FIX ME
+!       FIX ME
         Sres=0
         Pres=0
         Vr=0
@@ -429,15 +429,15 @@ c       FIX ME
         Rhgpom=0
         Rmhgsil=0
         Rmhgpom=0        
-c------------------------------------------------------------------
-c       compute loading/unit surface	!FIXME -> this could be done only once
-c------------------------------------------------------------------
+!------------------------------------------------------------------
+!       compute loading/unit surface	!FIXME -> this could be done only once
+!------------------------------------------------------------------
 
 	call mercury_surface_loading(npstate,eploadin,loadsup)
 
-c-------------------------------------------------------------------
-c       time management
-c-------------------------------------------------------------------
+!-------------------------------------------------------------------
+!       time management
+!-------------------------------------------------------------------
 
         t0 = 0.
         dtday = dt / 86400.
@@ -448,24 +448,24 @@ c-------------------------------------------------------------------
 
        if( it .le.dtime0+dt ) then
          do fortfilenum=250,282
-            write(fortfilenum,
-     +       "(2(a10,','),4(a15,','))")
-     +       'it','kext','wdepth','silt_w','POM_w','tauB'
+            write(fortfilenum, &
+     &       "(2(a10,','),4(a15,','))") &
+     &       'it','kext','wdepth','silt_w','POM_w','tauB'
          end do
        endif
 
 
        if( it .le.dtime0+dt ) then
          do fortfilenum=350,382
-            write(fortfilenum,
-     +       "(2(a10,','),4(a15,','))")
-     +       'it','kext','wdepth','Hgod','Hg2','MeHg'
+            write(fortfilenum, &
+     &       "(2(a10,','),4(a15,','))") &
+     &       'it','kext','wdepth','Hgod','Hg2','MeHg'
          end do
        endif
 
-c	-------------------------------------------------------------------
-c	loop on elements for reactor
-c	-------------------------------------------------------------------
+!	-------------------------------------------------------------------
+!	loop on elements for reactor
+!	-------------------------------------------------------------------
 
         mode = +1               !new time level for volume and depth
 
@@ -473,8 +473,8 @@ c	-------------------------------------------------------------------
 
         !call simple_sedi_bottom_stress(taubot)  !claurent-OGS: get friction coefficient array only once for all nodes
         call bottom_stress(taubot)  !claurent-OGS: get friction coefficient array only once for all nodes
-c       questa call è nel loop, il taub viene letto ad ogni passo.
-c       mettere fuori? FIXME
+!       questa call è nel loop, il taub viene letto ad ogni passo.
+!       mettere fuori? FIXME
         
         call init_crit_thre_erosion(tcek)
 
@@ -484,7 +484,7 @@ c       mettere fuori? FIXME
 	  call get_light(k,qrad)
           tau=taubot(k)    !claurent-OGS: get friction coeff at current k node
           etau(k)=tau      !claurent-OGS: store value to write 2Dfield in output
-c       FIXME conz è letta fuori dal ciclo sui livelli, è la conz(lmax)
+!       FIXME conz è letta fuori dal ciclo sui livelli, è la conz(lmax)
  
           call get_wind(k,wx,wy)
           uws=(wx*wx+wy*wy)**(1./2.)
@@ -515,27 +515,27 @@ c       FIXME conz è letta fuori dal ciclo sui livelli, è la conz(lmax)
             esolw(:) = emsolw(l,k,:)
 
             boxtype=.true.                
-c      FIXME conz(l) da leggere nel ciclo sui livelli
+!      FIXME conz(l) da leggere nel ciclo sui livelli
 
 
-        call sed4merc_water(bbottom,dtday,tday,vol,d,k,t,s,tau
-     +                          ,area,esolw,
-     +                          Dssink,Dpsink,Vds,Vdp,   
-     +                          ds_gm2s, dp_gm2s) !claurent-OGS:get values then send them to sed4merc_sed 
+        call sed4merc_water(bbottom,dtday,tday,vol,d,k,t,s,tau &
+     &                          ,area,esolw, &
+     &                          Dssink,Dpsink,Vds,Vdp,    &
+     &                          ds_gm2s, dp_gm2s) !claurent-OGS:get values then send them to sed4merc_sed 
            
               Dssink_sum=Dssink_sum+Dssink !claurent-OGS: stores sum of sinks for multiple ... 
               Dpsink_sum=Dpsink_sum+Dpsink !claurent-OGS: ... water levels above sea bed 
            
-c        write(86,*) Dssink, Dpsink, 'dssink and dpsink in mercury.f'
+!        write(86,*) Dssink, Dpsink, 'dssink and dpsink in mercury.f'
                 emsolw(l,k,:) = esolw(:)
 
                conz1=esolw(1)
                conz2=esolw(2)
-      call mercury_react(id,bsurf,bbottom,boxtype,dtday,vol
-     +                  ,d,k,t,uws,area,s,qrad,epela,epload
-     +                  ,Vds,Vdp,conz1,conz2,             !tday,
-     +                  Shgsil,Shgpom,Smhgsil,Smhgpom,
-     +                  faq1,faq2,fdoc1,fdoc2)
+      call mercury_react(id,bsurf,bbottom,boxtype,dtday,vol &
+     &                  ,d,k,t,uws,area,s,qrad,epela,epload &
+     &                  ,Vds,Vdp,conz1,conz2,             !tday, &
+     &                  Shgsil,Shgpom,Smhgsil,Smhgpom, &
+     &                  faq1,faq2,fdoc1,fdoc2)
 
               emp(l,k,:) = epela(:)
            
@@ -545,12 +545,12 @@ c        write(86,*) Dssink, Dpsink, 'dssink and dpsink in mercury.f'
           esedi(:)=ems(k,:)
           esols(:)=emsols(k,:)
         
-c         write(6,*) esols, 'esols' 
-          call sed4merc_sed(k,dtday,area,esolw,vol,
-     +                         tau,esols,Dssink_sum,Dpsink_sum,  !claurent-OGS: send sum instead of single sinks
-     +                           Sres,Pres,Vr,Bvels,Bvelp,
-     +                        ds_gm2s, dp_gm2s,tcek(k),       !claurent-OGS: values required by sed4merc_sed
-     +                        dZbed(k),dZactiv(k))    !claurent-OGS: get thicknesses for extraction of the fields in output                
+!         write(6,*) esols, 'esols' 
+          call sed4merc_sed(k,dtday,area,esolw,vol, &
+     &                         tau,esols,Dssink_sum,Dpsink_sum,  !claurent-OGS: send sum instead of single sinks &
+     &                           Sres,Pres,Vr,Bvels,Bvelp, &
+     &                        ds_gm2s, dp_gm2s,tcek(k),       !claurent-OGS: values required by sed4merc_sed &
+     &                        dZbed(k),dZactiv(k))    !claurent-OGS: get thicknesses for extraction of the fields in output                
           
           emsolw(l,k,:)=esolw(:)
           emsols(k,:)=esols(:)
@@ -559,7 +559,7 @@ c         write(6,*) esols, 'esols'
           silt=esols(1)
           pom= esols(2)
 
-c               write(*,*) 'silt_dopo_sed4merc', silt
+!               write(*,*) 'silt_dopo_sed4merc', silt
          
           epload(:)=0
           esedi(:)=ems(k,:)          !Hg in sed
@@ -568,29 +568,29 @@ c               write(*,*) 'silt_dopo_sed4merc', silt
 !         write(*,*) 'ems_before',ems(k,:)
 !         write(*,*) 'esedi_before',esedi(:)
  
-          call mercury_sed_react(dtday,
-     +                         k,t,area,esedi,epela,
-     +                  Shgsil, Shgpom, Smhgsil, Smhgpom,
-     +             faq1,faq2,fdoc1,fdoc2,
-     +             silt,pom,Vr,Bvels,Bvelp)
+          call mercury_sed_react(dtday, &
+     &                         k,t,area,esedi,epela, &
+     &                  Shgsil, Shgpom, Smhgsil, Smhgpom, &
+     &             faq1,faq2,fdoc1,fdoc2, &
+     &             silt,pom,Vr,Bvels,Bvelp)
          
 
           ems(k,:) = esedi(:)
           emp(l,k,:) = epela(:)
  
-c         write(*,*) 'silt_dopo_mercury_sed', silt
-c         write(*,*) 'ems_after',ems(k,:)
-c         write(*,*) 'esedi_after',esedi(:)
+!         write(*,*) 'silt_dopo_mercury_sed', silt
+!         write(*,*) 'ems_after',ems(k,:)
+!         write(*,*) 'esedi_after',esedi(:)
 
         end if ! bbottom
-c           end if ! d>0.01
+!           end if ! d>0.01
           end do
 	end do
 
 	end if	!breact
-c	-------------------------------------------------------------------
-c	advection and diffusion
-c	-------------------------------------------------------------------
+!	-------------------------------------------------------------------
+!	advection and diffusion
+!	-------------------------------------------------------------------
 
 	dtime = it
 	call bnds_read_new(what,idmerc,dtime)
@@ -600,10 +600,10 @@ c	-------------------------------------------------------------------
 
 	do i=1,npstate
 
-          call scal_adv(what,i
-     +                          ,emp(1,1,i),idmerc
-     +                          ,rkpar,wsink
-     +                          ,difhv,difv,difmol)
+          call scal_adv(what,i &
+     &                          ,emp(1,1,i),idmerc &
+     &                          ,rkpar,wsink &
+     &                          ,difhv,difv,difmol)
 
           call tsmass (emp(1,1,i),1,nlvdi,tpstot(i)) !mass control
 
@@ -617,10 +617,10 @@ c	-------------------------------------------------------------------
 !$OMP DO SCHEDULE(DYNAMIC) ! claurent-OGS: ...  region must be associated to only one loop		     
 	do i=1,nsolwst
 
-          call scal_adv(what2,i                          ! claurent-OGS: sends solid boundary conditions 
-     +                          ,emsolw(1,1,i),ids4merc  ! claurent-OGS: sends solid boundary conditions
-     +                          ,rkpar,wsink
-     +                          ,difhv,difv,difmol)
+          call scal_adv(what2,i                          ! claurent-OGS: sends solid boundary conditions  &
+     &                          ,emsolw(1,1,i),ids4merc  ! claurent-OGS: sends solid boundary conditions &
+     &                          ,rkpar,wsink &
+     &                          ,difhv,difv,difmol)
 
           call tsmass (emsolw(1,1,i),1,nlvdi,tpstot(i)) !mass control
 
@@ -637,27 +637,27 @@ c	-------------------------------------------------------------------
           call scalmass(emsols(1,i),0.1,tsstot(i))   !mass ctrl sed
         end do
 
-c 6.8. dmc fin qui
+! 6.8. dmc fin qui
 
-c	-------------------------------------------------------------------
-c	write of results
-c	-------------------------------------------------------------------
+!	-------------------------------------------------------------------
+!	write of results
+!	-------------------------------------------------------------------
 
 	call mercury_write_file_output(dtime)
 
-c	-------------------------------------------------------------------
-c	debug output
-c	-------------------------------------------------------------------
+!	-------------------------------------------------------------------
+!	debug output
+!	-------------------------------------------------------------------
 
-c	-------------------------------------------------------------------
-c	end of routine
-c	-------------------------------------------------------------------
+!	-------------------------------------------------------------------
+!	end of routine
+!	-------------------------------------------------------------------
 
 	end
 
-c*************************************************************
-c*************************************************************
-c*************************************************************
+!*************************************************************
+!*************************************************************
+!*************************************************************
 
 	subroutine mercury_init
 
@@ -667,11 +667,11 @@ c*************************************************************
 
 	end
 
-c*************************************************************
+!*************************************************************
 
 	subroutine mercury_init_file(dtime,nvar,nlvddi,nlv,nkn,val0,val)
 
-c initialization of mercury from file
+! initialization of mercury from file
 
         implicit none
 
@@ -683,12 +683,12 @@ c initialization of mercury from file
         real val0(nvar)
         real val(nlvddi,nkn,nvar)
 
-        call tracer_file_init('mercury init','mercin',dtime
-     +                          ,nvar,nlvddi,nlv,nkn,val0,val)
+        call tracer_file_init('mercury init','mercin',dtime &
+     &                          ,nvar,nlvddi,nlv,nkn,val0,val)
 
         end
 
-c*************************************************************
+!*************************************************************
 
         subroutine mercury_init_file_output
 
@@ -713,7 +713,7 @@ c*************************************************************
 
         end 
 
-c*************************************************************
+!*************************************************************
 
 	subroutine mercury_write_file_output(dtime)
 
@@ -732,23 +732,23 @@ c*************************************************************
           id = nint(da_out(4))
           do i=1,npstate
             idc = 250 + i
-            call shy_write_scalar_record(id,dtime,idc,nlvdi
-     +                                         ,emp(1,1,i))
+            call shy_write_scalar_record(id,dtime,idc,nlvdi &
+     &                                         ,emp(1,1,i))
           end do
           do i=1,nsstate
             idc = 270 + i
-            call shy_write_scalar_record(id,dtime,idc,1
-     +                                        ,ems(1,i))
+            call shy_write_scalar_record(id,dtime,idc,1 &
+     &                                        ,ems(1,i))
           end do
           do i=1,nsolwst
             idc = 280 + i                         ! claurent-OGS: was 270 + i
-            call shy_write_scalar_record(id,dtime,idc,1
-     +                                        ,emsolw(1,1,i))
+            call shy_write_scalar_record(id,dtime,idc,1 &
+     &                                        ,emsolw(1,1,i))
           end do
           do i=1,nsolsst
             idc = 290 + i                         ! claurent-OGS: was 270 + i
-            call shy_write_scalar_record(id,dtime,idc,1
-     +                                       ,emsols(1,i))
+            call shy_write_scalar_record(id,dtime,idc,1 &
+     &                                       ,emsols(1,i))
           end do
 
           idc = 297         ! claurent-OGS: created to produce outputs fields
@@ -762,9 +762,9 @@ c*************************************************************
 
 	end
 
-c*************************************************************
-c*************************************************************
-c*************************************************************
+!*************************************************************
+!*************************************************************
+!*************************************************************
 
        subroutine merc_euler(nstate,dt,vol,c,cold,cds) !
 
@@ -801,12 +801,12 @@ c*************************************************************
       end do
       end
      
-c*************************************************************
+!*************************************************************
 
       subroutine merc_euler_sed(nstate,dt,volold,volnew,c,cold,cds) 
 
-claurent-OGS: differenciates volold and volnew
-c      subroutine merc_euler(nstate,dt,vol,c,cold,cds) !
+!laurent-OGS: differenciates volold and volnew
+!      subroutine merc_euler(nstate,dt,vol,c,cold,cds) !
 
 ! new c is computed
 ! cold is returned which is just c before call
@@ -825,8 +825,8 @@ c      subroutine merc_euler(nstate,dt,vol,c,cold,cds) !
       real mass            !mass [g]
       real mder            !derivative [g/day]
 
-c      volold = vol
-c      volnew = vol
+!      volold = vol
+!      volnew = vol
 
       do i=1,nstate
         cold(i) = c(i)
@@ -842,9 +842,9 @@ c      volnew = vol
       end do
       end
  
-c*************************************************************
-c*************************************************************
-c*************************************************************
+!*************************************************************
+!*************************************************************
+!*************************************************************
 
 	subroutine mercury_surface_loading(npstate,eploadin,loadsup)
 
@@ -880,7 +880,7 @@ c*************************************************************
 
 	end
 
-c*************************************************************
+!*************************************************************
 
         subroutine init_crit_thre_erosion(tcek)
 
@@ -912,15 +912,15 @@ c*************************************************************
           if( ia== 8 )  tce = 0.86
           if( ia== 9 )  tce = 0.86
 
-c       mettere tutti gli if
+!       mettere tutti gli if
           do ii=1,3
             k = nen3v(ii,ie) !3 nodi --> 1 elemento 
             tceaux=tcek(k)
-c            tau = taubot(k)
-c                val minimo              tcek(k)=minimo tra tce e tcek(k)
+!            tau = taubot(k)
+!                val minimo              tcek(k)=minimo tra tce e tcek(k)
                 tceaux=max(tceaux,tce)
                  tcek(k)=tceaux
-c                 write(*,*) tce,k,tceaux,ia,ie
+!                 write(*,*) tce,k,tceaux,ia,ie
           end do
         end do
 

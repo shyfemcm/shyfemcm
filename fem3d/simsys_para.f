@@ -29,7 +29,7 @@
 !
 ! 18.10.2019	mbj	first version
 ! 13.03.2021    ggu     added routine system_finalize()
-c 23.04.2021    clr     adding mod_zeta_system
+! 23.04.2021    clr     adding mod_zeta_system
 !
 !******************************************************************
 
@@ -91,10 +91,10 @@ c 23.04.2021    clr     adding mod_zeta_system
 	call shympi_barrier
 
 	if( bmpi ) then			!only needed if not explicit !FIXME
-          call mod_system_init(nkn_global,nel_global,ngr_global
-     +				,mbw,nlv,g_matrix)
-	  call mod_system_insert_elem_index(nel_global,nen3v_global
-     +					,g_matrix)
+          call mod_system_init(nkn_global,nel_global,ngr_global &
+     &				,mbw,nlv,g_matrix)
+	  call mod_system_insert_elem_index(nel_global,nen3v_global &
+     &					,g_matrix)
 	  call mod_system_set_global(g_matrix)
 	  call para_initialize_system(g_matrix)		!calls coo_init_new
 	  call system_setup_global

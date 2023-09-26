@@ -23,60 +23,60 @@
 !
 !--------------------------------------------------------------------------
 
-c subroutines for 2 (bi) and 3-dimensional (tri) linear interpolation
-c
-c contents :
-c
-c function triint(u,x,y,z)	tri-linear interpolation in cube
-c function bilint(u,x,y)	bi-linear interpolation in square
-c subroutine exbil_test		exercise bi-linear interpolation
-c subroutine extri_test		exercise tri-linear interpolation
-c function grand_tri()		random numbers
-c
-c revision log :
-c
-c 21.08.1998	ggu	tri and bi linear interpolation
-c 23.03.2010	ggu	changed v6.1.1
-c 25.10.2013	ggu	changed VERS_6_1_68
-c 16.02.2019	ggu	changed VERS_7_5_60
-c
-c***********************************************************************
+! subroutines for 2 (bi) and 3-dimensional (tri) linear interpolation
+!
+! contents :
+!
+! function triint(u,x,y,z)	tri-linear interpolation in cube
+! function bilint(u,x,y)	bi-linear interpolation in square
+! subroutine exbil_test		exercise bi-linear interpolation
+! subroutine extri_test		exercise tri-linear interpolation
+! function grand_tri()		random numbers
+!
+! revision log :
+!
+! 21.08.1998	ggu	tri and bi linear interpolation
+! 23.03.2010	ggu	changed v6.1.1
+! 25.10.2013	ggu	changed VERS_6_1_68
+! 16.02.2019	ggu	changed VERS_7_5_60
+!
+!***********************************************************************
 
 	function triint(u,x,y,z)
 
-c tri-linear interpolation in cube
-c
-c (x,y,z) are in the range [0...1]
-c u is array of 8 values distributed in the following way
-c
-c
-c
-c                  z                      y
-c                  ^                     ^
-c                  |                    /
-c                  |                   /
-c                  |     7            /            8
-c                  |       *---------------------*
-c                  |      /|        /           /|
-c                  |     / |       /           / |
-c                  |    /  |      /           /  |
-c                  |   /   |     /           /	 |                   z = 1
-c                  |  /    |    /           /    |
-c                  | /     |   /           /     |
-c                  |/      |  /           /      |
-c                5 *---------------------* 6     |
-c                  |       |/            |       |
-c                  |     3 *-------------|-------* 4
-c                  |      /              |      /
-c                  |     /               |     /
-c                  |    /                |    /
-c                  |   /                 |   /	                     z = 0
-c                  |  /                  |  /
-c                  | /                   | /
-c                  |/                    |/
-c                  *---------------------*-----------------------> x
-c                1                         2
-c
+! tri-linear interpolation in cube
+!
+! (x,y,z) are in the range [0...1]
+! u is array of 8 values distributed in the following way
+!
+!
+!
+!                  z                      y
+!                  ^                     ^
+!                  |                    /
+!                  |                   /
+!                  |     7            /            8
+!                  |       *---------------------*
+!                  |      /|        /           /|
+!                  |     / |       /           / |
+!                  |    /  |      /           /  |
+!                  |   /   |     /           /	 |                   z = 1
+!                  |  /    |    /           /    |
+!                  | /     |   /           /     |
+!                  |/      |  /           /      |
+!                5 *---------------------* 6     |
+!                  |       |/            |       |
+!                  |     3 *-------------|-------* 4
+!                  |      /              |      /
+!                  |     /               |     /
+!                  |    /                |    /
+!                  |   /                 |   /	                     z = 0
+!                  |  /                  |  /
+!                  | /                   | /
+!                  |/                    |/
+!                  *---------------------*-----------------------> x
+!                1                         2
+!
 
 	implicit none
 
@@ -90,16 +90,16 @@ c
 
 	real atri(8,8)
 	save atri
-	data atri /
-     +			 1 , 0 , 0 , 0 , 0 , 0 , 0 , 0 ,
-     +			-1 , 1 , 0 , 0 , 0 , 0 , 0 , 0 ,
-     +			-1 , 0 , 1 , 0 , 0 , 0 , 0 , 0 ,
-     +			 1 ,-1 ,-1 , 1 , 0 , 0 , 0 , 0 ,
-     +			-1 , 0 , 0 , 0 , 1 , 0 , 0 , 0 ,
-     +			 1 ,-1 , 0 , 0 ,-1 , 1 , 0 , 0 ,
-     +			 1 , 0 ,-1 , 0 ,-1 , 0 , 1 , 0 ,
-     +			-1 , 1 , 1 ,-1 , 1 ,-1 ,-1 , 1 
-     +		 /
+	data atri / &
+     &			 1 , 0 , 0 , 0 , 0 , 0 , 0 , 0 , &
+     &			-1 , 1 , 0 , 0 , 0 , 0 , 0 , 0 , &
+     &			-1 , 0 , 1 , 0 , 0 , 0 , 0 , 0 , &
+     &			 1 ,-1 ,-1 , 1 , 0 , 0 , 0 , 0 , &
+     &			-1 , 0 , 0 , 0 , 1 , 0 , 0 , 0 , &
+     &			 1 ,-1 , 0 , 0 ,-1 , 1 , 0 , 0 , &
+     &			 1 , 0 ,-1 , 0 ,-1 , 0 , 1 , 0 , &
+     &			-1 , 1 , 1 ,-1 , 1 ,-1 ,-1 , 1  &
+     &		 /
 
 	do i=1,8
 	  acu = 0.
@@ -111,47 +111,47 @@ c
 
 	xy = x * y
 
-	val = a(1) + a(2) * x + a(3) * y + a(4) * xy
-     +		+ z * ( a(5) + a(6) * x + a(7) * y + a(8) * xy )
+	val = a(1) + a(2) * x + a(3) * y + a(4) * xy &
+     &		+ z * ( a(5) + a(6) * x + a(7) * y + a(8) * xy )
 
 	triint = val
 
 	end
 
-c*************************************************************
+!*************************************************************
 
 	function bilint(u,x,y)
 
-c bi-linear interpolation in square
-c
-c (x,y)		normalized coordinates in the range [0...1]
-c u		array of 4 values at the vertices of the
-c			the square distributed in the following way
-c bilint	interpolated value of u onto (x,y) on return
-c
-c
-c
-c                  y
-c                  ^
-c                  |
-c                  |
-c                  |
-c                  |
-c                3 |                       4
-c                  *---------------------*
-c                  |                     |
-c                  |                     |
-c                  |                     |
-c                  |                     |
-c                  |                     |
-c                  |                     |
-c                  |                     |
-c                  |                     |
-c                  |                     |
-c                  *---------------------*-----------------------> x
-c                1                         2
-c
-c
+! bi-linear interpolation in square
+!
+! (x,y)		normalized coordinates in the range [0...1]
+! u		array of 4 values at the vertices of the
+!			the square distributed in the following way
+! bilint	interpolated value of u onto (x,y) on return
+!
+!
+!
+!                  y
+!                  ^
+!                  |
+!                  |
+!                  |
+!                  |
+!                3 |                       4
+!                  *---------------------*
+!                  |                     |
+!                  |                     |
+!                  |                     |
+!                  |                     |
+!                  |                     |
+!                  |                     |
+!                  |                     |
+!                  |                     |
+!                  |                     |
+!                  *---------------------*-----------------------> x
+!                1                         2
+!
+!
 
 	implicit none
 
@@ -165,12 +165,12 @@ c
 
 	real atri(4,4)
 	save atri
-	data atri /
-     +			 1 , 0 , 0 , 0 ,
-     +			-1 , 1 , 0 , 0 ,
-     +			-1 , 0 , 1 , 0 ,
-     +			 1 ,-1 ,-1 , 1
-     +		 /
+	data atri / &
+     &			 1 , 0 , 0 , 0 , &
+     &			-1 , 1 , 0 , 0 , &
+     &			-1 , 0 , 1 , 0 , &
+     &			 1 ,-1 ,-1 , 1 &
+     &		 /
 
 	do i=1,4
 	  acu = 0.
@@ -186,13 +186,13 @@ c
 
 	end
 
-c*************************************************************
-c*************************************************************
-c*************************************************************
+!*************************************************************
+!*************************************************************
+!*************************************************************
 
 	subroutine exbil_test
 
-c exercise bi-linear interpolation
+! exercise bi-linear interpolation
 
 	implicit none
 
@@ -218,11 +218,11 @@ c exercise bi-linear interpolation
 
 	end
 	  
-c*************************************************************
+!*************************************************************
 
 	subroutine extri_test
 
-c exercise tri-linear interpolation
+! exercise tri-linear interpolation
 
 	implicit none
 
@@ -240,13 +240,13 @@ c exercise tri-linear interpolation
 	real triint,grand_tri
 
 	real xyz(8,3)
-	data xyz /
-     +			 0 , 1 , 0 , 1 , 0 , 1 , 0 , 1 ,
-     +			 0 , 0 , 1 , 1 , 0 , 0 , 1 , 1 ,
-     +			 0 , 0 , 0 , 0 , 1 , 1 , 1 , 1  
-     +		 /
+	data xyz / &
+     &			 0 , 1 , 0 , 1 , 0 , 1 , 0 , 1 , &
+     &			 0 , 0 , 1 , 1 , 0 , 0 , 1 , 1 , &
+     &			 0 , 0 , 0 , 0 , 1 , 1 , 1 , 1   &
+     &		 /
 
-c interpolation property
+! interpolation property
 
 	berror = .false.
 	write(6,*) 'Checking interpolation property...'
@@ -279,7 +279,7 @@ c interpolation property
 	  write(6,*) '   ...passed'
 	end if
 
-c linear interpolation
+! linear interpolation
 
 	do j=0,2
 
@@ -302,11 +302,11 @@ c linear interpolation
 
 	end
 
-c*************************************************************
+!*************************************************************
 
 	function grand_tri()
 
-c random numbers
+! random numbers
 
 	implicit none
 
@@ -321,14 +321,14 @@ c random numbers
 
 	end 
 
-c*************************************************************
-c
-c uncomment next lines to run test routines
+!*************************************************************
+!
+! uncomment next lines to run test routines
 
-c	program hptri_main
-c	call extri_test
-c	call exbil_test
-c	end
+!	program hptri_main
+!	call extri_test
+!	call exbil_test
+!	end
 
-c*************************************************************
+!*************************************************************
 

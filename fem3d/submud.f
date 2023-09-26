@@ -303,10 +303,10 @@
         if (ldumpmud) then
 	  write(6,*)'ldump ha un errore'
           do k = 1,nkn
-c            if(k.eq.349.or.k.eq.357.or.k.eq.369.or.k.eq.368.or.!DEB
-c     +	k.eq.365.or.k.eq.360.or.k.eq.353)then!DEB
-            if(k.eq.5004.or.k.eq.5005.or.k.eq.5003.or.k.eq.5002.or.!DEB
-     +	k.eq.5000)then!DEB
+!            if(k.eq.349.or.k.eq.357.or.k.eq.369.or.k.eq.368.or.!DEB
+!     +	k.eq.365.or.k.eq.360.or.k.eq.353)then!DEB
+            if(k.eq.5004.or.k.eq.5005.or.k.eq.5003.or.k.eq.5002.or.!DEB &
+     &	k.eq.5000)then!DEB
             lmax = ilhkv(k)
             !if (xgv(k) .gt. 7. .or. xgv(k) .lt. 0.) then
             do l = 1,lmax
@@ -1529,11 +1529,11 @@ c     +	k.eq.365.or.k.eq.360.or.k.eq.353)then!DEB
 ! -------------------------------------------------------------
 !
 ! -------------------------------------------------------------
-        subroutine scal_adv_mud(what,ivar,fact
-     +                          ,scal,bnd3
-     +                          ,rkpar,wsink,wsinkv
-     +                          ,difhv,difv,difmol
-     +                          ,mudref,lcircle,lsetbound)
+        subroutine scal_adv_mud(what,ivar,fact &
+     &                          ,scal,bnd3 &
+     &                          ,rkpar,wsink,wsinkv &
+     &                          ,difhv,difv,difmol &
+     &                          ,mudref,lcircle,lsetbound)
 
 !--------------------------------------------------------------
 ! shell for scalar (for parallel version)
@@ -1581,9 +1581,9 @@ c     +	k.eq.365.or.k.eq.360.or.k.eq.353)then!DEB
 !--------------------------------------------------------------
 ! transfer boundary conditions of var ivar to 3d matrix r3v
 !--------------------------------------------------------------
-	call bnds_trans(whatvar(1:iwhat)
-     +              ,nb3dim,bnd3,bnd3_aux
-     +                          ,ivar,nlvdim,r3v)
+	call bnds_trans(whatvar(1:iwhat) &
+     &              ,nb3dim,bnd3,bnd3_aux &
+     &                          ,ivar,nlvdim,r3v)
         if(lcircle)then
           call circflume(r3v,scal) 
         else if (lsetbound) then
@@ -1603,11 +1603,11 @@ c     +	k.eq.365.or.k.eq.360.or.k.eq.353)then!DEB
 !--------------------------------------------------------------
 ! do advection and diffusion
 !--------------------------------------------------------------
-        call scal3sh(whatvar(1:iwhat)
-     +              ,scal,nlvdim
-     +                          ,r3v,scal,robs
-     +              ,rkpar,wsink,wsinkv
-     +                          ,difhv,difv,difmol)
+        call scal3sh(whatvar(1:iwhat) &
+     &              ,scal,nlvdim &
+     &                          ,r3v,scal,robs &
+     &              ,rkpar,wsink,wsinkv &
+     &                          ,difhv,difv,difmol)
 
        end subroutine
 ! -------------------------------------------------------------

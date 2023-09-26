@@ -130,37 +130,37 @@
 
 	end subroutine off_output_hydro
 
-c******************************************************************
+!******************************************************************
 
         subroutine make_vertical_velocity_off(utlnv,vtlnv,wlnv)
 
-c computes vertical velocities
-c
-c from sp256w in new3di.F
-c
-c velocities are computed on S/T points (top and bottom of layer)
-c bottom velocity of the whole column is assumed to be 0
-c -> maybe change this
-c
-c computes volume differences and from these computes vertical
-c velocities at every time step so that the computed velocities
-c satisfy the continuity equation for every single time step
-c
-c wlnv is computed horizontally at a node and vertically
-c it is at the center of the layer -> there are nlv velocities
-c computed
-c
-c b,c are 1/m, (phi is dimensionless)
-c aj is m**2
-c utlnv... is m**2/s
-c dvol is in m**3/s
-c vv is m**2 (area)
-c
-c wlnv is first used to accumulate volume difference -> dvol
-c at the end it receives the vertical velocity
-c
-c wlnv (dvol)   aux array for volume difference
-c vv            aux array for area
+! computes vertical velocities
+!
+! from sp256w in new3di.F
+!
+! velocities are computed on S/T points (top and bottom of layer)
+! bottom velocity of the whole column is assumed to be 0
+! -> maybe change this
+!
+! computes volume differences and from these computes vertical
+! velocities at every time step so that the computed velocities
+! satisfy the continuity equation for every single time step
+!
+! wlnv is computed horizontally at a node and vertically
+! it is at the center of the layer -> there are nlv velocities
+! computed
+!
+! b,c are 1/m, (phi is dimensionless)
+! aj is m**2
+! utlnv... is m**2/s
+! dvol is in m**3/s
+! vv is m**2 (area)
+!
+! wlnv is first used to accumulate volume difference -> dvol
+! at the end it receives the vertical velocity
+!
+! wlnv (dvol)   aux array for volume difference
+! vv            aux array for area
 
         use evgeom
         use levels
@@ -184,9 +184,9 @@ c vv            aux array for area
         wauxv = 0.
         wlnv = 0.
 
-c compute difference of velocities for each layer
-c
-c f(ii) > 0 ==> flux into node ii
+! compute difference of velocities for each layer
+!
+! f(ii) > 0 ==> flux into node ii
 
         inwater = 0
 
@@ -206,13 +206,13 @@ c f(ii) > 0 ==> flux into node ii
          !end if
         end do
 
-c from vel difference get absolute velocity (w_bottom = 0)
-c       -> wlnv(nlv,k) is already in place !
-c       -> wlnv(nlv,k) = 0 + wlnv(nlv,k)
-c w of bottom of last layer must be 0 ! -> shift everything up
-c wlnv(nlv,k) is always 0
-c
-c dividing dvol(m**3/s) by area (wauxv) gives vertical velocity
+! from vel difference get absolute velocity (w_bottom = 0)
+!       -> wlnv(nlv,k) is already in place !
+!       -> wlnv(nlv,k) = 0 + wlnv(nlv,k)
+! w of bottom of last layer must be 0 ! -> shift everything up
+! wlnv(nlv,k) is always 0
+!
+! dividing dvol(m**3/s) by area (wauxv) gives vertical velocity
 
         do k=1,nkn
           wbot = 0.
@@ -232,19 +232,19 @@ c dividing dvol(m**3/s) by area (wauxv) gives vertical velocity
           end do
         end do
 
-c set w to zero at open boundary nodes (new 14.08.1998)
-c
-c FIXME -> only for ibtyp = 1,2 !!!!
+! set w to zero at open boundary nodes (new 14.08.1998)
+!
+! FIXME -> only for ibtyp = 1,2 !!!!
 
-c        do k=1,nkn
-c          if( inodv(k) .gt. 0 ) then    !open boundary node
-c            do l=0,nlv
-c               wlnv(l,k) = 0.
-c            end do
-c          end if
-c        end do
+!        do k=1,nkn
+!          if( inodv(k) .gt. 0 ) then    !open boundary node
+!            do l=0,nlv
+!               wlnv(l,k) = 0.
+!            end do
+!          end if
+!        end do
 
         return
         end
 
-c******************************************************************
+!******************************************************************

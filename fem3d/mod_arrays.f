@@ -36,27 +36,27 @@
         implicit none
 
         INTERFACE init_array
-        MODULE PROCEDURE         init_array_i,init_array_in
-     +                          ,init_array_r,init_array_rn
-     +                          ,init_array_d,init_array_dn
+        MODULE PROCEDURE         init_array_i,init_array_in &
+     &                          ,init_array_r,init_array_rn &
+     &                          ,init_array_d,init_array_dn
         END INTERFACE
 
         INTERFACE extend_array
-        MODULE PROCEDURE         extend_array_i
-     +                          ,extend_array_r
-     +                          ,extend_array_d
+        MODULE PROCEDURE         extend_array_i &
+     &                          ,extend_array_r &
+     &                          ,extend_array_d
         END INTERFACE
 
         INTERFACE append_to_array
-        MODULE PROCEDURE         append_to_array_i
-     +                          ,append_to_array_r
-     +                          ,append_to_array_d
+        MODULE PROCEDURE         append_to_array_i &
+     &                          ,append_to_array_r &
+     &                          ,append_to_array_d
         END INTERFACE
 
         INTERFACE trim_array
-        MODULE PROCEDURE         trim_array_i
-     +                          ,trim_array_r
-     +                          ,trim_array_d
+        MODULE PROCEDURE         trim_array_i &
+     &                          ,trim_array_r &
+     &                          ,trim_array_d
         END INTERFACE
 
 !==================================================================

@@ -23,26 +23,26 @@
 !
 !--------------------------------------------------------------------------
 
-c header for closing sections
-c
-c---------------------------------------------------------------------
+! header for closing sections
+!
+!---------------------------------------------------------------------
 
-c	dimension of vectors
+!	dimension of vectors
 
 ! revision log :
 !
 ! 23.03.2010	ggu	changed v6.1.1
 ! 16.02.2019	ggu	changed VERS_7_5_60
 
-c---------------------------------------------------------------------
+!---------------------------------------------------------------------
 
 
 	integer ipcdim,ivcdim
 	parameter (ipcdim=500,ivcdim=500)
 
-c---------------------------------------------------------------------
+!---------------------------------------------------------------------
 
-c	declaration of vectors
+!	declaration of vectors
 
 	integer ipccv(ipcdim)
 	integer ivccv(ivcdim)
@@ -55,16 +55,16 @@ c	declaration of vectors
 
 	save /ipccv/ , /ivccv/
 
-c---------------------------------------------------------------------
+!---------------------------------------------------------------------
 
-c	size of header and section
+!	size of header and section
 
 	integer lhead,lsect
 
 	parameter (lhead=7)		!size of header
 	parameter (lsect=25)		!size of one section
 
-c	pointer into header (must be called with isect = 0)
+!	pointer into header (must be called with isect = 0)
 
 	integer lipdim,livdim,lipful,livful,lnsect
 
@@ -74,7 +74,7 @@ c	pointer into header (must be called with isect = 0)
 	parameter (livful=lsect-lhead+4)	!filling of ivccv
 	parameter (lnsect=lsect-lhead+7)	!number of sections
 
-c	pointer into sections (must be called with isect > 0)
+!	pointer into sections (must be called with isect > 0)
 
 	integer lnkboc,lkboc,lniboc,liboc
 	integer lhboc,lnitb,litb,lkout,lkin
@@ -109,9 +109,9 @@ c	pointer into sections (must be called with isect > 0)
 	parameter (libnd=24)
 	parameter (libndz=25)
 
-c---------------------------------------------------------------------
-c
-c	ipnt(id,isect) = lhead + lsect*(isect-1) + id
-c
-c---------------------------------------------------------------------
+!---------------------------------------------------------------------
+!
+!	ipnt(id,isect) = lhead + lsect*(isect-1) + id
+!
+!---------------------------------------------------------------------
 

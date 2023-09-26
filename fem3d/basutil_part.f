@@ -267,8 +267,8 @@
 
 	if( shympi_is_master() ) then
           call grd_write('bas_partition.grd')
-          write(6,*) 'The partition has been written to' //
-     +				' bas_partition.grd'
+          write(6,*) 'The partition has been written to' // &
+     &				' bas_partition.grd'
 	end if
 
 	call shympi_syncronize
@@ -453,8 +453,8 @@
 	  if( bwrite ) write(6,*) 'checking domain ',ic,ncol
 	  !write(6,*) '========================================'
 
-	  call make_elem_index(.true.,ic,icolor
-     +				,nk,ne,nenv,nodep,elemp)
+	  call make_elem_index(.true.,ic,icolor &
+     &				,nk,ne,nenv,nodep,elemp)
 	  call make_new_index(nk,ne,nenv,nodep,elemp)
 	  call check_elem_index(nk,ne,nenv,kerr)
 
@@ -511,8 +511,8 @@
 
 !*******************************************************************
 
-	subroutine make_elem_index(bghost,ic,icolor
-     +				,nk,ne,nenv,nodep,elemp)
+	subroutine make_elem_index(bghost,ic,icolor &
+     &				,nk,ne,nenv,nodep,elemp)
 
 ! makes element index for domain with color ic
 
@@ -747,13 +747,13 @@
 
 	grdfile = 'part_error1.grd'
 	write(6,*) 'writing to file ',trim(grdfile)
-        call write_grd_file(grdfile,text,nkn,nel,xgv,ygv
-     +                          ,nen3v,inext,ieext,icolor,iecolor1)
+        call write_grd_file(grdfile,text,nkn,nel,xgv,ygv &
+     &                          ,nen3v,inext,ieext,icolor,iecolor1)
 
 	grdfile = 'part_error2.grd'
 	write(6,*) 'writing to file ',trim(grdfile)
-        call write_grd_file(grdfile,text,nkn,nel,xgv,ygv
-     +                          ,nen3v,inext,ieext,icolor,iecolor2)
+        call write_grd_file(grdfile,text,nkn,nel,xgv,ygv &
+     &                          ,nen3v,inext,ieext,icolor,iecolor2)
 
 !---------------------------------------------------------------
 ! write single domains
@@ -777,8 +777,8 @@
 	    if( n3c == 2 ) iecolor1(ie) = 2
 	    if( n3c == 1 ) iecolor1(ie) = 1
 	  end do
-          call write_grd_file(grdfile,text,nkn,nel,xgv,ygv
-     +                          ,nen3v,inext,ieext,icolor,iecolor1)
+          call write_grd_file(grdfile,text,nkn,nel,xgv,ygv &
+     &                          ,nen3v,inext,ieext,icolor,iecolor1)
 	end do
 
 !---------------------------------------------------------------

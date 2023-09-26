@@ -30,17 +30,17 @@
 ! subroutine dump_aquabc
 ! subroutine fluxes_aquabc
 
-c*************************************************************
-c*************************************************************
+!*************************************************************
+!*************************************************************
 
-	subroutine open_scalar_file_bio(ia_out,nlv,ilhkv_,hlv_,
-     + hev_,nvar,type)
+	subroutine open_scalar_file_bio(ia_out,nlv,ilhkv_,hlv_, &
+     & hev_,nvar,type)
 
-c opens (NOS) file
+! opens (NOS) file
 
 ! Modified by Petras for bottom sediments kinetics
 
-c on return iu = -1 means that no file has been opened and is not written
+! on return iu = -1 means that no file has been opened and is not written
 
 	!use mod_depth
 	!use levels
@@ -77,17 +77,17 @@ c on return iu = -1 means that no file has been opened and is not written
 	!real hev_(nel)
 	real hev_(2024)
     
-c-----------------------------------------------------
-c open file
-c-----------------------------------------------------
+!-----------------------------------------------------
+! open file
+!-----------------------------------------------------
 
 	iu = ifemop(type,'unformatted','new')
 	if( iu .le. 0 ) goto 98
 	ia_out(4) = iu
 
-c-----------------------------------------------------
-c initialize parameters
-c-----------------------------------------------------
+!-----------------------------------------------------
+! initialize parameters
+!-----------------------------------------------------
 
 	nvers = 5
 	date = nint(dgetpar('date'))
@@ -95,9 +95,9 @@ c-----------------------------------------------------
 	title = descrp
 	call get_shyfem_version(femver)
 
-c-----------------------------------------------------
-c write header of file
-c-----------------------------------------------------
+!-----------------------------------------------------
+! write header of file
+!-----------------------------------------------------
 
 	call nos_init(iu,nvers)
 	call nos_set_title(iu,title)
@@ -113,15 +113,15 @@ c-----------------------------------------------------
 	call nos_write_header2(iu,ilhkv_,hlv_,hev_,ierr)
         if(ierr.gt.0) goto 99
 
-c-----------------------------------------------------
-c write informational message to terminal
-c-----------------------------------------------------
+!-----------------------------------------------------
+! write informational message to terminal
+!-----------------------------------------------------
 
         write(6,*) 'open_scalar_file_bio: ',type,' file opened ',it
 
-c-----------------------------------------------------
-c end of routine
-c-----------------------------------------------------
+!-----------------------------------------------------
+! end of routine
+!-----------------------------------------------------
 
 	return
    98	continue
@@ -132,16 +132,16 @@ c-----------------------------------------------------
 	stop 'error stop open_scalar_file_bio'
 	end
 
-c*************************************************************
-c*************************************************************
-c*************************************************************
+!*************************************************************
+!*************************************************************
+!*************************************************************
 
 	subroutine write_scalar_file_bio(ia_out,ivar,nlvdi,ilhkv_,c)
 
-c writes NOS file
+! writes NOS file
 ! Modified by Petras to 
-c
-c the file must be open, the file will be written unconditionally
+!
+! the file must be open, the file will be written unconditionally
 
 	use basin, only: nkn
 
@@ -167,32 +167,32 @@ c the file must be open, the file will be written unconditionally
 
 
 
-c-----------------------------------------------------
-c check if files has to be written
-c-----------------------------------------------------
+!-----------------------------------------------------
+! check if files has to be written
+!-----------------------------------------------------
 
 	iu = ia_out(4)
 	if( iu .le. 0 ) return
 
-c-----------------------------------------------------
-c write file
-c-----------------------------------------------------
+!-----------------------------------------------------
+! write file
+!-----------------------------------------------------
 
 	call nos_write_record(iu,it,ivar,nlvdi,ilhkv_,c,ierr)
 	if(ierr.gt.0) goto 99
 
-c-----------------------------------------------------
-c write informational message to terminal
-c-----------------------------------------------------
+!-----------------------------------------------------
+! write informational message to terminal
+!-----------------------------------------------------
 
 	if( binfo ) then
-      write(6,*) 'write_scalar_file_bio: ivar = ',
-     + ivar,' written at ',it
+      write(6,*) 'write_scalar_file_bio: ivar = ', &
+     & ivar,' written at ',it
 	end if
 
-c-----------------------------------------------------
-c end of routine
-c-----------------------------------------------------
+!-----------------------------------------------------
+! end of routine
+!-----------------------------------------------------
 
 	return
    99	continue
@@ -200,17 +200,17 @@ c-----------------------------------------------------
 	stop 'error stop write_scalar_file_bio: error in writing record'
 	end
 
-c*************************************************************
-c*************************************************************
+!*************************************************************
+!*************************************************************
 
 
 
-c********************************************************************
-c********************************************************************
-c   Dumps state variables for repeated runs
-c
-       subroutine dump_aquabc(file_name,state,
-     +                 nkndim,nkn,nlvdim,nvar)
+!********************************************************************
+!********************************************************************
+!   Dumps state variables for repeated runs
+!
+       subroutine dump_aquabc(file_name,state, &
+     &                 nkndim,nkn,nlvdim,nvar)
 
       implicit none
       character*(*) file_name
@@ -255,14 +255,14 @@ c
       return
       end
 
-c**********************************************************************
-c**********************************************************************
+!**********************************************************************
+!**********************************************************************
 
 
-c**********************************************************************
-c**********************************************************************
-c**********************************************************************
-c**********************************************************************
+!**********************************************************************
+!**********************************************************************
+!**********************************************************************
+!**********************************************************************
 
 	subroutine fluxes_aquabc(ext,ivbase,nscal,scal)
 	
@@ -339,8 +339,8 @@ c**********************************************************************
 		call get_nlayers(kfluxm,kflux,nsect,nlayers,nllmax)
 
 		do i=1,nscal
-		  call fluxes_init(nlvdi,nsect,nlayers,trs(i)
-     +				,scalt(0,1,1,i))
+		  call fluxes_init(nlvdi,nsect,nlayers,trs(i) &
+     &				,scalt(0,1,1,i))
 		end do
 
                 nbflx = ifemop(ext,'unform','new')
@@ -351,8 +351,8 @@ c**********************************************************************
 	        nvers = 0
 		nvar = nscal
 		idtflx = nint(dda_out(1))
-                call flx_write_header(nbflx,0,nsect,kfluxm,idtflx
-     +                                  ,nllmax,nvar,ierr)
+                call flx_write_header(nbflx,0,nsect,kfluxm,idtflx &
+     &                                  ,nllmax,nvar,ierr)
                 if( ierr /= 0 ) goto 98
 
                 title = descrp
@@ -363,9 +363,9 @@ c**********************************************************************
                   kext(i) = ipext(kflux(i))
                 end do
 
-                call flx_write_header2(nbflx,0,nsect,kfluxm
-     +                          ,kext,nlayers
-     +                          ,atime0,title,femver,chflx,ierr)
+                call flx_write_header2(nbflx,0,nsect,kfluxm &
+     &                          ,kext,nlayers &
+     &                          ,atime0,title,femver,chflx,ierr)
                 if( ierr /= 0 ) goto 98
 
         end if
@@ -386,8 +386,8 @@ c**********************************************************************
 	do i=1,nscal
 	  ivar = ivbase + i
 	  call flxscs(kfluxm,kflux,iflux,az,fluxes,ivar,scal(1,1,i))
-	  call fluxes_accum(nlvdi,nsect,nlayers,dt,trs(i)
-     +			,scalt(0,1,1,i),fluxes)
+	  call fluxes_accum(nlvdi,nsect,nlayers,dt,trs(i) &
+     &			,scalt(0,1,1,i),fluxes)
 	end do
 
 !	-------------------------------------------------------
@@ -404,10 +404,10 @@ c**********************************************************************
 
 	do i=1,nscal
 	  ivar = ivbase + i
-	  call fluxes_aver(nlvdi,nsect,nlayers,trs(i)
-     +			,scalt(0,1,1,i),fluxes)
-          call flx_write_record(nbflx,nvers,atime,nlvdi,nsect,ivar
-     +                          ,nlayers,fluxes,ierr)
+	  call fluxes_aver(nlvdi,nsect,nlayers,trs(i) &
+     &			,scalt(0,1,1,i),fluxes)
+          call flx_write_record(nbflx,nvers,atime,nlvdi,nsect,ivar &
+     &                          ,nlayers,fluxes,ierr)
           if( ierr /= 0 ) goto 97
 	end do
 
@@ -416,8 +416,8 @@ c**********************************************************************
 !	-------------------------------------------------------
 
 	do i=1,nscal
-	  call fluxes_init(nlvdi,nsect,nlayers,trs(i)
-     +			,scalt(0,1,1,i))
+	  call fluxes_init(nlvdi,nsect,nlayers,trs(i) &
+     &			,scalt(0,1,1,i))
 	end do
 
 !-----------------------------------------------------------------
@@ -447,7 +447,7 @@ c**********************************************************************
 
 
 
-c**********************************************************************
+!**********************************************************************
 ! This is commented old version
 ! 	subroutine fluxes_aquabc(it,nscal,scal)
 ! 

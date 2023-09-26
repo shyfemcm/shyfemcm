@@ -75,8 +75,8 @@
 	  lmax = max(1,lmax)	!at least one layer
 	  if ( b2d ) lmax = 1
 	  lmaxreg = lmax
-	  call nc_open_reg(ncid,nxreg,nyreg,lmax
-     +				,ncflag,date0,time0,iztype)
+	  call nc_open_reg(ncid,nxreg,nyreg,lmax &
+     &				,ncflag,date0,time0,iztype)
 	else
 	  allocate(var3d(ncnlv*nkn))
 	  call nc_open_fem(ncid,nkn,nel,ncnlv,date0,time0,iztype)
@@ -102,11 +102,11 @@
         call nc_end_define(ncid)
 
         if( breg ) then
-          call nc_write_coords_reg(ncid,nxreg,nyreg,ncnlv
-     +					,xlon,ylat,hcoord,hlv)
+          call nc_write_coords_reg(ncid,nxreg,nyreg,ncnlv &
+     &					,xlon,ylat,hcoord,hlv)
         else
-          call nc_write_coords_fem(ncid,nkn,nel,ncnlv,xgv,ygv
-     +					,hkv,nen3v,hlv)
+          call nc_write_coords_fem(ncid,nkn,nel,ncnlv,xgv,ygv &
+     &					,hkv,nen3v,hlv)
         end if
 
 	end
@@ -139,8 +139,8 @@
 	  allocate(rncaux(nx,ny,lmax))
 	  if( nx*ny /= np ) stop 'error stop nc_output_record: breg'
           call nc_rewrite_3d_reg(nlvdi,lmax,nx,ny,sv,rncaux)
-          call nc_write_data_3d_reg(ncid,var_id,iwrite
-     +					,lmax,nx,ny,rncaux)
+          call nc_write_data_3d_reg(ncid,var_id,iwrite &
+     &					,lmax,nx,ny,rncaux)
 	else
 	  if( nkn /= np ) stop 'error stop nc_output_record: nkn'
           call nc_compact_3d(nlv,nlv,nkn,sv,var3d)
@@ -183,14 +183,14 @@
 	  var_id = var_ids(3)
           call fm2am3d(nlv,ilhv,uprv,nlvdi,nx,ny,fmreg,value3d)
           call nc_rewrite_3d_reg(nlvdi,lmax,nx,ny,value3d,rncaux)
-          call nc_write_data_3d_reg(ncid,var_id,iwrite
-     +				,lmax,nx,ny,rncaux)
+          call nc_write_data_3d_reg(ncid,var_id,iwrite &
+     &				,lmax,nx,ny,rncaux)
 
 	  var_id = var_ids(4)
           call fm2am3d(nlv,ilhv,vprv,nlvdi,nx,ny,fmreg,value3d)
           call nc_rewrite_3d_reg(nlvdi,lmax,nx,ny,value3d,rncaux)
-          call nc_write_data_3d_reg(ncid,var_id,iwrite
-     +				,lmax,nx,ny,rncaux)
+          call nc_write_data_3d_reg(ncid,var_id,iwrite &
+     &				,lmax,nx,ny,rncaux)
         else
 	  var_id = var_ids(1)
           call nc_write_data_2d(ncid,var_id,iwrite,nkn,znv)

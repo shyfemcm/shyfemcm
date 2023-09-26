@@ -187,8 +187,8 @@
 	logical elabtime_in_time_1
 	double precision atime
 
-	elabtime_in_time_1 
-     +			= elabtime_in_time_3(atime,atime,atime)
+	elabtime_in_time_1  &
+     &			= elabtime_in_time_3(atime,atime,atime)
 
 	end function elabtime_in_time_1
 
@@ -233,8 +233,8 @@
 	logical elabtime_over_time_1
 	double precision atime
 
-	elabtime_over_time_1 
-     +			= elabtime_over_time_3(atime,atime,atime)
+	elabtime_over_time_1  &
+     &			= elabtime_over_time_3(atime,atime,atime)
 
 	end function elabtime_over_time_1
 
@@ -337,8 +337,8 @@
         if( ichange /= 0 ) then
           if( bcheckdt .and. ichange > 0 ) then
             call dts_format_abs_time(atime,dline)
-            write(6,'(a,a,i8,f14.2)') '* change in time step: '
-     +                                          ,dline,nrec,dt
+            write(6,'(a,a,i8,f14.2)') '* change in time step: ' &
+     &                                          ,dline,nrec,dt
           end if
 
           bskip = ichange < 0
@@ -352,8 +352,8 @@
               write(6,*) '    new time: ',dline
             else if( bskip ) then
               call dts_format_abs_time(atime,dline)
-              write(6,*) '*** times not in order... skipping: '
-     +				,nrec,dline
+              write(6,*) '*** times not in order... skipping: ' &
+     &				,nrec,dline
             end if
           end if
         end if

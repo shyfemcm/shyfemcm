@@ -113,8 +113,8 @@
 
         call clo_add_sep('additional options')
 
-        call clo_add_option('lat',45.
-     +             ,'latitude for nodal correction (default 45)')
+        call clo_add_option('lat',45. &
+     &             ,'latitude for nodal correction (default 45)')
 
 !--------------------------------------------------------------
 ! parse command line options
@@ -176,15 +176,15 @@
         iout2 = iunit + 2
 
         if( iformout .eq. 1 ) then
-          open(iout1,file='out.tid.fem',status='unknown',
-     +          form='formatted')
-          open(iout2,file='out.res.fem',status='unknown',
-     +          form='formatted')
+          open(iout1,file='out.tid.fem',status='unknown', &
+     &          form='formatted')
+          open(iout2,file='out.res.fem',status='unknown', &
+     &          form='formatted')
         else
-          open(iout1,file='out.tid.fem',status='unknown',
-     +          form='unformatted')
-          open(iout2,file='out.res.fem',status='unknown',
-     +          form='unformatted')
+          open(iout1,file='out.tid.fem',status='unknown', &
+     &          form='unformatted')
+          open(iout2,file='out.res.fem',status='unknown', &
+     &          form='unformatted')
         end if
 
         date = 0
@@ -196,8 +196,8 @@
 ! read first record
 !--------------------------------------------------------------
 
-        call fem_file_read_params(iformat,iunit,dtime
-     +                        ,nvers,np,lmax,nvar,ntype,datetime,ierr)
+        call fem_file_read_params(iformat,iunit,dtime &
+     &                        ,nvers,np,lmax,nvar,ntype,datetime,ierr)
 
 	if( ierr .ne. 0 ) goto 99
 
@@ -212,8 +212,8 @@
 	allocate(hlv(lmax))
 	call fem_file_make_type(ntype,2,itype)
 
-	call fem_file_read_2header(iformat,iunit,ntype,lmax
-     +			,hlv,regpar,ierr)
+	call fem_file_read_2header(iformat,iunit,ntype,lmax &
+     &			,hlv,regpar,ierr)
 	if( ierr .ne. 0 ) goto 98
 
 	if( .not. bquiet ) then
@@ -276,8 +276,8 @@
 	end if
 
 	do iv=1,nvar
-	  call fem_file_skip_data(iformat,iunit
-     +                          ,nvers,np,lmax,string,ierr)
+	  call fem_file_skip_data(iformat,iunit &
+     &                          ,nvers,np,lmax,string,ierr)
 	  if( ierr .ne. 0 ) goto 97
 	  call string2ivar(string,ivar)
 	  if( .not. bquiet ) then
@@ -312,8 +312,8 @@
 
 	do 
 	  atold = atime
-          call fem_file_read_params(iformat,iunit,dtime
-     +                          ,nvers,np,lmax,nvar,ntype,datetime,ierr)
+          call fem_file_read_params(iformat,iunit,dtime &
+     &                          ,nvers,np,lmax,nvar,ntype,datetime,ierr)
 	  if( ierr .lt. 0 ) exit
 	  if( ierr .gt. 0 ) goto 99
 	  if( nvar .ne. nvar0 ) goto 96
@@ -326,17 +326,17 @@
 	  atlast = atime
 	  atnew = atime
 
-	  call fem_file_read_2header(iformat,iunit,ntype,lmax
-     +			,hlv,regpar,ierr)
+	  call fem_file_read_2header(iformat,iunit,ntype,lmax &
+     &			,hlv,regpar,ierr)
 	  if( ierr .ne. 0 ) goto 98
 
 	  do iv=1,nvar
-            call fem_file_read_data(iformat,iunit
-     +                          ,nvers,np,lmax
-     +                          ,string
-     +                          ,ilhkv,hd
-     +                          ,nlvdi,data(1,1,iv)
-     +                          ,ierr)
+            call fem_file_read_data(iformat,iunit &
+     &                          ,nvers,np,lmax &
+     &                          ,string &
+     &                          ,ilhkv,hd &
+     &                          ,nlvdi,data(1,1,iv) &
+     &                          ,ierr)
 	    if( ierr .ne. 0 ) goto 97
 	    if( string .ne. strings(iv) ) goto 95
 	  end do
@@ -370,13 +370,13 @@
 
 	call rayleigh_crit(dtday)
 
-	call fem_tidana(np,nvar,lmax,nequ,nrec,acov,tvar,bcov,
-     +		      tideh,tideg)
+	call fem_tidana(np,nvar,lmax,nequ,nrec,acov,tvar,bcov, &
+     &		      tideh,tideg)
 
         write(*,*)'Constant_name   Amplitude   Phase'
 	do i = 1,ntd
-          write(*,555)const_ar(i)%name,tideh(1,1,1,i)*100.,
-     +       tideg(1,1,1,i)
+          write(*,555)const_ar(i)%name,tideh(1,1,1,i)*100., &
+     &       tideg(1,1,1,i)
         end do
  555	format(a5,f12.3,f12.2)
 
@@ -395,8 +395,8 @@
 
         do
           atold = atime
-          call fem_file_read_params(iformat,iunit,dtime
-     +                          ,nvers,np,lmax,nvar,ntype,datetime,ierr)
+          call fem_file_read_params(iformat,iunit,dtime &
+     &                          ,nvers,np,lmax,nvar,ntype,datetime,ierr)
 	  if( ierr .lt. 0 ) exit
 	  if( ierr .gt. 0 ) goto 99
 	  if( nvar .ne. nvar0 ) goto 96
@@ -409,8 +409,8 @@
 	  atlast = atime
 	  atnew = atime
 
-	  call fem_file_read_2header(iformat,iunit,ntype,lmax
-     +			,hlv,regpar,ierr)
+	  call fem_file_read_2header(iformat,iunit,ntype,lmax &
+     &			,hlv,regpar,ierr)
 	  if( ierr .ne. 0 ) goto 98
 
 	  call fem_file_make_type(ntype,2,itype)
@@ -419,36 +419,36 @@
 	  if( breg ) flag = regpar(7)
 
           np_out = np
-          call fem_file_write_header(iformout,iout1,dtime
-     +                        ,0,np_out,lmax,nvar,ntype,lmax
-     +                        ,hlv,datetime,regpar)
-          call fem_file_write_header(iformout,iout2,dtime
-     +                        ,0,np_out,lmax,nvar,ntype,lmax
-     +                        ,hlv,datetime,regpar)
+          call fem_file_write_header(iformout,iout1,dtime &
+     &                        ,0,np_out,lmax,nvar,ntype,lmax &
+     &                        ,hlv,datetime,regpar)
+          call fem_file_write_header(iformout,iout2,dtime &
+     &                        ,0,np_out,lmax,nvar,ntype,lmax &
+     &                        ,hlv,datetime,regpar)
 
           do iv=1,nvar
-            call fem_file_read_data(iformat,iunit
-     +                      ,nvers,np,lmax
-     +                      ,string
-     +                      ,ilhkv,hd
-     +                      ,nlvdi,data(1,1,iv)
-     +                      ,ierr)
+            call fem_file_read_data(iformat,iunit &
+     &                      ,nvers,np,lmax &
+     &                      ,string &
+     &                      ,ilhkv,hd &
+     &                      ,nlvdi,data(1,1,iv) &
+     &                      ,ierr)
 
-            call tidal_pred(np,lmax,
-     +          atime,lat,tideh(iv,:,:,:),tideg(iv,:,:,:),
-     +          data(1,1,iv),datat,datas)
+            call tidal_pred(np,lmax, &
+     &          atime,lat,tideh(iv,:,:,:),tideg(iv,:,:,:), &
+     &          data(1,1,iv),datat,datas)
 
-            call fem_file_write_data(iformout,iout1
-     +                          ,0,np_out,lmax
-     +                          ,string
-     +                          ,ilhkv,hd
-     +                          ,nlvdi,datat)
+            call fem_file_write_data(iformout,iout1 &
+     &                          ,0,np_out,lmax &
+     &                          ,string &
+     &                          ,ilhkv,hd &
+     &                          ,nlvdi,datat)
 
-            call fem_file_write_data(iformout,iout2
-     +                          ,0,np_out,lmax
-     +                          ,string
-     +                          ,ilhkv,hd
-     +                          ,nlvdi,datas)
+            call fem_file_write_data(iformout,iout2 &
+     &                          ,0,np_out,lmax &
+     &                          ,string &
+     &                          ,ilhkv,hd &
+     &                          ,nlvdi,datas)
 
           end do
 
@@ -581,8 +581,8 @@
 !**********************************************************************
 ! Acumulate values
 
-	subroutine accumul_tide(nequ,lmax,nvar,np,data,x,
-     +			        tvar,bcov)
+	subroutine accumul_tide(nequ,lmax,nvar,np,data,x, &
+     &			        tvar,bcov)
 
         implicit none
 
@@ -622,8 +622,8 @@
 !**********************************************************************
 ! Compute amplitude and phase for all vars 
 
-	subroutine fem_tidana(np,nvar,lmax,nequ,nrec,acov,tvar,
-     +			  bcov,tideh,tideg)
+	subroutine fem_tidana(np,nvar,lmax,nequ,nrec,acov,tvar, &
+     &			  bcov,tideh,tideg)
 
         use tide
 
@@ -678,8 +678,8 @@
 !**********************************************************************
 ! General tide prediction subroutine
 
-        subroutine tidal_pred(np,lmax,atime,lat,tideh,tideg,
-     +		   data,datat,datas)
+        subroutine tidal_pred(np,lmax,atime,lat,tideh,tideg, &
+     &		   data,datat,datas)
 
 	use tide
 

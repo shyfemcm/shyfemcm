@@ -160,20 +160,20 @@
 	type(entry), save, private, allocatable :: pentry(:)
 
         INTERFACE strings_get_id
-        MODULE PROCEDURE         strings_get_id_by_name
-     +                          ,strings_get_id_by_ivar
+        MODULE PROCEDURE         strings_get_id_by_name &
+     &                          ,strings_get_id_by_ivar
         END INTERFACE
 
         INTERFACE strings_get_full_name
-        MODULE PROCEDURE         strings_get_full_name_by_name
-     +                          ,strings_get_full_name_by_ivar
-     +                          ,strings_get_full_name_by_ivar_isub
+        MODULE PROCEDURE         strings_get_full_name_by_name &
+     &                          ,strings_get_full_name_by_ivar &
+     &                          ,strings_get_full_name_by_ivar_isub
         END INTERFACE
 
         INTERFACE strings_get_short_name
-        MODULE PROCEDURE         strings_get_short_name_by_name
-     +                          ,strings_get_short_name_by_ivar
-     +                          ,strings_get_short_name_by_ivar_isub
+        MODULE PROCEDURE         strings_get_short_name_by_name &
+     &                          ,strings_get_short_name_by_ivar &
+     &                          ,strings_get_short_name_by_ivar_isub
         END INTERFACE
 
 !================================================================
@@ -564,8 +564,8 @@
           if( pentry(id)%full == pentry(id)%short ) then
             full = pentry(id)%full
             short = pentry(id)%short
-            write(6,*) 'warning: full==short: ',ivar
-     +                          ,trim(short),'  ',trim(full)
+            write(6,*) 'warning: full==short: ',ivar &
+     &                          ,trim(short),'  ',trim(full)
           end if
         end do
 
@@ -913,7 +913,7 @@
 
 	subroutine string_direction_and_unit(string,dir,unit)
 
-c finds direction and unit - does not change string
+! finds direction and unit - does not change string
 
 	character*(*) string,dir,unit
         character*80 aux
@@ -928,7 +928,7 @@ c finds direction and unit - does not change string
 
 	subroutine pop_direction_and_unit(string,dir,unit)
 
-c pops direction and unit and returns cleaned string
+! pops direction and unit and returns cleaned string
 
 	implicit none
 
@@ -986,12 +986,12 @@ c pops direction and unit and returns cleaned string
 
 	call strings_get_ivar(name,ivar)
 
-	has_direction = (
-     +			  ivar == 2 		!velocity
-     +		     .or. ivar == 3 		!transport
-     +		     .or. ivar == 21		!wind
-     +		     .or. ivar == 42		!wind stress
-     +			)
+	has_direction = ( &
+     &			  ivar == 2 		!velocity &
+     &		     .or. ivar == 3 		!transport &
+     &		     .or. ivar == 21		!wind &
+     &		     .or. ivar == 42		!wind stress &
+     &			)
 
 	end
 

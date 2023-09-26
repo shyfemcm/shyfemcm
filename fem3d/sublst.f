@@ -29,54 +29,54 @@
 ! 16.02.2019	ggu	changed VERS_7_5_60
 ! 21.05.2019	ggu	changed VERS_7_5_62
 
-c*********************************************************************
-c
+!*********************************************************************
+!
 	subroutine setlst(ip,rkey,n,rflag)
-c
+!
 	implicit none
-c
-c arguments
+!
+! arguments
 	integer ip(1),n
 	real rkey(1),rflag
-c common
+! common
 	integer nmax,nins
 	real rlast
 	common /lstloc/ nmax,nins,rlast
-c local
+! local
 	integer i
-c
+!
 	nmax=n
 	rlast=rflag
 	nins=0
-c
+!
 	do i=1,n
 	  ip(i)=0
 	  rkey(i)=rflag
 	end do
-c
+!
 	return
 	end
-c
-c*********************************************************************
-c
+!
+!*********************************************************************
+!
 	subroutine inslst(ip,rkey,ipact,rkact)
-c
+!
 	implicit none
-c
-c arguments
+!
+! arguments
 	integer ip(*),ipact
 	real rkey(*),rkact
-c common
+! common
 	integer nmax,nins
 	real rlast
 	common /lstloc/ nmax,nins,rlast
-c local
+! local
 	integer i
-c
+!
 	if(rkact.le.rlast) return
-c
+!
 	nins=nins+1
-c
+!
 	do i=nmax-1,1,-1
 		if(rkact.le.rkey(i)) goto 1
 		rkey(i+1)=rkey(i)
@@ -85,29 +85,29 @@ c
     1	continue
 	rkey(i+1)=rkact
 	ip(i+1)=ipact
-c
+!
 	rlast=rkey(nmax)
-c
+!
 	return
 	end
-c
+!
 	
-c
-c*********************************************************************
-c
+!
+!*********************************************************************
+!
 	subroutine maxlst(n)
-c
+!
 	implicit none
-c
-c arguments
+!
+! arguments
 	integer n
-c common
+! common
 	integer nmax,nins
 	real rlast
 	common /lstloc/ nmax,nins,rlast
-c
+!
 	n=nins
 	if(nins.gt.nmax) n=nmax
-c
+!
 	return
 	end

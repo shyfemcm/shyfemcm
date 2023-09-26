@@ -23,38 +23,38 @@
 !
 !--------------------------------------------------------------------------
 
-c topological set up routines
-c
-c contents :
-c
-c subroutine setnod
-c			 sets array inodv
-c
-c revision log :
-c
-c 01.08.2003	ggu	created from sublnk.f
-c 13.08.2003	ggu	in update_geom do not call setweg and setnod
-c 06.11.2008	ggu	better error handling
-c 06.04.2009	ggu	nlidim -> nlkdim
-c 02.12.2011	ggu	print_bound_nodes() for writing out boundary nodes
-c 04.05.2015	ggu	remove equivalence - use winkv as local array
-c 20.05.2015	ggu	new call to mklenkii to set up lenkiiv
-c 10.07.2015	ggu	changed VERS_7_1_50
-c 17.07.2015	ggu	changed VERS_7_1_80
-c 20.07.2015	ggu	changed VERS_7_1_81
-c 16.12.2015	ggu	changed VERS_7_3_16
-c 28.04.2016	ggu	changed VERS_7_5_9
-c 26.09.2017	ggu	changed VERS_7_5_32
-c 05.12.2017	ggu	changed VERS_7_5_39
-c 24.01.2018	ggu	changed VERS_7_5_41
-c 19.04.2018	ggu	changed VERS_7_5_45
-c 16.02.2019	ggu	changed VERS_7_5_60
-c
-c*****************************************************************
+! topological set up routines
+!
+! contents :
+!
+! subroutine setnod
+!			 sets array inodv
+!
+! revision log :
+!
+! 01.08.2003	ggu	created from sublnk.f
+! 13.08.2003	ggu	in update_geom do not call setweg and setnod
+! 06.11.2008	ggu	better error handling
+! 06.04.2009	ggu	nlidim -> nlkdim
+! 02.12.2011	ggu	print_bound_nodes() for writing out boundary nodes
+! 04.05.2015	ggu	remove equivalence - use winkv as local array
+! 20.05.2015	ggu	new call to mklenkii to set up lenkiiv
+! 10.07.2015	ggu	changed VERS_7_1_50
+! 17.07.2015	ggu	changed VERS_7_1_80
+! 20.07.2015	ggu	changed VERS_7_1_81
+! 16.12.2015	ggu	changed VERS_7_3_16
+! 28.04.2016	ggu	changed VERS_7_5_9
+! 26.09.2017	ggu	changed VERS_7_5_32
+! 05.12.2017	ggu	changed VERS_7_5_39
+! 24.01.2018	ggu	changed VERS_7_5_41
+! 19.04.2018	ggu	changed VERS_7_5_45
+! 16.02.2019	ggu	changed VERS_7_5_60
+!
+!*****************************************************************
 
 	subroutine update_geom
 
-c updates geometrical array (ieltv)
+! updates geometrical array (ieltv)
 
 	use mod_geom
 	use mod_geom_dynamic
@@ -62,28 +62,28 @@ c updates geometrical array (ieltv)
 
         implicit none
 
-c local
+! local
         integer n
 
-c-------------------------------------------------------------
-c update ieltv
-c-------------------------------------------------------------
+!-------------------------------------------------------------
+! update ieltv
+!-------------------------------------------------------------
 
         call update_ielt(nel,inodv,ieltv,nen3v)
 
 	!call exchange_ieltv
 
-c-------------------------------------------------------------
-c end of routine
-c-------------------------------------------------------------
+!-------------------------------------------------------------
+! end of routine
+!-------------------------------------------------------------
 
 	end
 
-c*****************************************************************
+!*****************************************************************
 
 	subroutine exchange_ieltv
 
-c exchanges ieltv structure
+! exchanges ieltv structure
 
 	use mod_geom
 	use mod_geom_dynamic
@@ -97,9 +97,9 @@ c exchanges ieltv structure
 	integer iiaux(nel)
 	integer i,ia,ic,nc
 
-c-------------------------------------------------------------
-c start exchanging
-c-------------------------------------------------------------
+!-------------------------------------------------------------
+! start exchanging
+!-------------------------------------------------------------
 
 	call shympi_comment('exchanging ieltv')
 	iiaux(:) = ieltv(1,:)
@@ -113,9 +113,9 @@ c-------------------------------------------------------------
 	iaux(3,:) = iiaux(:)
 	call shympi_barrier
 
-c-------------------------------------------------------------
-c print info
-c-------------------------------------------------------------
+!-------------------------------------------------------------
+! print info
+!-------------------------------------------------------------
 
         write(my_unit,*) 'printing ghost elems: ' // 'ieltv'
         write(my_unit,*) 'n_ghost_areas = ',n_ghost_areas,my_id
@@ -144,25 +144,25 @@ c-------------------------------------------------------------
 	  end do
 	end do
 
-c-------------------------------------------------------------
-c end of routine
-c-------------------------------------------------------------
+!-------------------------------------------------------------
+! end of routine
+!-------------------------------------------------------------
 
 	end
 
-c****************************************************************
+!****************************************************************
 
         subroutine setnod
 
-c sets (dynamic) array inodv
-c
-c inodv 
-c	 0: internal node  
-c	>0: open boundary node
-c       -1: boundary node  
-c	-2: out of system
-c
-c if open boundary node, inodv(k) is number of boundary (ggu 15.11.2001)
+! sets (dynamic) array inodv
+!
+! inodv 
+!	 0: internal node  
+!	>0: open boundary node
+!       -1: boundary node  
+!	-2: out of system
+!
+! if open boundary node, inodv(k) is number of boundary (ggu 15.11.2001)
 
 	use mod_geom_dynamic
 	use evgeom
@@ -180,12 +180,12 @@ c if open boundary node, inodv(k) is number of boundary (ggu 15.11.2001)
         integer ipext
 	integer itybnd,nkbnds,kbnds,nbnds
 
-c initialize array to hold angles
+! initialize array to hold angles
 
 	ndry = 0
 	winkv = 0.
 
-c sum angles
+! sum angles
 
         do ie=1,nel
           if(iwegv(ie).eq.0) then !element is in system
@@ -205,7 +205,7 @@ c sum angles
         !call shympi_comment('shympi_elem: exchange winkv')
         call shympi_exchange_and_sum_2d_nodes(winkv)
 
-c set up inodv
+! set up inodv
 
         do k=1,nkn
           if(winkv(k).gt.winmax) then     !internal node
@@ -217,7 +217,7 @@ c set up inodv
           end if
         end do
 
-c now mark open boundary nodes
+! now mark open boundary nodes
 
 	nbc = nbnds()
 
@@ -261,9 +261,9 @@ c now mark open boundary nodes
         stop 'error stop setnod: open boundary node'
         end
 
-c****************************************************************
-c****************************************************************
-c****************************************************************
+!****************************************************************
+!****************************************************************
+!****************************************************************
 
 	function is_internal_node(k)
 
@@ -278,7 +278,7 @@ c****************************************************************
 
 	end
 
-c****************************************************************
+!****************************************************************
 
 	function is_boundary_node(k)
 
@@ -293,7 +293,7 @@ c****************************************************************
 
 	end
 
-c****************************************************************
+!****************************************************************
 
 	function is_open_boundary_node(k)
 
@@ -308,7 +308,7 @@ c****************************************************************
 
 	end
 
-c****************************************************************
+!****************************************************************
 
 	function is_dry_node(k)
 
@@ -323,7 +323,7 @@ c****************************************************************
 
 	end
 
-c****************************************************************
-c****************************************************************
-c****************************************************************
+!****************************************************************
+!****************************************************************
+!****************************************************************
 

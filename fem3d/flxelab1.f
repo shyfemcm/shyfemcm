@@ -25,34 +25,34 @@
 !
 !--------------------------------------------------------------------------
 
-c revision log :
-c
-c 18.11.1998	ggu	check dimensions with dimnos
-c 06.04.1999	ggu	some cosmetic changes
-c 03.12.2001	ggu	some extra output -> place of min/max
-c 09.12.2003	ggu	check for NaN introduced
-c 07.03.2007	ggu	easier call
-c 08.11.2008	ggu	do not compute min/max in non-existing layers
-c 07.12.2010	ggu	write statistics on depth distribution (depth_stats)
-c 06.05.2015	ggu	noselab started
-c 05.06.2015	ggu	many more features added
-c 05.10.2015	ggu	started flxelab
-c 12.10.2015	ggu	changed VERS_7_3_3
-c 19.10.2015	ggu	changed VERS_7_3_6
-c 25.05.2016	ggu	changed VERS_7_5_10
-c 13.06.2017	ggu	changed VERS_7_5_29
-c 09.10.2017	ggu	changed VERS_7_5_33
-c 26.10.2017	ggu	various user related improvements, new flx subroutines
-c 04.11.2017	ggu	changed VERS_7_5_34
-c 14.11.2017	ggu	changed VERS_7_5_36
-c 17.11.2017	ggu	changed VERS_7_5_38
-c 22.02.2018	ggu	changed VERS_7_5_42
-c 03.04.2018	ggu	changed VERS_7_5_43
-c 16.02.2019	ggu	changed VERS_7_5_60
-c 06.03.2020	ggu	check for time step
-c 27.04.2020	ggu&ccf	bug fix for handling time step
-c
-c**************************************************************
+! revision log :
+!
+! 18.11.1998	ggu	check dimensions with dimnos
+! 06.04.1999	ggu	some cosmetic changes
+! 03.12.2001	ggu	some extra output -> place of min/max
+! 09.12.2003	ggu	check for NaN introduced
+! 07.03.2007	ggu	easier call
+! 08.11.2008	ggu	do not compute min/max in non-existing layers
+! 07.12.2010	ggu	write statistics on depth distribution (depth_stats)
+! 06.05.2015	ggu	noselab started
+! 05.06.2015	ggu	many more features added
+! 05.10.2015	ggu	started flxelab
+! 12.10.2015	ggu	changed VERS_7_3_3
+! 19.10.2015	ggu	changed VERS_7_3_6
+! 25.05.2016	ggu	changed VERS_7_5_10
+! 13.06.2017	ggu	changed VERS_7_5_29
+! 09.10.2017	ggu	changed VERS_7_5_33
+! 26.10.2017	ggu	various user related improvements, new flx subroutines
+! 04.11.2017	ggu	changed VERS_7_5_34
+! 14.11.2017	ggu	changed VERS_7_5_36
+! 17.11.2017	ggu	changed VERS_7_5_38
+! 22.02.2018	ggu	changed VERS_7_5_42
+! 03.04.2018	ggu	changed VERS_7_5_43
+! 16.02.2019	ggu	changed VERS_7_5_60
+! 06.03.2020	ggu	check for time step
+! 27.04.2020	ggu&ccf	bug fix for handling time step
+!
+!**************************************************************
 
 	subroutine flxelab
 
@@ -66,7 +66,7 @@ c**************************************************************
         use evgeom
         use levels
 
-c elaborates flx file
+! elaborates flx file
 
 	implicit none
 
@@ -111,7 +111,7 @@ c elaborates flx file
 	integer iapini,ifileo
 	integer ifem_open_file
 
-c--------------------------------------------------------------
+!--------------------------------------------------------------
 
 	nread=0
 	nelab=0
@@ -121,9 +121,9 @@ c--------------------------------------------------------------
 	rnull=-1.
 	bopen = .false.
 
-c--------------------------------------------------------------
-c set command line parameters
-c--------------------------------------------------------------
+!--------------------------------------------------------------
+! set command line parameters
+!--------------------------------------------------------------
 
 	call elabutil_init('FLX','flxelab')
 
@@ -143,8 +143,8 @@ c--------------------------------------------------------------
           stop 'error stop flxelab: not a valid flx file'
         end if
 
-	call flx_read_header(nin,nvers,nsect,kfluxm,idtflx
-     +                                  ,nlmax,nvar,ierr)
+	call flx_read_header(nin,nvers,nsect,kfluxm,idtflx &
+     &                                  ,nlmax,nvar,ierr)
 	if( ierr /= 0 ) goto 93
 
 	nscdi = nsect
@@ -160,9 +160,9 @@ c--------------------------------------------------------------
 	allocate(fluxes(0:nlvdi,3,nscdi))
 	allocate(fluxes0(nscdi))
 
-        call flx_read_header2(nin,nvers,nsect,kfluxm
-     +                          ,kflux,nlayers
-     +                          ,atime0,title,femver,strings,ierr)
+        call flx_read_header2(nin,nvers,nsect,kfluxm &
+     &                          ,kflux,nlayers &
+     &                          ,atime0,title,femver,strings,ierr)
 	if( ierr /= 0 ) goto 92
 
 	call set_nodes(nsect,kfluxm,kflux,nsnodes)
@@ -224,9 +224,9 @@ c--------------------------------------------------------------
 
 	ivarfirst = 0
         do iv=1,nvar
-          call flx_read_record(nin,nvers,atime
-     +                  ,nlvdi,nsect,ivar
-     +                  ,nlayers,fluxes,ierr)
+          call flx_read_record(nin,nvers,atime &
+     &                  ,nlvdi,nsect,ivar &
+     &                  ,nlayers,fluxes,ierr)
           if( ierr /= 0 ) goto 91
 	  ivars(iv) = ivar
 	  if( iv == 1 ) ivarfirst = ivar
@@ -283,18 +283,18 @@ c--------------------------------------------------------------
 
 	if( bopen ) then
 	  nb = ifileo(0,'out.flx','unform','new')
-	  call flx_write_header(nb,0,nsect,kfluxm
-     +			,idtflx,nlmax,nvar,ierr)
+	  call flx_write_header(nb,0,nsect,kfluxm &
+     &			,idtflx,nlmax,nvar,ierr)
 	  if( ierr /= 0 ) goto 99
-	  call flx_write_header2(nb,0,nsect,kfluxm
-     +			,kflux,nlayers
-     +			,atime0,title,femver,strings,ierr)
+	  call flx_write_header2(nb,0,nsect,kfluxm &
+     &			,kflux,nlayers &
+     &			,atime0,title,femver,strings,ierr)
 	  if( ierr /= 0 ) goto 99
 	end if
 
-c--------------------------------------------------------------
-c loop on data
-c--------------------------------------------------------------
+!--------------------------------------------------------------
+! loop on data
+!--------------------------------------------------------------
 
 	atime = atold
 	atwrite = -1
@@ -304,8 +304,8 @@ c--------------------------------------------------------------
 
 	 atold = atime
 
-	 call flx_read_record(nin,nvers,atime,nlvdi,nsect,ivar
-     +			,nlayers,fluxes,ierr)
+	 call flx_read_record(nin,nvers,atime,nlvdi,nsect,ivar &
+     &			,nlayers,fluxes,ierr)
          if(ierr.gt.0) write(6,*) 'error in reading file : ',ierr
          if(ierr.ne.0) exit
 
@@ -345,31 +345,31 @@ c--------------------------------------------------------------
 
 	  if( bsplit ) then
             call split_fluxes_0d(atime,nlvdi,nsect,nvar,iv,ivar,fluxes)
-            call split_fluxes_2d(atime,nlvdi,nsect,nvar,iv,ivar
-     +				,fluxes,bsplitall)
+            call split_fluxes_2d(atime,nlvdi,nsect,nvar,iv,ivar &
+     &				,fluxes,bsplitall)
 	    if( b3d ) then
-	      call split_fluxes_3d(atime,nlvdi,nsect,nvar,iv,ivar
-     +				,nlayers,fluxes,bsplitall)
+	      call split_fluxes_3d(atime,nlvdi,nsect,nvar,iv,ivar &
+     &				,nlayers,fluxes,bsplitall)
 	    end if
 	  end if
 
 	  if( boutput ) then
 	    if( ivar == 0 ) nout = nout + 1
 	    if( bverb ) write(6,*) 'writing output var: ',ivar
-            call flx_write_record(nb,0,atime
-     +			,nlvdi,nsect,ivar,nlayers,fluxes,ierr)
+            call flx_write_record(nb,0,atime &
+     &			,nlvdi,nsect,ivar,nlayers,fluxes,ierr)
 	    if( ierr /= 0 ) goto 99
 	  end if
 
 	end do		!time do loop
 
-c--------------------------------------------------------------
-c end of loop on data
-c--------------------------------------------------------------
+!--------------------------------------------------------------
+! end of loop on data
+!--------------------------------------------------------------
 
-c--------------------------------------------------------------
-c final write of variables
-c--------------------------------------------------------------
+!--------------------------------------------------------------
+! final write of variables
+!--------------------------------------------------------------
 
 	if( btrans ) then
 	  !write(6,*) 'istep,naccu: ',istep,naccu
@@ -387,9 +387,9 @@ c--------------------------------------------------------------
 	  end do
 	end if
 
-c--------------------------------------------------------------
-c write final message
-c--------------------------------------------------------------
+!--------------------------------------------------------------
+! write final message
+!--------------------------------------------------------------
 
 	if( .not. bsilent ) then
           write(6,*)
@@ -426,13 +426,13 @@ c--------------------------------------------------------------
           write(6,*) '  2d for depth averaged variables'
           write(6,*) '  3d for output at each layer'
 	  call compute_range(nsect,range)
-	  write(6,'(a,a)') ' sect is consecutive section numbering: '
-     +				,trim(range)
+	  write(6,'(a,a)') ' sect is consecutive section numbering: ' &
+     &				,trim(range)
 	  write(6,*) 'discharge data is normally total discharge'
-	  write(6,*) 'for 2d files the 4 columns are: '//
-     +			'total,positive,negative,absolute'
-	  write(6,*) 'for 3d files the columns are the total '//
-     +			'discharge for each layer'
+	  write(6,*) 'for 2d files the 4 columns are: '// &
+     &			'total,positive,negative,absolute'
+	  write(6,*) 'for 3d files the columns are the total '// &
+     &			'discharge for each layer'
 	 else if( boutput ) then
 	  write(6,*) 'output written to file out.flx'
 	 end if
@@ -442,9 +442,9 @@ c--------------------------------------------------------------
 	!write(6,*) 'names used: '
 	!write(6,*) 'simul: ',trim(simnam)
 
-c--------------------------------------------------------------
-c end of routine
-c--------------------------------------------------------------
+!--------------------------------------------------------------
+! end of routine
+!--------------------------------------------------------------
 
 	stop
    91	continue
@@ -462,14 +462,14 @@ c--------------------------------------------------------------
 	stop 'error stop flxelab: write error'
 	end
 
-c***************************************************************
-c***************************************************************
-c***************************************************************
+!***************************************************************
+!***************************************************************
+!***************************************************************
 
-        subroutine split_fluxes_2d(atime,nlvddi,nsect
-     +				,nvar,iv,ivar,fluxes,bext)
+        subroutine split_fluxes_2d(atime,nlvddi,nsect &
+     &				,nvar,iv,ivar,fluxes,bext)
 
-c writes 2d fluxes to file (only for ivar=0)
+! writes 2d fluxes to file (only for ivar=0)
 
         implicit none
 
@@ -523,7 +523,7 @@ c writes 2d fluxes to file (only for ivar=0)
 	  write(iu,'(a20,4f14.3)') dline,(ptot(i,j),i=1,4)
         end do
 
-c next is box format for Ali
+! next is box format for Ali
 
 	if( bext .and. ivar == 0 ) then
           write(iubox,*) atime
@@ -536,12 +536,12 @@ c next is box format for Ali
 
         end
 
-c****************************************************************
+!****************************************************************
 
-        subroutine split_fluxes_3d(atime,nlvddi,nsect,nvar,iv,ivar
-     +				,nlayers,fluxes,bext)
+        subroutine split_fluxes_3d(atime,nlvddi,nsect,nvar,iv,ivar &
+     &				,nlayers,fluxes,bext)
 
-c writes 3d fluxes to file
+! writes 3d fluxes to file
 
 	use shyfem_strings
 
@@ -566,13 +566,13 @@ c writes 3d fluxes to file
 	character*80 format,filename
 	character*10 short
 	character*20 dline
-	character*14, save :: what(5) = (/ 
-     +				 'disch_total   '
-     +				,'disch_positive'
-     +				,'disch_negative'
-     +				,'disch_absolute'
-     +				,'disch         '
-     +				/)
+	character*14, save :: what(5) = (/  &
+     &				 'disch_total   ' &
+     &				,'disch_positive' &
+     &				,'disch_negative' &
+     &				,'disch_absolute' &
+     &				,'disch         ' &
+     &				/)
 
         if( icall == 0 ) then
 	  imin = 5
@@ -619,12 +619,12 @@ c writes 3d fluxes to file
    99	continue
         end
 
-c****************************************************************
+!****************************************************************
 
-        subroutine split_fluxes_0d(atime,nlvddi,nsect,nvar,iv,ivar
-     +					,fluxes)
+        subroutine split_fluxes_0d(atime,nlvddi,nsect,nvar,iv,ivar &
+     &					,fluxes)
 
-c splits barotropic values of discharges - old version
+! splits barotropic values of discharges - old version
 
         implicit none
 
@@ -665,7 +665,7 @@ c splits barotropic values of discharges - old version
 
         end
 
-c*******************************************************************
+!*******************************************************************
 
 	subroutine set_nodes(nsect,kfluxm,kflux,nsnodes)
 
@@ -716,7 +716,7 @@ c*******************************************************************
 	stop 'error stop set_nodes: nsect'
 	end
 
-c*******************************************************************
+!*******************************************************************
 
 	subroutine iusplit_info(iu,j,iv,nsect,nvar)
 
@@ -740,5 +740,5 @@ c*******************************************************************
 
 	end
 
-c*******************************************************************
+!*******************************************************************
 

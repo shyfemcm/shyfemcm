@@ -24,45 +24,45 @@
 !
 !--------------------------------------------------------------------------
 
-c reading and interpolation of external files
-c
-c contents :
-c
-c revision log :
-c
-c 29.10.2012	ggu	created from scratch
-c 05.11.2012	ggu	changed VERS_6_1_60
-c 17.12.2012	ggu	changed VERS_6_1_61a
-c 25.01.2013	ggu	changed VERS_6_1_62
-c 03.05.2013	ggu	changed VERS_6_1_63
-c 13.06.2013	ggu	changed VERS_6_1_65
-c 17.06.2013	ggu	do not pass function into subroutine
-c 18.06.2014	ggu	changed VERS_6_1_77
-c 27.06.2014	ggu	changed VERS_6_1_78
-c 02.07.2014	ggu	new framework finished
-c 10.07.2014	ggu	only new file format allowed
-c 18.07.2014	ggu	changed VERS_7_0_1
-c 15.01.2015	ggu	changed VERS_7_1_1
-c 26.02.2015	ggu	changed VERS_7_1_5
-c 21.05.2015	ggu	changed VERS_7_1_11
-c 13.07.2015	ggu	changed VERS_7_1_51
-c 20.11.2015	ggu	changed VERS_7_3_15
-c 22.02.2016	ggu&erp	new files for generic tracer (nvar>1)
-c 06.06.2016	ggu	tracer_file routines changed
-c 10.06.2016	ggu	changed VERS_7_5_13
-c 09.09.2016	ggu	changed VERS_7_5_17
-c 25.02.2018	ggu	file cleaned - time is now double
-c 03.04.2018	ggu	changed VERS_7_5_43
-c 16.02.2019	ggu	changed VERS_7_5_60
-c 13.03.2019	ggu	changed VERS_7_5_61
-c 14.02.2020	ggu	new routine ts_file_exists()
-c 04.03.2020	ggu	iunit converted to id
-c 05.04.2022	ggu	in tracer_init_file only set existing layers
-c 27.10.2022	ggu	tracer_init_file also working for 2d arrays
-c
-c*******************************************************************	
-c*******************************************************************	
-c*******************************************************************	
+! reading and interpolation of external files
+!
+! contents :
+!
+! revision log :
+!
+! 29.10.2012	ggu	created from scratch
+! 05.11.2012	ggu	changed VERS_6_1_60
+! 17.12.2012	ggu	changed VERS_6_1_61a
+! 25.01.2013	ggu	changed VERS_6_1_62
+! 03.05.2013	ggu	changed VERS_6_1_63
+! 13.06.2013	ggu	changed VERS_6_1_65
+! 17.06.2013	ggu	do not pass function into subroutine
+! 18.06.2014	ggu	changed VERS_6_1_77
+! 27.06.2014	ggu	changed VERS_6_1_78
+! 02.07.2014	ggu	new framework finished
+! 10.07.2014	ggu	only new file format allowed
+! 18.07.2014	ggu	changed VERS_7_0_1
+! 15.01.2015	ggu	changed VERS_7_1_1
+! 26.02.2015	ggu	changed VERS_7_1_5
+! 21.05.2015	ggu	changed VERS_7_1_11
+! 13.07.2015	ggu	changed VERS_7_1_51
+! 20.11.2015	ggu	changed VERS_7_3_15
+! 22.02.2016	ggu&erp	new files for generic tracer (nvar>1)
+! 06.06.2016	ggu	tracer_file routines changed
+! 10.06.2016	ggu	changed VERS_7_5_13
+! 09.09.2016	ggu	changed VERS_7_5_17
+! 25.02.2018	ggu	file cleaned - time is now double
+! 03.04.2018	ggu	changed VERS_7_5_43
+! 16.02.2019	ggu	changed VERS_7_5_60
+! 13.03.2019	ggu	changed VERS_7_5_61
+! 14.02.2020	ggu	new routine ts_file_exists()
+! 04.03.2020	ggu	iunit converted to id
+! 05.04.2022	ggu	in tracer_init_file only set existing layers
+! 27.10.2022	ggu	tracer_init_file also working for 2d arrays
+!
+!*******************************************************************	
+!*******************************************************************	
+!*******************************************************************	
 
 	subroutine ts_file_descrp(id,name)
 	use intp_fem_file
@@ -72,13 +72,13 @@ c*******************************************************************
 	call iff_set_description(id,0,name)
 	end
 
-c*******************************************************************	
-c*******************************************************************	
-c*******************************************************************	
+!*******************************************************************	
+!*******************************************************************	
+!*******************************************************************	
 
 	subroutine ts_file_open(file,dtime,np,nlv,id)
 
-c opens T/S file
+! opens T/S file
 
 	use intp_fem_file
 
@@ -102,13 +102,13 @@ c opens T/S file
 	vconst = 0.
 
 !$OMP CRITICAL
-	call iff_init(dtime,file,nvar,nexp,lexp,nintp
-     +                                  ,nodes,vconst,id)
+	call iff_init(dtime,file,nvar,nexp,lexp,nintp &
+     &                                  ,nodes,vconst,id)
 !$OMP END CRITICAL
 
 	end
 
-c*******************************************************************	
+!*******************************************************************	
 
 	subroutine ts_next_record(dtime,id,nlvddi,nkn,nlv,value)
 
@@ -129,9 +129,9 @@ c*******************************************************************
         real vmin,vmax
 	character*80 string
 
-c--------------------------------------------------------------
-c read new data
-c--------------------------------------------------------------
+!--------------------------------------------------------------
+! read new data
+!--------------------------------------------------------------
 
 	ivar = 1
 	ndim = nkn
@@ -147,25 +147,25 @@ c--------------------------------------------------------------
 	  value(lmax+1:nlvddi,k) = 0
 	end do
 
-c--------------------------------------------------------------
-c some statistics
-c--------------------------------------------------------------
+!--------------------------------------------------------------
+! some statistics
+!--------------------------------------------------------------
 
         call conmima(nlvddi,value,vmin,vmax)
 
         !write(6,*) 'min/max: ',vmin,vmax
 
-c--------------------------------------------------------------
-c end of routine
-c--------------------------------------------------------------
+!--------------------------------------------------------------
+! end of routine
+!--------------------------------------------------------------
 
 	end
 
-c*******************************************************************	
+!*******************************************************************	
 
 	subroutine ts_file_close(id)
 
-c closes T/S file
+! closes T/S file
 
 	use intp_fem_file
 
@@ -177,11 +177,11 @@ c closes T/S file
 
 	end
 
-c*******************************************************************	
+!*******************************************************************	
 
 	subroutine ts_file_exists(file,bexist)
 
-c checks if file exists (and no read error)
+! checks if file exists (and no read error)
 
 	use intp_fem_file
 
@@ -194,17 +194,17 @@ c checks if file exists (and no read error)
 
 	end
 
-c*******************************************************************	
-c*******************************************************************	
-c*******************************************************************	
-c****** new routines ***********************************************	
-c*******************************************************************	
-c*******************************************************************	
-c*******************************************************************	
+!*******************************************************************	
+!*******************************************************************	
+!*******************************************************************	
+!****** new routines ***********************************************	
+!*******************************************************************	
+!*******************************************************************	
+!*******************************************************************	
 
 	subroutine tracer_file_open(file,dtime,nvar,np,nlv,val0,id)
 
-c opens tracer file
+! opens tracer file
 
 	use intp_fem_file
 
@@ -227,8 +227,8 @@ c opens tracer file
 	nodes = 0
 
 !$OMP CRITICAL
-	call iff_init(dtime,file,nvar,nexp,lexp,nintp
-     +                                  ,nodes,val0,id)
+	call iff_init(dtime,file,nvar,nexp,lexp,nintp &
+     &                                  ,nodes,val0,id)
 !$OMP END CRITICAL
 
 	if( id <= 0 ) then
@@ -238,12 +238,12 @@ c opens tracer file
 
 	end
 
-c*******************************************************************	
+!*******************************************************************	
 
-	subroutine tracer_file_next_record(dtime,id
-     +					,nvar,nlvddi,nkn,nlv,value)
+	subroutine tracer_file_next_record(dtime,id &
+     &					,nvar,nlvddi,nkn,nlv,value)
 
-c reads next record of tracer
+! reads next record of tracer
 
 	use intp_fem_file
 
@@ -260,30 +260,30 @@ c reads next record of tracer
 	integer ldim,ndim,ivar
 	character*80 string
 
-c--------------------------------------------------------------
-c read new data
-c--------------------------------------------------------------
+!--------------------------------------------------------------
+! read new data
+!--------------------------------------------------------------
 
 	ndim = nkn
 	ldim = nlvddi
 
 	call iff_read_and_interpolate(id,dtime)
 	do ivar=1,nvar
-	  call iff_time_interpolate(id,dtime,ivar,ndim,ldim
-     +					,value(:,:,ivar))
+	  call iff_time_interpolate(id,dtime,ivar,ndim,ldim &
+     &					,value(:,:,ivar))
 	end do
 
-c--------------------------------------------------------------
-c end of routine
-c--------------------------------------------------------------
+!--------------------------------------------------------------
+! end of routine
+!--------------------------------------------------------------
 
 	end
 
-c*******************************************************************	
+!*******************************************************************	
 
 	subroutine tracer_file_descrp(id,text)
 
-c sets description for file
+! sets description for file
 
 	use intp_fem_file
 
@@ -296,11 +296,11 @@ c sets description for file
 
 	end
 
-c*******************************************************************	
+!*******************************************************************	
 
 	subroutine tracer_file_close(id)
 
-c closes tracer file
+! closes tracer file
 
 	use intp_fem_file
 
@@ -312,14 +312,14 @@ c closes tracer file
 
 	end
 
-c*******************************************************************	
-c*******************************************************************	
-c*******************************************************************	
+!*******************************************************************	
+!*******************************************************************	
+!*******************************************************************	
 
-	subroutine tracer_file_init(what,file_init,dtime
-     +				,nvar,nlvddi,nlv,nkn,val0,val)
+	subroutine tracer_file_init(what,file_init,dtime &
+     &				,nvar,nlvddi,nlv,nkn,val0,val)
 
-c initialization of tracer from file
+! initialization of tracer from file
 
         use levels, only : ilhkv
 
@@ -365,7 +365,7 @@ c initialization of tracer from file
 
 	end
 
-c*******************************************************************	
-c*******************************************************************	
-c*******************************************************************	
+!*******************************************************************	
+!*******************************************************************	
+!*******************************************************************	
 

@@ -43,14 +43,14 @@
 
         subroutine turbine 
 
-c	This routine allows to reproduce the presence of a tidal turbine (vertical axis) in 2D simulations.
-c	In the first part, there is the process of identifying the grid elements belonging to the turbine.
+!	This routine allows to reproduce the presence of a tidal turbine (vertical axis) in 2D simulations.
+!	In the first part, there is the process of identifying the grid elements belonging to the turbine.
 C	Then, by using flow local condition, there is the evaluation of Lift and Drag coefficient (CL and CD) in static or dynamic conditions 
-c	using the  SUBROUTINE FOR STATIC COEFFICIENT or SUBROUTINE FOR DYNAMIC COEFFICIENT respectively.
-c 	The external text file called 'dati.txt' contains CL and CD tabulated as a function of the Reynolds number and the angle of attack.
-c	The 'dati.txt' file must contain number of rows, numers of columns, Reynolds number values, angle of attack values, CL and CD value in the mentioned order.	
-c	Pucci et al. https://doi.org/10.3390/jmse8121010
-c	Before starting the routine check ALL the assigned parameters       
+!	using the  SUBROUTINE FOR STATIC COEFFICIENT or SUBROUTINE FOR DYNAMIC COEFFICIENT respectively.
+! 	The external text file called 'dati.txt' contains CL and CD tabulated as a function of the Reynolds number and the angle of attack.
+!	The 'dati.txt' file must contain number of rows, numers of columns, Reynolds number values, angle of attack values, CL and CD value in the mentioned order.	
+!	Pucci et al. https://doi.org/10.3390/jmse8121010
+!	Before starting the routine check ALL the assigned parameters       
 
         use mod_hydro_vel
         use basin
@@ -68,16 +68,16 @@ c	Before starting the routine check ALL the assigned parameters
       
         implicit none
 
-c-----------------------------------------
-c icall = 0	run the turbine model
-c icall = -1	do not run the turbine model
-c-----------------------------------------					
+!-----------------------------------------
+! icall = 0	run the turbine model
+! icall = -1	do not run the turbine model
+!-----------------------------------------					
 
         integer, save :: icall = -1     ! number of time step
 
-c-----------------------------------------
-c turbine characteristics and fluid parameters
-c-----------------------------------------					
+!-----------------------------------------
+! turbine characteristics and fluid parameters
+!-----------------------------------------					
         real x0, y0                     ! coordinates of the turbine centre [m]
         parameter(x0=72., y0=75.)
         real r, chord, nb, om           ! turbine characteristc radius [m], chord [m], number of blades, rotational speed [ras/s] 
@@ -92,11 +92,11 @@ c-----------------------------------------
         parameter(U_inf=1.75)
         real ring_thick                 ! thickness of the ring representing the 2D turbine [m]
         parameter(ring_thick=0.4)
-c-----------------------------------------
-c file 'dati.txt' variables
+!-----------------------------------------
+! file 'dati.txt' variables
         real, save :: h(30),e(5),B(5,30),G(5,30)! file 'dati.txt' data, respectively angle of attack, Reynolds number, CL and CD, change array dimentions if needed 
         integer, save :: ic, ir         ! number of columns and rows in the 'dati.txt' file
-c-----------------------------------------
+!-----------------------------------------
         real x,y     ! coordinates of the element barycentre
         integer, save :: icount,disc_count   ! to count and check the elements found on the actuator ring and on the internal disc respectively
         integer, save, allocatable :: ring_ie(:)        ! ID of the ring elements belonging to the turbine 
@@ -137,17 +137,17 @@ c-----------------------------------------
         real alpha_aux,area_frict
         real area_aux !DEB
            
-c-----------------------------------------
-c do we have to run turbine?
-c
-c if you wanto to run turbine, please set icall=0 above
-c-----------------------------------------      
+!-----------------------------------------
+! do we have to run turbine?
+!
+! if you wanto to run turbine, please set icall=0 above
+!-----------------------------------------      
 
         if( icall < 0 ) return
 
-c-----------------------------------------
-c first time step
-c-----------------------------------------      
+!-----------------------------------------
+! first time step
+!-----------------------------------------      
 
          allocate (alpha(0:n_ring))    
         
@@ -156,11 +156,11 @@ c-----------------------------------------
         allocate (ring_theta(n_ring)) 
         allocate (disc_ie(n_ring))
         allocate (disc_theta(n_ring))
-c        allocate (ie_1D(ie1Dcount)) 
-c        allocate (ie_5D(ie5Dcount))
-c-----------------------------------------
-c read file 'dati.txt'
-c-----------------------------------------        
+!        allocate (ie_1D(ie1Dcount)) 
+!        allocate (ie_5D(ie5Dcount))
+!-----------------------------------------
+! read file 'dati.txt'
+!-----------------------------------------        
         open(unit=55, file='dati.txt', status='old')  
         read(55,*) ir   
         read(55,*) ic   
@@ -179,9 +179,9 @@ c-----------------------------------------
         end do
        
         close(55)
-c-----------------------------------------
-c turbine elements identification
-c-----------------------------------------
+!-----------------------------------------
+! turbine elements identification
+!-----------------------------------------
         open(unit=82,file='ID_Celle_disco.txt',status='unknown')  
         icount=0
         ie1Dcount=0
@@ -227,9 +227,9 @@ c-----------------------------------------
         write(82,*)disc_ie(disc_count),x,y !mic 19/07/21
           endif
 10      continue
-c-----------------------------------------
-c if necessary to find the wake elements (exception for 0.75D which is in front of the turbine)
-c-----------------------------------------
+!-----------------------------------------
+! if necessary to find the wake elements (exception for 0.75D which is in front of the turbine)
+!-----------------------------------------
         do ie=1,nel
         call baric(ie,x,y)   
         open(unit=78,file='ID_Celle_1D.txt',status='unknown')
@@ -244,8 +244,8 @@ c-----------------------------------------
         if(x.gt.x1_0_75.and.x.lt.x2_0_75)then  !change extreme on the basis of the grid 
         ie0_75Dcount=ie0_75Dcount+1
         ie_0_75D(ie0_75Dcount)=ie
-        write(79,*)ie_0_75D(ie0_75Dcount),
-     +   ipev(ie_0_75D(ie0_75Dcount)),x,y
+        write(79,*)ie_0_75D(ie0_75Dcount), &
+     &   ipev(ie_0_75D(ie0_75Dcount)),x,y
         end if
         if(x.gt.x1_3.and.x.lt.x2_3)then    !change extreme on the basis of the grid
         ie3Dcount=ie3Dcount+1
@@ -266,8 +266,8 @@ c-----------------------------------------
         write(6,*) icount,n_ring
         endif
 
-        open(unit=32,file='ID_celle_anello.txt',form='formatted',
-     +  status='unknown')
+        open(unit=32,file='ID_celle_anello.txt',form='formatted', &
+     &  status='unknown')
         do 20 i=1,icount-1   !these two do-cycles ordinate both the arrays in ascending order of theta
            do  j=i+1,icount 
              if (ring_theta(i).gt.ring_theta(j)) then
@@ -291,12 +291,12 @@ c-----------------------------------------
         end do  
         
         close(33)
-c-----------------------------------------
-c here the turbine is vitually devided in 18 horizontal stripes (change the number of stripes on the basis of n_ring) 
-c to assign to the internal disc upwind elements (only those with theta<180 degrees) the same theta angle of the ring element belonging to the same stripe       
-c-----------------------------------------      
-c        yaux1=71.8-0.36 !DEB
-c        yaux2=71.8 !DEB
+!-----------------------------------------
+! here the turbine is vitually devided in 18 horizontal stripes (change the number of stripes on the basis of n_ring) 
+! to assign to the internal disc upwind elements (only those with theta<180 degrees) the same theta angle of the ring element belonging to the same stripe       
+!-----------------------------------------      
+!        yaux1=71.8-0.36 !DEB
+!        yaux2=71.8 !DEB
         yaux1=yaux-deltay
         yaux2=yaux
         do i=1,n_stripes
@@ -326,9 +326,9 @@ c        yaux2=71.8 !DEB
         al_max=0
         al_min=0
         area_frict=0
-c-----------------------------------------
-c calculation of maximum and minimum alpha values (necessary for the dynamic subroutine)
-c-----------------------------------------        
+!-----------------------------------------
+! calculation of maximum and minimum alpha values (necessary for the dynamic subroutine)
+!-----------------------------------------        
         do i=1,icount      
         l=1 
         W_t1=ulnv(l,ring_ie(i))*cos(ring_theta(i)*pi/180) 
@@ -354,9 +354,9 @@ c-----------------------------------------
            write(6,*)'ERROR: alpha_max or alpha_min not acceptable'
            write(6,*) al_max, al_min 
         end if
-c-----------------------------------------
-c here starts the friction calculation for each actuator ring element
-c-----------------------------------------     
+!-----------------------------------------
+! here starts the friction calculation for each actuator ring element
+!-----------------------------------------     
         alpha(0)=0
         foo=0
         
@@ -390,9 +390,9 @@ c-----------------------------------------
           call static(alpha(i), Re, Cl_st2, Cd_st2, ir, ic, h, e, B, G)
 
           if(abs(ring_theta(i)).lt.180)then
-          call cl_dynamic(al_min, al_max,W,Re,al_in,al_in0,
-     +  chord,om,Cl_st,ir,ic,h,e,B,G,
-     +  foo,icall,alpha_aux,al_ds)
+          call cl_dynamic(al_min, al_max,W,Re,al_in,al_in0, &
+     &  chord,om,Cl_st,ir,ic,h,e,B,G, &
+     &  foo,icall,alpha_aux,al_ds)
           write(6,*)'al_ds',al_ds,al_in
           write(6,*)'foo,ring_theta(i)',foo,ring_theta(i)
            Li=(0.5*foo*ro*chord*W**2)/area_ele     
@@ -415,14 +415,14 @@ c-----------------------------------------
          
          open(unit=31, file='L_theta_partial.txt', status='unknown')    
 
-        write(31,*) icall,ring_theta(i),alpha(i),foo,Cl_st2,Cd_st2,
-     +  Li,D,W,area_ele,u_abs,rfricv(ring_ie(i)),utlnv(l,ring_ie(i)),
-     +  vtlnv(l,ring_ie(i)),uv  
+        write(31,*) icall,ring_theta(i),alpha(i),foo,Cl_st2,Cd_st2, &
+     &  Li,D,W,area_ele,u_abs,rfricv(ring_ie(i)),utlnv(l,ring_ie(i)), &
+     &  vtlnv(l,ring_ie(i)),uv  
 
          end do !end of ring cycle
-c-----------------------------------------
-c here starts the friction calculation for each internal disc element
-c-----------------------------------------         
+!-----------------------------------------
+! here starts the friction calculation for each internal disc element
+!-----------------------------------------         
 	yaux1=yaux-deltay
         yaux2=yaux
         do j=1,n_stripes !DEB
@@ -468,9 +468,9 @@ c-----------------------------------------
           write(6,*)'al_in,al_in0',al_in,al_in0
         call static(alpha(i), Re, Cl_st2, Cd_st2, ir, ic, h, e, B, G)
           if(abs(disc_theta(i)).lt.180)then
-          call cl_dynamic(al_min, al_max,W,Re,al_in,al_in0,
-     +  chord,om,Cl_st,ir,ic,h,e,B,G,
-     +  foo,icall,alpha_aux,al_ds)
+          call cl_dynamic(al_min, al_max,W,Re,al_in,al_in0, &
+     &  chord,om,Cl_st,ir,ic,h,e,B,G, &
+     &  foo,icall,alpha_aux,al_ds)
           write(6,*)'foo,disc_theta(i)',foo,disc_theta(i)
           Li=(0.5*foo*ro*chord*W**2)/area_ele    
           D=(0.5*Cd_st2*ro*chord*W**2)/area_ele
@@ -490,9 +490,9 @@ c-----------------------------------------
          endif 
        
         open(unit=41, file='L_theta_full.txt', status='unknown')
-        write(41,*) icall,disc_theta(i),alpha(i),foo,Cl_st2,Cd_st2,
-     +  Li,D,W,area_ele,u_abs,rfricv(disc_ie(i)),utlnv(l,disc_ie(i)),
-     +  vtlnv(l,disc_ie(i)),uv                  
+        write(41,*) icall,disc_theta(i),alpha(i),foo,Cl_st2,Cd_st2, &
+     &  Li,D,W,area_ele,u_abs,rfricv(disc_ie(i)),utlnv(l,disc_ie(i)), &
+     &  vtlnv(l,disc_ie(i)),uv                  
          
          else !if the elemente does not belong to the considered stripe
          goto 154
@@ -513,23 +513,23 @@ c-----------------------------------------
         open(unit=71, file='velocità5D.txt', status='unknown')
 
         do el=1, ie1Dcount     
-        write(68,*)icall,ulnv(l,ie_1D(el)),vlnv(l,ie_1D(el)),ie_1D(el),
-     +  ipev(ie_1D(el))
+        write(68,*)icall,ulnv(l,ie_1D(el)),vlnv(l,ie_1D(el)),ie_1D(el), &
+     &  ipev(ie_1D(el))
         end do
 
         do el=1, ie0_75Dcount
-        write(69,*)icall,ulnv(l,ie_0_75D(el)),vlnv(l,ie_0_75D(el)),
-     +  ie_0_75D(el),ipev(ie_0_75D(el))
+        write(69,*)icall,ulnv(l,ie_0_75D(el)),vlnv(l,ie_0_75D(el)), &
+     &  ie_0_75D(el),ipev(ie_0_75D(el))
         end do
 
         do el=1, ie3Dcount
-        write(70,*)icall,ulnv(l,ie_3D(el)),vlnv(l,ie_3D(el)),
-     +  ie_3D(el),ipev(ie_3D(el))
+        write(70,*)icall,ulnv(l,ie_3D(el)),vlnv(l,ie_3D(el)), &
+     &  ie_3D(el),ipev(ie_3D(el))
         end do
 
         do el=1, ie5Dcount
-        write(71,*)icall,ulnv(l,ie_5D(el)),vlnv(l,ie_5D(el)),
-     +  ie_5D(el),ipev(ie_5D(el))
+        write(71,*)icall,ulnv(l,ie_5D(el)),vlnv(l,ie_5D(el)), &
+     &  ie_5D(el),ipev(ie_5D(el))
         end do
        close(68)
        close(69)
@@ -540,7 +540,7 @@ c-----------------------------------------
         
          do j=1,disc_count
          write(51,*)icall,j,rfricv(disc_ie(j))!,utlnv(l,disc_ie(j)),
-c     +   utlnv(l,disc_ie(j)),uv,frict_3    
+!     +   utlnv(l,disc_ie(j)),uv,frict_3    
          end do
   
 102     continue
@@ -552,11 +552,11 @@ c     +   utlnv(l,disc_ie(j)),uv,frict_3
 114     continue          
         end   
 
-c***************************************************************** 
-c SUBROUTINE FOR STATIC COEFFICIENT 
-c the  routine calculates the static lift and drag coefficient 
-c using as input the angle of attack and the Reynolds number
-c***************************************************************** 
+!***************************************************************** 
+! SUBROUTINE FOR STATIC COEFFICIENT 
+! the  routine calculates the static lift and drag coefficient 
+! using as input the angle of attack and the Reynolds number
+!***************************************************************** 
 
         subroutine static(alpha, Re, Cl_st, Cd_st, ir, ic, h, e, B, G)  
 
@@ -590,14 +590,14 @@ c*****************************************************************
 
         do j= 1, ic
                                                    
-          if (angolo.ge.h(j-1).and.angolo.lt.h(j).or.    
-     +  angolo.gt.h(j-1).and.angolo.le.h(j))then    
+          if (angolo.ge.h(j-1).and.angolo.lt.h(j).or.     &
+     &  angolo.gt.h(j-1).and.angolo.le.h(j))then    
          f_alpha=(angolo-h(j-1))/(h(j)-h(j-1))  
          
         do t= 1, ir
  
-          if (Re.ge.e(t-1).and.Re.lt.e(t).or.
-     +  Re.gt.e(t-1).and.Re.le.e(t))then
+          if (Re.ge.e(t-1).and.Re.lt.e(t).or. &
+     &  Re.gt.e(t-1).and.Re.le.e(t))then
         f_Re=(Re-e(t-1))/(e(t)-e(t-1))
                       
         Cl1=B(t-1,j-1)*(1-f_Re)*(1-f_alpha)           
@@ -623,17 +623,17 @@ c*****************************************************************
 
         end 
 
-c***************************************************************** 
-c    SUBROUTINE FOR DYNAMIC COEFFICIENT 
-c This routine computes the whole Cl-alpha curve in dynamic conditions
-c input values for each time step: alpha maximum and minimum, 
-c W relative velocity, Omega, Reynolds number
-c Rocchio et al. DOI:10.1002/we.2463
-c*****************************************************************     
+!***************************************************************** 
+!    SUBROUTINE FOR DYNAMIC COEFFICIENT 
+! This routine computes the whole Cl-alpha curve in dynamic conditions
+! input values for each time step: alpha maximum and minimum, 
+! W relative velocity, Omega, Reynolds number
+! Rocchio et al. DOI:10.1002/we.2463
+!*****************************************************************     
 
-        subroutine cl_dynamic(al_min, al_max,W,Re,al_in,al_in0, 
-     +   chord,om,Cl_st,ir,ic,h,e,B,G, 
-     +   foo,icall,alpha,al_ds)
+        subroutine cl_dynamic(al_min, al_max,W,Re,al_in,al_in0,  &
+     &   chord,om,Cl_st,ir,ic,h,e,B,G,  &
+     &   foo,icall,alpha,al_ds)
 
         implicit none 
         real tau, k, dt, t_max, U_lev, chord, om, pi, W, Re 
@@ -669,16 +669,16 @@ c*****************************************************************
         t_max=4*2*pi/abs(om)
         U_lev=W/(3*chord)
         nt=t_max/dt 
-c-----------------------------------------
-c Model parameters
-c-----------------------------------------
+!-----------------------------------------
+! Model parameters
+!-----------------------------------------
         om_3=0.08
         om_5=0.12
         puls=2*pi*(0.235*W)/(chord) 
-c----------------------------------------- 
-c Local variables 
-c Static stall angle of the cl-alpha curve
-c-----------------------------------------
+!----------------------------------------- 
+! Local variables 
+! Static stall angle of the cl-alpha curve
+!-----------------------------------------
         cl_par0=0
         alfa=0   
         alfa0=0
@@ -694,9 +694,9 @@ c-----------------------------------------
         
         al_stallo=alfa0
         cl_stallo=cl_par0
-c----------------------------------------- 
-c Initialization
-c-----------------------------------------
+!----------------------------------------- 
+! Initialization
+!-----------------------------------------
                 al(:)=0
                 al_dot(:)=0   
                 cls(:)=0
@@ -712,10 +712,10 @@ c-----------------------------------------
                 i_vortex_start=0
                 vortex_start=0
                 reattached=0
-c-----------------------------------------
-c calculation of the dynamic CL-alpha curve
-c-----------------------------------------
-c        Amplitude and average value of the pitching motion 
+!-----------------------------------------
+! calculation of the dynamic CL-alpha curve
+!-----------------------------------------
+!        Amplitude and average value of the pitching motion 
           if(icall.eq.1) then !mic
                A_amp=36.0 ! deg 
                A_med=0.0  ! deg 
@@ -726,7 +726,7 @@ c        Amplitude and average value of the pitching motion
           
          do i=1, nt
 
-c	 calcultion dynamic stall alpha value: 
+!	 calcultion dynamic stall alpha value: 
           if(Re.lt.490000) then
                 al_ds=320*(k*A_amp*pi/180)+12
           else if (Re.ge.490000.and.Re.lt.980000) then
@@ -737,7 +737,7 @@ c	 calcultion dynamic stall alpha value:
                 al_ds=320*(k*A_amp*pi/180)+19
           endif
         
-c	calculation minimum alpha:
+!	calculation minimum alpha:
           if(Re.lt.490000) then
                 al_m=-372*(k*A_amp*pi/180)+18
           else if (Re.ge.490000.and.Re.lt.980000)then
@@ -747,27 +747,27 @@ c	calculation minimum alpha:
           else
                 al_m=-372*(k*A_amp*pi/180)+25
           end if
-c	calculation of cl_minimo:
+!	calculation of cl_minimo:
           if(Re.le.980000)then
                 cl_min=-15*(k*A_amp*pi/180)+0.75
           else
                 cl_min=-20*(k*A_amp*pi/180)+1.2
           endif
  
-c	frequency omega_6: 
+!	frequency omega_6: 
         tau_omega_6=2*pi*(A_amp+A_med-al_m)/(4*A_amp*3*om)
         
-c	frequency omega_4: 
+!	frequency omega_4: 
         om_4=(W/3)*tau 
   
-c 	sinusoidal motion 
+! 	sinusoidal motion 
         al(i)=A_med+A_amp*sin(om*(i-1)*dt+0) 
   
-c	alpha derivative in rad/s 
+!	alpha derivative in rad/s 
         al_dot(i)=+A_amp*om*cos(om*(i-1)*dt+0)*pi/180
-c-----------------------------------------
-c  calculation of static lift coefficient   
-c-----------------------------------------              
+!-----------------------------------------
+!  calculation of static lift coefficient   
+!-----------------------------------------              
         if (abs(al(i)).eq.al(i)) then
         segno=+1
         else
@@ -777,7 +777,7 @@ c-----------------------------------------
         call static(al(i), Re, Cl_st, Cd_st, ir, ic,  h, e, B, G)
 
         cls(i)=segno*Cl_st      
-c	linear lift coefficient 
+!	linear lift coefficient 
         cl0s(i)=cl_alpha*al(i)
         if(i.eq.0) then 	!FIXME i is never 0, arrays at i-1 not defined
                 cld(i)=cls(i)
@@ -869,9 +869,9 @@ c	linear lift coefficient
         
         endif      ! relative to i=0
         end do
-c-----------------------------------------        
-c this session uses the dynamic curve found and gives back the dynamic coefficient (called foo) relative to the alpha of interest (corresponding to al_in) 
-c-----------------------------------------        
+!-----------------------------------------        
+! this session uses the dynamic curve found and gives back the dynamic coefficient (called foo) relative to the alpha of interest (corresponding to al_in) 
+!-----------------------------------------        
         nt_in=3*nt/4  
         clmax=0  !mic
         clmin=0  !mic             
@@ -905,9 +905,9 @@ c-----------------------------------------
                 foo=clmin
                 goto 108 
            else if(al_in.ge.0)then
-c-----------------------------------------        
-c UPSTROKE: 
-c-----------------------------------------
+!-----------------------------------------        
+! UPSTROKE: 
+!-----------------------------------------
              if(al_in.ge.al_in0)then
                 
                do i=nt_in, (nt_in+(nt-nt_in)/2) 
@@ -924,9 +924,9 @@ c-----------------------------------------
                     goto 108
                    end if
                 end do
-c-----------------------------------------        
-c DOWNSTROKE: 
-c-----------------------------------------
+!-----------------------------------------        
+! DOWNSTROKE: 
+!-----------------------------------------
              else if(al_in.lt.al_in0)then
 
                do i=(nt_in+(nt-nt_in)/4), (nt_in+(nt-nt_in)*3/4)
@@ -939,9 +939,9 @@ c-----------------------------------------
                end do
              end if !relative to upstroke or downstroke
           elseif(al_in.lt.0)then
-c-----------------------------------------        
-c UPSTROKE: 
-c-----------------------------------------	        
+!-----------------------------------------        
+! UPSTROKE: 
+!-----------------------------------------	        
                if(al_in.le.al_in0)then
 
                 do i=(nt_in+(nt-nt_in)/2),nt
@@ -951,9 +951,9 @@ c-----------------------------------------
                    goto 108
                    end if                          
                   end do       
-c-----------------------------------------        
-c DOWNSTROKE: 
-c-----------------------------------------      
+!-----------------------------------------        
+! DOWNSTROKE: 
+!-----------------------------------------      
                elseif(al_in.gt.al_in0)then
                    do i=(nt_in+(nt-nt_in)/2), nt
                  
@@ -972,7 +972,7 @@ c-----------------------------------------
                     goto 108
                     end if
                   end do                                
-c108     continue   !mic                          
+!108     continue   !mic                          
                end if !relative to upstroke or downstroke   
           end if      !relative to al_in>0 or <0
 108     continue   !mic            

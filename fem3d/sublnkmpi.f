@@ -201,8 +201,8 @@
 	if( shympi_is_master() ) then
 	  file = 'domain1.grd'
 	  text = 'mpi domains'
-	  call write_grd_file(file,text,nkn_global,nel_global,xg,yg
-     +				,index,inext,ieext,intype,ietype)
+	  call write_grd_file(file,text,nkn_global,nel_global,xg,yg &
+     &				,index,inext,ieext,intype,ietype)
 	end if
 
 	where( id_elem(0,:) > 1 ) ieaux(:) = -1	!two/three domain elem
@@ -211,8 +211,8 @@
 	if( shympi_is_master() ) then
 	  file = 'domain2.grd'
 	  text = 'mpi domains 2'
-	  call write_grd_file(file,text,nkn_global,nel_global,xg,yg
-     +				,index,inext,ieext,intype,ietype)
+	  call write_grd_file(file,text,nkn_global,nel_global,xg,yg &
+     &				,index,inext,ieext,intype,ietype)
 	end if
 
 	call shympi_barrier
@@ -245,8 +245,8 @@
 	!write(6,*) file
 	text = 'local mpi domain'
 
-	call write_grd_file(file,text,nkn,nel,xgv,ygv
-     +				,index,inext,ieext,intype,ietype)
+	call write_grd_file(file,text,nkn,nel,xgv,ygv &
+     &				,index,inext,ieext,intype,ietype)
 
 !---------------------------------------------------------------
 ! end of routine
@@ -258,8 +258,8 @@
 
 !*****************************************************************
 
-	subroutine write_grd_general(file,text
-     +				,intype,ietype,rndepth,redepth)
+	subroutine write_grd_general(file,text &
+     &				,intype,ietype,rndepth,redepth)
 
 ! writes node and element arrays as type values to grd
 
@@ -316,10 +316,10 @@
 !---------------------------------------------------------------
 
 	if( shympi_is_master() ) then
-	  call write_grd_file_with_depth(file,text
-     +				,nkn_global,nel_global,xg,yg
-     +				,index,inext,ieext,ingtype,iegtype
-     +				,rndepth,regdepth)
+	  call write_grd_file_with_depth(file,text &
+     &				,nkn_global,nel_global,xg,yg &
+     &				,index,inext,ieext,ingtype,iegtype &
+     &				,rndepth,regdepth)
 	end if
 
 !---------------------------------------------------------------

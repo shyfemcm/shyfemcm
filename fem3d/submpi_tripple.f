@@ -143,8 +143,8 @@
 	itrtot = shympi_sum(itr)
 	if( my_id == 0 ) then
 	  write(6,*) 'summary for tripple points:'
-	  write(6,*) '                                  '//
-     +			'     domain         itr      itrtot'
+	  write(6,*) '                                  '// &
+     &			'     domain         itr      itrtot'
 	end if
 	call shympi_syncronize
 	write(6,*) 'total numbers of tripple points: ',my_id,itr,itrtot
@@ -645,8 +645,8 @@
 	do ie=1,nel_global
 	  do ii=1,3
 	    i1 = mod(ii,3) + 1
-	    if( nen3v_global(i1,ie) == kg1 
-     +			.and. nen3v_global(ii,ie) == kg2 ) then
+	    if( nen3v_global(i1,ie) == kg1  &
+     &			.and. nen3v_global(ii,ie) == kg2 ) then
 	      if( iei /= 0 ) stop 'error stop find_elem_neib: int (1)'
 	      iei = ie
 	    end if
@@ -691,8 +691,8 @@
 	integer i
 	character*80 header
 
-	header = '             ie      iee       id      ' //
-     +			'ie1     iee1      id1    lmax1       i0'
+	header = '             ie      iee       id      ' // &
+     &			'ie1     iee1      id1    lmax1       i0'
 
 	write(6,'(a)') trim(header)
 
@@ -713,8 +713,8 @@
 
 	character*80 header
 
-	header = '             ie      iee       id      ' //
-     +			'ie1     iee1      id1    lmax1       i0'
+	header = '             ie      iee       id      ' // &
+     &			'ie1     iee1      id1    lmax1       i0'
 	write(6,'(a)') trim(header)
 	write(6,'(a,8i9)') 'info: ',iexch(:)
 

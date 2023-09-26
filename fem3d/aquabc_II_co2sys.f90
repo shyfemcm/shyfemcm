@@ -40,7 +40,7 @@
 module VECTOR_MATRIX_UTILS
     use AQUABC_II_GLOBAL
     implicit none
-contains
+!ontains
     !**************************************************************************
     ! UTILITY FUNCTIONS BETWEEN FORTRAN AND MATLAB
     !**************************************************************************
@@ -174,7 +174,7 @@ module CO2SYS_CDIAC
     use VECTOR_MATRIX_UTILS
     implicit none
 
-contains
+!ontains
 
     subroutine CO2SYS &
                (PAR1     , PAR2  , PAR1TYPE, PAR2TYPE, SALT, TEMPIN,   &

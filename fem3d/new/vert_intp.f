@@ -23,18 +23,18 @@
 !
 !--------------------------------------------------------------------------
 
-c*************************************************************************
+!*************************************************************************
 
 ! revision log :
 !
 ! 23.03.2010	ggu	changed v6.1.1
 ! 16.02.2019	ggu	changed VERS_7_5_60
 
-c*************************************************************************
+!*************************************************************************
 
 	subroutine intp_vert(nl1,zb1,var1,nl2,zb2,var2)
 
-c vertical interpolation of variables from one grid to another
+! vertical interpolation of variables from one grid to another
 
 	implicit none
 
@@ -45,17 +45,17 @@ c vertical interpolation of variables from one grid to another
 	real zb2(0:nl2)		!depth of bottom of vertical boxes
 	real var2(nl2)		!value of variable at center of box
 
-c values are interpolated from first grid to second grid
-c z levels refer to bottom of each grid (zb1(nl1) is total depth of column)
-c zb(0) is surface ... normally 0
-c variables are considered at center of box
-c values are considered to be constant for every box
-c
-c ATTENTION: arrays zb1, var1 MUST be dimensioned one element bigger
-c	then the available data. The last element is altered by this
-c	subroutine, but should be of no concern for the calling program
-c
-c output is var1, all other variables are input values
+! values are interpolated from first grid to second grid
+! z levels refer to bottom of each grid (zb1(nl1) is total depth of column)
+! zb(0) is surface ... normally 0
+! variables are considered at center of box
+! values are considered to be constant for every box
+!
+! ATTENTION: arrays zb1, var1 MUST be dimensioned one element bigger
+!	then the available data. The last element is altered by this
+!	subroutine, but should be of no concern for the calling program
+!
+! output is var1, all other variables are input values
 
 	logical bmiss
 	integer l,j,ltop1,lbot1
@@ -139,7 +139,7 @@ c output is var1, all other variables are input values
 	stop 'error stop intp_vert: interval in (1) must include (2)'
 	end
 
-c*************************************************************************
+!*************************************************************************
 
 	subroutine intp_test
 
@@ -171,10 +171,10 @@ c*************************************************************************
 
 	end
 	
-c*************************************************************************
+!*************************************************************************
 
-	subroutine intp_make_test(iunit,ndim
-     +			,nl1,dz1,nl2,dz2,zb1,var1,zb2,var2)
+	subroutine intp_make_test(iunit,ndim &
+     &			,nl1,dz1,nl2,dz2,zb1,var1,zb2,var2)
 
 	implicit none
 
@@ -201,7 +201,7 @@ c*************************************************************************
 
 	end
 
-c*************************************************************************
+!*************************************************************************
 
 	subroutine intp_make_array(ndim,nl,dz,zb,var)
 
@@ -227,7 +227,7 @@ c*************************************************************************
 
 	end
 
-c*************************************************************************
+!*************************************************************************
 
 	subroutine intp_print(iunit,nl1,zb1,var1,nl2,zb2,var2)
 
@@ -255,7 +255,7 @@ c*************************************************************************
 
 	end
 
-c*************************************************************************
+!*************************************************************************
 
 	subroutine intp_total(nl1,zb1,var1,nl2,zb2,var2)
 
@@ -285,7 +285,7 @@ c*************************************************************************
 
 	end
 
-c*************************************************************************
+!*************************************************************************
 
 	subroutine intp_debora
 
@@ -341,11 +341,11 @@ c*************************************************************************
 
 	end
 
-c*************************************************************************
-c*************************************************************************
-c	program intp_main
-c	!call intp_test
-c	call intp_debora
-c	end
-c*************************************************************************
+!*************************************************************************
+!*************************************************************************
+!	program intp_main
+!	!call intp_test
+!	call intp_debora
+!	end
+!*************************************************************************
 

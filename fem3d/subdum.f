@@ -23,28 +23,28 @@
 !
 !--------------------------------------------------------------------------
 
-c dummy subroutines
-c
-c revision log :
-c
-c 17.06.1998	ggu	nrdskp introduced (needed to skip section)
-c 23.03.2010	ggu	changed v6.1.1
-c 05.12.2014	ggu	changed VERS_7_0_8
-c 16.02.2019	ggu	changed VERS_7_5_60
-c
-c***********************************************************
+! dummy subroutines
+!
+! revision log :
+!
+! 17.06.1998	ggu	nrdskp introduced (needed to skip section)
+! 23.03.2010	ggu	changed v6.1.1
+! 05.12.2014	ggu	changed VERS_7_0_8
+! 16.02.2019	ggu	changed VERS_7_5_60
+!
+!***********************************************************
 
 	subroutine colrd
 	implicit none
 	call nrdskp
 	end
 
-c***********************************************************
+!***********************************************************
 
 	subroutine legrd
 	implicit none
 	call nrdskp
 	end
 
-c***********************************************************
+!***********************************************************
  

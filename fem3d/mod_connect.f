@@ -68,7 +68,7 @@
 
 	if( .not. brealloc ) return
 
-call connect_internal_deallocate
+!all connect_internal_deallocate
 
 	nkn = nkn_l
 	nel = nel_l

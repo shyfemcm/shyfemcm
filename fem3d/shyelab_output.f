@@ -151,10 +151,10 @@
 	  allocate(ilcoord(nxy),xcoord(nxy),ycoord(nxy),hcoord(nxy))
 	  allocate(fmreg(4,nxy),fmextra(6,nkn))
 	  allocate(xlon(nxreg),ylat(nyreg))
-	  call fem_regular_setup(nxreg,nyreg,regpar,ilhv
-     +				,fmreg,fmextra
-     +				,ilcoord,xcoord,ycoord,hcoord
-     +				,xlon,ylat)
+	  call fem_regular_setup(nxreg,nyreg,regpar,ilhv &
+     &				,fmreg,fmextra &
+     &				,ilcoord,xcoord,ycoord,hcoord &
+     &				,xlon,ylat)
 	  if( .not. bquiet ) call fem_reg_print(regpar)
 	  breg = .true.
 	  ntype = ntype + 10
@@ -272,10 +272,10 @@
 	    if( breg ) np = nxreg*nyreg
 	    lmax = nlv
 	    if( b2d ) lmax = 1
-            call fem_file_write_header(iformat,iunit,dtime
-     +                          ,nvers,np,lmax
-     +                          ,nvar,ntype
-     +                          ,nlvdi,hlv,datetime_elab,regpar)
+            call fem_file_write_header(iformat,iunit,dtime &
+     &                          ,nvers,np,lmax &
+     &                          ,nvar,ntype &
+     &                          ,nlvdi,hlv,datetime_elab,regpar)
 	  else if( outformat == 'nc' ) then
 	    ncid = idout
 	    call nc_output_time(ncid,dtime)
@@ -293,9 +293,9 @@
 
 !***************************************************************
 
-	subroutine shyelab_record_output(id,idout,dtime,ivar,iv
-     +					,belem,n,m
-     +					,lmax,nlvddi,cv3)
+	subroutine shyelab_record_output(id,idout,dtime,ivar,iv &
+     &					,belem,n,m &
+     &					,lmax,nlvddi,cv3)
 
 ! writes data record
 
@@ -343,8 +343,8 @@
 	else if( belem ) then
 	  if( .not. bhydro ) then
 	    !convert from nel to nkn
-	    stop 'error stop shyelab_record_output: ' //
-     +				'belem==.true. not ready'
+	    stop 'error stop shyelab_record_output: ' // &
+     &				'belem==.true. not ready'
 	  end if
 	else if( .not. bsplit .and. .not. bshy ) then
 	  goto 98
@@ -358,26 +358,26 @@
 
 	if( bsplit .and. .not. bhydro ) then
 	  call shy_split_id(ivar,id,id_out)
-	  call shy_write_output_record(id_out,dtime,ivar
-     +						,belem,n,m
-     +						,lmax,nlvddi,cv3)
+	  call shy_write_output_record(id_out,dtime,ivar &
+     &						,belem,n,m &
+     &						,lmax,nlvddi,cv3)
 	else
 	  if( bshy ) then
-	    call shy_write_output_record(idout,dtime,ivar
-     +						,belem,n,m
-     +						,lmax,nlvddi,cv3)
+	    call shy_write_output_record(idout,dtime,ivar &
+     &						,belem,n,m &
+     &						,lmax,nlvddi,cv3)
 	  else if( outformat == 'gis' ) then
-            call gis_write_record(dtime,ivar,np,nlvddi,ilcoord
-     +					,svalue,xcoord,ycoord)
+            call gis_write_record(dtime,ivar,np,nlvddi,ilcoord &
+     &					,svalue,xcoord,ycoord)
 	  else if( outformat == 'fem' ) then
 	    iunit = idout
 	    nvers = 0
 	    call get_string_description(ivar,string)
-            call fem_file_write_data(iformat,iunit
-     +                          ,nvers,np,lmax
-     +                          ,string
-     +                          ,ilcoord,hcoord
-     +                          ,nlvddi,svalue)
+            call fem_file_write_data(iformat,iunit &
+     &                          ,nvers,np,lmax &
+     &                          ,string &
+     &                          ,ilcoord,hcoord &
+     &                          ,nlvddi,svalue)
 	  else if( outformat == 'nc' ) then
 	    ncid = idout
 	    var_id = var_ids(iv)
@@ -407,8 +407,8 @@
 
 !***************************************************************
 
-	subroutine shyelab_post_output(id,idout,dtime,nvar,n,m,nndim
-     +					,lmax,nlvddi,cv3all)
+	subroutine shyelab_post_output(id,idout,dtime,nvar,n,m,nndim &
+     &					,lmax,nlvddi,cv3all)
 
 ! writes complete time record after loop
 
@@ -483,18 +483,18 @@
               cv3all(:,:,0) = sum(cv3all,dim=3)
               ivar = 10
 	      belem = .false.
-	      call shy_write_output_record(idout,dtime,ivar
-     +					,belem,n,m
-     +					,lmax,nlvddi,cv3all(:,:,0))
+	      call shy_write_output_record(idout,dtime,ivar &
+     &					,belem,n,m &
+     &					,lmax,nlvddi,cv3all(:,:,0))
 	    else
 	      stop 'error stop shyelab_post_output: internal error (1)'
 	    end if
 	  else if( outformat == 'gis' ) then
-	    call gis_write_hydro(dtime,np,nlvddi,ilcoord
-     +				,zvalue,uvalue,vvalue,xcoord,ycoord)
+	    call gis_write_hydro(dtime,np,nlvddi,ilcoord &
+     &				,zvalue,uvalue,vvalue,xcoord,ycoord)
 	  else if( outformat == 'fem' ) then	!also covers breg
-	    call fem_write_hydro(idout,dtime,np,nlvddi
-     +					,zvalue,uvalue,vvalue)
+	    call fem_write_hydro(idout,dtime,np,nlvddi &
+     &					,zvalue,uvalue,vvalue)
 	  else if( outformat == 'nc' ) then
 	    ncid = idout
 	    call nc_output_hydro(ncid,znv,uprv,vprv)
@@ -567,8 +567,8 @@
           write(6,*) '  3d for output at each layer'
           write(format,'(i5)') nnodes
           format = adjustl(format)
-	  write(6,'(a)') ' node is consecutive node numbering: '
-     +				//'1-'//format
+	  write(6,'(a)') ' node is consecutive node numbering: ' &
+     &				//'1-'//format
 	end if
 
 	if( bsplit ) then
@@ -670,20 +670,20 @@
 	lmax = nlv
 	nvar = 3
 
-        call fem_file_write_header(iformat,iunit,dtime
-     +                          ,nvers,np,lmax
-     +                          ,nvar,ntype
-     +                          ,nlvdi,hlv,datetime_elab,regpar)
+        call fem_file_write_header(iformat,iunit,dtime &
+     &                          ,nvers,np,lmax &
+     &                          ,nvar,ntype &
+     &                          ,nlvdi,hlv,datetime_elab,regpar)
 
 	ivar = 1
 	lmax = 1
 	call get_string_description(ivar,string)
 
-        call fem_file_write_data(iformat,iunit
-     +                          ,nvers,np,lmax
-     +                          ,string
-     +                          ,ilcoord,hcoord
-     +                          ,lmax,zv)
+        call fem_file_write_data(iformat,iunit &
+     &                          ,nvers,np,lmax &
+     &                          ,string &
+     &                          ,ilcoord,hcoord &
+     &                          ,lmax,zv)
 
 	ivar = 2
 	lmax = nlv
@@ -691,17 +691,17 @@
 	stringx = trim(string) // ' x'
 	stringy = trim(string) // ' y'
 
-        call fem_file_write_data(iformat,iunit
-     +                          ,nvers,np,lmax
-     +                          ,stringx
-     +                          ,ilcoord,hcoord
-     +                          ,nlvddi,uv)
+        call fem_file_write_data(iformat,iunit &
+     &                          ,nvers,np,lmax &
+     &                          ,stringx &
+     &                          ,ilcoord,hcoord &
+     &                          ,nlvddi,uv)
 
-        call fem_file_write_data(iformat,iunit
-     +                          ,nvers,np,lmax
-     +                          ,stringy
-     +                          ,ilcoord,hcoord
-     +                          ,nlvddi,vv)
+        call fem_file_write_data(iformat,iunit &
+     &                          ,nvers,np,lmax &
+     &                          ,stringy &
+     &                          ,ilcoord,hcoord &
+     &                          ,nlvddi,vv)
 
 	end
 
@@ -756,8 +756,8 @@
 	  cv3(lm+1:nlvdi,k) = flag
 	end do
 
-	call fem_regular_interpolate(nxreg,nyreg,regexpand,lmax
-     +                  ,fmreg,fmextra,ilcoord,cv3,am)
+	call fem_regular_interpolate(nxreg,nyreg,regexpand,lmax &
+     &                  ,fmreg,fmextra,ilcoord,cv3,am)
 
 	end
 

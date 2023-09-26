@@ -32,44 +32,44 @@
 
 !**************************************************************************
 
-c curve manipulating routines
-c
-c contents :
-c
-c function minmax(x,y,n,xm,ym)		gets local min/max from a curve
-c function integm(x,y,ndim,xzero,rint)	computes integral from a curve (portion)
-c function rinteg(x,y,ndim,rpos,rneg)	computes integral from a curve
-c
-c******************************************************************
-c
+! curve manipulating routines
+!
+! contents :
+!
+! function minmax(x,y,n,xm,ym)		gets local min/max from a curve
+! function integm(x,y,ndim,xzero,rint)	computes integral from a curve (portion)
+! function rinteg(x,y,ndim,rpos,rneg)	computes integral from a curve
+!
+!******************************************************************
+!
 	function minmax(x,y,n,xm,ym)
-c
-c gets local min/max and returns them in vector
-c
-c x,y		array containing curve values
-c n		number of elements in x,y
-c xm,ym		array containing local min/max found
-c minmxa	number of local min/max found
-c
+!
+! gets local min/max and returns them in vector
+!
+! x,y		array containing curve values
+! n		number of elements in x,y
+! xm,ym		array containing local min/max found
+! minmxa	number of local min/max found
+!
         dimension x(n),y(n)
         dimension xm(n),ym(n)
-c
+!
 	nm=1
 	xm(nm)=x(1)
 	ym(nm)=y(1)
-c
+!
 	i=0
 	yo=y(1)
    10	i=i+1
 	if(i.gt.n) goto 80
 	if(y(i).eq.yo) goto 10
 	yn=y(i)
-c
+!
 	idir=1
 	if(yn.lt.yo) idir=-1
 	yo=yn
 	jo=i
-c
+!
 	do 30 j=i+1,n
 	yn=y(j)
 	if(yn.gt.yo) then
@@ -98,42 +98,42 @@ c
 		end if
 	end if
    30	continue
-c
+!
    80	continue
-c
+!
 	nm=nm+1
 	xm(nm)=x(n)
 	ym(nm)=y(n)
-c
+!
 	minmax=nm
-c
+!
 	return
 	end
-c
-c*****************************************************************
-c
+!
+!*****************************************************************
+!
 	function integm(x,y,ndim,xzero,rint)
-c
-c computes integral from a curve and returns an array with
-c ...positive/negative portion of the integral
-c
-c x,y		array containing x,y coordinate of curve
-c ndim		total number of elements in x,y
-c xzero		array containing x value of new integral portion
-c rint		array containing positive/negative portion of integral
-c integm	total number of pos/neg portions found
-c
+!
+! computes integral from a curve and returns an array with
+! ...positive/negative portion of the integral
+!
+! x,y		array containing x,y coordinate of curve
+! ndim		total number of elements in x,y
+! xzero		array containing x value of new integral portion
+! rint		array containing positive/negative portion of integral
+! integm	total number of pos/neg portions found
+!
         dimension x(ndim),y(ndim)
         dimension xzero(ndim),rint(ndim)
-c
+!
 	nm=0
 	yport=0.
-c
+!
 	xo=x(1)
 	yo=y(1)
-c
+!
 	do i=2,ndim
-c
+!
 	xn=x(i)
 	yn=y(i)
 	dx=xn-xo
@@ -150,41 +150,41 @@ c
 	end if
 	xo=xn
 	yo=yn
-c
+!
 	end do
-c
+!
 	if(yport.ne.0.) then
 		nm=nm+1
 		xzero(nm)=xn
 		rint(nm)=yport
 	end if
-c
+!
 	integm=nm
-c
+!
 	return
 	end
-c
-c*****************************************************************
-c
+!
+!*****************************************************************
+!
 	function rinteg(x,y,ndim,rpos,rneg)
-c
-c computes integral from a curve
-c
-c x,y		array containing x,y coordinate of curve
-c ndim		total number of elements in x,y
-c rpos,rneg	positive/negative portion of integral
-c rinteg	total value of integral (rpos+rneg)
-c
+!
+! computes integral from a curve
+!
+! x,y		array containing x,y coordinate of curve
+! ndim		total number of elements in x,y
+! rpos,rneg	positive/negative portion of integral
+! rinteg	total value of integral (rpos+rneg)
+!
         dimension x(ndim),y(ndim)
-c
+!
 	yportp=0.	!positive discharge
 	yportn=0.	!negative discharge
-c
+!
 	xo=x(1)
 	yo=y(1)
-c
+!
 	do i=2,ndim
-c
+!
 	xn=x(i)
 	yn=y(i)
 	dx=xn-xo
@@ -213,12 +213,12 @@ c
 	end if
 	xo=xn
 	yo=yn
-c
+!
 	end do
-c
+!
 	rpos=yportp
 	rneg=yportn
 	rinteg=rpos+rneg
-c
+!
 	return
 	end

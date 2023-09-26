@@ -25,15 +25,15 @@
 !
 !--------------------------------------------------------------------------
 
-c Parameter management routines taken from subpar3.f
-c changing the module name to para_aqua and name length
-c
-c 
-c
-c parameter management routines
-c
-c contents :
-c
+! Parameter management routines taken from subpar3.f
+! changing the module name to para_aqua and name length
+!
+! 
+!
+! parameter management routines
+!
+! contents :
+!
 ! function para_get_id(name,section)
 ! subroutine para_init_alloc
 ! subroutine para_init_new_id(id)
@@ -52,35 +52,35 @@ c
 ! subroutine para_put_value(name,value)
 ! subroutine para_get_string(name,string)
 ! subroutine para_add_string(name,string)
-c
-c revision log :
-c
-c 01.03.1988	ggu	written
-c 30.08.1988	ggu	(default values in rdpar..a/h)
-c 08.11.1988	ggu	(addpar,setpar,ittpar,ipadim...)
-c 05.12.1988	ggu	(rdpara/h substituted by nlsa/h)
-c 30.09.1989	ggu	(putpar,pripar,intpar)
-c 26.05.1990	ggu	(newly structured -> manpar)
-c 04.02.1991	ggu	(included iar..., far...)
-c 15.05.1997	ggu	(nnamdi set to 200)
-c 12.06.1997	ggu	(iar..., far... moved to subiar.f)
-c 12.06.1997	ggu	(section introduced)
-c 18.03.1998	ggu	introduced undocumented feature -> c
-c 18.03.1998	ggu	save secpar (bug uncovered by g77)
-c 07.11.2005	ggu	helper routine get_sect_of()
-c 11.09.2006	ggu	routine chapar removed
-c 16.04.2008	ggu	bugfix in pripar (character*79 -> *80)
-c 28.04.2008	ggu	all routines changed to double precision
-c 28.04.2008	ggu	three new routines: dgetpar, dputpar, daddpar
-c 28.07.2010	ggu	new routines (par and fnm together) -> subst. old ones
-c 25.06.2012	ggu	debugged
-c 26.02.2015	ggu	changed VERS_7_1_6
-c 16.02.2019	ggu	changed VERS_7_5_60
-c 13.03.2019	ggu	changed VERS_7_5_61
-c
-c**************************************************************
-c**************************************************************
-c**************************************************************
+!
+! revision log :
+!
+! 01.03.1988	ggu	written
+! 30.08.1988	ggu	(default values in rdpar..a/h)
+! 08.11.1988	ggu	(addpar,setpar,ittpar,ipadim...)
+! 05.12.1988	ggu	(rdpara/h substituted by nlsa/h)
+! 30.09.1989	ggu	(putpar,pripar,intpar)
+! 26.05.1990	ggu	(newly structured -> manpar)
+! 04.02.1991	ggu	(included iar..., far...)
+! 15.05.1997	ggu	(nnamdi set to 200)
+! 12.06.1997	ggu	(iar..., far... moved to subiar.f)
+! 12.06.1997	ggu	(section introduced)
+! 18.03.1998	ggu	introduced undocumented feature -> c
+! 18.03.1998	ggu	save secpar (bug uncovered by g77)
+! 07.11.2005	ggu	helper routine get_sect_of()
+! 11.09.2006	ggu	routine chapar removed
+! 16.04.2008	ggu	bugfix in pripar (character*79 -> *80)
+! 28.04.2008	ggu	all routines changed to double precision
+! 28.04.2008	ggu	three new routines: dgetpar, dputpar, daddpar
+! 28.07.2010	ggu	new routines (par and fnm together) -> subst. old ones
+! 25.06.2012	ggu	debugged
+! 26.02.2015	ggu	changed VERS_7_1_6
+! 16.02.2019	ggu	changed VERS_7_5_60
+! 13.03.2019	ggu	changed VERS_7_5_61
+!
+!**************************************************************
+!**************************************************************
+!**************************************************************
 
 !==================================================================
 	module para_aqua
@@ -544,14 +544,14 @@ c**************************************************************
 !==================================================================
 
 
-c**************************************************************
-c**************************************************************
-c**************************************************************
+!**************************************************************
+!**************************************************************
+!**************************************************************
 
 
-c***********************************************************
-c***********************************************************
-c***********************************************************
+!***********************************************************
+!***********************************************************
+!***********************************************************
 
 ! All these commented routines are located in subpara3.f:
 

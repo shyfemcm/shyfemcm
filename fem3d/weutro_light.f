@@ -23,24 +23,24 @@
 !
 !--------------------------------------------------------------------------
 
-c support routines for solar radiation
-c
-c contents :
-c
-c revision log :
-c
-c 20.08.2004	ggu	written from scratch
-c 26.08.2004	ggu	new linstant (same as rintens from weutro.f)
-c 23.03.2010	ggu	changed v6.1.1
-c 16.02.2019	ggu	changed VERS_7_5_60
-c
-c notes :
-c
-c***********************************************************
+! support routines for solar radiation
+!
+! contents :
+!
+! revision log :
+!
+! 20.08.2004	ggu	written from scratch
+! 26.08.2004	ggu	new linstant (same as rintens from weutro.f)
+! 23.03.2010	ggu	changed v6.1.1
+! 16.02.2019	ggu	changed VERS_7_5_60
+!
+! notes :
+!
+!***********************************************************
 
 	function declin(jd)
 
-c computes solar declination
+! computes solar declination
 
 	implicit none
 
@@ -54,11 +54,11 @@ c computes solar declination
 
 	end
 
-c***********************************************************
+!***********************************************************
 
 	function dayl(jd,rlat)
 
-c computes day length (in hours)
+! computes day length (in hours)
 
 	implicit none
 
@@ -78,11 +78,11 @@ c computes day length (in hours)
 
 	end
 
-c***********************************************************
+!***********************************************************
 
 	function dayl_max(rlat)
 
-c computes maximum day length during year (in hours)
+! computes maximum day length during year (in hours)
 
 	implicit none
 
@@ -100,11 +100,11 @@ c computes maximum day length during year (in hours)
 
 	end
 
-c***********************************************************
+!***********************************************************
 
 	function cd_solrad(jd,rlat)
 
-c computes average clear day solar radiation
+! computes average clear day solar radiation
 
 	implicit none
 
@@ -133,17 +133,17 @@ c computes average clear day solar radiation
 
 	cd_solrad = a + b * cos( 2.*pi*(jd-172)/365. )
 
-c	cd_solrad = cd_solrad * factw	!radiation in W/m**2
+!	cd_solrad = cd_solrad * factw	!radiation in W/m**2
 
 	end
 
-c***********************************************************
+!***********************************************************
 
 	subroutine get_radiation(jd,rlat,fday,itot,imax)
 
-c computes parameters for solar radiation
-c
-c itot is average solar radiation over one whole day
+! computes parameters for solar radiation
+!
+! itot is average solar radiation over one whole day
 
 	implicit none
 
@@ -164,11 +164,11 @@ c itot is average solar radiation over one whole day
 
 	end
 
-c***********************************************************
+!***********************************************************
 
         subroutine linstant(t,itot,fday,iinst)
 
-c computes light intensity during a day given itot and fday
+! computes light intensity during a day given itot and fday
 
         implicit none
 
@@ -196,11 +196,11 @@ c computes light intensity during a day given itot and fday
 
         end
 
-c***********************************************************
+!***********************************************************
 
 	subroutine test_solrad
 
-c tests solar radiation routines
+! tests solar radiation routines
 
 	implicit none
 
@@ -227,11 +227,11 @@ c tests solar radiation routines
 
 	end
 
-c***********************************************************
+!***********************************************************
 
 	subroutine luxlen_init(file)
 
-c initializes luxlen (reads file)
+! initializes luxlen (reads file)
 
 	implicit none
 
@@ -245,9 +245,9 @@ c initializes luxlen (reads file)
 	integer n
 	real tdummy
 
-c--------------------------------------------------------------
-c read in file
-c--------------------------------------------------------------
+!--------------------------------------------------------------
+! read in file
+!--------------------------------------------------------------
 
         open(2,file='lux.dat',status='old',form='formatted')
 	do n=1,365
@@ -255,17 +255,17 @@ c--------------------------------------------------------------
 	end do
 	close(2)
 
-c--------------------------------------------------------------
-c end of routine
-c--------------------------------------------------------------
+!--------------------------------------------------------------
+! end of routine
+!--------------------------------------------------------------
 
 	end
 
-c***********************************************************
+!***********************************************************
 
 	subroutine luxlen(t,lux,fday)
 
-c given a day t returns light intensity lux and day length fday
+! given a day t returns light intensity lux and day length fday
 
 	implicit none
 
@@ -281,26 +281,26 @@ c given a day t returns light intensity lux and day length fday
 	integer n
 	integer it2n
 
-c--------------------------------------------------------------
-c compute values
-c--------------------------------------------------------------
+!--------------------------------------------------------------
+! compute values
+!--------------------------------------------------------------
 
 	n = it2n(t)
 
 	lux = luxv(n)
 	fday = fdayv(n)
 
-c--------------------------------------------------------------
-c end of routine
-c--------------------------------------------------------------
+!--------------------------------------------------------------
+! end of routine
+!--------------------------------------------------------------
 
 	end
 
-c***********************************************************
+!***********************************************************
 
 	function it2n(t)
 
-c converts time [day] to pointer into array [1-365]
+! converts time [day] to pointer into array [1-365]
 
 	implicit none
 
@@ -319,10 +319,10 @@ c converts time [day] to pointer into array [1-365]
 
 	end
 
-c***********************************************************
+!***********************************************************
 
-c	call test_solrad
-c	end
+!	call test_solrad
+!	end
 
-c***********************************************************
+!***********************************************************
 

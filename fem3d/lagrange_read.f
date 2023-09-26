@@ -141,8 +141,8 @@
 ! allocate variables 
 !**********************************************************
 
-        subroutine lgr_alloc(nn,nc
-     +          ,id,ty,tt,s,ie,x,y,z,lb,hl,c)
+        subroutine lgr_alloc(nn,nc &
+     &          ,id,ty,tt,s,ie,x,y,z,lb,hl,c)
 
         implicit none
 
@@ -193,8 +193,8 @@
 ! return data block
 !**********************************************************
 
-        subroutine lgr_get_block(iu,nn,nc,
-     +			idb,tyb,ttb,sb,ieb,xb,yb,zb,lbb,hlb,cb)
+        subroutine lgr_get_block(iu,nn,nc, &
+     &			idb,tyb,ttb,sb,ieb,xb,yb,zb,lbb,hlb,cb)
 
         implicit none
 
@@ -342,8 +342,8 @@
 ! that type starts from 1).
 !**********************************************************
 
-        subroutine lgr_mean_posit(n,nc,tya,agea,sa,xa,ya,hla,ca,
-     +				 nm,tym,agem,sm,xm,ym,hlm,cm)
+        subroutine lgr_mean_posit(n,nc,tya,agea,sa,xa,ya,hla,ca, &
+     &				 nm,tym,agem,sm,xm,ym,hlm,cm)
 
         implicit none
 

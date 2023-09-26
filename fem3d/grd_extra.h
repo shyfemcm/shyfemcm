@@ -23,7 +23,7 @@
 !
 !--------------------------------------------------------------------------
 
-c extra data structure for grd files
+! extra data structure for grd files
 
 ! revision log :
 !

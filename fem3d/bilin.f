@@ -32,30 +32,30 @@
 
 !**************************************************************************
 
-c routines for bilinear interpolation in quadrilateral
-c
-c********************************************************************
-c
-c numeration of square
-c
-c                         (0,1)            (1,1)
-c                               +--------+
-c                               | 4    3 |
-c                               |        |
-c                               | 1    2 |
-c                               +--------+
-c                         (0,0)            (1,0)
-c
-c please note difference in numbering from old routines
-c numbering must be in anti-clockwise sense
-c
-c********************************************************************
+! routines for bilinear interpolation in quadrilateral
+!
+!********************************************************************
+!
+! numeration of square
+!
+!                         (0,1)            (1,1)
+!                               +--------+
+!                               | 4    3 |
+!                               |        |
+!                               | 1    2 |
+!                               +--------+
+!                         (0,0)            (1,0)
+!
+! please note difference in numbering from old routines
+! numbering must be in anti-clockwise sense
+!
+!********************************************************************
 
 	subroutine bilin_intp(xq,yq,vals,x,y,val)
 
-c performs bilinear interpolation in quadrilateral
-c coordinates can be arbitrary, but must be convex
-c numbering of nodes counterclockwise
+! performs bilinear interpolation in quadrilateral
+! coordinates can be arbitrary, but must be convex
+! numbering of nodes counterclockwise
 
 	real xq(4)	!x coordinates of quadrilateral
 	real yq(4)	!y coordinates of quadrilateral
@@ -70,12 +70,12 @@ c numbering of nodes counterclockwise
 
 	end
 
-c********************************************************************
+!********************************************************************
 
 	subroutine bilin_intp_square(vals,u,v,val)
 
-c performs bilinear interpolation in square [0-1]
-c numbering of nodes counterclockwise
+! performs bilinear interpolation in square [0-1]
+! numbering of nodes counterclockwise
 
 	real vals(4)	!values on corners
 	real u,v	!relative coordinates in square [0-1]
@@ -92,13 +92,13 @@ c numbering of nodes counterclockwise
 
 	end
 
-c********************************************************************
-c********************************************************************
-c********************************************************************
+!********************************************************************
+!********************************************************************
+!********************************************************************
 
 	subroutine bilin_direct(xq,yq,u,v,x,y)
 
-c direct transformation from unit square to arbitrary quadrilateral
+! direct transformation from unit square to arbitrary quadrilateral
 
 	implicit none
 
@@ -124,12 +124,12 @@ c direct transformation from unit square to arbitrary quadrilateral
 
 	end
 
-c********************************************************************
+!********************************************************************
 
 	subroutine bilin_inverse(xq,yq,u,v,x,y)
 
-c inverse transformation from unit square to arbitrary quadrilateral
-c computes relative coordinates in square
+! inverse transformation from unit square to arbitrary quadrilateral
+! computes relative coordinates in square
 
 	implicit none
 
@@ -183,30 +183,30 @@ c computes relative coordinates in square
 	uu2 = (-bb - dd) / (2*aa)
 	vv2 = (x - a0 - a1*uu2)/(a2+a3*uu2)
 
-c	if( uu1 .lt. 0. .or. uu1 .gt. 1. .or.
-c     +			vv1 .lt. 0. .or. vv1 .gt. 1. ) then
-c	  uu = uu2
-c	  vv = vv2
-c	else if( uu2 .lt. 0. .or. uu2 .gt. 1. .or.
-c     +			vv2 .lt. 0. .or. vv2 .gt. 1. ) then
-c	  uu = uu1
-c	  vv = vv1
-c	else		!check x/y
-c	  xx1 = a0 + a1*uu1 + a2*vv1 + a3*uu1*vv1
-c	  yy1 = b0 + b1*uu1 + b2*vv1 + b3*uu1*vv1
-c	  xx2 = a0 + a1*uu2 + a2*vv2 + a3*uu2*vv2
-c	  yy2 = b0 + b1*uu2 + b2*vv2 + b3*uu2*vv2
-c	  dd1 = max(abs(xx1-x),abs(yy1-y))
-c	  dd2 = max(abs(xx2-x),abs(yy2-y))
-c	  write(6,*) 'diff inverse: ',dd1,dd2
-c	  if( dd1 .gt. dd2 ) then
-c	    uu = uu2
-c	    vv = vv2
-c	  else
-c	    uu = uu1
-c	    vv = vv1
-c	  end if
-c	end if
+!	if( uu1 .lt. 0. .or. uu1 .gt. 1. .or.
+!     +			vv1 .lt. 0. .or. vv1 .gt. 1. ) then
+!	  uu = uu2
+!	  vv = vv2
+!	else if( uu2 .lt. 0. .or. uu2 .gt. 1. .or.
+!     +			vv2 .lt. 0. .or. vv2 .gt. 1. ) then
+!	  uu = uu1
+!	  vv = vv1
+!	else		!check x/y
+!	  xx1 = a0 + a1*uu1 + a2*vv1 + a3*uu1*vv1
+!	  yy1 = b0 + b1*uu1 + b2*vv1 + b3*uu1*vv1
+!	  xx2 = a0 + a1*uu2 + a2*vv2 + a3*uu2*vv2
+!	  yy2 = b0 + b1*uu2 + b2*vv2 + b3*uu2*vv2
+!	  dd1 = max(abs(xx1-x),abs(yy1-y))
+!	  dd2 = max(abs(xx2-x),abs(yy2-y))
+!	  write(6,*) 'diff inverse: ',dd1,dd2
+!	  if( dd1 .gt. dd2 ) then
+!	    uu = uu2
+!	    vv = vv2
+!	  else
+!	    uu = uu1
+!	    vv = vv1
+!	  end if
+!	end if
 
 	if( abs(aa_1) .gt. abs(aa_2) ) then
 	  uu = uu2
@@ -229,15 +229,15 @@ c	end if
 
 	end
 
-c********************************************************************
-c********************************************************************
-c********************************************************************
-c
-c from here on testing routines
-c
-c********************************************************************
-c********************************************************************
-c********************************************************************
+!********************************************************************
+!********************************************************************
+!********************************************************************
+!
+! from here on testing routines
+!
+!********************************************************************
+!********************************************************************
+!********************************************************************
 
 	subroutine bilin_test_one(xq,yq,u,v,diff)
 
@@ -284,7 +284,7 @@ c********************************************************************
 	stop
 	end
 
-c********************************************************************
+!********************************************************************
 
 	subroutine bilin_test
 
@@ -342,9 +342,9 @@ c********************************************************************
 
 	end
 
-c********************************************************************
-c********************************************************************
-c********************************************************************
+!********************************************************************
+!********************************************************************
+!********************************************************************
 
 	subroutine bilin_plot_grid(iunit,xx,yy,xq,yq)
 
@@ -390,7 +390,7 @@ c********************************************************************
 
 	end
 
-c********************************************************************
+!********************************************************************
 
 	function bilin_check_convex(xq,yq)
 
@@ -427,11 +427,11 @@ c********************************************************************
 
 	end
 
-c********************************************************************
+!********************************************************************
 
         function bilin_lefton(x1,y1,x2,y2,x3,y3)
 
-c left turn or straight ?
+! left turn or straight ?
 
         implicit none
 
@@ -444,11 +444,11 @@ c left turn or straight ?
 
 	end
 
-c********************************************************************
+!********************************************************************
 
         function bilin_areat(x1,y1,x2,y2,x3,y3)
 
-c computes area of triangle
+! computes area of triangle
 
         implicit none
 
@@ -459,7 +459,7 @@ c computes area of triangle
 
         end
 
-c********************************************************************
+!********************************************************************
 
       function bilin_rand(idum)
       parameter (m=714025,ia=1366,ic=150889,rm=1.4005112e-6)
@@ -485,11 +485,11 @@ c********************************************************************
       return
       end
 
-c********************************************************************
+!********************************************************************
 
 	program bilin_test_main
 	call bilin_test
 	end
 
-c********************************************************************
+!********************************************************************
 

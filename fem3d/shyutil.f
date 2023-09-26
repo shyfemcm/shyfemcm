@@ -193,11 +193,11 @@
 	else
 	  iflag = 1
 	  if( belem ) then
-	    call make_aver_3d(nlvdi,nn,cv3,areae,vol3e,ilhv,iflag
-     +				,cmin,cmax,cmed,cstd,atot,vtot,cv2)
+	    call make_aver_3d(nlvdi,nn,cv3,areae,vol3e,ilhv,iflag &
+     &				,cmin,cmax,cmed,cstd,atot,vtot,cv2)
 	  else
-	    call make_aver_3d(nlvdi,nn,cv3,areak,vol3k,ilhkv,iflag
-     +				,cmin,cmax,cmed,cstd,atot,vtot,cv2)
+	    call make_aver_3d(nlvdi,nn,cv3,areak,vol3k,ilhkv,iflag &
+     &				,cmin,cmax,cmed,cstd,atot,vtot,cv2)
 	  end if
 	end if
 
@@ -205,8 +205,8 @@
 
 !***************************************************************
 
-	subroutine shy_make_basin_aver(idims,nlvddi,nndim,cv3,iflag
-     +				,cmin,cmax,cmed,cstd,atot,vtot)
+	subroutine shy_make_basin_aver(idims,nlvddi,nndim,cv3,iflag &
+     &				,cmin,cmax,cmed,cstd,atot,vtot)
 
 ! this is called only for scalar (nndim==nkn)
 
@@ -242,18 +242,18 @@
 	    stop 'error stop shy_make_basin_aver: level must have lmax=1'
 	  end if
 	  if( nn == nkn ) then
-	    call make_aver_2d(nlvdi,nn,cv3,areak,iflag
-     +				,cmin,cmax,cmed,cstd,atot,vtot)
+	    call make_aver_2d(nlvdi,nn,cv3,areak,iflag &
+     &				,cmin,cmax,cmed,cstd,atot,vtot)
 	    vtot = sum(vol2k,mask=iflag>0)
 	  else if( nn == nel ) then
-	    call make_aver_2d(nlvdi,nn,cv3,areae,iflag
-     +				,cmin,cmax,cmed,cstd,atot,vtot)
+	    call make_aver_2d(nlvdi,nn,cv3,areae,iflag &
+     &				,cmin,cmax,cmed,cstd,atot,vtot)
 	    vtot = sum(vol2e,mask=iflag>0)
 	  else if( nn == 3*nel ) then			!zenv
 	    ze(:) = cv3(1,1)
 	    call shy_make_zeta_from_elem(nel,ze,zaux)
-	    call make_aver_2d(nlvdi,nel,zaux,areae,iflag
-     +				,cmin,cmax,cmed,cstd,atot,vtot)
+	    call make_aver_2d(nlvdi,nel,zaux,areae,iflag &
+     &				,cmin,cmax,cmed,cstd,atot,vtot)
 	    vtot = sum(vol2e,mask=iflag>0)
 	  else
 	    write(6,*) ivar,nn,nkn,nel
@@ -265,11 +265,11 @@
 	    stop 'error stop shy_make_basin_aver: nlvdi/=nlvddi'
 	  end if
 	  if( nn == nkn ) then
-	    call make_aver_3d(nlvddi,nn,cv3,areak,vol3k,ilhkv,iflag
-     +				,cmin,cmax,cmed,cstd,atot,vtot,cv2)
+	    call make_aver_3d(nlvddi,nn,cv3,areak,vol3k,ilhkv,iflag &
+     &				,cmin,cmax,cmed,cstd,atot,vtot,cv2)
 	  else if( nn == nel ) then
-	    call make_aver_3d(nlvddi,nn,cv3,areae,vol3e,ilhv,iflag
-     +				,cmin,cmax,cmed,cstd,atot,vtot,cv2)
+	    call make_aver_3d(nlvddi,nn,cv3,areae,vol3e,ilhv,iflag &
+     &				,cmin,cmax,cmed,cstd,atot,vtot,cv2)
 	  else
 	    write(6,*) ivar,nn,nkn,nel
 	    stop 'error stop shy_make_basin_aver: not possible'
@@ -280,8 +280,8 @@
 
 !***************************************************************
 
-	subroutine make_aver_2d(nlvddi,nn,cv3,area,iflag
-     +				,cmin,cmax,cmed,cstd,atot,vtot)
+	subroutine make_aver_2d(nlvddi,nn,cv3,area,iflag &
+     &				,cmin,cmax,cmed,cstd,atot,vtot)
 
 	implicit none
 
@@ -328,8 +328,8 @@
 
 !***************************************************************
 
-	subroutine make_aver_3d(nlvddi,nn,cv3,area,vol,il,iflag
-     +				,cmin,cmax,cmed,cstd,atot,vtot,cv2)
+	subroutine make_aver_3d(nlvddi,nn,cv3,area,vol,il,iflag &
+     &				,cmin,cmax,cmed,cstd,atot,vtot,cv2)
 
 	implicit none
 
@@ -549,8 +549,8 @@
 	  lmin = 1
 	  !write(6,*) ie,lmax,nlv,nlvdi
 	  call compute_zadapt_info(z,hlv,nsigma,lmax,lmin,nadapt,hadapt)
-	  call get_layer_thickness(lmax,lmin,nsigma,nadapt,
-     +				   hsigma,hadapt,z,h,hlv,hl)
+	  call get_layer_thickness(lmax,lmin,nsigma,nadapt, &
+     &				   hsigma,hadapt,z,h,hlv,hl)
 	  do l=1,lmax
 	    vk = ak * hl(l)
 	    ve = 3. * vk
@@ -590,8 +590,8 @@
 !***************************************************************
 !***************************************************************
 
-	subroutine shy_time_aver(bforce,avermode,iv,nread,ifreq,istep
-     +				,nndim,idims,threshold,cv3,bout,bverb)
+	subroutine shy_time_aver(bforce,avermode,iv,nread,ifreq,istep &
+     &				,nndim,idims,threshold,cv3,bout,bverb)
 
 ! avermode:  1:aver  2:sum  3:min  4:max  5:std  6:rms  7:thres  8:averdir
 !

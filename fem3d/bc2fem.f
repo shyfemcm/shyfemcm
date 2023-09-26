@@ -74,8 +74,8 @@
 ! command line
 !--------------------------------------------------------------
 
-	call parse_command_line(what,var,infile,hlvfile,date
-     +					,iformat)
+	call parse_command_line(what,var,infile,hlvfile,date &
+     &					,iformat)
 
 	write(6,*) 'what:       ',what
 	write(6,*) 'var:        ',var
@@ -130,9 +130,9 @@
 
 	end
 
-c*****************************************************************
-c*****************************************************************
-c*****************************************************************
+!*****************************************************************
+!*****************************************************************
+!*****************************************************************
 
 	subroutine field2fem(var,infile,iformat,b2d,hlvfile,date)
 
@@ -275,14 +275,14 @@ c*****************************************************************
 
 	  call convert_date_time(bdate0,it,dtime0,datetime,dtime)
 
-	  call fem_file_write_header(iformat,iunit,dtime
-     +                          ,nvers,np,lmax,nvar,ntype,nlvdi
-     +				,hlv,datetime,regpar)
-          call fem_file_write_data(iformat,iunit
-     +                          ,nvers,np,lmax
-     +                          ,string
-     +                          ,ilhkv,hd
-     +                          ,nlvdi,data)
+	  call fem_file_write_header(iformat,iunit,dtime &
+     &                          ,nvers,np,lmax,nvar,ntype,nlvdi &
+     &				,hlv,datetime,regpar)
+          call fem_file_write_data(iformat,iunit &
+     &                          ,nvers,np,lmax &
+     &                          ,string &
+     &                          ,ilhkv,hd &
+     &                          ,nlvdi,data)
 
 	  call progress(irec,1,60)
 	end do
@@ -324,7 +324,7 @@ c*****************************************************************
 	stop 'error stop field2fem'
 	end
 
-c*****************************************************************
+!*****************************************************************
 
 	subroutine bc2fem(var,infile,bformat,b2d,hlvfile,date)
 
@@ -434,9 +434,9 @@ c*****************************************************************
 
 	  call convert_date_time(bdate0,it,dtime0,datetime,dtime)
 
-	  call fem_file_write_header(iformat,iunit,dtime
-     +                          ,nvers,np,lmax,nvar,ntype,nlvdi
-     +				,hlv,datetime,regpar)
+	  call fem_file_write_header(iformat,iunit,dtime &
+     &                          ,nvers,np,lmax,nvar,ntype,nlvdi &
+     &				,hlv,datetime,regpar)
 
 	  do iv=1,nvar
 	    do i=1,n
@@ -445,11 +445,11 @@ c*****************************************************************
 	    end do
 
 	    write(stringaux,'(a,i4)') trim(string),iv
-            call fem_file_write_data(iformat,iunit
-     +                          ,nvers,np,lmax
-     +                          ,stringaux
-     +                          ,ilhkv,hd
-     +                          ,nlvdi,data)
+            call fem_file_write_data(iformat,iunit &
+     &                          ,nvers,np,lmax &
+     &                          ,stringaux &
+     &                          ,ilhkv,hd &
+     &                          ,nlvdi,data)
 
 	    call progress(irec,24,60)
 	  end do
@@ -492,7 +492,7 @@ c*****************************************************************
 	stop 'error stop bc2fem'
 	end
 
-c*****************************************************************
+!*****************************************************************
 
 	subroutine vel2fem(var,infile,bformat,b2d,hlvfile,date)
 
@@ -599,9 +599,9 @@ c*****************************************************************
 
 	  call convert_date_time(bdate0,it,dtime0,datetime,dtime)
 
-	  call fem_file_write_header(iformat,iunit,dtime
-     +                          ,nvers,np,lmax,nvar,ntype,nlvdi
-     +				,hlv,datetime,regpar)
+	  call fem_file_write_header(iformat,iunit,dtime &
+     &                          ,nvers,np,lmax,nvar,ntype,nlvdi &
+     &				,hlv,datetime,regpar)
 
 	  do iv = 1,nvar
 	    do i=1,n
@@ -609,11 +609,11 @@ c*****************************************************************
 	      if( j .ne. i ) goto 95
 	    end do
 
-            call fem_file_write_data(iformat,iunit
-     +                          ,nvers,np,lmax
-     +                          ,strings(iv)
-     +                          ,ilhkv,hd
-     +                          ,nlvdi,data)
+            call fem_file_write_data(iformat,iunit &
+     &                          ,nvers,np,lmax &
+     &                          ,strings(iv) &
+     &                          ,ilhkv,hd &
+     &                          ,nlvdi,data)
 
 	  end do
 	  call progress(irec,24,60)
@@ -656,7 +656,7 @@ c*****************************************************************
 	stop 'error stop vel2fem'
 	end
 
-c*****************************************************************
+!*****************************************************************
 
 	subroutine reg2fem(infile,bformat,date)
 
@@ -757,20 +757,20 @@ c*****************************************************************
 
 	  call convert_date_time(bdate0,it,dtime0,datetime,dtime)
 
-	  call fem_file_write_header(iformat,iunit,dtime
-     +                          ,nvers,np,lmax,nvar,ntype,nlvdi
-     +				,hlv,datetime,regpar)
+	  call fem_file_write_header(iformat,iunit,dtime &
+     &                          ,nvers,np,lmax,nvar,ntype,nlvdi &
+     &				,hlv,datetime,regpar)
 
 	  do i=1,nvar
             read(1,'(a)') string
             read(1,*) (data(j),j=1,np)
 	    call get_new_string(string,newstring)
 
-            call fem_file_write_data(iformat,iunit
-     +                          ,nvers,np,lmax
-     +                          ,newstring
-     +                          ,ilhkv,hd
-     +                          ,nlvdi,data)
+            call fem_file_write_data(iformat,iunit &
+     &                          ,nvers,np,lmax &
+     &                          ,newstring &
+     &                          ,ilhkv,hd &
+     &                          ,nlvdi,data)
 	  end do
 
 	  call progress(irec,2,60)
@@ -802,7 +802,7 @@ c*****************************************************************
 	stop 'error stop reg2fem'
 	end
 
-c*****************************************************************
+!*****************************************************************
 
 	subroutine meteo2fem(infile,bformat,date)
 
@@ -977,15 +977,15 @@ c*****************************************************************
 
 	  call convert_date_time(bdate0,it,dtime0,datetime,dtime)
 
-	  call fem_file_write_header(iformat,iunit,dtime
-     +                          ,nvers,np,lmax,nvar,ntype,nlvdi
-     +				,hlv,datetime,regpar)
+	  call fem_file_write_header(iformat,iunit,dtime &
+     &                          ,nvers,np,lmax,nvar,ntype,nlvdi &
+     &				,hlv,datetime,regpar)
 	  do i=1,nvar
-            call fem_file_write_data(iformat,iunit
-     +                          ,nvers,np,lmax
-     +                          ,strings(i)
-     +                          ,ilhkv,hd
-     +                          ,nlvdi,data(1,i))
+            call fem_file_write_data(iformat,iunit &
+     &                          ,nvers,np,lmax &
+     &                          ,strings(i) &
+     &                          ,ilhkv,hd &
+     &                          ,nlvdi,data(1,i))
 	  end do
 
 	  call progress(irec,2,60)
@@ -1017,9 +1017,9 @@ c*****************************************************************
 	stop 'error stop meteo2fem'
 	end
 
-c*****************************************************************
-c*****************************************************************
-c*****************************************************************
+!*****************************************************************
+!*****************************************************************
+!*****************************************************************
 
 	subroutine get_new_string(string,newstring)
 
@@ -1053,12 +1053,12 @@ c*****************************************************************
 
 	end
 
-c*****************************************************************
-c*****************************************************************
-c*****************************************************************
+!*****************************************************************
+!*****************************************************************
+!*****************************************************************
 
-	subroutine parse_command_line(what,var,infile,hlv,date
-     +					,iformat)
+	subroutine parse_command_line(what,var,infile,hlv,date &
+     &					,iformat)
 
 	implicit none
 
@@ -1137,16 +1137,16 @@ c*****************************************************************
 	write(6,*) '      -hlv file     file containing hlv levels'
 	write(6,*) '      -date date    date for fem time 0'
 	write(6,*) '                    date given as YYYY[MMDD]'
-	write(6,*) '      -format form  specify if input file'//
-     +						' is formatted'
-	write(6,*) '                    form=0 unformatted'//
-     +						'  form=1 formatted'
+	write(6,*) '      -format form  specify if input file'// &
+     &						' is formatted'
+	write(6,*) '                    form=0 unformatted'// &
+     &						'  form=1 formatted'
 	write(6,*) '                    if not specified tries to guess'
 
 	stop
 	end
 
-c*****************************************************************
+!*****************************************************************
 
 	subroutine convert_char_to_int(string,int)
 
@@ -1161,7 +1161,7 @@ c*****************************************************************
 
 	end
 
-c*****************************************************************
+!*****************************************************************
 
 	subroutine progress(irec,ifreq,nlen)
 
@@ -1175,7 +1175,7 @@ c*****************************************************************
 
 	end
 
-c*****************************************************************
+!*****************************************************************
 
 	subroutine description(what,string)
 
@@ -1204,7 +1204,7 @@ c*****************************************************************
 
 	end
 
-c*****************************************************************
+!*****************************************************************
 
 	subroutine get_hlv(hlvfile,lmax,hlv)
 
@@ -1239,13 +1239,13 @@ c*****************************************************************
 
 	end
 
-c*****************************************************************
-c*****************************************************************
-c*****************************************************************
+!*****************************************************************
+!*****************************************************************
+!*****************************************************************
 
 	subroutine convert_date_time(bdate0,it,dtime0,datetime,dtime)
 
-c converts datetime into actual time
+! converts datetime into actual time
 
 	implicit none
 
@@ -1269,11 +1269,11 @@ c converts datetime into actual time
 
 	end
 
-c*****************************************************************
+!*****************************************************************
 
 	subroutine setup_datetime(ntype,date,datetime,bdate0,dtime0)
 
-c sets up date and time management
+! sets up date and time management
 
 	implicit none
 
@@ -1299,9 +1299,9 @@ c sets up date and time management
 
 	end
 
-c*****************************************************************
-c*****************************************************************
-c*****************************************************************
+!*****************************************************************
+!*****************************************************************
+!*****************************************************************
 
 	subroutine check3dfield(file,bformat,bhashlv)
 
@@ -1349,5 +1349,5 @@ c*****************************************************************
 
 	end
 
-c*****************************************************************
+!*****************************************************************
 

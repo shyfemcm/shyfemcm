@@ -41,8 +41,8 @@
 	integer ip_lmax			!max number of levels
 	integer ip_iformat		!is formatted?
 
-c np = 0, nsize = 0	-> time series
-c np > 0, nsize > 0	-> fem file format
+! np = 0, nsize = 0	-> time series
+! np > 0, nsize > 0	-> fem file format
 
 	parameter( ip_iunit   =  1 )
 	parameter( ip_nintp   =  2 )

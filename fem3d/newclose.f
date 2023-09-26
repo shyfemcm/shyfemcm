@@ -582,8 +582,8 @@
         if ( bcfile ) call iff_ts_intp1(idfile,dtime,fclose)
 
 	write(nb13,*)
-	write(nb13,'(1x,a,4i5)') 'id,iact,imode,ioper :'
-     +				,id,iact,imode,ioper
+	write(nb13,'(1x,a,4i5)') 'id,iact,imode,ioper :' &
+     &				,id,iact,imode,ioper
 	write(nb13,*)
 
 !	----------------------------------------------

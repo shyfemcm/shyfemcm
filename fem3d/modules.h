@@ -23,16 +23,16 @@
 !
 !--------------------------------------------------------------------------
 
-c------------------------------------------------------------
-c parameter definition for module framework
-c------------------------------------------------------------
+!------------------------------------------------------------
+! parameter definition for module framework
+!------------------------------------------------------------
 
 ! revision log :
 !
 ! 23.03.2010	ggu	changed v6.1.1
 ! 16.02.2019	ggu	changed VERS_7_5_60
 
-c------------------------------------------------------------
+!------------------------------------------------------------
 
 
 	integer M_INIT		!initialization stand-alone
@@ -44,14 +44,14 @@ c------------------------------------------------------------
 	integer M_BEFOR		!do at beginning of time loop
 	integer M_AFTER		!do at end of time loop
 
-	parameter(
-     +			  M_INIT	= 1
-     +			, M_READ	= 2
-     +			, M_CHECK	= 3
-     +			, M_SETUP	= 4
-     +			, M_PRINT	= 5
-     +			, M_TEST	= 6
-     +			, M_BEFOR	= 7
-     +			, M_AFTER	= 8
-     +		 )
+	parameter( &
+     &			  M_INIT	= 1 &
+     &			, M_READ	= 2 &
+     &			, M_CHECK	= 3 &
+     &			, M_SETUP	= 4 &
+     &			, M_PRINT	= 5 &
+     &			, M_TEST	= 6 &
+     &			, M_BEFOR	= 7 &
+     &			, M_AFTER	= 8 &
+     &		 )
 

@@ -137,8 +137,8 @@
 
 	integer nk,ne,nl
 
-        if( nk == nkn_off .and. ne == nel_off
-     +          .and. nl == nlv_off ) return
+        if( nk == nkn_off .and. ne == nel_off &
+     &          .and. nl == nlv_off ) return
 
         if( nk > 0 .or. ne > 0 .or. nl > 0 ) then
           if( nk == 0 .or. ne == 0 .or. nl == 0 ) then

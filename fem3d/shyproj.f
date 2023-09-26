@@ -84,8 +84,8 @@
         call clo_add_sep('projection options')
 
         call clo_add_option('proj proj',' ','type of projection to use')
-        call clo_add_option('param list',' '
-     +				,'parameters for projection')
+        call clo_add_option('param list',' ' &
+     &				,'parameters for projection')
 
         call clo_add_sep('additional information')
         call clo_add_com('  proj can be one of the following:')
@@ -95,11 +95,11 @@
         call clo_add_com('    LCC    Lambert conformal conic')
         call clo_add_com('  list gives the parameters needed')
         call clo_add_com('    GB     fuse[,x-shift,y-shift]')
-        call clo_add_com('    UTM    sector'//
-     +		'[,false-easting,false-northing[,scale-factor]]')
+        call clo_add_com('    UTM    sector'// &
+     &		'[,false-easting,false-northing[,scale-factor]]')
         call clo_add_com('    EC     central-lat,lon-orig[,lat-orig]')
-        call clo_add_com('    LCC    lon0,lat0,lat1,lat2'//
-     +		'[,false-easting,false-northing]')
+        call clo_add_com('    LCC    lon0,lat0,lat1,lat2'// &
+     &		'[,false-easting,false-northing]')
 
         call clo_parse_options
 

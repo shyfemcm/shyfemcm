@@ -23,26 +23,26 @@
 !
 !--------------------------------------------------------------------------
 
-c spline routines
-c
-c contents :
-c
-c subroutine spline(n,x,y,y2)		prepares cubic spline
-c subroutine splint(n,xa,ya,y2a,x,y)	evaluates spline -> gives back y(x)
-c subroutine spltst			test spline
-c
-c revision log :
-c
-c 06.03.1999	ggu	routines written from scratch (Numerical receipes)
-c 23.03.2010	ggu	changed v6.1.1
-c 18.12.2018	ggu	changed VERS_7_5_52
-c 16.02.2019	ggu	changed VERS_7_5_60
-c
-c***************************************************************
+! spline routines
+!
+! contents :
+!
+! subroutine spline(n,x,y,y2)		prepares cubic spline
+! subroutine splint(n,xa,ya,y2a,x,y)	evaluates spline -> gives back y(x)
+! subroutine spltst			test spline
+!
+! revision log :
+!
+! 06.03.1999	ggu	routines written from scratch (Numerical receipes)
+! 23.03.2010	ggu	changed v6.1.1
+! 18.12.2018	ggu	changed VERS_7_5_52
+! 16.02.2019	ggu	changed VERS_7_5_60
+!
+!***************************************************************
 
       subroutine spline(n,x,y,y2)
 
-c prepares cubic spline
+! prepares cubic spline
 
       implicit none
 
@@ -55,13 +55,13 @@ c prepares cubic spline
       real sig,p
       real u(n)		!auxiliary array
 
-c     we treat only natural boundary conditions
+!     we treat only natural boundary conditions
 
       y2(1)=0.
       y2(n)=0.
       u(1)=0.
 
-c     decomposition of tridiagonal loop
+!     decomposition of tridiagonal loop
 
       do i=2,n-1
         sig=(x(i)-x(i-1))/(x(i+1)-x(i-1))
@@ -71,7 +71,7 @@ c     decomposition of tridiagonal loop
      *      /(x(i)-x(i-1)))/(x(i+1)-x(i-1))-sig*u(i-1))/p
       end do
 
-c     back substitution
+!     back substitution
 
       do i=n-1,1,-1
         y2(i)=y2(i)*y2(i+1)+u(i)
@@ -79,11 +79,11 @@ c     back substitution
 
       end
 
-c***************************************************************
+!***************************************************************
 
       subroutine splint(n,xa,ya,y2a,x,y)
 
-c evaluates spline -> gives back y(x)
+! evaluates spline -> gives back y(x)
 
       implicit none
 
@@ -97,7 +97,7 @@ c evaluates spline -> gives back y(x)
       integer klo,khi,k
       real a,b,h
 
-c     search for x by bisection
+!     search for x by bisection
 
       klo=1
       khi=n
@@ -121,13 +121,13 @@ c     search for x by bisection
 
       end
 
-c***************************************************************
-c***************************************************************
-c***************************************************************
+!***************************************************************
+!***************************************************************
+!***************************************************************
 
 	subroutine spltst
 
-c test spline
+! test spline
 
 	implicit none
 
@@ -162,11 +162,11 @@ c test spline
 
 	end
 	  
-c***************************************************************
+!***************************************************************
 
-c	program spltest
-c	call spltst
-c	end
+!	program spltest
+!	call spltst
+!	end
 
-c***************************************************************
+!***************************************************************
 

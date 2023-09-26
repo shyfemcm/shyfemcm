@@ -23,45 +23,45 @@
 !
 !--------------------------------------------------------------------------
 
-c-------------------------------------------------------------
-c header file for ETS file format
-c-------------------------------------------------------------
-c
-c ftype		file id
-c maxvers	newest version of file
-c maxcomp	compatible function calls down to here
-c
-c ndim		number of possible entries (open files)
-c nitdim	number of integer values to be stored
-c nchdim	number of string values to be stored
-c
-c etsitem	number of maximum entries in table
-c
-c etsvar	integer parameters of open files
-c etschar	string parameters of open files
-c
-c etsvar(0,n)   iunit
-c etsvar(1,n)   nvers
-c etsvar(2,n)   nkn
-c etsvar(3,n)   not used
-c etsvar(4,n)   nlv
-c etsvar(5,n)   nvar
-c etsvar(6,n)   date
-c etsvar(7,n)   time
-c
-c etschar(1,n)  title
-c etschar(2,n)  femver
-c
-c-------------------------------------------------------------
-c parameters
-c-------------------------------------------------------------
+!-------------------------------------------------------------
+! header file for ETS file format
+!-------------------------------------------------------------
+!
+! ftype		file id
+! maxvers	newest version of file
+! maxcomp	compatible function calls down to here
+!
+! ndim		number of possible entries (open files)
+! nitdim	number of integer values to be stored
+! nchdim	number of string values to be stored
+!
+! etsitem	number of maximum entries in table
+!
+! etsvar	integer parameters of open files
+! etschar	string parameters of open files
+!
+! etsvar(0,n)   iunit
+! etsvar(1,n)   nvers
+! etsvar(2,n)   nkn
+! etsvar(3,n)   not used
+! etsvar(4,n)   nlv
+! etsvar(5,n)   nvar
+! etsvar(6,n)   date
+! etsvar(7,n)   time
+!
+! etschar(1,n)  title
+! etschar(2,n)  femver
+!
+!-------------------------------------------------------------
+! parameters
+!-------------------------------------------------------------
 
 ! revision log :
 !
 ! 28.01.2014	ggu	changed VERS_6_1_71
 ! 16.02.2019	ggu	changed VERS_7_5_60
 
-c-------------------------------------------------------------
+!-------------------------------------------------------------
 
 
         integer ftype,maxvers,maxcomp
@@ -70,9 +70,9 @@ c-------------------------------------------------------------
         integer ndim,nitdim,nchdim
         parameter(ndim=10,nitdim=7,nchdim=2)
 
-c-------------------------------------------------------------
-c common
-c-------------------------------------------------------------
+!-------------------------------------------------------------
+! common
+!-------------------------------------------------------------
 
         integer etsitem
         common /etsitm/etsitem
@@ -83,15 +83,15 @@ c-------------------------------------------------------------
         character*80 etschar(nchdim,ndim)
         common /etschar/etschar
 
-c-------------------------------------------------------------
-c save
-c-------------------------------------------------------------
+!-------------------------------------------------------------
+! save
+!-------------------------------------------------------------
 
         save /etsitm/
         save /etsvar/
         save /etschar/
 
-c-------------------------------------------------------------
-c end of header
-c-------------------------------------------------------------
+!-------------------------------------------------------------
+! end of header
+!-------------------------------------------------------------
 

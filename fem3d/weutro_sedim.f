@@ -24,24 +24,24 @@
 !
 !--------------------------------------------------------------------------
 
-c weutro_sedim - sediment routines for weutro
-c
-c revision log :
-c
+! weutro_sedim - sediment routines for weutro
+!
+! revision log :
+!
 ! 20.06.2003	ggu&dmc	new routine for sediments
-c 18.04.2008	ggu	utility routines for bio3d taken out
-c 23.03.2010	ggu	changed v6.1.1
-c 07.06.2011	ggu	changed VERS_6_1_25
-c 22.11.2011	ggu	changed VERS_6_1_37
-c 27.06.2016	ggu	changed VERS_7_5_16
-c 16.02.2019	ggu	changed VERS_7_5_60
-c 13.03.2019	ggu	changed VERS_7_5_61
-c
-c********************************************************************
+! 18.04.2008	ggu	utility routines for bio3d taken out
+! 23.03.2010	ggu	changed v6.1.1
+! 07.06.2011	ggu	changed VERS_6_1_25
+! 22.11.2011	ggu	changed VERS_6_1_37
+! 27.06.2016	ggu	changed VERS_7_5_16
+! 16.02.2019	ggu	changed VERS_7_5_60
+! 13.03.2019	ggu	changed VERS_7_5_61
+!
+!********************************************************************
 
 	subroutine wsedim(k,t,dt,vol,depth,vel,stp,c,cs)
 
-c EUTRO 0-Dimensional (Sediments)
+! EUTRO 0-Dimensional (Sediments)
 
         implicit none
 
@@ -174,7 +174,7 @@ c EUTRO 0-Dimensional (Sediments)
 
         call euler(4,dt,vol,ca,caold,cds)
         call euler(2,dt,volsed,ca(5),caold(5),cds(5))
-c	write(6,*)cds
+!	write(6,*)cds
 
 	if( debug ) then
 	  write(6,*) (ca(i),i=1,8)
@@ -189,13 +189,13 @@ c	write(6,*)cds
 	cs(2) = ca(6)		!onsed
 	if(c(7).lt.0.) then
 	c(7)=0
-	write(6,*) 'wsedim ctrl on ',c(7),ca(3),on,cds(6)
-     +			,onsink,onresusp,ons2
+	write(6,*) 'wsedim ctrl on ',c(7),ca(3),on,cds(6) &
+     &			,onsink,onresusp,ons2
 	end if
 	if(c(8).lt.0)then
 	c(8)=0
-	write(6,*) 'wsedim ctrl  op',c(8),ca(1),op,cds(5)
-     +			,opsink,opresusp,ops2
+	write(6,*) 'wsedim ctrl  op',c(8),ca(1),op,cds(5) &
+     &			,opsink,opresusp,ops2
 	end if
 	if(cs(1).lt.0.or.cs(2).lt.0)then
 	write(6,*)'wsedim ctrl',cs(1),cs(2),depth,op,on
@@ -203,7 +203,7 @@ c	write(6,*)cds
 
 	end
 
-c********************************************************************
+!********************************************************************
 
 	subroutine tempcoef(stemp,kpt,knt)
 
@@ -220,11 +220,11 @@ c********************************************************************
 
 	end
 
-c********************************************************************
+!********************************************************************
 
         subroutine pn_tot(it,nstate,nsstate,tstot,tsstot)
 
-c computes total of N and P
+! computes total of N and P
 
         implicit none
 
@@ -249,11 +249,11 @@ c computes total of N and P
 
         end
 
-c********************************************************************
+!********************************************************************
 
 	subroutine loicz(k,t,dt,vol,depth,vel,stp,cs)
 
-c EUTRO 0-D (LOICZ BUdgeting Procedure)
+! EUTRO 0-D (LOICZ BUdgeting Procedure)
 
 	implicit none
 
@@ -302,5 +302,5 @@ c EUTRO 0-D (LOICZ BUdgeting Procedure)
 
 	end
 
-c********************************************************************
+!********************************************************************
 

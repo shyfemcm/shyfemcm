@@ -680,12 +680,12 @@
               write(6,*) 'Cannot open/create file logbio.txt'
               stop
              else
-              write(6,*) 'Aquabc_fem: File logbio.txt on unit: ',
-     +         ulogbio
-              write(ulogbio,*)
-     +           '      STRANGE VALUES FOR AQUABC VARIABLES'
-              write(ulogbio,*)
-     +           'Var.No Value  Node Level Time  Checking moment'
+              write(6,*) 'Aquabc_fem: File logbio.txt on unit: ', &
+     &         ulogbio
+              write(ulogbio,*) &
+     &           '      STRANGE VALUES FOR AQUABC VARIABLES'
+              write(ulogbio,*) &
+     &           'Var.No Value  Node Level Time  Checking moment'
            end if
           end if
 
@@ -747,8 +747,8 @@
           call get_first_dtime(dtime0)
           
           nvar = nstate
-          call bnds_init_new(what,dtime0,nintp,nvar,nkn,nlv
-     +                     ,ebound,idbio)
+          call bnds_init_new(what,dtime0,nintp,nvar,nkn,nlv &
+     &                     ,ebound,idbio)
 
 
 !-----------------------------------------------------------------------
@@ -959,8 +959,8 @@
          lmax_fast(k) = lmax
 
 ! gets meteorological variables
-         call meteo_get_heat_values(k,ITOT,tempair,rh,twetbulb,
-     +                         windspeed,cloudc,pr)  !New routine produced by Georg
+         call meteo_get_heat_values(k,ITOT,tempair,rh,twetbulb, &
+     &                         windspeed,cloudc,pr)  !New routine produced by Georg
 
          atemp_fast  (k) = tempair
          wind_fast   (k) = windspeed
@@ -1002,27 +1002,27 @@
          vol_old_fast(k,l) = volold
          area_fast   (k,l) = area
 
-         if (is_nan(depth).or.depth.eq.0)
-     +        then
-          print *,
-     +   'aquabc_II_fem_interface: Depth is NaN or zero:', depth,
-     +         'on level: ', l, 'on node: ',k
+         if (is_nan(depth).or.depth.eq.0) &
+     &        then
+          print *, &
+     &   'aquabc_II_fem_interface: Depth is NaN or zero:', depth, &
+     &         'on level: ', l, 'on node: ',k
           stop
          end if
 
-        if (is_nan(vol).or.vol.eq.0)
-     +        then
-         print *,
-     +   'aquabc_II_fem_interface: Volume is NaN or zero:', vol,
-     +         'on level: ', l, 'on node: ',k
+        if (is_nan(vol).or.vol.eq.0) &
+     &        then
+         print *, &
+     &   'aquabc_II_fem_interface: Volume is NaN or zero:', vol, &
+     &         'on level: ', l, 'on node: ',k
          stop
         end if
 
-         if (is_nan(area).or.area.eq.0)
-     +       then
-          print *,
-     +   'aquabc_II_fem_interface: Area is NaN or zero:', area,
-     +         'on level: ', l, 'on node: ',k
+         if (is_nan(area).or.area.eq.0) &
+     &       then
+          print *, &
+     &   'aquabc_II_fem_interface: Area is NaN or zero:', area, &
+     &         'on level: ', l, 'on node: ',k
           stop
          end if
 
@@ -1078,8 +1078,8 @@
              end do
                          
              else
-              es_fast0(1:nkn,1:noslay,1:nsstate)=
-     +                    es_fast1(1:nkn,1:noslay,1:nsstate)
+              es_fast0(1:nkn,1:noslay,1:nsstate)= &
+     &                    es_fast1(1:nkn,1:noslay,1:nsstate)
              end if  
 
             end if
@@ -1160,10 +1160,10 @@
 
       do i=1,nstate
 
-          call scal_adv(what,i
-     +                          ,e(1,1,i),idbio
-     +                          ,rkpar,wsink
-     +                          ,difhv,difv,difmol)
+          call scal_adv(what,i &
+     &                          ,e(1,1,i),idbio &
+     &                          ,rkpar,wsink &
+     &                          ,difhv,difv,difmol)
 !         calculates total mass for each variable
           call tsmass (e(1,1,i),1,nlvdi,tstot(i)) !mass control
 
@@ -1232,8 +1232,8 @@
      *                  NDGTSMX,NDGTS, DGTSNOD, DGTSFUN)
 
          if(idump.eq.1 .and. it .eq. itend) then
-            call  dump_aquabc('dump_wc.dat',e,
-     +                 nkndi,nkn,nlvdi,nstate)
+            call  dump_aquabc('dump_wc.dat',e, &
+     &                 nkndi,nkn,nlvdi,nstate)
          end if
 
 
@@ -1254,8 +1254,8 @@
 !          Recalculates NH4 and PO4 as solute concentrations in porewater
             call sed_recalc_final(es)
 
-            call  dump_aquabc('dump_bs.dat',es,
-     +                 nkndi,nkn,noslay,nsstate)
+            call  dump_aquabc('dump_bs.dat',es, &
+     &                 nkndi,nkn,noslay,nsstate)
            end if !idump
 
           end if !bsedim
@@ -1274,7 +1274,7 @@
 
       end
 
-c*************************************************************
+!*************************************************************
 !*************************************************************
 !*************************************************************
 !*************************************************************
@@ -1323,8 +1323,8 @@ c*************************************************************
           
            !print *,'hlv_sed = ',hlv_sed
            !stop
-            call shyfem_init_scalar_file_hlv
-     +          ('bbs',nsoutput,noslay,hlv_sed,id_file)
+            call shyfem_init_scalar_file_hlv &
+     &          ('bbs',nsoutput,noslay,hlv_sed,id_file)
             da_outs(4) = id_file
             write(6,*) 'Binary output for BS model initialized...'
           end if
@@ -1351,8 +1351,8 @@ c*************************************************************
           id_file = nint(da_out(4))
           do i=1,noutput
             id_var = 100 + i
-            call shy_write_scalar_record(id_file,dtime,id_var,nlvdi
-     +                                          ,wc_output(1,1,i))
+            call shy_write_scalar_record(id_file,dtime,id_var,nlvdi &
+     &                                          ,wc_output(1,1,i))
           end do
           print *,'Binary output for WC vars done'
         end if
@@ -1379,15 +1379,15 @@ c*************************************************************
           id_file = nint(da_outs(4))
           do i=1,nsoutput
             id_var = 200 + i
-            call shy_write_scalar_record(id_file,dtime,id_var,noslay
-     +                                          ,sed_output(1,1,i))
+            call shy_write_scalar_record(id_file,dtime,id_var,noslay &
+     &                                          ,sed_output(1,1,i))
           end do
           print *,'Binary output for BS vars done'
         end if
 
         end
 
-c*************************************************************
+!*************************************************************
 
 
 
@@ -1853,15 +1853,15 @@ c*************************************************************
 	            write(6,*) '------------------'
 
 	            if(ltsfun(j).le.0) then
-                      write(6,*) 'PROBLEMS ENCOUNTERED WHEN OPENING ',
-     +                           'TIME SERIES FILE FOR LOADING ', j
+                      write(6,*) 'PROBLEMS ENCOUNTERED WHEN OPENING ', &
+     &                           'TIME SERIES FILE FOR LOADING ', j
 	                write(6,*) ''
 			        ltsfer = 1
 	            else
-                      write(6,*) 'Unit of the loading time series file:'
-     +                           ,ltsfun(j)
-                      write(6,*) 'Name of the loading time series file:'
-     +                           ,ltsfnm(j)
+                      write(6,*) 'Unit of the loading time series file:' &
+     &                           ,ltsfun(j)
+                      write(6,*) 'Name of the loading time series file:' &
+     &                           ,ltsfnm(j)
 	                write(6,*) ''
 	            end if
 
@@ -1908,8 +1908,8 @@ c*************************************************************
 	            ilast = 1
                   close(nb)
 	        else
-                  write(6,*) 'SIMULATION START : ', (it - idt),
-     +			' START OF THE LOAD INTERVAL : ', itload
+                  write(6,*) 'SIMULATION START : ', (it - idt), &
+     &			' START OF THE LOAD INTERVAL : ', itload
 
                   write(6,*)'NEXT LOADING TIME INTERVAL WILL BE READ...'
 
@@ -1917,8 +1917,8 @@ c*************************************************************
                   irec = 8
 
 		          do j = 1, nimmis
-	                read(nb, 5020, err=94)
-     +				(areaload(j,ivar), ivar=1,nstate)
+	                read(nb, 5020, err=94) &
+     &				(areaload(j,ivar), ivar=1,nstate)
 		          end do
 
 		          write(6,*) 'RECORD 8 OF THE LOADING FILE READ'
@@ -1986,16 +1986,16 @@ c*************************************************************
 !                 Read the RECORD 8 of LOADING FILE TYPE 2
                   irec = 8
 
-	            read(ltsfun(j), 5060, err=94)
-     +			  itloa2(j), (areaload(j,ivar), ivar=1,nstate)
+	            read(ltsfun(j), 5060, err=94) &
+     &			  itloa2(j), (areaload(j,ivar), ivar=1,nstate)
 
 		          write(6,*) 'RECORD 8 OF THE LOADING FILE READ'
 
 				  if(itloa2(j).lt.(it-idt)) then
 
                       if(itloa2(j).lt.0) then
-                          write(6,*) 'FOR THIS SIMULATION NO LOADS WILL'
-     +					         , ' BE READ FOR LOADING ', j
+                          write(6,*) 'FOR THIS SIMULATION NO LOADS WILL' &
+     &					         , ' BE READ FOR LOADING ', j
                           write(6,*) 'ZERO LOADS ASSUMED FOR ', j
 
 						  do jj=1, nstate
@@ -2005,12 +2005,12 @@ c*************************************************************
 						ilast2(j) = 1
                           close(ltsfun(j))
 	                else
-                          write(6,*) 'SIMULATION START : ', (it - idt),
-     +			        ' START OF THE LOAD INTERVAL FOR LOADING ', j,
-     +                    ' : ', itloa2(j)
+                          write(6,*) 'SIMULATION START : ', (it - idt), &
+     &			        ' START OF THE LOAD INTERVAL FOR LOADING ', j, &
+     &                    ' : ', itloa2(j)
 
-                          write(6,*)'READING THE NEXT LOADING TIME ',
-     +					          'INTERVAL'
+                          write(6,*)'READING THE NEXT LOADING TIME ', &
+     &					          'INTERVAL'
 
                           goto 2
 
@@ -2029,8 +2029,8 @@ c*************************************************************
 !                 Read the RECORD 8 of LOADING FILE TYPE 2
                   irec = 8
 
-	            read(ltsfun(j), 5060, err=94)
-     +			itloa2(j), (nareaload(j,ivar), ivar=1,nstate)
+	            read(ltsfun(j), 5060, err=94) &
+     &			itloa2(j), (nareaload(j,ivar), ivar=1,nstate)
 
 	            inext2(j) = 1
 
@@ -2051,8 +2051,8 @@ c*************************************************************
 
 !             CHECK IF TIME FOR THE NEXT LOADING INTERVAL
               if(((it+idt).ge.itloa2(j)).and.(ilast2(j).eq.0)) then
-	            write(6,*) 'NEW LOADING INTERVAL STARTING NEXT TIME ',
-     +			           'STEP FOR LOAD ', j
+	            write(6,*) 'NEW LOADING INTERVAL STARTING NEXT TIME ', &
+     &			           'STEP FOR LOAD ', j
 
 				  do jj=1, nstate
                        areaload(j,jj) = nareaload(j,jj)
@@ -2156,15 +2156,15 @@ c*************************************************************
 	stop 'error stop setload'
 
    91 continue
-      write(6,*) 'error in record = ', irec, ' at row = ', j, 'node = ',
-     +            karee(j)
+      write(6,*) 'error in record = ', irec, ' at row = ', j, 'node = ', &
+     &            karee(j)
 	write(6,*) 'undefined loading area'
       write(6,*) 'Please check your loading file'
 	stop 'error stop setload'
 
    92 continue
-      write(6,*) 'error in record = ', irec,   ' at row = ', j,
-     +           ' loading area = ', iaree(j), ' node = ', karee(j)
+      write(6,*) 'error in record = ', irec,   ' at row = ', j, &
+     &           ' loading area = ', iaree(j), ' node = ', karee(j)
 	write(6,*) 'undefined nodes for loadings'
 	write(6,*) 'Please check your loading file'
 	stop 'error stop setload'
@@ -2176,28 +2176,28 @@ c*************************************************************
 	stop 'error stop setload'
 
    94	continue
-	write(6,*) 'read error in record = ',irec,' at row = ', j,
-     +           ' ivar = ', ivar
+	write(6,*) 'read error in record = ',irec,' at row = ', j, &
+     &           ' ivar = ', ivar
 	write(6,*) '... reading file ','loads.dat'
       write(6,*) 'Please check your loading file'
 	stop 'error stop setload'
 
    95 continue
       write(6,*) 'Array dimension error :'
-	write(6,*) 'This executeable image was compiled for ', nimmax,
-     + ' loadings but you use ', nimmis , ' loadings. Please deacrease',
-     + ' the number of loadings in the loads input file RECORD 3 or ',
-     + ' change nimmax parameter in SUBROUTINE SETLOAD to ', nimmis,
-     + ' or greater and recompile.'
+	write(6,*) 'This executeable image was compiled for ', nimmax, &
+     & ' loadings but you use ', nimmis , ' loadings. Please deacrease', &
+     & ' the number of loadings in the loads input file RECORD 3 or ', &
+     & ' change nimmax parameter in SUBROUTINE SETLOAD to ', nimmis, &
+     & ' or greater and recompile.'
 	stop 'error stop setload'
 
    96 continue
       write(6,*) 'Array dimension error :'
-	write(6,*) 'This executeable image was compiled for ', nodmax,
-     + ' nodes for loadings but you use ', nodes , ' nodes.',
-     + ' Please deacrease the number of nodes in the loads input ',
-     + 'file RECORD 3 or change nodmax parameter in SUBROUTINE SETLOAD',
-     + ' to ', nodes, ' or greater and recompile.'
+	write(6,*) 'This executeable image was compiled for ', nodmax, &
+     & ' nodes for loadings but you use ', nodes , ' nodes.', &
+     & ' Please deacrease the number of nodes in the loads input ', &
+     & 'file RECORD 3 or change nodmax parameter in SUBROUTINE SETLOAD', &
+     & ' to ', nodes, ' or greater and recompile.'
 	stop 'error stop setload'
 
    97	continue
@@ -2207,21 +2207,21 @@ c*************************************************************
    98 continue
 
 	if(preitl.eq.0) then
-	    write(6,*) 'read error in record = ',irec,' Please check ',
-     +               'RECORD 7 of the first loading interval.'
+	    write(6,*) 'read error in record = ',irec,' Please check ', &
+     &               'RECORD 7 of the first loading interval.'
 	else
-	    write(6,*) 'read error in record = ',irec,' Please check ',
-     +               'RECORD 7 of the loading interval next to the ',
-     +               'interval staring at ', preitl, ' secs.'
+	    write(6,*) 'read error in record = ',irec,' Please check ', &
+     &               'RECORD 7 of the loading interval next to the ', &
+     &               'interval staring at ', preitl, ' secs.'
       end if
 	stop 'error stop setload'
 
   100 continue
       write(6,*) 'Time error :'
-      write(6,*) 'Next loading time interval starts before the ',
-     +           'current time interval. Please check RECORD 7 ',
-     +           'after the time interval starting at ', preitl,
-     +           ' secs.'
+      write(6,*) 'Next loading time interval starts before the ', &
+     &           'current time interval. Please check RECORD 7 ', &
+     &           'after the time interval starting at ', preitl, &
+     &           ' secs.'
 	stop 'error stop setload'
 
   101	continue
@@ -2339,25 +2339,25 @@ c*************************************************************
             val = a(l,i)
             if( is_r_nan(val) ) then
               inan = inan + 1
-              if( debug ) write(ul,'(I3,G11.3,I5,I2,I10,1X,A16)') nvar,
-     +                        val,ipv(i),l,it,text
+              if( debug ) write(ul,'(I3,G11.3,I5,I2,I10,1X,A16)') nvar, &
+     &                        val,ipv(i),l,it,text
             else if(bval .and. (val .lt. vmin .or. val .gt. vmax)) then
               iout = iout + 1
-              if( debug ) write(ul,'(I3,G11.3,I5,I2,I10,1x,A16)') nvar,
-     +                        val,ipv(i),l,it,text
+              if( debug ) write(ul,'(I3,G11.3,I5,I2,I10,1x,A16)') nvar, &
+     &                        val,ipv(i),l,it,text
             end if
           end do
         end do
 
         if( inan .gt. 0 .or. iout .gt. 0 ) then
-          write(6,'(2A13,A4,A16,A2,2(A5,I4))') 'CHECK2DBIO: ',
-     +  textgen," (",text,") ",
-     +  ' NaN=',inan,' OUT=',iout
+          write(6,'(2A13,A4,A16,A2,2(A5,I4))') 'CHECK2DBIO: ', &
+     &  textgen," (",text,") ", &
+     &  ' NaN=',inan,' OUT=',iout
         end if
 
         end  !check2Dbio
 
-c*************************************************************
+!*************************************************************
 
 
       function max_int(array, index)
@@ -2382,7 +2382,7 @@ c*************************************************************
 
 	end  !max_int
 
-c*********************************************************
+!*********************************************************
 
        subroutine inicfil_aquabc(name,var,nvar)
 ! initializes state variables nodal values for WC model from file
@@ -2481,8 +2481,8 @@ c*********************************************************
       if(lmax .gt. nlvdi ) goto 99
 
       if( ivars .ne. nvar ) goto 96
-      if(ftype .ne. 1 .and. ftype .ne. 2
-     +  .and. ftype .ne. 3 .and. ftype .ne. 4) goto 91
+      if(ftype .ne. 1 .and. ftype .ne. 2 &
+     &  .and. ftype .ne. 3 .and. ftype .ne. 4) goto 91
 
 !********************************************************
 ! FILE TYPE 2 (spatialy heterogeneous initial conditions)
@@ -2619,8 +2619,8 @@ c*********************************************************
         write(6,*) '... reading file',file
         stop 'error stop inicfil_aquabc'
    91   continue
-        write(6,*)
-     +   'bad file type descriptor: value 1, 2 or 3 is allowed!'
+        write(6,*) &
+     &   'bad file type descriptor: value 1, 2 or 3 is allowed!'
         write(6,*) '... reading file',file
         stop 'error stop inicfil_aquabc'
    96   continue
@@ -2748,8 +2748,8 @@ c*********************************************************
 
 
       if( ivars .ne. nvar ) goto 96
-      if(ftype .ne. 1 .and. ftype .ne. 2
-     +  .and. ftype .ne. 3 .and. ftype .ne. 4) goto 91
+      if(ftype .ne. 1 .and. ftype .ne. 2 &
+     &  .and. ftype .ne. 3 .and. ftype .ne. 4) goto 91
 
 !********************************************************
 ! FILE TYPE 2 (spatialy heterogeneous initial conditions)
@@ -2886,8 +2886,8 @@ c*********************************************************
         write(6,*) '... reading file',file
         stop 'error stop inicfils_aquabc'
    91   continue
-        write(6,*)
-     +   'bad file type descriptor: value 1, 2 or 3 is allowed!'
+        write(6,*) &
+     &   'bad file type descriptor: value 1, 2 or 3 is allowed!'
         write(6,*) '... reading file',file
         stop 'error stop inicfils_aquabc'
    96   continue
@@ -2915,7 +2915,7 @@ c*********************************************************
 
         subroutine print_real_time(date,time)
 
-c prints date and time, gets date and time
+! prints date and time, gets date and time
 
         implicit none
         character  date*8, time*10           !Added by Petras 11.09.2004
@@ -3112,22 +3112,22 @@ c prints date and time, gets date and time
 
 
       if(NBIOTS.LT.0) then
-          write(6,*) 'NUMBER NODES FOR TIME SERIES OUTPUTS',
-     +              'CANNOT BE NEGATIVE'
+          write(6,*) 'NUMBER NODES FOR TIME SERIES OUTPUTS', &
+     &              'CANNOT BE NEGATIVE'
           stop 'error stop biotser_init'
       end if
 
 
        if (NBIOTS.GT.NBIOTSMX) then
-           write(6,*) 'This executable image was compiled for ',
-     +           NBIOTSMX, ' number of AQUABC time series outputs.'
-           write(6,*) 'please change  NBIOTSMX in aquabc.h from'
-     +           , NBIOTSMX, ' to ', NBIOTS, ' and recompile.'
+           write(6,*) 'This executable image was compiled for ', &
+     &           NBIOTSMX, ' number of AQUABC time series outputs.'
+           write(6,*) 'please change  NBIOTSMX in aquabc.h from' &
+     &           , NBIOTSMX, ' to ', NBIOTS, ' and recompile.'
            stop 'error stop biotser_init'
        end if
 
-       write(6,*) 'AQUABC TIME SERIES OUTPUT TO ASCII ',
-     +            'FILES WILL BE CREATED'
+       write(6,*) 'AQUABC TIME SERIES OUTPUT TO ASCII ', &
+     &            'FILES WILL BE CREATED'
 
 
       write(6,*) 'NUMBER OF  NODES WITH TIME SERIES OUTPUTS : ', NBIOTS
@@ -3138,8 +3138,8 @@ c prints date and time, gets date and time
        read(nb, *, err=100, end=200) BIOTSNOD(i), BTSERNAME(i)
        BIOTSFUN(i) = ifileo(70+i,trim(adjustl(BTSERNAME(i))),'f','u')
        if(BIOTSFUN(i).le.0) then
-            write(6,*) 'Cannot open/create the AQUABC time series ',
-     +                   ' output file ', i
+            write(6,*) 'Cannot open/create the AQUABC time series ', &
+     &                   ' output file ', i
               write(6,*) 'UNIT : ', BIOTSFUN(i)
               itroub = itroub + 1
        else
@@ -3165,8 +3165,8 @@ c prints date and time, gets date and time
 	    write(6,*) 'NO DIAGNOSTIC TIME SERIES OUTPUT TO ASCII FILES'
 	    return
 	else
-	    write(6,*) 'DIAGNOSTIC TIME SERIES OUTPUT TO ASCII FILES ',
-     +                'WILL BE CREATED'
+	    write(6,*) 'DIAGNOSTIC TIME SERIES OUTPUT TO ASCII FILES ', &
+     &                'WILL BE CREATED'
 	end if
 
 C     Read RECORD 4 - Read two lines
@@ -3179,46 +3179,46 @@ C         Read RECORD 5
           read(nb, 5010, err=103) header
           write(*,*) 'RECORD 5 Read for state variable ', j
 
-c          write(6,*)'bioser_init:', 'j=',j, 'NDGTS: ',NDGTS
+!          write(6,*)'bioser_init:', 'j=',j, 'NDGTS: ',NDGTS
 
 C         Read RECORD 6
           read(nb, *, err=104) NDGTS(j)
           write(*,*) 'RECORD 6 Read for state variable ', j
 	    if(NDGTS(j).LT.0) then
-           write(6,*) 'NUMBER OF DIAGNOSTIC TIME SERIES OUTPUTS FOR ',
-     +             'STATE VARIABLE ', j, ' IS ENTERED LESS THAN ZERO'
-           write(6,*) 'NUMBER OF DIAGNOSTIC TIME SERIES OUTPUTS ',
-     +		           'CANNOT BE NEGATIVE'
+           write(6,*) 'NUMBER OF DIAGNOSTIC TIME SERIES OUTPUTS FOR ', &
+     &             'STATE VARIABLE ', j, ' IS ENTERED LESS THAN ZERO'
+           write(6,*) 'NUMBER OF DIAGNOSTIC TIME SERIES OUTPUTS ', &
+     &		           'CANNOT BE NEGATIVE'
 	        stop 'error stop biotser_init'
 	    end if
 
 
 	    if(NDGTS(j).GT.NBIOTSMX) then
-              write(6,*) 'This executable image was compiled for ',
-     +             NDGTSMX, ' number of EUTRO diagnostic time series ',
-     +                      'outputs.'
-              write(6,*) 'please change parameter NDGTSMX ',
-     +                   'in AQUABC_AOUT.H ',
-     +            'from', NDGTSMX, ' to ', NDGTS(j), ' and recompile.'
+              write(6,*) 'This executable image was compiled for ', &
+     &             NDGTSMX, ' number of EUTRO diagnostic time series ', &
+     &                      'outputs.'
+              write(6,*) 'please change parameter NDGTSMX ', &
+     &                   'in AQUABC_AOUT.H ', &
+     &            'from', NDGTSMX, ' to ', NDGTS(j), ' and recompile.'
 	        stop 'error stop biotser_init'
 	    end if
 
-        write(6,*)
-     +  'NUMBER OF NODES FOR DIAGNOSTIC TIME SERIES OUTPUTS ',
-     +               'FOR STATE VARIABLE ', j, ' : ', NDGTS(j)
+        write(6,*) &
+     &  'NUMBER OF NODES FOR DIAGNOSTIC TIME SERIES OUTPUTS ', &
+     &               'FOR STATE VARIABLE ', j, ' : ', NDGTS(j)
 	    if(NDGTS(j).GT.0) then
 !             Read RECORD 7
 	        do i=1, NDGTS(j)
 		        read(nb, *, err=105) DGTSNOD(i,j), DTSERNAME(i,j)
           		DGTSFUN(i,j)=ifileo(70+(j*i),DTSERNAME(i,j),'f','u')
 	            if(DGTSFUN(i,j).le.0) then
-				    write(6,*) 'Cannot open/create EUTRO diagnostic',
-     +                ' time series file ', i, ' for state variable ', j
+				    write(6,*) 'Cannot open/create EUTRO diagnostic', &
+     &                ' time series file ', i, ' for state variable ', j
 				    write(6,*) 'UNIT : ', DGTSFUN(i,j)
 				    itroub = itroub + 1
 			    else
-				    write(6,*) 'EUTRO diagnostic time series file ', i
-     +			              ,' for state variable ', j, ' opened.'
+				    write(6,*) 'EUTRO diagnostic time series file ', i &
+     &			              ,' for state variable ', j, ' opened.'
                       write(6,*) 'File unit : ', DGTSFUN(i,j)
                       write(6,*) 'File name : ', DTSERNAME(i,j)
 
@@ -3236,8 +3236,8 @@ C         Read RECORD 6
 !             CONVERT EXTERNAL NODES TO INTERNAL
               call n2int(NDGTS(j), DUMMY, berror)
 	        if(berror) then
-	            write(6,*) 'Problem in converting external nodes to ',
-     +		           'internal, when processing state variable ', j
+	            write(6,*) 'Problem in converting external nodes to ', &
+     &		           'internal, when processing state variable ', j
 			    stop 'error stop: biotser_init'
 		    end if
 	        do i=1, NDGTS(j)
@@ -3255,52 +3255,52 @@ C         Read RECORD 6
       return
 
    97 continue
-      write(6,*)
-     + 'Cannot open AQUABC time series output information file'
+      write(6,*) &
+     & 'Cannot open AQUABC time series output information file'
 
 	stop 'error stop biotser_init'
    98 continue
-      write(6,*) 'Read error in RECORD 1 of AQUABC time series ',
-     +           'ASCII output  information file '
+      write(6,*) 'Read error in RECORD 1 of AQUABC time series ', &
+     &           'ASCII output  information file '
 	stop 'error stop biotser_init'
    99 continue
-      write(6,*) 'Read error in RECORD 2 of AQUABC time series ',
-     +           'ASCII output  information file '
+      write(6,*) 'Read error in RECORD 2 of AQUABC time series ', &
+     &           'ASCII output  information file '
 	stop 'error stop biotser_init'
   100 continue
-      write(6,*) 'Read error in RECORD 3 of AQUABC time series   ',
-     +           'ASCII output  information file : ', i
+      write(6,*) 'Read error in RECORD 3 of AQUABC time series   ', &
+     &           'ASCII output  information file : ', i
 	stop 'error stop biotser_init'
   101 continue
-      write(6,*) 'One or several AQUABC time series ASCII output',
-     +           '  files could not be opened/created.'
+      write(6,*) 'One or several AQUABC time series ASCII output', &
+     &           '  files could not be opened/created.'
 	stop 'error stop biotser_init'
   102 continue
-      write(6,*) 'Read error in RECORD 4 of AQUABC time series',
-     +           ' ASCII output  information file '
+      write(6,*) 'Read error in RECORD 4 of AQUABC time series', &
+     &           ' ASCII output  information file '
 	stop 'error stop biotser_init'
   103 continue
-      write(6,*) 'Read error in RECORD 5 of AQUABC time series',
-     +           ' ASCII output  information file '
+      write(6,*) 'Read error in RECORD 5 of AQUABC time series', &
+     &           ' ASCII output  information file '
 	stop 'error stop biotser_init'
 
   104 continue
-      write(6,*) 'Read error in RECORD 6 of AQUABC time series ',
-     +           'ASCII output  information file'
+      write(6,*) 'Read error in RECORD 6 of AQUABC time series ', &
+     &           'ASCII output  information file'
 	stop 'error stop biotser_init'
   105 continue
-      write(6,*) 'Read error in RECORD 7 of AQUABC time series ',
-     +           'ASCII output  information file :  on line', i,
-     +           'state variable ', j
+      write(6,*) 'Read error in RECORD 7 of AQUABC time series ', &
+     &           'ASCII output  information file :  on line', i, &
+     &           'state variable ', j
 	stop 'error stop biotser_init'
 
   106 continue
-      write(6,*) 'One or several EUTRO diagnostic time ',
-     +           'series output files could not be opened/created.'
+      write(6,*) 'One or several EUTRO diagnostic time ', &
+     &           'series output files could not be opened/created.'
 	stop 'error stop biotser_init'
   200 continue
-      write(6,*) 'ERROR, LESS TIME SERIES PLOT DATA AVAILABLE ',
-     +            'THEN REQUIRED !!!'
+      write(6,*) 'ERROR, LESS TIME SERIES PLOT DATA AVAILABLE ', &
+     &            'THEN REQUIRED !!!'
       stop 'error stop biotser_init'
 	return
 	end !biotser_init
@@ -3411,20 +3411,20 @@ C         Read RECORD 6
 !     Producing output format lines
       write(noutput_char,'(i2)') noutput
       FMT_many   = '(I15,I5,' // noutput_char   // '(1x,G13.4))'             !for many layers in seconds
-      FMT_many_d = '(I4.4,2I2.2,1x,3I2.2,I5,'   //
-     +                             noutput_char // '(1x,G13.4))'             !for many layers with date and time
+      FMT_many_d = '(I4.4,2I2.2,1x,3I2.2,I5,'   // &
+     &                             noutput_char // '(1x,G13.4))'             !for many layers with date and time
       FMT_1      = '(I15,'    // noutput_char   // '(1x,G13.4))'             !for one layer state variables in seconds
-      FMT_1_d    = '(I4.4,2I2.2,1x,3I2.2,'      //
-     +                            noutput_char  // '(1x,G13.4))'             !for one layer state variables with date and time
+      FMT_1_d    = '(I4.4,2I2.2,1x,3I2.2,'      // &
+     &                            noutput_char  // '(1x,G13.4))'             !for one layer state variables with date and time
 
       write(NDIAGVAR_char,'(i2)') NDIAGVAR
 
       FMT_diag_many   = '(I15,I5,' // NDIAGVAR_char //'(1x,G13.6))'           !for many layers in seconds
-      FMT_diag_many_d = '(I4.4,2I2.2,1x,3I2.2,I5,'  //
-     +                                NDIAGVAR_char //'(1x,G13.6))'            !for many layers with date and time
+      FMT_diag_many_d = '(I4.4,2I2.2,1x,3I2.2,I5,'  // &
+     &                                NDIAGVAR_char //'(1x,G13.6))'            !for many layers with date and time
       FMT_diag_1      = '(I15,'    // NDIAGVAR_char //'(1x,G13.6))'            !for one layer diagnostic variables in seconds
-      FMT_diag_1_d    = '(I4.4,2I2.2,1x,3I2.2,'     //
-     +                                NDIAGVAR_char //'(1x,G13.6))'            !for one layer diagnostic variables with date and time
+      FMT_diag_1_d    = '(I4.4,2I2.2,1x,3I2.2,'     // &
+     &                                NDIAGVAR_char //'(1x,G13.6))'            !for one layer diagnostic variables with date and time
 
 
 
@@ -3489,11 +3489,11 @@ C         Read RECORD 6
        do i=1, NDGTS(istate)
 
         if (ilhkv(DGTSNOD(i,istate)).le.1) then
-          if(isec.eq.1) write(DGTSFUN(i,istate), FMT_diag_1) it,
-     +        (dg(1,DGTSNOD(i,istate),istate,j),j=1,NDIAGVAR)
-          if(isec.eq.0) write(DGTSFUN(i,istate), FMT_diag_1_d)
-     +                          year,month,day,hour,min,sec,
-     +        (dg(1,DGTSNOD(i,istate),istate,j),j=1,NDIAGVAR)
+          if(isec.eq.1) write(DGTSFUN(i,istate), FMT_diag_1) it, &
+     &        (dg(1,DGTSNOD(i,istate),istate,j),j=1,NDIAGVAR)
+          if(isec.eq.0) write(DGTSFUN(i,istate), FMT_diag_1_d) &
+     &                          year,month,day,hour,min,sec, &
+     &        (dg(1,DGTSNOD(i,istate),istate,j),j=1,NDIAGVAR)
 
         else
          do k=1,ilhkv(DGTSNOD(i,istate))
@@ -3519,8 +3519,8 @@ C         Read RECORD 6
       end do  !istate
 
 ! Write to the standard output
-         write(6,*) 'BIOTSER_WRITE:', what, ' rates ',
-     +           ' for defined nodes written to text files at ',it
+         write(6,*) 'BIOTSER_WRITE:', what, ' rates ', &
+     &           ' for defined nodes written to text files at ',it
 !----------------------------------------------------------------------------------
 
        return
@@ -4339,8 +4339,8 @@ C     INITIALIZE ARRAYS BEFORE READING
 
 
 
-c********************************************************************
-c********************************************************************
+!********************************************************************
+!********************************************************************
 
 
       subroutine aquabcini(bsedim,par,par_sed,PHTIME,PHTAB,
@@ -4393,15 +4393,15 @@ c********************************************************************
       endif
 
 !  Initialisation of state variables ASCII output
-       write(6,*) '--------------------------------------------------'
-     +          ,'---------------'
+       write(6,*) '--------------------------------------------------' &
+     &          ,'---------------'
        write(6,*) ''
 
-       write(6,*) 'INITIALIZING TIME SERIES AND DIAGNOSTIC ',
-     +          'ASCII OUTPUTS FOR'
-     +          ,'AQUABC Water Column VARIABLES'
-       write(6,*) '--------------------------------------------------'
-     +          ,'---------------'
+       write(6,*) 'INITIALIZING TIME SERIES AND DIAGNOSTIC ', &
+     &          'ASCII OUTPUTS FOR' &
+     &          ,'AQUABC Water Column VARIABLES'
+       write(6,*) '--------------------------------------------------' &
+     &          ,'---------------'
        write(6,*) ''
 
 
@@ -4414,10 +4414,10 @@ c********************************************************************
         stop
       end if
 
-       print *,'Control file unit number for Water Column variables ',
-     +       ' ASCII output',nb
-       print *,'Control file name for Water Column variables ',
-     +       ' ASCII output',file
+       print *,'Control file unit number for Water Column variables ', &
+     &       ' ASCII output',nb
+       print *,'Control file name for Water Column variables ', &
+     &       ' ASCII output',file
 
        call biotser_init(nb,nstate,
      *                        NBIOTSMX,NBIOTS,
@@ -4426,16 +4426,16 @@ c********************************************************************
      *                        NDGTS,DGTSNOD,DGTSFUN)
 
        if (bsedim) then
-       write(6,*) '--------------------------------------------------'
-     +          ,'---------------'
+       write(6,*) '--------------------------------------------------' &
+     &          ,'---------------'
        write(6,*) ''
 
 
-       write(6,*) 'INITIALIZING TIME SERIES AND DIAGNOSTIC ',
-     +          'ASCII OUTPUTS FOR'
-     +          ,'AQUABC Bottom Sediment VARIABLES'
-       write(6,*) '--------------------------------------------------'
-     +          ,'---------------'
+       write(6,*) 'INITIALIZING TIME SERIES AND DIAGNOSTIC ', &
+     &          'ASCII OUTPUTS FOR' &
+     &          ,'AQUABC Bottom Sediment VARIABLES'
+       write(6,*) '--------------------------------------------------' &
+     &          ,'---------------'
        write(6,*) ''
 
 

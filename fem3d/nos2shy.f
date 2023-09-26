@@ -24,31 +24,31 @@
 !
 !--------------------------------------------------------------------------
 
-c revision log :
-c
-c 18.11.1998	ggu	check dimensions with dimnos
-c 06.04.1999	ggu	some cosmetic changes
-c 03.12.2001	ggu	some extra output -> place of min/max
-c 09.12.2003	ggu	check for NaN introduced
-c 07.03.2007	ggu	easier call
-c 08.11.2008	ggu	do not compute min/max in non-existing layers
-c 07.12.2010	ggu	write statistics on depth distribution (depth_stats)
-c 06.05.2015	ggu	noselab started
-c 05.06.2015	ggu	many more features added
-c 10.09.2015	ggu	std and rms for averaging implemented
-c 11.09.2015	ggu	write in gis format
-c 23.09.2015	ggu	handle more than one file (look for itstart)
-c 19.02.2016	ggu	bug fixes for bsumvar and mode==2 (sum)
-c 22.02.2016	ggu	handle catmode
-c 28.04.2016	ggu	changed VERS_7_5_9
-c 25.05.2016	ggu	changed VERS_7_5_10
-c 07.06.2016	ggu	changed VERS_7_5_12
-c 14.11.2017	ggu	changed VERS_7_5_36
-c 22.02.2018	ggu	changed VERS_7_5_42
-c 06.07.2018	ggu	changed VERS_7_5_48
-c 16.02.2019	ggu	changed VERS_7_5_60
-c
-c**************************************************************
+! revision log :
+!
+! 18.11.1998	ggu	check dimensions with dimnos
+! 06.04.1999	ggu	some cosmetic changes
+! 03.12.2001	ggu	some extra output -> place of min/max
+! 09.12.2003	ggu	check for NaN introduced
+! 07.03.2007	ggu	easier call
+! 08.11.2008	ggu	do not compute min/max in non-existing layers
+! 07.12.2010	ggu	write statistics on depth distribution (depth_stats)
+! 06.05.2015	ggu	noselab started
+! 05.06.2015	ggu	many more features added
+! 10.09.2015	ggu	std and rms for averaging implemented
+! 11.09.2015	ggu	write in gis format
+! 23.09.2015	ggu	handle more than one file (look for itstart)
+! 19.02.2016	ggu	bug fixes for bsumvar and mode==2 (sum)
+! 22.02.2016	ggu	handle catmode
+! 28.04.2016	ggu	changed VERS_7_5_9
+! 25.05.2016	ggu	changed VERS_7_5_10
+! 07.06.2016	ggu	changed VERS_7_5_12
+! 14.11.2017	ggu	changed VERS_7_5_36
+! 22.02.2018	ggu	changed VERS_7_5_42
+! 06.07.2018	ggu	changed VERS_7_5_48
+! 16.02.2019	ggu	changed VERS_7_5_60
+!
+!**************************************************************
 
 	program nos2shy
 
@@ -64,7 +64,7 @@ c**************************************************************
         use levels
 	use iso8601
 
-c elaborates nos file
+! elaborates nos file
 
 	implicit none
 
@@ -106,7 +106,7 @@ c elaborates nos file
 	integer ifem_open_file
 	logical concat_cycle
 
-c--------------------------------------------------------------
+!--------------------------------------------------------------
 
 	ifile = 1
 	nread=0
@@ -119,9 +119,9 @@ c--------------------------------------------------------------
 	dtfirst = 0.
 	dtlast = 0.
 
-c--------------------------------------------------------------
-c set command line parameters
-c--------------------------------------------------------------
+!--------------------------------------------------------------
+! set command line parameters
+!--------------------------------------------------------------
 
         call get_shyfem_version(vers)
         version = '2.0' // ' (SHYFEM version ' // trim(vers) // ')'
@@ -135,8 +135,8 @@ c--------------------------------------------------------------
         call clo_add_option('silent',.false.,'do not write anything')
 
         call clo_add_sep('date options')
-        call clo_add_option('date date',' '
-     +		,'give reference date if not contained in file')
+        call clo_add_option('date date',' ' &
+     &		,'give reference date if not contained in file')
 
         call clo_parse_options
  
@@ -209,8 +209,8 @@ c--------------------------------------------------------------
 	  call outfile_make_hkv(nkn,nel,nen3v,hm3v,hev,hkv)
           call ilhk2e(nkn,nel,nen3v,ilhkv,ilhv)
           call adjust_layer_index(nel,nlv,hev,hlv,ilhv)
-	  call init_volume(nlvdi,nkn,nel,nlv,nen3v,ilhkv
-     +                          ,hlv,hev,hl,vol3)
+	  call init_volume(nlvdi,nkn,nel,nlv,nen3v,ilhkv &
+     &                          ,hlv,hev,hl,vol3)
 	end if
 
 	if( bverb ) call depth_stats(nkn,nlvdi,ilhkv)
@@ -259,9 +259,9 @@ c--------------------------------------------------------------
           call shy_make_header(id)
 	end if
 
-c--------------------------------------------------------------
-c loop on data
-c--------------------------------------------------------------
+!--------------------------------------------------------------
+! loop on data
+!--------------------------------------------------------------
 
 	it = 0
 	cv3 = 0.
@@ -306,13 +306,13 @@ c--------------------------------------------------------------
 	 dtlast = dtime
 	end do		!time do loop
 
-c--------------------------------------------------------------
-c end of loop on data
-c--------------------------------------------------------------
+!--------------------------------------------------------------
+! end of loop on data
+!--------------------------------------------------------------
 
-c--------------------------------------------------------------
-c write final message
-c--------------------------------------------------------------
+!--------------------------------------------------------------
+! write final message
+!--------------------------------------------------------------
 
 	if( .not. bsilent ) then
 	write(6,*)
@@ -339,9 +339,9 @@ c--------------------------------------------------------------
 	!write(6,*) 'basin: ',trim(basnam)
 	!write(6,*) 'simul: ',trim(simnam)
 
-c--------------------------------------------------------------
-c end of routine
-c--------------------------------------------------------------
+!--------------------------------------------------------------
+! end of routine
+!--------------------------------------------------------------
 
 	stop
    85	continue
@@ -357,9 +357,9 @@ c--------------------------------------------------------------
 	stop 'error stop noselab: write error'
 	end
 
-c***************************************************************
-c***************************************************************
-c***************************************************************
+!***************************************************************
+!***************************************************************
+!***************************************************************
 
         subroutine nos_transfer_simul_params(nin,id)
 
@@ -383,7 +383,7 @@ c***************************************************************
 
 	end
 
-c***************************************************************
+!***************************************************************
 
 	subroutine compat_get_files(simfile,basfile)
 
@@ -455,4 +455,4 @@ c***************************************************************
 	stop 'error stop compat_get_files: NOS files'
 	end
 
-c***************************************************************
+!***************************************************************

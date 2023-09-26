@@ -24,23 +24,23 @@
 !
 !--------------------------------------------------------------------------
 
-c system routines for Pardiso solver
-c
-c revision log :
-c
-c 12.01.2009	ggu	new file for system routines
-c 31.03.2009	ggu	call renamed to pard_*
-c 23.03.2010	ggu	changed v6.1.1
-c 10.07.2015	ggu	changed VERS_7_1_50
-c 17.07.2015	ggu	changed VERS_7_1_80
-c 20.07.2015	ggu	changed VERS_7_1_81
-c 12.10.2015	ggu	changed VERS_7_3_4
-c 15.12.2015	dbf	adjusted for new 3d framework
-c 18.01.2019	ggu	changed VERS_7_5_55
-c 16.02.2019	ggu	changed VERS_7_5_60
-c 13.03.2019	ggu	changed VERS_7_5_61
-c
-c*************************************************************************
+! system routines for Pardiso solver
+!
+! revision log :
+!
+! 12.01.2009	ggu	new file for system routines
+! 31.03.2009	ggu	call renamed to pard_*
+! 23.03.2010	ggu	changed v6.1.1
+! 10.07.2015	ggu	changed VERS_7_1_50
+! 17.07.2015	ggu	changed VERS_7_1_80
+! 20.07.2015	ggu	changed VERS_7_1_81
+! 12.10.2015	ggu	changed VERS_7_3_4
+! 15.12.2015	dbf	adjusted for new 3d framework
+! 18.01.2019	ggu	changed VERS_7_5_55
+! 16.02.2019	ggu	changed VERS_7_5_60
+! 13.03.2019	ggu	changed VERS_7_5_61
+!
+!*************************************************************************
 
       subroutine pard_init_system
 
@@ -83,7 +83,7 @@ c*************************************************************************
 
       end
 
-c*************************************************************************
+!*************************************************************************
 
 	subroutine pard_solve_system(buse3d,nndim,n,z)
 
@@ -157,8 +157,8 @@ c*************************************************************************
 		  print*, 'Pardiso iterative solution: ',precision
 		  end if
           endif
-          call pardiso_solve(0,nth,ngl,precision,csr,icsr,jcsr,
-     +          ddum,ddum)
+          call pardiso_solve(0,nth,ngl,precision,csr,icsr,jcsr, &
+     &          ddum,ddum)
 	  icall_coo = 1
         end if
 
@@ -178,8 +178,8 @@ c*************************************************************************
      .		rvec,raux)
 
 	if( bdirect ) then
-          call pardiso_solve(3,nth,ngl,precision,csr,icsr,jcsr,ddum,
-     +         ddum)
+          call pardiso_solve(3,nth,ngl,precision,csr,icsr,jcsr,ddum, &
+     &         ddum)
 	end if
 
         if( buse3d ) then
@@ -202,7 +202,7 @@ c*************************************************************************
 	stop 'error stop pard_solve_system: dimension iwork'
 	end
 
-c*************************************************************************
+!*************************************************************************
 
       subroutine pardiso_solve(pcall,nth,nrow,precision,aa,iaa,jaa,b,x)
 
@@ -345,4 +345,4 @@ c*************************************************************************
 
       end
 
-c*************************************************************************
+!*************************************************************************

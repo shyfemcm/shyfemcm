@@ -386,10 +386,10 @@
 	double precision :: l2(n) = (/0, 0, 1, 3, 1, 5, 2, 2, 2, -1/)
 	!double precision :: l1(n) = (/ 3, 2, 1, 2, 1, 2, 1, -2, 4, 0/)
 	!double precision :: l2(n) = (/ 1, 3, 1, 5, 2, 2, 2, -1, 0, 0/)
-	double precision :: r(n) = 
-     +			(/8, 33, 8, 24, 29, 98, 99, 17, 57, 108/)
-	double precision :: t(n) = 
-     +			(/1, 2, 3, 4, 5, 6, 7, 8, 9, 10/)
+	double precision :: r(n) =  &
+     &			(/8, 33, 8, 24, 29, 98, 99, 17, 57, 108/)
+	double precision :: t(n) =  &
+     &			(/1, 2, 3, 4, 5, 6, 7, 8, 9, 10/)
 	double precision :: s(n)
 	double precision :: val(-2:2,n)
 	double precision :: val1(-2:2,n)
@@ -434,10 +434,10 @@
 	!double precision :: l2(n) = (/0, 0, 1, 3, 1, 5, 2, 2, 2, -1/)
 	double precision :: l1(n) = (/ 3, 2, 1, 2, 1, 2, 1, -2, 4, 0/)
 	double precision :: l2(n) = (/ 1, 3, 1, 5, 2, 2, 2, -1, 0, 0/)
-	double precision :: r(n) = 
-     +			(/8, 33, 8, 24, 29, 98, 99, 17, 57, 108/)
-	double precision :: t(n) = 
-     +			(/1, 2, 3, 4, 5, 6, 7, 8, 9, 10/)
+	double precision :: r(n) =  &
+     &			(/8, 33, 8, 24, 29, 98, 99, 17, 57, 108/)
+	double precision :: t(n) =  &
+     &			(/1, 2, 3, 4, 5, 6, 7, 8, 9, 10/)
 	double precision :: x(n)
 	double precision :: ss
 
@@ -549,8 +549,8 @@
 	  if( bint ) then
 	    write(6,*) n,m
 	    do i=1,n
-	      write(6,1000) nint(val(:,i))
-     +				,nint(s(i)),nint(r(i))
+	      write(6,1000) nint(val(:,i)) &
+     &				,nint(s(i)),nint(r(i))
 	    end do
  1000	    format(9i8)
 	  end if

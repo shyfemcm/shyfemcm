@@ -23,28 +23,28 @@
 !
 !--------------------------------------------------------------------------
 
-c revision log :
-c
-c 21.02.2014	ggu	subroutines copied from basbathy
-c 06.05.2015	ggu	set number of max iterations (imax)
-c 10.10.2015	ggu	changed VERS_7_3_2
-c 16.12.2015	ggu	depth ht is now passed in for square interpol
-c 11.04.2016	ggu	meaning of ufact has changed, expo interp working
-c 24.01.2018	ggu	changed VERS_7_5_41
-c 18.12.2018	ggu	changed VERS_7_5_52
-c 16.02.2019	ggu	changed VERS_7_5_60
-c 14.02.2022	ggu	cosmetic changes
-c
-c****************************************************************
+! revision log :
+!
+! 21.02.2014	ggu	subroutines copied from basbathy
+! 06.05.2015	ggu	set number of max iterations (imax)
+! 10.10.2015	ggu	changed VERS_7_3_2
+! 16.12.2015	ggu	depth ht is now passed in for square interpol
+! 11.04.2016	ggu	meaning of ufact has changed, expo interp working
+! 24.01.2018	ggu	changed VERS_7_5_41
+! 18.12.2018	ggu	changed VERS_7_5_52
+! 16.02.2019	ggu	changed VERS_7_5_60
+! 14.02.2022	ggu	cosmetic changes
+!
+!****************************************************************
 
 	!program interpol
 	!end
 
-c*******************************************************************
+!*******************************************************************
 
 	function dist2(x1,y1,x2,y2)
 
-c computes squared distance (also for latlon coordinates)
+! computes squared distance (also for latlon coordinates)
 
 	implicit none
 
@@ -73,7 +73,7 @@ c computes squared distance (also for latlon coordinates)
 
 	end
 	
-c*******************************************************************
+!*******************************************************************
 
 	subroutine set_dist(isphe)
 
@@ -89,15 +89,15 @@ c*******************************************************************
 
 	end
 
-c*******************************************************************
-c*******************************************************************
-c*******************************************************************
+!*******************************************************************
+!*******************************************************************
+!*******************************************************************
 
 	subroutine interpolq(np,xp,yp,dp,ht)
 
-c interpolates depth values - works only on elements
-c
-c interpolation on squares
+! interpolates depth values - works only on elements
+!
+! interpolation on squares
 
 	use mod_depth
 	use basin
@@ -128,14 +128,14 @@ c interpolation on squares
 	logical ok(nel)
 	logical inconvex,inquad
 
-c-----------------------------------------------------------------
-c set maximum iteration imax
-c
-c imax very high makes all necessary iterations to find depth
-c imax < 0 only looks in element
-c imax = 0 looks also in bordering rectangle
-c imax > 0 makes imax iterations increasing rectangle size
-c-----------------------------------------------------------------
+!-----------------------------------------------------------------
+! set maximum iteration imax
+!
+! imax very high makes all necessary iterations to find depth
+! imax < 0 only looks in element
+! imax = 0 looks also in bordering rectangle
+! imax > 0 makes imax iterations increasing rectangle size
+!-----------------------------------------------------------------
 
 	imax = 0
 	imax = 9999999
@@ -143,9 +143,9 @@ c-----------------------------------------------------------------
 
 	flag = -999.
 
-c-----------------------------------------------------------------
-c initialize
-c-----------------------------------------------------------------
+!-----------------------------------------------------------------
+! initialize
+!-----------------------------------------------------------------
 
 	netot = 0
 
@@ -164,9 +164,9 @@ c-----------------------------------------------------------------
 	nnone = nel-netot
 	write(6,*) 'Elements without depth (start): ',nnone,'/',nel
 
-c-----------------------------------------------------------------
-c initial interpolation -> point in element
-c-----------------------------------------------------------------
+!-----------------------------------------------------------------
+! initial interpolation -> point in element
+!-----------------------------------------------------------------
 
 	do n=1,np
 	  x = xp(n)
@@ -209,9 +209,9 @@ c-----------------------------------------------------------------
 	write(6,'(a)') 'interpol      iter   without      with     total'
 	write(6,1000) 'convex: ',-1,nel-netot,netot,nel
 
-c-----------------------------------------------------------------
-c next interpolation -> point in square
-c-----------------------------------------------------------------
+!-----------------------------------------------------------------
+! next interpolation -> point in square
+!-----------------------------------------------------------------
 
 	i = 0
 	do while( netot .lt. nel .and. i .le. imax )
@@ -259,9 +259,9 @@ c-----------------------------------------------------------------
 	 i = i + 1
 	end do
 
-c-----------------------------------------------------------------
-c end up
-c-----------------------------------------------------------------
+!-----------------------------------------------------------------
+! end up
+!-----------------------------------------------------------------
 
 	netot = 0
 
@@ -278,25 +278,25 @@ c-----------------------------------------------------------------
 
 	write(6,*) 'Elements without depth (end): ',nel-netot,nel
 
-c-----------------------------------------------------------------
-c copy interpolated depths to ht
-c-----------------------------------------------------------------
+!-----------------------------------------------------------------
+! copy interpolated depths to ht
+!-----------------------------------------------------------------
 
 	ht(1:nel) = hev(1:nel)
 
-c-----------------------------------------------------------------
-c end of routine
-c-----------------------------------------------------------------
+!-----------------------------------------------------------------
+! end of routine
+!-----------------------------------------------------------------
 
 	return
  1000	format(a,4i10)
 	end
 
-c*******************************************************************
+!*******************************************************************
 
 	function inquad(xp,yp,xmin,ymin,xmax,ymax)
 
-c is (xp/yp) in quad
+! is (xp/yp) in quad
 
 	implicit none
 
@@ -315,13 +315,13 @@ c is (xp/yp) in quad
 
 	end
 
-c*******************************************************************
-c*******************************************************************
-c*******************************************************************
+!*******************************************************************
+!*******************************************************************
+!*******************************************************************
 
 	subroutine interpole(np,xp,yp,dp,nt,xt,yt,at,ht,umfact,nminimum)
 
-c interpolates depth values - exponential interpolation
+! interpolates depth values - exponential interpolation
 
 	use mod_depth
 	use basin
@@ -362,9 +362,9 @@ c interpolates depth values - exponential interpolation
 	real dist2
 	logical inconvex,inquad
 
-c-----------------------------------------------------------------
-c initialize
-c-----------------------------------------------------------------
+!-----------------------------------------------------------------
+! initialize
+!-----------------------------------------------------------------
 
 	ntot = 0
 	do n=1,nt
@@ -381,9 +381,9 @@ c-----------------------------------------------------------------
 	write(6,*)
 	write(6,*) '       loop        done       total       fact'
 
-c-----------------------------------------------------------------
-c initial interpolation -> point in element
-c-----------------------------------------------------------------
+!-----------------------------------------------------------------
+! initial interpolation -> point in element
+!-----------------------------------------------------------------
 
         nmin = nminimum
 	if( nmin .le. 0 ) nmin = 1	!at least one point is needed
@@ -455,9 +455,9 @@ c-----------------------------------------------------------------
 
 	end do
 
-c-----------------------------------------------------------------
-c end up
-c-----------------------------------------------------------------
+!-----------------------------------------------------------------
+! end up
+!-----------------------------------------------------------------
 
 	ntot = 0
 
@@ -472,9 +472,9 @@ c-----------------------------------------------------------------
 
 	write(6,*) 'Items without depth (end): ',nt-ntot,nt
 
-c-----------------------------------------------------------------
-c end of routine
-c-----------------------------------------------------------------
+!-----------------------------------------------------------------
+! end of routine
+!-----------------------------------------------------------------
 
 	return
    98	continue
@@ -482,11 +482,11 @@ c-----------------------------------------------------------------
 	stop 'error stop interpole: negative area'
 	end
 
-c*******************************************************************
+!*******************************************************************
 
 	subroutine prepare_on_elem(nt,xt,yt,at,ht,ufact)
 
-c prepares xt,yt,at,ht on nodes
+! prepares xt,yt,at,ht on nodes
 
 	use mod_depth
 	use basin
@@ -500,8 +500,8 @@ c prepares xt,yt,at,ht on nodes
 	real ht(nt)	!depth
 	real ufact	!sigma or factor to be used
 
-c if ufact > 0: use as factor times area of elem/node
-c if ufact < 0: use it directly as sigma
+! if ufact > 0: use as factor times area of elem/node
+! if ufact < 0: use it directly as sigma
 
 	integer ie,ii,k
 	real area,x0,y0,fact,sigma2
@@ -533,11 +533,11 @@ c if ufact < 0: use it directly as sigma
 
 	end
 
-c*******************************************************************
+!*******************************************************************
 
 	subroutine prepare_on_node(nt,xt,yt,at,ht,ufact)
 
-c prepares xt,yt,at,ht on nodes
+! prepares xt,yt,at,ht on nodes
 
 	use mod_depth
 	use basin
@@ -551,8 +551,8 @@ c prepares xt,yt,at,ht on nodes
 	real ht(nt)
 	real ufact	!sigma or factor to be used
 
-c if ufact > 0: use as factor times area of elem/node
-c if ufact < 0: use it directly as sigma
+! if ufact > 0: use as factor times area of elem/node
+! if ufact < 0: use it directly as sigma
 
 	integer ie,ii,k
 	real area,fact,sigma2
@@ -588,13 +588,13 @@ c if ufact < 0: use it directly as sigma
 
 	end
 
-c*******************************************************************
-c*******************************************************************
-c*******************************************************************
+!*******************************************************************
+!*******************************************************************
+!*******************************************************************
 
 	subroutine interpola(np,xp,yp,dp,ap,nt,xt,yt,at,ht)
 
-c interpolates depth values with auto-correlation
+! interpolates depth values with auto-correlation
 
 	use mod_depth
 	use basin
@@ -640,9 +640,9 @@ c interpolates depth values with auto-correlation
 	real dist2
 	logical inconvex,inquad
 
-c-----------------------------------------------------------------
-c initialize
-c-----------------------------------------------------------------
+!-----------------------------------------------------------------
+! initialize
+!-----------------------------------------------------------------
 
 	ntot = 0
 	do n=1,nt
@@ -657,9 +657,9 @@ c-----------------------------------------------------------------
 
 	write(6,*) 'Points without depth (start): ',nt-ntot,nt
 
-c-----------------------------------------------------------------
-c initial interpolation -> point in element
-c-----------------------------------------------------------------
+!-----------------------------------------------------------------
+! initial interpolation -> point in element
+!-----------------------------------------------------------------
 
 	nintpol = 0
 	ntot = 0
@@ -705,9 +705,9 @@ c-----------------------------------------------------------------
 
 	write(6,*) 'Items without depth : ',nt-ntot,nt
 
-c-----------------------------------------------------------------
-c end up
-c-----------------------------------------------------------------
+!-----------------------------------------------------------------
+! end up
+!-----------------------------------------------------------------
 
 	ntot = 0
 
@@ -722,9 +722,9 @@ c-----------------------------------------------------------------
 
 	write(6,*) 'Items without depth (end): ',nt-ntot,nt
 
-c-----------------------------------------------------------------
-c end of routine
-c-----------------------------------------------------------------
+!-----------------------------------------------------------------
+! end of routine
+!-----------------------------------------------------------------
 
 	return
    98	continue
@@ -732,14 +732,14 @@ c-----------------------------------------------------------------
 	stop 'error stop interpole: negative area'
 	end
 
-c*******************************************************************
+!*******************************************************************
 
 	subroutine make_auto_corr(np,xp,yp,dp,ap,ufact)
 
-c computes minimum distance to next point
-c
-c this is used as sigma for the interpolation
-c there are margins for improving this
+! computes minimum distance to next point
+!
+! this is used as sigma for the interpolation
+! there are margins for improving this
 
 	implicit none
 
@@ -779,7 +779,7 @@ c there are margins for improving this
 
 	end
 
-c*******************************************************************
-c*******************************************************************
-c*******************************************************************
+!*******************************************************************
+!*******************************************************************
+!*******************************************************************
 

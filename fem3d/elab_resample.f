@@ -33,8 +33,8 @@
 !
 !***************************************************************
 
-	subroutine fem_resample_parse(string,regpar_in
-     +				,regpar_out,nxn,nyn,idx0,idy0)
+	subroutine fem_resample_parse(string,regpar_in &
+     &				,regpar_out,nxn,nyn,idx0,idy0)
 
 	use basin
 
@@ -202,9 +202,9 @@
 
 !***************************************************************
 
-	subroutine resample_data(flag,nlvdi,nx,ny,il_in,hd_in,data_in
-     +				,nxn,nyn,idx,idy
-     +				,il_out,hd_out,data_out)
+	subroutine resample_data(flag,nlvdi,nx,ny,il_in,hd_in,data_in &
+     &				,nxn,nyn,idx,idy &
+     &				,il_out,hd_out,data_out)
 
 	implicit none
 

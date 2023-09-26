@@ -24,72 +24,72 @@
 !
 !--------------------------------------------------------------------------
 
-c routines for concentration (utilities) (old subcon1.f)
-c
-c contents :
-c
-c subroutine conini(nlvddi,c,cref,cstrat)		sets initial conditions
-c
-c subroutine conmima(nlvddi,c,cmin,cmax)                 computes min/max
-c subroutine conmimas(nlvddi,c,cmin,cmax)                computes scalar min/max
-c
-c revision log :
-c
-c 19.08.1998	ggu	call to conzfi changed
-c 20.08.1998	ggu	makew removed (routine used is sp256w)
-c 24.08.1998	ggu	levdbg used for debug
-c 26.08.1998	ggu	subroutine convol, tstvol transferred to newchk
-c 26.08.1998	ggu	all subroutines re-written more generally
-c 26.01.1999	ggu	can be used also with 2D routines
-c 16.11.2001	ggu	subroutine conmima and diffstab
-c 05.12.2001	ggu	new routines diffstab,diffstab1,difflimit
-c 11.10.2002	ggu	commented diffset
-c 09.09.2003	ggu	new routine con3bnd
-c 13.03.2004	ggu	new routines set_c_bound, distribute_vertically
-c 13.03.2004	ggu	exec routine con3bnd() only for level BC (LEVELBC)
-c 14.03.2004	ggu	new routines open_b_flux
-c 05.01.2005	ggu	routine to write 2d nos file into subnosa.f
-c 07.01.2005	ggu	routine diffwrite deleted
-c 14.01.2005	ggu	new file for diffusion routines (copied to subdif.f)
-c 23.03.2006	ggu	changed time step to real
-c 31.05.2007	ggu	reset BC of flux type to old way (DEBHELP)
-c 07.04.2008	ggu	deleted set_c_bound
-c 08.04.2008	ggu	cleaned, deleted distribute_vertically, open_b_flux
-c 09.10.2008	ggu&ccf	call to confop changed -> nlv
-c 23.03.2010	ggu	changed v6.1.1
-c 14.07.2011	ggu	changed VERS_6_1_27
-c 01.06.2012	ggu	changed VERS_6_1_53
-c 20.01.2014	ggu	new writing format for nos files in confop, confil
-c 28.01.2014	ggu	changed VERS_6_1_71
-c 26.11.2014	ggu	changed VERS_7_0_7
-c 19.12.2014	ggu	changed VERS_7_0_10
-c 23.12.2014	ggu	changed VERS_7_0_11
-c 19.01.2015	ggu	changed VERS_7_1_3
-c 26.02.2015	ggu	changed VERS_7_1_5
-c 05.05.2015	ggu	changed VERS_7_1_10
-c 05.06.2015	ggu	changed VERS_7_1_12
-c 17.07.2015	ggu	changed VERS_7_1_80
-c 20.07.2015	ggu	changed VERS_7_1_81
-c 29.09.2015	ggu	changed VERS_7_2_5
-c 18.12.2015	ggu	changed VERS_7_3_17
-c 28.04.2016	ggu	changed VERS_7_5_9
-c 07.06.2016	ggu	changed VERS_7_5_12
-c 03.11.2017	ggu	new routines to write shy files scalar_output_*()
-c 22.02.2018	ggu	changed VERS_7_5_42
-c 03.04.2018	ggu	changed VERS_7_5_43
-c 06.07.2018	ggu	changed VERS_7_5_48
-c 16.02.2019	ggu	changed VERS_7_5_60
-c 20.03.2022	ggu	started discommissioning file
-c 21.03.2022	ggu	only some subroutines save to this new file
-c 22.03.2022	ggu	cmed routines transfered from subres.f to here
-c 05.04.2022	ggu	initialize only existing layers
-c 27.10.2022	ggu	conmima also working for 2d arrays
-c
-c*****************************************************************
+! routines for concentration (utilities) (old subcon1.f)
+!
+! contents :
+!
+! subroutine conini(nlvddi,c,cref,cstrat)		sets initial conditions
+!
+! subroutine conmima(nlvddi,c,cmin,cmax)                 computes min/max
+! subroutine conmimas(nlvddi,c,cmin,cmax)                computes scalar min/max
+!
+! revision log :
+!
+! 19.08.1998	ggu	call to conzfi changed
+! 20.08.1998	ggu	makew removed (routine used is sp256w)
+! 24.08.1998	ggu	levdbg used for debug
+! 26.08.1998	ggu	subroutine convol, tstvol transferred to newchk
+! 26.08.1998	ggu	all subroutines re-written more generally
+! 26.01.1999	ggu	can be used also with 2D routines
+! 16.11.2001	ggu	subroutine conmima and diffstab
+! 05.12.2001	ggu	new routines diffstab,diffstab1,difflimit
+! 11.10.2002	ggu	commented diffset
+! 09.09.2003	ggu	new routine con3bnd
+! 13.03.2004	ggu	new routines set_c_bound, distribute_vertically
+! 13.03.2004	ggu	exec routine con3bnd() only for level BC (LEVELBC)
+! 14.03.2004	ggu	new routines open_b_flux
+! 05.01.2005	ggu	routine to write 2d nos file into subnosa.f
+! 07.01.2005	ggu	routine diffwrite deleted
+! 14.01.2005	ggu	new file for diffusion routines (copied to subdif.f)
+! 23.03.2006	ggu	changed time step to real
+! 31.05.2007	ggu	reset BC of flux type to old way (DEBHELP)
+! 07.04.2008	ggu	deleted set_c_bound
+! 08.04.2008	ggu	cleaned, deleted distribute_vertically, open_b_flux
+! 09.10.2008	ggu&ccf	call to confop changed -> nlv
+! 23.03.2010	ggu	changed v6.1.1
+! 14.07.2011	ggu	changed VERS_6_1_27
+! 01.06.2012	ggu	changed VERS_6_1_53
+! 20.01.2014	ggu	new writing format for nos files in confop, confil
+! 28.01.2014	ggu	changed VERS_6_1_71
+! 26.11.2014	ggu	changed VERS_7_0_7
+! 19.12.2014	ggu	changed VERS_7_0_10
+! 23.12.2014	ggu	changed VERS_7_0_11
+! 19.01.2015	ggu	changed VERS_7_1_3
+! 26.02.2015	ggu	changed VERS_7_1_5
+! 05.05.2015	ggu	changed VERS_7_1_10
+! 05.06.2015	ggu	changed VERS_7_1_12
+! 17.07.2015	ggu	changed VERS_7_1_80
+! 20.07.2015	ggu	changed VERS_7_1_81
+! 29.09.2015	ggu	changed VERS_7_2_5
+! 18.12.2015	ggu	changed VERS_7_3_17
+! 28.04.2016	ggu	changed VERS_7_5_9
+! 07.06.2016	ggu	changed VERS_7_5_12
+! 03.11.2017	ggu	new routines to write shy files scalar_output_*()
+! 22.02.2018	ggu	changed VERS_7_5_42
+! 03.04.2018	ggu	changed VERS_7_5_43
+! 06.07.2018	ggu	changed VERS_7_5_48
+! 16.02.2019	ggu	changed VERS_7_5_60
+! 20.03.2022	ggu	started discommissioning file
+! 21.03.2022	ggu	only some subroutines save to this new file
+! 22.03.2022	ggu	cmed routines transfered from subres.f to here
+! 05.04.2022	ggu	initialize only existing layers
+! 27.10.2022	ggu	conmima also working for 2d arrays
+!
+!*****************************************************************
 
 	subroutine conini(nlvddi,c,cref,cstrat,hdko)
 
-c sets initial conditions (with stratification)
+! sets initial conditions (with stratification)
 
 	use basin, only : nkn,nel,ngr,mbw
 	use levels
@@ -101,7 +101,7 @@ c sets initial conditions (with stratification)
 	real cref		!reference value
 	real cstrat		!stratification [conc/km]
 	real hdko(nlvddi,nkn)	!layer thickness
-c local
+! local
 	integer k,l,lmax
 	real depth,hlayer
 
@@ -120,24 +120,24 @@ c local
 
 	end
 
-c*************************************************************
-c*************************************************************
-c*************************************************************
+!*************************************************************
+!*************************************************************
+!*************************************************************
 
         subroutine conmima(nlvddi,c,cmin,cmax)
 
-c computes min/max for scalar field
+! computes min/max for scalar field
 
 	use levels
 	use basin, only : nkn,nel,ngr,mbw
 
 	implicit none
 
-c arguments
+! arguments
 	integer nlvddi		!vertical dimension of c
 	real c(nlvddi,nkn)	!tracer (conz,salt,temp,...)
         real cmin,cmax
-c local
+! local
 	integer k,l,lmax
 	real cc
         logical debug
@@ -173,26 +173,26 @@ c local
 
         end
 
-c********************************************************************
-c********************************************************************
-c********************************************************************
+!********************************************************************
+!********************************************************************
+!********************************************************************
 
 	subroutine cmed_accum_2d(cvec,cmed,cmin,cmax)
 
-c accumulates scalar values
+! accumulates scalar values
 
 	use basin, only : nkn,nel,ngr,mbw
 
 	implicit none
 
-c parameter
+! parameter
 
 	real cvec(nkn)			!array with concentration
 	double precision cmed(nkn)	!average
 	real cmin(nkn)			!minimum
 	real cmax(nkn)			!maximum
 
-c local
+! local
 	logical bdebug
 	integer nout,id
 	integer nvar,nr
@@ -201,9 +201,9 @@ c local
 	real c
 	double precision rr
 
-c-------------------------------------------------------------
-c accumulate results
-c-------------------------------------------------------------
+!-------------------------------------------------------------
+! accumulate results
+!-------------------------------------------------------------
 
 	do k=1,nkn
 	    c = cvec(k)
@@ -212,17 +212,17 @@ c-------------------------------------------------------------
 	    if( c .gt. cmax(k) ) cmax(k) = c
 	end do
 
-c-------------------------------------------------------------
-c end of routine
-c-------------------------------------------------------------
+!-------------------------------------------------------------
+! end of routine
+!-------------------------------------------------------------
 
 	end
 
-c********************************************************************
+!********************************************************************
 
 	subroutine cmed_reset_2d(nr,cmed,cmin,cmax)
 
-c resets scalar values
+! resets scalar values
 
 	use basin
 
@@ -242,25 +242,25 @@ c resets scalar values
 
 	end
 
-c********************************************************************
+!********************************************************************
 
 	subroutine cmed_accum(cvec,cmed,cmin,cmax)
 
-c accumulates scalar values
+! accumulates scalar values
 
 	use levels
 	use basin, only : nkn,nel,ngr,mbw
 
 	implicit none
 
-c parameter
+! parameter
 
 	real cvec(nlvdi,nkn)			!array with concentration
 	double precision cmed(nlvdi,nkn)	!average
 	real cmin(nlvdi,nkn)			!minimum
 	real cmax(nlvdi,nkn)			!maximum
 
-c local
+! local
 	logical bdebug
 	integer nout,id
 	integer nvar,nr
@@ -274,9 +274,9 @@ c local
 
 	if( bdebug ) write(6,*) it,nout,id,nvar,nr,idtc,itmc,itc,nlv
 
-c-------------------------------------------------------------
-c accumulate results
-c-------------------------------------------------------------
+!-------------------------------------------------------------
+! accumulate results
+!-------------------------------------------------------------
 
 	do k=1,nkn
 	  lmax = ilhkv(k)
@@ -288,17 +288,17 @@ c-------------------------------------------------------------
 	  end do
 	end do
 
-c-------------------------------------------------------------
-c end of routine
-c-------------------------------------------------------------
+!-------------------------------------------------------------
+! end of routine
+!-------------------------------------------------------------
 
 	end
 
-c********************************************************************
+!********************************************************************
 
 	subroutine cmed_reset(nr,cmed,cmin,cmax)
 
-c resets scalar values
+! resets scalar values
 
 	use levels, only : nlvdi,nlv
 	use basin
@@ -319,7 +319,7 @@ c resets scalar values
 
 	end
 
-c********************************************************************
+!********************************************************************
 
 	subroutine ts_shell
 
@@ -329,15 +329,15 @@ c********************************************************************
 
 	implicit none
 
-c local
+! local
 	integer idtc,itmc,itsmed
 	integer id,nvar,idc,nr
 	double precision dtime
 	double precision rr
-c function
+! function
 	real getpar
 	logical has_output_d,is_over_output_d,next_output_d
-c save
+! save
 	double precision, save, allocatable :: tacu(:,:)
 	double precision, save, allocatable :: sacu(:,:)
 	real, save, allocatable :: tmin(:,:)
@@ -406,5 +406,5 @@ c save
 
 	end
 
-c********************************************************************
+!********************************************************************
 

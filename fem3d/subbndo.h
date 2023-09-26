@@ -23,9 +23,9 @@
 !
 !--------------------------------------------------------------------------
 
-c----------------------------------------------------------------------
-c data structures for open boundary conditions
-c----------------------------------------------------------------------
+!----------------------------------------------------------------------
+! data structures for open boundary conditions
+!----------------------------------------------------------------------
 
 ! revision log :
 !
@@ -33,7 +33,7 @@ c----------------------------------------------------------------------
 ! 18.06.2014	ggu	changed VERS_6_1_77
 ! 16.02.2019	ggu	changed VERS_7_5_60
 
-c----------------------------------------------------------------------
+!----------------------------------------------------------------------
 
 
 	integer kbcdim
@@ -59,20 +59,20 @@ c----------------------------------------------------------------------
 
 	save /ibndoc/, /rbndoc/
 
-c----------------------------------------------------------------------
-c next array is global and can be used to check for open boundary nodes
-c----------------------------------------------------------------------
-c
-c       integer iopbnd(nkndim)          !if >0 pointer into array irv
-c                                       !if <0 internal boundary (= -ibc)
-c
-c----------------------------------------------------------------------
-c end of file
-c----------------------------------------------------------------------
+!----------------------------------------------------------------------
+! next array is global and can be used to check for open boundary nodes
+!----------------------------------------------------------------------
+!
+!       integer iopbnd(nkndim)          !if >0 pointer into array irv
+!                                       !if <0 internal boundary (= -ibc)
+!
+!----------------------------------------------------------------------
+! end of file
+!----------------------------------------------------------------------
 
-c possible tests:
-c
-c iopbnd(k) .ne. 0 		boundary node (external or internal)
-c iopbnd(k) .gt. 0 		external boundary node (ibtyp = 1,2)
-c iopbnd(k) .lt. 0 		internal boundary node (ibtyp = 3)
+! possible tests:
+!
+! iopbnd(k) .ne. 0 		boundary node (external or internal)
+! iopbnd(k) .gt. 0 		external boundary node (ibtyp = 1,2)
+! iopbnd(k) .lt. 0 		internal boundary node (ibtyp = 3)
  

@@ -23,43 +23,43 @@
 !
 !--------------------------------------------------------------------------
 
-c matrix inversion routines (non symmetric band matrix) (Gauss inversion)
-c
-c contents :
-c
-c lp_init_system	initializes matrix and vector
-c lp_solve_system	factors and solves for solution
-c lp_subst_system	solves for solution
-c lp_mult_band		multiplies matrix with vector
-c
-c dlp_init_system	initializes matrix and vector
-c dlp_solve_system	factors and solves for solution
-c dlp_subst_system	solves for solution
-c dlp_mult_band		multiplies matrix with vector
-c
-c loclp			finds position in matrix
-c
-c revision log :
-c
-c 02.04.2007	ggu	assembled from lapack
-c 06.06.2007	ggu	new routines for back substitution and initialization
-c 22.04.2008	ggu	new SAXPY_NEW for parallelization trial
-c 04.01.2019	ggu	linpack and blas routines transfered
-c 18.01.2019	ggu	changed VERS_7_5_55
-c 16.02.2019	ggu	changed VERS_7_5_60
-c
-c*************************************************************************
-c
-c access of unsymmetric banded matrix in linpack
-c
-c linear matrix must have the following dimension:
-c		ndim = ( 3*m + 1 ) * n
-c
-c*************************************************************************
+! matrix inversion routines (non symmetric band matrix) (Gauss inversion)
+!
+! contents :
+!
+! lp_init_system	initializes matrix and vector
+! lp_solve_system	factors and solves for solution
+! lp_subst_system	solves for solution
+! lp_mult_band		multiplies matrix with vector
+!
+! dlp_init_system	initializes matrix and vector
+! dlp_solve_system	factors and solves for solution
+! dlp_subst_system	solves for solution
+! dlp_mult_band		multiplies matrix with vector
+!
+! loclp			finds position in matrix
+!
+! revision log :
+!
+! 02.04.2007	ggu	assembled from lapack
+! 06.06.2007	ggu	new routines for back substitution and initialization
+! 22.04.2008	ggu	new SAXPY_NEW for parallelization trial
+! 04.01.2019	ggu	linpack and blas routines transfered
+! 18.01.2019	ggu	changed VERS_7_5_55
+! 16.02.2019	ggu	changed VERS_7_5_60
+!
+!*************************************************************************
+!
+! access of unsymmetric banded matrix in linpack
+!
+! linear matrix must have the following dimension:
+!		ndim = ( 3*m + 1 ) * n
+!
+!*************************************************************************
 
 	subroutine lp_init_system(n,m,abd,b)
 
-c initializes band matrix
+! initializes band matrix
 
 	implicit none
 
@@ -81,11 +81,11 @@ c initializes band matrix
 
 	end
 
-c*************************************************************************
+!*************************************************************************
 
 	subroutine lp_solve_system(n,m,abd,b,ipvt,z)
 
-c solves system a*x=b
+! solves system a*x=b
 
 	implicit none
 
@@ -117,11 +117,11 @@ c solves system a*x=b
 
 	end
 
-c*************************************************************************
+!*************************************************************************
 
 	subroutine lp_subst_system(n,m,abd,b,ipvt)
 
-c solves a*x=b with a already factored (by lp_solve_system)
+! solves a*x=b with a already factored (by lp_solve_system)
 
 	integer n,m
 	real abd(1)		!band matrix (already factored)
@@ -139,11 +139,11 @@ c solves a*x=b with a already factored (by lp_solve_system)
 
 	end
 
-c*************************************************************************
+!*************************************************************************
 
 	subroutine lp_mult_band(n,m,abd,b,res)
 
-c multiplies band matrix a with vector b and returns result in res
+! multiplies band matrix a with vector b and returns result in res
 
 	implicit none
 
@@ -173,11 +173,11 @@ c multiplies band matrix a with vector b and returns result in res
 
 	end
 
-c*************************************************************************
+!*************************************************************************
 
         subroutine dlp_init_system(n,m,abd,b)
 
-c initializes band matrix
+! initializes band matrix
 
         implicit none
 
@@ -201,11 +201,11 @@ c initializes band matrix
 
         end
 
-c*************************************************************************
+!*************************************************************************
 
 	subroutine dlp_solve_system(n,m,abd,b,ipvt,z)
 
-c solves system a*x=b
+! solves system a*x=b
 
 	implicit none
 
@@ -237,11 +237,11 @@ c solves system a*x=b
 
 	end
 
-c*************************************************************************
+!*************************************************************************
 
 	subroutine dlp_subst_system(n,m,abd,b,ipvt)
 
-c solves a*x=b with a already factored (by dlp_solve_system)
+! solves a*x=b with a already factored (by dlp_solve_system)
 
 	integer n,m
 	double precision abd(1)		!band matrix (already factored)
@@ -259,11 +259,11 @@ c solves a*x=b with a already factored (by dlp_solve_system)
 
 	end
 
-c*************************************************************************
+!*************************************************************************
 
 	subroutine dlp_mult_band(n,m,abd,b,res)
 
-c multiplies band matrix a with vector b and returns result in res
+! multiplies band matrix a with vector b and returns result in res
 
 	implicit none
 
@@ -293,16 +293,16 @@ c multiplies band matrix a with vector b and returns result in res
 
 	end
 
-c*************************************************************************
+!*************************************************************************
 
         function loclp(i,j,n,m)
 
-c access linpack routines (unsymmetric banded matrix)
-c
-c (i,j)   position of element in square matrix (row,column)
-c n       dimension of square matrix
-c m       band width of square matrix
-c loclp   position of element in band matrix
+! access linpack routines (unsymmetric banded matrix)
+!
+! (i,j)   position of element in square matrix (row,column)
+! n       dimension of square matrix
+! m       band width of square matrix
+! loclp   position of element in band matrix
 
         implicit none
 
@@ -321,15 +321,15 @@ c loclp   position of element in band matrix
 
         end
 
-c*************************************************************************
-c*************************************************************************
-c*************************************************************************
-c*************************************************************************
-c*************************************************************************
+!*************************************************************************
+!*************************************************************************
+!*************************************************************************
+!*************************************************************************
+!*************************************************************************
 
 	subroutine loclp_test
 
-c use test of linpack routine
+! use test of linpack routine
 
 	implicit none
 
@@ -425,11 +425,11 @@ c use test of linpack routine
 
 	end
 
-c*************************************************************************
+!*************************************************************************
 
 	subroutine dloclp_test
 
-c use test of linpack routine
+! use test of linpack routine
 
 	implicit none
 
@@ -525,11 +525,11 @@ c use test of linpack routine
 
 	end
 
-c*************************************************************************
-c*************************************************************************
-c*************************************************************************
-c*************************************************************************
-c*************************************************************************
+!*************************************************************************
+!*************************************************************************
+!*************************************************************************
+!*************************************************************************
+!*************************************************************************
 
 	subroutine loclp_init(l,n,a)
 
@@ -548,7 +548,7 @@ c*************************************************************************
 
 	end
 
-c*************************************************************************
+!*************************************************************************
 
 	subroutine loclp_print(l,n,a)
 
@@ -565,7 +565,7 @@ c*************************************************************************
 
 	end
 
-c*************************************************************************
+!*************************************************************************
 
 	subroutine dloclp_init(l,n,a)
 
@@ -584,7 +584,7 @@ c*************************************************************************
 
 	end
 
-c*************************************************************************
+!*************************************************************************
 
 	subroutine dloclp_print(l,n,a)
 
@@ -601,16 +601,16 @@ c*************************************************************************
 
 	end
 
-c*************************************************************************
-c*************************************************************************
-c*************************************************************************
-c*************************************************************************
-c*************************************************************************
+!*************************************************************************
+!*************************************************************************
+!*************************************************************************
+!*************************************************************************
+!*************************************************************************
 
-c	program loclp_main
-c	call loclp_test
-c	call dloclp_test
-c	end
+!	program loclp_main
+!	call loclp_test
+!	call dloclp_test
+!	end
 
-c*************************************************************************
+!*************************************************************************
 

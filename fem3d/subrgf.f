@@ -24,93 +24,93 @@
 !
 !--------------------------------------------------------------------------
 
-c regular file time handling
-c
-c revision log :
-c
-c 10.03.2009	ggu	finished coding
-c 27.03.2009	ggu	bug fix ITACT (itact was not adjourned)
-c 31.03.2009	ggu	changed header of regular files (x0,.., description)
-c 23.03.2010	ggu	changed v6.1.1
-c 16.02.2011	ggu	completely restructured - store geo information
-c 18.02.2011	ggu	bug fix in rgf_check_header() -> get instead of set
-c 22.11.2011	ggu	changed VERS_6_1_37
-c 23.02.2012	ggu	new routines for time series (ts) and regular check
-c 16.03.2012	ggu	changed VERS_6_1_48
-c 02.05.2013	ggu	bug fix: call to rgf_intp() was wrong
-c 15.05.2014	ggu&pzy	bug fix: compare reals in rgf_check_header()
-c 16.02.2019	ggu	changed VERS_7_5_60
-c
-c notes :
-c
-c ifidim	dimension of array (bigger than needed)
-c ifimax	elements used for integer information
-c ifi_geobase	base from where geo vars start
-c
-c structure of ifile:
-c
-c	basic variables
+! regular file time handling
+!
+! revision log :
+!
+! 10.03.2009	ggu	finished coding
+! 27.03.2009	ggu	bug fix ITACT (itact was not adjourned)
+! 31.03.2009	ggu	changed header of regular files (x0,.., description)
+! 23.03.2010	ggu	changed v6.1.1
+! 16.02.2011	ggu	completely restructured - store geo information
+! 18.02.2011	ggu	bug fix in rgf_check_header() -> get instead of set
+! 22.11.2011	ggu	changed VERS_6_1_37
+! 23.02.2012	ggu	new routines for time series (ts) and regular check
+! 16.03.2012	ggu	changed VERS_6_1_48
+! 02.05.2013	ggu	bug fix: call to rgf_intp() was wrong
+! 15.05.2014	ggu&pzy	bug fix: compare reals in rgf_check_header()
+! 16.02.2019	ggu	changed VERS_7_5_60
+!
+! notes :
+!
+! ifidim	dimension of array (bigger than needed)
+! ifimax	elements used for integer information
+! ifi_geobase	base from where geo vars start
+!
+! structure of ifile:
+!
+!	basic variables
 
-c	  ifile(1)   iunit
-c	  ifile(2)   itold
-c	  ifile(3)   itnew
-c	  ifile(4)   itact
-c	  ifile(5)   nvar
-c	  ifile(6)   nx
-c	  ifile(7)   ny
-c	  ifile(8)   n (=nvar*nx*ny)
-c
-c	from here new variables...
-c
-c	  ifile(9)	mode (file type)
-c			 0 if mode still has to be determined
-c			 1 unformatted
-c			 2 direct
-c			 3 regular
-c			 4 time series
-c			-1 file is closed or is not existing
-c	  ifile(10)	nkn
-c
-c	at the end geo variables
-c
-c	  ifile(19)  x0			ifi_geobase = 18
-c	  ifile(20)  y0
-c	  ifile(21)  dx
-c	  ifile(22)  dy
-c	  ifile(23)  flag
-c 
-c	mode: 0 unknown  1 unformatted  2 regular  3 time series  4 direct
-c
-c in dfile are three records:
-c	1	actual timestep
-c	2	old timestep
-c	3	new timestep
-c
-c every record may contain more than one variable
-c
-c	dile(ix,iy,ivar)
-c	first data point is lower left corner, then rowwise
-c	after this new variable
-c
-c format of regular meteo forcing file (one time record):
-c
-c (data is rowwise, lower left corner is first point)
-c
-c	read(iunit,*,end=1) it,nvar,nx,ny,x0,y0,dx,dy,flag
-c	do ivar=1,nvar
-c	  read(iunit,'(a)') description
-c	  read(iunit,*) ((data(ix,iy,ivar),ix=1,nx),iy=1,ny)
-c	end do
-c
-c*********************************************************************
+!	  ifile(1)   iunit
+!	  ifile(2)   itold
+!	  ifile(3)   itnew
+!	  ifile(4)   itact
+!	  ifile(5)   nvar
+!	  ifile(6)   nx
+!	  ifile(7)   ny
+!	  ifile(8)   n (=nvar*nx*ny)
+!
+!	from here new variables...
+!
+!	  ifile(9)	mode (file type)
+!			 0 if mode still has to be determined
+!			 1 unformatted
+!			 2 direct
+!			 3 regular
+!			 4 time series
+!			-1 file is closed or is not existing
+!	  ifile(10)	nkn
+!
+!	at the end geo variables
+!
+!	  ifile(19)  x0			ifi_geobase = 18
+!	  ifile(20)  y0
+!	  ifile(21)  dx
+!	  ifile(22)  dy
+!	  ifile(23)  flag
+! 
+!	mode: 0 unknown  1 unformatted  2 regular  3 time series  4 direct
+!
+! in dfile are three records:
+!	1	actual timestep
+!	2	old timestep
+!	3	new timestep
+!
+! every record may contain more than one variable
+!
+!	dile(ix,iy,ivar)
+!	first data point is lower left corner, then rowwise
+!	after this new variable
+!
+! format of regular meteo forcing file (one time record):
+!
+! (data is rowwise, lower left corner is first point)
+!
+!	read(iunit,*,end=1) it,nvar,nx,ny,x0,y0,dx,dy,flag
+!	do ivar=1,nvar
+!	  read(iunit,'(a)') description
+!	  read(iunit,*) ((data(ix,iy,ivar),ix=1,nx),iy=1,ny)
+!	end do
+!
+!*********************************************************************
 
 	subroutine rgf_admin(it,file,nvar0,ndim,ifile,dfile)
 
-c administers interpolation of regular fields
+! administers interpolation of regular fields
 
-c can be called any time
-c at first call ifile(1) must be -1 (to indicate need for initialization)
-c ifile and dfile are returned and contain all needed information
+! can be called any time
+! at first call ifile(1) must be -1 (to indicate need for initialization)
+! ifile and dfile are returned and contain all needed information
 
 	implicit none
 
@@ -134,9 +134,9 @@ c ifile and dfile are returned and contain all needed information
 
 	itact = it
 
-c-------------------------------------------------------------
-c initialize regular data files
-c-------------------------------------------------------------
+!-------------------------------------------------------------
+! initialize regular data files
+!-------------------------------------------------------------
 
 	iunit = ifile(1)
 	if( iunit .eq. 0 ) return	!file has encountered EOF before
@@ -157,8 +157,8 @@ c-------------------------------------------------------------
 
 	  iunit = -iunit	!force initialization
 
-	  call rgf_intp(iunit,ndim,itact,itold,itnew,ifile
-     +				,dfile(1,1),dfile(1,2),dfile(1,3))
+	  call rgf_intp(iunit,ndim,itact,itold,itnew,ifile &
+     &				,dfile(1,1),dfile(1,2),dfile(1,3))
 
 	  nvar  = ifile(5)
 	  nx    = ifile(6)
@@ -174,9 +174,9 @@ c-------------------------------------------------------------
 	  ifile(4) = itact
 	end if
 
-c-------------------------------------------------------------
-c interpolate in time
-c-------------------------------------------------------------
+!-------------------------------------------------------------
+! interpolate in time
+!-------------------------------------------------------------
 
 	itold = ifile(2)
 	itnew = ifile(3)
@@ -184,8 +184,8 @@ c-------------------------------------------------------------
 
 	if( it .ne. itact ) then
 	  itact = it			!bugfix ITACT
-	  call rgf_intp(iunit,ndim,itact,itold,itnew,ifile
-     +				,dfile(1,1),dfile(1,2),dfile(1,3))
+	  call rgf_intp(iunit,ndim,itact,itold,itnew,ifile &
+     &				,dfile(1,1),dfile(1,2),dfile(1,3))
 	end if
 
 	ifile(1) = iunit
@@ -193,9 +193,9 @@ c-------------------------------------------------------------
 	ifile(3) = itnew
 	ifile(4) = itact
 
-c-------------------------------------------------------------
-c end of routine
-c-------------------------------------------------------------
+!-------------------------------------------------------------
+! end of routine
+!-------------------------------------------------------------
 
 	return
    97	continue
@@ -206,16 +206,16 @@ c-------------------------------------------------------------
 	stop 'error stop rgf_admin: cannot open file'
 	end
 
-c*********************************************************************
+!*********************************************************************
 
-	subroutine rgf_intp(iunit,ndim,it,itold,itnew
-     +                          ,ifile,dact,dold,dnew)
+	subroutine rgf_intp(iunit,ndim,it,itold,itnew &
+     &                          ,ifile,dact,dold,dnew)
 
-c handles time interpolation of regular fields
-c
-c file must alread be open on unit iunit
-c the first time must be called with negative iunit
-c sets iunit = 0 if EOF has been found
+! handles time interpolation of regular fields
+!
+! file must alread be open on unit iunit
+! the first time must be called with negative iunit
+! sets iunit = 0 if EOF has been found
 
 	implicit none
 
@@ -232,9 +232,9 @@ c sets iunit = 0 if EOF has been found
 
 	logical bdata
 
-c--------------------------------------------------------------
-c read first time
-c--------------------------------------------------------------
+!--------------------------------------------------------------
+! read first time
+!--------------------------------------------------------------
 
 	if( iunit .eq. 0 ) return	!EOF found before
 
@@ -247,9 +247,9 @@ c--------------------------------------------------------------
 	  call rgf_copy(ifile,dnew,dold)
 	end if
 
-c--------------------------------------------------------------
-c read new record
-c--------------------------------------------------------------
+!--------------------------------------------------------------
+! read new record
+!--------------------------------------------------------------
 
 	do while( it .gt. itnew )
 	  itold = itnew
@@ -261,28 +261,28 @@ c--------------------------------------------------------------
 	  end if
 	end do
 
-c--------------------------------------------------------------
-c interpolate
-c--------------------------------------------------------------
+!--------------------------------------------------------------
+! interpolate
+!--------------------------------------------------------------
 
-	call rgf_time_interpolate(it,itold,itnew
-     +				,ifile,dact,dold,dnew)
+	call rgf_time_interpolate(it,itold,itnew &
+     &				,ifile,dact,dold,dnew)
 
-c--------------------------------------------------------------
-c end of routine
-c--------------------------------------------------------------
+!--------------------------------------------------------------
+! end of routine
+!--------------------------------------------------------------
 
 	return
    99	continue
 	stop 'error stop rgf_intp: no data'
 	end
 
-c*********************************************************************
+!*********************************************************************
 
-	subroutine rgf_time_interpolate(it,itold,itnew
-     +				,ifile,dact,dold,dnew)
+	subroutine rgf_time_interpolate(it,itold,itnew &
+     &				,ifile,dact,dold,dnew)
 
-c time interpolation of regular field data
+! time interpolation of regular field data
 
 	implicit none
 
@@ -314,13 +314,13 @@ c time interpolation of regular field data
 
 	end
 
-c*********************************************************************
-c*********************************************************************
-c*********************************************************************
+!*********************************************************************
+!*********************************************************************
+!*********************************************************************
 
 	subroutine rgf_copy(ifile,dsource,dtarget)
 
-c copy regular field record
+! copy regular field record
 
 	implicit none
 
@@ -341,13 +341,13 @@ c copy regular field record
 
 	end
 
-c*********************************************************************
-c*********************************************************************
-c*********************************************************************
+!*********************************************************************
+!*********************************************************************
+!*********************************************************************
 
 	subroutine rgf_read(iunit,ndim,it,ifile,data,bdata)
 
-c read complete record of regular field
+! read complete record of regular field
 
 	implicit none
 
@@ -363,15 +363,15 @@ c read complete record of regular field
 
 	integer n,i
 
-c------------------------------------------------------------
-c read header
-c------------------------------------------------------------
+!------------------------------------------------------------
+! read header
+!------------------------------------------------------------
 
 	call rgf_read_header(iunit,it,ifile,bdata)
 
-c------------------------------------------------------------
-c check for errors
-c------------------------------------------------------------
+!------------------------------------------------------------
+! check for errors
+!------------------------------------------------------------
 
 	if( .not. bdata ) return		!no more data
 
@@ -383,23 +383,23 @@ c------------------------------------------------------------
 	  stop 'error stop rgf_read: ndim'
 	end if
 
-c------------------------------------------------------------
-c read data
-c------------------------------------------------------------
+!------------------------------------------------------------
+! read data
+!------------------------------------------------------------
 
 	call rgf_read_data(iunit,ifile,data)
 
-c------------------------------------------------------------
-c end of routine
-c------------------------------------------------------------
+!------------------------------------------------------------
+! end of routine
+!------------------------------------------------------------
 
 	end
 
-c*********************************************************************
+!*********************************************************************
 
 	subroutine rgf_read_header(iunit,it,ifile,bdata)
 
-c reads header of regular field
+! reads header of regular field
 
 	implicit none
 
@@ -439,11 +439,11 @@ c reads header of regular field
 	stop 'error stop rgf_intp: parameters are zero'
 	end
 
-c*********************************************************************
+!*********************************************************************
 
 	subroutine rgf_read_data(iunit,ifile,data)
 
-c reads data of regular field
+! reads data of regular field
 
 	implicit none
 
@@ -471,13 +471,13 @@ c reads data of regular field
 
 	end
 
-c*********************************************************************
-c*********************************************************************
-c*********************************************************************
+!*********************************************************************
+!*********************************************************************
+!*********************************************************************
 
 	subroutine rgf_set_header(ifile,nvar,nx,ny,x0,y0,dx,dy,flag)
 
-c sets header information
+! sets header information
 
 	implicit none
 
@@ -498,11 +498,11 @@ c sets header information
 
 	end
 
-c*********************************************************************
+!*********************************************************************
 
 	subroutine rgf_check_header(ifile,it,nvar,nx,ny,x0,y0,dx,dy,flag)
 
-c checks header information
+! checks header information
 
 	implicit none
 
@@ -546,13 +546,13 @@ c checks header information
 	stop 'error stop rgf_check_header: parameter mismatch'
 	end
 
-c*********************************************************************
-c*********************************************************************
-c*********************************************************************
+!*********************************************************************
+!*********************************************************************
+!*********************************************************************
 
 	subroutine rgf_set_geo(ifile,x0,y0,dx,dy,flag)
 
-c set geo information
+! set geo information
 
 	implicit none
 
@@ -582,11 +582,11 @@ c set geo information
 
 	end
 
-c*********************************************************************
+!*********************************************************************
 
 	subroutine rgf_get_geo(ifile,x0,y0,dx,dy,flag)
 
-c get geo information
+! get geo information
 
 	implicit none
 
@@ -616,13 +616,13 @@ c get geo information
 
 	end
 
-c*********************************************************************
-c*********************************************************************
-c*********************************************************************
+!*********************************************************************
+!*********************************************************************
+!*********************************************************************
 
 	subroutine rgf_info(nout,ifile)
 
-c prints info of regular field to unit nout
+! prints info of regular field to unit nout
 
 	implicit none
 
@@ -645,11 +645,11 @@ c prints info of regular field to unit nout
 
 	end
 
-c*********************************************************************
+!*********************************************************************
 
 	subroutine rgf_print(nout,ifile,dfile)
 
-c prints data of regular field to unit nout
+! prints data of regular field to unit nout
 
 	implicit none
 
@@ -676,11 +676,11 @@ c prints data of regular field to unit nout
 
 	end
 
-c*********************************************************************
+!*********************************************************************
 
 	subroutine rgf_get_val(ifile,dfile,ivar,i,j,value)
 
-c gets value of regular field
+! gets value of regular field
 
 	implicit none
 
@@ -714,9 +714,9 @@ c gets value of regular field
 	stop 'error stop rgf_get_val: input parameters'
 	end
 
-c*********************************************************************
-c*********************************************************************
-c*********************************************************************
+!*********************************************************************
+!*********************************************************************
+!*********************************************************************
 
 	function is_meteo_ts(file,nvar_expected)
 
@@ -738,11 +738,11 @@ c*********************************************************************
 
 	end
 
-c*********************************************************************
+!*********************************************************************
 
 	subroutine ts_test_file(file,it,nvar_expected,nvar)
 
-c tests file if it is regular meteo forcing file
+! tests file if it is regular meteo forcing file
 
 	implicit none
 
@@ -775,11 +775,11 @@ c tests file if it is regular meteo forcing file
 
 	end
 
-c*********************************************************************
+!*********************************************************************
 
 	subroutine ts_read(it,ifile,data,bdata)
 
-c reads one line of time series
+! reads one line of time series
 
 	implicit none
 
@@ -803,9 +803,9 @@ c reads one line of time series
 
 	end
 
-c*********************************************************************
-c*********************************************************************
-c*********************************************************************
+!*********************************************************************
+!*********************************************************************
+!*********************************************************************
 
 	function is_meteo_regular(file,id_expected)
 
@@ -827,11 +827,11 @@ c*********************************************************************
 
 	end
 
-c*********************************************************************
+!*********************************************************************
 
 	subroutine rgf_test_file(file,it,id,nvar,nx,ny)
 
-c tests file if it is regular meteo forcing file
+! tests file if it is regular meteo forcing file
 
 	implicit none
 
@@ -882,9 +882,9 @@ c tests file if it is regular meteo forcing file
 
 	end
 
-c*********************************************************************
-c*********************************************************************
-c*********************************************************************
+!*********************************************************************
+!*********************************************************************
+!*********************************************************************
 
 	subroutine test_regular
 
@@ -939,9 +939,9 @@ c*********************************************************************
 
         end
 
-c***************************************************************
-c       program test_regular_main
-c       call test_regular
-c       end
-c***************************************************************
+!***************************************************************
+!       program test_regular_main
+!       call test_regular
+!       end
+!***************************************************************
 

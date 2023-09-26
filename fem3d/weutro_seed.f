@@ -24,44 +24,44 @@
 !
 !--------------------------------------------------------------------------
 
-c$Id: seeding.f, v 1.0 2014-03-12 14.53 donata
-c
-c loading routines
-c
-c revision log :
-c
-c 15.06.2004	ggu	written from scratch
+!$Id: seeding.f, v 1.0 2014-03-12 14.53 donata
+!
+! loading routines
+!
+! revision log :
+!
+! 15.06.2004	ggu	written from scratch
 ! 28.06.2004	dmc	loading factor was wrong: kgs  = 1.e+6
 ! 28.06.2004	dmc	areaload loops now over state variables
-c 14.03.2008	ggu	new routine set_surface_load
+! 14.03.2008	ggu	new routine set_surface_load
 ! 12.03.2014	dmc	seed of shellfish
 ! 17.06.2016	dmc	last changes integrated
-c 27.06.2016	ggu	changed VERS_7_5_16
-c 26.09.2017	ggu	adjourned to new module framework (segfault)
-c 03.04.2018	ggu	changed VERS_7_5_43
-c 16.02.2019	ggu	changed VERS_7_5_60
-c
-c notes :
-c
-c needed new routine init_load (sets to 0)
-c in setseed_new add to load matrix
-c
-c*************************************************************
+! 27.06.2016	ggu	changed VERS_7_5_16
+! 26.09.2017	ggu	adjourned to new module framework (segfault)
+! 03.04.2018	ggu	changed VERS_7_5_43
+! 16.02.2019	ggu	changed VERS_7_5_60
+!
+! notes :
+!
+! needed new routine init_load (sets to 0)
+! in setseed_new add to load matrix
+!
+!*************************************************************
 
 	subroutine setseed_new(eseed)
 
-c sets up eseed which is loading for specified areas
-c
-c
-c variables to be specified:
-c
-c nareas        total number of areas for which loading is specified
-c nodes         total number of nodes used to identify all areas
-c karee         node numbers that specify the areas of loading
-c iaree         area numbers for the nodes [1-nareas]
-c areaseed      total loadings [kg/day] for areas
-c
-c  the node numbers in karee are external node numbers
+! sets up eseed which is loading for specified areas
+!
+!
+! variables to be specified:
+!
+! nareas        total number of areas for which loading is specified
+! nodes         total number of nodes used to identify all areas
+! karee         node numbers that specify the areas of loading
+! iaree         area numbers for the nodes [1-nareas]
+! areaseed      total loadings [kg/day] for areas
+!
+!  the node numbers in karee are external node numbers
 
 	use basin
 	use levels
@@ -105,9 +105,9 @@ c  the node numbers in karee are external node numbers
 
         integer, save :: icall = 0
 
-c---------------------------------------------------------
-c initialization
-c---------------------------------------------------------
+!---------------------------------------------------------
+! initialization
+!---------------------------------------------------------
 
         if( icall .eq. 0 ) then
           icall = 1
@@ -116,22 +116,22 @@ c---------------------------------------------------------
           call seed_add_area(1,nnodes1,nodes1,aree)
         end if
      
-c---------------------------------------------------------
-c compute volumes
-c---------------------------------------------------------
+!---------------------------------------------------------
+! compute volumes
+!---------------------------------------------------------
 
         call seed_make_volume(nareas,volume,aree)
 
-c---------------------------------------------------------
-c set eseed
-c---------------------------------------------------------
+!---------------------------------------------------------
+! set eseed
+!---------------------------------------------------------
 
 	eseed = 0.
 
         do k=1,nkn
 	  ia = aree(k)
           if( ia .gt. 0 ) then
-c	    vol = volume(ia)
+!	    vol = volume(ia)
             lmax = ilhkv(k)
 	    do i=1,nshstate
               do l=1,lmax
@@ -140,19 +140,19 @@ c	    vol = volume(ia)
 	    end do
           end if
 	end do
-c	write(86,*) eseed
+!	write(86,*) eseed
 
-c---------------------------------------------------------
-c end of routine
-c---------------------------------------------------------
+!---------------------------------------------------------
+! end of routine
+!---------------------------------------------------------
 
 	end
 
-c*************************************************************
+!*************************************************************
 
         subroutine seed_add_area(iarea,n,nodes,aree)
 
-c initializes area array
+! initializes area array
 
 	use basin
 
@@ -176,11 +176,11 @@ c initializes area array
 
         end
 
-c*************************************************************
+!*************************************************************
 
         subroutine seed_make_volume(nareas,volume,aree)
 
-c makes total volume of areas
+! makes total volume of areas
 
 	use basin
 	use levels
@@ -214,22 +214,22 @@ c makes total volume of areas
 
         end
 
-c*************************************************************
+!*************************************************************
 
 	subroutine setseed_ulva(ulseed)
 
-c sets up eseed which is loading for specified areas
-c
-c
-c variables to be specified:
-c
-c nareas        total number of areas for which loading is specified
-c nodes         total number of nodes used to identify all areas
-c karee         node numbers that specify the areas of loading
-c iaree         area numbers for the nodes [1-nareas]
-c areaseed      total loadings [kg/day] for areas
-c
-c  the node numbers in karee are external node numbers
+! sets up eseed which is loading for specified areas
+!
+!
+! variables to be specified:
+!
+! nareas        total number of areas for which loading is specified
+! nodes         total number of nodes used to identify all areas
+! karee         node numbers that specify the areas of loading
+! iaree         area numbers for the nodes [1-nareas]
+! areaseed      total loadings [kg/day] for areas
+!
+!  the node numbers in karee are external node numbers
 
 	use basin
 	use levels
@@ -261,9 +261,9 @@ c  the node numbers in karee are external node numbers
 
         integer, save :: icall = 0
 
-c---------------------------------------------------------
-c initialization
-c---------------------------------------------------------
+!---------------------------------------------------------
+! initialization
+!---------------------------------------------------------
 
         if( icall .eq. 0 ) then
           icall = 1
@@ -272,22 +272,22 @@ c---------------------------------------------------------
           call seed_add_area(1,nnodes1,nodes1,aree)
         end if
      
-c---------------------------------------------------------
-c compute volumes
-c---------------------------------------------------------
+!---------------------------------------------------------
+! compute volumes
+!---------------------------------------------------------
 
         call seed_make_volume(nareas,volume,aree)
 
-c---------------------------------------------------------
-c set ulseed
-c---------------------------------------------------------
+!---------------------------------------------------------
+! set ulseed
+!---------------------------------------------------------
 
 	ulseed = 0.
 
         do k=1,nkn
 	  ia = aree(k)
           if( ia .gt. 0 ) then
-c	    vol = volume(ia)
+!	    vol = volume(ia)
             lmax = ilhkv(k)
 	    do i=1,nulstate
               do l=1,lmax
@@ -296,13 +296,13 @@ c	    vol = volume(ia)
 	    end do
           end if
 	end do
-c	write(86,*) ulseed
+!	write(86,*) ulseed
 
-c---------------------------------------------------------
-c end of routine
-c---------------------------------------------------------
+!---------------------------------------------------------
+! end of routine
+!---------------------------------------------------------
 
 	end
 
-c*************************************************************
+!*************************************************************
 

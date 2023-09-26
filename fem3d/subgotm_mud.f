@@ -24,41 +24,41 @@
 !
 !--------------------------------------------------------------------------
 
-c gotm module
-c
-c contents :
-c
-c revision log :
-c
-c 10.08.2003	ggu	call gotm_init
-c 05.10.2004	ggu	new administration routine turb_closure, Munk-And.
-c 23.03.2006	ggu	changed time step to real
-c 20.11.2006	ggu	new version of keps, for gotm changed common blocks
-c 20.10.2007	ccf	new version of gotm (4.0.0)
-c 10.04.2008	ggu	integrated in main branch
-c 18.09.2008	ccf	bug fix for m2 in setm2n2
-c 02.12.2008	ggu	bug in gotm_init: no limiting values for initialization
-c 18.12.2008	ggu	bug in GOTM module and setm2n2() corrected
-c 16.02.2011	ggu	write n2max to info file, profiles in special node
-c 26.06.2012	ggu	changed VERS_6_1_55
-c 29.03.2013	ggu	avoid call to areaele -> ev(10,ie)
-c 25.10.2013	ggu	changed VERS_6_1_68
-c 18.06.2014	ggu	changed VERS_6_1_77
-c 19.12.2014	ggu	changed VERS_7_0_10
-c 23.12.2014	ggu	changed VERS_7_0_11
-c 19.01.2015	ggu	changed VERS_7_1_3
-c 17.07.2015	ggu	changed VERS_7_1_80
-c 20.07.2015	ggu	changed VERS_7_1_81
-c 25.05.2016	ggu	changed VERS_7_5_10
-c 16.02.2019	ggu	changed VERS_7_5_60
-c 01.04.2021	ggu	mod_turbulence substituted by mod_keps
-c 09.05.2023    lrp     introduce top layer index variable
-c
-c**************************************************************
+! gotm module
+!
+! contents :
+!
+! revision log :
+!
+! 10.08.2003	ggu	call gotm_init
+! 05.10.2004	ggu	new administration routine turb_closure, Munk-And.
+! 23.03.2006	ggu	changed time step to real
+! 20.11.2006	ggu	new version of keps, for gotm changed common blocks
+! 20.10.2007	ccf	new version of gotm (4.0.0)
+! 10.04.2008	ggu	integrated in main branch
+! 18.09.2008	ccf	bug fix for m2 in setm2n2
+! 02.12.2008	ggu	bug in gotm_init: no limiting values for initialization
+! 18.12.2008	ggu	bug in GOTM module and setm2n2() corrected
+! 16.02.2011	ggu	write n2max to info file, profiles in special node
+! 26.06.2012	ggu	changed VERS_6_1_55
+! 29.03.2013	ggu	avoid call to areaele -> ev(10,ie)
+! 25.10.2013	ggu	changed VERS_6_1_68
+! 18.06.2014	ggu	changed VERS_6_1_77
+! 19.12.2014	ggu	changed VERS_7_0_10
+! 23.12.2014	ggu	changed VERS_7_0_11
+! 19.01.2015	ggu	changed VERS_7_1_3
+! 17.07.2015	ggu	changed VERS_7_1_80
+! 20.07.2015	ggu	changed VERS_7_1_81
+! 25.05.2016	ggu	changed VERS_7_5_10
+! 16.02.2019	ggu	changed VERS_7_5_60
+! 01.04.2021	ggu	mod_turbulence substituted by mod_keps
+! 09.05.2023    lrp     introduce top layer index variable
+!
+!**************************************************************
 
 	subroutine turb_closure
 
-c administers turbulence closure
+! administers turbulence closure
 
 	implicit none
 
@@ -90,11 +90,11 @@ c administers turbulence closure
 
 	end
 
-c**************************************************************
+!**************************************************************
 
 	subroutine munk_anderson_shell
 
-c computes turbulent quantities with Munk - Anderson model
+! computes turbulent quantities with Munk - Anderson model
 
 	use mod_diff_visc_fric
 	use levels, only : nlvdi,nlv
@@ -107,9 +107,9 @@ c computes turbulent quantities with Munk - Anderson model
 	include 'femtime.h'
 	include 'pkonst.h'
 
-c---------------------------------------------------------------
-c aux arrays superposed onto other aux arrays
-c---------------------------------------------------------------
+!---------------------------------------------------------------
+! aux arrays superposed onto other aux arrays
+!---------------------------------------------------------------
 
 	real shearf2(nlvdim,nkndim)
 	real buoyf2(nlvdim,nkndim)
@@ -130,9 +130,9 @@ c---------------------------------------------------------------
 	save icall
 	data icall / 0 /
 
-c------------------------------------------------------
-c initialization
-c------------------------------------------------------
+!------------------------------------------------------
+! initialization
+!------------------------------------------------------
 
 	if( icall .lt. 0 ) return
 
@@ -142,15 +142,15 @@ c------------------------------------------------------
 
 	icall = icall + 1
 
-c------------------------------------------------------
-c set up buoyancy frequency and shear frequency
-c------------------------------------------------------
+!------------------------------------------------------
+! set up buoyancy frequency and shear frequency
+!------------------------------------------------------
 
 	call setm2n2(nlvdim,buoyf2,shearf2)
 
-c------------------------------------------------------
-c set up parameters
-c------------------------------------------------------
+!------------------------------------------------------
+! set up parameters
+!------------------------------------------------------
 
 	mode = +1
 	a = 10.
@@ -160,9 +160,9 @@ c------------------------------------------------------
 	vistur = getpar('vistur')
 	diftur = getpar('diftur')
 
-c------------------------------------------------------
-c compute richardson number for each water column
-c------------------------------------------------------
+!------------------------------------------------------
+! compute richardson number for each water column
+!------------------------------------------------------
 
 	do k=1,nkn
 
@@ -194,17 +194,17 @@ c------------------------------------------------------
 
 	end do
 
-c------------------------------------------------------
-c end of routine
-c------------------------------------------------------
+!------------------------------------------------------
+! end of routine
+!------------------------------------------------------
 
 	end
 
-c**************************************************************
+!**************************************************************
 
 	subroutine gotm_shell
 
-c computes turbulent quantities with GOTM model
+! computes turbulent quantities with GOTM model
 
 	use mod_meteo
 	use mod_sinking
@@ -248,9 +248,9 @@ c computes turbulent quantities with GOTM model
 	include 'pkonst.h'
 
 
-c---------------------------------------------------------------
-c aux arrays superposed onto other aux arrays
-c---------------------------------------------------------------
+!---------------------------------------------------------------
+! aux arrays superposed onto other aux arrays
+!---------------------------------------------------------------
 
 	real taub(nkndim)
 	real areaac(nkndim)
@@ -311,19 +311,19 @@ c---------------------------------------------------------------
 	logical, save :: ldebug
 
 
-c------------------------------------------------------
-c documentation
-c------------------------------------------------------
+!------------------------------------------------------
+! documentation
+!------------------------------------------------------
 
-c total stress :  tau_x = a |u| u   tau_y = a |u| v
-c tau_tot^2 = a^2 |u|^2 ( u^2 + v^2 ) a^2 |u|^4
-c tau_tot = sqrt(tau_x^2+tau_y^2) = a |u|^2
-c
-c u_taus=sqrt(sqrt(tx*tx+ty*ty))	(friction velocity)
+! total stress :  tau_x = a |u| u   tau_y = a |u| v
+! tau_tot^2 = a^2 |u|^2 ( u^2 + v^2 ) a^2 |u|^4
+! tau_tot = sqrt(tau_x^2+tau_y^2) = a |u|^2
+!
+! u_taus=sqrt(sqrt(tx*tx+ty*ty))	(friction velocity)
 
-c------------------------------------------------------
-c initialization
-c------------------------------------------------------
+!------------------------------------------------------
+! initialization
+!------------------------------------------------------
 
 	if( icall .lt. 0 ) return
 
@@ -337,15 +337,15 @@ c------------------------------------------------------
       ldebug   = nint(getpar('ldebug')) .ne. 0
       testnode = getpar('testnode')
       icycle   = getpar('icycle')
-c         --------------------------------------------------------
-c         Initializes gotm arrays 
-c         --------------------------------------------------------
+!         --------------------------------------------------------
+!         Initializes gotm arrays 
+!         --------------------------------------------------------
 
 	  call gotm_init
 
-c         --------------------------------------------------------
-c         Get file name containing GOTM turbulence model parameters
-c         --------------------------------------------------------
+!         --------------------------------------------------------
+!         Get file name containing GOTM turbulence model parameters
+!         --------------------------------------------------------
 
           call getfnm('gotmpa',fn)
 
@@ -365,21 +365,21 @@ c         --------------------------------------------------------
 	dt = dtreal
 	g = grav
 
-c------------------------------------------------------
-c set up bottom stress on nodes
-c------------------------------------------------------
+!------------------------------------------------------
+! set up bottom stress on nodes
+!------------------------------------------------------
 
 	call bnstress(czdef,taub,areaac)
 
-c------------------------------------------------------
-c set up buoyancy frequency and shear frequency
-c------------------------------------------------------
+!------------------------------------------------------
+! set up buoyancy frequency and shear frequency
+!------------------------------------------------------
 
 	call setm2n2(nlvdim,buoyf2,shearf2)
 
-c------------------------------------------------------
-c call gotm for each water column
-c------------------------------------------------------
+!------------------------------------------------------
+! call gotm for each water column
+!------------------------------------------------------
 
 	rlmax = 0.
 	nltot = 0
@@ -391,9 +391,9 @@ c------------------------------------------------------
 
             if( numOfLev .eq. 1 ) goto 1
 
-c           ------------------------------------------------------
-c           update boyancy and shear-frequency vectors
-c           ------------------------------------------------------
+!           ------------------------------------------------------
+!           update boyancy and shear-frequency vectors
+!           ------------------------------------------------------
 
 	    do l=flev,nlev-1
 	      laux = nlev - l
@@ -405,9 +405,9 @@ c           ------------------------------------------------------
 	    ss(0) = ss(1)
 	    ss(numOfLev) = ss(numOfLev-1)
 
-c       ------------------------------------------------------
-c       compute layer thickness and total depth
-c       ------------------------------------------------------
+!       ------------------------------------------------------
+!       compute layer thickness and total depth
+!       ------------------------------------------------------
 
             depth = 0.
             ddepth = 0.
@@ -420,18 +420,18 @@ c       ------------------------------------------------------
               ddepth(l) = depth - ddepth(l) 
             end do
 
-c           ------------------------------------------------------
-c           compute surface friction velocity (m/s)
-c           ------------------------------------------------------
+!           ------------------------------------------------------
+!           compute surface friction velocity (m/s)
+!           ------------------------------------------------------
 
 	    u_taus = sqrt( sqrt( tauxnv(k)**2 + tauynv(k)**2 ) )
 
 	    z0s = charnock_val*u_taus**2/g
 	    z0s = max(z0s,z0s_min)
 
-c           ------------------------------------------------------
-c           compute bottom friction velocity (m/s)
-c           ------------------------------------------------------
+!           ------------------------------------------------------
+!           compute bottom friction velocity (m/s)
+!           ------------------------------------------------------
 
 	    z0b = z0bk(k)
 	    u_taub = sqrt( taub(k) )
@@ -441,9 +441,9 @@ c           ------------------------------------------------------
 	    rr = 0.4/(log((z0b+hh(1)/2)/z0b))
             u_taub = rr*sqrt( ubot*ubot + vbot*vbot )
 
-c           ------------------------------------------------------
-c           update 1-dimensional vectors
-c           ------------------------------------------------------
+!           ------------------------------------------------------
+!           update 1-dimensional vectors
+!           ------------------------------------------------------
 
 	    do l=0,nlev
 	      num(l) = numv_gotm(l,k)
@@ -460,9 +460,9 @@ c           ------------------------------------------------------
 
 	    !call save_gotm_init
 
-c           ------------------------------------------------------
-c           call GOTM turbulence routine
-c           ------------------------------------------------------
+!           ------------------------------------------------------
+!           call GOTM turbulence routine
+!           ------------------------------------------------------
 
  	    call do_gotm_turb   (
      &				  numOfLev,dt,depth
@@ -492,9 +492,9 @@ c           ------------------------------------------------------
 		call stress_mud(nlvdim,k,ldebug,testnode,icycle)
 	  end if
         end if
-c           ------------------------------------------------------
-c           copy back to node vectors
-c           ------------------------------------------------------
+!           ------------------------------------------------------
+!           copy back to node vectors
+!           ------------------------------------------------------
 
 	    bwrite = .false.
 
@@ -540,9 +540,9 @@ c           ------------------------------------------------------
 	      write(89,*) '==========================='
 	    end if
 
-c           ------------------------------------------------------
-c           update viscosity and diffusivity
-c           ------------------------------------------------------
+!           ------------------------------------------------------
+!           update viscosity and diffusivity
+!           ------------------------------------------------------
 
 	    do l=0,nlev
 	      laux = nlev - l
@@ -626,17 +626,17 @@ c           ------------------------------------------------------
 !	  write(189,*) it,nlev,(difv(l,ks),l=1,nlev)
 !	end if
 
-c------------------------------------------------------
-c end of routine
-c------------------------------------------------------
+!------------------------------------------------------
+! end of routine
+!------------------------------------------------------
 
 	end
 
-c**************************************************************
+!**************************************************************
 
 	subroutine gotm_init
 
-c initializes gotm arrays
+! initializes gotm arrays
 
 	use mod_gotm_aux
 	use levels, only : nlvdi,nlv
@@ -672,11 +672,11 @@ c initializes gotm arrays
 
 	end
 
-c**************************************************************
+!**************************************************************
 
 	subroutine gotm_get(k,nlev,num,nuh,tk,ep,rl)
 
-c returns internal parameters from turbulence closure
+! returns internal parameters from turbulence closure
 
 	use mod_gotm_aux
 
@@ -708,7 +708,7 @@ c returns internal parameters from turbulence closure
 
 	end
 
-c**************************************************************
+!**************************************************************
 
       subroutine Yevol(Nmx,dt,h,nuh,difmol,Qsour,Yvar,Yd,
      &                 Bcup,Yup,Bcdw,Ydw,Taur)
@@ -729,11 +729,11 @@ c**************************************************************
 	real Ydw		!value for boundary condition (lower)
 	real Taur		!time scale to use with Yd [s]
 
-c if Taur <= 0	-> do not use Yd
-c Bcup/Bcdw :   1 = Neuman condition   2 = Dirichlet condition
-c Yup,Ydw   :   value to use for boundary condition
-c
-c example: Bcup = 1  and Yup = 0  --> no flux condition across surface
+! if Taur <= 0	-> do not use Yd
+! Bcup/Bcdw :   1 = Neuman condition   2 = Dirichlet condition
+! Yup,Ydw   :   value to use for boundary condition
+!
+! example: Bcup = 1  and Yup = 0  --> no flux condition across surface
 
 !     This subroutine computes the evolution of any 
 !     state variable "Y" after Mixing/Advection/Source
@@ -831,7 +831,7 @@ c example: Bcup = 1  and Yup = 0  --> no flux condition across surface
       return
       end
 
-c**************************************************************
+!**************************************************************
 
       subroutine Tridiagonal(Nmx,fi,lt,au,bu,cu,du,value)
       implicit none
@@ -891,19 +891,19 @@ c**************************************************************
       end
 !EOC
 
-c**************************************************************
+!**************************************************************
 
 	subroutine setm2n2(nldim,buoyf2,shearf2)
 
-c sets buoyancy and shear frequency
-c
-c this is done directly for each node
-c in rhov is already rho^prime = rho - rho0 (deviation)
+! sets buoyancy and shear frequency
+!
+! this is done directly for each node
+! in rhov is already rho^prime = rho - rho0 (deviation)
 !  Discretisation of vertical shear squared according to Burchard (2002)
 !  in order to guarantee conservation of kinetic energy when transformed
 !  from mean kinetic energy to turbulent kinetic energy.
-c
-c bug fix in computation of shearf2 -> abs() statements to avoid negative vals
+!
+! bug fix in computation of shearf2 -> abs() statements to avoid negative vals
 
 	use mod_ts
 	use mod_hydro_print
@@ -989,7 +989,7 @@ c bug fix in computation of shearf2 -> abs() statements to avoid negative vals
 
 	end
 
-c**************************************************************
+!**************************************************************
 
       subroutine richardson(k,nldim,rif,rig,ldebug,testnode,icycle)
 
@@ -1042,7 +1042,7 @@ c**************************************************************
 
         if (k==testnode) iwrite = iwrite + 1
       end subroutine
-c**************************************************************
+!**************************************************************
 
       subroutine stress3d(nldim,k,tstress,ldebug,testnode,icycle)
 
@@ -1094,14 +1094,14 @@ c**************************************************************
         tstress(nlev) = tstress(nlev-1)
       end subroutine stress3d
 
-c**************************************************************
+!**************************************************************
 
 	subroutine bnstress(czdef,taub,areaac)
 
-c computes bottom stress at nodes
-c
-c this is evaluated for every element and then averaged for each node
-c taub (stress at bottom) is accumulated and weighted by area
+! computes bottom stress at nodes
+!
+! this is evaluated for every element and then averaged for each node
+! taub (stress at bottom) is accumulated and weighted by area
  
 	use mod_hydro_vel
 	use evgeom
@@ -1125,18 +1125,18 @@ c taub (stress at bottom) is accumulated and weighted by area
 
 	imud = getpar('imud')
 
-c	---------------------------------------------------
-c	initialize arrays
-c	---------------------------------------------------
+!	---------------------------------------------------
+!	initialize arrays
+!	---------------------------------------------------
 
         do k=1,nkn
           taub(k) = 0.
           areaac(k) = 0.
         end do
  
-c	---------------------------------------------------
-c	accumulate
-c	---------------------------------------------------
+!	---------------------------------------------------
+!	accumulate
+!	---------------------------------------------------
 !AR: mud 
         if (imud == 0) then
           do ie=1,nel
@@ -1169,9 +1169,9 @@ c	---------------------------------------------------
           end do
         endif
 
-c	---------------------------------------------------
-c	compute bottom stress
-c	---------------------------------------------------
+!	---------------------------------------------------
+!	compute bottom stress
+!	---------------------------------------------------
 
         do k=1,nkn
           if( areaac(k) .le. 0. ) stop 'error stop bnstress: (2)'
@@ -1180,15 +1180,15 @@ c	---------------------------------------------------
 
 	end
 
-c**************************************************************
+!**************************************************************
 
 	subroutine notused
  
-c this is evaluated for every element and then averaged for each node
-c the average is weigthed with the volume of each element
-c level l (for node) refers to interface between layers l and l+1
-c
-c taub (stress at bottom) is also accumulated and weighted by area
+! this is evaluated for every element and then averaged for each node
+! the average is weigthed with the volume of each element
+! level l (for node) refers to interface between layers l and l+1
+!
+! taub (stress at bottom) is also accumulated and weighted by area
 
 	!implicit none
 
@@ -1264,11 +1264,11 @@ c taub (stress at bottom) is also accumulated and weighted by area
 
 	end
 
-c**************************************************************
+!**************************************************************
 
 	subroutine checka(nldim,shearf2,buoyf2,taub)
 
-c checks arrays for nan or other strange values
+! checks arrays for nan or other strange values
 
 	use mod_meteo
 	use mod_diff_visc_fric
@@ -1307,11 +1307,11 @@ c checks arrays for nan or other strange values
  
 	end
 
-c**************************************************************
+!**************************************************************
 
 	subroutine checkb(text)
 
-c checks arrays for strange values
+! checks arrays for strange values
 
 	use mod_meteo
 	use mod_ts
@@ -1354,7 +1354,7 @@ c checks arrays for strange values
 
 	end
 
-c**************************************************************
+!**************************************************************
 
 	subroutine keps_shell
 
@@ -1401,20 +1401,20 @@ c**************************************************************
 	  taus = rhoair * cd * (wx*wx+wy*wy)
 	  taub = rho0 * cb * (ubot*ubot+vbot*vbot)
 
-          call keps(lmax,dt,rho0
-     +		,taus,taub
-     +		,hdknv(1,k),uprv(1,k),vprv(1,k)
-     +		,rhov(1,k),visv(0,k),difv(0,k),tken(0,k),eps(0,k))
+          call keps(lmax,dt,rho0 &
+     &		,taus,taub &
+     &		,hdknv(1,k),uprv(1,k),vprv(1,k) &
+     &		,rhov(1,k),visv(0,k),difv(0,k),tken(0,k),eps(0,k))
 
 	end do
 
 	end
 
-c**************************************************************
+!**************************************************************
 
         subroutine keps_init
 
-c initializes arrays for keps routine
+! initializes arrays for keps routine
 
 	use mod_keps
 	use mod_diff_visc_fric
@@ -1423,7 +1423,7 @@ c initializes arrays for keps routine
         implicit none
 
 	real kmin,epsmin,lenmin,avumol,avtmol,avsmol
-c       parameter(kmin=1.e-10,epsmin=1.e-12,lenmin=0.01)
+!       parameter(kmin=1.e-10,epsmin=1.e-12,lenmin=0.01)
         parameter(kmin=3.e-6,epsmin=5.e-10,lenmin=0.01)
         parameter(avumol=1.3e-6,avtmol=1.4e-7,avsmol=1.1e-9)
 
@@ -1441,15 +1441,15 @@ c       parameter(kmin=1.e-10,epsmin=1.e-12,lenmin=0.01)
 
         end
 
-c**************************************************************
-c**************************************************************
-c debug routines
-c**************************************************************
-c**************************************************************
+!**************************************************************
+!**************************************************************
+! debug routines
+!**************************************************************
+!**************************************************************
 
-	subroutine write_node_vel_info(iunit,it,k,ndim,depth
-     +			,u_taus,u_taub,z0s,z0b
-     +			,num,nuh,ken,dis,len,nn,ss,hh)
+	subroutine write_node_vel_info(iunit,it,k,ndim,depth &
+     &			,u_taus,u_taub,z0s,z0b &
+     &			,num,nuh,ken,dis,len,nn,ss,hh)
 
 	implicit none
 
@@ -1481,11 +1481,11 @@ c**************************************************************
 
 	end
 
-c**************************************************************
+!**************************************************************
 
-	subroutine write_node_bin_info(iunit,it,k,ndim,depth
-     +			,u_taus,u_taub,z0s,z0b
-     +			,num,nuh,ken,dis,len,nn,ss,hh)
+	subroutine write_node_bin_info(iunit,it,k,ndim,depth &
+     &			,u_taus,u_taub,z0s,z0b &
+     &			,num,nuh,ken,dis,len,nn,ss,hh)
 
 	implicit none
 
@@ -1516,5 +1516,5 @@ c**************************************************************
 
 	end
 
-c**************************************************************
+!**************************************************************
 

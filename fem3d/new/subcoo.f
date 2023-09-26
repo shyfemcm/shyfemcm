@@ -23,18 +23,18 @@
 !
 !--------------------------------------------------------------------------
 
-c******************************************************************
+!******************************************************************
 
 ! revision log :
 !
 ! 23.03.2010	ggu	changed v6.1.1
 ! 16.02.2019	ggu	changed VERS_7_5_60
 
-c******************************************************************
+!******************************************************************
 
 	subroutine coo_init(nel,nkn,mbw,nen3v,ndim,nnot0,ijp,ip,jp)
 
-c construct pointers for coo matrix
+! construct pointers for coo matrix
 
 	implicit none
 
@@ -86,11 +86,11 @@ c construct pointers for coo matrix
 	stop 'error stop coo_init: ndim'
 	end
 
-c******************************************************************
+!******************************************************************
 
 	subroutine coo_find(i,j,mbw,ijp,n)
 
-c finds position of non zero element in arrays
+! finds position of non zero element in arrays
 
 	implicit none
 
@@ -103,11 +103,11 @@ c finds position of non zero element in arrays
 
 	end
 
-c******************************************************************
+!******************************************************************
 
 	subroutine coo_check(nkn,mbw,ijp,ip,jp)
 
-c checks sanity of ijp, ip, jp arrays
+! checks sanity of ijp, ip, jp arrays
 
 	implicit none
 
@@ -138,11 +138,11 @@ c checks sanity of ijp, ip, jp arrays
 	stop 'error stop coo_check: internal error'
 	end
 
-c******************************************************************
+!******************************************************************
 
 	subroutine coo_init_insert(k1,k2,nkn,mbw,ip,n)
 
-c internal routine for insertion of non 0 elements
+! internal routine for insertion of non 0 elements
 
 	implicit none
 
@@ -184,5 +184,5 @@ c internal routine for insertion of non 0 elements
 
 	end
 	  
-c******************************************************************
+!******************************************************************
 

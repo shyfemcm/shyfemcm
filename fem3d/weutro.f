@@ -27,154 +27,154 @@
 !
 !--------------------------------------------------------------------------
 
-c weutro - EUTRO box model
-c
-c contents :
-c
-c revision log :
-c
-c 01.01.2000	ggu	original version until April 2002
+! weutro - EUTRO box model
+!
+! contents :
+!
+! revision log :
+!
+! 01.01.2000	ggu	original version until April 2002
 ! 19.04.2002	ggu&dmc	BUGFIX1, print_init, changes in ZOOP
 ! 20.06.2003	ggu&dmc	new routine for sediments
-c 19.12.2003	ggu	new routines param_taranto and param_venezia
-c 19.12.2003	isa	new routine rintens_tar()
+! 19.12.2003	ggu	new routines param_taranto and param_venezia
+! 19.12.2003	isa	new routine rintens_tar()
 ! 18.02.2004	dmc	dtl non viene passato nel reattore dtl=300/86400
 ! 26.02.2004	dmc	BUGFIX 2D 3D for depth > 1 (???) (LIGHTFIX)
-c 03.03.2004	ggu	in rlim new var btaranto (FIX)
-c 04.03.2004	ggu	changes from donata integrated
-c 10.06.2004	ggu	new routine param_read for Michol
-c 09.08.2004	ggu	marked changes from Donata with GGU
-c 17.08.2004	ggu	new routines for debug (eutro_replay)
-c 21.08.2004	ggu	rearangments, renaming ($LGA)
-c 24.08.2004	ggu	all changes incorporated (see check history 1-11)
-c 30.08.2004	ggu	cleanup of settopseg, setbotseg
-c 15.02.2006	ggu&mcg	some comments inserted for denitrification (SK18D,SK14D)
-c 23.03.2010	ggu	changed v6.1.1
-c 08.10.2010	ggu	changed VERS_6_1_13
-c 16.03.2012	ggu	dummy restart routines added
+! 03.03.2004	ggu	in rlim new var btaranto (FIX)
+! 04.03.2004	ggu	changes from donata integrated
+! 10.06.2004	ggu	new routine param_read for Michol
+! 09.08.2004	ggu	marked changes from Donata with GGU
+! 17.08.2004	ggu	new routines for debug (eutro_replay)
+! 21.08.2004	ggu	rearangments, renaming ($LGA)
+! 24.08.2004	ggu	all changes incorporated (see check history 1-11)
+! 30.08.2004	ggu	cleanup of settopseg, setbotseg
+! 15.02.2006	ggu&mcg	some comments inserted for denitrification (SK18D,SK14D)
+! 23.03.2010	ggu	changed v6.1.1
+! 08.10.2010	ggu	changed VERS_6_1_13
+! 16.03.2012	ggu	dummy restart routines added
 ! 24.09.2013	dmc	insert direct call to qflux input file from shyfem
 ! 28.09.2014	dmc	PNO3G1 cancelled
-c 10.07.2015	ggu	changed VERS_7_1_50
-c 01.04.2016	ggu	changed VERS_7_5_7
-c 07.06.2016	ggu	changed VERS_7_5_12
+! 10.07.2015	ggu	changed VERS_7_1_50
+! 01.04.2016	ggu	changed VERS_7_5_7
+! 07.06.2016	ggu	changed VERS_7_5_12
 ! 17.06.2016	dmc	deleted rlux, link for shyfem 7_5_13
-c 27.06.2016	ggu	changed VERS_7_5_16
-c 31.08.2018	ggu	changed VERS_7_5_49
-c 16.02.2019	ggu	changed VERS_7_5_60
-c 13.03.2019	ggu	changed VERS_7_5_61
-c
-c notes :
-c
-c 1
-c       debug routines
-c       nutlim
-c       in steele temp1 = ke and not ke*depth
-c       zood ?
-c       wsedim, nempar (?)
-c
-c 2
-c       changes signed with GGU
-c       ddin1, ddin2, prod, cons
-c       loicz()
-c       wsedim
-c
-c 3
-c       no denit (?)
-c
-c 5
-c       denit set again
-c
-c 6
-c       new array cold
-c       eutro_check
-c       param_read
-c       wsedim -> cold
-c
-c 7
-c       changes to eutro_check
-c       deleted rdtemp()
-c       eutro_replay, read/write_debug_param
-c       ample re-formatting
-c
-c 8
-c      new default of SOD1D
-c      deleted rlim(), rewritten steele
-c      changed rintens()
-c      deleted rintens_tar()
-c
-c 9
-c       renamed param_init, param_print
-c       in source new rlux in arguments
-c          set rlghts, call rintens()
-c       cleaned up reaeration part
-c       consider light attenuation in ditoro()
-c       new weutro_test as a test drive for weutro
-c       revised steele, rintens
-c       moved luxlen, it2n to weutro_light.f
-c       moved loicz, wsedim, tempcoef to weutro_sedim.f
-c       new comments, reformatting
-c
-c 10
-c       no changes
-c
-c 11
-c       use id, rlux internally (error_check etc.)
-c       new routines get/set_internal_param
-c       new routine weutro_debug
-c       eliminated ITYPE and segtype()
-c       call BENTFLUX only if botseg is true
-c       topseg used for reaeration
-c       debug -> wdebug : weutro_debug(.true.), weutro_debug(.false.)
-c
-c
-c
-c State variables used: (Wasp)
-c
-c nh3           71      1
-c no3           72      2
-c opo4          73      3
-c phyto         74      4
-c cbod          75      5
-c do            76      6
-c on            77      7
-c op            78      8
-c zoo           79      9
-c
-c********************************************************************
-c********************************************************************
-c********************************************************************
-c********************************************************************
-c********************************************************************
+! 27.06.2016	ggu	changed VERS_7_5_16
+! 31.08.2018	ggu	changed VERS_7_5_49
+! 16.02.2019	ggu	changed VERS_7_5_60
+! 13.03.2019	ggu	changed VERS_7_5_61
+!
+! notes :
+!
+! 1
+!       debug routines
+!       nutlim
+!       in steele temp1 = ke and not ke*depth
+!       zood ?
+!       wsedim, nempar (?)
+!
+! 2
+!       changes signed with GGU
+!       ddin1, ddin2, prod, cons
+!       loicz()
+!       wsedim
+!
+! 3
+!       no denit (?)
+!
+! 5
+!       denit set again
+!
+! 6
+!       new array cold
+!       eutro_check
+!       param_read
+!       wsedim -> cold
+!
+! 7
+!       changes to eutro_check
+!       deleted rdtemp()
+!       eutro_replay, read/write_debug_param
+!       ample re-formatting
+!
+! 8
+!      new default of SOD1D
+!      deleted rlim(), rewritten steele
+!      changed rintens()
+!      deleted rintens_tar()
+!
+! 9
+!       renamed param_init, param_print
+!       in source new rlux in arguments
+!          set rlghts, call rintens()
+!       cleaned up reaeration part
+!       consider light attenuation in ditoro()
+!       new weutro_test as a test drive for weutro
+!       revised steele, rintens
+!       moved luxlen, it2n to weutro_light.f
+!       moved loicz, wsedim, tempcoef to weutro_sedim.f
+!       new comments, reformatting
+!
+! 10
+!       no changes
+!
+! 11
+!       use id, rlux internally (error_check etc.)
+!       new routines get/set_internal_param
+!       new routine weutro_debug
+!       eliminated ITYPE and segtype()
+!       call BENTFLUX only if botseg is true
+!       topseg used for reaeration
+!       debug -> wdebug : weutro_debug(.true.), weutro_debug(.false.)
+!
+!
+!
+! State variables used: (Wasp)
+!
+! nh3           71      1
+! no3           72      2
+! opo4          73      3
+! phyto         74      4
+! cbod          75      5
+! do            76      6
+! on            77      7
+! op            78      8
+! zoo           79      9
+!
+!********************************************************************
+!********************************************************************
+!********************************************************************
+!********************************************************************
+!********************************************************************
 
       subroutine param_init
 
       implicit none
       INCLUDE 'weutro.h'
 
-c initialization of parameters
+! initialization of parameters
 
 C       BYPASS OPTIONS FOR SYSTEMS 1-9. 1=BYPASS 0=SIMULATE
       
 
         PI = 3.14159
 
-c--------------------------------------------------------------
-c       please do not change anything in this subroutine below this point
-c       all changes to parameters should be done in a custom subroutine
-c       see param_venezia or param_taranto for example
-c--------------------------------------------------------------
+!--------------------------------------------------------------
+!       please do not change anything in this subroutine below this point
+!       all changes to parameters should be done in a custom subroutine
+!       see param_venezia or param_taranto for example
+!--------------------------------------------------------------
 
-c       start parameter values
+!       start parameter values
 
-c--------------------------------------------------------------
-c       general parameters
-c--------------------------------------------------------------
+!--------------------------------------------------------------
+!       general parameters
+!--------------------------------------------------------------
 
       graztype=1        !if graztype=1 simulate zoop. variable
                   !if graztype=0  use wasp formulation
                   !Set initial value of variable zoo=0
       
-c      if CCHLX is variable in the segments, introduce each value else
+!      if CCHLX is variable in the segments, introduce each value else
 
         CCHL=50      !range 20-50
       CCHLX(1) = CCHL
@@ -183,62 +183,62 @@ c      if CCHLX is variable in the segments, introduce each value else
                   ! Default=0
                         ! GGU new value (was 1) ?
 
-c--------------------------------------------------------------
-c       subroutine phyto
-c--------------------------------------------------------------
+!--------------------------------------------------------------
+!       subroutine phyto
+!--------------------------------------------------------------
 
-c------ growth and respiration
+!------ growth and respiration
 
-c      K1RT=1.045       !wasp orig      
-c      K1RC=0.125      !wasp orig
+!      K1RT=1.045       !wasp orig      
+!      K1RC=0.125      !wasp orig
       K1RT=1.068      !adapting the curve to dejak model
       K1RC=0.096      !adapting the curve to dejak model
         K1T=1.068      
         K1C=2.               !GGU new value (was 1.5) ?
 
-c      KMPHYT=1.
+!      KMPHYT=1.
       KMPHYT=0.
 
-c------ decomposition
+!------ decomposition
 
         KPZDC=0.02      !verify the value
         KPZDT=1.08      !Default=1.0
 
-c------ nutrients limitation
+!------ nutrients limitation
 
-c        KMNG1=0.025      !for standard model application
+!        KMNG1=0.025      !for standard model application
                   !use a large KMNG1 (when KMNG1=0 PNH3G1=1.0)
         KMNG1=0.05      !from dejak model Venice lagoon
         KMPG1=0.01       
 
-c      F(10,10,1) !spatially variable dissolved fraction of inorganic P
+!      F(10,10,1) !spatially variable dissolved fraction of inorganic P
       FOPO4=0.9 !spatially variable dissolved fraction of inorganic P
          
-c      attenzione: nel benthic layer asume valori diversi (0.045-0.001)
+!      attenzione: nel benthic layer asume valori diversi (0.045-0.001)
 
-c------ grazing - zooplankton as a forcing
+!------ grazing - zooplankton as a forcing
 
         K1G=0.            
-c        K1G=0.08            
-c        K1D=0.02       !wasp orig
+!        K1G=0.08            
+!        K1D=0.02       !wasp orig
       K1D=0.12      !from dejak model Venice Lagoon 
-c        K1D=0.2         !prova 12sett
+!        K1D=0.2         !prova 12sett
       ZOO=0.7      
-c      if fraction is variable in segments, input each value, else:
+!      if fraction is variable in segments, input each value, else:
       ZOOSG(1)=1.
 
-c------ grazing - zooplankton as a variable
+!------ grazing - zooplankton as a variable
 
-c      KGRZ=1.44      !max grazing rate day-1
+!      KGRZ=1.44      !max grazing rate day-1
         KGRZ=2.         !prova 12sett
       KPHYZ=0.5      !
-c      EFF=0.5            !zoo-phyto digestion efficiency
+!      EFF=0.5            !zoo-phyto digestion efficiency
       EFF=0.7
       KDZ=0.192      !zoo death (with excrection)
 
-c--------------------------------------------------------------
-c       subroutine organop, inorganp (P=phosphorous)
-c--------------------------------------------------------------
+!--------------------------------------------------------------
+!       subroutine organop, inorganp (P=phosphorous)
+!--------------------------------------------------------------
 
         PCRB=0.025 !mgP/mgC
         FOP=0.5            !unitless
@@ -248,13 +248,13 @@ c--------------------------------------------------------------
         KOPDT=1.08      !unitless
       KPO4=1.0      !microg. P/L
 
-c--------------------------------------------------------------
-c       subroutine organicn, ammonia, nitrate
-c--------------------------------------------------------------
+!--------------------------------------------------------------
+!       subroutine organicn, ammonia, nitrate
+!--------------------------------------------------------------
 
       NCRB=0.115      !mg N/mg C
              FON=0.5     
-c            K1320C=0.1      !0.09-0.13 day-1 wasp orig 
+!            K1320C=0.1      !0.09-0.13 day-1 wasp orig 
       K1320C=0.05      !from dejak model lagoon of Venice
         K1320T=1.08      !unitless
         K140C=0.09      !day-1
@@ -266,9 +266,9 @@ c            K1320C=0.1      !0.09-0.13 day-1 wasp orig
         KONDC=0.0004    !day-1     
         KONDT=1.08      !unitles
 
-c--------------------------------------------------------------
-c       subroutine CBOD
-c--------------------------------------------------------------
+!--------------------------------------------------------------
+!       subroutine CBOD
+!--------------------------------------------------------------
 
       OCRB=32./12.      !mg O2/mg C
         KDC=0.18       !0.16-0.21 day-1
@@ -277,9 +277,9 @@ c--------------------------------------------------------------
         KDST=1.08      !unitless
         KBOD=0.5      !mg N/L
 
-c--------------------------------------------------------------
-c       subroutine dissoxyg
-c--------------------------------------------------------------
+!--------------------------------------------------------------
+!       subroutine dissoxyg
+!--------------------------------------------------------------
 
       WIND=3.             !m/s
         AIRTMP=22.           !C
@@ -288,32 +288,32 @@ c--------------------------------------------------------------
 
         K2=0   !4.3      !4.1-4.7 day-1 if k2=0 then use kawind or kahydra      
 
-c        REARSG(i)=0       !Segment specific reareation rate constant
+!        REARSG(i)=0       !Segment specific reareation rate constant
                         !REARSG  used when  rear is not calc from wind or hydro
 
                   !FIXME
        SOD1D(1)=0.0      !g/m2-day 0.2-4.0 sediment oxygen demand for segment
        SODTA(1)=1.08 
 
-c--------------------------------------------------------------
-c       light limitation
-c--------------------------------------------------------------
+!--------------------------------------------------------------
+!       light limitation
+!--------------------------------------------------------------
 
         LGHTSW=3        !LIGHT SWITCH: 1=Di Toro 2=Smith  3=Steele
-c      IS2=50000.      !optimum light intensity for Steele lux/h
+!      IS2=50000.      !optimum light intensity for Steele lux/h
       IS2=1200000.      !optimum light intensity for Steele lux/day
       IS2= 20            !prova W/m2/timestep 300 sec!
-c--------------------------------------------------------------
-c       subroutine ditoro
-c--------------------------------------------------------------
+!--------------------------------------------------------------
+!       subroutine ditoro
+!--------------------------------------------------------------
 
         FDAY=0.5
         IS1=300.      !(Ly/day) langleys/day
         IS1X(1)=IS1      !FIXME
 
-c--------------------------------------------------------------
-c       subroutine smith
-c--------------------------------------------------------------
+!--------------------------------------------------------------
+!       subroutine smith
+!--------------------------------------------------------------
 
         PHIMX=720.      !mg C/mole photon
         XKC=0.017      !m2/mg chl a
@@ -322,11 +322,11 @@ c--------------------------------------------------------------
         DTDAY=0.5           !??????verificare, serve a modulare il seno: day
         NEWDAY=1      !unknown????if G.E. 1 calcolo smith
 
-c--------------------------------------------------------------
-c       light attenuation
-c--------------------------------------------------------------
+!--------------------------------------------------------------
+!       light attenuation
+!--------------------------------------------------------------
 
-c you can have up to 5 KE time functions here default is 1
+! you can have up to 5 KE time functions here default is 1
 
       KE(1)=1.
       KEFN(1)=1
@@ -334,23 +334,23 @@ c you can have up to 5 KE time functions here default is 1
 
       end
 
-c********************************************************************
-c********************************************************************
-c********************************************************************
-c********************************************************************
-c********************************************************************
+!********************************************************************
+!********************************************************************
+!********************************************************************
+!********************************************************************
+!********************************************************************
 
 
-c********************************************************************
-c********************************************************************
-c********************************************************************
-c********************************************************************
-c********************************************************************
+!********************************************************************
+!********************************************************************
+!********************************************************************
+!********************************************************************
+!********************************************************************
 
         subroutine eutro0d(id,t,dt,vol,depth,vel,uws,stp,sal,qss
      &				,c,loads)
 
-c EUTRO 0-Dimensional
+! EUTRO 0-Dimensional
 
         implicit none
 
@@ -377,16 +377,16 @@ c EUTRO 0-Dimensional
         call source(id,t,vel,uws,stp,sal,vol,depth,qss,c,cds)
         call load0d(cds,loads,vol)
         call euler(nstate,dt,vol,c,cold,cds)
-        call eutro_check(id,nstate,t,dt,vel,stp,sal,qss,vol,depth
-     +          ,c,cold,cds,loads)
+        call eutro_check(id,nstate,t,dt,vel,stp,sal,qss,vol,depth &
+     &          ,c,cold,cds,loads)
 
         end
 
-c********************************************************************
+!********************************************************************
 
       subroutine load0d(cds,loads,vol)
 
-c integrate loadings
+! integrate loadings
 
       implicit none
 
@@ -405,12 +405,12 @@ c integrate loadings
 
       end
 
-c********************************************************************
+!********************************************************************
 
       subroutine euler(nstate,dt,vol,c,cold,cds)
 
-c new c is computed
-c cold is returned which is just c before call
+! new c is computed
+! cold is returned which is just c before call
 
       implicit none
 
@@ -439,13 +439,13 @@ c cold is returned which is just c before call
 
       end
       
-c********************************************************************
+!********************************************************************
 
-        subroutine eutro_check(id,nstate,t,dt,vel,stp,sal,qss
-     +          ,vol,depth
-     +          ,c,cold,cds,loads)
+        subroutine eutro_check(id,nstate,t,dt,vel,stp,sal,qss &
+     &          ,vol,depth &
+     &          ,c,cold,cds,loads)
 
-c checks result of integration for negatives
+! checks result of integration for negatives
 
         implicit none
 
@@ -478,8 +478,8 @@ c checks result of integration for negatives
 
         if( berror ) then
           write(6,*) '*** eutro_check: error in eutro0d'
-          call write_debug_param(id,nstate,t,dt
-     +                ,vol,depth,vel,stp,sal,qss,c,cold,cds,loads)
+          call write_debug_param(id,nstate,t,dt &
+     &                ,vol,depth,vel,stp,sal,qss,c,cold,cds,loads)
           write(6,*) '--- eutro_check: end of error message'
 
           write(6,*) 'id=', id
@@ -504,11 +504,11 @@ c checks result of integration for negatives
 
         end
 
-c********************************************************************
+!********************************************************************
 
       subroutine eutroini
 
-c initializes eutro routines
+! initializes eutro routines
 
       implicit none
 
@@ -523,11 +523,11 @@ c initializes eutro routines
 
       end
 
-c********************************************************************
+!********************************************************************
 
       subroutine param_print
 
-c prints parameters for weutro
+! prints parameters for weutro
 
       implicit none
 
@@ -601,12 +601,12 @@ c prints parameters for weutro
 
       end
 
-c********************************************************************
+!********************************************************************
 
       subroutine source(id,t,vel0,uws0,stp0,sal0,vol0,depth0,qss0,c,cds)
 
-c vel      velocity
-c stp      temperature
+! vel      velocity
+! stp      temperature
       
       implicit none
 
@@ -625,12 +625,12 @@ c stp      temperature
       real c(nstate)            ![mg/L]            !FIXME
       real cds(nstate)      ![g/day]      !FIXME
 
-c if rlux is > 0, at return it will be replaced with the attenuation
-c factor at the bottom of the box -> therefore it can be used
-c with the next call in 3D models looping from surface to bottom
-c for 2D models the value of rlux should be 1 (value replaced at return)
-c or <= 0 which leaves the value untouched
-c for the surface box the value of rlux should be 1
+! if rlux is > 0, at return it will be replaced with the attenuation
+! factor at the bottom of the box -> therefore it can be used
+! with the next call in 3D models looping from surface to bottom
+! for 2D models the value of rlux should be 1 (value replaced at return)
+! or <= 0 which leaves the value untouched
+! for the surface box the value of rlux should be 1
 
         INCLUDE 'weutro.h'
       
@@ -644,10 +644,10 @@ c for the surface box the value of rlux should be 1
       
       daytime = t
 
-c deal with light climate
+! deal with light climate
 
 
-c      call rintens(daytime,itot,fday,iinst)      !compute instant light
+!      call rintens(daytime,itot,fday,iinst)      !compute instant light
 
          NH3 = C (1)
          NO3 = C (2)
@@ -670,7 +670,7 @@ c      call rintens(daytime,itot,fday,iinst)      !compute instant light
         SA = vol0/depth0
 
       iinst=qss0
-c      write(6,*)iinst
+!      write(6,*)iinst
 
 C                        Compute derivatives
 C              For PHYT, OP, OPO4, ON, NH3, NO3, CBOD, DO
@@ -691,27 +691,27 @@ C              For PHYT, OP, OPO4, ON, NH3, NO3, CBOD, DO
 
          if( botseg ) CALL BENTFLUX
 
-c adesso sono definiti i cd
+! adesso sono definiti i cd
 
       do i=1,nstate
         cds(i) = cd(i,iseg)
       end do
 
-c save light climate for next call
+! save light climate for next call
 
 
       end
 
-c********************************************************************
-c********************************************************************
-c********************************************************************
+!********************************************************************
+!********************************************************************
+!********************************************************************
 
       subroutine wmeteo(tempair,windspeed)
 
-c sets meteo parameters
-c
-c tempair is the air temperature in degrees C
-c windspeed is the wind speed in m/s
+! sets meteo parameters
+!
+! tempair is the air temperature in degrees C
+! windspeed is the wind speed in m/s
 
       implicit none
 
@@ -725,11 +725,11 @@ c windspeed is the wind speed in m/s
 
       end
 
-c********************************************************************
+!********************************************************************
 
       subroutine wturbid(turbid)
 
-c sets turbidity parameter (units [1/m])
+! sets turbidity parameter (units [1/m])
 
       implicit none
 
@@ -744,14 +744,14 @@ c sets turbidity parameter (units [1/m])
 
       end
 
-c********************************************************************
+!********************************************************************
 
       subroutine wlight(fracday,itotal)
 
-c sets light parameters
-c
-c fracday      the fraction of the day that is light [0-1]
-c itotal      average incident light intensity during whole day [ly/day]
+! sets light parameters
+!
+! fracday      the fraction of the day that is light [0-1]
+! itotal      average incident light intensity during whole day [ly/day]
 
       implicit none
 
@@ -765,16 +765,16 @@ c itotal      average incident light intensity during whole day [ly/day]
       itotmp = itotal            !not used
 
       iav=0.9 *itot/FDAY
-c       IAV = 0.9*ITOTmp*RLGHTS (ISEG, 2)/FDAY !is multiplied in ditoro
+!       IAV = 0.9*ITOTmp*RLGHTS (ISEG, 2)/FDAY !is multiplied in ditoro
 
       end
 
-c********************************************************************
+!********************************************************************
 
       subroutine icecover(ice)
 
-c sets ice cover parameter
-c ice=1: ice covers all the surface; ice=0 no ice cover      
+! sets ice cover parameter
+! ice=1: ice covers all the surface; ice=0 no ice cover      
 
       implicit none
 
@@ -786,14 +786,14 @@ c ice=1: ice covers all the surface; ice=0 no ice cover
 
       end
 
-c********************************************************************
+!********************************************************************
 
       subroutine grazing(zoopl)
 
-c sets zooplankton state variable
-c
-c set in zoo the C/l value of grazing zooplankton
-c may be used to implement measured zoo
+! sets zooplankton state variable
+!
+! set in zoo the C/l value of grazing zooplankton
+! may be used to implement measured zoo
 
       implicit none
 
@@ -805,12 +805,12 @@ c may be used to implement measured zoo
 
       end
 
-c********************************************************************
+!********************************************************************
 
       subroutine sedflux(flnh4,flpo4)
 
-c sets sediment fluxes
-c fluxes are in [mg/(m**2 day)]
+! sets sediment fluxes
+! fluxes are in [mg/(m**2 day)]
 
       implicit none
 
@@ -821,17 +821,17 @@ c fluxes are in [mg/(m**2 day)]
       fnh4(1) = flnh4
       fpo4(1) = flpo4
 
-c      write(6,*) 'sedflux : ',flnh4,flpo4
+!      write(6,*) 'sedflux : ',flnh4,flpo4
 
       end
 
-c********************************************************************
-c********************************************************************
-c********************************************************************
+!********************************************************************
+!********************************************************************
+!********************************************************************
 
         subroutine settopseg(bstate)
 
-c sets segment as surface or not
+! sets segment as surface or not
 
         implicit none
         include 'weutro.h'
@@ -841,11 +841,11 @@ c sets segment as surface or not
 
         end
 
-c********************************************************************
+!********************************************************************
 
         subroutine setbotseg(bstate)
 
-c sets segment as bottom or not
+! sets segment as bottom or not
 
         implicit none
         include 'weutro.h'
@@ -855,11 +855,11 @@ c sets segment as bottom or not
 
         end
 
-c********************************************************************
+!********************************************************************
 
         subroutine setsedseg(bstate)
 
-c sets segment as sediment or not
+! sets segment as sediment or not
 
         implicit none
         include 'weutro.h'
@@ -869,11 +869,11 @@ c sets segment as sediment or not
 
         end
 
-c********************************************************************
-c********************************************************************
-c********************************************************************
-c********************************************************************
-c********************************************************************
+!********************************************************************
+!********************************************************************
+!********************************************************************
+!********************************************************************
+!********************************************************************
 
       SUBROUTINE EUTROINT
 
@@ -899,17 +899,17 @@ CDDD      changed PHIMAX ---> PHIMX
       botseg = .true.
         wdebug = .false.
 
-c      DUMMY = 0.
-c      CHLA2 = 0.
+!      DUMMY = 0.
+!      CHLA2 = 0.
       GP1 = 0.
       DP1 = 0.
-c      GP2 = 0.
-c      DP2 = 0.
-c      GZ1 = 0.
-c      DZ1 = 0.
-c      GZ2 = 0.
-c      DZ2 = 0.
-c      CFOREA = 1.0
+!      GP2 = 0.
+!      DP2 = 0.
+!      GZ1 = 0.
+!      DZ1 = 0.
+!      GZ2 = 0.
+!      DZ2 = 0.
+!      CFOREA = 1.0
 C
       noseg=segmax
 
@@ -929,8 +929,8 @@ CRBA--Date: Tuesday, 1 June 1993.  Time: 09:01:20.
       IF (XARG .LT. R0MIN) NCRB = 0.25
       XARG = ABS(PCRB)
       IF (XARG .LT. R0MIN) PCRB = 0.025
-c      XARG = ABS(LGHTSW)
-c      IF (XARG .LT. R0MIN) LGHTSW = 1.0
+!      XARG = ABS(LGHTSW)
+!      IF (XARG .LT. R0MIN) LGHTSW = 1.0
       if( LGHTSW .lt. 0 ) LGHTSW = 0
       if( LGHTSW .gt. 3 ) LGHTSW = 3
       
@@ -1014,19 +1014,19 @@ CCSC
       XARG = ABS(KDST)
       IF (XARG .LT. R0MIN) KDST = 1.0
 
-c sediment fluxes
+! sediment fluxes
 
       do i=1,segmax
           FNH4 (i) = 0.
           FPO4 (i) = 0.
       end do
 
-c      write(6,*) segmax,FNH4(1),FPO4(1)
+!      write(6,*) segmax,FNH4(1),FPO4(1)
 
       RETURN
       END
 
-c********************************************************************
+!********************************************************************
 
       SUBROUTINE AMMONIA
 
@@ -1066,28 +1066,28 @@ C
       END IF
       IF (STP .LT. 7.) SK1314 = 0.0
        ddin1=sk1013+SR13P-SK13P1        !GGU new
-c      write(6,*)ddin1
+!      write(6,*)ddin1
 
 C
 C                   Formulate Derivative
 C
-c      write(6,*) 'ammonia debug :'
-c      write(6,*) SR13P,SR13ON,SK13P1,SK1314,VOL,CD (1, ISEG)
-c      write(6,*) PNH3G1,NCRB,GP1,PHYT
+!      write(6,*) 'ammonia debug :'
+!      write(6,*) SR13P,SR13ON,SK13P1,SK1314,VOL,CD (1, ISEG)
+!      write(6,*) PNH3G1,NCRB,GP1,PHYT
 
       if (wdebug) then
       write(99,*)'ammondebug:',SR13P,denit,SR13ON,SK13P1,SK1314
       end if
 
-c      CD (1, ISEG) = (SR13P +denit+ SR13ON - SK13P1 - SK1314)*VOL      !just for tests
+!      CD (1, ISEG) = (SR13P +denit+ SR13ON - SK13P1 - SK1314)*VOL      !just for tests
       CD (1, ISEG) = (SR13P + SR13ON - SK13P1 - SK1314)*VOL     !ORIG
 
-c      write(6,*) CD (1, ISEG),iseg
+!      write(6,*) CD (1, ISEG),iseg
 C
       RETURN
       END
 
-c********************************************************************
+!********************************************************************
 
       SUBROUTINE NITRATE
 
@@ -1115,12 +1115,12 @@ C
       SK14D = (K140C*K140T**STP20)*NO3
       IF (DO .GT. 0) SK14D = SK14D*KNO3/(KNO3 + DO)
 C
-c for no denitrification set SK14D to 0.
+! for no denitrification set SK14D to 0.
 
-c      IF (SK14D .LT. 1.00E-24) SK14D = 1.00E-24
+!      IF (SK14D .LT. 1.00E-24) SK14D = 1.00E-24
 
       ddin2=-SK14P1-SK14D       !GGU new
-c      write (6,*) ddin2
+!      write (6,*) ddin2
 
 
 C
@@ -1136,7 +1136,7 @@ C
       RETURN
       END
 
-c********************************************************************
+!********************************************************************
 
       SUBROUTINE INORGANP
 
@@ -1165,7 +1165,7 @@ C
 
         prod = SR8OP+SR8P       !GGU new
       cons= SK8P              !GGU new
-c      write(6,*) 'prod phosph',prod
+!      write(6,*) 'prod phosph',prod
 C
 C                   Formulate Derivative
 C
@@ -1178,7 +1178,7 @@ C
       RETURN
       END
 
-c********************************************************************
+!********************************************************************
 
       SUBROUTINE PHYTO
 
@@ -1194,25 +1194,25 @@ C     Last Revised:  Date: Thursday, 1 February 1990.  Time: 16:32:57.
 C
 C        *-*-*-*-*-*  System 4 - Phytoplankton  *-*-*-*-*-*
 C
-c         open (9, file = 'outgp.dat')      !ggu
+!         open (9, file = 'outgp.dat')      !ggu
 
 
-c      write(6,*) 'phyto, sedseg,iseg : ',SEDSEG,iseg
+!      write(6,*) 'phyto, sedseg,iseg : ',SEDSEG,iseg
       IF (SEDSEG) THEN
 
-c      write(6,*) 'phyto,  ctrl: ',K1C,PHYT,K1T,STP20
-c      write(6,*) 'phyto, ctrl: ',GITMX1,KEFN(1)
+!      write(6,*) 'phyto,  ctrl: ',K1C,PHYT,K1T,STP20
+!      write(6,*) 'phyto, ctrl: ',GITMX1,KEFN(1)
             GP1 = K1C
             GPP = GP1*PHYT
             PNH3G1 = 0.
 
          ELSE
-c      write(6,*) 'phyto, ctrl : ',K1C,PHYT,K1T,STP20
+!      write(6,*) 'phyto, ctrl : ',K1C,PHYT,K1T,STP20
             GITMX1 = K1C*K1T**STP20
             GITMAX = GITMX1
             IKE = KEFN (ISEG)
       
-c         write(6,*) 'phyto, ctrl1 : ',GITMAX
+!         write(6,*) 'phyto, ctrl1 : ',GITMAX
 C
 C               Compute growth rate reduction due to light conditions
 C               using either Dick Smith's or Di Toro's formulation
@@ -1223,7 +1223,7 @@ C
             if( LGHTSW .eq. 3 ) call steele
 
              GIT1 = RLIGHT*GITMAX
-c            write(6,*) 'phyto, ctrl2 : ',GITMAX,GIT1
+!            write(6,*) 'phyto, ctrl2 : ',GITMAX,GIT1
 
 C                   Compute ammonia preference
             PNH3G1 = 0.0
@@ -1236,7 +1236,7 @@ C
 C              Compute Michaelis Limitations
 C
             CN = NH3 + NO3
-c      write(6,*)KMNG1,PNH3G1,NH3,NO3,CN
+!      write(6,*)KMNG1,PNH3G1,NH3,NO3,CN
             XEMP1 = CN/(KMNG1 + CN)
 
                DOPO4 = OPO4*FOPO4
@@ -1249,35 +1249,35 @@ CCSC
             XARG = ABS(NUTLIM)
             IF (XARG .LT. R0MIN) RNUTR = AMIN1 (XEMP1, XEMP2)
 
-c      write(6,*) '-------------- ggu --------------'
-c      write(6,*) NUTLIM,XARG,R0MIN
-c      write(6,*) XEMP1,XEMP2,RNUTR
-c      write(6,*) '-------------- ggu --------------'
+!      write(6,*) '-------------- ggu --------------'
+!      write(6,*) NUTLIM,XARG,R0MIN
+!      write(6,*) XEMP1,XEMP2,RNUTR
+!      write(6,*) '-------------- ggu --------------'
 CCSC
             IF (NUTLIM .EQ. 1.) RNUTR = XEMP1*XEMP2
-c            write(6,*) RNUTR
+!            write(6,*) RNUTR
             GP1 = RNUTR*GIT1
             GPP = GP1*PHYT
       
-c
+!
 C       ********************************************
 C                     Respiration Rate
 C       ********************************************
 C
          RESP = K1RC*K1RT**STP20
-c      
+!      
 C
 C       ALGAL RESPIRATION + DEATH + GRAZING
 C
-c         DP1 = RESP + K1D + K1G*ZOO*ZOOSG(ISEG)      !old
+!         DP1 = RESP + K1D + K1G*ZOO*ZOOSG(ISEG)      !old
 
          DP1 = RESP + K1D             !FIXMED 
 
          DPP = DP1*PHYT      !BUGFIX1   LAA
-c         DPP = DPP + DP1*PHYT       
-c         RESP = RESP*PHYT      !BUGFIX1
+!         DPP = DPP + DP1*PHYT       
+!         RESP = RESP*PHYT      !BUGFIX1
 
-c      write(6,*) DP1,RESP,K1D,K1G,ZOO,ZOOSG(iseg)
+!      write(6,*) DP1,RESP,K1D,K1G,ZOO,ZOOSG(iseg)
 
 
 C         IF (PHTY .GT. 1.0E-6)THEN
@@ -1290,34 +1290,34 @@ C         ENDIF
 C
       END IF      !sedsed
 C
-c      write(6,*) 'phyto debug ggu'
+!      write(6,*) 'phyto debug ggu'
       if (wdebug) then
       write(99,*)'phytodebug:',GP1,DPP,GRZ
       end if
 
-c        write(9,'(3(f8.4,2x))') RLIGHT,DP1, RESP       !ggu
+!        write(9,'(3(f8.4,2x))') RLIGHT,DP1, RESP       !ggu
 
-c      CD (4, ISEG) = (GP1 - DP1-GRZ)*PHYT*VOL      !BUGFIX1
+!      CD (4, ISEG) = (GP1 - DP1-GRZ)*PHYT*VOL      !BUGFIX1
       CD (4, ISEG) = (GPP - DPP - GRZ)*VOL
       RETURN
       END
 
-c********************************************************************
+!********************************************************************
 
       subroutine zoop
 
-c zooplankton
+! zooplankton
 
       implicit none
       include 'weutro.h'
       real gra
 
-c      *-*-*-*- system 9 zooplankton *-*-*-
-c
-c      Sources: zooplankton growth
+!      *-*-*-*- system 9 zooplankton *-*-*-
+!
+!      Sources: zooplankton growth
 
-c zoosk      Sink term: zooplankton death -->source term for organop organicn cbodsv
-c          grazing inefficiency -> source term for  organop organicn cbodsv
+! zoosk      Sink term: zooplankton death -->source term for organop organicn cbodsv
+!          grazing inefficiency -> source term for  organop organicn cbodsv
 
       if( graztype.eq.1 ) then
         DPP = 0.
@@ -1339,7 +1339,7 @@ c          grazing inefficiency -> source term for  organop organicn cbodsv
       return
       end
 
-c********************************************************************
+!********************************************************************
 
       SUBROUTINE CBODSV
 
@@ -1368,7 +1368,7 @@ C                            Oxidation
 C
  1010 CONTINUE
       IF ( .NOT. SEDSEG) THEN
-c         IF (DO .GT. 1.0E-15) THEN
+!         IF (DO .GT. 1.0E-15) THEN
          IF (DO .GT. 1.0E-15 .AND. CBOD .GT. 1.0E-5) THEN
             SK180 = (KDC*KDT**STP20)*((CBOD*DO)/(KBOD + DO))
          ELSE
@@ -1383,8 +1383,8 @@ c         IF (DO .GT. 1.0E-15) THEN
       END IF
 C
 C                         Denitrification
-c
-c ggu & mcg: next formula is indepenedent of BOD -> insert dependence
+!
+! ggu & mcg: next formula is indepenedent of BOD -> insert dependence
 
        SK18D = (5./4.)*(32./14.)*SK14D
 C
@@ -1398,7 +1398,7 @@ C
       RETURN
       END
 
-c********************************************************************
+!********************************************************************
 
       SUBROUTINE DISSOXYG
 
@@ -1430,11 +1430,11 @@ C
  1000 CONTINUE
       IF ( topseg .AND. XICECVR .GT. 0.0) THEN
 
-c if surface element and not completly covered with ice
+! if surface element and not completly covered with ice
 
-c elimino rear e rearsg perch\E9 non ci interessano, sono una time function 
-c e una segment specific reareation rate, ma noi usiamo la reareation from
-c  kawind o kahydra o imponendo un valore della costante di reareazione
+! elimino rear e rearsg perch\E9 non ci interessano, sono una time function 
+! e una segment specific reareation rate, ma noi usiamo la reareation from
+!  kawind o kahydra o imponendo un valore della costante di reareazione
 
          IF (K2 .EQ. 0.0) THEN
             CALL KAWIND (WIND, STP, AIRTMP, H, WTYPE,  K2WIND) 
@@ -1468,7 +1468,7 @@ C
 C
       SR190 = KA*(CS - DO)
 
-c      write(88,*) KA,CS,SR190
+!      write(88,*) KA,CS,SR190
 C
 C                 Evolution by phytoplankton
 C          growth of phytoplankton using CO2 and NH3
@@ -1487,7 +1487,7 @@ C
 C                             Sinks
 C                       Algal Respiration
 
-c      SK19P = OCRB*RESP                  !BUGFIX1
+!      SK19P = OCRB*RESP                  !BUGFIX1
       SK19P = OCRB*RESP*PHYT
 C
 C        Nitrification (NH3-N + 2O2 = NO3-N + H2O + H)
@@ -1507,21 +1507,21 @@ C======================================================================
 C                     Formulate Derivative
 C
       if (wdebug) then
-      write(99,*)'doxdebug:',SR190,SR19PA,SR19PB,SK19P
-     +                        ,SK1913,SK1918,SK19S
+      write(99,*)'doxdebug:',SR190,SR19PA,SR19PB,SK19P &
+     &                        ,SK1913,SK1918,SK19S
       end if
 
       CD (6, ISEG) = (SR190 + SR19PA + SR19PB - SK19P
      1   - SK1913 - SK1918 - SK19S)*VOL
 
-c        write(54,'(8(f8.4,2x))') SR190,SR19PA,SR19PB,SK19P,SK1913,SK1918
-c     & ,SK19S 
-c        write(54,'(3(f8.4,2x))') SR19PA,SR19PB,GP1      !ggu
+!        write(54,'(8(f8.4,2x))') SR190,SR19PA,SR19PB,SK19P,SK1913,SK1918
+!     & ,SK19S 
+!        write(54,'(3(f8.4,2x))') SR19PA,SR19PB,GP1      !ggu
        
       RETURN
       END
 
-c********************************************************************
+!********************************************************************
 
       SUBROUTINE ORGANICN
 
@@ -1559,7 +1559,7 @@ C
       RETURN
       END
 
-c********************************************************************
+!********************************************************************
 
       SUBROUTINE ORGANOP
 
@@ -1598,52 +1598,52 @@ C
       RETURN
       END
 
-c********************************************************************
-c
-c IAVBOT                bottom light                            not used
-c IAVBOTX(ISEG)         bottom light (variable in seg)          not used
-c daytime               = t
-c KESG(ISEG)            given turbidity [1/m]
-c KE(IKE)               time function for turbidity
-c SKE                   turbidity (given and phyto) [1/m]
-c
-c RLIGHT                limiting factor
-c RLGHTS(ISEG, 1)       = RLIGHT
-c RLGHTS(ISEG, 2)       fraction of surface light in segment (0-1)
-c                          is 1 in surface layer
-c ITO                   pointer to lower segment
-c IS1,IS1X(ISEG)        saturation light intensity
-c IS2                   optimum light intensity for Steele
-c FDAY                  fraction of day that is daylight (unitless)
-c IAV                   average incident light intensity during daylight hours
-c                          (iav=0.9*itot/fday)
-c ITOT                  total incident light intensity during one day [ly/day]
-c ITOTMP                ...                                     not used
-c
-c smith and steele use ITOT
-c ditoro uses IAV
-c
-c summary: we need IAV, ITOT, IINST, FDAY, IS1, IS2, KESG
-c
-c primary:   ITOT, FDAY
-c derived:   IAV, IINST
-c constants: IS1, IS2, KESG
-c
-c set primary, compute derived, use constants
-c
-c moreover: 
-c      RLGHTS(ISEG,2) is attenuation coefficient (enter) [0-1]
-c      RLGHTS(ITO,2) is attenuation coefficient at bottom (return) [0-1]
-c
-c********************************************************************
+!********************************************************************
+!
+! IAVBOT                bottom light                            not used
+! IAVBOTX(ISEG)         bottom light (variable in seg)          not used
+! daytime               = t
+! KESG(ISEG)            given turbidity [1/m]
+! KE(IKE)               time function for turbidity
+! SKE                   turbidity (given and phyto) [1/m]
+!
+! RLIGHT                limiting factor
+! RLGHTS(ISEG, 1)       = RLIGHT
+! RLGHTS(ISEG, 2)       fraction of surface light in segment (0-1)
+!                          is 1 in surface layer
+! ITO                   pointer to lower segment
+! IS1,IS1X(ISEG)        saturation light intensity
+! IS2                   optimum light intensity for Steele
+! FDAY                  fraction of day that is daylight (unitless)
+! IAV                   average incident light intensity during daylight hours
+!                          (iav=0.9*itot/fday)
+! ITOT                  total incident light intensity during one day [ly/day]
+! ITOTMP                ...                                     not used
+!
+! smith and steele use ITOT
+! ditoro uses IAV
+!
+! summary: we need IAV, ITOT, IINST, FDAY, IS1, IS2, KESG
+!
+! primary:   ITOT, FDAY
+! derived:   IAV, IINST
+! constants: IS1, IS2, KESG
+!
+! set primary, compute derived, use constants
+!
+! moreover: 
+!      RLGHTS(ISEG,2) is attenuation coefficient (enter) [0-1]
+!      RLGHTS(ITO,2) is attenuation coefficient at bottom (return) [0-1]
+!
+!********************************************************************
 
       SUBROUTINE DITORO
 
 C*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*
 C        Di Toro et al Light Formulation
 C*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*
-c
-c needs IAV, IS1 and FDAY (plus KESG)
+!
+! needs IAV, IS1 and FDAY (plus KESG)
 
       implicit none
       INCLUDE 'weutro.h'
@@ -1669,33 +1669,33 @@ C         Get average solar radiation during daylight hours
      1   TEMP3) - EXP ( - TEMP2))
       RLGHTS (ISEG, 1) = RLIGHT
 
-c      write(6,*) 'ditoro debug ggu'
-c      write(6,*) H,SKE,TEMP1,TEMP2,TEMP3,IAVBOT
-c      write(6,*) FDAY,RLGHTS (ISEG, 1),RLIGHT
-c      write(6,*) ISEG,ITO,IS1,IAV, 2.718*FDAY,temp1
-c      write(6,*) H
-c       write(10,'(6(f8.5,2x))')KESHD,SKE,PHYT,RLIGHT
+!      write(6,*) 'ditoro debug ggu'
+!      write(6,*) H,SKE,TEMP1,TEMP2,TEMP3,IAVBOT
+!      write(6,*) FDAY,RLGHTS (ISEG, 1),RLIGHT
+!      write(6,*) ISEG,ITO,IS1,IAV, 2.718*FDAY,temp1
+!      write(6,*) H
+!       write(10,'(6(f8.5,2x))')KESHD,SKE,PHYT,RLIGHT
 
       RETURN
       END
 
-c********************************************************************
+!********************************************************************
 
       SUBROUTINE SMITH
 
 C*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*
 C          Dick Smith variable carbon/chlorophyll ratio
 C*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*
-c
-c needs ITOT and FDAY (plus KESG)
-c IS1 is not needed (optimal light value is computed)
-c RLGHTS (ISEG, 2) is always 1 as implemented now
+!
+! needs ITOT and FDAY (plus KESG)
+! IS1 is not needed (optimal light value is computed)
+! RLGHTS (ISEG, 2) is always 1 as implemented now
 
       implicit none
       INCLUDE 'weutro.h'
 
       real I0,IMAX,IAVSG,SUM,KESHD,SKE
-c      real IAVBOTX(segmax)
+!      real IAVBOTX(segmax)
       real CCHL1,TCHLA
        real temp1, temp2, temp3
       integer I
@@ -1751,15 +1751,15 @@ C        Adapt carbon to chlorophyll ratio:
       RETURN
       END
 
-c***************************************************************
+!***************************************************************
 
       subroutine steele
 
-c computes light limitation with steele formula
-c
-c uses instantaneous light intensity IINST, and not IAV or ITOT
-c
-c needs IINST and IS2 (plus KESG)
+! computes light limitation with steele formula
+!
+! uses instantaneous light intensity IINST, and not IAV or ITOT
+!
+! needs IINST and IS2 (plus KESG)
 
       implicit none
 
@@ -1778,7 +1778,7 @@ c needs IINST and IS2 (plus KESG)
         IF (IKE .GT. 0 .AND. IKE .LE. 5) SKE = SKE*KE (IKE)
         SKE = SKE + KESHD
 
-c       write(66,*) daytime,itot,fday,iinst,ske
+!       write(66,*) daytime,itot,fday,iinst,ske
 
       temp1 = ske * h
       temp1 = ske                                    !$WRONG_FORMULA
@@ -1792,22 +1792,22 @@ c       write(66,*) daytime,itot,fday,iinst,ske
         RLIGHT = temp2*temp3*exp(1-temp2*temp3)         !2D_FORMULA
 
         RLGHTS (ISEG, 1) = RLIGHT
-c        write(66,*) ,'2', temp1,temp2,temp3,'fine2'
-c        write(66,*) ,'3', RLGHTS,'fine3'
-c        write(66,*) ,'4', RLIGHT,'fine4'
+!        write(66,*) ,'2', temp1,temp2,temp3,'fine2'
+!        write(66,*) ,'3', RLGHTS,'fine3'
+!        write(66,*) ,'4', RLIGHT,'fine4'
 
       end
 
-c***************************************************************
+!***************************************************************
 
       subroutine rintens(t,itot,fday,iinst)
 
-c computes light intensity during a day given itot and fday
-c
-c uses formula 5.7 in WASP user manual
-c
-c needs ITOT (average incident light intensity over one whole day)
-c and FDAY (fraction of day length)
+! computes light intensity during a day given itot and fday
+!
+! uses formula 5.7 in WASP user manual
+!
+! needs ITOT (average incident light intensity over one whole day)
+! and FDAY (fraction of day length)
 
       implicit none
 
@@ -1832,13 +1832,13 @@ c and FDAY (fraction of day length)
         t_old = t
       end if
 
-c      write(6,*) ,'rintens1',iinst
+!      write(6,*) ,'rintens1',iinst
 
       tday = t - int(t)                  !fraction in day
       if( tday .lt. 0. ) tday = tday + 1.      !negative days
       tday = tday - 0.5                  !maximum at noon
 
-c        intens = itot * (300./86400.)         !LIGHTFIX !FIXME
+!        intens = itot * (300./86400.)         !LIGHTFIX !FIXME
 
       aux = pi / fday
 
@@ -1850,10 +1850,10 @@ c        intens = itot * (300./86400.)         !LIGHTFIX !FIXME
 
       iinst_old = iinst
 
-c        write(66,*) ,'intens' ,t, tday,itot,iinst
+!        write(66,*) ,'intens' ,t, tday,itot,iinst
       end
 
-c********************************************************************
+!********************************************************************
 
       SUBROUTINE KAWIND (WS, TW, TA, depth, WTYPE,  RK)
 
@@ -1906,7 +1906,7 @@ CC******************************************************************
 
       real R0MIN
       parameter( R0MIN = 1.e-15 )
-c      INCLUDE 'weutro.h'
+!      INCLUDE 'weutro.h'
 C*
 C*  Declarations:
 C*
@@ -1945,7 +1945,7 @@ C*
         real RK2        !!auxiliar variable
         real RK3        !!auxiliar variable
 
-c       !!!!???!!!decidere      quale tenere depth(iseg) o depth. main1 o param?
+!       !!!!???!!!decidere      quale tenere depth(iseg) o depth. main1 o param?
         real ut !Transitional Shear Velocity, cm/s defined in kawind
         real uc !Critical Shear Velocity, cm/sec  defined in kawind
         real ze !Equilibrium Roughness, cm
@@ -1962,22 +1962,22 @@ C*   Water Body:
 C*
 CCSC
 CRBA      XARG1 = ABS(WTYPE)
-cdd      XWDIFF= WTYPE - 3.0
-cdd      XARG2 = ABS(XWDIFF)
+!dd      XWDIFF= WTYPE - 3.0
+!dd      XARG2 = ABS(XWDIFF)
       IWTYPE = NINT(WTYPE)
       IF (IWTYPE .eq. 3) then
 CRBA      IF (XARG1.LT.R0MIN.OR.XARG2.LT.R0MIN) THEN
-cddd      IF (XARG2.LT.R0MIN) THEN
+!ddd      IF (XARG2.LT.R0MIN) THEN
          UT = 10.0
          UC = 11.0
          ZE = 0.35
          LAM = 3.0
          GAM = 5.0
 CCSC
-cddd         XWDIFF = WTYPE - 1.0
-cddd         XARG1 = ABS(XWDIFF)
+!ddd         XWDIFF = WTYPE - 1.0
+!ddd         XARG1 = ABS(XWDIFF)
       ELSE IF (IWTYPE .eq. 1 ) THEN
-cddd         IF (XARG1 .LT. R0MIN) THEN
+!ddd         IF (XARG1 .LT. R0MIN) THEN
             UT = 9.0
             UC = 22.0
             ZE = 0.25
@@ -1990,7 +1990,7 @@ cddd         IF (XARG1 .LT. R0MIN) THEN
             LAM = 3.0
             GAM = 6.5
       else
-c            write(6,*) 'iwtype: ',iwtype
+!            write(6,*) 'iwtype: ',iwtype
             stop 'error stop'
       END IF
 C*
@@ -2077,11 +2077,11 @@ C CALC 1050S VALUES FOR WINDSPEED BETWEEN 6 AND 20 M/S
  6000 FORMAT(5X,'SOLUTION DID NOT CONVERGE')
  1060 CONTINUE
       rk = rk/depth
-cddd
+!ddd
       RETURN
       END
 
-c********************************************************************
+!********************************************************************
 
       SUBROUTINE KAHYDRA (K2HYDRA) 
 
@@ -2158,11 +2158,11 @@ C
       RETURN
       END
 
-c****************************************************
+!****************************************************
 
         function oxysat(temp,salt)
 
-c computes oxygen level at saturation
+! computes oxygen level at saturation
 
         implicit none
 
@@ -2171,11 +2171,11 @@ c computes oxygen level at saturation
 
         oxysat = (14.6244-0.367134*temp+4.4972E-3*temp**2
      :     -0.0966*salt+0.00205*salt*temp+2.739E-4*salt**2)
-c     :    /32.
+!     :    /32.
 
         end
 
-c****************************************************
+!****************************************************
 
       SUBROUTINE BENTFLUX
 
@@ -2196,12 +2196,12 @@ C
          FLUXP = FPO4 (ISEG)*AUX
          CD (3, ISEG) = CD (3, ISEG) + FLUXP
 
-c      write(77,*) FLUXN,ISEG,AUX,FNH4(ISEG)      !ggu
+!      write(77,*) FLUXN,ISEG,AUX,FNH4(ISEG)      !ggu
 C
       RETURN
       END
 
-c********************************************************************
+!********************************************************************
 
         subroutine param_read
 
@@ -2229,38 +2229,38 @@ c********************************************************************
         end
 
 
-c********************************************************************
+!********************************************************************
 
       subroutine param_venezia
 
       implicit none
       INCLUDE 'weutro.h'
 
-c        IS2 = 63       !optimum for Steele input Kj/m2/day, (or Kj/m2/300sec?dmk 20/9/2013)timestep 300 sec
+!        IS2 = 63       !optimum for Steele input Kj/m2/day, (or Kj/m2/300sec?dmk 20/9/2013)timestep 300 sec
         IS2 = 20        !optimum for Steele input Watt*h/mq/300sec (coherently with the previous line-dmk 20/9/2013)FixME
         IS2 = 200       !optimum for Steele input Watt*h/mq/300sec (coherently with the previous line-dmk 20/9/2013)FixME
         KESG(1)=0.85     !m-1 range: 0.1-5
-c        KGRZ=0.8        !run07KGRZ= 1.2 primi 2 run 2013 mgl (inclusi nuovi_input)
+!        KGRZ=0.8        !run07KGRZ= 1.2 primi 2 run 2013 mgl (inclusi nuovi_input)
         KGRZ=0.80
         KDZ = 0.150       ! 0.168 run08
-c        K1C = 2.        !primi 2 run 2013
-c        K1C = 2.5       ! test15 e test16 (squentin) 
-c         K1C = 1.025      ! test17 (squentin)
+!        K1C = 2.        !primi 2 run 2013
+!        K1C = 2.5       ! test15 e test16 (squentin) 
+!         K1C = 1.025      ! test17 (squentin)
          K1C = 0.45       ! test19 (squintin) originale 0.9
 
-c        K58C = 0.44     ! test17 (squentin) increase(*2) remineralization of OP
-c        k58C = 0.66     ! test19 (squintin) increase 10% remineralization of P
+!        K58C = 0.44     ! test17 (squentin) increase(*2) remineralization of OP
+!        k58C = 0.66     ! test19 (squintin) increase 10% remineralization of P
          k58C = 0.60     ! ultimo valore, provare 0.20
          KMNG1 = 0.125  ! test22 (squintin) decrease KMNG1(0.072),increase ammonia preference (PNH3G1)
          KMPG1= 0.096
       
         EFF = 0.5
         K1013C=0.037    !day-1 prova 4 agosto (primi 2 run)
-c       K1013C =0.075   !test21(squintin) 0.035 descrease 50% remineralization DON (0.075 original)
+!       K1013C =0.075   !test21(squintin) 0.035 descrease 50% remineralization DON (0.075 original)
          FON=1.0         !prova 4 agosto
-c        FON=0.5        !prova 22 luglio 2015
+!        FON=0.5        !prova 22 luglio 2015
          FOP=1.          !prova 4 agosto
-c       K140C=0.18      !prova 11 agosto !che sia per questo che va a valori negativi? 24 sett 2013
+!       K140C=0.18      !prova 11 agosto !che sia per questo che va a valori negativi? 24 sett 2013
         K140C=1.6      !increase denitrification at 1 d-1. San quintin value
      
         K1320C=0.010    !rate for nitrification 0.09-0.3
@@ -2272,7 +2272,7 @@ c       K140C=0.18      !prova 11 agosto !che sia per questo che va a valori neg
 
         end
 
-c********************************************************************
+!********************************************************************
 
       subroutine param_taranto
 
@@ -2293,7 +2293,7 @@ c********************************************************************
 
         end
 
-c********************************************************************
+!********************************************************************
 
         subroutine weutro_debug(debug)
 
@@ -2307,7 +2307,7 @@ c********************************************************************
 
         end
 
-c********************************************************************
+!********************************************************************
 
         subroutine eutro_replay
 
@@ -2337,11 +2337,11 @@ c********************************************************************
         call eutroini
 
         write(6,*) 'reading...'
-        call read_debug_param(id,nstate,t,dt
-     +                ,vol,depth,vel,stp,sal,qss,c,cold,cds,loads)
+        call read_debug_param(id,nstate,t,dt &
+     &                ,vol,depth,vel,stp,sal,qss,c,cold,cds,loads)
 
-        call write_debug_param(id,nstate,t,dt
-     +                ,vol,depth,vel,stp,sal,qss,c,cold,cds,loads)
+        call write_debug_param(id,nstate,t,dt &
+     &                ,vol,depth,vel,stp,sal,qss,c,cold,cds,loads)
 
         do i=1,nstate
           c(i) = cold(i)
@@ -2351,15 +2351,15 @@ c********************************************************************
         call eutro0d(id,t,dt,vol,depth,vel,uws,stp,sal,qss,c,loads)
         write(6,*) 'finished...'
 
-        call write_debug_param(id,nstate,t,dt
-     +                ,vol,depth,vel,stp,sal,qss,c,cold,cds,loads)
+        call write_debug_param(id,nstate,t,dt &
+     &                ,vol,depth,vel,stp,sal,qss,c,cold,cds,loads)
 
         end
 
-c********************************************************************
+!********************************************************************
 
-        subroutine read_debug_param(id,nstate,t,dt
-     +                ,vol,depth,vel,stp,sal,qss,c,cold,cds,loads)
+        subroutine read_debug_param(id,nstate,t,dt &
+     &                ,vol,depth,vel,stp,sal,qss,c,cold,cds,loads)
 
         implicit none
 
@@ -2396,16 +2396,16 @@ c********************************************************************
         read(5,*) (cds(i),i=1,nstate)
         read(5,*) (loads(i),i=1,nstate)
 
-        call set_internal_param(tair,wspeed,turbid,fracday,itotal
-     +                  ,ice,flnh4,flpo4
-     +                  ,tops,bots,seds)
+        call set_internal_param(tair,wspeed,turbid,fracday,itotal &
+     &                  ,ice,flnh4,flpo4 &
+     &                  ,tops,bots,seds)
 
         end
 
-c***************************************************************
+!***************************************************************
 
-        subroutine write_debug_param(id,nstate,t,dt
-     +                ,vol,depth,vel,stp,sal,qss,c,cold,cds,loads)
+        subroutine write_debug_param(id,nstate,t,dt &
+     &                ,vol,depth,vel,stp,sal,qss,c,cold,cds,loads)
 
         implicit none
 
@@ -2430,9 +2430,9 @@ c***************************************************************
 
         integer i
 
-        call get_internal_param(tair,wspeed,turbid,fracday,itotal
-     +                  ,ice,flnh4,flpo4
-     +                  ,tops,bots,seds)
+        call get_internal_param(tair,wspeed,turbid,fracday,itotal &
+     &                  ,ice,flnh4,flpo4 &
+     &                  ,tops,bots,seds)
 
         write(6,*) id,nstate,t,dt
         write(6,*) vel,stp,sal,vol,depth,qss
@@ -2446,13 +2446,13 @@ c***************************************************************
 
         end
 
-c***************************************************************
+!***************************************************************
 
-        subroutine get_internal_param(tair,wspeed,turbid,fracday,itotal
-     +                  ,ice,flnh4,flpo4
-     +                  ,tops,bots,seds)
+        subroutine get_internal_param(tair,wspeed,turbid,fracday,itotal &
+     &                  ,ice,flnh4,flpo4 &
+     &                  ,tops,bots,seds)
 
-c gets internal parameters (that can be altered through functions)
+! gets internal parameters (that can be altered through functions)
 
         implicit none
 
@@ -2476,13 +2476,13 @@ c gets internal parameters (that can be altered through functions)
 
         end
 
-c***************************************************************
+!***************************************************************
 
-        subroutine set_internal_param(tair,wspeed,turbid,fracday,itotal
-     +                  ,ice,flnh4,flpo4
-     +                  ,tops,bots,seds)
+        subroutine set_internal_param(tair,wspeed,turbid,fracday,itotal &
+     &                  ,ice,flnh4,flpo4 &
+     &                  ,tops,bots,seds)
 
-c sets internal parameters (that can be altered through functions)
+! sets internal parameters (that can be altered through functions)
 
         implicit none
 
@@ -2506,84 +2506,84 @@ c sets internal parameters (that can be altered through functions)
 
         end
 
-c***************************************************************
+!***************************************************************
 
-c      subroutine weutro_test
+!      subroutine weutro_test
 
-c test drives weutro
+! test drives weutro
 
-c      integer nstate
-c      parameter (nstate=9)
+!      integer nstate
+!      parameter (nstate=9)
 
-c       integer iddt,nt,iday,n,it
-c        integer id
-c        real vol,depth,vel,stp,sal
-c        real dt,t
-c        real rlux
-c        real pi
-c        real itot,fday,iinst,imax
+!       integer iddt,nt,iday,n,it
+!        integer id
+!        real vol,depth,vel,stp,sal
+!        real dt,t
+!        real rlux
+!        real pi
+!        real itot,fday,iinst,imax
 
-c      real c(nstate)
-c      real loads(nstate)
+!      real c(nstate)
+!      real loads(nstate)
 
-c       data c /0.05, 0.4, 0.01, 0.05, 2., 11., 0.2, 0.01, 0.015/
-c        data loads /0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0/
+!       data c /0.05, 0.4, 0.01, 0.05, 2., 11., 0.2, 0.01, 0.015/
+!        data loads /0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0/
 
-c        id = 1234
-c      iddt = 300
-c        rlat = 45.              !latitude
+!        id = 1234
+!      iddt = 300
+!        rlat = 45.              !latitude
 
-c        pi = 4.*atan(1.)
-c      vol = 1.e+6
-c      depth = 1.
-c      vel = 1.
-c      stp = 20.
-c      sal = 18.
+!        pi = 4.*atan(1.)
+!      vol = 1.e+6
+!      depth = 1.
+!      vel = 1.
+!      stp = 20.
+!      sal = 18.
 
-c      nt = 86400 / iddt      !time steps per day
-c        if( nt*iddt .ne. 86400 ) then
-c            stop 'error stop: iddt must devide 86400'
-c      end if
-c      dt = iddt/86400.
-c      t = 0.
-c        it = 0
+!      nt = 86400 / iddt      !time steps per day
+!        if( nt*iddt .ne. 86400 ) then
+!            stop 'error stop: iddt must devide 86400'
+!      end if
+!      dt = iddt/86400.
+!      t = 0.
+!        it = 0
 
-c       call eutroini
-c       call luxlen_init('lux.dat')      
+!       call eutroini
+!       call luxlen_init('lux.dat')      
 
-c      do iday=1,365
+!      do iday=1,365
 
-c          stp = 17. + 13. * cos(2.*pi*(iday-172)/365.)   !simple temp curve
-c      write(6,*) 'ma qui ci arrivo?'
+!          stp = 17. + 13. * cos(2.*pi*(iday-172)/365.)   !simple temp curve
+!      write(6,*) 'ma qui ci arrivo?'
 
-c        call luxlen(t,itot,fday)
-c          itot = itot * (300./86400.)   !for data Donata
-c          call get_radiation(iday,rlat,fday,itot,imax)
-c          itot = itot / 8.              !just to have same magnitude
+!        call luxlen(t,itot,fday)
+!          itot = itot * (300./86400.)   !for data Donata
+!          call get_radiation(iday,rlat,fday,itot,imax)
+!          itot = itot / 8.              !just to have same magnitude
 
-c        call wlight(fday,itot)
+!        call wlight(fday,itot)
 
-c        do n=1,nt
-c            it = it + iddt
-c          t = it / 86400.
-c            rlux = 1.
-c            call eutro0d(id,t,dt,vol,depth,vel,stp,sal,qss,c,loads)
-c        end do
+!        do n=1,nt
+!            it = it + iddt
+!          t = it / 86400.
+!            rlux = 1.
+!            call eutro0d(id,t,dt,vol,depth,vel,stp,sal,qss,c,loads)
+!        end do
 
-c          write(6,*) t,stp,c
-c          write(75,'(11e14.6)') t,stp,c
-c      end do
+!          write(6,*) t,stp,c
+!          write(75,'(11e14.6)') t,stp,c
+!      end do
 
-c      end
+!      end
 
 
-c**************************************************************
-c**************************************************************
-c**************************************************************
-c restart files -> fill in real routines
-c**************************************************************
-c**************************************************************
-c**************************************************************
+!**************************************************************
+!**************************************************************
+!**************************************************************
+! restart files -> fill in real routines
+!**************************************************************
+!**************************************************************
+!**************************************************************
 
         subroutine write_restart_eco(iunit)
         implicit none
@@ -2608,12 +2608,12 @@ c**************************************************************
         call skip_restart_eco(iunit)
         end
 
-c***************************************************************
+!***************************************************************
 
-c        program main
-c        call eutro_replay
-c        call weutro_test
-c        end
+!        program main
+!        call eutro_replay
+!        call weutro_test
+!        end
 
-c***************************************************************
+!***************************************************************
 

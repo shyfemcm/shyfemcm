@@ -82,9 +82,9 @@
       !!
       !!-----------------------------------------------------------------------
 
-        subroutine heatmfsbulk(days,im,ih,ddlon,ddlat,ta,pa,uuw,vvw,dp,
-     +                   cc,tm,uub,vvb,qsens,qlat,qlong,evap,qswa,
-     +                   cd)  
+        subroutine heatmfsbulk(days,im,ih,ddlon,ddlat,ta,pa,uuw,vvw,dp, &
+     &                   cc,tm,uub,vvb,qsens,qlat,qlong,evap,qswa, &
+     &                   cd)  
 
         implicit none
 
@@ -112,28 +112,28 @@
         dew = dp + ckelv    
         norspeed =sqrt (uub*uub + vvb*vvb)   
 
-        call mfs_qfluxes(ddlon,ddlat,
-     +                   days,ih,im,
-     +                   sstk,uuw,vvw,
-     +                   tairk,dew,cc,
-     +                   uub,vvb,norspeed,pa,
-     +                   qswa,
-     +                   qsens,qlat,qlong,evap,
-     +                   cd)
+        call mfs_qfluxes(ddlon,ddlat, &
+     &                   days,ih,im, &
+     &                   sstk,uuw,vvw, &
+     &                   tairk,dew,cc, &
+     &                   uub,vvb,norspeed,pa, &
+     &                   qswa, &
+     &                   qsens,qlat,qlong,evap, &
+     &                   cd)
 
 
         end
 
         !---------------------------------------------------
 
-        subroutine mfs_qfluxes(ddlon,ddlat,
-     +                   days,ih,im,
-     +                   sstk,uuw,vvw,
-     +                   tairk,dew,cc,
-     +                   uub,vvb,norspeed,pa,
-     +                   qswa,
-     +                   qsens,qlat,qlong,evap,
-     +                   cd)
+        subroutine mfs_qfluxes(ddlon,ddlat, &
+     &                   days,ih,im, &
+     &                   sstk,uuw,vvw, &
+     &                   tairk,dew,cc, &
+     &                   uub,vvb,norspeed,pa, &
+     &                   qswa, &
+     &                   qsens,qlat,qlong,evap, &
+     &                   cd)
 
         implicit none
 
@@ -153,9 +153,9 @@
        real, parameter  :: stefan = 5.67e-8
        real, parameter  :: emic = 0.97
 
-       real,parameter, dimension(6) :: ahr =
-     +           (/ 0.934e-3, 0.788e-4, 0.868e-4,
-     +              -0.616e-6,-.120e-5,-.214e-5 / )
+       real,parameter, dimension(6) :: ahr = &
+     &           (/ 0.934e-3, 0.788e-4, 0.868e-4, &
+     &              -0.616e-6,-.120e-5,-.214e-5 / )
 
        real pa         
        real ea
@@ -173,22 +173,22 @@
        real rel_u,rel_v,rspeed,norspeed
        real tairk
 
-       real,parameter, dimension(5) :: a_h =
-     +           (/0.0,0.927,1.15,1.17,1.652/)
-       real,parameter, dimension(5) :: a_e =
-     +           (/0.0,0.969,1.18,1.196,1.68/)
-       real,parameter, dimension(5) :: b_h =
-     +           (/1.185,0.0546,0.01,0.0075,-0.017/)
-       real,parameter, dimension(5) :: b_e =
-     +           (/1.23,0.0521,0.01,0.008,-0.016/)
-       real,parameter, dimension(5) :: c_h =
-     +           (/0.0,0.0,0.0,-0.00045,0.0/)
-       real,parameter, dimension(5) :: c_e =
-     +           (/0.0,0.0,0.0,-0.0004,0.0/)
-       real,parameter, dimension(5) :: p_h =
-     +           (/-0.157,1.0,1.0,1.0,1.0/)
-       real,parameter, dimension(5) :: p_e =
-     +           (/-0.16,1.0,1.0,1.0,1.0/)
+       real,parameter, dimension(5) :: a_h = &
+     &           (/0.0,0.927,1.15,1.17,1.652/)
+       real,parameter, dimension(5) :: a_e = &
+     &           (/0.0,0.969,1.18,1.196,1.68/)
+       real,parameter, dimension(5) :: b_h = &
+     &           (/1.185,0.0546,0.01,0.0075,-0.017/)
+       real,parameter, dimension(5) :: b_e = &
+     &           (/1.23,0.0521,0.01,0.008,-0.016/)
+       real,parameter, dimension(5) :: c_h = &
+     &           (/0.0,0.0,0.0,-0.00045,0.0/)
+       real,parameter, dimension(5) :: c_e = &
+     &           (/0.0,0.0,0.0,-0.0004,0.0/)
+       real,parameter, dimension(5) :: p_h = &
+     &           (/-0.157,1.0,1.0,1.0,1.0/)
+       real,parameter, dimension(5) :: p_e = &
+     &           (/-0.16,1.0,1.0,1.0,1.0/)
        real,parameter  :: onsea = 0.98
        real,parameter  :: par1 = 640380.
        real,parameter  :: par2 = -5107.4
@@ -224,9 +224,9 @@
 
         ea = (wair / (wair+0.622) ) * pa
 
-        qlong = emic*stefan*( sstk**4. )
-     +       - ( stefan*( tairk**4. ) * ( 0.653 + 0.00535*ea ) )
-     +           * ( 1. + 0.1762*( cc * cc ) )
+        qlong = emic*stefan*( sstk**4. ) &
+     &       - ( stefan*( tairk**4. ) * ( 0.653 + 0.00535*ea ) ) &
+     &           * ( 1. + 0.1762*( cc * cc ) )
 
 
        ! QSENS   -------------------------------
@@ -275,11 +275,11 @@
 
 
        !calculate ce,ch :
-            ch = ( a_h(kku) + b_h(kku) * norspeed ** p_h(kku)
-     +                        + c_h(kku) * (norspeed - 8 )**2) * fh
+            ch = ( a_h(kku) + b_h(kku) * norspeed ** p_h(kku) &
+     &                        + c_h(kku) * (norspeed - 8 )**2) * fh
 
-            ce = ( a_e(kku) + b_e(kku) * norspeed ** p_e(kku)
-     +                        + c_e(kku) * (norspeed - 8 )**2) * fe
+            ce = ( a_e(kku) + b_e(kku) * norspeed ** p_e(kku) &
+     &                        + c_e(kku) * (norspeed - 8 )**2) * fe
 
             ch = ch / 1000.0
             ce = ce / 1000.0
@@ -309,15 +309,15 @@
             cseep = ce * norspeed * esre     ! --- calculates the term: Ce*|V|*[qs(Ts)-qa(t2d)]
             evap = (cseep * rhom)  ! in [kg/m2/sec] !! ---calculates the EVAPORATION RATE [m/yr]
 
-            qlat = rhom * cseep *
-     +             (2.5008e+6 -2.3e+3 * (sstk - ckelv))
+            qlat = rhom * cseep * &
+     &             (2.5008e+6 -2.3e+3 * (sstk - ckelv))
 
 
         ! WIND STRESSES  --------------------------
         ! HellerRose
-        cd = ahr(1) + ahr(2)*norspeed + ahr(3)*deltemp 
-     +       + ahr(4) *norspeed*norspeed 
-     +       + ahr(5)*deltemp*deltemp + ahr(6)*norspeed*deltemp
+        cd = ahr(1) + ahr(2)*norspeed + ahr(3)*deltemp  &
+     &       + ahr(4) *norspeed*norspeed  &
+     &       + ahr(5)*deltemp*deltemp + ahr(6)*norspeed*deltemp
 
         return
 
@@ -344,9 +344,9 @@
         !at 40N and 30N for the Atlantic Ocean (hence the same latitudinal
         !band of the Mediterranean Sea) :
 
-        real,parameter, dimension(12) :: alpham =
-     +            (/0.095,0.08,0.065,0.065,0.06,0.06,0.06,0.06,
-     +              0.065,0.075,0.09,0.10/)
+        real,parameter, dimension(12) :: alpham = &
+     &            (/0.095,0.08,0.065,0.065,0.06,0.06,0.06,0.06, &
+     &              0.065,0.075,0.09,0.10/)
 
         integer im,ih,days
         real ddlat,ddlon,cc
@@ -370,9 +370,9 @@
         th03 = 3.*th0
 
         !sun declination:
-        sundec = 0.006918 - 0.399912*cos(th0) + 0.070257*sin(th0) -
-     +  0.006758*cos(th02) + 0.000907*sin(th02) -
-     +  0.002697*cos(th03) + 0.001480*sin(th03)
+        sundec = 0.006918 - 0.399912*cos(th0) + 0.070257*sin(th0) - &
+     &  0.006758*cos(th02) + 0.000907*sin(th02) - &
+     &  0.002697*cos(th03) + 0.001480*sin(th03)
 
         alat=ddlat*degrad
         alon=ddlon*degrad
@@ -405,8 +405,8 @@
 
        !sin of the solar noon altitude in radians :
 
-       sunbet=sin(alat)*sin(eclips*sin(tjul)) +
-     +        cos(alat)*cos(eclips*sin(tjul))
+       sunbet=sin(alat)*sin(eclips*sin(tjul)) + &
+     &        cos(alat)*cos(eclips*sin(tjul))
 
        !solar noon altitude in degrees :
 

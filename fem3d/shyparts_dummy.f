@@ -137,10 +137,10 @@
 	  write(6,*) 'ncol = ',ncol
 	  write(6,*) 'npart min/max: ',minval(npart),maxval(npart)
 	  write(6,*) 'epart min/max: ',minval(epart),maxval(epart)
-	  call write_partition_to_grd('domain_custom',.false.
-     +		,np,npart,epart)
-	  call write_partition_to_grd('domain_color',.false.
-     +		,np,ncolor,epart)
+	  call write_partition_to_grd('domain_custom',.false. &
+     &		,np,npart,epart)
+	  call write_partition_to_grd('domain_color',.false. &
+     &		,np,ncolor,epart)
 	end do
 
 !------------------------------------------------------------

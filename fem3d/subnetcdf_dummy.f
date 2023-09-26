@@ -24,25 +24,25 @@
 !
 !--------------------------------------------------------------------------
 
-c Dummy NetCDF file administration routines
-c Do nothing if NetCDF output is not set
-c Link to Hydro_netcdfs_fem.f  
-c
-c contents :
-c
-c subroutine wrnetcdf
-c
-c revision log :
-c
-c 07.11.2007	ccf	start writing NetCDF output 
-c 23.03.2010	ggu	changed v6.1.1
-c 16.02.2019	ggu	changed VERS_7_5_60
-c
-c********************************************************
+! Dummy NetCDF file administration routines
+! Do nothing if NetCDF output is not set
+! Link to Hydro_netcdfs_fem.f  
+!
+! contents :
+!
+! subroutine wrnetcdf
+!
+! revision log :
+!
+! 07.11.2007	ccf	start writing NetCDF output 
+! 23.03.2010	ggu	changed v6.1.1
+! 16.02.2019	ggu	changed VERS_7_5_60
+!
+!********************************************************
 
 	subroutine wrnetcdf
 
-c writes and administers NetCDF file
+! writes and administers NetCDF file
 
 	implicit none
 

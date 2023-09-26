@@ -23,25 +23,25 @@
 !
 !--------------------------------------------------------------------------
 
-c 18.11.1998    ggu     check dimensions with dimnos
-c 06.04.1999    ggu     some cosmetic changes
-c 03.12.2001    ggu     some extra output -> place of min/max
-c 09.12.2003    ggu     check for NaN introduced
-c
-c**************************************************************
+! 18.11.1998    ggu     check dimensions with dimnos
+! 06.04.1999    ggu     some cosmetic changes
+! 03.12.2001    ggu     some extra output -> place of min/max
+! 09.12.2003    ggu     check for NaN introduced
+!
+!**************************************************************
 
 ! revision log :
 !
 ! 23.03.2010	ggu	changed v6.1.1
 ! 16.02.2019	ggu	changed VERS_7_5_60
 
-c**************************************************************
+!**************************************************************
 
 	program nosdiff
 
-c computes difference between two NOS files - same grid
-c
-c still to be finished
+! computes difference between two NOS files - same grid
+!
+! still to be finished
 
 	implicit none
 
@@ -73,7 +73,7 @@ c still to be finished
         integer iapini,ifileo
 	integer ifem_open_file
         character*80 file1,fileout, descrp
-c--------------------------------------------------------------
+!--------------------------------------------------------------
 
 	nread=0
 	rnull=0.
@@ -84,9 +84,9 @@ c--------------------------------------------------------------
                 cv3(l,k) = 0. 
               enddo
            enddo
-c--------------------------------------------------------------
-c open basin and simulation
-c--------------------------------------------------------------
+!--------------------------------------------------------------
+! open basin and simulation
+!--------------------------------------------------------------
 
 	if(iapini(2,nkndim,neldim,0).eq.0) then
 		stop 'error stop : iapini'
@@ -97,19 +97,19 @@ c--------------------------------------------------------------
         read (5,'(a)') file1
         nin=ifileo(55,file1,'unform','old')
         print*,nin
-c       call rhnos(nin,nvers,nkndim,neldim,nlvdim,nkn,nel,nlv,nvar
-c     +				,ilhkv,hlv,hev,title)
+!       call rhnos(nin,nvers,nkndim,neldim,nlvdim,nkn,nel,nlv,nvar
+!     +				,ilhkv,hlv,hev,title)
         call rfnos(nin,nvers,nkn,nel,nlv,nvar,title,ierr)
         call rsnos(nin,ilhkv,hlv,hev,ierr)
-c        print*,nin,title,nvers,nvar,ierr
+!        print*,nin,title,nvers,nvar,ierr
 
-c open file
+! open file
         iunos = 56
         fileout='ciccio.nos'
         
         iunos = ifileo(iunos,fileout,'unform','new')
 	if( iunos .le. 0 ) goto 98
-c write header of file
+! write header of file
 
 
 	call wfnos(iunos,3,nkn,nel,nlv,nvar,descrp,ierr)
@@ -118,9 +118,9 @@ c write header of file
 	call wsnos(iunos,ilhkv,hlv,hev,ierr)
         if(ierr.gt.0) goto 99
 
-c--------------------------------------------------------------
-c loop on data
-c--------------------------------------------------------------
+!--------------------------------------------------------------
+! loop on data
+!--------------------------------------------------------------
 
 	do while(.true.)
            do l=1,nlv
@@ -151,9 +151,9 @@ c--------------------------------------------------------------
 
 	end do	!do while
 
-c--------------------------------------------------------------
-c end of loop on data
-c--------------------------------------------------------------
+!--------------------------------------------------------------
+! end of loop on data
+!--------------------------------------------------------------
 
   100	continue
 
@@ -161,9 +161,9 @@ c--------------------------------------------------------------
 	write(6,*) nread,' records read'
 	write(6,*)
 
-c--------------------------------------------------------------
-c end of routine
-c--------------------------------------------------------------
+!--------------------------------------------------------------
+! end of routine
+!--------------------------------------------------------------
         return
    98	continue
 	write(6,*) 'error opening file 1',file1
@@ -173,16 +173,16 @@ c--------------------------------------------------------------
 	stop 'error stop confop'
 	end
 
-c***************************************************************
+!***************************************************************
 
         subroutine mimar(xx,n,xmin,xmax,rnull)
 
-c computes min/max of vector
-c
-c xx            vector
-c n             dimension of vector
-c xmin,xmax     min/max value in vector
-c rnull		invalid value
+! computes min/max of vector
+!
+! xx            vector
+! n             dimension of vector
+! xmin,xmax     min/max value in vector
+! rnull		invalid value
 
         implicit none
 
@@ -215,16 +215,16 @@ c rnull		invalid value
 
         end
 
-c***************************************************************
+!***************************************************************
 
         subroutine mimar_s(xx,nlvdim,n,xmin,xmax,rnull)
 
-c computes min/max of vector
-c
-c xx            vector
-c n             dimension of vector
-c xmin,xmax     min/max value in vector
-c rnull		invalid value
+! computes min/max of vector
+!
+! xx            vector
+! n             dimension of vector
+! xmin,xmax     min/max value in vector
+! rnull		invalid value
 
         implicit none
 
@@ -249,5 +249,5 @@ c rnull		invalid value
 
         end
 
-c***************************************************************
+!***************************************************************
 

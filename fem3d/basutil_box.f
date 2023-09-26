@@ -23,32 +23,32 @@
 !
 !--------------------------------------------------------------------------
 
-c revision log :
-c
-c 07.05.2013	ggu	copied from bastreat
-c 14.05.2013	ggu	subroutines cleaned
-c 10.10.2015	ggu	changed VERS_7_3_2
-c 31.03.2017	ggu	changed VERS_7_5_24
-c 22.02.2018	ggu	changed VERS_7_5_42
-c 14.02.2019	ggu	changed VERS_7_5_56
-c 16.02.2019	ggu	changed VERS_7_5_60
-c 10.04.2021	ggu	better error handling and info output
-c 10.11.2021	ggu	avoid warning for stack size
-c 10.02.2022	ggu	better error message for not connected domain
-c 16.02.2022	ggu	new routine basboxgrd()
-c 09.03.2022	ggu	write also file index_sections.grd for the sections
-c 10.05.2022	ggu	write element types on external element numbers
-c 10.05.2022	ggu	new routine sort_multiple_sections() for predictability
-c 18.05.2022	ggu	some more checks in sort_multiple_sections()
-c 08.06.2022	ggu	save external nodes in basboxgrd for grd_write_item()
-c 16.06.2022	ggu	write coloring errors to grd files
-c 13.07.2022	ggu	forgot setting listold(0,:)
-c
-c****************************************************************
+! revision log :
+!
+! 07.05.2013	ggu	copied from bastreat
+! 14.05.2013	ggu	subroutines cleaned
+! 10.10.2015	ggu	changed VERS_7_3_2
+! 31.03.2017	ggu	changed VERS_7_5_24
+! 22.02.2018	ggu	changed VERS_7_5_42
+! 14.02.2019	ggu	changed VERS_7_5_56
+! 16.02.2019	ggu	changed VERS_7_5_60
+! 10.04.2021	ggu	better error handling and info output
+! 10.11.2021	ggu	avoid warning for stack size
+! 10.02.2022	ggu	better error message for not connected domain
+! 16.02.2022	ggu	new routine basboxgrd()
+! 09.03.2022	ggu	write also file index_sections.grd for the sections
+! 10.05.2022	ggu	write element types on external element numbers
+! 10.05.2022	ggu	new routine sort_multiple_sections() for predictability
+! 18.05.2022	ggu	some more checks in sort_multiple_sections()
+! 08.06.2022	ggu	save external nodes in basboxgrd for grd_write_item()
+! 16.06.2022	ggu	write coloring errors to grd files
+! 13.07.2022	ggu	forgot setting listold(0,:)
+!
+!****************************************************************
 
         subroutine basbox
 
-c reads grid with box information and writes index file boxes.txt
+! reads grid with box information and writes index file boxes.txt
 
 	use mod_geom
 	use mod_depth
@@ -80,18 +80,18 @@ c reads grid with box information and writes index file boxes.txt
 	integer iaux1(2,nlbdim)
 	integer iaux2(nlbdim)
 
-c-----------------------------------------------------------------
-c check if we have read a bas file and not a grd file
-c-----------------------------------------------------------------
+!-----------------------------------------------------------------
+! check if we have read a bas file and not a grd file
+!-----------------------------------------------------------------
 
         if( .not. breadbas .and. .not. bnew ) then
           write(6,*) 'for -box we need a bas file'
           stop 'error stop basbox: need a bas file'
         end if
 
-c-----------------------------------------------------------------
-c handle boxes
-c-----------------------------------------------------------------
+!-----------------------------------------------------------------
+! handle boxes
+!-----------------------------------------------------------------
 
 	allocate(boxinf(3,nlbdim,nbxdim))
 
@@ -100,23 +100,23 @@ c-----------------------------------------------------------------
 	call check_boxes(nbxdim,nbox,nblink)
 	call handle_boxes(nbxdim,nlbdim,nbox,nblink,boxinf)
 
-c-----------------------------------------------------------------
-c write index file boxes.txt
-c-----------------------------------------------------------------
+!-----------------------------------------------------------------
+! write index file boxes.txt
+!-----------------------------------------------------------------
 
 	open(69,file='boxes.txt',form='formatted',status='unknown')
 
 	call write_boxes(nbxdim,nlbdim,nbox,nblink,boxinf,bnew)
-	call sort_boxes(nbxdim,nlbdim,nbox,nblink,boxinf,neib
-     +			,iaux1,iaux2)
+	call sort_boxes(nbxdim,nlbdim,nbox,nblink,boxinf,neib &
+     &			,iaux1,iaux2)
 
 	close(69)
  
 	call make_line_boxes
 
-c-----------------------------------------------------------------
-c end of routine
-c-----------------------------------------------------------------
+!-----------------------------------------------------------------
+! end of routine
+!-----------------------------------------------------------------
 
 	write(6,*) 
 	write(6,*) 'finished writing files'
@@ -125,21 +125,21 @@ c-----------------------------------------------------------------
 	return
 	end
 
-c*******************************************************************
-c*******************************************************************
-c*******************************************************************
+!*******************************************************************
+!*******************************************************************
+!*******************************************************************
 
-	subroutine sort_boxes(nbxdim,nlbdim,nbox,nblink,boxinf,neib
-     +				,iaux1,iaux2)
+	subroutine sort_boxes(nbxdim,nlbdim,nbox,nblink,boxinf,neib &
+     &				,iaux1,iaux2)
 
-c creates boxinf that contains information on sections
-c boxinf(ii,n,ib)
-c	ib is box number
-c	n is an index of found intersections
-c	ii=1	first node
-c	ii=2	second node
-c	ii=3	box number of neibor
-c there are nblink(ib) node pairs in boxinf, so n=1,nblink(ib)
+! creates boxinf that contains information on sections
+! boxinf(ii,n,ib)
+!	ib is box number
+!	n is an index of found intersections
+!	ii=1	first node
+!	ii=2	second node
+!	ii=3	box number of neibor
+! there are nblink(ib) node pairs in boxinf, so n=1,nblink(ib)
 
 	use basin
 
@@ -225,7 +225,7 @@ c there are nblink(ib) node pairs in boxinf, so n=1,nblink(ib)
 
 	end
 
-c*******************************************************************
+!*******************************************************************
 
 	subroutine sort_multiple_sections(ns,nf,list,ipv)
 
@@ -350,13 +350,13 @@ c*******************************************************************
 
 	end
 
-c*******************************************************************
+!*******************************************************************
 
 	subroutine sort_section(nlbdim,jfill,iaux1,nf,iaux2,nkn,kantv)
 
-c given a list of points sorts the nodes to be continuous
-c deals with sections that are not connected
-c inserts between these connections a 0
+! given a list of points sorts the nodes to be continuous
+! deals with sections that are not connected
+! inserts between these connections a 0
 
 	implicit none
 
@@ -415,7 +415,7 @@ c inserts between these connections a 0
 	stop 'error stop sort_section: internal error'
 	end
 
-c*******************************************************************
+!*******************************************************************
 
 	subroutine count_sections(n,list,ns)
 
@@ -434,7 +434,7 @@ c*******************************************************************
 
 	end
 
-c*******************************************************************
+!*******************************************************************
 
 	subroutine write_section(n,list,id,ib,ibn,ipv)
 
@@ -470,7 +470,7 @@ c*******************************************************************
 
 	end
 
-c*******************************************************************
+!*******************************************************************
 
 	subroutine invert_list(n,list)
 
@@ -490,7 +490,7 @@ c*******************************************************************
 
 	end
 
-c*******************************************************************
+!*******************************************************************
 
 	subroutine write_boxes(nbxdim,nlbdim,nbox,nblink,boxinf,bnew)
 
@@ -538,7 +538,7 @@ c*******************************************************************
 
 	end
 
-c*******************************************************************
+!*******************************************************************
 
 	subroutine check_boxes(nbxdim,nbox,nblink)
 
@@ -580,11 +580,11 @@ c*******************************************************************
 	stop 'error stop check_boxes: nbxdim'
 	end
 
-c*******************************************************************
+!*******************************************************************
 
 	subroutine handle_boxes(nbxdim,nlbdim,nbox,nblink,boxinf)
 
-c sets up box index
+! sets up box index
 
 	use mod_geom
 	use basin
@@ -650,13 +650,13 @@ c sets up box index
 	stop 'error stop handle_boxes: nbxdim'
 	end
 
-c*******************************************************************
-c*******************************************************************
-c*******************************************************************
+!*******************************************************************
+!*******************************************************************
+!*******************************************************************
 
 	subroutine check_box_connection
 
-c checks if all boxes are connected
+! checks if all boxes are connected
 
 	use mod_geom
 	use basin
@@ -711,15 +711,15 @@ c checks if all boxes are connected
 	    if( list(1,j) == icol ) then
 		icerror = icerror + 1
 		write(6,*) 'not connected area found ',icol
-	        write(6,*) 'area            elements'
-     +		// '   elem number (int)'
-     +		// '   elem number (ext)'
+	        write(6,*) 'area            elements' &
+     &		// '   elem number (int)' &
+     &		// '   elem number (ext)'
 		write(6,1123) list(:,i),ieext(list(3,i))
 		write(6,1123) list(:,j),ieext(list(3,j))
 	        ie = list(3,i)
 	        if( list(2,i) > list(2,j) ) ie = list(3,j)
-	        write(6,*) 'not connected area contains element (int/ext)'
-     +			,ie,ieext(ie)
+	        write(6,*) 'not connected area contains element (int/ext)' &
+     &			,ie,ieext(ie)
 	        write(6,*) 'coordinates of element are: '
 		do ii=1,3
 		  k = nen3v(ii,ie)
@@ -790,14 +790,14 @@ c checks if all boxes are connected
 	stop 'error stop check_box_connection: color code too high'
 	end
 
-c*******************************************************************
+!*******************************************************************
 
 	subroutine color_box_area(iestart,icon,icol,nc)
 
-c colors all accessible elements starting from iestart
-c colors only elements with same area code
-c uses this area code to color the elements
-c area code 0 is not allowed !!!!
+! colors all accessible elements starting from iestart
+! colors only elements with same area code
+! uses this area code to color the elements
+! area code 0 is not allowed !!!!
 
 	use mod_geom
 	use basin
@@ -1031,8 +1031,8 @@ c area code 0 is not allowed !!!!
 	intype = 0
 	ietype = icon
 
-	call write_grd_file(file,text,nkn,nel,xgv,ygv,nen3v
-     +                  ,inext,ieext,intype,ietype)
+	call write_grd_file(file,text,nkn,nel,xgv,ygv,nen3v &
+     &                  ,inext,ieext,intype,ietype)
 
 	end
 

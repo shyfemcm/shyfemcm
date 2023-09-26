@@ -24,27 +24,27 @@
 !
 !--------------------------------------------------------------------------
 
-c weutro_shell -  routines for benthic filter feeding linked to weutro
-c
-c revision log :
-c
+! weutro_shell -  routines for benthic filter feeding linked to weutro
+!
+! revision log :
+!
 ! 15.03.2014	dmc	routine for shellfish farming simulation
 ! 17.06.2016	dmc	last changes integrated
-c 27.06.2016	ggu	changed VERS_7_5_16
-c 16.02.2019	ggu	changed VERS_7_5_60
-c 13.03.2019	ggu	changed VERS_7_5_61
-c 21.05.2019	ggu	changed VERS_7_5_62
-c
-c notes :
-c
-c Reference: Melaku Caunu, Aveytua, Camacho-Ibar, Solidoro.
-c Trophic properties and effect of upwelling  the San Quintin Bay. in prep.  
-c
-c********************************************************************
+! 27.06.2016	ggu	changed VERS_7_5_16
+! 16.02.2019	ggu	changed VERS_7_5_60
+! 13.03.2019	ggu	changed VERS_7_5_61
+! 21.05.2019	ggu	changed VERS_7_5_62
+!
+! notes :
+!
+! Reference: Melaku Caunu, Aveytua, Camacho-Ibar, Solidoro.
+! Trophic properties and effect of upwelling  the San Quintin Bay. in prep.  
+!
+!********************************************************************
 
 	subroutine wshell(k,t,dt,vol,depth,vel,stp,c,csh)
 
-c EUTRO 0-Dimensional (Sediments)
+! EUTRO 0-Dimensional (Sediments)
 
         implicit none
 
@@ -100,38 +100,38 @@ c EUTRO 0-Dimensional (Sediments)
 
 
 
-c	debug = k .eq. 100
-c	debug = k .eq.-1 
+!	debug = k .eq. 100
+!	debug = k .eq.-1 
 
 
-c	kfilt= 0.001    !originale
+!	kfilt= 0.001    !originale
         kfilt= 0.010
-c	eff = 1.        !originale
+!	eff = 1.        !originale
         eff = 3.25
 	kphy=0.8  	!semisaturation constant for phytop filtration 
-c       kphy=0.5        !originale
+!       kphy=0.5        !originale
 	kdec=.001	!decay rate for oyster death
-c	kshell=1.0	!semisaturation constant for shellfish growth (originale)
+!	kshell=1.0	!semisaturation constant for shellfish growth (originale)
         kshell=0.8      !16/nov/2015
 
-c	call tempcoef(stp,kpt,knt)
+!	call tempcoef(stp,kpt,knt)
 
 	phyto = c(4)
 
 	shellfarm= csh(1)
 	shellsize = csh(2)  
 	
-c	write(6,*) 'shellfarm1'
-c	write (6,*) shellfarm,shellsize,phyto
+!	write(6,*) 'shellfarm1'
+!	write (6,*) shellfarm,shellsize,phyto
 
 	filtration = kfilt* shellfarm*shellsize*vol*phyto/(kphy+phyto)
 	shellgrowth= filtration*eff/(kshell+shellsize)
 	decay = shellfarm*kdec*vol
 	
-c	write(6,*) 'shellfarm2'
-c	if(filtration.gt.0) then
-c	write (6,*) filtration,shellgrowth, decay
-c	end if
+!	write(6,*) 'shellfarm2'
+!	if(filtration.gt.0) then
+!	write (6,*) filtration,shellgrowth, decay
+!	end if
 	
 	ca(1) = phyto 
 	ca(2) = shellfarm
@@ -141,10 +141,10 @@ c	end if
 	cds(2) = -decay	*1.068**(stp-20)!se move o no? proposta 25 marzo
 	cds(3) = shellgrowth
 
-c
+!
 
 	
-c
+!
        call euler(1,dt,vol,ca(1),caold,cds(1))     ! euler(1,dt,vol,ca(1),caold(1),cds(1)) 
        call euler(2,dt,vol,ca(2),caold(2),cds(2))  ! euler(1,dt,vol,ca(2),caold(2),cds(2))
 
@@ -152,37 +152,37 @@ c
 	csh(1)=ca(2)
 	csh(2)=ca(3)
 
-c	controllo=csh(3)
-c	if (controllo.gt.0) then
-c	if( debug ) then
-c	  write(6,*) 
-c	  write(6,*),'ca', (ca(i),i=1,3)
-c	  write(88,*),'csh', (csh(i),i=1,3)
-cc	  write(6,*) '-----weutro_shell---------------------------'
-c	end if
-c	end if
+!	controllo=csh(3)
+!	if (controllo.gt.0) then
+!	if( debug ) then
+!	  write(6,*) 
+!	  write(6,*),'ca', (ca(i),i=1,3)
+!	  write(88,*),'csh', (csh(i),i=1,3)
+!c	  write(6,*) '-----weutro_shell---------------------------'
+!	end if
+!	end if
 
 
 	end
 
-c********************************************************************
+!********************************************************************
 
-c	subroutine tempcoef(stemp,kpt,knt)
-c
-c	implicit none
-c
-c	real stemp,kpt,knt
-c	real stemp20
-c
-c	include 'weutro.h'
-c
-c	stemp20 = stemp - 20.
-c	kpt = K58T**STemp20
-c	knt = K1013T**STemp20
-c
-c	end
-c
-c********************************************************************
+!	subroutine tempcoef(stemp,kpt,knt)
+!
+!	implicit none
+!
+!	real stemp,kpt,knt
+!	real stemp20
+!
+!	include 'weutro.h'
+!
+!	stemp20 = stemp - 20.
+!	kpt = K58T**STemp20
+!	knt = K1013T**STemp20
+!
+!	end
+!
+!********************************************************************
 
-c********************************************************************
+!********************************************************************
 

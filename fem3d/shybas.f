@@ -24,66 +24,66 @@
 !
 !--------------------------------------------------------------------------
 
-c revision log :
-c
-c 06.04.1999	ggu	completely restructured
-c 04.06.1999	ggu	new statistics are computed
-c 28.11.2005	ggu	new call to makehkv
-c 31.05.2007	ggu	added area and volume frequency curve
-c 24.08.2007	ggu	added new routine write_grd_from_bas
-c 06.04.2009	ggu	read param.h
-c 12.06.2009	ggu	areatr in double precision - new algorithm
-c 01.03.2010	ggu	new routine basqual() to compute grid quality
-c 22.03.2010	ggu	write external element number in basqual()
-c 17.05.2011	ggu	changes in freqdep()
-c 12.07.2011	ggu	better treatment of freqdep()
-c 16.11.2011	ggu	basin.h introduced
-c 10.02.2012	ggu	use angles in quality of basin (basqual)
-c 30.09.2015	ggu	shybas started
-c 01.10.2015	ggu	shybas nearly finished
-c 02.10.2015	ggu	only basproj is missing
-c 10.10.2015	ggu	changed VERS_7_3_2
-c 12.10.2015	ggu	changed VERS_7_3_3
-c 16.12.2015	ggu	changed VERS_7_3_16
-c 17.03.2016	ggu	new routine write_depth_from_bas()
-c 15.04.2016	ggu	changed VERS_7_5_8
-c 25.05.2016	ggu	changed VERS_7_5_10
-c 11.10.2016	ggu	changed VERS_7_5_20
-c 21.03.2017	ggu	new routine to compute area/vol on area code
-c 31.03.2017	ggu	changed VERS_7_5_24
-c 09.10.2017	ggu	changed VERS_7_5_33
-c 17.11.2017	ggu	changed VERS_7_5_37
-c 07.12.2017	ggu	changed VERS_7_5_40
-c 24.01.2018	ggu	changed VERS_7_5_41
-c 22.02.2018	ggu	changed VERS_7_5_42
-c 04.04.2018	ggu	new code for real area (m) and explicit stability
-c 04.04.2018	ggu	new code for nodal partition check and write
-c 13.04.2018	ggu	new routine to elab partition and write to file
-c 26.04.2018	ggu	changed VERS_7_5_46
-c 16.10.2018	ggu	changed VERS_7_5_50
-c 25.10.2018	ccf	grid output in gr3 and msh formats
-c 16.02.2019	ggu	changed VERS_7_5_60
-c 13.03.2019	ggu	changed VERS_7_5_61
-c 13.02.2020	ggu	new routine write_regular_depth() with -reg
-c 01.04.2020    ggu     new option -custom (bcustom) 
-c 28.05.2020    ggu     implement bquiet and bsilent
-c 12.12.2020    ggu     compute transport CFL
-c 22.04.2021    ggu     initialize levels for bounds check
-c 10.11.2021    ggu     avoid warning for stack size
-c 16.02.2022    ggu     new call to basboxgrd() to re-create grd file from index
-c 12.10.2022    ggu     new routine code_count called with -detail
-c 12.01.2023    ggu     correct statistics of area also for lat/lon
-c 29.01.2023    ggu     more on correct area computation (eliminated areatr)
-c
-c todo :
-c
-c reading grd file ngr is 1 too high
-c
-c****************************************************************
+! revision log :
+!
+! 06.04.1999	ggu	completely restructured
+! 04.06.1999	ggu	new statistics are computed
+! 28.11.2005	ggu	new call to makehkv
+! 31.05.2007	ggu	added area and volume frequency curve
+! 24.08.2007	ggu	added new routine write_grd_from_bas
+! 06.04.2009	ggu	read param.h
+! 12.06.2009	ggu	areatr in double precision - new algorithm
+! 01.03.2010	ggu	new routine basqual() to compute grid quality
+! 22.03.2010	ggu	write external element number in basqual()
+! 17.05.2011	ggu	changes in freqdep()
+! 12.07.2011	ggu	better treatment of freqdep()
+! 16.11.2011	ggu	basin.h introduced
+! 10.02.2012	ggu	use angles in quality of basin (basqual)
+! 30.09.2015	ggu	shybas started
+! 01.10.2015	ggu	shybas nearly finished
+! 02.10.2015	ggu	only basproj is missing
+! 10.10.2015	ggu	changed VERS_7_3_2
+! 12.10.2015	ggu	changed VERS_7_3_3
+! 16.12.2015	ggu	changed VERS_7_3_16
+! 17.03.2016	ggu	new routine write_depth_from_bas()
+! 15.04.2016	ggu	changed VERS_7_5_8
+! 25.05.2016	ggu	changed VERS_7_5_10
+! 11.10.2016	ggu	changed VERS_7_5_20
+! 21.03.2017	ggu	new routine to compute area/vol on area code
+! 31.03.2017	ggu	changed VERS_7_5_24
+! 09.10.2017	ggu	changed VERS_7_5_33
+! 17.11.2017	ggu	changed VERS_7_5_37
+! 07.12.2017	ggu	changed VERS_7_5_40
+! 24.01.2018	ggu	changed VERS_7_5_41
+! 22.02.2018	ggu	changed VERS_7_5_42
+! 04.04.2018	ggu	new code for real area (m) and explicit stability
+! 04.04.2018	ggu	new code for nodal partition check and write
+! 13.04.2018	ggu	new routine to elab partition and write to file
+! 26.04.2018	ggu	changed VERS_7_5_46
+! 16.10.2018	ggu	changed VERS_7_5_50
+! 25.10.2018	ccf	grid output in gr3 and msh formats
+! 16.02.2019	ggu	changed VERS_7_5_60
+! 13.03.2019	ggu	changed VERS_7_5_61
+! 13.02.2020	ggu	new routine write_regular_depth() with -reg
+! 01.04.2020    ggu     new option -custom (bcustom) 
+! 28.05.2020    ggu     implement bquiet and bsilent
+! 12.12.2020    ggu     compute transport CFL
+! 22.04.2021    ggu     initialize levels for bounds check
+! 10.11.2021    ggu     avoid warning for stack size
+! 16.02.2022    ggu     new call to basboxgrd() to re-create grd file from index
+! 12.10.2022    ggu     new routine code_count called with -detail
+! 12.01.2023    ggu     correct statistics of area also for lat/lon
+! 29.01.2023    ggu     more on correct area computation (eliminated areatr)
+!
+! todo :
+!
+! reading grd file ngr is 1 too high
+!
+!****************************************************************
 
         program shybas
 
-c writes information and manipulates basin
+! writes information and manipulates basin
 
 	use mod_depth
 	use mod_geom
@@ -101,9 +101,9 @@ c writes information and manipulates basin
 	logical bwrite
 	character*80 file
 
-c-----------------------------------------------------------------
-c read in basin
-c-----------------------------------------------------------------
+!-----------------------------------------------------------------
+! read in basin
+!-----------------------------------------------------------------
 
 	call basutil_init('BAS')
 
@@ -115,9 +115,9 @@ c-----------------------------------------------------------------
 
 	call shympi_init(.false.)
 
-c-----------------------------------------------------------------
-c initialize modules
-c-----------------------------------------------------------------
+!-----------------------------------------------------------------
+! initialize modules
+!-----------------------------------------------------------------
 
 	call levels_init_2d(nkn,nel)
 
@@ -136,9 +136,9 @@ c-----------------------------------------------------------------
         call makehev(hev)
         call makehkv(hkv)
 
-c-----------------------------------------------------------------
-c info on basin read
-c-----------------------------------------------------------------
+!-----------------------------------------------------------------
+! info on basin read
+!-----------------------------------------------------------------
 
 	if( .not. bquiet ) then
 	  call bas_info
@@ -150,9 +150,9 @@ c-----------------------------------------------------------------
         call node_test				!basic check
 	if( bcheck ) call bascheck		!extra check
 
-c-----------------------------------------------------------------
-c transformations and extra info on basin
-c-----------------------------------------------------------------
+!-----------------------------------------------------------------
+! transformations and extra info on basin
+!-----------------------------------------------------------------
 
 	if( bfreq ) call freqdep
 	if( bquality ) call basqual		!grid quality
@@ -168,15 +168,15 @@ c-----------------------------------------------------------------
 
 	if( bcustom ) call bas_custom
 
-c-----------------------------------------------------------------
-c loop for interactive information on nodes and elems
-c-----------------------------------------------------------------
+!-----------------------------------------------------------------
+! loop for interactive information on nodes and elems
+!-----------------------------------------------------------------
 
 	if( binter ) call basin_interactive
 
-c-----------------------------------------------------------------
-c write output files
-c-----------------------------------------------------------------
+!-----------------------------------------------------------------
+! write output files
+!-----------------------------------------------------------------
 
 	if( bgrd ) call write_grd_from_bas
         if( bxyz ) call write_xy('bas.xyz',nkn,ipv,xgv,ygv,hkv)
@@ -189,15 +189,15 @@ c-----------------------------------------------------------------
 	if( bgr3 ) call write_gr3_from_bas
 	if( bmsh ) call write_msh_from_bas
 
-c-----------------------------------------------------------------
-c end of routine
-c-----------------------------------------------------------------
+!-----------------------------------------------------------------
+! end of routine
+!-----------------------------------------------------------------
 
 	end
 
-c*******************************************************************
-c*******************************************************************
-c*******************************************************************
+!*******************************************************************
+!*******************************************************************
+!*******************************************************************
 
 	subroutine read_command_line_file(file,bwrite)
 
@@ -232,9 +232,9 @@ c*******************************************************************
 
 	end
 
-c*******************************************************************
-c*******************************************************************
-c*******************************************************************
+!*******************************************************************
+!*******************************************************************
+!*******************************************************************
 
 	subroutine basin_interactive
 
@@ -255,11 +255,11 @@ c*******************************************************************
 
 	end
 
-c*******************************************************************
+!*******************************************************************
 
 	subroutine nodeinfo(bnode)
 
-c info on node number
+! info on node number
 
 	use mod_depth
 	use basin
@@ -278,7 +278,7 @@ c info on node number
 
         write(6,*) 
 
-c look for node and give info
+! look for node and give info
 
 	do while( bloop )
 
@@ -293,8 +293,8 @@ c look for node and give info
         else if(kint.le.0) then
            write(6,*) ' no node number : ',kext
            if(kext.le.nkn) then
-              write(6,*) '(intern : ',kext
-     +                          ,' extern : ',ipext(kext),')'
+              write(6,*) '(intern : ',kext &
+     &                          ,' extern : ',ipext(kext),')'
            end if
            write(6,*)
 	else
@@ -310,10 +310,10 @@ c look for node and give info
                  if(nen3v(ii,ie).eq.kint) in=ii
               end do
               if(in.gt.0) then
-                 write(6,2000)   ipev(ie)
-     +                          ,(ipext(nen3v(ii,ie)),ii=1,3)
-     +                          ,(hm3v(ii,ie),ii=1,3)
-     +                          ,iarv(ie),hm3v(in,ie)
+                 write(6,2000)   ipev(ie) &
+     &                          ,(ipext(nen3v(ii,ie)),ii=1,3) &
+     &                          ,(hm3v(ii,ie),ii=1,3) &
+     &                          ,iarv(ie),hm3v(in,ie)
               end if
 	   end do
            write(6,*)
@@ -322,16 +322,16 @@ c look for node and give info
 	end do
 
 	return
- 2200   format(/1x,'element',8x,'nodes',14x,'depth in element'
-     +          ,3x,'  area',4x,'depth of node')
+ 2200   format(/1x,'element',8x,'nodes',14x,'depth in element' &
+     &          ,3x,'  area',4x,'depth of node')
  2000   format(1x,i6,2x,3i6,2x,3f8.2,2x,i5,5x,f8.2)
 	end
 
-c*****************************************************************
+!*****************************************************************
 
 	subroutine eleminfo(belem)
 
-c info on element number
+! info on element number
 
 	use basin
 
@@ -361,8 +361,8 @@ c info on element number
         else if(eint.le.0) then
            write(6,*) ' no element number : ',eext
            if(eext.le.nel) then
-              write(6,*) '(intern : ',eext
-     +                     ,' extern : ',ieext(eext),')'
+              write(6,*) '(intern : ',eext &
+     &                     ,' extern : ',ieext(eext),')'
            end if
            write(6,*)
 	else
@@ -377,29 +377,29 @@ c info on element number
 	   end do
 
            write(6,3200)
-           write(6,3000) ieext(ie)
-     +                  ,(ipext(nen3v(ii,ie)),ii=1,3)
-     +                  ,(hm3v(ii,ie),ii=1,3)
-     +                  ,area_elem(ie)
-     +                  ,iarv(ie)
+           write(6,3000) ieext(ie) &
+     &                  ,(ipext(nen3v(ii,ie)),ii=1,3) &
+     &                  ,(hm3v(ii,ie),ii=1,3) &
+     &                  ,area_elem(ie) &
+     &                  ,iarv(ie)
            write(6,*)
 	end if
 
 	end do
 
         return
- 3200   format(/1x,'element',8x,'nodes',14x,'depth in element'
-     +          ,3x,'   area',3x,'  area code')
+ 3200   format(/1x,'element',8x,'nodes',14x,'depth in element' &
+     &          ,3x,'   area',3x,'  area code')
  3000           format(1x,i6,2x,3i6,2x,3f8.2,2x,e10.2,2x,i5)
         end
 
-c*****************************************************************
-c*****************************************************************
-c*****************************************************************
+!*****************************************************************
+!*****************************************************************
+!*****************************************************************
 
 	subroutine basstat_area
 
-c writes statistics on basin for each area code
+! writes statistics on basin for each area code
 
 	use basin
 
@@ -409,9 +409,9 @@ c writes statistics on basin for each area code
 	integer imin,imax
 	real area,vol
 
-c-----------------------------------------------------------------
-c area code
-c-----------------------------------------------------------------
+!-----------------------------------------------------------------
+! area code
+!-----------------------------------------------------------------
 
 	imin = iarv(1)
 	imax = imin
@@ -421,12 +421,12 @@ c-----------------------------------------------------------------
 	  imax = max(imax,iarv(ie))
 	end do
 
-c-----------------------------------------------------------------
-c area
-c-----------------------------------------------------------------
+!-----------------------------------------------------------------
+! area
+!-----------------------------------------------------------------
 
-	write(6,'(2a)') '      ia    ntot         area       '
-     +			,'         volume              depth'
+	write(6,'(2a)') '      ia    ntot         area       ' &
+     &			,'         volume              depth'
 
 	do ia=imin,imax
 	  call areavol(ia,na,area,vol)
@@ -434,17 +434,17 @@ c-----------------------------------------------------------------
 	  write(6,'(2i8,3g20.8)') ia,na,area,vol,vol/area
 	end do
 
-c-----------------------------------------------------------------
-c end of routine
-c-----------------------------------------------------------------
+!-----------------------------------------------------------------
+! end of routine
+!-----------------------------------------------------------------
 
 	end
 
-c*****************************************************************
+!*****************************************************************
 
 	subroutine areavol(ia,na,area,vol)
 
-c computes area and volume of area code ia
+! computes area and volume of area code ia
 
 	use basin
 
@@ -488,11 +488,11 @@ c computes area and volume of area code ia
 
 	end
 
-c*****************************************************************
+!*****************************************************************
 
 	subroutine basstat(bnomin,bdetail)
 
-c writes statistics on basin
+! writes statistics on basin
 
 	use basin
 	use evgeom
@@ -521,9 +521,9 @@ c writes statistics on basin
 
 	real area_elem
 
-c-----------------------------------------------------------------
-c area code
-c-----------------------------------------------------------------
+!-----------------------------------------------------------------
+! area code
+!-----------------------------------------------------------------
 
 	imin = iarv(1)
 	imax = imin
@@ -549,9 +549,9 @@ c-----------------------------------------------------------------
 
 	if( bdetail ) call code_count(imax,nkn,iarnv)
 
-c-----------------------------------------------------------------
-c node numbers
-c-----------------------------------------------------------------
+!-----------------------------------------------------------------
+! node numbers
+!-----------------------------------------------------------------
 
 	imin = ipv(1)
 	imax = imin
@@ -563,9 +563,9 @@ c-----------------------------------------------------------------
 
 	write(6,*) 'Node number min/max:    ',imin,imax
 
-c-----------------------------------------------------------------
-c element numbers
-c-----------------------------------------------------------------
+!-----------------------------------------------------------------
+! element numbers
+!-----------------------------------------------------------------
 
 	imin = ipev(1)
 	imax = imin
@@ -577,9 +577,9 @@ c-----------------------------------------------------------------
 
 	write(6,*) 'Element number min/max: ',imin,imax
 
-c-----------------------------------------------------------------
-c area
-c-----------------------------------------------------------------
+!-----------------------------------------------------------------
+! area
+!-----------------------------------------------------------------
 
 	amin = area_elem(1)
 	amax = amin
@@ -613,9 +613,9 @@ c-----------------------------------------------------------------
 	write(6,*) 'Total area (all/h>0):   ',atot,aptot
 	write(6,*) 'Total volume (all/h>0): ',vtot,vptot
 
-c-----------------------------------------------------------------
-c coordinates
-c-----------------------------------------------------------------
+!-----------------------------------------------------------------
+! coordinates
+!-----------------------------------------------------------------
 
 	xmin = xgv(1)
 	ymin = ygv(1)
@@ -632,9 +632,9 @@ c-----------------------------------------------------------------
 	write(6,*) 'X-Coordinates min/max:  ',xmin,xmax
 	write(6,*) 'Y-Coordinates min/max:  ',ymin,ymax
 
-c-----------------------------------------------------------------
-c size of elements
-c-----------------------------------------------------------------
+!-----------------------------------------------------------------
+! size of elements
+!-----------------------------------------------------------------
 
 	dxmax = 0.
 	dymax = 0.
@@ -656,9 +656,9 @@ c-----------------------------------------------------------------
 
 	write(6,*) 'Element dxmax/dymax:    ',dxmax,dymax
 
-c-----------------------------------------------------------------
-c depth
-c-----------------------------------------------------------------
+!-----------------------------------------------------------------
+! depth
+!-----------------------------------------------------------------
 
 	amin = 999999.
 	amax = -amin
@@ -680,9 +680,9 @@ c-----------------------------------------------------------------
 	write(6,*) 'Depth min/max:          ',amin,amax
 	write(6,*) 'Depth average (all/h>0):',dtot,dptot
 
-c-----------------------------------------------------------------
-c minimum distance of nodes
-c-----------------------------------------------------------------
+!-----------------------------------------------------------------
+! minimum distance of nodes
+!-----------------------------------------------------------------
 
         !distmin = (xmax-xmin)**2 + (ymax-ymin)**2
 	call compute_distance(xmin,ymin,xmax,ymax,dx,dy)
@@ -711,15 +711,15 @@ c-----------------------------------------------------------------
 	  write(6,*) 'min node distance:      ',distmin,ipv(km1),ipv(km2)
 	end if
 
-c-----------------------------------------------------------------
-c end of routine
-c-----------------------------------------------------------------
+!-----------------------------------------------------------------
+! end of routine
+!-----------------------------------------------------------------
 
 	!write(6,*)
 
 	end
 
-c*******************************************************************
+!*******************************************************************
 
 	subroutine bas_stabil
 
@@ -768,21 +768,21 @@ c*******************************************************************
 	dt = sqrt( dt2/grav )
 	dtt = sqrt( dtt2 )
 
-	write(6,*) 'explicit time-step                  ' 
-     +				// 'time-step [s] '
-     +				// '  element (ext)'
+	write(6,*) 'explicit time-step                  '  &
+     &				// 'time-step [s] ' &
+     &				// '  element (ext)'
 	write(6,*) 'max explicit time-step (gravity):   ',dt,ipev(iemin)
 	write(6,*) 'max explicit time-step (transport): ',dtt,ipev(ietmin)
 
 	end
 
-c*******************************************************************
-c*******************************************************************
-c*******************************************************************
+!*******************************************************************
+!*******************************************************************
+!*******************************************************************
 
 	subroutine freqdep
 
-c writes frequency distribution of depth
+! writes frequency distribution of depth
 
 	use mod_depth
 	use basin
@@ -803,9 +803,9 @@ c writes frequency distribution of depth
 
 	real area_elem
 
-c-----------------------------------------------------------------
-c area code
-c-----------------------------------------------------------------
+!-----------------------------------------------------------------
+! area code
+!-----------------------------------------------------------------
 
 	allocate(freqa(0:ndim))
 	allocate(freqv(0:ndim))
@@ -876,14 +876,14 @@ c-----------------------------------------------------------------
 
 	end
 
-c*******************************************************************
+!*******************************************************************
 
         function areatr(ie)
 
-c determination of area of element (not working for lat/lon)
-c
-c ie            number of element (internal)
-c areatr        element area (return value)
+! determination of area of element (not working for lat/lon)
+!
+! ie            number of element (internal)
+! areatr        element area (return value)
 
 	use basin
 
@@ -905,11 +905,11 @@ c areatr        element area (return value)
 
         end
 
-c*******************************************************************
+!*******************************************************************
 
 	subroutine make_unique_depth
 
-c makes unique depth 
+! makes unique depth 
 
 	use evgeom
 	use basin
@@ -947,11 +947,11 @@ c makes unique depth
 
 	end
 
-c*******************************************************************
+!*******************************************************************
 
 	subroutine make_constant_depth
 
-c makes constant depth 
+! makes constant depth 
 
 	use evgeom
 	use basin
@@ -973,11 +973,11 @@ c makes constant depth
 
 	end
 
-c*******************************************************************
+!*******************************************************************
 
 	subroutine round_depth(hd)
 
-c rounds depth values to nearest given value
+! rounds depth values to nearest given value
 
 	use basin
 
@@ -1000,11 +1000,11 @@ c rounds depth values to nearest given value
 
 	end
 
-c*******************************************************************
+!*******************************************************************
 
 	subroutine invert_depth
 
-c inverts depth values
+! inverts depth values
 
 	use basin
 	use basutil
@@ -1017,11 +1017,11 @@ c inverts depth values
 
 	end
 
-c*******************************************************************
+!*******************************************************************
 
 	subroutine write_grd_with_unique_depth
 
-c writes grd file extracting info from bas file
+! writes grd file extracting info from bas file
 
 	implicit none
 
@@ -1035,11 +1035,11 @@ c writes grd file extracting info from bas file
 
 	end
 
-c*******************************************************************
+!*******************************************************************
 
 	subroutine write_grd_with_elem_depth
 
-c writes grd file extracting info from bas file
+! writes grd file extracting info from bas file
 
 	implicit none
 
@@ -1054,11 +1054,11 @@ c writes grd file extracting info from bas file
 
 	end
 
-c*******************************************************************
+!*******************************************************************
 
 	subroutine write_grd_from_bas
 
-c writes grd file extracting info from bas file
+! writes grd file extracting info from bas file
 
 	implicit none
 
@@ -1069,12 +1069,12 @@ c writes grd file extracting info from bas file
 
 	end
 
-c*******************************************************************
+!*******************************************************************
 
 	subroutine write_gr3_from_bas
 
-c writes grid in gr3 format from bas file
-c the gr3 format is used by WWMIII wave model
+! writes grid in gr3 format from bas file
+! the gr3 format is used by WWMIII wave model
 
 	use basutil
 
@@ -1097,12 +1097,12 @@ c the gr3 format is used by WWMIII wave model
 
 	end
 
-c*******************************************************************
+!*******************************************************************
 
 	subroutine write_msh_from_bas
 
-c writes grid in msh (gmsh v.2) format from bas file
-c the msh format is used by WWM3 wave model
+! writes grid in msh (gmsh v.2) format from bas file
+! the msh format is used by WWM3 wave model
 
 	use basutil
 
@@ -1124,11 +1124,11 @@ c the msh format is used by WWM3 wave model
 
 	end
 
-c*******************************************************************
+!*******************************************************************
 
 	subroutine basqual
 
-c writes statistics on grid quality
+! writes statistics on grid quality
 
 	use evgeom
 	use basin
@@ -1157,17 +1157,17 @@ c writes statistics on grid quality
 
 	integer ieext,ipext
 
-c-----------------------------------------------------------------
-c initialization
-c-----------------------------------------------------------------
+!-----------------------------------------------------------------
+! initialization
+!-----------------------------------------------------------------
 
 	do k=1,nkn
 	  areav(k) = 0.
 	end do
 
-c-----------------------------------------------------------------
-c compute fraction
-c-----------------------------------------------------------------
+!-----------------------------------------------------------------
+! compute fraction
+!-----------------------------------------------------------------
 
 	do ie=1,nel
 	  area = 4.*ev(10,ie)
@@ -1206,9 +1206,9 @@ c-----------------------------------------------------------------
 	write(6,*) '   maximum: ',iemax,ieext(iemax),fmax
 	write(6,*)
 
-c-----------------------------------------------------------------
-c compute angles
-c-----------------------------------------------------------------
+!-----------------------------------------------------------------
+! compute angles
+!-----------------------------------------------------------------
 
 	do i=0,18
 	  iangle(i) = 0
@@ -1236,17 +1236,17 @@ c-----------------------------------------------------------------
 
 	write(6,*)
 
-c-----------------------------------------------------------------
-c end of routine
-c-----------------------------------------------------------------
+!-----------------------------------------------------------------
+! end of routine
+!-----------------------------------------------------------------
 
 	end
 
-c*******************************************************************
+!*******************************************************************
 
         subroutine write_xy(nfile,nkn,ipv,xgv,ygv,hkv)
 
-c writes xy as data to file (format is gis format)
+! writes xy as data to file (format is gis format)
 
         implicit none
 
@@ -1267,17 +1267,17 @@ c writes xy as data to file (format is gis format)
         close(1)
         write(6,*) 'The coordinates have been written to ',nfile
 
-c-----------------------------------------------------------------
-c end of routine
-c-----------------------------------------------------------------
+!-----------------------------------------------------------------
+! end of routine
+!-----------------------------------------------------------------
 
 	end
 
-c*******************************************************************
+!*******************************************************************
 
         subroutine bascheck
 
-c writes statistics on basin
+! writes statistics on basin
 
         use evgeom
         use basin
@@ -1301,9 +1301,9 @@ c writes statistics on basin
 
         eps = 1.e-5
 
-c-----------------------------------------------------------------
-c area code
-c-----------------------------------------------------------------
+!-----------------------------------------------------------------
+! area code
+!-----------------------------------------------------------------
 
 	write(6,*) 'checking basin...'
 	write(6,*) '(node numbers are external)'
@@ -1325,9 +1325,9 @@ c-----------------------------------------------------------------
           end if
         end do
 
-c-----------------------------------------------------------------
-c angle
-c-----------------------------------------------------------------
+!-----------------------------------------------------------------
+! angle
+!-----------------------------------------------------------------
 
 	icount = 0
 
@@ -1339,7 +1339,7 @@ c-----------------------------------------------------------------
 	    if( iang > ndim ) stop 'error stop bascheck: iang'
             if( iang .gt. 0 ) then
               icount(iang) = icount(iang) + 1
-c             write(6,*) k,ii,w,iang
+!             write(6,*) k,ii,w,iang
             end if
           end do
         end do
@@ -1361,17 +1361,17 @@ c             write(6,*) k,ii,w,iang
           end do
         end do
 
-c-----------------------------------------------------------------
-c end of routine
-c-----------------------------------------------------------------
+!-----------------------------------------------------------------
+! end of routine
+!-----------------------------------------------------------------
 
         end
 
-c*******************************************************************
+!*******************************************************************
 
 	subroutine bascompare
 
-c compares two basins and writes delta depths to file
+! compares two basins and writes delta depths to file
 
 	use basin
 	use evgeom
@@ -1409,7 +1409,7 @@ c compares two basins and writes delta depths to file
 
 	end
 
-c*******************************************************************
+!*******************************************************************
 
         subroutine node_test
 
@@ -1446,7 +1446,7 @@ c*******************************************************************
 
         end
 
-c*******************************************************************
+!*******************************************************************
 
         subroutine write_depth_from_bas
 
@@ -1490,7 +1490,7 @@ c*******************************************************************
 
         end
 
-c*******************************************************************
+!*******************************************************************
 
 	subroutine write_nodal_partition(bwrite)
 
@@ -1556,19 +1556,19 @@ c*******************************************************************
 
         end
 
-c*******************************************************************
+!*******************************************************************
 
         subroutine setnod_bas
 
-c sets (dynamic) array inodv
-c
-c inodv 
-c        0: internal node  
-c       >0: open boundary node
-c       -1: boundary node  
-c       -2: out of system
-c
-c if open boundary node, inodv(k) is number of boundary (ggu 15.11.2001)
+! sets (dynamic) array inodv
+!
+! inodv 
+!        0: internal node  
+!       >0: open boundary node
+!       -1: boundary node  
+!       -2: out of system
+!
+! if open boundary node, inodv(k) is number of boundary (ggu 15.11.2001)
 
         use mod_geom_dynamic
         use evgeom
@@ -1582,12 +1582,12 @@ c if open boundary node, inodv(k) is number of boundary (ggu 15.11.2001)
         integer nbc,ndry
         double precision winkv(nkn)
 
-c initialize array to hold angles
+! initialize array to hold angles
 
         ndry = 0
         winkv = 0.
 
-c sum angles
+! sum angles
 
         do ie=1,nel
           if(iwegv(ie).eq.0) then !element is in system
@@ -1600,7 +1600,7 @@ c sum angles
           end if
         end do
 
-c set up inodv
+! set up inodv
 
         do k=1,nkn
           if(winkv(k).gt.winmax) then     !internal node
@@ -1614,7 +1614,7 @@ c set up inodv
 
         end
 
-c****************************************************************
+!****************************************************************
 
 	subroutine sort_basin
 
@@ -1703,7 +1703,7 @@ c****************************************************************
 
 	end
 
-c****************************************************************
+!****************************************************************
 
         subroutine write_regular_depth(dreg)
 
@@ -1767,8 +1767,8 @@ c****************************************************************
 	call write_regular_2d_1var_record(iunit,string,regpar,np,hreg)
 	close(iunit)
 
-	write(6,*) 'The regular bathymetry has been written to file '
-     +			,trim(file)
+	write(6,*) 'The regular bathymetry has been written to file ' &
+     &			,trim(file)
 
 !-------------------------------------------------------------
 ! end of routine
@@ -1776,7 +1776,7 @@ c****************************************************************
 
 	end
 
-c****************************************************************
+!****************************************************************
 
 	subroutine code_count(imax,n,iarray)
 
@@ -1806,5 +1806,5 @@ c****************************************************************
 
 	end
 
-c****************************************************************
+!****************************************************************
 

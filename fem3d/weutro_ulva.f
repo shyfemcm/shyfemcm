@@ -32,27 +32,27 @@
 
 !**************************************************************************
 
-c weutro_ulva
-c notes:
-c State variables used: (Wasp)
-c
-c nh3           71      1   -
-c no3 , nox     72      2   -
-c opo4          73      3   -
-c phyto         74      4
-c cbod          75      5
-c do , oxy      76      6   -
-c on , onsed    77      7
-c op , opsed    78      8
-c zoo           79      9
-c
-c********************************************************************
-c********************************************************************
-c********************************************************************
-c
+! weutro_ulva
+! notes:
+! State variables used: (Wasp)
+!
+! nh3           71      1   -
+! no3 , nox     72      2   -
+! opo4          73      3   -
+! phyto         74      4
+! cbod          75      5
+! do , oxy      76      6   -
+! on , onsed    77      7
+! op , opsed    78      8
+! zoo           79      9
+!
+!********************************************************************
+!********************************************************************
+!********************************************************************
+!
         subroutine wulva(k,t,dt,vol,depth,vel,stp,qrad,c,culva)
 
-c EUTRO 0-Dimensional (Sediments)
+! EUTRO 0-Dimensional (Sediments)
 
         implicit none
 
@@ -159,32 +159,32 @@ c EUTRO 0-Dimensional (Sediments)
 
         fi0 = qrad * p_kpar * exp(-p_kest * depth) !converto radsol tot (W/m2)-PAR ULVA!!
         fugl = (1 - EXP(-fi0 / p_ugl1) )
-c
+!
 !...    Temperature limiting function for growth and respiration
-c
+!
         fugt = (1/ (1 + exp(-p_ugt1 * (stp-p_ugt2)) ) )   !funz. crescita
         furt = (1/ (1 + exp(-p_urt1 * (stp-p_urt2)) ) )   !funz. respirazione
-c
-c...	Funzione limitante fosforo pb(kpo4) = 0.01
-c
+!
+!...	Funzione limitante fosforo pb(kpo4) = 0.01
+!
         fupl = opo4 /(p_kpo4 + opo4) 
-c
+!
 !...    Mortality function : physiological + DO induced
 
         mtu = min(p_kmtu2 * (Wdt**p_kmtu1), p_kmtdo*Wdt)
 !
 !...    Nitrogen Uptake
 !
-        tsnh = ( (p_Vnhu * nh3) / (nh3+p_Knhu) ) 
-     +           * ( (p_Qmax - Quota) / (p_Qmax - p_Qmin) )
+        tsnh = ( (p_Vnhu * nh3) / (nh3+p_Knhu) )  &
+     &           * ( (p_Qmax - Quota) / (p_Qmax - p_Qmin) )
 
-        tsno = ( (p_Vnou * nox) / (nox+p_Knou) )  
-     +           * ( (p_Qmax - Quota) / (p_Qmax - p_Qmin) )
+        tsno = ( (p_Vnou * nox) / (nox+p_Knou) )   &
+     &           * ( (p_Qmax - Quota) / (p_Qmax - p_Qmin) )
 
 !...    growth function
 !
-        gusp = p_Vgud * ( (Quota-p_Qmin) / (Quota-p_Qlc) )  
-     +          * fugt * fugl * fupl
+        gusp = p_Vgud * ( (Quota-p_Qmin) / (Quota-p_Qlc) )   &
+     &          * fugt * fugl * fupl
 !
 !..     Compute growth effect on dry weight and internal quota
 !
@@ -204,7 +204,7 @@ c
         tsrp = gusp * p_upc 
 !
 !...    Uptake from the water column
-c
+!
         ca(1)   =  nh3  
         ca(2)   =  nox  
         ca(3)   =  opo4 
@@ -303,5 +303,5 @@ c
         return
         end
 
-c****************************************************************************
+!****************************************************************************
 

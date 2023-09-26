@@ -39,16 +39,16 @@
 
 !**************************************************************************
 
-c*****************************************************************
-c*****************************************************************
-c*****************************************************************
-c below files for -check
-c*****************************************************************
-c*****************************************************************
-c*****************************************************************
+!*****************************************************************
+!*****************************************************************
+!*****************************************************************
+! below files for -check
+!*****************************************************************
+!*****************************************************************
+!*****************************************************************
 
-	subroutine fem_check(atime,np,lmax,nvar,data,flag
-     +				,strings,scheck,bquiet)
+	subroutine fem_check(atime,np,lmax,nvar,data,flag &
+     &				,strings,scheck,bquiet)
 
 	use iso8601
 
@@ -179,8 +179,8 @@ c*****************************************************************
             file = 'aver.' // trim(filename) // '.txt'
 	    call get_new_unit(iu)
             open(iu,file=file,form='formatted',status='unknown')
-	    write(iu,'(a)') '#      date_and_time    minimum'//
-     +			'       average       maximum       std'
+	    write(iu,'(a)') '#      date_and_time    minimum'// &
+     &			'       average       maximum       std'
 	    filenames(iv) = file
 	    ius(iv) = iu
 	    ivars(iv) = ivar
@@ -220,8 +220,8 @@ c*****************************************************************
 
 	do iv=1,nvar
 	  if( iv == ivect ) then
-	    call aver_vect_data(np,lmax,data(:,:,iv:iv+1)
-     +				,flag,bmeteo,vals,vald)
+	    call aver_vect_data(np,lmax,data(:,:,iv:iv+1) &
+     &				,flag,bmeteo,vals,vald)
 	    aver(iv) = vals
 	  else if( ivect > 0 .and. iv == ivect+1 ) then
 	    aver(iv) = vald
@@ -278,8 +278,8 @@ c*****************************************************************
 
 	  if( bfirst  .and. bw .and. bfile ) then
 	    write(6,*)
-	    write(6,'(a)') 'varid naccum         date_and_time'//
-     +			'    minimum       average       maximum'
+	    write(6,'(a)') 'varid naccum         date_and_time'// &
+     &			'    minimum       average       maximum'
 	    bfirst = .false.
 	  end if
 
@@ -330,8 +330,8 @@ c*****************************************************************
 	    write(6,*) '  ',trim(filenames(iv))
 	  end do
 	  write(6,*) 'the four colums are min/aver/max/std'
-	  write(6,*) 'the averaging has been done over period: '
-     +				,trim(scheck)
+	  write(6,*) 'the averaging has been done over period: ' &
+     &				,trim(scheck)
 	end if
 
 !	-------------------------------
@@ -340,7 +340,7 @@ c*****************************************************************
 
 	end 
 
-c*****************************************************************
+!*****************************************************************
 
 	subroutine aver_data(np,lmax,data,flag,aver)
 
@@ -383,7 +383,7 @@ c*****************************************************************
 
 	end
 
-c*****************************************************************
+!*****************************************************************
 
 	subroutine aver_vect_data(np,lmax,data,flag,bmeteo,avers,averd)
 
@@ -436,5 +436,5 @@ c*****************************************************************
 
 	end
 
-c*****************************************************************
+!*****************************************************************
 

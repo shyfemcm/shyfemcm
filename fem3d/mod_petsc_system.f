@@ -108,16 +108,16 @@
         integer, parameter :: amgx_id=1
         character(len=4) :: AmgX_mode='dDDI'
 
-       public :: create_objects,
-     +           init_solver,
-     +           add_matvec_values,
-     +           add_full_rhs,
-     +           matvec_assemble,
-     +           solve,
-     +           get_solution,
-     +           reset_zero_entries,
-     +           destroy_matvecobjects,
-     +           destroy_solver
+       public :: create_objects, &
+     &           init_solver, &
+     &           add_matvec_values, &
+     &           add_full_rhs, &
+     &           matvec_assemble, &
+     &           solve, &
+     &           get_solution, &
+     &           reset_zero_entries, &
+     &           destroy_matvecobjects, &
+     &           destroy_solver
 !==================================================================
        contains
 !==================================================================
@@ -145,15 +145,15 @@
          if (trim(petscconfig).ne.' ') then
 	   write(6,*) 'petscrc config file: |',trim(petscconfig),'|'
            write(6,*) 'reading petscrc file : ',petscconfig
-           call PetscOptionsInsertFILE(
-     +                     new_system%PETSC_COMM,
-     +                     PETSC_NULL_INTEGER,
-     +                     petscconfig, 
-     +                     PETSC_TRUE,
-     +                     perr )
+           call PetscOptionsInsertFILE( &
+     &                     new_system%PETSC_COMM, &
+     &                     PETSC_NULL_INTEGER, &
+     &                     petscconfig,  &
+     &                     PETSC_TRUE, &
+     &                     perr )
            if (perr .ne. 0) then
-              write(6,*)'Unable to read from config file ',
-     +                    petscconfig
+              write(6,*)'Unable to read from config file ', &
+     &                    petscconfig
               stop
            endif
          else
@@ -163,13 +163,13 @@
         write(*,*)'Options Get String'
 #endif
 
-         call PetscOptionsGetString(
-     +                 PETSC_NULL_OPTIONS,
-     +                 PETSC_NULL_CHARACTER,
-     +                 "-shyfem_solver",
-     +                 shyfem_solver,
-     +                 opt_found,
-     +                 perr)
+         call PetscOptionsGetString( &
+     &                 PETSC_NULL_OPTIONS, &
+     &                 PETSC_NULL_CHARACTER, &
+     &                 "-shyfem_solver", &
+     &                 shyfem_solver, &
+     &                 opt_found, &
+     &                 perr)
          call assert(perr.eq.0,'PETScOptionsGetString',perr)
          if(opt_found.neqv. .true.)then
             shyfem_solver='petsc'
@@ -179,18 +179,18 @@
         write(*,*)'set solver id'
 #endif
          if (trim(shyfem_solver)=='amgx') then
-           write(*,*)'using shyfem_solver ',shyfem_solver,
-     +      ' => AmgX routines '     
+           write(*,*)'using shyfem_solver ',shyfem_solver, &
+     &      ' => AmgX routines '     
             !if (trim(amgxconfig).eq.'NO_FILE_GIVEN') then
             if (trim(amgxconfig).eq.' ') then
-              write(*,*)'using shyfem_solver ',shyfem_solver,
-     +          'requires an AmgX configuration file name in the .str'
+              write(*,*)'using shyfem_solver ',shyfem_solver, &
+     &          'requires an AmgX configuration file name in the .str'
               stop "ERROR, AmgX configuration file name is missing"
             endif
            new_system%use_AmgX=.True.
          elseif(trim(shyfem_solver)=='petsc') then                    
-           write(*,*)'using shyfem_solver ',shyfem_solver,
-     +      ' => PETSc routines '     
+           write(*,*)'using shyfem_solver ',shyfem_solver, &
+     &      ' => PETSc routines '     
            new_system%use_AmgX=.False.
          else
            stop "shyfem_solver must be 'petsc' or 'amgx'"
@@ -219,12 +219,12 @@
 #ifdef Verbose
          write(6,*)'PETSc Create Matrix',nodes_loc,nodes_glob
 #endif
-         call MatCreate(self%PETSC_COMM,
-     +              self%A,perr)
+         call MatCreate(self%PETSC_COMM, &
+     &              self%A,perr)
          call assert(perr.eq.0,'PETScMatCreate',perr)
-         call MatSetSizes(self%A,
-     +                      nodes_loc,nodes_loc,
-     +                      nodes_glob,nodes_glob,perr)
+         call MatSetSizes(self%A, &
+     &                      nodes_loc,nodes_loc, &
+     &                      nodes_glob,nodes_glob,perr)
          call assert(perr.eq.0,'PETScMatSetSize',perr)
          call MatSetType(self%A,MATAIJ,perr) ! matrix type MATAIJ is identical
                                                ! to MATSEQAIJ when constructed with 
@@ -236,41 +236,41 @@
          call MatSetFromOptions(self%A,perr)  
          call assert(perr.eq.0,'PETScMatSetFromOptions',perr)
          if( bmpi ) then
-             call MatMPIAIJSetPreallocation(self%A,
-     +                      PETSC_DECIDE,d_nnz,
-     +                      PETSC_DECIDE,o_nnz,
-     +                      perr)
+             call MatMPIAIJSetPreallocation(self%A, &
+     &                      PETSC_DECIDE,d_nnz, &
+     &                      PETSC_DECIDE,o_nnz, &
+     &                      perr)
          call assert(perr.eq.0,'MatMPIAIJSetPreallocation',perr)
          else
-             call MatSEQAIJSetPreallocation(self%A,
-     +                      PETSC_DECIDE,d_nnz,
-     +                      perr)
+             call MatSEQAIJSetPreallocation(self%A, &
+     &                      PETSC_DECIDE,d_nnz, &
+     &                      perr)
          call assert(perr.eq.0,'MatSEQAIJSetPreallocation',perr)
          endif
          !call PetscObjectSetName(self%A,'A (Mat)',perr)	!ggu-fix
          ! --------------------------------------------------------
-         call MatSetOption(self%A,
-     +                     MAT_NEW_NONZERO_ALLOCATION_ERR,PETSC_TRUE,
-     +                     perr)
+         call MatSetOption(self%A, &
+     &                     MAT_NEW_NONZERO_ALLOCATION_ERR,PETSC_TRUE, &
+     &                     perr)
          call assert(perr.eq.0,'MatSetFromOpt perr',perr)
          call MatSetUp(self%A,perr)
          call assert(perr.eq.0,'MatSetUp perr',perr)
 
          ! --------------------------------------------------------
-         call MatGetOwnershipRange(self%A,
-     +                            rowStart_read,rowEnd_read,perr)
-         call assert(rowStart_read==rowStart,
-     +                     'rowStart changed',perr)
+         call MatGetOwnershipRange(self%A, &
+     &                            rowStart_read,rowEnd_read,perr)
+         call assert(rowStart_read==rowStart, &
+     &                     'rowStart changed',perr)
          call assert(rowEnd_read==rowEnd,'rowStart changed',perr)
          call MatGetSize(self%A,Rsize,Csize,perr)
          call assert(perr.eq.0,'MatGetSize',perr)
 
 #ifdef Verbose
-         write(6,'(a,i3,4(a,2i8))')
-     +           'PETSc : rank',my_id,' with num loc rows and cols ',
-     +       nodes_loc,nodes_loc,' and num glob rows and cols',
-     +       nodes_glob,nodes_glob,' owns rows',rowStart,rowEnd,
-     +          ' in matrix of size',Rsize,Csize
+         write(6,'(a,i3,4(a,2i8))') &
+     &           'PETSc : rank',my_id,' with num loc rows and cols ', &
+     &       nodes_loc,nodes_loc,' and num glob rows and cols', &
+     &       nodes_glob,nodes_glob,' owns rows',rowStart,rowEnd, &
+     &          ' in matrix of size',Rsize,Csize
 #endif
          !-------------------------------------------------------------        
          ! Initialize PETSc Vectors
@@ -285,8 +285,8 @@
          ! to run on the GPU request VECCUDA in the options database
          ! to replace default VECSTANDARD Type of vector B
          call VecSetFromOptions(self%B,perr) 
-         call VecSetOption(self%B,
-     +           VEC_IGNORE_NEGATIVE_INDICES,PETSC_TRUE,perr)
+         call VecSetOption(self%B, &
+     &           VEC_IGNORE_NEGATIVE_INDICES,PETSC_TRUE,perr)
          !call PetscObjectSetName(self%B,'B (rhs)',perr)	!ggu-fix
 
          !-------------------------------------------------------------        
@@ -313,8 +313,8 @@
          !-------------------------------------------------------------        
          call VecGetOwnershipRange(self%B, rowStart,rowEnd,perr)
 #ifdef Verbose
-         write(6,*)'PETSc : rank',my_id,
-     +                       ' owns rows ',rowStart,rowEnd  
+         write(6,*)'PETSc : rank',my_id, &
+     &                       ' owns rows ',rowStart,rowEnd  
 #endif
          call VecGetOwnershipRange(self%X, rowStart,rowEnd,perr)
 
@@ -365,9 +365,9 @@
          call KSPCreate(self%PETSC_COMM,self%ksp,perr)
          call assert(perr.eq.0,'KSPCreate perr',perr)
 
-         call KSPSetOperators(self%ksp,
-     +                        self%A,self%A,
-     +                        perr)
+         call KSPSetOperators(self%ksp, &
+     &                        self%A,self%A, &
+     &                        perr)
          call assert(perr.eq.0,'KSPSetOperators perr',perr)
        
          call KSPSetUp(self%ksp,perr)
@@ -378,23 +378,23 @@
 
          rtol  = 1e-8           
 	 opt_val = ' '
-         call KSPSetTolerances(self%ksp,
-     +            rtol,
-     +            PETSC_DEFAULT_REAL,
-     +            PETSC_DEFAULT_REAL,
-     +            PETSC_DEFAULT_INTEGER,perr)
+         call KSPSetTolerances(self%ksp, &
+     &            rtol, &
+     &            PETSC_DEFAULT_REAL, &
+     &            PETSC_DEFAULT_REAL, &
+     &            PETSC_DEFAULT_INTEGER,perr)
          call KSPSetFromOptions(self%ksp,perr)
-         call PetscOptionsGetString(
-     +                 PETSC_NULL_OPTIONS,
-     +                 PETSC_NULL_CHARACTER,
-     +                 "-ksp_type",
-     +                 opt_val,
-     +                 opt_found,
-     +                 perr)
+         call PetscOptionsGetString( &
+     &                 PETSC_NULL_OPTIONS, &
+     &                 PETSC_NULL_CHARACTER, &
+     &                 "-ksp_type", &
+     &                 opt_val, &
+     &                 opt_found, &
+     &                 perr)
          write(*,*)'kps_type=',opt_val
-         if(opt_found.neqv. .true. .or. (
-     +     trim(opt_val).ne.'preonly'.and.trim(opt_val).ne.'choleski')) 
-     +       call KSPSetInitialGuessNonzero(self%ksp,PETSC_TRUE,perr)
+         if(opt_found.neqv. .true. .or. ( &
+     &     trim(opt_val).ne.'preonly'.and.trim(opt_val).ne.'choleski'))  &
+     &       call KSPSetInitialGuessNonzero(self%ksp,PETSC_TRUE,perr)
 
          call KSPGetPC(self%ksp,self%pc,perr)
          call assert(perr.eq.0,'KSPGetPC perr ', perr)
@@ -424,8 +424,8 @@
        implicit none
        class(petsc_system),target :: self
        character(len=len_trim(AmgX_mode)+1,kind=c_char) :: modestr
-       character(len=len_trim(self%AmgX_configfile)+1,
-     +           kind=c_char) :: cfgfile
+       character(len=len_trim(self%AmgX_configfile)+1, &
+     &           kind=c_char) :: cfgfile
        external :: CAmgX_GetInitSolver
        external :: CAmgX_GetSolver
        external :: CAmgX_Initialize
@@ -442,8 +442,8 @@
 !     +                        modestr,cfgfile)
 
          call CAmgX_GetSolver(self%AmgX_Solver)
-         call CAmgX_Initialize(self%AmgX_Solver,self%PETSC_COMM,
-     +                       modestr,cfgfile,perr)
+         call CAmgX_Initialize(self%AmgX_Solver,self%PETSC_COMM, &
+     &                       modestr,cfgfile,perr)
 
         write(6,*)'AmgX solver creation is done'
        end subroutine init_solver_AmgX
@@ -458,25 +458,25 @@
           integer, intent(in):: ie
 
 #ifdef Verbose
-          write(6,'(2(a,i3),3(a,f15.7),2f15.7,a,3i3)')
-     +          'rank',my_id,' ele ',ie,
-     +          ' adds matrix values min: ',minval(self%mat3x3),
-     +           ' max:',maxval(self%mat3x3),' vec:',
-     +            self%vecx3,' in row,col=',
-     +           nodes_eleshy2block(:,ie)
+          write(6,'(2(a,i3),3(a,f15.7),2f15.7,a,3i3)') &
+     &          'rank',my_id,' ele ',ie, &
+     &          ' adds matrix values min: ',minval(self%mat3x3), &
+     &           ' max:',maxval(self%mat3x3),' vec:', &
+     &            self%vecx3,' in row,col=', &
+     &           nodes_eleshy2block(:,ie)
 #endif
-          call MatSetValues(self%A, ! the matrix that is set
-     +                 three,nodes_eleshy2block(:,ie),     ! the number of rows and their global indices 
-     +                 three,nodes_eleshy2block(:,ie),     ! the number of columns and their global indices
-     +                 self%mat3x3,         ! the block of values to be inserted
-     +                 ADD_VALUES,   ! sum with matrix values
-     +                 perr)
+          call MatSetValues(self%A, ! the matrix that is set &
+     &                 three,nodes_eleshy2block(:,ie),     ! the number of rows and their global indices  &
+     &                 three,nodes_eleshy2block(:,ie),     ! the number of columns and their global indices &
+     &                 self%mat3x3,         ! the block of values to be inserted &
+     &                 ADD_VALUES,   ! sum with matrix values &
+     &                 perr)
 
-          call VecSetValues(self%B, ! the matrix that is set
-     +                 three,nodes_eleshy2block(:,ie),     ! the number of elements and their global indices 
-     +                 self%vecx3,         ! the block of values to be inserted
-     +                 ADD_VALUES,   ! sum with matrix values
-     +                 perr)
+          call VecSetValues(self%B, ! the matrix that is set &
+     &                 three,nodes_eleshy2block(:,ie),     ! the number of elements and their global indices  &
+     &                 self%vecx3,         ! the block of values to be inserted &
+     &                 ADD_VALUES,   ! sum with matrix values &
+     &                 perr)
 
        end subroutine add_matvec_values
 
@@ -544,16 +544,16 @@
                 row=nodes_shy2block(k)  
                 if( row>=rowStart .and. row<rowEnd )then !only assemble inner nodes
 #ifdef Verbose
-                write(6,'(a,i3,a,f10.5,2(a,i3))')'rank',my_id,
-     +                     ' sets vector  value ',array(k),' of node',
-     +                         k,' in row ',row
+                write(6,'(a,i3,a,f10.5,2(a,i3))')'rank',my_id, &
+     &                     ' sets vector  value ',array(k),' of node', &
+     &                         k,' in row ',row
 #endif
-                call VecSetValue(self%B,
-     +                           row,val,
-     +                           ADD_VALUES,
-     +                           perr) 
-                call assert(perr.eq.0,'VecSetVale _add_full_rhs perr',
-     +                            perr)
+                call VecSetValue(self%B, &
+     &                           row,val, &
+     &                           ADD_VALUES, &
+     &                           perr) 
+                call assert(perr.eq.0,'VecSetVale _add_full_rhs perr', &
+     &                            perr)
                 endif
              end do
 #ifdef Verbose
@@ -592,10 +592,10 @@
               if(my_id==0) write(*,*)'PETSc solve system'
 #endif
               ! set KSP solver
-              call KSPSetOperators(self%ksp,self%A,
-     +                  self%A,perr)
-              call assert(perr.eq.0,
-     +                          'KSPSetOperators perr',perr)
+              call KSPSetOperators(self%ksp,self%A, &
+     &                  self%A,perr)
+              call assert(perr.eq.0, &
+     &                          'KSPSetOperators perr',perr)
 
               ! solve
               call KSPSolve(self%ksp,self%B,self%X,perr)
@@ -628,8 +628,8 @@
         if(my_id==0) write(*,*)'solve system'
 #endif
         call CAmgX_SetA(self%AmgX_Solver,self%A,perr) ! AmgX Wrapper
-        call CAmgX_Solve(self%AmgX_Solver,self%X,
-     +                   self%B,perr)  ! AmgX Wrapper
+        call CAmgX_Solve(self%AmgX_Solver,self%X, &
+     &                   self%B,perr)  ! AmgX Wrapper
 !       call CAmgX_getiters(self%AmgX_Solver,iters,perr)
 !       do iter=0,iters-1
 !         call CAmgX_getresidual(self%AmgX_Solver,
@@ -661,10 +661,10 @@
 #endif
              offset=0
              if(bmpi)then
-               call VecGhostUpdateBegin(self%X,
-     +                           INSERT_VALUES,SCATTER_FORWARD,perr)
-               call VecGhostUpdateEnd(self%X,
-     +                           INSERT_VALUES,SCATTER_FORWARD,perr)   
+               call VecGhostUpdateBegin(self%X, &
+     &                           INSERT_VALUES,SCATTER_FORWARD,perr)
+               call VecGhostUpdateEnd(self%X, &
+     &                           INSERT_VALUES,SCATTER_FORWARD,perr)   
                call VecGetArrayReadF90(self%X_loc,self%p_X_loc,perr)
              else
                call VecGetArrayReadF90(self%X,self%p_X_loc,perr)
@@ -674,11 +674,11 @@
 
 #ifdef Verbose
                if(bmpi)then
-                call VecView(self%X_loc,PETSC_VIEWER_STDOUT_WORLD,
-     +                           perr)
+                call VecView(self%X_loc,PETSC_VIEWER_STDOUT_WORLD, &
+     &                           perr)
                else
-                call VecView(self%X,PETSC_VIEWER_STDOUT_WORLD,
-     +                           perr)
+                call VecView(self%X,PETSC_VIEWER_STDOUT_WORLD, &
+     &                           perr)
                endif
                write(6,*)'rank ',my_id,' has X n=',n,' offset ',tmp
 #endif

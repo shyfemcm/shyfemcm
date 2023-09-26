@@ -377,8 +377,8 @@
 	 ! read new data set
 	 !--------------------------------------------------------------
 
-	 call read_records(id,dtime,bhydro,nvar,nndim,nlvdi,idims
-     +				,cv3,cv3all,ierr)
+	 call read_records(id,dtime,bhydro,nvar,nndim,nlvdi,idims &
+     &				,cv3,cv3all,ierr)
 
          if(ierr.ne.0) then	!EOF - see if we have to read another file
 	   if( ierr > 0 .or. atstart == -1. ) exit
@@ -397,8 +397,8 @@
 	 !--------------------------------------------------------------
 
 	 if( bdiff ) then
-	   call read_records(iddiff,ddtime,bhydro,nvar,nndim,nlvdi,idims
-     +				,cv3,cv3diff,ierr)
+	   call read_records(iddiff,ddtime,bhydro,nvar,nndim,nlvdi,idims &
+     &				,cv3,cv3diff,ierr)
 	   if( ierr /= 0 ) goto 62
 	   !if( dtime /= ddtime ) goto 61
 	   cv3all = cv3all - cv3diff
@@ -474,29 +474,29 @@
 	  end if
 
 	  if( btrans ) then
-	    call shy_time_aver(bforce,avermode,iv,nread,ifreq,istep,nndim
-     +			,idims,threshold,cv3,boutput,bverb)
+	    call shy_time_aver(bforce,avermode,iv,nread,ifreq,istep,nndim &
+     &			,idims,threshold,cv3,boutput,bverb)
 	  end if
 
 	  if( b2d ) then
 	    call shy_make_vert_aver(idims(:,iv),belem,nndim,cv3,cv2)
-	    call shyelab_record_output(id,idout,dtime,ivar,iv
-     +						,belem,n,m
-     +						,1,1,cv2)
+	    call shyelab_record_output(id,idout,dtime,ivar,iv &
+     &						,belem,n,m &
+     &						,1,1,cv2)
 	  else if( bsumvar .or. binfluencemap .or. bvorticity ) then
 	    ! only write at end of loop over variables
 	  else
-	    call shyelab_record_output(id,idout,dtime,ivar,iv
-     +						,belem,n,m
-     +						,lmax,nlvdi,cv3)
+	    call shyelab_record_output(id,idout,dtime,ivar,iv &
+     &						,belem,n,m &
+     &						,lmax,nlvdi,cv3)
 	  end if
 
 	  if( baverbas .and. bscalar ) then
 	    call shy_assert(nndim==nkn,'shyelab internal error (123)')
-	    call shy_make_basin_aver(idims(:,iv),nlv,nndim,cv3,ikflag
-     +                          ,cmin,cmax,cmed,cstd,atot,vtot)
-	    call shy_write_aver(aline,nvar,iv,ivar
-     +				,cmin,cmax,cmed,cstd,atot,vtot)
+	    call shy_make_basin_aver(idims(:,iv),nlv,nndim,cv3,ikflag &
+     &                          ,cmin,cmax,cmed,cstd,atot,vtot)
+	    call shy_write_aver(aline,nvar,iv,ivar &
+     &				,cmin,cmax,cmed,cstd,atot,vtot)
 	  end if
 
 	 end do		!loop on ivar
@@ -506,27 +506,27 @@
 	 !--------------------------------------------------------------
 
 	 if( baverbas .and. bhydro ) then
-           call shy_make_hydro_aver(aline,nndim,cv3all,ikflag
-     +                  ,znv,uprv,vprv,sv,dv)
+           call shy_make_hydro_aver(aline,nndim,cv3all,ikflag &
+     &                  ,znv,uprv,vprv,sv,dv)
 	 end if
 
 	 if( binfluencemap ) then
            ivar = 75
 	   iv = 1
-           call comp_influence_map(nlvdi,nkn,nvar,pthresh,cthresh
-     +					,cv3all,cv3)
-	   call shyelab_record_output(id,idout,dtime,ivar,iv
-     +						,belem,n,m
-     +						,lmax,nlvdi,cv3)
+           call comp_influence_map(nlvdi,nkn,nvar,pthresh,cthresh &
+     &					,cv3all,cv3)
+	   call shyelab_record_output(id,idout,dtime,ivar,iv &
+     &						,belem,n,m &
+     &						,lmax,nlvdi,cv3)
 	 end if
 
 	 if( bvorticity ) then
            ivar = 19
 	   iv = 1
            call compute_vorticity(nndim,cv3all,cv3)
-	   call shyelab_record_output(id,idout,dtime,ivar,iv
-     +						,belem,nkn,1
-     +						,lmax,nlvdi,cv3)
+	   call shyelab_record_output(id,idout,dtime,ivar,iv &
+     &						,belem,nkn,1 &
+     &						,lmax,nlvdi,cv3)
 	 end if
 
 	 if( bnodes ) then	!nodal output
@@ -534,8 +534,8 @@
 	 end if
  
 	 ! bsumvar is also handled in here
-	 call shyelab_post_output(id,idout,dtime,nvar,n,m,nndim
-     +                                  ,lmax,nlvdi,cv3all)
+	 call shyelab_post_output(id,idout,dtime,nvar,n,m,nndim &
+     &                                  ,lmax,nlvdi,cv3all)
 
 	end do		!time do loop
 
@@ -554,16 +554,16 @@
 	    if( naccum > 0 ) then
 	      !call shyelab_increase_nwrite	!done in *_output
 	      if( bverb ) write(6,*) 'final aver: ',ip,iv,naccum
-	      call shy_time_aver(bforce,-avermode,iv,ip,0,istep,nndim
-     +			,idims,threshold,cv3,boutput,bverb)
+	      call shy_time_aver(bforce,-avermode,iv,ip,0,istep,nndim &
+     &			,idims,threshold,cv3,boutput,bverb)
 	      n = idims(1,iv)
 	      m = idims(2,iv)
 	      belem = ( bhydro .and. iv > 1 )
 	      lmax = idims(3,iv)
 	      ivar = idims(4,iv)
-	      call shyelab_record_output(id,idout,dtime,ivar,iv
-     +						,belem,n,m
-     +						,lmax,nlvdi,cv3)
+	      call shyelab_record_output(id,idout,dtime,ivar,iv &
+     &						,belem,n,m &
+     &						,lmax,nlvdi,cv3)
 	    end if
 	   end do
 	  end do
@@ -663,8 +663,8 @@
 !***************************************************************
 !***************************************************************
 
-        subroutine shy_make_hydro_aver(aline,nndim,cv3all,ikflag
-     +                  ,znv,uprv,vprv,sv,dv)
+        subroutine shy_make_hydro_aver(aline,nndim,cv3all,ikflag &
+     &                  ,znv,uprv,vprv,sv,dv)
 
         use basin
         use levels
@@ -695,33 +695,33 @@
 	iv = 1
         ivar = 1
         idim = (/nkn,1,1,ivar/)
-        call shy_make_basin_aver(idim,1,nkn,znv,ikflag
-     +                          ,cmin,cmax,cmed,cstd,atot,vtot)
-        call shy_write_aver(aline,nvar,iv,ivar
-     +				,cmin,cmax,cmed,cstd,atot,vtot)
+        call shy_make_basin_aver(idim,1,nkn,znv,ikflag &
+     &                          ,cmin,cmax,cmed,cstd,atot,vtot)
+        call shy_write_aver(aline,nvar,iv,ivar &
+     &				,cmin,cmax,cmed,cstd,atot,vtot)
 
 	iv = 2
         ivar = 2
         idim = (/nkn,1,nlv,ivar/)
-        call shy_make_basin_aver(idim,nlv,nkn,uprv,ikflag
-     +                          ,cmin,cmax,cmed,cstd,atot,vtot)
-        call shy_write_aver(aline,nvar,iv,ivar
-     +				,cmin,cmax,cmed,cstd,atot,vtot)
+        call shy_make_basin_aver(idim,nlv,nkn,uprv,ikflag &
+     &                          ,cmin,cmax,cmed,cstd,atot,vtot)
+        call shy_write_aver(aline,nvar,iv,ivar &
+     &				,cmin,cmax,cmed,cstd,atot,vtot)
 
 	iv = 3
-        call shy_make_basin_aver(idim,nlv,nkn,vprv,ikflag
-     +                          ,cmin,cmax,cmed,cstd,atot,vtot)
-        call shy_write_aver(aline,nvar,iv,ivar
-     +				,cmin,cmax,cmed,cstd,atot,vtot)
+        call shy_make_basin_aver(idim,nlv,nkn,vprv,ikflag &
+     &                          ,cmin,cmax,cmed,cstd,atot,vtot)
+        call shy_write_aver(aline,nvar,iv,ivar &
+     &				,cmin,cmax,cmed,cstd,atot,vtot)
 
 	iv = 4
         ivar = 6
         idim = (/nkn,1,nlv,ivar/)
-        call shy_make_basin_aver(idim,nlv,nkn,sv,ikflag
-     +                          ,cmin,cmax,cmed,cstd,atot,vtot)
+        call shy_make_basin_aver(idim,nlv,nkn,sv,ikflag &
+     &                          ,cmin,cmax,cmed,cstd,atot,vtot)
 	!vtot = 0.
-        call shy_write_aver(aline,nvar,iv,ivar
-     +				,cmin,cmax,cmed,cstd,atot,vtot)
+        call shy_write_aver(aline,nvar,iv,ivar &
+     &				,cmin,cmax,cmed,cstd,atot,vtot)
 
         end
 
@@ -895,7 +895,7 @@
 
         subroutine comp_influence_map(nlvddi,nkn,nvar,pt,ct,cvv,valri)
 
-c compute dominant discharge and put index in valri (custom routine)
+! compute dominant discharge and put index in valri (custom routine)
 
 	use levels
 

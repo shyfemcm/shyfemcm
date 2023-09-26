@@ -85,7 +85,7 @@ module aquabc_II_layers_data
     
    type(SAVED_OUTPUT_MATRIX_DS), dimension(:), allocatable :: SAVED_OUTPUTS_IN_LAYERS 
     
-contains
+!ontains
 
     subroutine ALLOC_SAVED_OUTPUTS_IN_LAYERS &
                (NUM_SHYFEM_LAYERS, NUM_WC_SAVED_OUTPUTS, NUM_NODES_IN_LAYERS)

@@ -24,31 +24,31 @@
 !
 !--------------------------------------------------------------------------
 
-c revision log :
-c
-c 06.04.1999	ggu	completely restructured
-c 04.06.1999	ggu	new statistics are computed
-c 08.09.2003	ggu	mode 5 -> write depth values from elements
-c 23.09.2004	ggu	interpolq() changed for bathy interpolation
-c 02.10.2004	ggu	interpole() for exponential interpolation
-c 01.11.2004	ggu	whole program simplyfied
-c 06.12.2008	ggu	smoothing introduced
-c 06.04.2009	ggu	read param.h
-c 29.05.2009	ggu	does only depth limiting and smoothing
-c 20.11.2009	ggu	possibility to smooth only on specific areas
-c 30.03.2011	ggu	new routines to delete elements
-c 13.06.2013	ggu	copy_depth() renamed to transfer_depth()
-c 10.10.2015	ggu	changed VERS_7_3_2
-c 16.02.2019	ggu	changed VERS_7_5_60
-c 26.03.2022	ggu	bug: ike was passed, but logical needed -> bnodes
-c
-c****************************************************************
+! revision log :
+!
+! 06.04.1999	ggu	completely restructured
+! 04.06.1999	ggu	new statistics are computed
+! 08.09.2003	ggu	mode 5 -> write depth values from elements
+! 23.09.2004	ggu	interpolq() changed for bathy interpolation
+! 02.10.2004	ggu	interpole() for exponential interpolation
+! 01.11.2004	ggu	whole program simplyfied
+! 06.12.2008	ggu	smoothing introduced
+! 06.04.2009	ggu	read param.h
+! 29.05.2009	ggu	does only depth limiting and smoothing
+! 20.11.2009	ggu	possibility to smooth only on specific areas
+! 30.03.2011	ggu	new routines to delete elements
+! 13.06.2013	ggu	copy_depth() renamed to transfer_depth()
+! 10.10.2015	ggu	changed VERS_7_3_2
+! 16.02.2019	ggu	changed VERS_7_5_60
+! 26.03.2022	ggu	bug: ike was passed, but logical needed -> bnodes
+!
+!****************************************************************
 
         subroutine bas_smooth
 
-c performs modifications on basin
-c
-c takes care of lat/lon coordinates
+! performs modifications on basin
+!
+! takes care of lat/lon coordinates
 
 	use mod_geom
 	use mod_depth
@@ -67,9 +67,9 @@ c takes care of lat/lon coordinates
 	logical is_depth_unique
 	integer iscanf
 
-c-----------------------------------------------------------------
-c what to do
-c-----------------------------------------------------------------
+!-----------------------------------------------------------------
+! what to do
+!-----------------------------------------------------------------
 
         !write(6,*)
         !write(6,*) 'Enter parameters for smoothing:'
@@ -96,15 +96,15 @@ c-----------------------------------------------------------------
 	f(3) = alpha
 	f(4) = 10000.
 
-c-----------------------------------------------------------------
-c handling depth
-c-----------------------------------------------------------------
+!-----------------------------------------------------------------
+! handling depth
+!-----------------------------------------------------------------
 
 	bnodes = is_depth_unique()	!.true. if depth is on nodes
 
-c-----------------------------------------------------------------
-c smooth
-c-----------------------------------------------------------------
+!-----------------------------------------------------------------
+! smooth
+!-----------------------------------------------------------------
 
 	call limit_depth(bnodes,hmin,hmax)
 
@@ -114,28 +114,28 @@ c-----------------------------------------------------------------
 
 	call transfer_depth(bnodes)	!copy to nodes/elements
 
-c-----------------------------------------------------------------
-c special
-c-----------------------------------------------------------------
+!-----------------------------------------------------------------
+! special
+!-----------------------------------------------------------------
 
 	!call delete_elements(0.)
 
-c-----------------------------------------------------------------
-c write
-c-----------------------------------------------------------------
+!-----------------------------------------------------------------
+! write
+!-----------------------------------------------------------------
 
         call basin_to_grd
         call grd_write('bassmooth.grd')
         write(6,*) 'The basin has been written to bassmooth.grd'
 
-c-----------------------------------------------------------------
-c end of routine
-c-----------------------------------------------------------------
+!-----------------------------------------------------------------
+! end of routine
+!-----------------------------------------------------------------
 
 	return
 	end
 
-c*******************************************************************
+!*******************************************************************
 
 	subroutine limit_depth(bnodes,hmin,hmax)
 
@@ -167,11 +167,11 @@ c*******************************************************************
 
 	end
 
-c*******************************************************************
+!*******************************************************************
 
 	subroutine smooth_bathy(bnodes,niter,f)
 
-c smoothes depth values
+! smoothes depth values
 
 	implicit none
 
@@ -187,11 +187,11 @@ c smoothes depth values
 
 	end
 
-c*******************************************************************
+!*******************************************************************
 
 	subroutine smooth_bathy_elem(niter,f)
 
-c smoothes depth values
+! smoothes depth values
 
 	use mod_depth
 	use evgeom
@@ -213,9 +213,9 @@ c smoothes depth values
 	integer ihev(nel)
 	logical inconvex
 
-c--------------------------------------------------------------
-c set parameters
-c--------------------------------------------------------------
+!--------------------------------------------------------------
+! set parameters
+!--------------------------------------------------------------
 
 	a1 = f(1)
 	h1 = f(2)
@@ -225,15 +225,15 @@ c--------------------------------------------------------------
 	write(6,*) 'smoothing bathymetry: ',niter
 	write(6,*) '  params: ',(f(i),i=1,4)
 
-c--------------------------------------------------------------
-c iterate over smoother
-c--------------------------------------------------------------
+!--------------------------------------------------------------
+! iterate over smoother
+!--------------------------------------------------------------
 
 	do i=1,niter
 
-c	  -----------------------------------------------
-c	  compute values at nodes (averages of element)
-c	  -----------------------------------------------
+!	  -----------------------------------------------
+!	  compute values at nodes (averages of element)
+!	  -----------------------------------------------
 
 	  do k=1,nkn
 	    hkv(k) = 0.
@@ -253,9 +253,9 @@ c	  -----------------------------------------------
 	    hkv(k) = hkv(k) / v1v(k)
 	  end do
 
-c	  -----------------------------------------------
-c	  average to element
-c	  -----------------------------------------------
+!	  -----------------------------------------------
+!	  average to element
+!	  -----------------------------------------------
 
 	  nok = 0
 
@@ -282,21 +282,21 @@ c	  -----------------------------------------------
 	    hev(ie) = (1.-alpha) * hold + alpha * hnew
 	  end do
 
-c	  -----------------------------------------------
-c	  write to terminal
-c	  -----------------------------------------------
+!	  -----------------------------------------------
+!	  write to terminal
+!	  -----------------------------------------------
 
 	  write(6,*) 'pass ',i,' of ',niter,'  elements smoothed ',nok
 
 	end do
 
-c-----------------------------------------------------------------
-c end of routine
-c-----------------------------------------------------------------
+!-----------------------------------------------------------------
+! end of routine
+!-----------------------------------------------------------------
 
 	end
 
-c*******************************************************************
+!*******************************************************************
 
 	subroutine coords_ok(ie,alpha)
 
@@ -329,13 +329,13 @@ c*******************************************************************
 
 	end
 
-c*******************************************************************
-c*******************************************************************
-c*******************************************************************
+!*******************************************************************
+!*******************************************************************
+!*******************************************************************
 
 	subroutine delete_elements(hmin)
 
-c deletes elements with depth lower then hmin
+! deletes elements with depth lower then hmin
 
 	use mod_geom
 	use mod_depth
@@ -392,11 +392,11 @@ c deletes elements with depth lower then hmin
 
 	end
 
-c*******************************************************************
+!*******************************************************************
 
 	subroutine delete_elements_depth(hmin)
 
-c deletes elements with depth lower then hmin
+! deletes elements with depth lower then hmin
 
 	use mod_depth
 	use basin
@@ -411,9 +411,9 @@ c deletes elements with depth lower then hmin
 	integer ind(nel)	!index for nodes/elements to substitute
 	integer rind(nel)	!reverse index
 
-c-----------------------------------------
-c delete elements
-c-----------------------------------------
+!-----------------------------------------
+! delete elements
+!-----------------------------------------
 
 	n = nel
 	call determine_shift(n,ind,hev,hmin)
@@ -433,9 +433,9 @@ c-----------------------------------------
 	write(6,*) 'new elements: ',nel,n
 	nel = n
 
-c-----------------------------------------
-c flag unused nodes and delete (using hkv)
-c-----------------------------------------
+!-----------------------------------------
+! flag unused nodes and delete (using hkv)
+!-----------------------------------------
 
 	do k=1,nkn
 	  hkv(k) = hmin - 1
@@ -465,9 +465,9 @@ c-----------------------------------------
 	write(6,*) 'new nodes: ',nkn,n
 	nkn = n
 
-c-----------------------------------------
-c adjust element index
-c-----------------------------------------
+!-----------------------------------------
+! adjust element index
+!-----------------------------------------
 
 	do ie=1,nel
 	  do ii=1,3
@@ -477,17 +477,17 @@ c-----------------------------------------
 	  end do
 	end do
 
-c-----------------------------------------
-c end of routine
-c-----------------------------------------
+!-----------------------------------------
+! end of routine
+!-----------------------------------------
 
 	end
 
-c*******************************************************************
+!*******************************************************************
 
 	subroutine determine_shift(n,ind,h,hmin)
 
-c determines what element/nodes must be shifted
+! determines what element/nodes must be shifted
 
 	implicit none
 
@@ -526,7 +526,7 @@ c determines what element/nodes must be shifted
 
 	end
 
-c*******************************************************************
+!*******************************************************************
 
 	subroutine check_connection(icon,icol,ibig)
 
@@ -572,7 +572,7 @@ c*******************************************************************
 
 	end
 
-c*******************************************************************
+!*******************************************************************
 
 	subroutine color_area(iestart,icol,icon)
 
@@ -614,5 +614,5 @@ c*******************************************************************
 	stop 'error stop color_area: internal error (1)'
 	end
 
-c*******************************************************************
+!*******************************************************************
 

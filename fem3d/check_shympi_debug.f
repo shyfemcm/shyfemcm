@@ -172,8 +172,8 @@
 	  ntime = ntime + 1
 
 	  if( bverbose ) then
-	    write(6,*) '       irec          nh          nv' //
-     +			'        type name'
+	    write(6,*) '       irec          nh          nv' // &
+     &			'        type name'
 	  end if
 
 	  nrec = 0
@@ -204,8 +204,8 @@
 	implicit none
 
 	INTERFACE 
-	  subroutine allocate_arrays(nsize,ndim
-     +			,ival1,ival2,rval1,rval2,dval1,dval2)
+	  subroutine allocate_arrays(nsize,ndim &
+     &			,ival1,ival2,rval1,rval2,dval1,dval2)
 	  integer nsize,ndim
 	  integer, allocatable :: ival1(:),ival2(:)
 	  real, allocatable :: rval1(:),rval2(:)
@@ -337,8 +337,8 @@
 	    call read_data_header(nh,nv,nt,ntot,nrec,text,ierr)
 	    if( nt == 0 .or. ierr == -1 ) exit
 
-	    call allocate_arrays(ntot,ndim
-     +			,ival1,ival2,rval1,rval2,dval1,dval2)
+	    call allocate_arrays(ntot,ndim &
+     &			,ival1,ival2,rval1,rval2,dval1,dval2)
 	    if( ntot .gt. ndim ) goto 97
 
 	    idiff = 0
@@ -374,8 +374,8 @@
 	    else if( idiff > 0 .or. bverbose ) then
 	      if( bheader ) then
 		bheader = .false.
-	        write(6,'(a)') '    nrec      nh      nv      nt' //
-     +				'     idiff          max-diff var'
+	        write(6,'(a)') '    nrec      nh      nv      nt' // &
+     &				'     idiff          max-diff var'
 	      end if
 	      write(6,2000) nrec,nh,nv,nt,idiff,diff,' ',trim(text)
 	    end if
@@ -395,8 +395,8 @@
 	close(2)
 
 	if( .not. bsilent ) then
-	  write(6,*) 'time records read: ',ntime
-     +			,'  differences found: ',idiff_tot
+	  write(6,*) 'time records read: ',ntime &
+     &			,'  differences found: ',idiff_tot
 	end if
 
 	idiff_end = idiff_tot
@@ -452,8 +452,8 @@
 	  ntime = ntime + 1
 
 	  if( bverbose ) then
-	    write(6,*) '       irec          nh          nv' //
-     +			'        type        diff name'
+	    write(6,*) '       irec          nh          nv' // &
+     &			'        type        diff name'
 	  end if
 
 	ierr = 0
@@ -1188,8 +1188,8 @@
 
 !*******************************************************************
 
-	subroutine allocate_arrays(nsize,ndim
-     +			,ival1,ival2,rval1,rval2,dval1,dval2)
+	subroutine allocate_arrays(nsize,ndim &
+     &			,ival1,ival2,rval1,rval2,dval1,dval2)
 
 	implicit none
 

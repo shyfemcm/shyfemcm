@@ -31,44 +31,44 @@
 
 !**************************************************************************
 
-c file name routines (for VAX/VMS systems)
-c
-c contents :
-c
-c function namdef(...)			supplies default values for file name
-c function iscnam(name,type,back)	scanns a file name
-c
-c***********************************************************
-c
-	function namdef(name,node,device,directory,file
-     +			,extension,version,back)
-c
-c supplies default values for file name
-c
-c name		original file name
-c node,...	defaults for different portions of file name
-c back		complete file name (missing portions in 'name'
-c		...have been substituted by their default values
-c		...passed in node,...)
-c namdef	length of file name in 'back'
-c
+! file name routines (for VAX/VMS systems)
+!
+! contents :
+!
+! function namdef(...)			supplies default values for file name
+! function iscnam(name,type,back)	scanns a file name
+!
+!***********************************************************
+!
+	function namdef(name,node,device,directory,file &
+     &			,extension,version,back)
+!
+! supplies default values for file name
+!
+! name		original file name
+! node,...	defaults for different portions of file name
+! back		complete file name (missing portions in 'name'
+!		...have been substituted by their default values
+!		...passed in node,...)
+! namdef	length of file name in 'back'
+!
 	character*(*) name,node,device,directory,file
 	character*(*) extension,version,back
 	character*80 help1,help2
-c
-c test for error in name
-c
+!
+! test for error in name
+!
 	ichar1=iscnam(name,'node',help1)
-c
+!
 	if(ichar1.lt.-1) goto 88	!error
-c
+!
 	nextc=1
 	nback=len(back)
-c
-c node
-c
+!
+! node
+!
 	ichar2=iscnam(node,'node',help2)
-c
+!
 	if(ichar1.gt.0) then
 		if(nextc.gt.nback) goto 90
 		back(nextc:)=help1
@@ -78,12 +78,12 @@ c
 		back(nextc:)=help2
 		nextc=nextc+ichar2
 	end if
-c
-c device
-c
+!
+! device
+!
 	ichar1=iscnam(name,'device',help1)
 	ichar2=iscnam(device,'device',help2)
-c
+!
 	if(ichar1.gt.0) then
 		if(nextc.gt.nback) goto 90
 		back(nextc:)=help1
@@ -93,12 +93,12 @@ c
 		back(nextc:)=help2
 		nextc=nextc+ichar2
 	end if
-c
-c directory
-c
+!
+! directory
+!
 	ichar1=iscnam(name,'directory',help1)
 	ichar2=iscnam(directory,'directory',help2)
-c
+!
 	if(ichar1.gt.0) then
 		if(nextc.gt.nback) goto 90
 		back(nextc:)=help1
@@ -108,12 +108,12 @@ c
 		back(nextc:)=help2
 		nextc=nextc+ichar2
 	end if
-c
-c file
-c
+!
+! file
+!
 	ichar1=iscnam(name,'file',help1)
 	ichar2=iscnam(file,'file',help2)
-c
+!
 	if(ichar1.gt.0) then
 		if(nextc.gt.nback) goto 90
 		back(nextc:)=help1
@@ -123,12 +123,12 @@ c
 		back(nextc:)=help2
 		nextc=nextc+ichar2
 	end if
-c
-c extension
-c
+!
+! extension
+!
 	ichar1=iscnam(name,'extension',help1)
 	ichar2=iscnam(extension,'extension',help2)
-c
+!
 	if(ichar1.gt.0) then
 		if(nextc.gt.nback) goto 90
 		back(nextc:)=help1
@@ -138,12 +138,12 @@ c
 		back(nextc:)=help2
 		nextc=nextc+ichar2
 	end if
-c
-c version
-c
+!
+! version
+!
 	ichar1=iscnam(name,'version',help1)
 	ichar2=iscnam(version,'version',help2)
-c
+!
 	if(ichar1.gt.0) then
 		if(nextc.gt.nback) goto 90
 		back(nextc:)=help1
@@ -153,13 +153,13 @@ c
 		back(nextc:)=help2
 		nextc=nextc+ichar2
 	end if
-c
+!
 	namdef=nextc-1
-c
+!
 	goto 100
-c
-c error traps and end
-c
+!
+! error traps and end
+!
    90	continue
 	write(6,*) 'name too long. does not fit in back :'
 	write(6,*) back
@@ -168,56 +168,56 @@ c
    88	continue
 	namdef=ichar1
 	goto 100
-c
+!
   100	continue
-c
+!
 	return
 	end
-c
-c****************************************************************
-c
+!
+!****************************************************************
+!
 	function iscnam1(name,type,back)
-c
-c scanns a file name and gives back the desired component
-c
-c VMS file name format
-c
-c name		file name
-c type		the desired portion of the file name
-c		...type has to be one of these keywords :
-c		... [ node  device  directory  file  extension  version ]
-c		...non ambigous abreviations can be used
-c back		the returned portion of the file name
-c		...nothing is returned if the desired portion
-c		...of the file is missing
-c		...node and device are returned with their colons
-c		...directory is returned with their brackets
-c		...extension and version with their leading dot
-c		...or semicolon
-c iscnam1	length of the character string (return value)
-c		...(0 if nothing is returned)
-c		...if iscnam1 is negativ, an error has occured
-c 		... error code :
-c			-1: nothing in name
-c			-2: error in file name
-c			-3: ambigous type
-c			-4: type not recognized
-c			-5: dimension of back too small
-c			-6: name too long (maximum 80 characters)
-c
+!
+! scanns a file name and gives back the desired component
+!
+! VMS file name format
+!
+! name		file name
+! type		the desired portion of the file name
+!		...type has to be one of these keywords :
+!		... [ node  device  directory  file  extension  version ]
+!		...non ambigous abreviations can be used
+! back		the returned portion of the file name
+!		...nothing is returned if the desired portion
+!		...of the file is missing
+!		...node and device are returned with their colons
+!		...directory is returned with their brackets
+!		...extension and version with their leading dot
+!		...or semicolon
+! iscnam1	length of the character string (return value)
+!		...(0 if nothing is returned)
+!		...if iscnam1 is negativ, an error has occured
+! 		... error code :
+!			-1: nothing in name
+!			-2: error in file name
+!			-3: ambigous type
+!			-4: type not recognized
+!			-5: dimension of back too small
+!			-6: name too long (maximum 80 characters)
+!
 	character*(*) name,type,back
-c
+!
 	character*80 node,device,directory,file,extension,version
 	character*80 help
 	character*1  c
 	logical btest
-c
+!
 	data btest /.false./	!.true. ==> test output on terminal
-c
+!
 	nname=len(name)
 	ntype=len(type)
 	nback=len(back)
-c
+!
 	node=' '
 	device=' '
 	directory=' '
@@ -225,20 +225,20 @@ c
 	extension=' '
 	version=' '
 	back=' '
-c	
+!	
 	do i=1,nname
 	if(name(i:i).ne.' ') goto 1
 	end do
 	goto 99
     1	ifirst=i
-c
+!
 	i=ifirst
 	istart=i
 	indir=0
 	lwhere=0
 	c=name(i:i)
 	do while(c.ne.' '.and.i.le.nname)
-c
+!
 	if(c.eq.':') then
 		if(i.lt.nname.and.name(i+1:i+1).eq.':') then	!node
 			if(lwhere.gt.0) goto 98	!node must be first
@@ -301,14 +301,14 @@ c
 			goto 98		!; not allowed here
 		end if
 	end if
-c
+!
 	i=i+1
 	if(i.le.nname) c=name(i:i)
-c
+!
 	end do
-c
+!
 	if(indir.eq.1) goto 98		!directory not closed
-c
+!
 	if(lwhere.le.3) then			!end file
 		if(i-istart.gt.80) goto 94	!name too long
 		if(i.gt.istart) file=name(istart:i-1)
@@ -325,7 +325,7 @@ c
 		istart=i
 		lwhere=6
 	end if
-c
+!
 	if(ntype.lt.1) goto 97
 	c=type(1:1)
 	if(c.eq.'n'.or.c.eq.'N') then
@@ -353,25 +353,25 @@ c
 	else
 		goto 96
 	end if
-c
+!
 	do i=80,1,-1
 	if(help(i:i).ne.' ') goto 3
 	end do
 	i=0
     3	continue
-c
+!
 	if(i.gt.nback) goto 95	!back to small
-c
+!
 	if(i.gt.0) back(1:i)=help(1:i)
-c
+!
 	iscnam1=i
-c
+!
 	goto 100
-c
-c +-----------------------------------------------------------+
-c !	error traps
-c +-----------------------------------------------------------+
-c
+!
+! +-----------------------------------------------------------+
+! !	error traps
+! +-----------------------------------------------------------+
+!
    94	continue
 	write(6,*) 'name too long (maximum 80 characters) :'
 	write(6,*) name
@@ -400,13 +400,13 @@ c
    99	continue
 	iscnam1=-1
 	goto 100
-c
-c +--------------------------------------------------------------+
-c !	test output and end
-c +--------------------------------------------------------------+
-c
+!
+! +--------------------------------------------------------------+
+! !	test output and end
+! +--------------------------------------------------------------+
+!
   100	continue
-c
+!
 	if(btest) then
 		write(6,*) node
 		write(6,*) device
@@ -417,55 +417,55 @@ c
 		write(6,*) 'iscnam1,i,istart,indir,lwhere : '
 		write(6,*)  iscnam1,i,istart,indir,lwhere
 	end if
-c
+!
 	return
 	end
-c
-c****************************************************************
-c
+!
+!****************************************************************
+!
 	function iscnam(name,type,back)
-c
-c scanns a file name and gives back the desired component
-c
-c version for UNIX file format; node, disk & version retained for
-c    compatibility with VMS
-c
-c name		file name
-c type		the desired portion of the file name
-c		...type has to be one of these keywords :
-c		... [ node  device  directory  file  extension  version ]
-c		...non ambigous abreviations can be used
-c back		the returned portion of the file name
-c		...nothing is returned if the desired portion
-c		...of the file is missing
-c		...node and device are returned with their colons
-c		...directory is returned with their brackets
-c		...extension and version with their leading dot
-c		...or semicolon
-c iscnam	length of the character string (return value)
-c		...(0 if nothing is returned)
-c		...if iscnam is negativ, an error has occured
-c 		... error code :
-c			-1: nothing in name
-c			-2: error in file name
-c			-3: ambigous type
-c			-4: type not recognized
-c			-5: dimension of back too small
-c			-6: name too long (maximum 80 characters)
-c
+!
+! scanns a file name and gives back the desired component
+!
+! version for UNIX file format; node, disk & version retained for
+!    compatibility with VMS
+!
+! name		file name
+! type		the desired portion of the file name
+!		...type has to be one of these keywords :
+!		... [ node  device  directory  file  extension  version ]
+!		...non ambigous abreviations can be used
+! back		the returned portion of the file name
+!		...nothing is returned if the desired portion
+!		...of the file is missing
+!		...node and device are returned with their colons
+!		...directory is returned with their brackets
+!		...extension and version with their leading dot
+!		...or semicolon
+! iscnam	length of the character string (return value)
+!		...(0 if nothing is returned)
+!		...if iscnam is negativ, an error has occured
+! 		... error code :
+!			-1: nothing in name
+!			-2: error in file name
+!			-3: ambigous type
+!			-4: type not recognized
+!			-5: dimension of back too small
+!			-6: name too long (maximum 80 characters)
+!
 	character*(*) name,type,back
-c
+!
 	character*80 node,device,directory,file,extension,version
 	character*80 help
 	character*1  c
 	logical btest
-c
+!
 	data btest /.false./	!.true. ==> test output on terminal
-c
+!
 	nname=len(name)
 	ntype=len(type)
 	nback=len(back)
-c
+!
 	node=' '
 	device=' '
 	directory=' '
@@ -473,21 +473,21 @@ c
 	extension=' '
 	version=' '
 	back=' '
-c	
+!	
 	do i=1,nname
 	if(name(i:i).ne.' ') goto 1
 	end do
 	goto 99
     1	ifirst=i
-c
+!
 	do i=nname,1,-1
 	if(name(i:i).ne.' ') goto 2
 	end do
 	goto 99
     2	ilast=i
-c
-c find directory
-c
+!
+! find directory
+!
 	idir=ifirst-1
 	do i=ilast,ifirst,-1
 	  if(name(i:i).eq.'/') goto 5
@@ -498,33 +498,33 @@ c
 	  idir=i
 	  directory=name(ifirst:i)
 	end if
-c
-c find extension
-c
+!
+! find extension
+!
 	iext=ilast+1
 	do i=ilast,ifirst,-1
 	  if(name(i:i).eq.'.') goto 6
 	end do
     6	continue
-c	if(i.gt.idir+1) then	!idir+1 to allow names like .login
+!	if(i.gt.idir+1) then	!idir+1 to allow names like .login
 	if(i.gt.idir) then
 	  if(ilast-i.ge.80) goto 94
 	  iext=i
 	  extension=name(i:ilast)
 	end if
-c
-c copy file name
-c
-c	write(6,*) idir,iext
-c	write(6,*) directory
-c	write(6,*) extension
+!
+! copy file name
+!
+!	write(6,*) idir,iext
+!	write(6,*) directory
+!	write(6,*) extension
 
 	if(iext-idir-2.gt.80) then
 	  goto 94
 	else if(iext-idir-2.ge.0) then
 	  file=name(idir+1:iext-1)
 	end if
-c
+!
 	if(ntype.lt.1) goto 97
 	c=type(1:1)
 	if(c.eq.'n'.or.c.eq.'N') then
@@ -552,25 +552,25 @@ c
 	else
 		goto 96
 	end if
-c
+!
 	do i=80,1,-1
 	if(help(i:i).ne.' ') goto 3
 	end do
 	i=0
     3	continue
-c
+!
 	if(i.gt.nback) goto 95	!back to small
-c
+!
 	if(i.gt.0) back(1:i)=help(1:i)
-c
+!
 	iscnam=i
-c
+!
 	goto 100
-c
-c +-----------------------------------------------------------+
-c !	error traps
-c +-----------------------------------------------------------+
-c
+!
+! +-----------------------------------------------------------+
+! !	error traps
+! +-----------------------------------------------------------+
+!
    94	continue
 	write(6,*) 'name too long (maximum 80 characters) :'
 	write(6,*) name
@@ -591,21 +591,21 @@ c
 	write(6,*) 'supply more characters'
 	iscnam=-3
 	goto 100
-c  98	continue	!$$ALPHA
-c	write(6,*) 'error in name :'
-c	write(6,*) name
-c	iscnam=-2
-c	goto 100
+!  98	continue	!$$ALPHA
+!	write(6,*) 'error in name :'
+!	write(6,*) name
+!	iscnam=-2
+!	goto 100
    99	continue
 	iscnam=-1
 	goto 100
-c
-c +--------------------------------------------------------------+
-c !	test output and end
-c +--------------------------------------------------------------+
-c
+!
+! +--------------------------------------------------------------+
+! !	test output and end
+! +--------------------------------------------------------------+
+!
   100	continue
-c
+!
 	if(btest) then
 		write(6,*) node
 		write(6,*) device
@@ -616,6 +616,6 @@ c
 		write(6,*) 'iscnam,i,istart,indir,lwhere : '
 		write(6,*)  iscnam,i,istart,indir,lwhere
 	end if
-c
+!
 	return
 	end

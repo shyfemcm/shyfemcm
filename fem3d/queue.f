@@ -73,21 +73,21 @@
 	public :: queue_info		!call queue_info(id)
 
         INTERFACE queue_enqueue
-        MODULE PROCEDURE         queue_enqueue_d
-     +                          ,queue_enqueue_r
-     +                          ,queue_enqueue_i
+        MODULE PROCEDURE         queue_enqueue_d &
+     &                          ,queue_enqueue_r &
+     &                          ,queue_enqueue_i
         END INTERFACE
 
         INTERFACE queue_dequeue
-        MODULE PROCEDURE         queue_dequeue_d
-     +                          ,queue_dequeue_r
-     +                          ,queue_dequeue_i
+        MODULE PROCEDURE         queue_dequeue_d &
+     &                          ,queue_dequeue_r &
+     &                          ,queue_dequeue_i
         END INTERFACE
 
         INTERFACE queue_peek
-        MODULE PROCEDURE         queue_peek_d
-     +                          ,queue_peek_r
-     +                          ,queue_peek_i
+        MODULE PROCEDURE         queue_peek_d &
+     &                          ,queue_peek_r &
+     &                          ,queue_peek_i
         END INTERFACE
 
 !===============================================================

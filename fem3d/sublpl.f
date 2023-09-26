@@ -23,47 +23,47 @@
 !
 !--------------------------------------------------------------------------
 
-c laplacian interpolation routines
-c
-c contents :
-c
-c revision log :
-c
-c 20.08.2003	ggu	new routines lapint and lapl_assemble
-c 20.08.2003	ggu	new routine prepare_bc
-c 30.10.2003	ggu	routine prepare_bc moved to laplap.f file
-c 23.03.2010	ggu	changed v6.1.1
-c 23.12.2014	ggu	changed VERS_7_0_11
-c 19.01.2015	ggu	changed VERS_7_1_3
-c 05.05.2015	ggu	changed VERS_7_1_10
-c 17.07.2015	ggu	changed VERS_7_1_80
-c 20.07.2015	ggu	changed VERS_7_1_81
-c 16.02.2019	ggu	changed VERS_7_5_60
-c
-c******************************************************************
+! laplacian interpolation routines
+!
+! contents :
+!
+! revision log :
+!
+! 20.08.2003	ggu	new routines lapint and lapl_assemble
+! 20.08.2003	ggu	new routine prepare_bc
+! 30.10.2003	ggu	routine prepare_bc moved to laplap.f file
+! 23.03.2010	ggu	changed v6.1.1
+! 23.12.2014	ggu	changed VERS_7_0_11
+! 19.01.2015	ggu	changed VERS_7_1_3
+! 05.05.2015	ggu	changed VERS_7_1_10
+! 17.07.2015	ggu	changed VERS_7_1_80
+! 20.07.2015	ggu	changed VERS_7_1_81
+! 16.02.2019	ggu	changed VERS_7_5_60
+!
+!******************************************************************
 
 	subroutine lapint(rmat,zv,rzv,flag)
 
-c solves linear system matrix for laplacian
-c
-c uses the following variables and arrays:
-c
-c	nkn,nel,mbw
-c	nen3v
-c	ev
+! solves linear system matrix for laplacian
+!
+! uses the following variables and arrays:
+!
+!	nkn,nel,mbw
+!	nen3v
+!	ev
 
 	use basin, only : nkn,nel,ngr,mbw
 
 	implicit none
 
-c arguments
+! arguments
 	real rmat(1)		!band matrix to be assembled
 	real zv(1)		!solution to system on return
 	real rzv(1)		!boundary conditions
 	real flag		!flag to distinguish boundary condition
 
-c common
-c local
+! common
+! local
 	integer i,k
 	integer matdim
 	integer ier
@@ -92,33 +92,33 @@ c local
 	stop 'error stop : lapint'
 	end
 
-c******************************************************************
+!******************************************************************
 
 	subroutine lapl_assemble(rmat,zv,rzv,flag)
 
-c assembles linear system matrix for laplacian
+! assembles linear system matrix for laplacian
 
 	use evgeom
 	use basin
 
 	implicit none
 
-c arguments
+! arguments
 	real rmat(1)		!band matrix to be assembled
 	real zv(1)		!constant vector for z system
 	real rzv(1)		!boundary conditions
 	real flag		!flag to distinguish boundary condition
-c common
+! common
 
 	include 'param.h'
-c local
+! local
 	integer kn(3)
 	integer ie,i,j,j1,j2,n,m,kk
 	integer ngl
 	real area,rw
 	real hia(3,3),hik(3)
 	real b(3),c(3)
-c fucntion
+! fucntion
 	integer locsps
 
 	ngl=nkn
@@ -133,7 +133,7 @@ c fucntion
 
 	  area = 12. * ev(10,ie)
 
-c set up local matrix
+! set up local matrix
 
 	  do n=1,3
 	    do m=1,3
@@ -142,7 +142,7 @@ c set up local matrix
 	    hik(n) = 0.
 	  end do
 
-c implement boundary conditions
+! implement boundary conditions
 
 	  do i=1,3
 	    if(rzv(kn(i)).ne.flag) then
@@ -159,7 +159,7 @@ c implement boundary conditions
 	    end if
 	  end do
 
-c in hia(i,j),hik(i),i,j=1,3 is system
+! in hia(i,j),hik(i),i,j=1,3 is system
 
           do i=1,3
             do j=1,3
@@ -175,5 +175,5 @@ c in hia(i,j),hik(i),i,j=1,3 is system
 
 	end
 
-c******************************************************************
+!******************************************************************
 

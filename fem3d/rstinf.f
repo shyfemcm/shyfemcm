@@ -65,8 +65,8 @@
 ! create title strings
 !-------------------------------------------------------------------
 
-	title1 = 'version nrec       nkn       nel       nlv' //
-     +                  '     iflag'
+	title1 = 'version nrec       nkn       nel       nlv' // &
+     &                  '     iflag'
 !                 12345678901234567890123456789012345678901234567890123
 	title2 = '   irec                         atime     date'
 
@@ -92,8 +92,8 @@
 
 	do
 
-	  call rst_skip_record(iunit,atime,nvers,nrec
-     +					,nknr,nelr,nlvr,iflag,ierr)
+	  call rst_skip_record(iunit,atime,nvers,nrec &
+     &					,nknr,nelr,nlvr,iflag,ierr)
 	  if( ierr .ne. 0 ) exit
 
 	  if( nread == 0 ) then
@@ -163,8 +163,8 @@
 
 	iunit = 1
 	open(iunit,file=file,status='old',form='unformatted')
-	call rst_skip_record(iunit,atime,nvers,nrec
-     +					,nk,ne,nl,iflag,ierr)
+	call rst_skip_record(iunit,atime,nvers,nrec &
+     &					,nk,ne,nl,iflag,ierr)
 
 	call basin_init(nk,ne)
 	call levels_init(nk,ne,nl)

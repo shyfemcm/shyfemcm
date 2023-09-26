@@ -27,30 +27,30 @@
 !
 ! 20.12.2019	ggu	changed VERS_7_5_67
 
-         subroutine mercury_sed_react(dtday,
-     +                          k,temp,area,C,Cw,
-     +             Shgsil, Shgpom, Smhgsil, Smhgpom,
-     +             fdiss1w,fdiss2w,fdoc1w,fdoc2w,
-     +             silt,pom,Vr,bvels,bvelp)
+         subroutine mercury_sed_react(dtday, &
+     &                          k,temp,area,C,Cw, &
+     &             Shgsil, Shgpom, Smhgsil, Smhgpom, &
+     &             fdiss1w,fdiss2w,fdoc1w,fdoc2w, &
+     &             silt,pom,Vr,bvels,bvelp)
 
-c	
+!	
 ************************************************************************
 * 
 * !! reaction mass yied coefficients: 1.07 (met); 0.93 (demet) !!
 * !! oppure calcolare in mol e poi convertire (?) !!
 
-c -----------------------------------------------------------------------
-c ---- Call from bentic sediment model: ---------------------------------
-c 	 Vr, Bvels, Bvelp
-c      silt, POM, por    
-c-----------------------------------------------------------------------
-c
-c INITIAL CONDITIONS: concentrations of hg and mehg [ mg(hg)/kg(sed) ]
-c that are converted to hgit and mehgt [ ug(hg)/m3(s+w) ] 
-c
+! -----------------------------------------------------------------------
+! ---- Call from bentic sediment model: ---------------------------------
+! 	 Vr, Bvels, Bvelp
+!      silt, POM, por    
+!-----------------------------------------------------------------------
+!
+! INITIAL CONDITIONS: concentrations of hg and mehg [ mg(hg)/kg(sed) ]
+! that are converted to hgit and mehgt [ ug(hg)/m3(s+w) ] 
+!
 ************************************************************************
       implicit none
-c	include 'mercury.h'
+!	include 'mercury.h'
       integer m,nvmerc !water or sediment box
       parameter (nvmerc=2)
 
@@ -74,20 +74,20 @@ c	include 'mercury.h'
       real cold(nvmerc)
       real coldw(3)
 
-c------------------------------------------------------------------
-c----- variables - initial COND. - ug(hg)/g(sed)  
-c	------------------------------------------------------------------
+!------------------------------------------------------------------
+!----- variables - initial COND. - ug(hg)/g(sed)  
+!	------------------------------------------------------------------
       real Hg2sed, MeHgsed   ![ug(hg)/g(sed)]
       real hgit, hgp, hgd,hgp1, hgp2     ! [ug m-3] or [ng(hg)/l(w+s)] 
       real mehgt, mehgd_ngl, mehgp1, mehgp2, mehgpi
-c
+!
       ! hgp = Hg2sed*Csilt/10**3 !   
       ! kd/por =  Hg2sed/ hgd 
       ! hgit = hgp + hgd	        [ug m-3]or [ng(hg) l(w+s)-1] 
-c ----------------------------------------------------------------------
-c     ! Hg2x  = hgit   * fx1
-c     ! MeHgx = mehgt * fx1     [ug m-3]or [ng(hg) l(w+s)-1] 
-c ----------------------------------------------------------------------
+! ----------------------------------------------------------------------
+!     ! Hg2x  = hgit   * fx1
+!     ! MeHgx = mehgt * fx1     [ug m-3]or [ng(hg) l(w+s)-1] 
+! ----------------------------------------------------------------------
       real Hg2Cl, Hg2DOC, Hgpsilt, Hg2POM, Hg2P      ! [ug m-3]or [ng(hg) l(w+s)-1] 
       real MeHgCl, MeHgDOC,MeHgPOM, MeHgsilt, MeHgP  ! [ug m-3]or [ng(hg) l(w+s)-1] 
       real Hg2D, MeHgD ![ng l(w+s)-1]  
@@ -95,63 +95,63 @@ c ----------------------------------------------------------------------
 
       real hgitw, mehgtw,HgDw,MeHgDw   !hg species in water [ng(hg)l-1] 
 
-c 	Hg2dpw, MeHgdpw sono usate x calcolo fllussi diff; Hg2pw, MeHgpw calcolate dopo integrazione
-c	real Hg0sed    ! ? ---- reductive demethylation produces hg0 ---- 
-c
-c----- partition coefficients and fractions *****************************
-c	------------------------------------------------------------------
+! 	Hg2dpw, MeHgdpw sono usate x calcolo fllussi diff; Hg2pw, MeHgpw calcolate dopo integrazione
+!	real Hg0sed    ! ? ---- reductive demethylation produces hg0 ---- 
+!
+!----- partition coefficients and fractions *****************************
+!	------------------------------------------------------------------
       real K1silt, K1doc,K1POM,K1tp, num1  !Kd of Hg2 to silt,doc !K1sand, 
       real K2silt, K2doc, K2POM, K2tp,num2 !Kd of MeHg to silt, sand, doc, poc
       real partden1, partden2  !auxiliar variable in computation
       real d1,si1,sa1,P1, d2,si2,sa2,P2
       real faq1, fsilt1, fsand1, fPOM1, fdoc1, ftot1 ! fraction of hg sp. in sed
       real faq2, fsilt2, fsand2, fPOM2, fdoc2, ftot2 ! fraction of mehg sp. in sed
-c --------------------------------------------------------------------
-c----- Hg and MeHg resuspension and burial -----------------------------
-c   --------------------------------------------------------------------
+! --------------------------------------------------------------------
+!----- Hg and MeHg resuspension and burial -----------------------------
+!   --------------------------------------------------------------------
       real  DOC                 ! [g  m-3]
       real  Cdoc, Csilt,  Cpom, Ctot       ! [g cm-3] or [kg l-1]
       real  Rhgsil, Rhgpom, Rmhgsil, Rmhgpom !resuspension vel [m s-1] and fluxes [..]         
       real  bursHg, burpHg, bursMHg, burpMHg !burial vel [m s-1] and fluxes
-c ----------------------------------------------------------------------
-c----- Pore-water diffusion --------------------------------------------
-c   --------------------------------------------------------------------	
+! ----------------------------------------------------------------------
+!----- Pore-water diffusion --------------------------------------------
+!   --------------------------------------------------------------------	
       real pw_m3,pw_L, por, tor !pore-w volume,liters, porosity and tortuosity 
       real hgd_ugl, hgd_ngl     !conversions for diss hg in pore-water
-c	
+!	
       real Dchg_t, Dchg_25 !diffusion coefficient [m2 s-1]
       real ft1, JHgD,   num3, num4, Jngm2d !difffusion flux
       real ft2, JMHgD,  num5, JMngm2d !difffusion flux 	
-c --------------------------------------------------------------------
-c----- Hg methylation and MeHg demethylation ---------------------------
-c   --------------------------------------------------------------------    
+! --------------------------------------------------------------------
+!----- Hg methylation and MeHg demethylation ---------------------------
+!   --------------------------------------------------------------------    
       real ksmet, ksdem, Qbac
       real Eadem, tkel, tkref, R, Rcal, deltat
       real cksmet,sksme, cksdem, sksdem
       real add1,add2
-c
-c       deposition terms
-c
+!
+!       deposition terms
+!
       integer fortfilenum
       integer ipext,ipint,kext     !nodes external and internal
 
-c	------------------------------------------------------
-c------  BOX features --------------------------------------------------
-c	------------------------------------------------------
+!	------------------------------------------------------
+!------  BOX features --------------------------------------------------
+!	------------------------------------------------------
       depth = 0.02             ! m
       vol= depth*area          ! m3
       
       DOC = 15.                  ! [mg/l] di DOC in sediment
       por = 0.7                  ! FIXME read from sed4merc_sed GR 11-02-2020     
-c	-----------------------------------------------------------------------------
-c	---------REACTIONS--rate constants-------------------------------------------
+!	-----------------------------------------------------------------------------
+!	---------REACTIONS--rate constants-------------------------------------------
 
       ksmet = 0.09      ! d-1
       ksdem = 0.12      ! d-1
       Qbac = 1.5
 
-c	------------------------------------------------------	
-c -- partition coefficients [L/kg] for mercury into silt,sand,DOC,POC
+!	------------------------------------------------------	
+! -- partition coefficients [L/kg] for mercury into silt,sand,DOC,POC
         K1silt= 10.**(5)        !Hg2 in silt   
         K1doc=  1.0*10.**5      !Hg2 in doc
         K1POM=  10.**(5)        ! Hg2 to POM particles 
@@ -160,34 +160,34 @@ c -- partition coefficients [L/kg] for mercury into silt,sand,DOC,POC
         K2doc=  2.0*10.**4     !MeHg  in doc
         K2POM=  10.**5         !MeHg in POC particles 
 
-c ---------------Assign old variables-----------------------
+! ---------------Assign old variables-----------------------
 
         hgitw=Cw(2)
         mehgtw=Cw(3)
         hgit =C(1)
         mehgt=C(2)
 
-c -----------------------------------------------------------
-c ----- Lamborg et al., 2016 --------------------------------
-c ------- log(kdPOM) = 6.72+-2%; kdCacO3 = log(6.71)+-4% ----
-c -----------------------------------------------------------
-c --------log(kd-lithogenic part) =5.84+-9% -----------------
-c -----------------------------------------------------------
-c --- Soerensen Baltic sea: one Kd proportional to LOI ------
-c ---- LOI = 4.2854*p_OC+0.859-------------------------------
-c -----kd hg = 2.97 + 0.15*LOI ---(= 10**3 -10**4)----------- 
-c -----kd mehg = 1.98 + 0.18*LOI ---(= 10**2.2 -10**3.1)-----
+! -----------------------------------------------------------
+! ----- Lamborg et al., 2016 --------------------------------
+! ------- log(kdPOM) = 6.72+-2%; kdCacO3 = log(6.71)+-4% ----
+! -----------------------------------------------------------
+! --------log(kd-lithogenic part) =5.84+-9% -----------------
+! -----------------------------------------------------------
+! --- Soerensen Baltic sea: one Kd proportional to LOI ------
+! ---- LOI = 4.2854*p_OC+0.859-------------------------------
+! -----kd hg = 2.97 + 0.15*LOI ---(= 10**3 -10**4)----------- 
+! -----kd mehg = 1.98 + 0.18*LOI ---(= 10**2.2 -10**3.1)-----
 
 ***** call from solids water module********************************
-c	
-c	Sw, POMw, Vds, Vdp   ! solids water and sink velocities
-c--------------------------------------------------------------
+!	
+!	Sw, POMw, Vds, Vdp   ! solids water and sink velocities
+!--------------------------------------------------------------
 ****** call from Hg water module***********************************
-c 
-c     hgitw, MeHgw ! hgit in water [ng l-1] or [μg m-3]    
-c     fsilt1w,fpom1w, fdiss1w  !fraction Hg-silt -pom -diss water
-c      fsilt2w, fpom2w, fdiss2w  ! fraction MeHg-silt -pom -diss water
-c
+! 
+!     hgitw, MeHgw ! hgit in water [ng l-1] or [μg m-3]    
+!     fsilt1w,fpom1w, fdiss1w  !fraction Hg-silt -pom -diss water
+!      fsilt2w, fpom2w, fdiss2w  ! fraction MeHg-silt -pom -diss water
+!
 ****** call from solids module***********************************
 ****** CONCENTRATIONS of silt, POM, DOC in sed*********part 04**********
 ******* converted from [g m-3] to [g cm-3] or [kg l-1]***********
@@ -202,18 +202,18 @@ c
       K1tp = num1/Ctot!  KD to all solids
       K2tp = num2/Ctot
 
-c      write(*,*) 'K1tp',K1tp,'K2tp',K2tp 
+!      write(*,*) 'K1tp',K1tp,'K2tp',K2tp 
 
       pw_m3 = por*vol    ! [m-3(w)] 
       pw_L  = pw_m3*1000.               ! g m-3 * m3 -> g of pore water
  
-c------------------------------------------------------------------------
-c ---------- Hg and MeHg Fractions ------------- ------------------------
-c------------------------------------------------------part 06-----------
-c ---------- kD  [g(hg)/kg(s)] / [g(hg)/l(w)] --> [l(w)/kg(s)] ----------
-c ---------- por [l(w)/l(s+w)] ------------------------------------------ 
-c ---------- kD/por = [l(w)/kg(s)]*[l(s+w)/l(w)]*Csolid [kg(s) l-1(s+w)]- 
-c------------------------------------------------------------------------
+!------------------------------------------------------------------------
+! ---------- Hg and MeHg Fractions ------------- ------------------------
+!------------------------------------------------------part 06-----------
+! ---------- kD  [g(hg)/kg(s)] / [g(hg)/l(w)] --> [l(w)/kg(s)] ----------
+! ---------- por [l(w)/l(s+w)] ------------------------------------------ 
+! ---------- kD/por = [l(w)/kg(s)]*[l(s+w)/l(w)]*Csolid [kg(s) l-1(s+w)]- 
+!------------------------------------------------------------------------
 
       d1  = (K1doc/por) * Cdoc  !   
       si1 = (K1silt/por)* Csilt
@@ -241,90 +241,90 @@ c------------------------------------------------------------------------
       ftot1 = faq1 + fsilt1 + fPOM1 +fdoc1    !fsand1	
       ftot2 = faq2 + fsilt2 + fPOM2 +fdoc2     !+fsand2+
 
-c      write(*,*) ':::::::::::::: PARTITIONING :::::::::::::::::::::::::'
-c      write(*,*) '    ' 
-c      write(*,*) 'K1doc :',K1doc , 'K2doc :', K2doc	!---------- 
-c      write(*,*) 'K1silt', K1silt, 'K2silt:', K2silt	!------------
-c      write(*,*) 'K1POM',  K1POM,  'K2POM:', K2POM	!------------
-c      write(*,*) '    '           
-c      write(*,*) 'por', por, 'Doc', DOC	!-----------------------
-c      write(*,*) 'partden1', partden1, 'partden2', partden2	   
-c      write(*,*) 'fsilt1', fsilt1, 'fsilt2', fsilt2	!------------- 
-c      write(*,*) 'CDOC', Cdoc, 'Cpom', Cpom	!------------------- 
-c      write(*,*) 'fPOM1', fPOM1, 'fPOM2', fPOM2	!------------------- 
-c      write(*,*) 'fdoc1', fdoc1, 'fdoc2', fdoc2	!-------------------       
-c      write(*,*) 'ftot HgSed', ftot1, 'ftot MeHgSed', ftot2    !----------------                
-c      write(*,*) ':::::::::::::::::::::::::::::::::::::::::::::::::::::'
-c      write(*,*) ' '       
-c------------------------------------------------------------------------
-c------------------------------------------------------------------------
-c ---------- Benthic dynamics   -----------------------------------------   
-c------------------------------------------------------part 07-----------
-c ----------Hg MeHg RESUSPENSION  --------------------------------------- 
-c   
+!      write(*,*) ':::::::::::::: PARTITIONING :::::::::::::::::::::::::'
+!      write(*,*) '    ' 
+!      write(*,*) 'K1doc :',K1doc , 'K2doc :', K2doc	!---------- 
+!      write(*,*) 'K1silt', K1silt, 'K2silt:', K2silt	!------------
+!      write(*,*) 'K1POM',  K1POM,  'K2POM:', K2POM	!------------
+!      write(*,*) '    '           
+!      write(*,*) 'por', por, 'Doc', DOC	!-----------------------
+!      write(*,*) 'partden1', partden1, 'partden2', partden2	   
+!      write(*,*) 'fsilt1', fsilt1, 'fsilt2', fsilt2	!------------- 
+!      write(*,*) 'CDOC', Cdoc, 'Cpom', Cpom	!------------------- 
+!      write(*,*) 'fPOM1', fPOM1, 'fPOM2', fPOM2	!------------------- 
+!      write(*,*) 'fdoc1', fdoc1, 'fdoc2', fdoc2	!-------------------       
+!      write(*,*) 'ftot HgSed', ftot1, 'ftot MeHgSed', ftot2    !----------------                
+!      write(*,*) ':::::::::::::::::::::::::::::::::::::::::::::::::::::'
+!      write(*,*) ' '       
+!------------------------------------------------------------------------
+!------------------------------------------------------------------------
+! ---------- Benthic dynamics   -----------------------------------------   
+!------------------------------------------------------part 07-----------
+! ----------Hg MeHg RESUSPENSION  --------------------------------------- 
+!   
 
       kext=ipext(k)
  
       Rhgsil = Vr * hgit * fsilt1 *area  !m s-1 * ug m-3 * m2-> ug s-1  
       Rhgpom = Vr * hgit * fPOM1 *area   !m s-1 * ug m-3 * m2-> ug s-1  
-c        
+!        
       Rmhgsil = Vr * mehgt * fsilt2 *area  ! m s-1 * ug m-3 -> ug s-1  
       Rmhgpom = Vr * mehgt * fPOM2 *area   ! m s-1 * ug m-3 -> ug s-1   
 
-c      
-c      if (hgitw .GT. 50) then
-c      write(777,*) hgitw,Vr,hgit, fsilt1,ipext(k)
-c      write(778,*) Rhgsil, Rhgpom, Rmhgsil, Rmhgpom,ipext(k)  
-c      end if
+!      
+!      if (hgitw .GT. 50) then
+!      write(777,*) hgitw,Vr,hgit, fsilt1,ipext(k)
+!      write(778,*) Rhgsil, Rhgpom, Rmhgsil, Rmhgpom,ipext(k)  
+!      end if
 
 
-c      write(771,*) Vr, Rhgsil/area, Rmhgsil/area,ipext(k) 
-c      write(772,*) Vr, Rhgpom/area, Rmhgpom/area,ipext(k)
+!      write(771,*) Vr, Rhgsil/area, Rmhgsil/area,ipext(k) 
+!      write(772,*) Vr, Rhgpom/area, Rmhgpom/area,ipext(k)
 
 
-c      write(*,*) '    ' 
-c      write(*,*) ':::::::::::::: RESUSPENSION :::::::::::::::::::::::::'                       
-c      write(*,*)  'res [ug s-1] hg-silt:', Rhgsil,'hg-pom:', Rhgpom   
-c      write(*,*)  'res [ug s-1] mhg-silt:', Rmhgsil,'mhg-pom:', Rmhgpom  
-c      write(*,*) '    '  
-c      write(*,*)  'Vr:',Vr,'hgit:',hgit,'fsilt1:', fsilt1       
-c      write(*,*) ':::::::::::::::::::::::::::::::::::::::::::::::::::::'      
-c      write(*,*) ' '  
-c------------------------------------------------------------------------    
-c --------- Hg MeHg BURIAL  ---------------------------------------------
-c------------------------------------------------------------------------
+!      write(*,*) '    ' 
+!      write(*,*) ':::::::::::::: RESUSPENSION :::::::::::::::::::::::::'                       
+!      write(*,*)  'res [ug s-1] hg-silt:', Rhgsil,'hg-pom:', Rhgpom   
+!      write(*,*)  'res [ug s-1] mhg-silt:', Rmhgsil,'mhg-pom:', Rmhgpom  
+!      write(*,*) '    '  
+!      write(*,*)  'Vr:',Vr,'hgit:',hgit,'fsilt1:', fsilt1       
+!      write(*,*) ':::::::::::::::::::::::::::::::::::::::::::::::::::::'      
+!      write(*,*) ' '  
+!------------------------------------------------------------------------    
+! --------- Hg MeHg BURIAL  ---------------------------------------------
+!------------------------------------------------------------------------
       bursHg  = (hgit*fsilt1 *Bvels*area) ![ug s-1]=[ug m-3]*[m s-1]*[m2]
       burpHg  = (hgit*fpom1  *Bvelp*area)  
        
       bursMHg = (mehgt*fsilt2*Bvels*area) ![ug s-1]=[ug m-3]*[m s-1]*[m2]
       burpMHg = (mehgt*fpom2*Bvelp*area)          
      
-c      if (kext .EQ. 2284) then
-c      write(665,*) Bvels, Bvelp, 'merc_SED'
-c      write(664,*) silt,POM, 'merc_SED'
-c      end if     
+!      if (kext .EQ. 2284) then
+!      write(665,*) Bvels, Bvelp, 'merc_SED'
+!      write(664,*) silt,POM, 'merc_SED'
+!      end if     
 
-c      write(*,*) '    ' 
-c      write(*,*) '::::::::::::::: BURIAL ::::::::::::::::::::::::'                       
-c      write(*,*)  'bur [ug s-1] hg-silt:', bursHg, 'hg-pom',burpHg
-c      write(*,*)  'bur [ug s-1] mhg-silt:', bursMHg, 'mhg-pom',burpMHg
-c      write(*,*) '    '  
-c      write(*,*)  'Bvels:', Bvels,'fsilt1:', fsilt1,'fpom1:', fpom1              
-c      write(*,*) '::::::::::::::::::::::::::::::::::::::::::::::'      
-c      write(*,*) '    ' 
-c-----------------------------------------------------------------------
-c --------- Hg MeHg DIFFUSION ------------------------------------------
-c-------------------------------------------------------part 08---------
-c---------- leggere Oxygen conc from biogeochem. model ? ---------------
-c --Soerensen et al., 2016 --- if Oxy<0 :  Dchg_25_ANOX = 10.0/10**10 --
-c ----------------------------------------------------------------------
-c ---Sunderland et al., 2010 -------------------------------------------
-c ---------- Dchg_25 = 2.0/10.**10.- Hg aggregated with macromolecular --
-c -------------------------------------- colloidal organic matter -------
-c-------- Dchg_25 = 9.5/10.**10.- HgCl4----------------------------------
-c ----------------------------------------------------------------------- 
-c ---------- Dchg_25 = 1.2/10.**9. -- MeHg sulfides (CH3HgSH0)----------- 
-c -----------------------------------------------------------------------
+!      write(*,*) '    ' 
+!      write(*,*) '::::::::::::::: BURIAL ::::::::::::::::::::::::'                       
+!      write(*,*)  'bur [ug s-1] hg-silt:', bursHg, 'hg-pom',burpHg
+!      write(*,*)  'bur [ug s-1] mhg-silt:', bursMHg, 'mhg-pom',burpMHg
+!      write(*,*) '    '  
+!      write(*,*)  'Bvels:', Bvels,'fsilt1:', fsilt1,'fpom1:', fpom1              
+!      write(*,*) '::::::::::::::::::::::::::::::::::::::::::::::'      
+!      write(*,*) '    ' 
+!-----------------------------------------------------------------------
+! --------- Hg MeHg DIFFUSION ------------------------------------------
+!-------------------------------------------------------part 08---------
+!---------- leggere Oxygen conc from biogeochem. model ? ---------------
+! --Soerensen et al., 2016 --- if Oxy<0 :  Dchg_25_ANOX = 10.0/10**10 --
+! ----------------------------------------------------------------------
+! ---Sunderland et al., 2010 -------------------------------------------
+! ---------- Dchg_25 = 2.0/10.**10.- Hg aggregated with macromolecular --
+! -------------------------------------- colloidal organic matter -------
+!-------- Dchg_25 = 9.5/10.**10.- HgCl4----------------------------------
+! ----------------------------------------------------------------------- 
+! ---------- Dchg_25 = 1.2/10.**9. -- MeHg sulfides (CH3HgSH0)----------- 
+! -----------------------------------------------------------------------
       HgDw  = hgitw*(fdiss1w+fdoc1w)  ! Hg diss acque [ng l-1(w+s)] - da model water
       MeHgDw  = mehgtw*(fdiss2w+fdoc2w)  ! Hg diss acque [ng l-1(w+s)] - da model water
       Dchg_25 = 2.0/(10.**10.)                ! [m2 s-1]
@@ -344,44 +344,44 @@ c -----------------------------------------------------------------------
       JHgD     = ft1*area  ![ug s-1] < 0: da sedimenti ad acque
       Jngm2d     = ft1*1000.*86400. ![ng m-2] < 0: da sedimenti ad acque
 
-c    ! calculated:  7 - 570       [ng m-2 d-1] Emili et al. 2012
-c    ! measured  : 2.000 - 70.000 [ng m-2 d-1] Emili et al. 2012
+!    ! calculated:  7 - 570       [ng m-2 d-1] Emili et al. 2012
+!    ! measured  : 2.000 - 70.000 [ng m-2 d-1] Emili et al. 2012
       
       JMHgD     = ft2*area  ![ug s-1] < 0: da sedimenti ad acque
       JMngm2d   = ft2*1000.*86400. ![ug m-2] < 0: da sedimenti ad acque
-c     
-c      JHgD_kgy     = JHgD *365/10**9! kg y-1
-c      write(*,*) '    ' 
-c      write(*,*) '::::::::::::::: DIFFUSION FLUX ::::::::::::::::::::::'         
-c      write(*,*) 'Jngm2d:', Jngm2d,num3,num4,Hg2dpw,MeHgdpw
-c      write(*,*) 'hgit,mehgt', hgit,mehgt,fdoc1,faq1
-c      write(*,*) 'hgdw,depth', hgdw,depth,Hg2dpw
-c      write(*,*) '7 - 570       [ng m-2 d-1] Emili et al. 2012'
-c      if (JHgD .LT. 0.0) then 
-c      write(*,*) 'diff flux from sediment to water'
-c      else if (JHgD .GT. 0.0) then 
-c      write(*,*) 'diff flux from water to sediment'
-c      else 
-c      write(*,*) 'diff flux = 0'
-c
-c      write(*,*) 'JHgD', JHgD   
-c      write(*,*) '::::::::::::::: DIFFUSION FLUX ::::::::::::::::::::::'               
-c      write(*,*) '    ' 
-c      write(*,*) 'hgit' , hgit, 'mehgt', mehgt
+!     
+!      JHgD_kgy     = JHgD *365/10**9! kg y-1
+!      write(*,*) '    ' 
+!      write(*,*) '::::::::::::::: DIFFUSION FLUX ::::::::::::::::::::::'         
+!      write(*,*) 'Jngm2d:', Jngm2d,num3,num4,Hg2dpw,MeHgdpw
+!      write(*,*) 'hgit,mehgt', hgit,mehgt,fdoc1,faq1
+!      write(*,*) 'hgdw,depth', hgdw,depth,Hg2dpw
+!      write(*,*) '7 - 570       [ng m-2 d-1] Emili et al. 2012'
+!      if (JHgD .LT. 0.0) then 
+!      write(*,*) 'diff flux from sediment to water'
+!      else if (JHgD .GT. 0.0) then 
+!      write(*,*) 'diff flux from water to sediment'
+!      else 
+!      write(*,*) 'diff flux = 0'
+!
+!      write(*,*) 'JHgD', JHgD   
+!      write(*,*) '::::::::::::::: DIFFUSION FLUX ::::::::::::::::::::::'               
+!      write(*,*) '    ' 
+!      write(*,*) 'hgit' , hgit, 'mehgt', mehgt
 
-c-----------------------------------------------------------------------
-c --------- Hg methylation and MeHg demethylation ---------------------- 
-c -----------------------------------------------------------------------
+!-----------------------------------------------------------------------
+! --------- Hg methylation and MeHg demethylation ---------------------- 
+! -----------------------------------------------------------------------
       cksmet=(ksmet*Qbac**((temp-20.)/10.))/86400.       ! [d-1] to [s-1]
       sksme=cksmet*(hgit*(faq1+fdoc1))*vol    ! [s-1] * [ug m-3] = ug s-1
 
-c -----------------------------------------------------------------------
-c --------- Soerensen et al. 2016 FOR WATER COLUMN ----------------------
-c -- OXIC COND.----- kmet = rmr/100 ! rmr = remineralization rate--------
-c -- ANOXIC COND.--- kmet = (PO4 - PO4subox)*0.0005----------------------
-c -----------------------------------------------------------------------
-c ---met - demet in sedimentfrom observations and ratio MeHg/Hg----------
-c -----------------------------------------------------------------------
+! -----------------------------------------------------------------------
+! --------- Soerensen et al. 2016 FOR WATER COLUMN ----------------------
+! -- OXIC COND.----- kmet = rmr/100 ! rmr = remineralization rate--------
+! -- ANOXIC COND.--- kmet = (PO4 - PO4subox)*0.0005----------------------
+! -----------------------------------------------------------------------
+! ---met - demet in sedimentfrom observations and ratio MeHg/Hg----------
+! -----------------------------------------------------------------------
 
       Eadem=10.      !WASP manual around 10 kcal/mol
       tkel=temp+273.
@@ -393,19 +393,19 @@ c -----------------------------------------------------------------------
       cksdem=(ksdem*exp(Eadem*1000*(deltat/(Rcal*tkel*tkref))))/86400
       sksdem=(cksdem*mehgt*(faq2+fdoc2))*vol ! [s-1] * [ug m-3] = ug s-1
 
-c -------------------------------------------------------------------------------- 
-c --------- part 09--------------------------------------------------------------- 
-c ------------------------integration--------------------------------------------- 
-c       Check Ginevra, 
-c        C(1) = hgit              ! ug m-3
-c        C(2) = mehgt
+! -------------------------------------------------------------------------------- 
+! --------- part 09--------------------------------------------------------------- 
+! ------------------------integration--------------------------------------------- 
+!       Check Ginevra, 
+!        C(1) = hgit              ! ug m-3
+!        C(2) = mehgt
 
       Rhgsil=0.0
       Rhgpom=0.0
       Rmhgsil=0.0
       Rmhgpom=0.0
-c      JHgD=0.0
-c      JMHgD=0.0    
+!      JHgD=0.0
+!      JMHgD=0.0    
  
       if (bursHg .GE. 0.) then       
       CD(1) = +Shgsil +Shgpom +(-Rhgsil -Rhgpom +JHgD -bursHg -burpHg 
@@ -424,40 +424,40 @@ c      JMHgD=0.0
 
        !write (889,*) (C(m), m=1,nvmerc),k    !'HgSED vars old'
 
-c      if (kext .EQ. 1372) then
-c          write (666,*) (CD(m), m=1,nvmerc),k
-c      write (666,*) Shgsil/area
-c      write (667,*) Shgpom/area
-c      write (668,*) Rhgsil/area
-c      write (669,*) Rhgpom/area
-c      write (670,*) JHgD/area
-c      write (671,*) bursHg/area
-c      write (672,*) burpHg/area
-c      write (673,*) vol
-c      write (674,*) area
-c      write (675,*) (C(m), m=1,nvmerc),k
-c      elseif (kext .EQ. 3216) then 
-c          write (666,*) (CD(m), m=1,nvmerc),k
-c          write (667,*) (C(m), m=1,nvmerc),k
-c      elseif (kext .EQ. 2407) then
-c          write (666,*) (CD(m), m=1,nvmerc),k
-c          write (667,*) (C(m), m=1,nvmerc),k
-c      elseif (kext .EQ. 2654) then
-c          write (666,*) (CD(m), m=1,nvmerc),k
-c          write (667,*) (C(m), m=1,nvmerc),k
-c      elseif (kext .EQ. 2341) then
-c          write (666,*) (CD(m), m=1,nvmerc),k
-c          write (667,*) (C(m), m=1,nvmerc),k
-c      elseif (kext .EQ. 2150) then
-c          write (666,*) (CD(m), m=1,nvmerc),k
-c          write (667,*) (C(m), m=1,nvmerc),k
-c      elseif (kext .EQ. 3762) then
-c          write (666,*) (CD(m), m=1,nvmerc),k
-c          write (667,*) (C(m), m=1,nvmerc),k
-c      elseif (kext .EQ. 3985) then
-c          write (666,*) (CD(m), m=1,nvmerc),k
-c          write (667,*) (C(m), m=1,nvmerc),k
-c      end if 
+!      if (kext .EQ. 1372) then
+!          write (666,*) (CD(m), m=1,nvmerc),k
+!      write (666,*) Shgsil/area
+!      write (667,*) Shgpom/area
+!      write (668,*) Rhgsil/area
+!      write (669,*) Rhgpom/area
+!      write (670,*) JHgD/area
+!      write (671,*) bursHg/area
+!      write (672,*) burpHg/area
+!      write (673,*) vol
+!      write (674,*) area
+!      write (675,*) (C(m), m=1,nvmerc),k
+!      elseif (kext .EQ. 3216) then 
+!          write (666,*) (CD(m), m=1,nvmerc),k
+!          write (667,*) (C(m), m=1,nvmerc),k
+!      elseif (kext .EQ. 2407) then
+!          write (666,*) (CD(m), m=1,nvmerc),k
+!          write (667,*) (C(m), m=1,nvmerc),k
+!      elseif (kext .EQ. 2654) then
+!          write (666,*) (CD(m), m=1,nvmerc),k
+!          write (667,*) (C(m), m=1,nvmerc),k
+!      elseif (kext .EQ. 2341) then
+!          write (666,*) (CD(m), m=1,nvmerc),k
+!          write (667,*) (C(m), m=1,nvmerc),k
+!      elseif (kext .EQ. 2150) then
+!          write (666,*) (CD(m), m=1,nvmerc),k
+!          write (667,*) (C(m), m=1,nvmerc),k
+!      elseif (kext .EQ. 3762) then
+!          write (666,*) (CD(m), m=1,nvmerc),k
+!          write (667,*) (C(m), m=1,nvmerc),k
+!      elseif (kext .EQ. 3985) then
+!          write (666,*) (CD(m), m=1,nvmerc),k
+!          write (667,*) (C(m), m=1,nvmerc),k
+!      end if 
       
         CDw=0
         CDw(2)=(Rhgsil+Rhgpom-JHgD)*86400   !Resuspension and pw diffusion to the water                                                           
@@ -476,21 +476,21 @@ c      end if
 
        if(Cw(2) .LT.0) then
        write(*,*) 'Hg2W<=0',Cw(2),C(1),'node',ipext(k),'merc_sed bef'
-c       write(667,*) 'Hg2W<=0',Cw(2),C(1),'node',ipext(k),'merc_sed bef'
-c       stop
+!       write(667,*) 'Hg2W<=0',Cw(2),C(1),'node',ipext(k),'merc_sed bef'
+!       stop
        end if
 
        if(Cw(3).LT.0) then
        write(*,*) 'MHgW<=0',Cw(3),C(2),'node',ipext(k),'merc_sed bef'
-c       write(778,*) 'MHgW<=0',Cw(3),C(2),'node',ipext(k),'merc_sed bef'
-c       stop
+!       write(778,*) 'MHgW<=0',Cw(3),C(2),'node',ipext(k),'merc_sed bef'
+!       stop
        end if
 
 
        call merc_euler_sed(nvmerc,dtday,vol,vol,c,cold,cd) !claurent-OGS:add second volume
-c       call merc_euler_sed (3,dtday,vol,vol,cw,coldw,cdw) !claurent-OGS:add second volume
+!       call merc_euler_sed (3,dtday,vol,vol,cw,coldw,cdw) !claurent-OGS:add second volume
 
-c       call merc_euler (nvmerc,dtday,vol,c,cold,cd) 
+!       call merc_euler (nvmerc,dtday,vol,c,cold,cd) 
        call merc_euler(3,dtday,vol,cw,coldw,cdw) 
 
        if(C(1) .LT.0) then
@@ -505,30 +505,30 @@ c       call merc_euler (nvmerc,dtday,vol,c,cold,cd)
 
        if(Cw(2) .LT.0) then
        write(*,*) 'Hg2W<=0',Cw(2),C(1),'at node',ipext(k),'merc_sed aft'
-c       stop
+!       stop
        end if
 
        if(Cw(3).LT.0) then
        write(*,*) 'MHgW<=0',Cw(3),C(2),'node',ipext(k),'merc_sed aft'
-c       stop
+!       stop
        end if 
 
-c	write(*,*) 'Hg2sed' , Hg2sed, 'MeHgsed', MeHgsed
-c      write(*,*) ' ' 
-c      write(*,*) 'hgit' , hgit, 'mehgt', mehgt
-c      write(*,*) ' '    
+!	write(*,*) 'Hg2sed' , Hg2sed, 'MeHgsed', MeHgsed
+!      write(*,*) ' ' 
+!      write(*,*) 'hgit' , hgit, 'mehgt', mehgt
+!      write(*,*) ' '    
 !	------------------------------------------------------------------
       Hgpsilt= hgit * fsilt1  ! [ug m-3] or [ng(hg) l(w+s)-1]
       Hg2POM = hgit * fPOM1   
       Hg2doc = hgit * fdoc1
       Hg2Cl =  hgit * faq1  
 
-c      write (*,*) '' 
-c      write (*,*) 'Hgpsilt',Hgpsilt, 'Hg2POM',Hg2POM
-c      write (*,*) ''
-c      write (*,*) 'Hg2doc',Hg2doc, 'Hg2Cl',Hg2Cl 
-c      write (*,*) ''
-c      write (*,*) 'hgit', hgit
+!      write (*,*) '' 
+!      write (*,*) 'Hgpsilt',Hgpsilt, 'Hg2POM',Hg2POM
+!      write (*,*) ''
+!      write (*,*) 'Hg2doc',Hg2doc, 'Hg2Cl',Hg2Cl 
+!      write (*,*) ''
+!      write (*,*) 'hgit', hgit
 
         
        MeHgsilt= mehgt * fsilt2  ![ug(hg) m-3(w+s)] or [ng l-1]
@@ -551,40 +551,40 @@ c      write (*,*) 'hgit', hgit
       Hg2sed = Hg2P/(silt+POM)
       MeHgsed = MeHgP/(silt+POM)
 
-c     Cdoc  = por*DOC/10.**6. ! g(DOC)/m3(w) * 0.8 m3(w)/m3(s+w) -> mg(DOC)/L(s+w)/10**6 -> kgl-1
-c     Csilt = silt/10.**6.  ! from [g m-3] to [g cm-3] or [kg l-1]      
-c     Cpom  = POM /10.**6.  ! [kg l-1]   
-c     Ctot  = Csilt+Cpom 
+!     Cdoc  = por*DOC/10.**6. ! g(DOC)/m3(w) * 0.8 m3(w)/m3(s+w) -> mg(DOC)/L(s+w)/10**6 -> kgl-1
+!     Csilt = silt/10.**6.  ! from [g m-3] to [g cm-3] or [kg l-1]      
+!     Cpom  = POM /10.**6.  ! [kg l-1]   
+!     Ctot  = Csilt+Cpom 
 
-c      write (*,*) '' 
-c       write (*,*) 'Hg2P', Hg2P
-c      write (*,*) ''
-c       write (*,*) 'Hg2D ngl', Hg2D
-c      write (*,*) ''  
-c       write (889,*) (C(m), m=1,nvmerc),'k',k, 'HgSED vars new'
+!      write (*,*) '' 
+!       write (*,*) 'Hg2P', Hg2P
+!      write (*,*) ''
+!       write (*,*) 'Hg2D ngl', Hg2D
+!      write (*,*) ''  
+!       write (889,*) (C(m), m=1,nvmerc),'k',k, 'HgSED vars new'
       
-c      write (91,*) Hgpsilt, Hg2POM,Hg2doc,Hg2Cl 
-c      write (92,*) Shgsil, Shgpom,Rhgsil, Rhgpom,JHgD, bursHg,burpHg
-c      write (93,*) Smhgsil,Smhgpom,Rmhgsil,Rmhgpom,JMHgD,bursMHg,burpMHg
-c      write (94,*) MeHgsed, MeHgpw 
-c      write (95,*) MeHgsilt, MeHgPOM,MeHgdoc,MeHgCl 
-c      write (96,*) sksme, sksdem
+!      write (91,*) Hgpsilt, Hg2POM,Hg2doc,Hg2Cl 
+!      write (92,*) Shgsil, Shgpom,Rhgsil, Rhgpom,JHgD, bursHg,burpHg
+!      write (93,*) Smhgsil,Smhgpom,Rmhgsil,Rmhgpom,JMHgD,bursMHg,burpMHg
+!      write (94,*) MeHgsed, MeHgpw 
+!      write (95,*) MeHgsilt, MeHgPOM,MeHgdoc,MeHgCl 
+!      write (96,*) sksme, sksdem
 
-c------ dissolved hg and mehg in porewater ------------------------------
-c     hgd = (faq/por)*hgit    !Thomann and Di Toro, 1983
-c       write(*,*) ' '
-c       write(*,*) 'Hg2sed', Hg2sed ,'MeHgsed', MeHgsed
-c       write (*,*) ''
+!------ dissolved hg and mehg in porewater ------------------------------
+!     hgd = (faq/por)*hgit    !Thomann and Di Toro, 1983
+!       write(*,*) ' '
+!       write(*,*) 'Hg2sed', Hg2sed ,'MeHgsed', MeHgsed
+!       write (*,*) ''
 
-c     stop
-c	Hg0sed=C(1)
-c     Hg2sed=C(1)+DepHg2-burHg
-c     MeHgsed=C(3)+ DepMeHg-burMeHg
+!     stop
+!	Hg0sed=C(1)
+!     Hg2sed=C(1)+DepHg2-burHg
+!     MeHgsed=C(3)+ DepMeHg-burMeHg
 
-c     write (89,*) time, i,(C(m), m=1,nvmerc) !, ' variables'
-c     write (91,*) DepHg2,DepMeHg,burHg,burMeHg,dt !, ' variables'        
-c --------------------------------------------------------
-c--------------------------------------------------
+!     write (89,*) time, i,(C(m), m=1,nvmerc) !, ' variables'
+!     write (91,*) DepHg2,DepMeHg,burHg,burMeHg,dt !, ' variables'        
+! --------------------------------------------------------
+!--------------------------------------------------
 
           if (k .GE. 1) then
            kext=ipext(k)
@@ -655,14 +655,14 @@ c--------------------------------------------------
                fortfilenum=482
            endif
            if(fortfilenum.ge.0)then
-c               if(fortfilenum==450)
-c     +             write(*,*) 'stamp to file 350... at iter=',iter,
-c     +             ', tday=', tday
-               write(fortfilenum,"(7(f20.7,','))")
-     +         Hg2sed,hgit,mehgt,silt,POM,add1,add2
-c Hg2sed, MeHgsed,Hg2pw,MeHgpw
+!               if(fortfilenum==450)
+!     +             write(*,*) 'stamp to file 350... at iter=',iter,
+!     +             ', tday=', tday
+               write(fortfilenum,"(7(f20.7,','))") &
+     &         Hg2sed,hgit,mehgt,silt,POM,add1,add2
+! Hg2sed, MeHgsed,Hg2pw,MeHgpw
            endif
          endif
 
       end 
-c	
+!	

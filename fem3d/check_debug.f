@@ -59,7 +59,7 @@
 
 	program check_debug
 
-c checks two files written with check_debug from shyfem
+! checks two files written with check_debug from shyfem
 
 	use mod_check_debug
 
@@ -76,8 +76,8 @@ c checks two files written with check_debug from shyfem
 	integer i,idiff,idiff_tot
 	integer nc
 
-	caption=' variable        nrec     tot dim   first dim'//
-     +				'       idiff'
+	caption=' variable        nrec     tot dim   first dim'// &
+     &				'       idiff'
 
 	bstop = .false.			!stop on error
 	bstop = .true.			!stop on error

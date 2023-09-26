@@ -25,18 +25,18 @@
 !
 !--------------------------------------------------------------------------
 
-c subroutines for flux computation - mpi versions
-c
-c revision log :
-c
-c 28.05.2022	ggu	copied from subflxa.f
-c 19.01.2023	ggu	new routine gather_sum_d3()
-c 21.04.2023	ggu	problems in gather_sum_d3() ... not yet solved
-c 18.05.2023	ggu	flux_write() changed, new routine flx_collect_3d()
-c
-c******************************************************************
-c******************************************************************
-c******************************************************************
+! subroutines for flux computation - mpi versions
+!
+! revision log :
+!
+! 28.05.2022	ggu	copied from subflxa.f
+! 19.01.2023	ggu	new routine gather_sum_d3()
+! 21.04.2023	ggu	problems in gather_sum_d3() ... not yet solved
+! 18.05.2023	ggu	flux_write() changed, new routine flx_collect_3d()
+!
+!******************************************************************
+!******************************************************************
+!******************************************************************
 
 	subroutine correct_nlayers(nsect,nlayers,nlmax)
 
@@ -66,7 +66,7 @@ c******************************************************************
 
 	end
 
-c******************************************************************
+!******************************************************************
 
 	subroutine correct_iflux(kfluxm,kflux,iflux)
 
@@ -93,11 +93,11 @@ c******************************************************************
 
 	end
 
-c******************************************************************
+!******************************************************************
 
         subroutine convert_nodes(n,nodes)
 
-c converts external to internal nodes
+! converts external to internal nodes
 
         implicit none
 
@@ -129,12 +129,12 @@ c converts external to internal nodes
 
         end
 
-c******************************************************************
-c******************************************************************
-c******************************************************************
+!******************************************************************
+!******************************************************************
+!******************************************************************
 
-	subroutine flux_initialize(kfluxm,kflux,iflux
-     +				,nsect,nlayers,nlmax)
+	subroutine flux_initialize(kfluxm,kflux,iflux &
+     &				,nsect,nlayers,nlmax)
 
 	use shympi
 
@@ -168,8 +168,8 @@ c******************************************************************
 !******************************************************************
 !******************************************************************
 
-	subroutine flux_file_open(type,da_out,nvar,nsect,kfluxm
-     +				,kflux_ext,nlayers,chflx)
+	subroutine flux_file_open(type,da_out,nvar,nsect,kfluxm &
+     &				,kflux_ext,nlayers,chflx)
 
 	use shympi
 
@@ -205,8 +205,8 @@ c******************************************************************
 
 	  nvers = 0
 	  idtflx = nint(da_out(1))
-	  call flx_write_header(nbflx,nvers,nsect,kfluxm,idtflx
-     +                                  ,nlmax,nvar,ierr)
+	  call flx_write_header(nbflx,nvers,nsect,kfluxm,idtflx &
+     &                                  ,nlmax,nvar,ierr)
 	  if( ierr /= 0 ) goto 98
 
 	  title = descrp
@@ -224,9 +224,9 @@ c******************************************************************
 	write(6,*) 'calling header2:'
 	end if
 
-          call flx_write_header2(nbflx,nvers,nsect,kfluxm
-     +                          ,kflux_ext,nlayers
-     +                          ,atime0,title,femver,chflx,ierr)
+          call flx_write_header2(nbflx,nvers,nsect,kfluxm &
+     &                          ,kflux_ext,nlayers &
+     &                          ,atime0,title,femver,chflx,ierr)
 	  if( ierr /= 0 ) goto 98
 
 	end if
@@ -245,8 +245,8 @@ c******************************************************************
 
 !******************************************************************
 
-	subroutine flux_write(nbflx,atime,ivar,nlvddi,nsect
-     +				,nlayers,flux_global)
+	subroutine flux_write(nbflx,atime,ivar,nlvddi,nsect &
+     &				,nlayers,flux_global)
 
 	use shympi
 
@@ -271,8 +271,8 @@ c******************************************************************
 	nvers = 0
 
 	if( shympi_is_master() ) then
-	  call flx_write_record(nbflx,nvers,atime,nlv_global,nsect,ivar
-     +				,nlayers,flux_real,ierr)
+	  call flx_write_record(nbflx,nvers,atime,nlv_global,nsect,ivar &
+     &				,nlayers,flux_real,ierr)
 	  if( ierr /= 0 ) goto 97
 	end if
 

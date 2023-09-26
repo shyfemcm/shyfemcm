@@ -23,67 +23,67 @@
 !
 !--------------------------------------------------------------------------
 
-c revision log :
-c
-c 20.08.2003	ggu	new laplacian interpolation
-c 02.09.2003	ggu	some comments, write to .dat file
-c 30.10.2003	ggu	subroutine prepare_bc_l included in this file
-c 04.03.2004	ggu	writes also number of variables (1)
-c 11.03.2009	ggu	bug fix -> declare hev() here
-c 28.01.2014	ggu	changed VERS_6_1_71
-c 23.12.2014	ggu	changed VERS_7_0_11
-c 19.01.2015	ggu	changed VERS_7_1_3
-c 07.02.2015	ggu	OI finished
-c 26.02.2015	ggu	changed VERS_7_1_5
-c 17.07.2015	ggu	changed VERS_7_1_53
-c 17.07.2015	ggu	changed VERS_7_1_80
-c 20.07.2015	ggu	changed VERS_7_1_81
-c 14.09.2015	ggu	OI adapted to new modular structure
-c 29.09.2015	ggu	move some vars to custimize to the beginning of file
-c 26.09.2017	ggu	changed VERS_7_5_32
-c 26.03.2018	ggu	completely restructured for model driven obs
-c 03.04.2018	ggu	changed VERS_7_5_43
-c 16.02.2019	ggu	changed VERS_7_5_60
-c
-c notes :
-c
-c header_record_1
-c data_record_1
-c header_record_2
-c data_record_2
-c etc...
-c
-c where header_record is
-c
-c time,nobs
-c
-c and data_record is either:
-c
-c k_1	val_1
-c k_2	val_2
-c ...
-c k_n	val_n
-c
-c or alternatively:
-c
-c x_1 y_1    val_1
-c x_2 y_2    val_2
-c ...
-c x_n y_n    val_n
-c
-c legend:
-c
-c time		time in seconds (relative time to a reference time)
-c nobs		number of observations in data record
-c k		node (external) of observation in basin
-c x,y		coordinates of observation
-c val		value of observation
-c
-c****************************************************************
+! revision log :
+!
+! 20.08.2003	ggu	new laplacian interpolation
+! 02.09.2003	ggu	some comments, write to .dat file
+! 30.10.2003	ggu	subroutine prepare_bc_l included in this file
+! 04.03.2004	ggu	writes also number of variables (1)
+! 11.03.2009	ggu	bug fix -> declare hev() here
+! 28.01.2014	ggu	changed VERS_6_1_71
+! 23.12.2014	ggu	changed VERS_7_0_11
+! 19.01.2015	ggu	changed VERS_7_1_3
+! 07.02.2015	ggu	OI finished
+! 26.02.2015	ggu	changed VERS_7_1_5
+! 17.07.2015	ggu	changed VERS_7_1_53
+! 17.07.2015	ggu	changed VERS_7_1_80
+! 20.07.2015	ggu	changed VERS_7_1_81
+! 14.09.2015	ggu	OI adapted to new modular structure
+! 29.09.2015	ggu	move some vars to custimize to the beginning of file
+! 26.09.2017	ggu	changed VERS_7_5_32
+! 26.03.2018	ggu	completely restructured for model driven obs
+! 03.04.2018	ggu	changed VERS_7_5_43
+! 16.02.2019	ggu	changed VERS_7_5_60
+!
+! notes :
+!
+! header_record_1
+! data_record_1
+! header_record_2
+! data_record_2
+! etc...
+!
+! where header_record is
+!
+! time,nobs
+!
+! and data_record is either:
+!
+! k_1	val_1
+! k_2	val_2
+! ...
+! k_n	val_n
+!
+! or alternatively:
+!
+! x_1 y_1    val_1
+! x_2 y_2    val_2
+! ...
+! x_n y_n    val_n
+!
+! legend:
+!
+! time		time in seconds (relative time to a reference time)
+! nobs		number of observations in data record
+! k		node (external) of observation in basin
+! x,y		coordinates of observation
+! val		value of observation
+!
+!****************************************************************
 
         program optintp
 
-c optimal interpolation interpolation
+! optimal interpolation interpolation
 
 	use mod_depth
 	use evgeom
@@ -151,32 +151,32 @@ c optimal interpolation interpolation
 	bloop = .false.
 	bloop = .true.
 
-c--------------------------------------------------------------
-c parameters and command line options
-c--------------------------------------------------------------
+!--------------------------------------------------------------
+! parameters and command line options
+!--------------------------------------------------------------
 
         call clo_init('optintp','input-file','1.0')
 
         call clo_add_info('Optimal interpolation for sparse data')
         call clo_add_option('basin',' ','basin to be used')
-        call clo_add_option('rl #',-1.
-     +		,'set length scale for covariance matrix')
-        call clo_add_option('drl #',-1.
-     +		,'try multiple values of rl with step drl')
-        call clo_add_option('rlmax #',-1.
-     +		,'maximum distance of nodes to be considered')
-        call clo_add_option('rr #',-1.
-     +		,'std of observation errors')
-        call clo_add_option('ss #',-1.
-     +		,'std of background field')
-        call clo_add_option('dx #',0.
-     +		,'dx for regular field')
-        call clo_add_option('dy #',0.
-     +		,'dy for regular field (Default dy=dx)')
-        call clo_add_option('cart',.false.
-     +		,'force use of cartesian coordinates')
-        call clo_add_option('limit',.false.
-     +		,'limit values to min/max of observations')
+        call clo_add_option('rl #',-1. &
+     &		,'set length scale for covariance matrix')
+        call clo_add_option('drl #',-1. &
+     &		,'try multiple values of rl with step drl')
+        call clo_add_option('rlmax #',-1. &
+     &		,'maximum distance of nodes to be considered')
+        call clo_add_option('rr #',-1. &
+     &		,'std of observation errors')
+        call clo_add_option('ss #',-1. &
+     &		,'std of background field')
+        call clo_add_option('dx #',0. &
+     &		,'dx for regular field')
+        call clo_add_option('dy #',0. &
+     &		,'dy for regular field (Default dy=dx)')
+        call clo_add_option('cart',.false. &
+     &		,'force use of cartesian coordinates')
+        call clo_add_option('limit',.false. &
+     &		,'limit values to min/max of observations')
         call clo_add_option('quiet',.false.,'do not be verbose')
 	call clo_add_extra('defaults for undefined values:')
 	call clo_add_extra('  rl=1/10 of basin size, rlmax=10*rl')
@@ -202,9 +202,9 @@ c--------------------------------------------------------------
 	bback = .false.
 	call clo_get_file(1,file)
 
-c-----------------------------------------------------------------
-c set some variables
-c-----------------------------------------------------------------
+!-----------------------------------------------------------------
+! set some variables
+!-----------------------------------------------------------------
 
 	!ivar = 85		!what is in the observations - ice
 	!string = 'ice cover [0-1]'
@@ -220,9 +220,9 @@ c-----------------------------------------------------------------
 	nrec = 10
 	nrec = 0
 
-c-----------------------------------------------------------------
-c time management
-c-----------------------------------------------------------------
+!-----------------------------------------------------------------
+! time management
+!-----------------------------------------------------------------
 
 	time = 0
 	call dtsini(date,time)
@@ -230,9 +230,9 @@ c-----------------------------------------------------------------
 	dtime0 = 0.
 	dtime = 0.
 
-c-----------------------------------------------------------------
-c read in basin
-c-----------------------------------------------------------------
+!-----------------------------------------------------------------
+! read in basin
+!-----------------------------------------------------------------
 
 	call ap_set_names(basnam,' ')
 	call ap_init(.false.,1,0,0)
@@ -267,9 +267,9 @@ c-----------------------------------------------------------------
 	  write(6,*) 'limit:     ',blimit
 	end if
 
-c-----------------------------------------------------------------
-c set up ev and background grid
-c-----------------------------------------------------------------
+!-----------------------------------------------------------------
+! set up ev and background grid
+!-----------------------------------------------------------------
 
 	call ev_init(nel)
 	call mod_depth_init(nkn,nel)
@@ -282,8 +282,8 @@ c-----------------------------------------------------------------
 
 	regpar = 0.
 	nback = nkn
-	call setup_background(ndim,dx,dy,xmin,ymin,xmax,ymax
-     +			,nback,xback,yback,regpar)
+	call setup_background(ndim,dx,dy,xmin,ymin,xmax,ymax &
+     &			,nback,xback,yback,regpar)
 	nx = nint(regpar(1))
 	ny = nint(regpar(2))
 
@@ -328,9 +328,9 @@ c-----------------------------------------------------------------
 
 	if( bdebug ) write(6,*) 'ggu 3'
 
-c-----------------------------------------------------------------
-c open files
-c-----------------------------------------------------------------
+!-----------------------------------------------------------------
+! open files
+!-----------------------------------------------------------------
 
 	irec = 0
 	!drl = 0.05		!test different rl, distance drl
@@ -356,12 +356,12 @@ c-----------------------------------------------------------------
 	call read_use_file(nobs,iuse)
 	where( iuse == 0 ) rra = 100.*rr
 
-c-----------------------------------------------------------------
-c read observations and interpolate
-c-----------------------------------------------------------------
+!-----------------------------------------------------------------
+! read observations and interpolate
+!-----------------------------------------------------------------
 
-	write(6,*) '                time     ' //
-     +		'min/max interpol  min/max observed   rmse'
+	write(6,*) '                time     ' // &
+     &		'min/max interpol  min/max observed   rmse'
 
 	iexcl = 0
 
@@ -370,8 +370,8 @@ c-----------------------------------------------------------------
 	if ( nrec > 0 .and. irec == nrec ) exit
 
 	nobs = nobdim
-	call read_observations(iuobs
-     +				,dtime,nobs,xobs,yobs,zobs)
+	call read_observations(iuobs &
+     &				,dtime,nobs,xobs,yobs,zobs)
 
 	if( nobs <= 0 ) exit
 
@@ -383,15 +383,15 @@ c-----------------------------------------------------------------
 	  call write_obs_grid(nobs,xobs,yobs,zobs)
 	end if
 
-c-----------------------------------------------------------------
-c interpolate
-c-----------------------------------------------------------------
+!-----------------------------------------------------------------
+! interpolate
+!-----------------------------------------------------------------
 
 	do j=-jmax,jmax
 	  rlact = rl + j*drl
-          call opt_intp(nobs,xobs,yobs,zobs,bobs
-     +                  ,nback,bback,xback,yback,zback
-     +                  ,rlact,rlmax,ssa,rra,zanal)
+          call opt_intp(nobs,xobs,yobs,zobs,bobs &
+     &                  ,nback,bback,xback,yback,zback &
+     &                  ,rlact,rlmax,ssa,rra,zanal)
 
 	  call mima(zanal,nback,zmin,zmax)
 	  if( blimit ) call limit_values(nback,zanal,zomin,zomax)
@@ -406,23 +406,23 @@ c-----------------------------------------------------------------
 	  datetime = (/date,time/)
 
 	  if( bfem ) then
-	    call fem_file_write_header(iformat,iufem,dtime0
-     +                          ,nvers,np,lmax
-     +                          ,nvar,ntype
-     +                          ,nlvdi,hlv,datetime,regpar)
-            call fem_file_write_data(iformat,iufem
-     +                          ,nvers,np,lmax
-     +                          ,string
-     +                          ,ilhkv,hd
-     +                          ,nlvdi,zanal)
+	    call fem_file_write_header(iformat,iufem,dtime0 &
+     &                          ,nvers,np,lmax &
+     &                          ,nvar,ntype &
+     &                          ,nlvdi,hlv,datetime,regpar)
+            call fem_file_write_data(iformat,iufem &
+     &                          ,nvers,np,lmax &
+     &                          ,string &
+     &                          ,ilhkv,hd &
+     &                          ,nlvdi,zanal)
 	  end if
 	  if( bloop ) then
-	    call compute_rmse(nobs,xobs,yobs,zobs,nx,ny,regpar
-     +				,zanal,0,rmse1)
+	    call compute_rmse(nobs,xobs,yobs,zobs,nx,ny,regpar &
+     &				,zanal,0,rmse1)
 	    write(67,*) dtime,nobs
-            call opt_intp_loop(nobs,xobs,yobs,zobs,bobs
-     +                  ,nback,bback,xback,yback,zback,regpar
-     +                  ,rlact,rlmax,ssa,rra,zanal,rmse2,errors)
+            call opt_intp_loop(nobs,xobs,yobs,zobs,bobs &
+     &                  ,nback,bback,xback,yback,zback,regpar &
+     &                  ,rlact,rlmax,ssa,rra,zanal,rmse2,errors)
 	    !write(6,*) rmse1,rmse2
 	    write(66,*) dtime,nobs
 	    write(66,*) errors(1:nobs)
@@ -432,8 +432,8 @@ c-----------------------------------------------------------------
 	    write(6,3000) 'min/max: ',dtime,zmin,zmax,zomin,zomax
  1000	    format(a,5f12.2)
 	  else if( bloop ) then
-	    write(6,3000) 'min/max: ',dtime
-     +				,zmin,zmax,zomin,zomax,rmse1,rmse2
+	    write(6,3000) 'min/max: ',dtime &
+     &				,zmin,zmax,zomin,zomax,rmse1,rmse2
  3000	    format(a,f12.2,4f9.2,2x,2f9.3)
 	  end if
 
@@ -448,16 +448,16 @@ c-----------------------------------------------------------------
 	  write(6,*) 'limiting records treated to: ',nrec
 	end if
 
-c-----------------------------------------------------------------
-c end of routine
-c-----------------------------------------------------------------
+!-----------------------------------------------------------------
+! end of routine
+!-----------------------------------------------------------------
 
 	end
 
-c****************************************************************
+!****************************************************************
 
-	subroutine setup_background(ndim,dx,dy,xmin,ymin,xmax,ymax
-     +			,nback,xback,yback,regpar)
+	subroutine setup_background(ndim,dx,dy,xmin,ymin,xmax,ymax &
+     &			,nback,xback,yback,regpar)
 
 	use basin
 
@@ -536,11 +536,11 @@ c****************************************************************
 	stop 'error stop setup_background: dimension ndim'
 	end
 
-c****************************************************************
+!****************************************************************
 
 	subroutine limit_values(nback,zback,zomin,zomax)
 
-c limits computed values to min/max of observations
+! limits computed values to min/max of observations
 
 	implicit none
 
@@ -557,27 +557,27 @@ c limits computed values to min/max of observations
 
 	end
 
-c****************************************************************
+!****************************************************************
 
-	subroutine read_observations(iuobs
-     +				,dtime,nobs,xobs,yobs,zobs)
+	subroutine read_observations(iuobs &
+     &				,dtime,nobs,xobs,yobs,zobs)
 
-c reads boundary conditions from file and sets up array
-c
-c file must be made like this:
-c
-c	k1, val1
-c	k2, val2
-c	...
-c	kn, valn
-c
-c or
-c
-c	x1, y1, val1
-c	x2, y2, val2
-c	...
-c	xn, yn, valn
-c
+! reads boundary conditions from file and sets up array
+!
+! file must be made like this:
+!
+!	k1, val1
+!	k2, val2
+!	...
+!	kn, valn
+!
+! or
+!
+!	x1, y1, val1
+!	x2, y2, val2
+!	...
+!	xn, yn, valn
+!
 
 	use basin
 
@@ -660,7 +660,7 @@ c
 	stop 'error stop read_observations: no such node'
 	end
 
-c******************************************************************
+!******************************************************************
 
 	subroutine write_reg_grid(nx,ny,x0,y0,dx,dy)
 
@@ -691,7 +691,7 @@ c******************************************************************
 
 	end
 
-c******************************************************************
+!******************************************************************
 
 	subroutine write_box_grid(nx,ny,x0,y0,dx,dy)
 
@@ -737,7 +737,7 @@ c******************************************************************
 
 	end
 
-c******************************************************************
+!******************************************************************
 
 	subroutine write_obs_grid(nobs,xobs,yobs,zobs)
 
@@ -766,10 +766,10 @@ c******************************************************************
 
 	end
 
-c******************************************************************
+!******************************************************************
 
-	subroutine compute_rmse(nobs,xobs,yobs,zobs,nx,ny,regpar
-     +					,za,iexcl,rmse)
+	subroutine compute_rmse(nobs,xobs,yobs,zobs,nx,ny,regpar &
+     &					,za,iexcl,rmse)
 
 	implicit none
 
@@ -834,11 +834,11 @@ c******************************************************************
 
 	end
 
-c******************************************************************
+!******************************************************************
 
-        subroutine opt_intp_loop(nobs,xobs,yobs,zobs,bobs
-     +                  ,nback,bback,xback,yback,zback,regpar
-     +                  ,rlact,rlmax,ssa,rra,zanal,rmse,errors)
+        subroutine opt_intp_loop(nobs,xobs,yobs,zobs,bobs &
+     &                  ,nback,bback,xback,yback,zback,regpar &
+     &                  ,rlact,rlmax,ssa,rra,zanal,rmse,errors)
 
 	implicit none
 
@@ -873,11 +873,11 @@ c******************************************************************
 	do i=1,nobs
 	  rrsave = rra(i)
 	  rra(i) = 1000. * rra(i)
-          call opt_intp(nobs,xobs,yobs,zobs,bobs
-     +                  ,nback,bback,xback,yback,zback
-     +                  ,rlact,rlmax,ssa,rra,zanal)
-	  call compute_rmse(nobs,xobs,yobs,zobs,nx,ny,regpar
-     +					,zanal,i,error)
+          call opt_intp(nobs,xobs,yobs,zobs,bobs &
+     &                  ,nback,bback,xback,yback,zback &
+     &                  ,rlact,rlmax,ssa,rra,zanal)
+	  call compute_rmse(nobs,xobs,yobs,zobs,nx,ny,regpar &
+     &					,zanal,i,error)
 	  errors(i) = error
 	  rrr = rrr + error**2
 	  rra(i) = rrsave
@@ -887,7 +887,7 @@ c******************************************************************
 
 	end
 
-c******************************************************************
+!******************************************************************
 
 	subroutine read_use_file(nobs,iuse)
 
@@ -919,5 +919,5 @@ c******************************************************************
 
 	end
 
-c******************************************************************
+!******************************************************************
 

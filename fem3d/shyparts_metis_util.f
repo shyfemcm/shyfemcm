@@ -99,8 +99,8 @@
 !-----------------------------------------------------------------
 
 	!write(6,*) 'partitioning with METIS...'
-        call METIS_PartMeshNodal(nel, nkn, eptr, eind, vwgt, vsize, 
-     +       nparts, tpwgts, options, objval, epart, npart)
+        call METIS_PartMeshNodal(nel, nkn, eptr, eind, vwgt, vsize,  &
+     &       nparts, tpwgts, options, objval, epart, npart)
 
 !-----------------------------------------------------------------
 ! end of routine

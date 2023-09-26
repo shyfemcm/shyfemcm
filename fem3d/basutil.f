@@ -167,53 +167,53 @@
         call clo_add_option('xyz',.false.,'writes xyz file')
         call clo_add_option('depth',.false.,'writes depth values')
         call clo_add_option('reg dxy',0.,'writes regular depth values')
-        call clo_add_option('unique',.false.
-     +		,'writes grd file with unique depths on nodes')
-        call clo_add_option('delem',.false.
-     +		,'writes grd file with constant depths on elements')
+        call clo_add_option('unique',.false. &
+     &		,'writes grd file with unique depths on nodes')
+        call clo_add_option('delem',.false. &
+     &		,'writes grd file with constant depths on elements')
         call clo_add_option('hsigma',-1,'creates hybrid depth level')
-        call clo_add_option('npart',.false.
-     +		,'writes grd file with nodal partition to be visualized')
-        call clo_add_option('part grd-file',' '
-     +		,'uses lines contained in grd-file to create partition')
-        call clo_add_option('gr3',.false.
-     +		,'writes grid in gr3 format (for WWMIII model')
-        call clo_add_option('msh',.false.
-     +		,'writes grid in msh (gmsh v. 2) format (for WW3 model')
+        call clo_add_option('npart',.false. &
+     &		,'writes grd file with nodal partition to be visualized')
+        call clo_add_option('part grd-file',' ' &
+     &		,'uses lines contained in grd-file to create partition')
+        call clo_add_option('gr3',.false. &
+     &		,'writes grid in gr3 format (for WWMIII model')
+        call clo_add_option('msh',.false. &
+     &		,'writes grid in msh (gmsh v. 2) format (for WW3 model')
 
         call clo_add_sep('what to do:')
 
-        call clo_add_option('inter',.false.
-     +				,'interactively shows nodes and elems')
+        call clo_add_option('inter',.false. &
+     &				,'interactively shows nodes and elems')
 
         call clo_add_option('quality',.false.,'shows quality of file')
         call clo_add_option('resol',.false.,'writes resolution of file')
         call clo_add_option('freq',.false.,'computes frequency curves')
         call clo_add_option('check',.false.,'runs extra check on file')
-        call clo_add_option('compare',.false.
-     +				,'compares depth of 2 basins')
-        call clo_add_option('invert_depth',.false.
-     +				,'inverts depth values')
+        call clo_add_option('compare',.false. &
+     &				,'compares depth of 2 basins')
+        call clo_add_option('invert_depth',.false. &
+     &				,'inverts depth values')
         call clo_add_option('box',.false.,'creates index for box model')
         call clo_add_option('boxgrd index',' ','creates grd from index')
-        call clo_add_option('custom',.false.
-     +				,'run custom routine defined by user')
+        call clo_add_option('custom',.false. &
+     &				,'run custom routine defined by user')
 
         call clo_add_sep('bathymetry interpolation:')
 
-        call clo_add_option('bfile bathy',' '
-     +				,'bathymetry file for interpolation')
-        call clo_add_option('all',.false.
-     +				,'interpolate in all items')
-        call clo_add_option('btype type',-1,'interpolate only on '//
-     +				 'elems with type (Default -1)')
-        call clo_add_option('node',.false.,'interpolate on nodes '//
-     +				 ',else on elements')
+        call clo_add_option('bfile bathy',' ' &
+     &				,'bathymetry file for interpolation')
+        call clo_add_option('all',.false. &
+     &				,'interpolate in all items')
+        call clo_add_option('btype type',-1,'interpolate only on '// &
+     &				 'elems with type (Default -1)')
+        call clo_add_option('node',.false.,'interpolate on nodes '// &
+     &				 ',else on elements')
         call clo_add_option('bmode mode',1,'mode of interpolation')
-        call clo_add_option('usfact fact',1,'factor for std '//
-     +				 '(Default 1)')
-        call clo_add_option('uxfact fact',3,'factor for max radius '//
-     +				 '(Default 3)')
+        call clo_add_option('usfact fact',1,'factor for std '// &
+     &				 '(Default 1)')
+        call clo_add_option('uxfact fact',3,'factor for max radius '// &
+     &				 '(Default 3)')
 
         call clo_add_sep('limiting and smoothing bathymetry:')
         call clo_add_option('hmin val',-99999.,'minimum depth')
@@ -315,11 +315,11 @@
 	end module basutil
 !====================================================
 
-c***************************************************************
+!***************************************************************
 
         subroutine transfer_depth(bnode)
 
-c copies depth values from elems/nodes to nodes/elems
+! copies depth values from elems/nodes to nodes/elems
 
         use mod_depth
         use basin
@@ -358,5 +358,5 @@ c copies depth values from elems/nodes to nodes/elems
 
         end
 
-c*******************************************************************
+!*******************************************************************
 

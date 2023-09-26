@@ -62,12 +62,12 @@
 
         write(6,*) 'mpi my_unit: ',my_unit
         write(6,'(a,9i7)') ' mpi domain: ',my_id,n_ghost_areas
-        write(6,'(a,5i7)') 'nkn: '
-     +                  ,nkn_global,nkn_local,nkn_unique
-     +                  ,nkn_inner,nkn_local-nkn_inner
-        write(6,'(a,5i7)') 'nel: '
-     +                  ,nel_global,nel_local,nel_unique
-     +                  ,nel_inner,nel_local-nel_inner
+        write(6,'(a,5i7)') 'nkn: ' &
+     &                  ,nkn_global,nkn_local,nkn_unique &
+     &                  ,nkn_inner,nkn_local-nkn_inner
+        write(6,'(a,5i7)') 'nel: ' &
+     &                  ,nel_global,nel_local,nel_unique &
+     &                  ,nel_inner,nel_local-nel_inner
 
         call shympi_syncronize
 
@@ -469,8 +469,8 @@
 	  ic = ghost_areas(1,ia)
 	  nc = ghost_areas(2,ia)
 	  write(my_unit,*) 'ghost_area color: ',ic
-	  write(my_unit,*) 'nkn inner,unique,local: '
-     +     				,nkn_inner,nkn_unique,nkn_local
+	  write(my_unit,*) 'nkn inner,unique,local: ' &
+     &     				,nkn_inner,nkn_unique,nkn_local
 	  write(my_unit,*) 'nodes outer: ',ic,nc
 	  flush(my_unit)
 	  do i=1,nc
@@ -491,8 +491,8 @@
 	  flush(my_unit)
 	  end do
 	  nc = ghost_areas(4,ia)
-	  write(my_unit,*) 'nel inner,unique,local: '
-     +     				,nel_inner,nel_unique,nel_local
+	  write(my_unit,*) 'nel inner,unique,local: ' &
+     &     				,nel_inner,nel_unique,nel_local
 	  flush(my_unit)
 	  write(my_unit,*) 'elems outer: ',ic,nc
 	  flush(my_unit)

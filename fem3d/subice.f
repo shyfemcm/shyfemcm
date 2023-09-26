@@ -262,9 +262,9 @@
 	!  vars(1) = tm + Tkelvin
 	!end if
 !---------------------------------------------------------------
-	call ice_run(k,Cl,Fsd_cloud,P_rate,qa,qs
-     +				,Ta,Ua,Sw,deltat,hdm
-     +                          ,i0,vars,iceth)
+	call ice_run(k,Cl,Fsd_cloud,P_rate,qa,qs &
+     &				,Ta,Ua,Sw,deltat,hdm &
+     &                          ,i0,vars,iceth)
 
 	icevars(:,k) = vars(:)
 	icethick(k) = iceth
@@ -360,8 +360,8 @@
 	if( kdebug > 0 ) then
 	  iunit1 = 555
 	  call find_unit(iunit1)
-	  open(iunit1,file='icethickness.txt'
-     +			,status='unknown',form='formatted')
+	  open(iunit1,file='icethickness.txt' &
+     &			,status='unknown',form='formatted')
 	end if
 
 	end
@@ -426,9 +426,9 @@
 	integer nvars
 	double precision vars(nvars)
 
-	write(777,*) Cl,Fsd_cloud,P_rate,qa,qs
-     +			,Ta,Ua,Sw,deltat,hdm,iceth
-     +			,j,nvars,vars
+	write(777,*) Cl,Fsd_cloud,P_rate,qa,qs &
+     &			,Ta,Ua,Sw,deltat,hdm,iceth &
+     &			,j,nvars,vars
 
 	end
 

@@ -63,9 +63,9 @@
         uv(:,1:nel)    = cv3all(:,1:nel,3)
         vv(:,1:nel)    = cv3all(:,1:nel,4)
 
-        call shy_transp2vel(bvel,nel,nkn,nlv,nlvdi,hev,zenv,nen3v
-     +                          ,ilhv,hlv,uv,vv
-     +                          ,uprv,vprv)
+        call shy_transp2vel(bvel,nel,nkn,nlv,nlvdi,hev,zenv,nen3v &
+     &                          ,ilhv,hlv,uv,vv &
+     &                          ,uprv,vprv)
 
         deallocate(zenv,uv,vv)
 
@@ -103,9 +103,9 @@
         uv(:,1:nel)    = cv3all(:,1:nel,3)
         vv(:,1:nel)    = cv3all(:,1:nel,4)
 
-        call shy_transp2vel_e(bvel,nel,nkn,nlv,nlvdi,hev,zenv,nen3v
-     +                          ,ilhv,hlv,uv,vv
-     +                          ,zev,ue3v,ve3v)
+        call shy_transp2vel_e(bvel,nel,nkn,nlv,nlvdi,hev,zenv,nen3v &
+     &                          ,ilhv,hlv,uv,vv &
+     &                          ,zev,ue3v,ve3v)
 
         deallocate(znv,zenv,uv,vv)
 
@@ -143,10 +143,10 @@
 
 !***************************************************************
 
-        subroutine shy_transp2vel(bvel,nel,nkn,nlv,nlvddi
-     +				,hev,zenv,nen3v
-     +                          ,ilhv,hlv,utlnv,vtlnv
-     +                          ,uprv,vprv)
+        subroutine shy_transp2vel(bvel,nel,nkn,nlv,nlvddi &
+     &				,hev,zenv,nen3v &
+     &                          ,ilhv,hlv,utlnv,vtlnv &
+     &                          ,uprv,vprv)
 
 ! transforms transports at elements to velocities at nodes
 
@@ -194,10 +194,10 @@
 	  if( bvel ) then
 	    zeta = sum(zenv(:,ie)) / 3.	!average of zeta on element
 	    zmin = minval(zenv(:,ie))   !min: z-adapt coords works with zmin
-	    call compute_zadapt_info(zmin,hlv,nsigma,lmax,
-     +			             lmin,nadapt,hadapt)
-	    call get_layer_thickness(lmax,lmin,nsigma,nadapt,
-     +				     hsigma,hadapt,zeta,hev(ie),hlv,hl)
+	    call compute_zadapt_info(zmin,hlv,nsigma,lmax, &
+     &			             lmin,nadapt,hadapt)
+	    call get_layer_thickness(lmax,lmin,nsigma,nadapt, &
+     &				     hsigma,hadapt,zeta,hev(ie),hlv,hl)
 	  end if
 
           do l=1,lmax
@@ -227,10 +227,10 @@
 
 !***************************************************************
 
-        subroutine shy_transp2vel_e(bvel,nel,nkn,nlv,nlvddi
-     +				,hev,zenv,nen3v
-     +                          ,ilhv,hlv,utlnv,vtlnv
-     +                          ,zev,ue3v,ve3v)
+        subroutine shy_transp2vel_e(bvel,nel,nkn,nlv,nlvddi &
+     &				,hev,zenv,nen3v &
+     &                          ,ilhv,hlv,utlnv,vtlnv &
+     &                          ,zev,ue3v,ve3v)
 
 ! transforms transports at elements to velocities at elements
 
@@ -274,10 +274,10 @@
 	  zeta = sum(zenv(:,ie)) / 3.	!average of zeta on element
           zmin = minval(zenv(:,ie))     !min: z-adapt coords works with zmin	  
 	  if( bvel ) then
-	    call compute_zadapt_info(zmin,hlv,nsigma,lmax,
-     +			             lmin,nadapt,hadapt)
-	    call get_layer_thickness(lmax,lmin,nsigma,nadapt,
-     +				     hsigma,hadapt,zeta,hev(ie),hlv,hl)
+	    call compute_zadapt_info(zmin,hlv,nsigma,lmax, &
+     &			             lmin,nadapt,hadapt)
+	    call get_layer_thickness(lmax,lmin,nsigma,nadapt, &
+     &				     hsigma,hadapt,zeta,hev(ie),hlv,hl)
 	  end if
 
 	  zev(ie) = zeta

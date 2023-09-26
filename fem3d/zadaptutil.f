@@ -24,27 +24,27 @@
 !
 !--------------------------------------------------------------------------
 
-c routines for handling z-adaptive layers
-c
-c revision log :
-c
-c 05.06.2023    lrp     introduce z-star
-c 18.07.2023	lrp	rzmov read from shy
-c 20.07.2023	lrp	new parameter nzadapt
-c
-c notes:
-c this file is used also in:      
-c      
-c	compute_zadaptive_info (subele.f)
-c	init_rzmov_info (shyelab1.f)
-c	get_zadapt_info (newexpl.f,lagrange_vertical.f)
-c	set_zadapt_info (subele.f)
-c       compute_zadaptive_info (shyelab_average.f,shyelab_utils.f,shyelab_nodes.f,shyutil.f,subfemintp.f)
-c	init_zadaptation (shyfem.f)
-c
-c******************************************************************
-c******************************************************************
-c******************************************************************
+! routines for handling z-adaptive layers
+!
+! revision log :
+!
+! 05.06.2023    lrp     introduce z-star
+! 18.07.2023	lrp	rzmov read from shy
+! 20.07.2023	lrp	new parameter nzadapt
+!
+! notes:
+! this file is used also in:      
+!      
+!	compute_zadaptive_info (subele.f)
+!	init_rzmov_info (shyelab1.f)
+!	get_zadapt_info (newexpl.f,lagrange_vertical.f)
+!	set_zadapt_info (subele.f)
+!       compute_zadaptive_info (shyelab_average.f,shyelab_utils.f,shyelab_nodes.f,shyutil.f,subfemintp.f)
+!	init_zadaptation (shyfem.f)
+!
+!******************************************************************
+!******************************************************************
+!******************************************************************
 
 !==================================================================
         module zadapt
@@ -61,7 +61,7 @@ c******************************************************************
         end module zadapt
 !==================================================================
 
-c******************************************************************
+!******************************************************************
 
         subroutine get_rzmov_info(rzmov)
 
@@ -75,7 +75,7 @@ c******************************************************************
 
         end
 
-c******************************************************************
+!******************************************************************
 
         subroutine set_rzmov_info(rzmov)
 
@@ -89,7 +89,7 @@ c******************************************************************
 
         end
 
-c******************************************************************
+!******************************************************************
 
 	subroutine compute_rzmov_info(nlv,nzadapt,hlv,rzmov)
 
@@ -116,7 +116,7 @@ c******************************************************************
 
 	end 
 
-c******************************************************************
+!******************************************************************
 
         subroutine init_rzmov_info(nlv,nzadapt,hlv,rzmov)
 
@@ -132,7 +132,7 @@ c******************************************************************
 
         end
 
-c******************************************************************
+!******************************************************************
 
         subroutine get_nzadapt_info(nzadapt)
 
@@ -146,7 +146,7 @@ c******************************************************************
 
         end
 
-c******************************************************************
+!******************************************************************
 
         subroutine set_nzadapt_info(nzadapt)
 
@@ -160,7 +160,7 @@ c******************************************************************
 
         end
 
-c******************************************************************
+!******************************************************************
 
         subroutine get_zadapt_info(ie,nadapt,hadapt)
 
@@ -179,7 +179,7 @@ c******************************************************************
 
         end
 
-c******************************************************************
+!******************************************************************
 
         subroutine set_zadapt_info(ie,nadapt,hadapt)
 
@@ -196,11 +196,11 @@ c******************************************************************
 
         end
 
-c******************************************************************
+!******************************************************************
 
 	subroutine compute_nadapt_info(z,hlv,lmax,lmin,nadapt)
 
-c returns lowest index of adaptive deforming layers
+! returns lowest index of adaptive deforming layers
 
 	implicit none
 
@@ -228,11 +228,11 @@ c returns lowest index of adaptive deforming layers
 
 	end
 
-c******************************************************************
+!******************************************************************
 
 	subroutine compute_zadapt_info(z,hlv,nsig,lmax,lmin,nzad,hzad)
 
-c returns relevant info for z-surface-adaptive layers
+! returns relevant info for z-surface-adaptive layers
 
 	implicit none
 
@@ -252,45 +252,45 @@ c returns relevant info for z-surface-adaptive layers
 
 	if( nsig .eq. 0 ) then   
 
-c---------------------------------------------------------
-c surface layer index
-c---------------------------------------------------------  
+!---------------------------------------------------------
+! surface layer index
+!---------------------------------------------------------  
 
-c         !for now commented: lmin = 1
+!         !for now commented: lmin = 1
 
-c         rgridtop = getpar('rztop')
-c      	  do l=1,lmax              !a threshold is used
-c           if((-hlv(l)+rgridtop*(hlv(l)-hlv(l-1))).le.z) exit
-c         end do
-c         lmin=min(l,lmax)         !safety min: jlhv>=ilhv    
+!         rgridtop = getpar('rztop')
+!      	  do l=1,lmax              !a threshold is used
+!           if((-hlv(l)+rgridtop*(hlv(l)-hlv(l-1))).le.z) exit
+!         end do
+!         lmin=min(l,lmax)         !safety min: jlhv>=ilhv    
 
-c---------------------------------------------------------
-c lowest index of adaptive deforming layers
-c--------------------------------------------------------- 
+!---------------------------------------------------------
+! lowest index of adaptive deforming layers
+!--------------------------------------------------------- 
 
 	  call compute_nadapt_info(z,hlv,lmax,lmin,levmax)
 
 	end if 
 
-c---------------------------------------------------------
-c compute nzad, hzad
-c--------------------------------------------------------- 
+!---------------------------------------------------------
+! compute nzad, hzad
+!--------------------------------------------------------- 
 
         hzad = hlv(levmax)
         nzad = max(0,levmax-lmin+1) !+1 (min 2 adaptive layer)
 
 	end
 
-c******************************************************************
+!******************************************************************
 
-        subroutine compute_zadaptive_info(ie,nlv,lmin,lmax,hlv,z,htot,
-     +					  nadapt,ladapt,hadapt,hdl)
+        subroutine compute_zadaptive_info(ie,nlv,lmin,lmax,hlv,z,htot, &
+     &					  nadapt,ladapt,hadapt,hdl)
 
-c returns z-surface-adaptive layers info. Info is computed by node of element:
-c number of adaptive layers       by node (3) + by ele (1)
-c lowest index of adaptive layer  by node (3) + by ele (1)
-c closing depth of adaptive layer by node (3) + by ele (1)
-c coefficients of adaptive layers 
+! returns z-surface-adaptive layers info. Info is computed by node of element:
+! number of adaptive layers       by node (3) + by ele (1)
+! lowest index of adaptive layer  by node (3) + by ele (1)
+! closing depth of adaptive layer by node (3) + by ele (1)
+! coefficients of adaptive layers 
 
         implicit none
 
@@ -325,43 +325,43 @@ c coefficients of adaptive layers
 
         if( .not.bsigma .and. .not.bzstandard) then
 
-c---------------------------------------------------------
-c loop over nodes: adaptation is node-driven
-c---------------------------------------------------------
+!---------------------------------------------------------
+! loop over nodes: adaptation is node-driven
+!---------------------------------------------------------
 
 	do ii=1,3
 
-c---------------------------------------------------------
-c lowest index of adaptive deforming layers
-c---------------------------------------------------------       
+!---------------------------------------------------------
+! lowest index of adaptive deforming layers
+!---------------------------------------------------------       
 
           call compute_nadapt_info(z(ii),hlv,lmax,lmin(ii),levmax)
 
-c---------------------------------------------------------
-c compute nadapt, ladapt, hadapt 
-c---------------------------------------------------------  	  
+!---------------------------------------------------------
+! compute nadapt, ladapt, hadapt 
+!---------------------------------------------------------  	  
 
 	  hadapt(ii) = hlv(levmax) 
 	  nadapt(ii) = max(0,levmax-lmin(ii)+1) !+1 (min 2 adaptive layer)
 	  ladapt(ii) = levmax
 
-c---------------------------------------------------------
-c compute hdl: different strategy tested
-c--------------------------------------------------------- 
+!---------------------------------------------------------
+! compute hdl: different strategy tested
+!--------------------------------------------------------- 
 
     	  if (nadapt(ii).gt.0) then	  
-c	  den = (nsigma(ii)-1.)+r		!freezed
+!	  den = (nsigma(ii)-1.)+r		!freezed
           den = hadapt(ii)-hlv(lmin(ii)-1) !zstar
 	  if (ladapt(ii).eq.lmax) den = htot(ii)-hlv(lmin(ii)-1)
           do l=lmin(ii),ladapt(ii)
-c	    hdl(l,ii) = - 1. / den		!freezed		
-c           hdl(l,ii) = - 1. / nsigma(ii)       !constant
+!	    hdl(l,ii) = - 1. / den		!freezed		
+!           hdl(l,ii) = - 1. / nsigma(ii)       !constant
 	    htop = hlv(l-1)
 	    hbot = hlv(l)
 	    if (l.eq.lmax) hbot = htot(ii)
             hdl(l,ii) = (htop-hbot)/den   	!zstar
 	  end do
-c         hdl(lmin(ii),ii) = - r / den          !freezed
+!         hdl(lmin(ii),ii) = - r / den          !freezed
 	  check = 0.
 	  do l=lmin(ii),ladapt(ii)
             check = check + hdl(l,ii)
@@ -376,9 +376,9 @@ c         hdl(lmin(ii),ii) = - r / den          !freezed
 	  end if
 	  end if
 
-c---------------------------------------------------------
-c compute element info: number of adaptive layers in ele
-c---------------------------------------------------------
+!---------------------------------------------------------
+! compute element info: number of adaptive layers in ele
+!---------------------------------------------------------
 
 	  !flag adaptive layers in element with non-conformal edge:
 	  !free-surface must span all layers greater then lmin
@@ -391,13 +391,13 @@ c---------------------------------------------------------
 
 	end if
 
-c---------------------------------------------------------
-c end of routine
-c---------------------------------------------------------
+!---------------------------------------------------------
+! end of routine
+!---------------------------------------------------------
 
 	end
 
-c******************************************************************
+!******************************************************************
 
         subroutine init_zadaptation
 
@@ -451,9 +451,9 @@ c******************************************************************
 
 	end
 
-c******************************************************************
-c	program zadapt_main
-c	call zadapt_test
-c	end
-c******************************************************************
+!******************************************************************
+!	program zadapt_main
+!	call zadapt_test
+!	end
+!******************************************************************
 

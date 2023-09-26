@@ -24,36 +24,36 @@
 !
 !--------------------------------------------------------------------------
 
-c revision log :
-c
-c 18.11.1998	ggu	check dimensions with dimnos
-c 06.04.1999	ggu	some cosmetic changes
-c 03.12.2001	ggu	some extra output -> place of min/max
-c 09.12.2003	ggu	check for NaN introduced
-c 07.03.2007	ggu	easier call
-c 08.11.2008	ggu	do not compute min/max in non-existing layers
-c 07.12.2010	ggu	write statistics on depth distribution (depth_stats)
-c 06.05.2015	ggu	noselab started
-c 05.06.2015	ggu	many more features added
-c 14.09.2015	ggu	changed VERS_7_2_2
-c 05.10.2015	ggu	variables in xv were used in the wromg order - fixed
-c 12.10.2015	ggu	changed VERS_7_3_3
-c 19.10.2015	ggu	changed VERS_7_3_6
-c 25.05.2016	ggu	changed VERS_7_5_10
-c 05.10.2017	ggu	implement quiet, silent option, write dir
-c 09.10.2017	ggu	consistent treatment of output files
-c 20.10.2017	ggu	write time in string format
-c 26.10.2017	ggu	various user related improvements
-c 04.11.2017	ggu	changed VERS_7_5_34
-c 14.11.2017	ggu	changed VERS_7_5_36
-c 05.12.2017	ggu	changed VERS_7_5_39
-c 22.02.2018	ggu	changed VERS_7_5_42
-c 16.10.2018	ggu	changed VERS_7_5_50
-c 16.02.2019	ggu	changed VERS_7_5_60
-c 03.02.2020	ggu	cleaned, new headers for split
-c 06.03.2020	ggu	check for time step
-c
-c**************************************************************
+! revision log :
+!
+! 18.11.1998	ggu	check dimensions with dimnos
+! 06.04.1999	ggu	some cosmetic changes
+! 03.12.2001	ggu	some extra output -> place of min/max
+! 09.12.2003	ggu	check for NaN introduced
+! 07.03.2007	ggu	easier call
+! 08.11.2008	ggu	do not compute min/max in non-existing layers
+! 07.12.2010	ggu	write statistics on depth distribution (depth_stats)
+! 06.05.2015	ggu	noselab started
+! 05.06.2015	ggu	many more features added
+! 14.09.2015	ggu	changed VERS_7_2_2
+! 05.10.2015	ggu	variables in xv were used in the wromg order - fixed
+! 12.10.2015	ggu	changed VERS_7_3_3
+! 19.10.2015	ggu	changed VERS_7_3_6
+! 25.05.2016	ggu	changed VERS_7_5_10
+! 05.10.2017	ggu	implement quiet, silent option, write dir
+! 09.10.2017	ggu	consistent treatment of output files
+! 20.10.2017	ggu	write time in string format
+! 26.10.2017	ggu	various user related improvements
+! 04.11.2017	ggu	changed VERS_7_5_34
+! 14.11.2017	ggu	changed VERS_7_5_36
+! 05.12.2017	ggu	changed VERS_7_5_39
+! 22.02.2018	ggu	changed VERS_7_5_42
+! 16.10.2018	ggu	changed VERS_7_5_50
+! 16.02.2019	ggu	changed VERS_7_5_60
+! 03.02.2020	ggu	cleaned, new headers for split
+! 06.03.2020	ggu	check for time step
+!
+!**************************************************************
 
 	subroutine extelab
 
@@ -67,7 +67,7 @@ c**************************************************************
         use evgeom
         use levels
 
-c elaborates ext file
+! elaborates ext file
 
 	implicit none
 
@@ -114,21 +114,21 @@ c elaborates ext file
 	character*10 :: short
 	character*40 :: full
 	integer, parameter :: niu = 6
-	character*5 :: what(niu) = (/'velx ','vely ','zeta '
-     +				,'speed','dir  ','all  '/)
-	character*26 :: descrp(niu) = (/
-     +		 'velocity in x-direction   '
-     +		,'velocity in y-direction   '
-     +		,'water level               '
-     +		,'current speed             '
-     +		,'current direction         '
-     +		,'all hydrodynamic variables'
-     +			/)
+	character*5 :: what(niu) = (/'velx ','vely ','zeta ' &
+     &				,'speed','dir  ','all  '/)
+	character*26 :: descrp(niu) = (/ &
+     &		 'velocity in x-direction   ' &
+     &		,'velocity in y-direction   ' &
+     &		,'water level               ' &
+     &		,'current speed             ' &
+     &		,'current direction         ' &
+     &		,'all hydrodynamic variables' &
+     &			/)
 
 	integer iapini,ifileo
 	integer ifem_open_file
 
-c--------------------------------------------------------------
+!--------------------------------------------------------------
 
 	nread=0
 	nelab=0
@@ -138,9 +138,9 @@ c--------------------------------------------------------------
 	rnull=-1.
 	bopen = .false.
 
-c--------------------------------------------------------------
-c set command line parameters
-c--------------------------------------------------------------
+!--------------------------------------------------------------
+! set command line parameters
+!--------------------------------------------------------------
 
 	call elabutil_init('EXT','extelab')
 
@@ -184,11 +184,11 @@ c--------------------------------------------------------------
 	femver = ' '
 	ivars = 0
 
-	call ext_read_header2(nin,nvers,knausm,lmax
-     +                          ,atime0
-     +                          ,href,hzmin,nzadapt,title,femver
-     +                          ,knaus,hdep,il,x,y,strings,hl
-     +				,ierr)
+	call ext_read_header2(nin,nvers,knausm,lmax &
+     &                          ,atime0 &
+     &                          ,href,hzmin,nzadapt,title,femver &
+     &                          ,knaus,hdep,il,x,y,strings,hl &
+     &				,ierr)
 	if( ierr /= 0 ) goto 93
 
 	if( .not. bquiet ) then
@@ -201,11 +201,11 @@ c--------------------------------------------------------------
 	  write(6,*) 'nzadapt    : ',nint(nzadapt)
           write(6,*) 'title      : ',trim(title)
 	  write(6,*) 'Nodes contained in file:'
-          write(6,*) ' i    node  il      hdep' //
-     +			'           x           y  description'
+          write(6,*) ' i    node  il      hdep' // &
+     &			'           x           y  description'
 	  do i=1,knausm
-            write(6,1000) i,knaus(i),il(i),hdep(i),x(i),y(i)
-     +					,'  ',trim(strings(i))
+            write(6,1000) i,knaus(i),il(i),hdep(i),x(i),y(i) &
+     &					,'  ',trim(strings(i))
  1000	    format(i3,i8,i4,f10.2,2f12.2,a,a)
 	  end do
 	end if
@@ -232,9 +232,9 @@ c--------------------------------------------------------------
 	  write(6,*) 'Variables contained in file:'
 	  write(6,*) ' i ivar  short     full'
 	  do iv=1,nvar
-	    call ext_read_record(nin,nvers,atime,knausm,lmax
-     +				,ivar,m,il,vals
-     +				,ierr)
+	    call ext_read_record(nin,nvers,atime,knausm,lmax &
+     &				,ivar,m,il,vals &
+     &				,ierr)
 	    if( ierr /= 0 ) goto 91
 	    if( ivar == 0 ) ivar = 1
 	    ivars(iv) = ivar
@@ -288,17 +288,17 @@ c--------------------------------------------------------------
 	  nb = ifileo(0,'out.ext','unform','new')
 	  call ext_write_header(nb,0,knausm,lmax,nvar,ierr)
 	  if( ierr /= 0 ) goto 99
-          call ext_write_header2(nb,0,knausm,lmax
-     +				,atime0
-     +                          ,href,hzmin,nzadapt,title,femver
-     +                          ,knaus,hdep,il,x,y,strings,hl
-     +                          ,ierr)
+          call ext_write_header2(nb,0,knausm,lmax &
+     &				,atime0 &
+     &                          ,href,hzmin,nzadapt,title,femver &
+     &                          ,knaus,hdep,il,x,y,strings,hl &
+     &                          ,ierr)
 	  if( ierr /= 0 ) goto 99
 	end if
 
-c--------------------------------------------------------------
-c loop on data
-c--------------------------------------------------------------
+!--------------------------------------------------------------
+! loop on data
+!--------------------------------------------------------------
 
 	atime = atold
 	atwrite = -1
@@ -307,9 +307,9 @@ c--------------------------------------------------------------
 	do
 
 	  atold = atime
-	  call ext_read_record(nin,nvers,atime,knausm,lmax
-     +				,ivar,m,il,vals
-     +				,ierr)
+	  call ext_read_record(nin,nvers,atime,knausm,lmax &
+     &				,ivar,m,il,vals &
+     &				,ierr)
           if(ierr.gt.0) write(6,*) 'error in reading file : ',ierr
           if(ierr.ne.0) exit
 	  nread = nread + 1
@@ -383,12 +383,12 @@ c--------------------------------------------------------------
 	    else
 	      iv = iv + 1
 	      if( lmax > 1 ) then
-                call split_var3d(atime,knausm,lmax,il
-     +				,m,nvar,ivar,iv,vals)
+                call split_var3d(atime,knausm,lmax,il &
+     &				,m,nvar,ivar,iv,vals)
 	      end if
 	      if( ivar /= 2 ) then	!only if not velocity
-                call split_var2d(atime,knausm
-     +				,m,nvar,ivar,iv,val0)
+                call split_var2d(atime,knausm &
+     &				,m,nvar,ivar,iv,val0)
 	      end if
 	    end if
 	  end if
@@ -396,20 +396,20 @@ c--------------------------------------------------------------
 	  if( boutput ) then
 	    if( ivar == 0 ) nout = nout + 1
 	    if( bverb ) write(6,*) 'writing to output: ',ivar,atime
-            call ext_write_record(nb,0,atime,knausm,lmax
-     +                                  ,ivar,m,il,vals,ierr)
+            call ext_write_record(nb,0,atime,knausm,lmax &
+     &                                  ,ivar,m,il,vals,ierr)
 	    if( ierr /= 0 ) goto 99
 	  end if
 
 	end do		!time do loop
 
-c--------------------------------------------------------------
-c end of loop on data
-c--------------------------------------------------------------
+!--------------------------------------------------------------
+! end of loop on data
+!--------------------------------------------------------------
 
-c--------------------------------------------------------------
-c final write of variables
-c--------------------------------------------------------------
+!--------------------------------------------------------------
+! final write of variables
+!--------------------------------------------------------------
 
 	if( btrans ) then
 	  !write(6,*) 'istep,naccu: ',istep,naccu
@@ -427,9 +427,9 @@ c--------------------------------------------------------------
 	  end do
 	end if
 
-c--------------------------------------------------------------
-c write final message
-c--------------------------------------------------------------
+!--------------------------------------------------------------
+! write final message
+!--------------------------------------------------------------
 
 	if( .not. bsilent ) then
           write(6,*)
@@ -461,8 +461,8 @@ c--------------------------------------------------------------
 	  write(6,*) '  2d for depth averaged variables'
 	  write(6,*) '  3d for output at each layer'
 	  call compute_range(knausm,range)
-	  write(6,1123) ' node is consecutive node numbering: '
-     +					,trim(range)
+	  write(6,1123) ' node is consecutive node numbering: ' &
+     &					,trim(range)
 	 else if( boutput ) then
 	  write(6,*) 'output written to file out.ext'
 	 end if
@@ -476,9 +476,9 @@ c--------------------------------------------------------------
 	! write(6,*) '  simul: ',trim(simnam)
 	!end if
 
-c--------------------------------------------------------------
-c end of routine
-c--------------------------------------------------------------
+!--------------------------------------------------------------
+! end of routine
+!--------------------------------------------------------------
 
 	return
    85	continue
@@ -497,9 +497,9 @@ c--------------------------------------------------------------
 	stop 'error stop extelab: write error'
 	end
 
-c***************************************************************
-c***************************************************************
-c***************************************************************
+!***************************************************************
+!***************************************************************
+!***************************************************************
 
 	subroutine split_var0d(atime,knausm,nvar,what,zeta,uu,vv)
 
@@ -523,16 +523,16 @@ c***************************************************************
 	integer, save :: icall = 0
 	integer, save, allocatable :: iusplit(:,:)
 	character*20, save :: time_date = '#          date_time'
-	character*80, save :: title(niu) = (
-     +			/'      velx'
-     +			,'      vely'
-     +			,'      zeta'
-     +			,'     speed'
-     +			,'       dir'
-     +			,'       all'
-     +			/)
-	character*80, save :: all =	
-     +  '      zeta        velx        vely       speed         dir'
+	character*80, save :: title(niu) = ( &
+     &			/'      velx' &
+     &			,'      vely' &
+     &			,'      zeta' &
+     &			,'     speed' &
+     &			,'       dir' &
+     &			,'       all' &
+     &			/)
+	character*80, save :: all =	 &
+     &  '      zeta        velx        vely       speed         dir'
 
 	if( icall == 0 ) then
 	  allocate(iusplit(niu,knausm))
@@ -570,10 +570,10 @@ c***************************************************************
  1000	format(a20,f12.4)
         end
 
-c***************************************************************
+!***************************************************************
 
-        subroutine split_var2d(atime,knausm
-     +				,m,nvar,ivar,iv,val0)
+        subroutine split_var2d(atime,knausm &
+     &				,m,nvar,ivar,iv,val0)
 
 ! splits 2d scalar records
 
@@ -630,7 +630,7 @@ c***************************************************************
  1000	format(a20,f14.4)
 	end
 
-c***************************************************************
+!***************************************************************
 
         subroutine split_var_wave(atime,knausm,lmax,nvar,ivar,iv,vals)
 
@@ -680,10 +680,10 @@ c***************************************************************
 
 	end
 
-c***************************************************************
+!***************************************************************
 
-        subroutine split_var3d(atime,knausm,lmax,il
-     +				,m,nvar,ivar,iv,vals)
+        subroutine split_var3d(atime,knausm,lmax,il &
+     &				,m,nvar,ivar,iv,vals)
 
 ! splits 3d values
 	use shyfem_strings
@@ -765,9 +765,9 @@ c***************************************************************
 
         end
 
-c***************************************************************
-c***************************************************************
-c***************************************************************
+!***************************************************************
+!***************************************************************
+!***************************************************************
 
 	subroutine minmaxmed(val,n,vmin,vmax,vmed)
 
@@ -786,7 +786,7 @@ c***************************************************************
 
 	end
 
-c***************************************************************
+!***************************************************************
 
 	subroutine average_val(knausm,lmax,il,hl,hdep,zeta,vals,val0)
 
@@ -815,4 +815,4 @@ c***************************************************************
 
 	end
 
-c***************************************************************
+!***************************************************************

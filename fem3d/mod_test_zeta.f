@@ -29,15 +29,15 @@
 
 	call getazam(azpar,ampar)
 
-	if( (azpar == 0. .and. ampar == 1. ) .or.
-     +        (azpar == 1. .and. ampar == 0. ) )  then
-           open(unit = 99998, 
-     +          file = "test_zeta."//trim(n_threads_s)//
-     +                 ".EXPLICIT_"//trim(my_id_s))
+	if( (azpar == 0. .and. ampar == 1. ) .or. &
+     &        (azpar == 1. .and. ampar == 0. ) )  then
+           open(unit = 99998,  &
+     &          file = "test_zeta."//trim(n_threads_s)// &
+     &                 ".EXPLICIT_"//trim(my_id_s))
 	else 
-           open(unit = 99998, 
-     +          file = "test_zeta."//trim(n_threads_s)//
-     +                 ".IMPLICIT_"//trim(my_id_s))
+           open(unit = 99998,  &
+     &          file = "test_zeta."//trim(n_threads_s)// &
+     &                 ".IMPLICIT_"//trim(my_id_s))
         endif
 
         if(nkn<100) then

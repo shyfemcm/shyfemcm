@@ -33,9 +33,9 @@
 !**************************************************************************
 
 	subroutine anneal(nkn,ngrddi,kphv,ng,iknot,maux,iaux)
-c
-c simulated annealing
-c
+!
+! simulated annealing
+!
 	implicit none
 
 	integer nkn,ngrddi
@@ -98,14 +98,14 @@ c
 		nsucc=nsucc+1
 		call exchi(nkn,ngrddi,i1,i2,kphv,ng,iknot,maux,mbw)
 	    end if
-c	    call mcontr(nkn,ngrddi,ng,iknot,kphv,maux,iaux,mbw)
-c	    write(6,*) iover,i1,i2,md,mbw,nsucc
-c	if(mod(iover,100).eq.0) read(5,'(i10)') i
+!	    call mcontr(nkn,ngrddi,ng,iknot,kphv,maux,iaux,mbw)
+!	    write(6,*) iover,i1,i2,md,mbw,nsucc
+!	if(mod(iover,100).eq.0) read(5,'(i10)') i
 	    if(nsucc.gt.nlimit) goto 1
 	  end do
     1	  continue
 	  write(6,*) '*** ',t,exp(-1./t),mbw,iover,nsucc
-c	read(5,'(i10)') i
+!	read(5,'(i10)') i
 	  t=t*tfactr
 	  if(nsucc.eq.0) return
 	end do
@@ -113,11 +113,11 @@ c	read(5,'(i10)') i
 	return
 	end
 
-c*****************************************************************
+!*****************************************************************
 
 	function metrop(md,t)
 
-c issues verdict for simulated annealing
+! issues verdict for simulated annealing
 
 	logical metrop
 	real md,t
@@ -128,28 +128,28 @@ c issues verdict for simulated annealing
 	save iseed
 	data iseed / 97 /
 
-c	metrop=.true.
-c	if(md.lt.0.) return
-c	aux=exp(-md/t)
-c	raux=ran(iseed)
-c	write(6,*) md,raux,aux
-c	metrop = (md.lt.0) .or. (raux.lt.aux)
+!	metrop=.true.
+!	if(md.lt.0.) return
+!	aux=exp(-md/t)
+!	raux=ran(iseed)
+!	write(6,*) md,raux,aux
+!	metrop = (md.lt.0) .or. (raux.lt.aux)
 
 	metrop = .true.
 	if (md.lt.0) return
 	if (ran(iseed).lt.exp(-md/t)) return
 	metrop = .false.
 
-c	metrop = (md.lt.0) .or. (ran(iseed).lt.exp(-md/t))
+!	metrop = (md.lt.0) .or. (ran(iseed).lt.exp(-md/t))
 
 	return
 	end
 
-c*****************************************************************
+!*****************************************************************
 
 	subroutine exchi(nkn,ngrddi,i1,i2,kphv,ng,iknot,maux,mbw)
 
-c exchanges indices
+! exchanges indices
 
 	implicit none
 
@@ -204,11 +204,11 @@ c exchanges indices
 	return
 	end
 
-c*****************************************************************
+!*****************************************************************
 
 	function mband(nkn,ngrddi,ng,iknot,kphv)
 
-c computes bandwidth
+! computes bandwidth
 
 	implicit none
 
@@ -232,13 +232,13 @@ c computes bandwidth
 	return
 	end
 
-c*****************************************************************
+!*****************************************************************
 
 	function mbandk(nkn,ngrddi,j,k,ng,iknot,kphv)
 
-c computes bandwidth for node at index j and node number k
+! computes bandwidth for node at index j and node number k
 
-c if real bandwidth is desired, call function with k=kphv(j)
+! if real bandwidth is desired, call function with k=kphv(j)
 
 	implicit none
 
@@ -263,11 +263,11 @@ c if real bandwidth is desired, call function with k=kphv(j)
 	return
 	end
 
-c****************************************************************
+!****************************************************************
 
 	subroutine mcontr(nkn,ngrddi,ng,iknot,kphv,maux,iaux,mbw)
 
-c controlls array maux if it is up to date
+! controlls array maux if it is up to date
 
 	implicit none
 
@@ -310,7 +310,7 @@ c controlls array maux if it is up to date
 	return
 	end
 
-c*********************************************************************
+!*********************************************************************
 
       FUNCTION RAN(ISEED)
       PARAMETER(IA=7141,IC=54773,IM=259200)

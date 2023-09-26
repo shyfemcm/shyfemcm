@@ -29,8 +29,8 @@
 ! 20.04.2021	clr	adding this dummy file to remove use_AmgX pragma directive
 !
 !*******************************************************************
-      subroutine CAmgX_GetInitSolver(AmgX_Solver,PETSC_COMM,
-     +                               modestr,cfgfile)
+      subroutine CAmgX_GetInitSolver(AmgX_Solver,PETSC_COMM, &
+     &                               modestr,cfgfile)
        use iso_c_binding
         implicit none
            type(c_ptr) :: AmgX_Solver
@@ -47,8 +47,8 @@
            stop "ERROR CAmgX_dummy, AmgX wasn't enabled at compilation"
       end subroutine CAmgX_GetSolver
 !*******************************************************************
-      subroutine CAmgX_Initialize(AmgX_Solver,PETSC_COMM,
-     +                            modestr,cfgfile,perr)
+      subroutine CAmgX_Initialize(AmgX_Solver,PETSC_COMM, &
+     &                            modestr,cfgfile,perr)
 #include "petsc/finclude/petsc.h"
        use iso_c_binding
         use petscdm

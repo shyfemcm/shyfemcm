@@ -77,14 +77,14 @@
 
         call clo_add_option('intp data',' ','data for interpolation')
 	call clo_add_com('  data is nintp,nextb,nextf,idt')
-	call clo_add_com('   nintp  number of new records between '
-     +				// 'existing ones')
+	call clo_add_com('   nintp  number of new records between ' &
+     &				// 'existing ones')
 	call clo_add_com('   nextb  number of records before start')
 	call clo_add_com('   nextf  number of records after end')
 	call clo_add_com('   idt    time step for extension records')
 
-	call clo_add_option('calendar',' '
-     +				,'converts to real calendar')
+	call clo_add_option('calendar',' ' &
+     &				,'converts to real calendar')
 
         call clo_add_sep('options in/output')
 
@@ -226,8 +226,8 @@
 ! prepare for output if needed
 !--------------------------------------------------------------
 
-	call femutil_open_for_write('out.fem'
-     +			,ffinfo_in%iformat,ffinfo_out)
+	call femutil_open_for_write('out.fem' &
+     &			,ffinfo_in%iformat,ffinfo_out)
 
 !--------------------------------------------------------------
 ! read first record
@@ -438,8 +438,8 @@
 ! prepare for output if needed
 !--------------------------------------------------------------
 
-	call femutil_open_for_write('out.fem'
-     +			,ffinfo_in%iformat,ffinfo_out)
+	call femutil_open_for_write('out.fem' &
+     &			,ffinfo_in%iformat,ffinfo_out)
 
 !--------------------------------------------------------------
 ! read first record

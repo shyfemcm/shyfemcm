@@ -148,15 +148,15 @@
 	  end subroutine parse_strings
 	end interface
 
-c-----------------------------------------------------------------
-c initialize parameters
-c-----------------------------------------------------------------
+!-----------------------------------------------------------------
+! initialize parameters
+!-----------------------------------------------------------------
 
 	file = ' '
 
-c-----------------------------------------------------------------
-c find out what to do
-c-----------------------------------------------------------------
+!-----------------------------------------------------------------
+! find out what to do
+!-----------------------------------------------------------------
 
 	call clo_init('nc2fem','nc-file','1.2')
         call clo_add_info('converts nc (netcdf) file to fem file')
@@ -169,46 +169,46 @@ c-----------------------------------------------------------------
         call clo_add_option('quiet',.false.,'be as quiet as possible')
         call clo_add_option('silent',.false.,'be silent')
         call clo_add_option('debug',.false.,'produce debug information')
-        call clo_add_option('varinfo',.false.
-     +		,'list variables contained in file')
-        call clo_add_option('list',.false.
-     +		,'list possible names for description')
+        call clo_add_option('varinfo',.false. &
+     &		,'list variables contained in file')
+        call clo_add_option('list',.false. &
+     &		,'list possible names for description')
 
 	call clo_add_sep('special variables')
 
-        call clo_add_option('time',.false.
-     +		,'write available time records to terminal')
+        call clo_add_option('time',.false. &
+     &		,'write available time records to terminal')
         call clo_add_option('coords',.false.,'write coordinate file')
-        call clo_add_option('bathy var',' '
-     +		,'write bathymetry file using variable var')
-        call clo_add_option('slmask var',' '
-     +		,'write sea-land mask file using variable var')
+        call clo_add_option('bathy var',' ' &
+     &		,'write bathymetry file using variable var')
+        call clo_add_option('slmask var',' ' &
+     &		,'write sea-land mask file using variable var')
 
-        call clo_add_option('invertdepth',.false.
-     +		,'invert depth values for bathymetry')
-        call clo_add_option('invertslm',.false.
-     +		,'invert slmask values (0 for sea)')
-        call clo_add_option('unform',.false.
-     +		,'write fem file unformatted')
-        call clo_add_option('tcorrect',.false.
-     +		,'correct time for climate runs of SMHI')
+        call clo_add_option('invertdepth',.false. &
+     &		,'invert depth values for bathymetry')
+        call clo_add_option('invertslm',.false. &
+     &		,'invert slmask values (0 for sea)')
+        call clo_add_option('unform',.false. &
+     &		,'write fem file unformatted')
+        call clo_add_option('tcorrect',.false. &
+     &		,'correct time for climate runs of SMHI')
 	call clo_hide_option('tcorrect')
 
 	call clo_add_sep('output general variables')
 
-        call clo_add_option('vars text',' '
-     +		,'write variables given in text to out.fem')
-        call clo_add_option('descrp text',' '
-     +		,'use this description for variables')
-        call clo_add_option('fact facts',' '
-     +		,'scale vars with these factors')
-        call clo_add_option('offset offsets',' '
-     +		,'add offsets to vars')
-        call clo_add_option('single file',' '
-     +		,'file containing x/y coordinates for interpolation')
+        call clo_add_option('vars text',' ' &
+     &		,'write variables given in text to out.fem')
+        call clo_add_option('descrp text',' ' &
+     &		,'use this description for variables')
+        call clo_add_option('fact facts',' ' &
+     &		,'scale vars with these factors')
+        call clo_add_option('offset offsets',' ' &
+     &		,'add offsets to vars')
+        call clo_add_option('single file',' ' &
+     &		,'file containing x/y coordinates for interpolation')
 
-        call clo_add_option('domain limits',' '
-     +		,'give domain limits and resolution')
+        call clo_add_option('domain limits',' ' &
+     &		,'give domain limits and resolution')
         call clo_add_option('regexpand iexp',-1,'expand regular grid')
 
         call clo_add_com('    iexp>0 expands iexp cells, =0 whole grid')
@@ -216,20 +216,20 @@ c-----------------------------------------------------------------
 
         call clo_add_sep('additional information')
         call clo_add_com('  var is name of variable in nc file')
-        call clo_add_com('  facts is list of factors for'
-     +				// ' multiplication of vars')
-        call clo_add_com('  offsets is list of constants to'
-     +				// ' be added to vars')
-        call clo_add_com('  text is list of variables and descriptions'
-     +				// ' for output')
+        call clo_add_com('  facts is list of factors for' &
+     &				// ' multiplication of vars')
+        call clo_add_com('  offsets is list of constants to' &
+     &				// ' be added to vars')
+        call clo_add_com('  text is list of variables and descriptions' &
+     &				// ' for output')
         call clo_add_com('    seperate with comma and leave no space')
         call clo_add_com('    or enclose in ""')
         call clo_add_com('    example: U10,V10,PSFC or "U10 V10 PSFC"')
         call clo_add_com('  limits gives extension of domain')
-        call clo_add_com('    for regular domain use x0,y0,x1,y1 ' //
-     +				'(dx,dy are the same)')
-	call clo_add_com('    for irregular domain use ' //
-     +				'dx[,dy[,x0,y0,x1,y1]]')
+        call clo_add_com('    for regular domain use x0,y0,x1,y1 ' // &
+     &				'(dx,dy are the same)')
+	call clo_add_com('    for irregular domain use ' // &
+     &				'dx[,dy[,x0,y0,x1,y1]]')
 
 	call clo_parse_options
 
@@ -281,9 +281,9 @@ c-----------------------------------------------------------------
 
 	call populate_strings
 
-c-----------------------------------------------------------------
-c open nc file and write info
-c-----------------------------------------------------------------
+!-----------------------------------------------------------------
+! open nc file and write info
+!-----------------------------------------------------------------
 
 	call nc_open_read(ncid,file)
 	if( .not. bsilent ) call global_information(ncid)
@@ -292,9 +292,9 @@ c-----------------------------------------------------------------
 
 	call ncnames_init
 
-        call get_dims_and_coords(ncid,bwrite
-     +                  ,nt,nx,ny,nz
-     +                  ,tcoord,xcoord,ycoord,zcoord)
+        call get_dims_and_coords(ncid,bwrite &
+     &                  ,nt,nx,ny,nz &
+     &                  ,tcoord,xcoord,ycoord,zcoord)
 
 	nxdim = max(1,nx)
 	nydim = max(1,ny)
@@ -323,37 +323,37 @@ c-----------------------------------------------------------------
 	  stop
 	end if
 
-c-----------------------------------------------------------------
-c handle time
-c-----------------------------------------------------------------
+!-----------------------------------------------------------------
+! handle time
+!-----------------------------------------------------------------
 
 	if( btime ) then
 	  call print_time_records(ncid)
 	end if
 
-c-----------------------------------------------------------------
-c handle coordinates and special variables
-c-----------------------------------------------------------------
+!-----------------------------------------------------------------
+! handle coordinates and special variables
+!-----------------------------------------------------------------
 
-	call setup_coordinates(ncid,bverb,xcoord,ycoord
-     +				,nxdim,nydim,nx,ny
-     +				,xlon,ylat)
+	call setup_coordinates(ncid,bverb,xcoord,ycoord &
+     &				,nxdim,nydim,nx,ny &
+     &				,xlon,ylat)
 	call setup_zcoord(ncid,bverb,zcoord,nlvdim,nz,zdep,nz1,hlv)
-	call setup_bathymetry(ncid,bverb,binvertdepth,bathy
-     +				,nxdim,nydim,nx,ny,bat)
+	call setup_bathymetry(ncid,bverb,binvertdepth,bathy &
+     &				,nxdim,nydim,nx,ny,bat)
 	call setup_sealand(ncid,bverb,slmask,nxdim,nydim,nx,ny,slm)
 	if( binvertslm ) slm = 1.-slm
 
-c-----------------------------------------------------------------
-c check regularity of grid 
-c - in regpar_data is info on original grid
-c - in regpar is info on desired regular output grid
-c - bregular is true if regular_data is regular
-c-----------------------------------------------------------------
+!-----------------------------------------------------------------
+! check regularity of grid 
+! - in regpar_data is info on original grid
+! - in regpar is info on desired regular output grid
+! - bregular is true if regular_data is regular
+!-----------------------------------------------------------------
 
 	!call handle_unusual_coordinates(nxdim,nydim,xlon,ylat)
-	call check_regular_coords(nxdim,nydim,xlon,ylat
-     +				,bregular,regpar_data)
+	call check_regular_coords(nxdim,nydim,xlon,ylat &
+     &				,bregular,regpar_data)
 	if( bverb ) write(6,*) bregular,regpar_data
 	call handle_domain(bverb,dstring,bregular,regpar_data,regpar)
 
@@ -367,9 +367,9 @@ c-----------------------------------------------------------------
 	 end if
 	end if
 
-c-----------------------------------------------------------------
-c write special files or info
-c-----------------------------------------------------------------
+!-----------------------------------------------------------------
+! write special files or info
+!-----------------------------------------------------------------
 
 	if( bcoords ) then
 	  call write_coordinates(nxdim,nydim,xlon,ylat)
@@ -399,9 +399,9 @@ c-----------------------------------------------------------------
 	  write(6,*) 'sea-land mask written to files: ',files
 	end if
 
-c-----------------------------------------------------------------
-c check variables to write
-c-----------------------------------------------------------------
+!-----------------------------------------------------------------
+! check variables to write
+!-----------------------------------------------------------------
 
 	n = -1
 	call parse_strings(varline,n,vars)
@@ -420,9 +420,9 @@ c-----------------------------------------------------------------
 	offs = 0.
 	call setup_facts(nd,soffs,offs)
 
-c-----------------------------------------------------------------
-c set up interpolation
-c-----------------------------------------------------------------
+!-----------------------------------------------------------------
+! set up interpolation
+!-----------------------------------------------------------------
 
 	nxnew = nint(regpar(1))
 	nynew = nint(regpar(2))
@@ -437,9 +437,9 @@ c-----------------------------------------------------------------
 	  call prepare_interpol(nxdim,nydim,xlon,ylat,regpar)
 	end if
 
-c-----------------------------------------------------------------
-c interpolate special variables
-c-----------------------------------------------------------------
+!-----------------------------------------------------------------
+! interpolate special variables
+!-----------------------------------------------------------------
 
 	if( bathy .ne. ' ' ) then
 	  allocate(batnew(nxdim,nydim))
@@ -449,29 +449,29 @@ c-----------------------------------------------------------------
 	  call write_2d_grd_regular('bathy_new.grd',regpar,batnew)
 	end if
 
-c-----------------------------------------------------------------
-c check if some dimension is inverted
-c-----------------------------------------------------------------
+!-----------------------------------------------------------------
+! check if some dimension is inverted
+!-----------------------------------------------------------------
 
 	if( bregular ) then
 	  call check_invert(regpar)
 	end if
 
-c-----------------------------------------------------------------
-c write variables
-c-----------------------------------------------------------------
+!-----------------------------------------------------------------
+! write variables
+!-----------------------------------------------------------------
 
-	call write_variables(ncid,n,bunform,bdebug,bquiet
-     +				,vars,descrps,facts,offs,flags
-     +				,regexpand
-     +				,nxdim,nydim,nlvdim
-     +				,xlon,ylat
-     +				,nz1,hlv
-     +				,nxnew,nynew,regpar,nrec)
+	call write_variables(ncid,n,bunform,bdebug,bquiet &
+     &				,vars,descrps,facts,offs,flags &
+     &				,regexpand &
+     &				,nxdim,nydim,nlvdim &
+     &				,xlon,ylat &
+     &				,nz1,hlv &
+     &				,nxnew,nynew,regpar,nrec)
 
-c-----------------------------------------------------------------
-c end of routine
-c-----------------------------------------------------------------
+!-----------------------------------------------------------------
+! end of routine
+!-----------------------------------------------------------------
 
 	if( nrec > 0 .and. .not. bsilent ) then
 	  write(6,*) 'total number of time records written: ',nrec
@@ -490,20 +490,20 @@ c-----------------------------------------------------------------
 
 	end
 
-c*****************************************************************
-c*****************************************************************
-c*****************************************************************
+!*****************************************************************
+!*****************************************************************
+!*****************************************************************
 
-c*****************************************************************
-c*****************************************************************
-c*****************************************************************
+!*****************************************************************
+!*****************************************************************
+!*****************************************************************
 
-c*****************************************************************
-c*****************************************************************
-c*****************************************************************
+!*****************************************************************
+!*****************************************************************
+!*****************************************************************
 
-	subroutine handle_variable_description(ncid,nvar
-     +				,vars,descrps,bwrite)
+	subroutine handle_variable_description(ncid,nvar &
+     &				,vars,descrps,bwrite)
 
 	use ncnames
 	use shyfem_strings
@@ -530,8 +530,8 @@ c*****************************************************************
 	  call nc_get_var_id(ncid,var,var_id)
 	  if( var_id == 0 ) then
 	    write(6,*) 'no such variable: ',trim(var)
-	    stop 'error stop handle_variable_description: '//
-     +			'no such variable'
+	    stop 'error stop handle_variable_description: '// &
+     &			'no such variable'
 	  end if
 	  if( bwrite ) then
 	    write(6,*) 'variable: ',trim(var),i,var_id
@@ -574,7 +574,7 @@ c*****************************************************************
 
 	end
 
-c*****************************************************************
+!*****************************************************************
 
 	subroutine handle_direction(nvar,descrps)
 
@@ -604,7 +604,7 @@ c*****************************************************************
 
 	end
 
-c*****************************************************************
+!*****************************************************************
 
 	subroutine print_description(nvar,vars,descrps)
 
@@ -631,7 +631,7 @@ c*****************************************************************
 
 	end
 
-c*****************************************************************
+!*****************************************************************
 
 	subroutine parse_strings(line,nvars,vars)
 
@@ -667,7 +667,7 @@ c*****************************************************************
 
 	end
 
-c*****************************************************************
+!*****************************************************************
 
 	subroutine count_variables(varline,n)
 
@@ -711,7 +711,7 @@ c*****************************************************************
 
 	end
 
-c*****************************************************************
+!*****************************************************************
 
 	subroutine parse_variables(varline,ndim,vars)
 
@@ -770,15 +770,15 @@ c*****************************************************************
 
 	end
 
-c*****************************************************************
+!*****************************************************************
 
-	subroutine write_variables(ncid,nvar,bunform,bdebug,bquiet
-     +					,vars,descrps,facts,offs,flags
-     +					,regexpand
-     +					,nx,ny,nz
-     +					,x,y
-     +					,nz1,hlv
-     +					,nxnew,nynew,regpar,nrec)
+	subroutine write_variables(ncid,nvar,bunform,bdebug,bquiet &
+     &					,vars,descrps,facts,offs,flags &
+     &					,regexpand &
+     &					,nx,ny,nz &
+     &					,x,y &
+     &					,nz1,hlv &
+     &					,nxnew,nynew,regpar,nrec)
 
 	use iso8601
 
@@ -915,26 +915,26 @@ c*****************************************************************
 	    write(6,*) 'writing record: ',it,'   ',stime
 	  end if
 
-	  call fem_file_write_params(iformat,iunit,dtime
-     +                          ,nvers,npnew,lmax
-     +                          ,nvar,ntype,datetime)
-          call fem_file_write_2header(iformat,iunit,ntype,lmax
-     +                  	,hlv,regpar(1:7))
+	  call fem_file_write_params(iformat,iunit,dtime &
+     &                          ,nvers,npnew,lmax &
+     &                          ,nvar,ntype,datetime)
+          call fem_file_write_2header(iformat,iunit,ntype,lmax &
+     &                  	,hlv,regpar(1:7))
 
 	  do i=1,nvar
 	    nzz = nz
 	    if( dims(i) == 2 ) nzz = 1
-	    call handle_data(ncid,bdebug,vars(i),it,dims(i),flags(i)
-     +				,nx,ny,nzz
-     +				,x,y
-     +				,nxnew,nynew,regpar,ilhkv
-     +				,data,femdata,npnew)
+	    call handle_data(ncid,bdebug,vars(i),it,dims(i),flags(i) &
+     &				,nx,ny,nzz &
+     &				,x,y &
+     &				,nxnew,nynew,regpar,ilhkv &
+     &				,data,femdata,npnew)
 
 	    if( bexpand ) then
-	      call reg_expand_3d(nz,nxnew,nynew,lmax,regexpand
-     +					,my_flag,femdata)
-	      call adjust_reg_vertical(nz,nxnew,nynew,my_flag
-     +					,femdata,ilhkv)
+	      call reg_expand_3d(nz,nxnew,nynew,lmax,regexpand &
+     &					,my_flag,femdata)
+	      call adjust_reg_vertical(nz,nxnew,nynew,my_flag &
+     &					,femdata,ilhkv)
 	    end if
 
 	    if( facts(i) /= 1. ) then
@@ -948,15 +948,15 @@ c*****************************************************************
 
 	    lmax = nzz
 	    string = descrps(i)
-            call fem_file_write_data(iformat,iunit
-     +                          ,nvers,npnew,lmax
-     +                          ,string
-     +                          ,ilhkv,hd
-     +                          ,lmax,femdata)
+            call fem_file_write_data(iformat,iunit &
+     &                          ,nvers,npnew,lmax &
+     &                          ,string &
+     &                          ,ilhkv,hd &
+     &                          ,lmax,femdata)
 
 	    if( bdebug ) then
-	      call write_grd_var(vars(i),it,nx,ny,nzz,nxnew,nynew
-     +			,regpar,x,y,data,femdata)
+	      call write_grd_var(vars(i),it,nx,ny,nzz,nxnew,nynew &
+     &			,regpar,x,y,data,femdata)
 	    end if
 	  end do
 
@@ -973,13 +973,13 @@ c*****************************************************************
 
 	end
 
-c*****************************************************************
+!*****************************************************************
 
-	subroutine handle_data(ncid,bdebug,varname,it,ndims,flag
-     +				,nx,ny,nz
-     +				,x,y
-     +				,nxnew,nynew,regpar,ilhkv
-     +				,data,femdata,np)
+	subroutine handle_data(ncid,bdebug,varname,it,ndims,flag &
+     &				,nx,ny,nz &
+     &				,x,y &
+     &				,nxnew,nynew,regpar,ilhkv &
+     &				,data,femdata,np)
 
 	implicit none
 
@@ -1030,8 +1030,8 @@ c*****************************************************************
 	  stop 'error stop handle_data: dimensions x/y'
 	end if
 
-	if( ndims == 3 .and. nz /= dims(3) .or.
-     +			ndims == 2 .and. nz /= 1 ) then
+	if( ndims == 3 .and. nz /= dims(3) .or. &
+     &			ndims == 2 .and. nz /= 1 ) then
 	  write(6,*) 'error in dimensions: '
 	  write(6,*) 'ndims: ',ndims
 	  write(6,*) 'nz given: ',nz
@@ -1069,10 +1069,10 @@ c*****************************************************************
 
 	end
 
-c*****************************************************************
+!*****************************************************************
 
-	subroutine write_grd_var(varname,it,nx,ny,nz,nxnew,nynew
-     +			,regpar,x,y,data,femdata)
+	subroutine write_grd_var(varname,it,nx,ny,nz,nxnew,nynew &
+     &			,regpar,x,y,data,femdata)
 
 	implicit none
 
@@ -1118,7 +1118,7 @@ c*****************************************************************
 
 	end
 
-c*****************************************************************
+!*****************************************************************
 
 	subroutine setup_facts(n,sfacts,facts)
 
@@ -1148,7 +1148,7 @@ c*****************************************************************
 	stop 'error stop setup_facts: parse error'
 	end
 
-c*****************************************************************
+!*****************************************************************
 
 	subroutine global_information(ncid)
 
@@ -1167,7 +1167,7 @@ c*****************************************************************
 
 	end
 
-c*****************************************************************
+!*****************************************************************
 
 	subroutine global_info(ncid,what)
 
@@ -1185,7 +1185,7 @@ c*****************************************************************
 
 	end
 
-c*****************************************************************
+!*****************************************************************
 
 	subroutine make_filename(varname,it,filename)
 
@@ -1206,7 +1206,7 @@ c*****************************************************************
 
 	end
 
-c*****************************************************************
+!*****************************************************************
 
 	subroutine handle_unusual_coordinates(nx,ny,x,y)
 
@@ -1261,7 +1261,7 @@ c*****************************************************************
 	stop 'error stop handle_unusual_coordinates: not regular'
 	end
 
-c*****************************************************************
+!*****************************************************************
 
 	subroutine check_invert(regpar)
 
@@ -1288,5 +1288,5 @@ c*****************************************************************
 
 	end
 
-c*****************************************************************
+!*****************************************************************
 

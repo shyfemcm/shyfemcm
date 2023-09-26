@@ -40,13 +40,13 @@
 !************************************************************
 
 
-c***************************************************************
-c***************************************************************
-c***************************************************************
+!***************************************************************
+!***************************************************************
+!***************************************************************
 
         subroutine gis_write_record(dtime,ivar,np,nlvddi,il,cv,xv,yv)
 
-c writes one record to file (3D)
+! writes one record to file (3D)
 
         !use basin
         use shyfem_strings
@@ -90,9 +90,9 @@ c writes one record to file (3D)
           write(nout,1002) '# ivar:    ',ivar
           write(nout,1001) '# varname: ',trim(full)
           write(nout,1002) '# nodes:   ',np
-          write(nout,1000) '#    inode'//
-     +			'             x             y'//
-     +			'  layers      data (all layers)'
+          write(nout,1000) '#    inode'// &
+     &			'             x             y'// &
+     &			'  layers      data (all layers)'
 	end if
 
 	lmax = 1
@@ -113,11 +113,11 @@ c writes one record to file (3D)
  1002	format(a,i10)
         end
 
-c***************************************************************
+!***************************************************************
 
         subroutine gis_write_hydro(dtime,np,nlvddi,il,zv,uv,vv,xv,yv)
 
-c writes one record to file (3D)
+! writes one record to file (3D)
 
         !use basin
 
@@ -160,12 +160,12 @@ c writes one record to file (3D)
 	  write(nout,1000) '# data extracted to gis format by shyelab'
 	  write(nout,1001) '# date:    ',dateline
 	  write(nout,1002) '# ivar:    ',0
-	  write(nout,1001) '# varname: '
-     +			,'water level (zeta) and velocities'
+	  write(nout,1001) '# varname: ' &
+     &			,'water level (zeta) and velocities'
 	  write(nout,1002) '# nodes:   ',np
-	  write(nout,1000) '#   inode              x             y'//
-     +				'  layers      zeta'//
-     +				'     velocities x/y (all layers)'
+	  write(nout,1000) '#   inode              x             y'// &
+     &				'  layers      zeta'// &
+     &				'     velocities x/y (all layers)'
 	end if
 
 	lmax = 1
@@ -176,8 +176,8 @@ c writes one record to file (3D)
           y = yv(i)
 	  nn = 1 + 2*lmax
 	  write(format,'(a,i5,a)') '(i10,2e14.6,i8,',nn,'g14.6)'
-          write(nout,format) i,x,y,lmax,zv(i)
-     +			,(uv(l,i),vv(l,i),l=1,lmax)
+          write(nout,format) i,x,y,lmax,zv(i) &
+     &			,(uv(l,i),vv(l,i),l=1,lmax)
         end do
 
 	close(nout)
@@ -188,7 +188,7 @@ c writes one record to file (3D)
  1002	format(a,i10)
         end
 
-c***************************************************************
+!***************************************************************
 
 	subroutine gis_subst_colon(line_old,line_new)
 
@@ -208,11 +208,11 @@ c***************************************************************
 
 	end
 
-c***************************************************************
+!***************************************************************
 
         subroutine gis_write_connect
 
-c writes connectivity
+! writes connectivity
 
         use basin
 
@@ -231,4 +231,4 @@ c writes connectivity
 
 	end
 
-c***************************************************************
+!***************************************************************

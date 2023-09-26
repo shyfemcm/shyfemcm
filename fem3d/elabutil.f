@@ -302,8 +302,8 @@
 
 	binputfile = bfemfile .or. btsfile
 
-	text = 'returns info on or elaborates a ' //
-     +			'shyfem file'
+	text = 'returns info on or elaborates a ' // &
+     &			'shyfem file'
         call clo_add_info(text)
 
 	call elabutil_set_general_options
@@ -331,10 +331,10 @@
         call clo_add_sep('general options')
 
         call clo_add_option('info',.false.,'only give info on header')
-        call clo_add_option('verbose',.false.
-     +				,'be more verbose, write time records')
-        call clo_add_option('quiet',.false.
-     +				,'do not write header information')
+        call clo_add_option('verbose',.false. &
+     &				,'be more verbose, write time records')
+        call clo_add_option('quiet',.false. &
+     &				,'do not write header information')
         call clo_add_option('silent',.false.,'do not write anything')
         call clo_add_option('write',.false.,'write min/max of records')
         call clo_add_option('debug',.false.,'write debug information')
@@ -342,24 +342,24 @@
 
         call clo_add_sep('time options')
 
-        call clo_add_option('tmin time',' '
-     +                  ,'only process starting from time')
-        call clo_add_option('tmax time',' '
-     +                  ,'only process up to time')
-        call clo_add_option('inclusive',.false.
-     +			,'output includes whole time period given')
-        call clo_add_option('changetime difftime',0.
-     +                  ,'add difftime to time record (difftime [s])')
+        call clo_add_option('tmin time',' ' &
+     &                  ,'only process starting from time')
+        call clo_add_option('tmax time',' ' &
+     &                  ,'only process up to time')
+        call clo_add_option('inclusive',.false. &
+     &			,'output includes whole time period given')
+        call clo_add_option('changetime difftime',0. &
+     &                  ,'add difftime to time record (difftime [s])')
 
 	call clo_add_com('    time is either YYYY-MM-DD[::hh[:mm[:ss]]]')
 	call clo_add_com('    or integer for relative time')
 
-        call clo_add_option('rmin rec',1.
-     +                  ,'only process starting from record rec')
-        call clo_add_option('rmax rec',0.
-     +                  ,'only process up to record rec')
-        call clo_add_option('rfreq freq',1.
-     +                  ,'only process every freq record')
+        call clo_add_option('rmin rec',1. &
+     &                  ,'only process starting from record rec')
+        call clo_add_option('rmax rec',0. &
+     &                  ,'only process up to record rec')
+        call clo_add_option('rfreq freq',1. &
+     &                  ,'only process every freq record')
 
 	call clo_add_com('    rec in rmax can be negative')
 	call clo_add_com('    this indicates rec records from the back')
@@ -377,26 +377,26 @@
         call clo_add_option('out',.false.,'writes new file')
 
         call clo_add_option('outformat form','native','output format')
-	call clo_add_com('    possible output formats are: '
-     +				// 'shy|gis|fem|nc|off'
-     +				// ' (Default native)')
-	call clo_add_com('    not all formats are available for'
-     +				// ' all file types')
+	call clo_add_com('    possible output formats are: ' &
+     &				// 'shy|gis|fem|nc|off' &
+     &				// ' (Default native)')
+	call clo_add_com('    not all formats are available for' &
+     &				// ' all file types')
 
-        call clo_add_option('catmode cmode',0.,'concatenation mode'
-     +				// ' for handeling more files')
-	call clo_add_com('    possible values for cmode are: -1,0,+1'
-     +				// ' (Default 0)')
-	call clo_add_com('    -1: all of first file, '
-     +				// 'then remaining of second')
+        call clo_add_option('catmode cmode',0.,'concatenation mode' &
+     &				// ' for handeling more files')
+	call clo_add_com('    possible values for cmode are: -1,0,+1' &
+     &				// ' (Default 0)')
+	call clo_add_com('    -1: all of first file, ' &
+     &				// 'then remaining of second')
 	call clo_add_com('     0: simply concatenate files')
-	call clo_add_com('    +1: first file until start of second, '
-     +				// 'then all of second')
+	call clo_add_com('    +1: first file until start of second, ' &
+     &				// 'then all of second')
 
-        call clo_add_option('proj projection',' '
-     +                          ,'projection of coordinates')
-        call clo_add_com('    projection is string consisting of '//
-     +                          'mode,proj,params')
+        call clo_add_option('proj projection',' ' &
+     &                          ,'projection of coordinates')
+        call clo_add_com('    projection is string consisting of '// &
+     &                          'mode,proj,params')
         call clo_add_com('    mode: +1: cart to geo,  -1: geo to cart')
         call clo_add_com('    proj: 1:GB, 2:UTM, 3:CPP')
 
@@ -413,43 +413,43 @@
         call clo_add_option('split',.false.,'split file for variables')
 
 	if( bshowall .or. bflxfile .or. bextfile ) then
-          call clo_add_option('splitall',.false.
-     +		,'splits file (EXT and FLX) for extended data')
+          call clo_add_option('splitall',.false. &
+     &		,'splits file (EXT and FLX) for extended data')
 	end if
 
 	if( bshowall .or. binputfile ) then
-          call clo_add_option('check period',' '
-     +				,'checks data over period')
-          call clo_add_com('  period can be '//
-     +				'all,year,month,week,day,none')
+          call clo_add_option('check period',' ' &
+     &				,'checks data over period')
+          call clo_add_com('  period can be '// &
+     &				'all,year,month,week,day,none')
 	end if
 
 	!if( bshowall .or. binputfile .or. bshyfile ) then
 	!if( bshowall .or. binputfile ) then
-          call clo_add_option('checkdt',.false.
-     +			,'check for change of time step')
+          call clo_add_option('checkdt',.false. &
+     &			,'check for change of time step')
 	!end if
 
 	if( bshowall .or. binputfile ) then
-          call clo_add_option('checkrain',.false.
-     +			,'check for yearly rain (if file contains rain)')
+          call clo_add_option('checkrain',.false. &
+     &			,'check for yearly rain (if file contains rain)')
 	end if
 
 	if( bshowall .or. bshyfile ) then
-          call clo_add_option('node nlist',' '
-     +			,'extract vars of nodes in list')
-	  call clo_add_com('    nlist is a comma separated list of nodes'
-     +				//' to be extracted')
-          call clo_add_option('nodes nfile',' '
-     +			,'extract vars at nodes given in file nfile')
-	  call clo_add_com('    nfile is a file with nodes'
-     +				//' to be extracted')
-          call clo_add_option('extract recs',' '
-     +			,'extract records specified in recs')
-	  call clo_add_com('    recs is either a comma separated list'
-     +				//' like r1,r2,r3')
-	  call clo_add_com('    or in the format istart..ifreq..iend'
-     +				//' (..iend may be missing)')
+          call clo_add_option('node nlist',' ' &
+     &			,'extract vars of nodes in list')
+	  call clo_add_com('    nlist is a comma separated list of nodes' &
+     &				//' to be extracted')
+          call clo_add_option('nodes nfile',' ' &
+     &			,'extract vars at nodes given in file nfile')
+	  call clo_add_com('    nfile is a file with nodes' &
+     &				//' to be extracted')
+          call clo_add_option('extract recs',' ' &
+     &			,'extract records specified in recs')
+	  call clo_add_com('    recs is either a comma separated list' &
+     &				//' like r1,r2,r3')
+	  call clo_add_com('    or in the format istart..ifreq..iend' &
+     &				//' (..iend may be missing)')
 	end if
 
 	if( bshowall .or. bshyfile .or. bfemfile ) then
@@ -459,10 +459,10 @@
 
 	if( bshowall .or. btsfile ) then
           call clo_add_sep('time series options')
-          call clo_add_option('convert',.false.
-     +			,'convert time column to ISO string')
-          call clo_add_option('date0',' '
-     +			,'reference date for conversion of time column')
+          call clo_add_option('convert',.false. &
+     &			,'convert time column to ISO string')
+          call clo_add_option('date0',' ' &
+     &			,'reference date for conversion of time column')
 	end if
 
 	end subroutine elabutil_set_extract_options
@@ -475,13 +475,13 @@
 
 	if( clo_has_option('facts') ) return
 
-        call clo_add_option('facts fstring',' '
-     +			,'apply factors to data in data-file')
-        call clo_add_option('offset ostring',' '
-     +			,'apply factors to data in data-file')
-        call clo_add_com('    fstring and ostring is comma'
-     +			// ' separated factors,'
-     +                  // ' empty for no change')
+        call clo_add_option('facts fstring',' ' &
+     &			,'apply factors to data in data-file')
+        call clo_add_option('offset ostring',' ' &
+     &			,'apply factors to data in data-file')
+        call clo_add_com('    fstring and ostring is comma' &
+     &			// ' separated factors,' &
+     &                  // ' empty for no change')
 
 	end subroutine elabutil_set_facts_options
 
@@ -507,21 +507,21 @@
 
         call clo_add_sep('specific FEM file options')
 
-        call clo_add_option('condense',.false.
-     +			,'condense file data into one node')
-        call clo_add_option('chform',.false.
-     +			,'change output format form/unform of FEM file')
-        call clo_add_option('grd',.false.
-     +			,'write GRD file from data in FEM file')
-        call clo_add_option('grdcoord',.false.
-     +			,'write regular coordinates in GRD format')
+        call clo_add_option('condense',.false. &
+     &			,'condense file data into one node')
+        call clo_add_option('chform',.false. &
+     &			,'change output format form/unform of FEM file')
+        call clo_add_option('grd',.false. &
+     &			,'write GRD file from data in FEM file')
+        call clo_add_option('grdcoord',.false. &
+     &			,'write regular coordinates in GRD format')
         call clo_add_option('nodei node',' ','extract internal node')
-        call clo_add_com('    node is internal numbering in fem file'
-     +                  //' or ix,iy of regular grid')
-        call clo_add_option('newstring sstring',' '
-     +			,'substitute string description in fem-file')
-        call clo_add_com('    sstring is comma separated strings,'
-     +                  //' empty for no change')
+        call clo_add_com('    node is internal numbering in fem file' &
+     &                  //' or ix,iy of regular grid')
+        call clo_add_option('newstring sstring',' ' &
+     &			,'substitute string description in fem-file')
+        call clo_add_com('    sstring is comma separated strings,' &
+     &                  //' empty for no change')
 
 	call elabutil_set_facts_options
 
@@ -572,15 +572,15 @@
 	call clo_add_option('std',.false.,'standard deviation of records')
         call clo_add_option('rms',.false.,'root mean square of records')
         call clo_add_option('sumvar',.false.,'sum over variables')
-	call clo_add_option('threshold t',flag
-     +				,'compute records over threshold t')
+	call clo_add_option('threshold t',flag &
+     &				,'compute records over threshold t')
 	call clo_add_option('fact fact',1.,'multiply values by fact')
-	call clo_add_option('freq n',0.
-     +			,'frequency for aver/sum/min/max/std/rms')
+	call clo_add_option('freq n',0. &
+     &			,'frequency for aver/sum/min/max/std/rms')
 
 	call clo_add_option('2d',.false.,'average vertically to 2d field')
-	call clo_add_option('vorticity',.false.
-     +			,'compute vorticity for hydro file')
+	call clo_add_option('vorticity',.false. &
+     &			,'compute vorticity for hydro file')
 
 	end subroutine elabutil_set_shy_options
 
@@ -594,13 +594,13 @@
 
         call clo_add_sep('difference of SHY file options')
 
-	call clo_add_option('diff',.false.
-     +			,'check if 2 files are different')
-	call clo_add_option('diffeps deps',0.
-     +			,'files differ by more than deps (default 0)')
+	call clo_add_option('diff',.false. &
+     &			,'check if 2 files are different')
+	call clo_add_option('diffeps deps',0. &
+     &			,'files differ by more than deps (default 0)')
 
-	call clo_add_com('    this option needs two files' //
-     +				' and exits at difference')
+	call clo_add_com('    this option needs two files' // &
+     &				' and exits at difference')
 	call clo_add_com('    with -out writes difference to out file')
 
 	end subroutine elabutil_set_diff_options
@@ -617,12 +617,12 @@
 
         call clo_add_sep('extra options')
 
-        call clo_add_option('areas line-file',' '
-     +			,'line delimiting areas for -averbas option')
-        call clo_add_option('dates date-file',' '
-     +			,'give dates for averaging in file')
-        call clo_add_option('influencemap',.false.
-     +			,'computes influence map from multi-conz')
+        call clo_add_option('areas line-file',' ' &
+     &			,'line delimiting areas for -averbas option')
+        call clo_add_option('dates date-file',' ' &
+     &			,'give dates for averaging in file')
+        call clo_add_option('influencemap',.false. &
+     &			,'computes influence map from multi-conz')
 
 	call clo_show_next_options
 
@@ -638,8 +638,8 @@
 
 	call clo_add_com('All options for all file types are shown')
 	call clo_add_com('Not all options are available for all files')
-	call clo_add_com('To show options for a specific file use: '
-     +		//'shyelab -h file')
+	call clo_add_com('To show options for a specific file use: ' &
+     &		//'shyelab -h file')
 
 	end subroutine elabutil_set_all_file_options
 
@@ -653,20 +653,20 @@
 
         call clo_add_sep('specific LGR file options')
 
-        call clo_add_option('lgmean',.false.,'extract mean position'
-     +                  //' and age in function')
-        call clo_add_com('     of particle type. It '
-     +                  //' write files lagrange_mean_traj.*')
-        call clo_add_option('lgdens',.false.,'compute distribution of'
-     +                  //' particle density and age')
-        call clo_add_com('     either on nodes or on'
-     +                  //' regular grid (using -reg option)')
-	call clo_add_option('lg2d',.false.,'sum particles vertically' 
-     +                  //' when computing the ')
+        call clo_add_option('lgmean',.false.,'extract mean position' &
+     &                  //' and age in function')
+        call clo_add_com('     of particle type. It ' &
+     &                  //' write files lagrange_mean_traj.*')
+        call clo_add_option('lgdens',.false.,'compute distribution of' &
+     &                  //' particle density and age')
+        call clo_add_com('     either on nodes or on' &
+     &                  //' regular grid (using -reg option)')
+	call clo_add_option('lg2d',.false.,'sum particles vertically'  &
+     &                  //' when computing the ')
         call clo_add_com('     particle density/age')
         call clo_add_option('lgtype',.false.,'compute density per type')
-        call clo_add_option('nlgtype max-type',0
-     +			,'max number of types to compute')
+        call clo_add_option('nlgtype max-type',0 &
+     &			,'max number of types to compute')
 
         end subroutine elabutil_set_lgr_options
 
@@ -807,8 +807,8 @@
         if( .not. bsilent ) then
 	  flow = ftype
 	  call to_lower(flow)
-	  text = trim(flow) // 'elab - elaborates ' 
-     +				// trim(ftype) // ' files'
+	  text = trim(flow) // 'elab - elaborates '  &
+     &				// trim(ftype) // ' files'
           call shyfem_copyright(trim(text))
 	end if
 
@@ -893,8 +893,8 @@
         avermode = 0
         btrans = .false.
 
-	ic = count( (/baver,bsum,bmin,bmax,bstd,brms
-     +				,bthreshold,baverdir/) )
+	ic = count( (/baver,bsum,bmin,bmax,bstd,brms &
+     &				,bthreshold,baverdir/) )
 
 	if( ic > 1 ) then
 	  write(6,*) 'Only one of the following options can be given:'
@@ -946,7 +946,7 @@
 
         subroutine outfile_make_depth(nkn,nel,nen3v,hm3v,hev,hkv)
 
-c averages vertically
+! averages vertically
 
         implicit none
 
@@ -974,11 +974,11 @@ c averages vertically
 
         end
 
-c***************************************************************
+!***************************************************************
 
         subroutine outfile_make_hkv(nkn,nel,nen3v,hm3v,hev,hkv)
 
-c averages vertically
+! averages vertically
 
         implicit none
 
@@ -1002,11 +1002,11 @@ c averages vertically
 
         end
 
-c***************************************************************
+!***************************************************************
 
         subroutine depth_stats(nkn,nlvddi,ilhkv)
 
-c       computes statistics on levels
+!       computes statistics on levels
 
         implicit none
 
@@ -1057,14 +1057,14 @@ c       computes statistics on levels
 
         end
 
-c***************************************************************
-c***************************************************************
-c***************************************************************
+!***************************************************************
+!***************************************************************
+!***************************************************************
 
-        subroutine shy_write_aver(aline,nvar,iv,ivar
-     +				,cmin,cmax,cmed,cstd,atot,vtot)
+        subroutine shy_write_aver(aline,nvar,iv,ivar &
+     &				,cmin,cmax,cmed,cstd,atot,vtot)
 
-c writes basin average to file
+! writes basin average to file
 
         implicit none
 
@@ -1087,16 +1087,16 @@ c writes basin average to file
           call ivar2filename(ivar,filename)
           call make_iunit_name(filename,'','0d',0,iu)
           ius(iv) = iu
-          write(iu,'(a)') '#      date_and_time    minimum'//
-     +                  '    average    maximum        std'//
-     +                  '         total'
+          write(iu,'(a)') '#      date_and_time    minimum'// &
+     &                  '    average    maximum        std'// &
+     &                  '         total'
 	  if( iv == 1 ) then
             !call ivar2filename(0,filename)
 	    filename = 'volume_and_area'
             call make_iunit_name(filename,'','0d',0,iu)
             ius(0) = iu
-            write(iu,'(a)') '#      date_and_time        volume'//
-     +                  '          area'
+            write(iu,'(a)') '#      date_and_time        volume'// &
+     &                  '          area'
 	  end if
 	end if
 
@@ -1117,11 +1117,11 @@ c writes basin average to file
  2236   format(a20,2e14.6)
         end
 
-c***************************************************************
+!***************************************************************
 
         subroutine write_aver(it,ivar,cmin,cmax,cmed,vtot)
 
-c writes basin average to file
+! writes basin average to file
 
         implicit none
 
@@ -1142,9 +1142,9 @@ c writes basin average to file
  1236   format(i10,e14.6)
         end
 
-c***************************************************************
-c***************************************************************
-c***************************************************************
+!***************************************************************
+!***************************************************************
+!***************************************************************
 
 	subroutine ilhe2k(nkn,nel,nen3v,ilhv,ilhkv)
 
@@ -1169,11 +1169,11 @@ c***************************************************************
 
 	end
 
-c***************************************************************
+!***************************************************************
 
 	subroutine ilhk2e(nkn,nel,nen3v,ilhkv,ilhv)
 
-c create ilhv -> result is not exact and must be adjusted
+! create ilhv -> result is not exact and must be adjusted
 
 	implicit none
 
@@ -1197,15 +1197,15 @@ c create ilhv -> result is not exact and must be adjusted
 
 	end
 
-c***************************************************************
-c***************************************************************
-c***************************************************************
+!***************************************************************
+!***************************************************************
+!***************************************************************
 
         subroutine open_shy_file(file,status,nunit)
 
-c open SHY file
-c
-c nunit is 0 if no other file exists
+! open SHY file
+!
+! nunit is 0 if no other file exists
 
 	use clo
 
@@ -1229,13 +1229,13 @@ c nunit is 0 if no other file exists
 
         end
 
-c***************************************************************
+!***************************************************************
 
 	function concat_cycle_a(atime,atlast,atstart)
 
 	use elabutil
 
-c decides if with concatenation we have to use record or not
+! decides if with concatenation we have to use record or not
 
 	implicit none
 
@@ -1264,13 +1264,13 @@ c decides if with concatenation we have to use record or not
 
 	end
 
-c***************************************************************
+!***************************************************************
 
 	function concat_cycle(it,itold,itstart,nrec)
 
 	use elabutil
 
-c decides if with concatenation we have to use record or not
+! decides if with concatenation we have to use record or not
 
 	implicit none
 
@@ -1297,13 +1297,13 @@ c decides if with concatenation we have to use record or not
 
 	end
 
-c***************************************************************
-c***************************************************************
-c***************************************************************
-c output utilities
-c***************************************************************
-c***************************************************************
-c***************************************************************
+!***************************************************************
+!***************************************************************
+!***************************************************************
+! output utilities
+!***************************************************************
+!***************************************************************
+!***************************************************************
 
 	subroutine compute_range(n,string)
 
@@ -1321,7 +1321,7 @@ c***************************************************************
 
 	end
 
-c***************************************************************
+!***************************************************************
 
 	subroutine write_vars(nvar,ivars)
 
@@ -1346,7 +1346,7 @@ c***************************************************************
 
 	end
 
-c***************************************************************
+!***************************************************************
 
 	subroutine write_extra_vars(nvar,ivars,post,descrp)
 
@@ -1373,7 +1373,7 @@ c***************************************************************
 
 	end
 
-c***************************************************************
+!***************************************************************
 
 	subroutine write_special_vars(nvar,what,descrp)
 
@@ -1397,7 +1397,7 @@ c***************************************************************
 
 	end
 
-c***************************************************************
+!***************************************************************
 
 	subroutine write_grd_coords(regpar)
 
@@ -1473,5 +1473,5 @@ c***************************************************************
  1003	format(i1,i10,i4,i6,5i6)
 	end
 
-c***************************************************************
+!***************************************************************
 

@@ -41,66 +41,66 @@
 ! 28.04.2023	ggu	avoid using floating for **2
 !
 !********************************************************************
-c DOCS  START   S_tide
+! DOCS  START   S_tide
 
-c SHYFEM includes an as\-tro\-no\-mi\-cal tidal model which can be
-c activated by setting the parameter |rtide| equal 1 in the |para| 
-c section.
-c
-c The model calculates equilibrium tidal potential ($\eta$) and load 
-c tides ($\beta$) and uses these to force the free surface. 
-c The term $\eta$ in the momentum equations is calculated as a sum
-c of the tidal potential of each tidal constituents multiplied by the
-c frequency-dependent elasticity factor. The factor $\beta$ accounts 
-c for the effect of the load tides, assuming that loading tides are
-c in-phase with the oceanic tide. $\beta$ is function of the water 
-c depth as $\beta=ltidec*H$ with |ltidec| a calibration factor to be 
-c set in the str |para| section.
-c
-c The model cosiders the following tidal costituents:
-c \begin{itemize}
-c \item Semidiurnal species:
-c    \begin{itemize}
-c    \item M2  semi-diurnal principal lunar
-c    \item S2  semi-diurnal principal solar
-c    \item N2  large elliptical tide of first-order to M2
-c    \item K2  semi-diurnal declination to M2
-c    \item NU2 large evection tide to M2
-c    \item MU2 large variation tide to M2
-c    \item L2  small elliptical tide of first-order to M2
-c    \item T2  large elliptical tide of first-order to S2
-c    \end{itemize}
-c \item Diurnal species:
-c    \begin{itemize}
-c    \item K1  declination luni-solar
-c    \item O1  principal lunar
-c    \item P1  principal solar
-c    \item Q1  elliptical lunar
-c    \item J1  elliptical tide of first-order to K1
-c    \item OO1 evection tide to O1
-c    \item S1  radiational tide 
-c    \end{itemize}
-c \item Long-Period species:
-c    \begin{itemize}
-c    \item MF  fortnightly lunar
-c    \item MM  monthly lunar
-c    \item MSM S0-semiannual solar
-c    \item MSF Evection tide to M0
-c    \item SSA semiannual solar
-c    \item SA  elliptical tide of first-order to S0
-c    \end{itemize}
-c \end{itemize}
-c
-c SHYFEM also allows to perform the tidal analysis of water levels
-c during the model runtime. The tidal analysis is actived by setting
-c |itmtid| and |idttid|. |idttid| should be long enough to perform 
-c a reliable analysis. The parameter |itmtid| can be used to start 
-c the analysis after the simulation spin-up. The tidal analysis module
-c write an output file .tide.shy containing amplitudes and phases
-c of all tidal constituents over the computational domain (on the 
-c nodes).
-c
-c DOCS  END
+! SHYFEM includes an as\-tro\-no\-mi\-cal tidal model which can be
+! activated by setting the parameter |rtide| equal 1 in the |para| 
+! section.
+!
+! The model calculates equilibrium tidal potential ($\eta$) and load 
+! tides ($\beta$) and uses these to force the free surface. 
+! The term $\eta$ in the momentum equations is calculated as a sum
+! of the tidal potential of each tidal constituents multiplied by the
+! frequency-dependent elasticity factor. The factor $\beta$ accounts 
+! for the effect of the load tides, assuming that loading tides are
+! in-phase with the oceanic tide. $\beta$ is function of the water 
+! depth as $\beta=ltidec*H$ with |ltidec| a calibration factor to be 
+! set in the str |para| section.
+!
+! The model cosiders the following tidal costituents:
+! \begin{itemize}
+! \item Semidiurnal species:
+!    \begin{itemize}
+!    \item M2  semi-diurnal principal lunar
+!    \item S2  semi-diurnal principal solar
+!    \item N2  large elliptical tide of first-order to M2
+!    \item K2  semi-diurnal declination to M2
+!    \item NU2 large evection tide to M2
+!    \item MU2 large variation tide to M2
+!    \item L2  small elliptical tide of first-order to M2
+!    \item T2  large elliptical tide of first-order to S2
+!    \end{itemize}
+! \item Diurnal species:
+!    \begin{itemize}
+!    \item K1  declination luni-solar
+!    \item O1  principal lunar
+!    \item P1  principal solar
+!    \item Q1  elliptical lunar
+!    \item J1  elliptical tide of first-order to K1
+!    \item OO1 evection tide to O1
+!    \item S1  radiational tide 
+!    \end{itemize}
+! \item Long-Period species:
+!    \begin{itemize}
+!    \item MF  fortnightly lunar
+!    \item MM  monthly lunar
+!    \item MSM S0-semiannual solar
+!    \item MSF Evection tide to M0
+!    \item SSA semiannual solar
+!    \item SA  elliptical tide of first-order to S0
+!    \end{itemize}
+! \end{itemize}
+!
+! SHYFEM also allows to perform the tidal analysis of water levels
+! during the model runtime. The tidal analysis is actived by setting
+! |itmtid| and |idttid|. |idttid| should be long enough to perform 
+! a reliable analysis. The parameter |itmtid| can be used to start 
+! the analysis after the simulation spin-up. The tidal analysis module
+! write an output file .tide.shy containing amplitudes and phases
+! of all tidal constituents over the computational domain (on the 
+! nodes).
+!
+! DOCS  END
 !********************************************************************
 ! Initialize tidal variables and parameters
 
@@ -238,8 +238,8 @@ c DOCS  END
         eqtide = 0.
         do i = 1,ntd
           ld1  = const_ar(i)%dood(1)
-          fact = const_ar(i)%mask * const_ar(i)%loven *
-     +           fvk(i,k) * const_ar(i)%amp * latf(ld1)
+          fact = const_ar(i)%mask * const_ar(i)%loven * &
+     &           fvk(i,k) * const_ar(i)%amp * latf(ld1)
           arg = (vvk(i,k)+uvk(i,k))*twopi + ld1*llon
           eqtide = eqtide + fact*cos(arg)
         end do
@@ -345,9 +345,9 @@ c DOCS  END
         character*20 	   	   	    :: aline
         integer                             :: iks,ikend,nchunk,nthreads
 
-c-----------------------------------------------------------------
-c Start of code
-c-----------------------------------------------------------------
+!-----------------------------------------------------------------
+! Start of code
+!-----------------------------------------------------------------
 
         if( itidana <= -1 ) return
 
@@ -478,8 +478,8 @@ c-----------------------------------------------------------------
           call omp_compute_minmax(nchunk,nkn,k,ikend)
 
           do iks=k,ikend
-            call tda_solve(nequ,ndat,tvar(iks),acov(:,:,iks),
-     +          bcov(:,iks),tideh(:,iks),tideg(:,iks))
+            call tda_solve(nequ,ndat,tvar(iks),acov(:,:,iks), &
+     &          bcov(:,iks),tideh(:,iks),tideg(:,iks))
           end do
 
 !$OMP END TASK

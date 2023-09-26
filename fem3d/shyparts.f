@@ -105,8 +105,8 @@
 ! write grd files
 !-----------------------------------------------------------------
 
-        call write_partition_to_grd(grdfile,bdebug
-     +                  ,nparts,npart,epart)
+        call write_partition_to_grd(grdfile,bdebug &
+     &                  ,nparts,npart,epart)
 
 !-----------------------------------------------------------------
 ! final message

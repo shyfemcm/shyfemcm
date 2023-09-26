@@ -89,9 +89,9 @@
 	  if( .not. bquiet ) then
 	    write(6,*) 'Nodes to be extracted: ',nnodes
             !write(6,*) nodese
-            write(6,*) '          j        node'
-     +			//'            x                y'
-     +			//'            depth'
+            write(6,*) '          j        node' &
+     &			//'            x                y' &
+     &			//'            depth'
 	    do j=1,nnodes
 	      ki = nodesi(j)
 	      ke = nodese(j)
@@ -164,16 +164,16 @@
 	character*40 full
 
 	integer, parameter :: niu = 6
-        character*5, save :: what(niu) = (/'velx ','vely ','zeta '
-     +                          ,'speed','dir  ','all  '/)
-        character*26, save :: descrp(niu) = (/
-     +           'velocity in x-direction   '
-     +          ,'velocity in y-direction   '
-     +          ,'water level               '
-     +          ,'current speed             '
-     +          ,'current direction         '
-     +          ,'all hydrodynamic variables'
-     +					/)
+        character*5, save :: what(niu) = (/'velx ','vely ','zeta ' &
+     &                          ,'speed','dir  ','all  '/)
+        character*26, save :: descrp(niu) = (/ &
+     &           'velocity in x-direction   ' &
+     &          ,'velocity in y-direction   ' &
+     &          ,'water level               ' &
+     &          ,'current speed             ' &
+     &          ,'current direction         ' &
+     &          ,'all hydrodynamic variables' &
+     &					/)
 
 	bhydro = ( ftype == 1 )
 	bscalar = ( ftype == 2 )
@@ -186,14 +186,14 @@
           write(6,*) '  what.dim.point'
           write(6,*) 'what is one of the following:'
 	  call write_special_vars(niu,what,descrp)      !write hydro variables
-	  call write_special_vars(1,'vel_p'
-     +				,'profile for velocities')
+	  call write_special_vars(1,'vel_p' &
+     &				,'profile for velocities')
           write(6,*) 'dim is 2d or 3d'
           write(6,*) '  2d for depth averaged variables'
           write(6,*) '  3d for output at each layer'
 	  call compute_range(nnodes,range)
-	  write(6,'(a,a)') ' point is consecutive numbering: '
-     +				,trim(range)
+	  write(6,'(a,a)') ' point is consecutive numbering: ' &
+     &				,trim(range)
 	  write(6,*) 'the 5 columns in vel_p.3d.* are:'
 	  write(6,*) '  depth,velx,vely,speed,dir'
 	end if
@@ -209,8 +209,8 @@
           write(6,*) '  2d for depth averaged variables'
           write(6,*) '  3d for output at each layer'
 	  call compute_range(nnodes,range)
-	  write(6,'(a,a)') ' point is consecutive numbering: '
-     +				,trim(range)
+	  write(6,'(a,a)') ' point is consecutive numbering: ' &
+     &				,trim(range)
 	  write(6,*) 'the 2 columns in *_p.3d.* are:'
 	  write(6,*) '  depth,value'
 	end if
@@ -625,8 +625,8 @@
 	integer, save :: iuall = 0
 	integer, save, allocatable :: ius(:,:,:)
 	integer, parameter :: niu = 6
-        character*5 :: what(niu) = (/'velx ','vely ','zeta '
-     +                          ,'speed','dir  ','all  '/)
+        character*5 :: what(niu) = (/'velx ','vely ','zeta ' &
+     &                          ,'speed','dir  ','all  '/)
 	character*5 :: numb
 	character*10 short
 	character*20 dline
@@ -802,18 +802,18 @@
         call dts_from_abs_time(date,time,atime)
 	datetime = (/date,time/)
 
-        call fem_file_write_header(iformat,iunit,dtime
-     +                          ,nvers,np,lmax
-     +                          ,nvar,ntype
-     +                          ,nlvdi,hlv,datetime,regpar)
+        call fem_file_write_header(iformat,iunit,dtime &
+     &                          ,nvers,np,lmax &
+     &                          ,nvar,ntype &
+     &                          ,nlvdi,hlv,datetime,regpar)
 
 	do iv=1,nvar
 	  string = strings(iv)
-          call fem_file_write_data(iformat,iunit
-     +                          ,nvers,np,lmax
-     +                          ,string
-     +                          ,il,hd
-     +                          ,nlvdi,cv3(:,:,iv))
+          call fem_file_write_data(iformat,iunit &
+     &                          ,nvers,np,lmax &
+     &                          ,string &
+     &                          ,il,hd &
+     &                          ,nlvdi,cv3(:,:,iv))
 
 	end do
 
@@ -889,20 +889,20 @@
         call dts_from_abs_time(date,time,atime)
 	datetime = (/date,time/)
 
-        call fem_file_write_header(iformat,iunit,dtime
-     +                          ,nvers,np,lmax
-     +                          ,nvar,ntype
-     +                          ,nlvdi,hlv,datetime,regpar)
+        call fem_file_write_header(iformat,iunit,dtime &
+     &                          ,nvers,np,lmax &
+     &                          ,nvar,ntype &
+     &                          ,nlvdi,hlv,datetime,regpar)
 
 	ivar = 1
 	lmax = 1
 	call ivar2femstring(ivar,string)
 
-        call fem_file_write_data(iformat,iunit
-     +                          ,nvers,np,lmax
-     +                          ,string
-     +                          ,il,hd
-     +                          ,lmax,z)
+        call fem_file_write_data(iformat,iunit &
+     &                          ,nvers,np,lmax &
+     &                          ,string &
+     &                          ,il,hd &
+     &                          ,lmax,z)
 
 	ivar = 2
 	lmax = nlv
@@ -910,17 +910,17 @@
 	stringx = trim(string) // ' x'
 	stringy = trim(string) // ' y'
 
-        call fem_file_write_data(iformat,iunit
-     +                          ,nvers,np,lmax
-     +                          ,stringx
-     +                          ,il,hd
-     +                          ,nlvdi,u)
+        call fem_file_write_data(iformat,iunit &
+     &                          ,nvers,np,lmax &
+     &                          ,stringx &
+     &                          ,il,hd &
+     &                          ,nlvdi,u)
 
-        call fem_file_write_data(iformat,iunit
-     +                          ,nvers,np,lmax
-     +                          ,stringy
-     +                          ,il,hd
-     +                          ,nlvdi,v)
+        call fem_file_write_data(iformat,iunit &
+     &                          ,nvers,np,lmax &
+     &                          ,stringy &
+     &                          ,il,hd &
+     &                          ,nlvdi,v)
 
 	return
    74	continue
@@ -956,16 +956,16 @@
         real hl(lmax)
 	character*80 header1,header2
 
-	header1 = '#      date_and_time     point'
-     +			// '  ext-node  int-node    layers'
-     +			// '      ivar'
+	header1 = '#      date_and_time     point' &
+     &			// '  ext-node  int-node    layers' &
+     &			// '      ivar'
 
         bcenter = .true.        !depth at center of layer
         call get_sigma_info(nlvaux,nsigma,hsigma)
 
 	call compute_zadapt_info(z,hlv,nsigma,lmax,lmin,nadapt,hadapt)
-        call get_layer_thickness(lmax,lmin,nsigma,nadapt,
-     +                           hsigma,hadapt,z,h,hlv,hd)
+        call get_layer_thickness(lmax,lmin,nsigma,nadapt, &
+     &                           hsigma,hadapt,z,h,hlv,hd)
 
         call get_depth_of_layer(bcenter,lmax,z,hd,hl)
 
@@ -1005,17 +1005,17 @@
         real hl(lmax)
 	character*80 header1,header2
 
-	header1 = '#      date_and_time     point'
-     +			// '  ext-node  int-node    layers'
-     +			// '        zeta'
-	header2 = '#        depth         x-vel         y-vel'
-     +			// '         speed     direction'
+	header1 = '#      date_and_time     point' &
+     &			// '  ext-node  int-node    layers' &
+     &			// '        zeta'
+	header2 = '#        depth         x-vel         y-vel' &
+     &			// '         speed     direction'
 
         bcenter = .true.        !depth at center of layer
         call get_sigma_info(nlvaux,nsigma,hsigma)
         call compute_zadapt_info(z,hlv,nsigma,lmax,lmin,nadapt,hadapt)	
-        call get_layer_thickness(lmax,lmin,nsigma,nadapt,
-     +                           hsigma,hadapt,z,h,hlv,hd)
+        call get_layer_thickness(lmax,lmin,nsigma,nadapt, &
+     &                           hsigma,hadapt,z,h,hlv,hd)
         call get_depth_of_layer(bcenter,lmax,z,hd,hl)
 
         write(iu,'(a)') header1

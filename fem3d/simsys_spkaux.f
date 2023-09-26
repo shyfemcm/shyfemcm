@@ -109,10 +109,10 @@
 	call shympi_barrier
 
 	if( bmpi ) then			!only needed if not explicit !FIXME
-          call mod_system_init(nkn_global,nel_global,ngr_global
-     +				,mbw,nlv_global,g_matrix)
-	  call mod_system_insert_elem_index(nel_global,nen3v_global
-     +					,g_matrix)
+          call mod_system_init(nkn_global,nel_global,ngr_global &
+     &				,mbw,nlv_global,g_matrix)
+	  call mod_system_insert_elem_index(nel_global,nen3v_global &
+     &					,g_matrix)
 	  call mod_system_set_global(g_matrix)
 	  call spk_initialize_system(g_matrix)		!calls coo_init_new
 	  call system_setup_global
@@ -357,13 +357,13 @@
 	!write(6,*) '====== system_solve_global end ======'
 
 	if( n > size(mm%rvec2d) ) then
-	  write(6,*) 'dimension error for mm%rvec2d: '
-     +				,n,size(mm%rvec2d)
+	  write(6,*) 'dimension error for mm%rvec2d: ' &
+     &				,n,size(mm%rvec2d)
 	  stop 'error stop system_solve_global: dimension error'
 	end if
 	if( n2zero > size(mm%c2coo) ) then
-	  write(6,*) 'dimension error for mm%c2coo: '
-     +				,n2zero,size(mm%c2coo)
+	  write(6,*) 'dimension error for mm%c2coo: ' &
+     &				,n2zero,size(mm%c2coo)
 	  stop 'error stop system_solve_global: dimension error'
 	end if
 

@@ -126,10 +126,10 @@
 
 !***************************************************************
 
-	subroutine fem_regular_setup(nx,ny,regpar,ilhv
-     +				,fmreg,fmextra
-     +				,ilcoord,xcoord,ycoord,hcoord
-     +				,xlon,ylat)
+	subroutine fem_regular_setup(nx,ny,regpar,ilhv &
+     &				,fmreg,fmextra &
+     &				,ilcoord,xcoord,ycoord,hcoord &
+     &				,xlon,ylat)
 
 	use basin
 
@@ -195,8 +195,8 @@
 
 !***************************************************************
 
-	subroutine fem_regular_interpolate(nx,ny,regexpand,lmax
-     +			,fmreg,fmextra,il,cv3,am)
+	subroutine fem_regular_interpolate(nx,ny,regexpand,lmax &
+     &			,fmreg,fmextra,il,cv3,am)
 
         use basin
 	use levels

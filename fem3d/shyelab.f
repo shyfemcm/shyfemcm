@@ -24,41 +24,41 @@
 !
 !--------------------------------------------------------------------------
 
-c revision log :
-c
-c 06.05.2015	ggu	noselab started
-c 05.06.2015	ggu	many more features added
-c 30.07.2015	ggu	shyelab started
-c 14.09.2015	ggu	support for ext files added
-c 05.10.2015	ggu	support for flx files added
-c 09.10.2015	ggu	use last file to determine file type, call this routine
-c 19.10.2015	ggu	changed VERS_7_3_6
-c 25.05.2016	ggu	changed VERS_7_5_10
-c 17.06.2016	ggu	changed VERS_7_5_15
-c 09.10.2017	ggu	changed VERS_7_5_33
-c 04.11.2017	ggu	new functionality tselab
-c 14.11.2017	ggu	changed VERS_7_5_36
-c 06.07.2018	ggu	changed VERS_7_5_48
-c 30.08.2018	ccf	new functionality lgrelab
-c 25.10.2018	ggu	changed VERS_7_5_51
-c 16.02.2019	ggu	changed VERS_7_5_60
-c
-c**************************************************************
+! revision log :
+!
+! 06.05.2015	ggu	noselab started
+! 05.06.2015	ggu	many more features added
+! 30.07.2015	ggu	shyelab started
+! 14.09.2015	ggu	support for ext files added
+! 05.10.2015	ggu	support for flx files added
+! 09.10.2015	ggu	use last file to determine file type, call this routine
+! 19.10.2015	ggu	changed VERS_7_3_6
+! 25.05.2016	ggu	changed VERS_7_5_10
+! 17.06.2016	ggu	changed VERS_7_5_15
+! 09.10.2017	ggu	changed VERS_7_5_33
+! 04.11.2017	ggu	new functionality tselab
+! 14.11.2017	ggu	changed VERS_7_5_36
+! 06.07.2018	ggu	changed VERS_7_5_48
+! 30.08.2018	ccf	new functionality lgrelab
+! 25.10.2018	ggu	changed VERS_7_5_51
+! 16.02.2019	ggu	changed VERS_7_5_60
+!
+!**************************************************************
 
 	program shyelab
 
 	use clo
 	use elabutil
 
-c elaborates output file
+! elaborates output file
 
 	implicit none
 
 	character*80 file,type
 
-c--------------------------------------------------------------
-c set command line parameters
-c--------------------------------------------------------------
+!--------------------------------------------------------------
+! set command line parameters
+!--------------------------------------------------------------
 
 	call clo_get_last_file(file)
 	call check_file_type(file,type)
@@ -94,7 +94,7 @@ c--------------------------------------------------------------
 	
         end
 
-c***************************************************************
+!***************************************************************
 
 	subroutine check_file_type(file,type)
 
@@ -135,7 +135,7 @@ c***************************************************************
 	
         end
 
-c***************************************************************
+!***************************************************************
 
 	subroutine ask_to_convert_file(type)
 
@@ -159,5 +159,5 @@ c***************************************************************
 
 	end
 
-c***************************************************************
+!***************************************************************
 

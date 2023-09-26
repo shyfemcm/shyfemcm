@@ -23,25 +23,25 @@
 !
 !--------------------------------------------------------------------------
 
-c utilities for reading/writing fem files
-c
-c contents :
-c
-c revision log :
-c
-c 31.08.2017	ggu	started from scratch
-c 02.09.2017	ggu	changed VERS_7_5_31
-c 30.01.2018	ggu	new routine for combining records
-c 22.02.2018	ggu	changed VERS_7_5_42
-c 16.02.2019	ggu	changed VERS_7_5_60
-c 01.04.2020    ggu     new routines to write regular fem file
-c 22.04.2020    ggu     module procedures introduced
-c 18.05.2020    ggu     check read/write of files, flag in structure
-c 10.07.2020    ggu     compiler warnings resolved (do not init arrays)
-c
-c**************************************************************
-c**************************************************************
-c**************************************************************
+! utilities for reading/writing fem files
+!
+! contents :
+!
+! revision log :
+!
+! 31.08.2017	ggu	started from scratch
+! 02.09.2017	ggu	changed VERS_7_5_31
+! 30.01.2018	ggu	new routine for combining records
+! 22.02.2018	ggu	changed VERS_7_5_42
+! 16.02.2019	ggu	changed VERS_7_5_60
+! 01.04.2020    ggu     new routines to write regular fem file
+! 22.04.2020    ggu     module procedures introduced
+! 18.05.2020    ggu     check read/write of files, flag in structure
+! 10.07.2020    ggu     compiler warnings resolved (do not init arrays)
+!
+!**************************************************************
+!**************************************************************
+!**************************************************************
 
 !==================================================================
 	module fem_util
@@ -92,48 +92,48 @@ c**************************************************************
         END INTERFACE
 
         INTERFACE femutil_open_for_write
-        MODULE PROCEDURE femutil_open_for_write_fem
-     +			,femutil_open_for_write_file
+        MODULE PROCEDURE femutil_open_for_write_fem &
+     &			,femutil_open_for_write_file
         END INTERFACE
 
         INTERFACE femutil_open_for_read
-        MODULE PROCEDURE femutil_open_for_read_fem
-     +			,femutil_open_for_read_file
+        MODULE PROCEDURE femutil_open_for_read_fem &
+     &			,femutil_open_for_read_file
         END INTERFACE
 
         INTERFACE femutil_close
-        MODULE PROCEDURE femutil_close_fem
-     +			,femutil_close_file
+        MODULE PROCEDURE femutil_close_fem &
+     &			,femutil_close_file
         END INTERFACE
 
         INTERFACE femutil_write_record
-        MODULE PROCEDURE femutil_write_record_fem
-     +			,femutil_write_record_ff
+        MODULE PROCEDURE femutil_write_record_fem &
+     &			,femutil_write_record_ff
         END INTERFACE
 
         INTERFACE femutil_read_record
-        MODULE PROCEDURE femutil_read_record_fem
-     +			,femutil_read_record_ff
+        MODULE PROCEDURE femutil_read_record_fem &
+     &			,femutil_read_record_ff
         END INTERFACE
 
         INTERFACE femutil_peek_time
-        MODULE PROCEDURE femutil_peek_time_fem
-     +			,femutil_peek_time_rec
+        MODULE PROCEDURE femutil_peek_time_fem &
+     &			,femutil_peek_time_rec
         END INTERFACE
 
         INTERFACE femutil_get_flag
-        MODULE PROCEDURE femutil_get_flag_fem
-     +			,femutil_get_flag_rec
+        MODULE PROCEDURE femutil_get_flag_fem &
+     &			,femutil_get_flag_rec
         END INTERFACE
 
         INTERFACE femutil_is_regular
-        MODULE PROCEDURE femutil_is_regular_fem
-     +			,femutil_is_regular_rec
+        MODULE PROCEDURE femutil_is_regular_fem &
+     &			,femutil_is_regular_rec
         END INTERFACE
 
         INTERFACE femutil_copy
-        MODULE PROCEDURE femutil_copy_fem
-     +			,femutil_copy_rec
+        MODULE PROCEDURE femutil_copy_fem &
+     &			,femutil_copy_rec
         END INTERFACE
 
 !==================================================================
@@ -369,28 +369,28 @@ c**************************************************************
 	np = frec%np
 	ntype = frec%ntype
 
-	call fem_file_write_header(iformat,iunit
-     +				,frec%dtime
-     +                          ,nvers
-     +				,np
-     +				,lmax
-     +                          ,nvar
-     +				,ntype
-     +                          ,lmax
-     +				,frec%hlv
-     +				,frec%datetime
-     +				,frec%regpar)
+	call fem_file_write_header(iformat,iunit &
+     &				,frec%dtime &
+     &                          ,nvers &
+     &				,np &
+     &				,lmax &
+     &                          ,nvar &
+     &				,ntype &
+     &                          ,lmax &
+     &				,frec%hlv &
+     &				,frec%datetime &
+     &				,frec%regpar)
 
 	do iv=1,nvar
-	  call fem_file_write_data(iformat,iunit
-     +                          ,nvers
-     +				,np
-     +				,lmax
-     +                          ,frec%strings(iv)
-     +                          ,frec%ilhkv
-     +				,frec%hd
-     +                          ,lmax
-     +				,frec%data(:,:,iv))
+	  call fem_file_write_data(iformat,iunit &
+     &                          ,nvers &
+     &				,np &
+     &				,lmax &
+     &                          ,frec%strings(iv) &
+     &                          ,frec%ilhkv &
+     &				,frec%hd &
+     &                          ,lmax &
+     &				,frec%data(:,:,iv))
 	end do
 
 	end subroutine
@@ -430,15 +430,15 @@ c**************************************************************
 	  stop 'error stop femutil_read_record: inconsistency'
 	end if
 
-	call fem_file_read_params(iformat,iunit
-     +				,frec%dtime
-     +                          ,nvers
-     +				,np
-     +				,lmax
-     +                          ,nvar
-     +				,ntype
-     +				,frec%datetime
-     +				,ierr)
+	call fem_file_read_params(iformat,iunit &
+     &				,frec%dtime &
+     &                          ,nvers &
+     &				,np &
+     &				,lmax &
+     &                          ,nvar &
+     &				,ntype &
+     &				,frec%datetime &
+     &				,ierr)
 	if( ierr /= 0 ) return
 
 	ffile%nvers = nvers
@@ -473,8 +473,8 @@ c**************************************************************
 	  frec%bchanged = .false.
 	end if
 
-        call fem_file_read_2header(iformat,iunit,ntype,lmax
-     +                  ,frec%hlv,frec%regpar,ierr)
+        call fem_file_read_2header(iformat,iunit,ntype,lmax &
+     &                  ,frec%hlv,frec%regpar,ierr)
 	if( ierr /= 0 ) return
 
 	if( femutil_is_regular(frec) ) then
@@ -490,21 +490,21 @@ c**************************************************************
 
 	do iv=1,nvar
 	  if( bbskip ) then
-            call fem_file_skip_data(iformat,iunit
-     +                          ,nvers,np,lmax
-     +                          ,frec%strings(iv),ierr)
+            call fem_file_skip_data(iformat,iunit &
+     &                          ,nvers,np,lmax &
+     &                          ,frec%strings(iv),ierr)
 	    llmax(iv) = lmax
 	  else
-	    call fem_file_read_data(iformat,iunit
-     +                          ,nvers
-     +				,np
-     +				,llmax(iv)
-     +                          ,frec%strings(iv)
-     +                          ,frec%ilhkv
-     +				,frec%hd
-     +                          ,lmax
-     +				,frec%data(:,:,iv)
-     +                          ,ierr)
+	    call fem_file_read_data(iformat,iunit &
+     &                          ,nvers &
+     &				,np &
+     &				,llmax(iv) &
+     &                          ,frec%strings(iv) &
+     &                          ,frec%ilhkv &
+     &				,frec%hd &
+     &                          ,lmax &
+     &				,frec%data(:,:,iv) &
+     &                          ,ierr)
 	  end if
 	  if( ierr /= 0 ) return
 	end do
@@ -535,8 +535,8 @@ c**************************************************************
         integer nvers,np,lmax,nvar,ntype
         integer datetime(2)
 	atime = -1
-	call fem_file_peek_params(ffile%iformat,ffile%iunit,dtime
-     +                      ,nvers,np,lmax,nvar,ntype,datetime,ierr)
+	call fem_file_peek_params(ffile%iformat,ffile%iunit,dtime &
+     &                      ,nvers,np,lmax,nvar,ntype,datetime,ierr)
 	if( ierr /= 0 ) return
 	call dts_convert_to_atime(datetime,dtime,atime)
 	end subroutine
@@ -709,10 +709,10 @@ c**************************************************************
 ! utility routines
 !------------------------------------------------------------------
 
-	subroutine write_regular_2d_1var_record(iunit
-     +			,string
-     +			,regpar
-     +			,np,data)
+	subroutine write_regular_2d_1var_record(iunit &
+     &			,string &
+     &			,regpar &
+     &			,np,data)
 
 	implicit none
 
@@ -740,38 +740,38 @@ c**************************************************************
 	ilhkv = 1
 	hd = 10000.
 
-	call fem_file_write_header(iformat,iunit
-     +				,dtime
-     +                          ,nvers
-     +				,np
-     +				,lmax
-     +                          ,nvar
-     +				,ntype
-     +                          ,lmax
-     +				,hlv
-     +				,datetime
-     +				,regpar)
+	call fem_file_write_header(iformat,iunit &
+     &				,dtime &
+     &                          ,nvers &
+     &				,np &
+     &				,lmax &
+     &                          ,nvar &
+     &				,ntype &
+     &                          ,lmax &
+     &				,hlv &
+     &				,datetime &
+     &				,regpar)
 
 	!do iv=1,nvar
-	  call fem_file_write_data(iformat,iunit
-     +                          ,nvers
-     +				,np
-     +				,lmax
-     +                          ,string
-     +                          ,ilhkv
-     +				,hd
-     +                          ,lmax
-     +				,data)
+	  call fem_file_write_data(iformat,iunit &
+     &                          ,nvers &
+     &				,np &
+     &				,lmax &
+     &                          ,string &
+     &                          ,ilhkv &
+     &				,hd &
+     &                          ,lmax &
+     &				,data)
 	!end do
 
 	end subroutine
 
 !******************************************************************
 
-	subroutine write_regular_2d_nodes(file
-     +			,string
-     +			,dreg
-     +			,data)
+	subroutine write_regular_2d_nodes(file &
+     &			,string &
+     &			,dreg &
+     &			,data)
 
 	implicit none
 

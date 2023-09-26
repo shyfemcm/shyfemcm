@@ -23,28 +23,28 @@
 !
 !--------------------------------------------------------------------------
 
-c routines for pre processing routines
-c
-c contents :
-c
-c subroutine sp190(nen,nel,nform,mbw)           determine bandwidth mbw
-c
-c revision log :
-c
-c 15.05.2000	ggu	subroutine sp191 removed
-c 23.03.2010	ggu	changed v6.1.1
-c 16.02.2019	ggu	changed VERS_7_5_60
-c
-c**********************************************************
+! routines for pre processing routines
+!
+! contents :
+!
+! subroutine sp190(nen,nel,nform,mbw)           determine bandwidth mbw
+!
+! revision log :
+!
+! 15.05.2000	ggu	subroutine sp191 removed
+! 23.03.2010	ggu	changed v6.1.1
+! 16.02.2019	ggu	changed VERS_7_5_60
+!
+!**********************************************************
 
 	subroutine sp190(nen,nel,nform,mbw)
 
-c determine bandwidth mbw
-c
-c nen           node index
-c nel           number of elements
-c nform         number of nodes per element
-c mbw           bandwidth (return value)
+! determine bandwidth mbw
+!
+! nen           node index
+! nel           number of elements
+! nform         number of nodes per element
+! mbw           bandwidth (return value)
 
 	dimension nen(1)
 
@@ -69,5 +69,5 @@ c mbw           bandwidth (return value)
 
 	end
 
-c**********************************************************
+!**********************************************************
 

@@ -26,65 +26,65 @@
 !
 !--------------------------------------------------------------------------
 
-c routines for interpolation onto regular grid
-c
-c contents :
-c
-c subroutine find_close_elem(ieold,xp,yp,ielem)
-c		finds element for point (xp,yp) starting from ieold
-c subroutine find_elem_from_old(ieold,xp,yp,ielem)
-c		finds element for point (xp,yp) starting from ieold
-c subroutine find_element(xp,yp,ielem)
-c		finds element for point (xp,yp)
-c function in_element(ie,xp,yp)
-c		checks if point (xp,yp) is in element ie
-c
-c revision log :
-c
-c 18.11.1998	ggu	routine commented
-c 18.11.1998	ggu	routine setgeo introduced
-c 19.11.1998	ggu	routines a2char, prchar added
-c 19.10.1999	ggu	routine mkmask added from subutl
-c 25.11.2004	ggu	new routines femintp and elemintp for interpolation
-c 14.03.2005	ggu	new routines for interpolation in element
-c 11.03.2009	ggu	new helper routine getgeoflag()
-c 12.06.2009	ggu	passing to double precision, intrid, bug bug_f_64bit
-c 26.01.2011	ggu&mbj	handling extrapolation in am2av()
-c 27.01.2011	ggu&ccf	bug fix in find_elem_from_old() BUG_27.01.2011
-c 31.03.2011	ggu	new routine elemmask()
-c 24.11.2011	ggu	new routine find_close_elem()
-c 20.06.2012	ggu	new routine get_scal_elem()
-c 07.10.2012	ggu	new routine av2fm()
-c 10.10.2012	ggu	new routine fm2am2d() and fm2am3d()
-c 26.10.2012	ggu	bug fix: do not access not existing storage
-c 30.05.2014	ggu	in av2amk() do not interpolate for flag values
-c 07.07.2014	ggu	new routine intp_reg()
-c 25.09.2015	ggu	new routines intp_reg_nodes(), intp_reg_elems()
-c 05.05.2016	ggu	file restructured (module)
-c 14.05.2016	ggu	allow for extension of grid -> bregextend
-c 23.06.2016	ggu	allow for eps in computing box
-c 23.09.2016	ggu	allow for eps in computing box and reg intp
-c 23.04.2017	ggu	new routine intp_reg_single_nodes()
-c 25.05.2017	ggu	changed VERS_7_5_28
-c 16.02.2019	ggu	changed VERS_7_5_60
-c 13.03.2019	ggu	changed VERS_7_5_61
-c 18.10.2019	ggu	cleaned contents
-c
-c notes :
-c
-c pxareg,pyareg         coordinates of lower left point of matrix
-c pxdreg,pydreg         grid size of matrix
-c pzlreg                value of z for land points
-c
-c******************************************************
-c******************************************************
-c******************************************************
+! routines for interpolation onto regular grid
+!
+! contents :
+!
+! subroutine find_close_elem(ieold,xp,yp,ielem)
+!		finds element for point (xp,yp) starting from ieold
+! subroutine find_elem_from_old(ieold,xp,yp,ielem)
+!		finds element for point (xp,yp) starting from ieold
+! subroutine find_element(xp,yp,ielem)
+!		finds element for point (xp,yp)
+! function in_element(ie,xp,yp)
+!		checks if point (xp,yp) is in element ie
+!
+! revision log :
+!
+! 18.11.1998	ggu	routine commented
+! 18.11.1998	ggu	routine setgeo introduced
+! 19.11.1998	ggu	routines a2char, prchar added
+! 19.10.1999	ggu	routine mkmask added from subutl
+! 25.11.2004	ggu	new routines femintp and elemintp for interpolation
+! 14.03.2005	ggu	new routines for interpolation in element
+! 11.03.2009	ggu	new helper routine getgeoflag()
+! 12.06.2009	ggu	passing to double precision, intrid, bug bug_f_64bit
+! 26.01.2011	ggu&mbj	handling extrapolation in am2av()
+! 27.01.2011	ggu&ccf	bug fix in find_elem_from_old() BUG_27.01.2011
+! 31.03.2011	ggu	new routine elemmask()
+! 24.11.2011	ggu	new routine find_close_elem()
+! 20.06.2012	ggu	new routine get_scal_elem()
+! 07.10.2012	ggu	new routine av2fm()
+! 10.10.2012	ggu	new routine fm2am2d() and fm2am3d()
+! 26.10.2012	ggu	bug fix: do not access not existing storage
+! 30.05.2014	ggu	in av2amk() do not interpolate for flag values
+! 07.07.2014	ggu	new routine intp_reg()
+! 25.09.2015	ggu	new routines intp_reg_nodes(), intp_reg_elems()
+! 05.05.2016	ggu	file restructured (module)
+! 14.05.2016	ggu	allow for extension of grid -> bregextend
+! 23.06.2016	ggu	allow for eps in computing box
+! 23.09.2016	ggu	allow for eps in computing box and reg intp
+! 23.04.2017	ggu	new routine intp_reg_single_nodes()
+! 25.05.2017	ggu	changed VERS_7_5_28
+! 16.02.2019	ggu	changed VERS_7_5_60
+! 13.03.2019	ggu	changed VERS_7_5_61
+! 18.10.2019	ggu	cleaned contents
+!
+! notes :
+!
+! pxareg,pyareg         coordinates of lower left point of matrix
+! pxdreg,pydreg         grid size of matrix
+! pzlreg                value of z for land points
+!
+!******************************************************
+!******************************************************
+!******************************************************
 
 	subroutine find_close_elem(ieold,xp,yp,ielem)
 
-c finds element for point (xp,yp) starting from ieold
-c
-c uses data structure ev and ieltv
+! finds element for point (xp,yp) starting from ieold
+!
+! uses data structure ev and ieltv
 
 	use mod_geom
 	use evgeom
@@ -108,9 +108,9 @@ c uses data structure ev and ieltv
 
 	call is_init_ev(binit)
 
-c-------------------------------------------------------------
-c check if old element is given -> if not test all elements
-c-------------------------------------------------------------
+!-------------------------------------------------------------
+! check if old element is given -> if not test all elements
+!-------------------------------------------------------------
 
 	if( bdebug ) write(6,*) 'ggu_xi (1) ',ieold
 	if( ieold .le. 0 .or. ieold .gt. nel ) then
@@ -124,9 +124,9 @@ c-------------------------------------------------------------
 	  return
 	end if
 
-c-------------------------------------------------------------
-c start from old element
-c-------------------------------------------------------------
+!-------------------------------------------------------------
+! start from old element
+!-------------------------------------------------------------
 
 	if( bdebug ) write(6,*) 'ggu_xi (3) ',ieold
 
@@ -163,11 +163,11 @@ c-------------------------------------------------------------
 
 	end
 
-c******************************************************
+!******************************************************
 
 	subroutine find_elem_from_old(ieold,xp,yp,ielem)
 
-c finds element for point (xp,yp) starting from ieold
+! finds element for point (xp,yp) starting from ieold
 
 	use basin, only : nkn,nel,ngr,mbw
 
@@ -180,27 +180,27 @@ c finds element for point (xp,yp) starting from ieold
 	logical in_element
 	integer iem,iep
 
-c-------------------------------------------------------------
-c check if old element is given -> if not test all elements
-c-------------------------------------------------------------
+!-------------------------------------------------------------
+! check if old element is given -> if not test all elements
+!-------------------------------------------------------------
 
 	if( ieold .le. 0 .or. ieold .gt. nel ) then
 	  call find_element(xp,yp,ielem)
 	  return
 	end if
 
-c-------------------------------------------------------------
-c check if in old element
-c-------------------------------------------------------------
+!-------------------------------------------------------------
+! check if in old element
+!-------------------------------------------------------------
 
 	if( in_element(ieold,xp,yp) ) then
 	  ielem = ieold
 	  return
 	end if
 
-c-------------------------------------------------------------
-c start from old element going upwards and downwards
-c-------------------------------------------------------------
+!-------------------------------------------------------------
+! start from old element going upwards and downwards
+!-------------------------------------------------------------
 
 	iem = ieold-1
 	if( iem .lt. 1 ) iem = nel		!BUG_27.01.2011
@@ -223,23 +223,23 @@ c-------------------------------------------------------------
 	  if( iep .gt. nel ) iep = 1
 	end do
 
-c-------------------------------------------------------------
-c no element found
-c-------------------------------------------------------------
+!-------------------------------------------------------------
+! no element found
+!-------------------------------------------------------------
 
 	ielem = 0
 
-c-------------------------------------------------------------
-c end of routine
-c-------------------------------------------------------------
+!-------------------------------------------------------------
+! end of routine
+!-------------------------------------------------------------
 
 	end
 
-c******************************************************
+!******************************************************
 
 	subroutine find_element(xp,yp,ielem)
 
-c finds element for point (xp,yp)
+! finds element for point (xp,yp)
 
 	use basin, only : nkn,nel,ngr,mbw
 
@@ -263,11 +263,11 @@ c finds element for point (xp,yp)
 
 	end
 
-c******************************************************
+!******************************************************
 
 	function in_element(ie,xp,yp)
 
-c checks if point (xp,yp) is in element ie
+! checks if point (xp,yp) is in element ie
 
 	use basin
 
@@ -305,5 +305,5 @@ c checks if point (xp,yp) is in element ie
 
 	end
 
-c******************************************************
+!******************************************************
 

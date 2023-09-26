@@ -404,8 +404,8 @@
 
 !*****************************************************************
 
-	subroutine adjust_indices(n_lk,n_le
-     +				,nodes,elems,nindex,eindex)
+	subroutine adjust_indices(n_lk,n_le &
+     &				,nodes,elems,nindex,eindex)
 
 ! computes nkn_local/unique/inner and nel_local/unique/inner
 ! also rearranges eindex to keep track of this
@@ -653,8 +653,8 @@
 	do ie=1,nel_local
 	  if( ie > nel_inner ) bwrite = .true.
 	  if( ie <= nel_inner ) then
-	    if( id_elem(1,ie) /= my_id .or. 
-     +			any(id_elem(2:3,ie)/=-1) ) goto 98
+	    if( id_elem(1,ie) /= my_id .or.  &
+     &			any(id_elem(2:3,ie)/=-1) ) goto 98
 	  end if
 	  if( bwrite ) write(iu,*) ie,id_elem(:,ie)
 	  if( ie == nel_inner ) write(iu,*) 'unique elements'
@@ -1063,8 +1063,8 @@
 
 	do k=1,n_lk
 	  if( ip_int_node(k) /= ip_int_nodes(k,ia) ) then
-	    write(iu,*) 'node differences: ',k,ip_int_node(k)
-     +				,ip_int_nodes(k,ia)
+	    write(iu,*) 'node differences: ',k,ip_int_node(k) &
+     &				,ip_int_nodes(k,ia)
 	    idiff = idiff + 1
 	    bstop = .true.
 	  end if
@@ -1072,8 +1072,8 @@
 
 	do ie=1,n_le
 	  if( ip_int_elem(ie) /= ip_int_elems(ie,ia) ) then
-	    write(iu,*) 'elem differences: ',ie,ip_int_elem(ie)
-     +				,ip_int_elems(ie,ia)
+	    write(iu,*) 'elem differences: ',ie,ip_int_elem(ie) &
+     &				,ip_int_elems(ie,ia)
 	    idiff = idiff + 1
 	    bstop = .true.
 	  end if

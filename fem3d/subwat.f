@@ -24,66 +24,66 @@
 !
 !--------------------------------------------------------------------------
 
-c water volume, surface and flux routines
-c
-c contents :
-c
-c subroutine volnod(k,vol,dz)	inputs volume vol into finite volume (node) k
-c subroutine zrise(dz)		inputs water distributed over total surface
-c subroutine surel(ielem,dz)	inputs water distributed over surface
-c subroutine connod(k,dz,con,coe)	changes concentration in node k
-c subroutine conele(ielem,dz,con,coe)	changes concentration in element ielem
-c
-c subroutine volz3(k,dvol)                      inputs water volume
-c
-c subroutine volco0(k,lmax,nlvddi,s,area,vol,vol0,svol)
-c       computes volume and total mass of concentration in column of node k
-c subroutine volno0(k,lmax,nlvddi,s,dvol,dcon)
-c       inputs concentration in finite volume (node) k
-c
-c revision log :
-c
-c 05.08.1992	ggu	$$ibtyp3 - implementation of ibtyp=3 (volnod) (connod)
-c 19.01.1994	ggu	$$conz - implementation of concentration (vol/connod)
-c 20.01.1994	ggu	$$lumpc - evaluate conz at node (vol/connod)
-c 24.03.1994	ggu	from volnod (surel,conele)
-c 07.04.1995	ggu	copied from volno3 (volz3)
-c 06.08.1997	ggu	use zenv for water level (volz3)
-c 04.12.1997	ggu	concentration not adjusted anymore (volnod,surel)
-c 04.12.1997	ggu	concentration adjusted in own routine (connod,conele)
-c 30.04.1998	ggu	routines from subflx.f merged into this file
-c 20.06.1998	ggu	two dimensional common blocks regolarized (nen3v,...)
-c 21.08.1998	ggu	xv eliminated
-c 22.10.1999	ggu	file cleaned, added 3D routines
-c 16.01.2001	ggu	new concentration unique for node (connod)
-c 20.11.2001	ggu	input concentration with ambient value ($AMB0)
-c 25.03.2003	ggu	new routine zrise
-c 28.04.2009	ggu	links re-structured 
-c 23.03.2010	ggu	changed v6.1.1
-c 18.06.2014	ggu	changed VERS_6_1_77
-c 23.12.2014	ggu	changed VERS_7_0_11
-c 19.01.2015	ggu	changed VERS_7_1_2
-c 19.01.2015	ggu	changed VERS_7_1_3
-c 05.05.2015	ggu	changed VERS_7_1_10
-c 05.06.2015	ggu	changed VERS_7_1_12
-c 10.07.2015	ggu	changed VERS_7_1_50
-c 17.07.2015	ggu	changed VERS_7_1_80
-c 20.07.2015	ggu	changed VERS_7_1_81
-c 16.12.2015	ggu	changed VERS_7_3_16
-c 28.04.2016	ggu	changed VERS_7_5_9
-c 16.02.2019	ggu	changed VERS_7_5_60
-c 13.03.2019	ggu	changed VERS_7_5_61
-c 21.05.2019	ggu	changed VERS_7_5_62
-c 
-c*****************************************************************
+! water volume, surface and flux routines
+!
+! contents :
+!
+! subroutine volnod(k,vol,dz)	inputs volume vol into finite volume (node) k
+! subroutine zrise(dz)		inputs water distributed over total surface
+! subroutine surel(ielem,dz)	inputs water distributed over surface
+! subroutine connod(k,dz,con,coe)	changes concentration in node k
+! subroutine conele(ielem,dz,con,coe)	changes concentration in element ielem
+!
+! subroutine volz3(k,dvol)                      inputs water volume
+!
+! subroutine volco0(k,lmax,nlvddi,s,area,vol,vol0,svol)
+!       computes volume and total mass of concentration in column of node k
+! subroutine volno0(k,lmax,nlvddi,s,dvol,dcon)
+!       inputs concentration in finite volume (node) k
+!
+! revision log :
+!
+! 05.08.1992	ggu	$$ibtyp3 - implementation of ibtyp=3 (volnod) (connod)
+! 19.01.1994	ggu	$$conz - implementation of concentration (vol/connod)
+! 20.01.1994	ggu	$$lumpc - evaluate conz at node (vol/connod)
+! 24.03.1994	ggu	from volnod (surel,conele)
+! 07.04.1995	ggu	copied from volno3 (volz3)
+! 06.08.1997	ggu	use zenv for water level (volz3)
+! 04.12.1997	ggu	concentration not adjusted anymore (volnod,surel)
+! 04.12.1997	ggu	concentration adjusted in own routine (connod,conele)
+! 30.04.1998	ggu	routines from subflx.f merged into this file
+! 20.06.1998	ggu	two dimensional common blocks regolarized (nen3v,...)
+! 21.08.1998	ggu	xv eliminated
+! 22.10.1999	ggu	file cleaned, added 3D routines
+! 16.01.2001	ggu	new concentration unique for node (connod)
+! 20.11.2001	ggu	input concentration with ambient value ($AMB0)
+! 25.03.2003	ggu	new routine zrise
+! 28.04.2009	ggu	links re-structured 
+! 23.03.2010	ggu	changed v6.1.1
+! 18.06.2014	ggu	changed VERS_6_1_77
+! 23.12.2014	ggu	changed VERS_7_0_11
+! 19.01.2015	ggu	changed VERS_7_1_2
+! 19.01.2015	ggu	changed VERS_7_1_3
+! 05.05.2015	ggu	changed VERS_7_1_10
+! 05.06.2015	ggu	changed VERS_7_1_12
+! 10.07.2015	ggu	changed VERS_7_1_50
+! 17.07.2015	ggu	changed VERS_7_1_80
+! 20.07.2015	ggu	changed VERS_7_1_81
+! 16.12.2015	ggu	changed VERS_7_3_16
+! 28.04.2016	ggu	changed VERS_7_5_9
+! 16.02.2019	ggu	changed VERS_7_5_60
+! 13.03.2019	ggu	changed VERS_7_5_61
+! 21.05.2019	ggu	changed VERS_7_5_62
+! 
+!*****************************************************************
 
 	subroutine volnod(k,vol,dz)
 
-c inputs volume vol into finite volume (node) k by changing water level z
-c
-c k	node where to input
-c vol	volume to input
-c dz	achieved water level change (return)
+! inputs volume vol into finite volume (node) k by changing water level z
+!
+! k	node where to input
+! vol	volume to input
+! dz	achieved water level change (return)
 
 	use mod_geom
 	use mod_hydro
@@ -92,10 +92,10 @@ c dz	achieved water level change (return)
 
 	implicit none
 
-c arguments
+! arguments
 	integer k
 	real vol,dz
-c local
+! local
 	real area
 	integer ie,i,ii,nl
 	integer ibase
@@ -124,22 +124,22 @@ c local
 
 	end
 
-c*****************************************************************
+!*****************************************************************
 
 	subroutine zrise(dz)
 
-c inputs water distributed over total surface
-c
-c dz		rise of water level to achieve
+! inputs water distributed over total surface
+!
+! dz		rise of water level to achieve
 
 	use mod_hydro
 	use basin, only : nkn,nel,ngr,mbw
 
 	implicit none
 
-c arguments
+! arguments
 	real dz
-c local
+! local
 	integer ie,ii,k
 
 	do ie=1,nel
@@ -156,24 +156,24 @@ c local
 
 	end
 
-c*****************************************************************
+!*****************************************************************
 
 	subroutine surel(ielem,dz)
 
-c inputs water distributed over surface to element ie
-c
-c ielem		element to input water, 0: all elements
-c dz		rise of water level to achieve
+! inputs water distributed over surface to element ie
+!
+! ielem		element to input water, 0: all elements
+! dz		rise of water level to achieve
 
 	use mod_hydro
 	use basin, only : nkn,nel,ngr,mbw
 
 	implicit none
 
-c arguments
+! arguments
 	integer ielem
 	real dz
-c local
+! local
 	integer ie,ii
 	integer ie1,ie2
 
@@ -194,17 +194,17 @@ c local
 
 	end
 
-c*****************************************************************
+!*****************************************************************
 
 	subroutine connod(k,dz,con,coe)
 
-c changes concentration according to a water level rise dz with conz. con
-c in node k on variable coe
-c
-c k	node where to input
-c dz	water level change 
-c con	concentraion of water injected
-c coe	variable to change
+! changes concentration according to a water level rise dz with conz. con
+! in node k on variable coe
+!
+! k	node where to input
+! dz	water level change 
+! con	concentraion of water injected
+! coe	variable to change
 
 	use mod_geom
 	use mod_hydro
@@ -213,11 +213,11 @@ c coe	variable to change
 
 	implicit none
 
-c arguments
+! arguments
 	integer k
 	real con,dz
 	real coe(3,1)
-c local
+! local
 	integer ie,i,ii,nl
 	integer ibase
 	integer elems(maxlnk)
@@ -257,8 +257,8 @@ c local
 	end do
 
 	massnew = cnew
-c	write(6,*) 'ggu0: ',dvoltot
-c	write(6,*) 'ggu1: ',massold,massnew,massnew-massold
+!	write(6,*) 'ggu0: ',dvoltot
+!	write(6,*) 'ggu1: ',massold,massnew,massnew-massold
 
 	massnew = 0.
 	do i=1,nl
@@ -269,32 +269,32 @@ c	write(6,*) 'ggu1: ',massold,massnew,massnew-massold
 	  vol = area * depth
 	  massnew = massnew + coe(ii,ie)*vol
 	end do
-c	write(6,*) 'ggu2: ',massold,massnew,massnew-massold
+!	write(6,*) 'ggu2: ',massold,massnew,massnew-massold
 
 	end
 
-c*****************************************************************
+!*****************************************************************
 
 	subroutine conele(ielem,dz,con,coe)
 
-c changes concentration according to water level rise dz with conz. con
-c in element ielem on variable coe
-c
-c ielem		element to input water, 0: all elements
-c dz		rise of water level
-c con		conzentration of injected water
-c coe		variable to change
+! changes concentration according to water level rise dz with conz. con
+! in element ielem on variable coe
+!
+! ielem		element to input water, 0: all elements
+! dz		rise of water level
+! con		conzentration of injected water
+! coe		variable to change
 
 	use mod_hydro
 	use basin
 
 	implicit none
 
-c arguments
+! arguments
 	integer ielem
 	real dz,con
 	real coe(3,1)
-c local
+! local
 	real depth
 	integer ie,ii
 	integer ie1,ie2
@@ -316,15 +316,15 @@ c local
 
 	end
 
-c*****************************************************************
-c
+!*****************************************************************
+!
 	subroutine volz3(k,dvol)
-c
-c inputs water volume into finite volume
-c ( 3d version )
-c
-c k	node
-c dvol	water volume change (for whole time step)
+!
+! inputs water volume into finite volume
+! ( 3d version )
+!
+! k	node
+! dvol	water volume change (for whole time step)
 
 	use mod_hydro
 	use evgeom
@@ -332,10 +332,10 @@ c dvol	water volume change (for whole time step)
 
 	implicit none
 
-c arguments
+! arguments
 	integer k
 	real dvol
-c local
+! local
         integer ie,ii
         real area,zz
 
@@ -363,19 +363,19 @@ c local
 
 	end
 
-c***************************************************************
+!***************************************************************
 
 	subroutine volco0(k,lmax,nlvddi,s,area,vol,vol0,svol)
 
-c computes volume and total mass of concentration in column of node k
-c + volume of upper layer
-c new version that computes only up to layer lmax (lmax > 0)
+! computes volume and total mass of concentration in column of node k
+! + volume of upper layer
+! new version that computes only up to layer lmax (lmax > 0)
 
 	use levels
 
 	implicit none
 
-c arguments
+! arguments
 	integer k		!node defining column			(in)
 	integer lmax		!maximum level to which compute		(in)
 	integer nlvddi		!vertical dimension			(in)
@@ -384,11 +384,11 @@ c arguments
 	real vol		!total volume of column			(out)
 	real vol0		!volume of first layer			(out)
 	real svol		!total mass of s in column		(out)
-c local
+! local
 	integer l,ilevel,nlev
 	integer mode
 	real volume
-c functions
+! functions
 	real volnode,areanode
 
 	nlev = lmax
@@ -410,25 +410,25 @@ c functions
 
 	end
 
-c******************************************************
+!******************************************************
 
 	subroutine volno0(k,lmax,nlvddi,s,dvol,dcon)
 
-c inputs concentration in finite volume (node) k
-c ( 3d version ) -> only up to layer lmax
+! inputs concentration in finite volume (node) k
+! ( 3d version ) -> only up to layer lmax
 
 	use levels
 
 	implicit none
 
-c arguments
+! arguments
 	integer k		!node defining volume
 	integer lmax		!maximum level to which introduce
 	integer nlvddi		!vertical dimension
 	real s(nlvddi,1)	!variable (temperature, salinity,...)
 	real dvol		!change in water volume (whole time step)
 	real dcon		!concentration of new volume dvol
-c local
+! local
 	logical debug
 	integer l,nlev
 	real area,vol,vol0,svol
@@ -460,5 +460,5 @@ c local
 
 	end
 
-c******************************************************
+!******************************************************
 

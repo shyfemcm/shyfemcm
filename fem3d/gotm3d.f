@@ -40,12 +40,12 @@
 
 !**************************************************************************
 
-c internal gotm routines
-c
-c these are routines that should not be used anymore
-c please use the routines directly from the GOTM library
-c
-c********************************************************************
+! internal gotm routines
+!
+! these are routines that should not be used anymore
+! please use the routines directly from the GOTM library
+!
+!********************************************************************
 
 	subroutine has_gotm(bgotm)
 
@@ -57,7 +57,7 @@ c********************************************************************
 
 	end
 
-c********************************************************************
+!********************************************************************
 
 	subroutine init_gotm_turb(iunit,fn,ndim)
 
@@ -71,7 +71,7 @@ c********************************************************************
 
 	end
 
-c********************************************************************
+!********************************************************************
 
         subroutine do_gotm_turb   (
      &                            Nmx
@@ -102,9 +102,9 @@ c********************************************************************
 
 	end
 
-c********************************************************************
-c********************************************************************
-c********************************************************************
+!********************************************************************
+!********************************************************************
+!********************************************************************
 
 !-------------------------------------------------------------------------
 !             General Ocean Turbulence Model (GOTM)                      !
@@ -201,78 +201,78 @@ c********************************************************************
 
 	if( bdebug ) then	!ggu
 
-c	if( istep .eq. 0 ) then
-c	write(95,*) 'depth...' 
-c	doi=nmx,1,-1
-c	  j = Nmx - i + 1
-c	  write(95,'(i3,7e11.3)') j,h(i)
-c	end do
-c	end if
+!	if( istep .eq. 0 ) then
+!	write(95,*) 'depth...' 
+!	doi=nmx,1,-1
+!	  j = Nmx - i + 1
+!	  write(95,'(i3,7e11.3)') j,h(i)
+!	end do
+!	end if
 
-c	call write_common(99)
-c	call write_dt(91,dt)
+!	call write_common(99)
+!	call write_dt(91,dt)
 
-c	write(95,*) istep,depth,u_taus,u_taub
-c	write(95,*) z0b,z0s
-c	write(95,*) k_min,epsmin,L_min
-c	write(95,*) Nmx,dt
-c	do i=nmx,nmlast,-1
-c	  j = Nmx - i + 1
-c	  write(95,'(i3,7e11.3)') j,num(i),nuh(i)
-c     +			,k(i),eps(i),L(i),ss(i),nn(i)
-c	end do
+!	write(95,*) istep,depth,u_taus,u_taub
+!	write(95,*) z0b,z0s
+!	write(95,*) k_min,epsmin,L_min
+!	write(95,*) Nmx,dt
+!	do i=nmx,nmlast,-1
+!	  j = Nmx - i + 1
+!	  write(95,'(i3,7e11.3)') j,num(i),nuh(i)
+!     +			,k(i),eps(i),L(i),ss(i),nn(i)
+!	end do
 	istep = istep + 1
 	end if
 
       call StabilityFunctions(Nmx,k,L,SS,NN,
      &                        cmue1,cmue2,P,B,num,nuh,xRf)
 
-	call pr_info('Stab',91,istep,Nmx,nmlast
-     +			,num,nuh,k,eps,L,ss,nn)
+	call pr_info('Stab',91,istep,Nmx,nmlast &
+     &			,num,nuh,k,eps,L,ss,nn)
 
       call TKE(Nmx,dt,cmue1,cmue2,num,P,B,eps,L,k,ko,h,u_taus,u_taub,
      &          NN,SS)
 
-	call pr_info('TKE',91,istep,Nmx,nmlast
-     +			,num,nuh,k,eps,L,ss,nn)
+	call pr_info('TKE',91,istep,Nmx,nmlast &
+     &			,num,nuh,k,eps,L,ss,nn)
 
       call LengthScale(Nmx,dt,k,ko,eps,L,num,nuh,NN,SS,h,
      &                  cmue1,cmue2,P,B,u_taus,u_taub,depth,xRf)
 
-	call pr_info('Len',91,istep,Nmx,nmlast
-     +			,num,nuh,k,eps,L,ss,nn)
+	call pr_info('Len',91,istep,Nmx,nmlast &
+     &			,num,nuh,k,eps,L,ss,nn)
 
       call KolPran(Nmx,cmue1,cmue2,k,L,num,nuh,u_taus,u_taub)
 
-	call pr_info('KolP',91,istep,Nmx,nmlast
-     +			,num,nuh,k,eps,L,ss,nn)
+	call pr_info('KolP',91,istep,Nmx,nmlast &
+     &			,num,nuh,k,eps,L,ss,nn)
 
       call InternalWave(Nmx,num,nuh,NN,SS,k)
 
-	call pr_info('IWave',91,istep,Nmx,nmlast
-     +			,num,nuh,k,eps,L,ss,nn)
+	call pr_info('IWave',91,istep,Nmx,nmlast &
+     &			,num,nuh,k,eps,L,ss,nn)
 
-c	if( bdebug ) then	!ggu
-c	write(96,*) istep,depth,u_taus,u_taub
-c	write(96,*) z0b,z0s
-c	write(96,*) k_min,epsmin,L_min
-c	write(96,*) Nmx,dt
-c	do i=nmx,nmlast,-1
-c	  j = Nmx - i + 1
-c	  write(96,'(i3,7e11.3)') j,num(i),nuh(i)
-c     +			,k(i),eps(i),L(i),ss(i),nn(i)
-c	end do
-c	end if
+!	if( bdebug ) then	!ggu
+!	write(96,*) istep,depth,u_taus,u_taub
+!	write(96,*) z0b,z0s
+!	write(96,*) k_min,epsmin,L_min
+!	write(96,*) Nmx,dt
+!	do i=nmx,nmlast,-1
+!	  j = Nmx - i + 1
+!	  write(96,'(i3,7e11.3)') j,num(i),nuh(i)
+!     +			,k(i),eps(i),L(i),ss(i),nn(i)
+!	end do
+!	end if
 
       return
       end
 !EOC
 
-c**********************************************************************
+!**********************************************************************
 
 	subroutine write_vars(iunit,it,low,high,fact,var)
 
-c writes var to file
+! writes var to file
 
 	implicit none
 
@@ -287,7 +287,7 @@ c writes var to file
 
 	end
 
-c**********************************************************************
+!**********************************************************************
 
 	subroutine write_dt(iunit,dt)
 
@@ -306,7 +306,7 @@ c**********************************************************************
 
 	end
 
-c**********************************************************************
+!**********************************************************************
 
 	subroutine write_common(iunit)
 
@@ -361,10 +361,10 @@ c**********************************************************************
 
 	end
 
-c**********************************************************************
+!**********************************************************************
 
-	subroutine pr_info(text,iunit,istep,Nmx,nmlast
-     +				,num,nuh,k,eps,L,ss,nn)
+	subroutine pr_info(text,iunit,istep,Nmx,nmlast &
+     &				,num,nuh,k,eps,L,ss,nn)
 
 	implicit none
 
@@ -391,13 +391,13 @@ c**********************************************************************
 	write(iunit,*) istep,nmx,last
 	do i=nmx,last,-1
 	  j = Nmx - i + 1
-	  write(iunit,'(i3,7e11.3)') j,num(i),nuh(i)
-     +			,k(i),eps(i),L(i),ss(i),nn(i)
+	  write(iunit,'(i3,7e11.3)') j,num(i),nuh(i) &
+     &			,k(i),eps(i),L(i),ss(i),nn(i)
 	end do
 
 	end
 
-c***************************************************************
+!***************************************************************
  
         function istdebug()
  
@@ -410,7 +410,7 @@ c***************************************************************
  
         end
  
-c***************************************************************                
+!***************************************************************                
 !-------------------------------------------------------------------------
 !             General Ocean Turbulence Model (GOTM)                      !
 !-------------------------------------------------------------------------
@@ -1145,11 +1145,11 @@ c***************************************************************
 
 
 
-c      k(1) = 11.60 +  2.14*an
-c      k(2) = 41.64 + 17.35*an - 0.160*as
-c      k(3) = 46.40 + 38.15*an - 1.813*as + 1.715*an*an - 0.343*an*as
-c      k(4) = 16.00 + 25.85*an - 6.133*as + 3.292*an*an - 1.744*an*as
-c      k(5) =          4.27*an - 5.333*as + 0.853*an*an - 1.715*an*as
+!      k(1) = 11.60 +  2.14*an
+!      k(2) = 41.64 + 17.35*an - 0.160*as
+!      k(3) = 46.40 + 38.15*an - 1.813*as + 1.715*an*an - 0.343*an*as
+!      k(4) = 16.00 + 25.85*an - 6.133*as + 3.292*an*an - 1.744*an*as
+!      k(5) =          4.27*an - 5.333*as + 0.853*an*an - 1.715*an*as
 
       kk(1) = 4*k(1)      
       kk(2) = 3*k(2)      
@@ -3171,15 +3171,15 @@ c      k(5) =          4.27*an - 5.333*as + 0.853*an*an - 1.715*an*as
          bu(i)=1.-au(i)-cu(i)+pminus(i)*dt/k(i)
          du(i)=(1+pplus(i)*dt/k(i))*k(i)
          du(i)=k(i)+pplus(i)*dt
-c	 if( istdebug() ) then		!ggu ggg
-c	   write(91,*) i,du(i),du(199)
-c	 end if
+!	 if( istdebug() ) then		!ggu ggg
+!	   write(91,*) i,du(i),du(199)
+!	 end if
       end do
 
-c ggu
+! ggu
 
-        call pr_info('in after loop abcd',91,-1,Nmx,30
-     +                  ,pplus,pminus,k,au,bu,cu,du) 
+        call pr_info('in after loop abcd',91,-1,Nmx,30 &
+     &                  ,pplus,pminus,k,au,bu,cu,du) 
 
 	if( istdebug() ) then
 	  i= Nmx - 1
@@ -3187,18 +3187,18 @@ c ggu
 	  write(91,*) Nmx,i,Nmx - i + 1,dt
 	  write(91,*) k(i),pplus(i), k(i)+pplus(i)*dt,du(i)
 	end if
-        call pr_info('in TKEeq',91,-1,Nmx,30
-     +                  ,num,avh,k,eps,L,P,B)                                 
+        call pr_info('in TKEeq',91,-1,Nmx,30 &
+     &                  ,num,avh,k,eps,L,P,B)                                 
 
-        call pr_info('in TKEeq...',91,-1,Nmx,30
-     +                  ,pplus,pminus,k,eps,L,P,B)                                 
+        call pr_info('in TKEeq...',91,-1,Nmx,30 &
+     &                  ,pplus,pminus,k,eps,L,P,B)                                 
 
       if (fluxcond) then
 !     +-------------------------------------------------------------+
 !     | No-flux conditions for TKE                                  | 
 !     +-------------------------------------------------------------+
-        call pr_info('befor tridiag',91,-1,Nmx,30
-     +                  ,num,avh,k,au,bu,cu,du)                                 
+        call pr_info('befor tridiag',91,-1,Nmx,30 &
+     &                  ,num,avh,k,au,bu,cu,du)                                 
 
 	if( istdebug() ) then
 	  write(91,*) 'tridiag extra...'
@@ -3222,15 +3222,15 @@ c ggu
          call Tridiagonalx(Nmx,0,Nmx,au,bu,cu,du,k)
       end if 
 
-        call pr_info('after tridiag',91,-1,Nmx,30
-     +                  ,num,avh,k,au,bu,cu,du)                                 
+        call pr_info('after tridiag',91,-1,Nmx,30 &
+     &                  ,num,avh,k,au,bu,cu,du)                                 
 
       do 104 i=0,Nmx
          if (k(i).lt.k_min) k(i)=k_min
 104   continue
 222   format (5(F15.10,1x)) 
-        call pr_info('after linit',91,-1,Nmx,30
-     +                  ,num,avh,k,au,bu,cu,du)                                 
+        call pr_info('after linit',91,-1,Nmx,30 &
+     &                  ,num,avh,k,au,bu,cu,du)                                 
 
  
       return

@@ -86,8 +86,8 @@
 
 	call clo_add_sep('additional options')
 
-	call clo_add_option('unform',.false.
-     +				,'write output file unformatted')
+	call clo_add_option('unform',.false. &
+     &				,'write output file unformatted')
 
 !--------------------------------------------------------------
 ! parse command line options

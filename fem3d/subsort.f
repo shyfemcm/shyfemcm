@@ -52,26 +52,26 @@
 !==========================================================
 
         INTERFACE sort
-        MODULE PROCEDURE   sort_real_direct
-     +                   , sort_int_direct
-     +                   , sort_real_indirect
-     +                   , sort_int_indirect
+        MODULE PROCEDURE   sort_real_direct &
+     &                   , sort_int_direct &
+     &                   , sort_real_indirect &
+     &                   , sort_int_indirect
         END INTERFACE
 
         INTERFACE sort_invert
-        MODULE PROCEDURE   sort_int_invert
-     +                   , sort_real_invert
+        MODULE PROCEDURE   sort_int_invert &
+     &                   , sort_real_invert
         END INTERFACE
 
         INTERFACE locate
-        MODULE PROCEDURE   locate_int
-     +                   , locate_real
+        MODULE PROCEDURE   locate_int &
+     &                   , locate_real
 !     +                   , locate_real_all
         END INTERFACE
 
         INTERFACE permute
-        MODULE PROCEDURE   permute_int
-     +                   , permute_real
+        MODULE PROCEDURE   permute_int &
+     &                   , permute_real
         END INTERFACE
 
 !==========================================================
@@ -551,7 +551,7 @@
 
 	end
 
-c**********************************************************
+!**********************************************************
 
 	subroutine permute_int(n,index,array)
 
@@ -577,7 +577,7 @@ c**********************************************************
 
 	end
 
-c**********************************************************
+!**********************************************************
 
 	function is_permutation(n,index)
 

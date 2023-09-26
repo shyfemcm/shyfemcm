@@ -66,8 +66,8 @@
 ! create title strings
 !-------------------------------------------------------------------
 
-	title1 = 'version nrec       nkn       nel       nlv' //
-     +			'     iflag'
+	title1 = 'version nrec       nkn       nel       nlv' // &
+     &			'     iflag'
 !                 12345678901234567890123456789012345678901234567890123
 	title2 = '   irec                         atime     date'
 
@@ -88,8 +88,8 @@
 !-------------------------------------------------------------------
 
 	open(iunit,file=rstfile,status='old',form='unformatted')
-	call rst_skip_record(iunit,atime,nvers,nrec
-     +					,nknr,nelr,nlvr,iflag,ierr)
+	call rst_skip_record(iunit,atime,nvers,nrec &
+     &					,nknr,nelr,nlvr,iflag,ierr)
 	if( ierr .ne. 0 ) then
 	  stop 'error stop rst2shy: reading parameters'
 	end if
@@ -418,8 +418,8 @@
 	else if( ic > 1 ) then
 	  do i=1,ic
 	    idc = 300 + 1
-	    call shy_write_scalar_record(id,dtime,idc,nlvdi
-     +				,conzv(1,1,i))
+	    call shy_write_scalar_record(id,dtime,idc,nlvdi &
+     &				,conzv(1,1,i))
 	  end do
 	end if
 
@@ -476,8 +476,8 @@
 	integer id
 	double precision dtime
 
-	call shy_write_hydro_records(id,dtime,nlvdi
-     +			,znv,zenv,utlnv,vtlnv)
+	call shy_write_hydro_records(id,dtime,nlvdi &
+     &			,znv,zenv,utlnv,vtlnv)
 
 	end
 

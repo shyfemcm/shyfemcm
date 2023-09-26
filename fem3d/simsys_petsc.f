@@ -179,9 +179,9 @@
 
         call getfnm('petsc_zcfg',PETSc_zeta_configfile)
         call getfnm('amgx_zcfg',AmgX_zeta_configfile)
-        zeta_system=petsc_system(PETSc_zeta_configfile,
-     +                           AmgX_zeta_configfile
-     +                            ) !constructor
+        zeta_system=petsc_system(PETSc_zeta_configfile, &
+     &                           AmgX_zeta_configfile &
+     &                            ) !constructor
         hia => zeta_system%mat3x3(:,:)
         hik => zeta_system%vecx3(:)
 

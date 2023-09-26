@@ -24,94 +24,94 @@
 !
 !--------------------------------------------------------------------------
 
-c bfm module - ERSEM module (old - do not use)
-c
-c contents :
-c
-c subroutine bfm_module(it,dt)
-c				administers bfm ecological model
-c subroutine bfm_shell(it,dt)
-c				computes ecological scalars with BFM  model
-c subroutine bfm_init(nbfmv1,b1cn,nbfmv2,b2cn,nbfmv3,b3cn)
-c				initializes bfm  arrays
-c subroutine comp_out(ivs1,ivs2,ivs3,itmbfm,idtbfm)
-c				outputs variables
-c subroutine setlux
-c				light routine ??
-c
-c revision log :
-c
-c 10.03.2008	aac	bfm ecological module from scratch
-c 29.04.2008	ggu	bfm model integrated in main branch
-c 30.04.2008	ggu	double to real (BUG)
-c 23.03.2010	ggu	changed v6.1.1
-c 17.02.2011	ggu	changed VERS_6_1_18
-c 18.02.2011	ggu	changed VERS_6_1_19
-c 31.05.2011	ggu	clean from useless common blocks
-c 07.06.2011	ggu	changed VERS_6_1_25
-c 15.01.2012	aac	advection for all BFM var introduced
-c 17.02.2012	aac&ggu	restart for bfm
-c 26.03.2012	ggu	bfm1-3 had wrong second dimension
-c 01.06.2012	ggu	changed VERS_6_1_53
-c 22.10.2012	ggu	saved some variables
-c 17.06.2013	ggu	bug fix: wsinkv was not present in call
-c 18.06.2014	ggu	changed VERS_6_1_77
-c 18.07.2014	ggu	changed VERS_7_0_1
-c 21.10.2014	ggu	converted to new boundary treatment
-c 05.11.2014	ggu	changed VERS_7_0_5
-c 23.12.2014	ggu	changed VERS_7_0_11
-c 19.01.2015	ggu	changed VERS_7_1_3
-c 17.07.2015	ggu	changed VERS_7_1_80
-c 20.07.2015	ggu	changed VERS_7_1_81
-c 30.07.2015	ggu	changed VERS_7_1_83
-c 03.04.2018	ggu	changed VERS_7_5_43
-c 16.02.2019	ggu	changed VERS_7_5_60
-c 17.10.2019	ggu	mark as obsolete
-c
-c**************************************************************
-c
-c DOCS  FILENAME        Boundary conditions
-c
-c Boundary conditions have to be given in a file in every
-c section |bound|.
-c
-c |bfm2dn|      File name that contains boundary conditions for
-c               concentration of the bfm ecological variables.
-c               The format is the same as for the file |boundn|.
-c               The unit of the values given in the second
-c               and following columns (nbfmv data columns for ERSEM)
-c               must the ones of the variable.
-c
-c DOCS  FILENAME        Initial conditions
-c
-c Initialization of variables are done by file. The files can be created
-c by the progam |laplap|. They have to be given in section |name|.
-c
-c**************************************************************
-c
-c b1cn is real in main and double precision in init ???????????
-c ligth -> light	dove viene utilizzato ???
-c ddepth		a che cosa serve ???? -> needed in standalone
-c drr			-> needed in standalone
-c
-c in bfm Makefile:
-c
-c	cleanall
-c
-c changed:
-c
-c	btanf -> ibtanf
-c	btend -> itbend
-c	lightflag -> blight
-c
-c cosa fanno tutte le variabili di gotm qui???
-c 
-c**************************************************************
-c**************************************************************
+! bfm module - ERSEM module (old - do not use)
+!
+! contents :
+!
+! subroutine bfm_module(it,dt)
+!				administers bfm ecological model
+! subroutine bfm_shell(it,dt)
+!				computes ecological scalars with BFM  model
+! subroutine bfm_init(nbfmv1,b1cn,nbfmv2,b2cn,nbfmv3,b3cn)
+!				initializes bfm  arrays
+! subroutine comp_out(ivs1,ivs2,ivs3,itmbfm,idtbfm)
+!				outputs variables
+! subroutine setlux
+!				light routine ??
+!
+! revision log :
+!
+! 10.03.2008	aac	bfm ecological module from scratch
+! 29.04.2008	ggu	bfm model integrated in main branch
+! 30.04.2008	ggu	double to real (BUG)
+! 23.03.2010	ggu	changed v6.1.1
+! 17.02.2011	ggu	changed VERS_6_1_18
+! 18.02.2011	ggu	changed VERS_6_1_19
+! 31.05.2011	ggu	clean from useless common blocks
+! 07.06.2011	ggu	changed VERS_6_1_25
+! 15.01.2012	aac	advection for all BFM var introduced
+! 17.02.2012	aac&ggu	restart for bfm
+! 26.03.2012	ggu	bfm1-3 had wrong second dimension
+! 01.06.2012	ggu	changed VERS_6_1_53
+! 22.10.2012	ggu	saved some variables
+! 17.06.2013	ggu	bug fix: wsinkv was not present in call
+! 18.06.2014	ggu	changed VERS_6_1_77
+! 18.07.2014	ggu	changed VERS_7_0_1
+! 21.10.2014	ggu	converted to new boundary treatment
+! 05.11.2014	ggu	changed VERS_7_0_5
+! 23.12.2014	ggu	changed VERS_7_0_11
+! 19.01.2015	ggu	changed VERS_7_1_3
+! 17.07.2015	ggu	changed VERS_7_1_80
+! 20.07.2015	ggu	changed VERS_7_1_81
+! 30.07.2015	ggu	changed VERS_7_1_83
+! 03.04.2018	ggu	changed VERS_7_5_43
+! 16.02.2019	ggu	changed VERS_7_5_60
+! 17.10.2019	ggu	mark as obsolete
+!
+!**************************************************************
+!
+! DOCS  FILENAME        Boundary conditions
+!
+! Boundary conditions have to be given in a file in every
+! section |bound|.
+!
+! |bfm2dn|      File name that contains boundary conditions for
+!               concentration of the bfm ecological variables.
+!               The format is the same as for the file |boundn|.
+!               The unit of the values given in the second
+!               and following columns (nbfmv data columns for ERSEM)
+!               must the ones of the variable.
+!
+! DOCS  FILENAME        Initial conditions
+!
+! Initialization of variables are done by file. The files can be created
+! by the progam |laplap|. They have to be given in section |name|.
+!
+!**************************************************************
+!
+! b1cn is real in main and double precision in init ???????????
+! ligth -> light	dove viene utilizzato ???
+! ddepth		a che cosa serve ???? -> needed in standalone
+! drr			-> needed in standalone
+!
+! in bfm Makefile:
+!
+!	cleanall
+!
+! changed:
+!
+!	btanf -> ibtanf
+!	btend -> itbend
+!	lightflag -> blight
+!
+! cosa fanno tutte le variabili di gotm qui???
+! 
+!**************************************************************
+!**************************************************************
 
         subroutine ecological_module
 
-c general interface to ecological module
+! general interface to ecological module
 
         implicit none
 
@@ -127,11 +127,11 @@ c general interface to ecological module
 
         end
 
-c**************************************************************
+!**************************************************************
 
 	subroutine bfm_module(it,dt)
 
-c administers bfm ecological model
+! administers bfm ecological model
 
 	implicit none
 
@@ -147,9 +147,9 @@ c administers bfm ecological model
      
 	if( ibfm .lt. 0 ) return
 
-c------------------------------------------------------------
-c initialization
-c------------------------------------------------------------
+!------------------------------------------------------------
+! initialization
+!------------------------------------------------------------
 
 	if( ibfm .eq. 0 ) then
 	  ibfm = nint(getpar('ibfm'))
@@ -162,29 +162,29 @@ c------------------------------------------------------------
 	  write(*,*) 'BFM ECOLOGICAL MODEL INCLUDED: ',ibfm
 	end if
 
-c------------------------------------------------------------
-c is it time ?
-c------------------------------------------------------------
+!------------------------------------------------------------
+! is it time ?
+!------------------------------------------------------------
 
         if( it .lt. ibtanf .or. it .gt. ibtend ) return
 
-c------------------------------------------------------------
-c call bfm module
-c------------------------------------------------------------
+!------------------------------------------------------------
+! call bfm module
+!------------------------------------------------------------
 
 	call bfm_shell(it,dt)
 
-c------------------------------------------------------------
-c end of routine
-c------------------------------------------------------------
+!------------------------------------------------------------
+! end of routine
+!------------------------------------------------------------
 
 	end
 
-c**************************************************************
+!**************************************************************
 
 	subroutine bfm_shell(it,dt)
 
-c computes ecological scalars with BFM  model
+! computes ecological scalars with BFM  model
 
 	use mod_sinking
 	use mod_depth
@@ -253,45 +253,45 @@ c computes ecological scalars with BFM  model
 
 	data b3bound /17.0 , 0.1 , 17.0 , 1.0/
 
-	real fc2_a(nbfmv2),fc2_b(nbfmv2),fc2_c(nbfmv2)
-     +  ,fc2_d(nbfmv2),fc3_a,fc3_b,fc3_c
+	real fc2_a(nbfmv2),fc2_b(nbfmv2),fc2_c(nbfmv2) &
+     &  ,fc2_d(nbfmv2),fc3_a,fc3_b,fc3_c
 
-	data fc2_a / 0.017,
-     +             0.0126,
-     +             0.0126,
-     +             0.0126,
-     +             0.0126,
-     +             0.015,
-     +             0.015,
-     +             0.0167,
-     + 	 	   0.0167 /
-	data fc2_b / 0.0019,
-     +             0.0007862,
-     +             0.0007862,
-     +             0.0007862,
-     +             0.0007862,
-     +             0.00167,
-     +             0.00167,
-     +             0.00185,
-     +             0.00185 /
-	data fc2_c / 0,
-     +             0.05,
-     +             0.03,
-     +             0.07,
-     +             0.02,
-     +             0.,
-     +             0.,
-     +             0.,
-     +             0. /
-	data fc2_d / 0.,
-     +             0.01,
-     +             0.,
-     +             0.,
-     +             0.,
-     +             0.,
-     +             0.,
-     +             0.,
-     +             0. /
+	data fc2_a / 0.017, &
+     &             0.0126, &
+     &             0.0126, &
+     &             0.0126, &
+     &             0.0126, &
+     &             0.015, &
+     &             0.015, &
+     &             0.0167, &
+     & 	 	   0.0167 /
+	data fc2_b / 0.0019, &
+     &             0.0007862, &
+     &             0.0007862, &
+     &             0.0007862, &
+     &             0.0007862, &
+     &             0.00167, &
+     &             0.00167, &
+     &             0.00185, &
+     &             0.00185 /
+	data fc2_c / 0, &
+     &             0.05, &
+     &             0.03, &
+     &             0.07, &
+     &             0.02, &
+     &             0., &
+     &             0., &
+     &             0., &
+     &             0. /
+	data fc2_d / 0., &
+     &             0.01, &
+     &             0., &
+     &             0., &
+     &             0., &
+     &             0., &
+     &             0., &
+     &             0., &
+     &             0. /
 
 	parameter( fc3_a =0.0126,fc3_b =0.0007862,fc3_c =0.01 )
 
@@ -443,9 +443,9 @@ c computes ecological scalars with BFM  model
 
 	integer ok
 
-c------------------------------------------------------
-c documentation
-c------------------------------------------------------
+!------------------------------------------------------
+! documentation
+!------------------------------------------------------
 
 !------------------------------------------------------
 ! initialization
@@ -468,18 +468,18 @@ c------------------------------------------------------
 !         --------------------------------------------------------
 
 	  if( .not. has_restart(6) ) then       
-	    call bfm_init(nbfmv1,b1cn,nbfmv2,b2cn
-     +			,b2cn_a,b2cn_b,b2cn_c,b2cn_d,nbfmv3
-     +			,b3cn,b3cn_a,b3cn_b,b3cn_c)
+	    call bfm_init(nbfmv1,b1cn,nbfmv2,b2cn &
+     &			,b2cn_a,b2cn_b,b2cn_c,b2cn_d,nbfmv3 &
+     &			,b3cn,b3cn_a,b3cn_b,b3cn_c)
 	  endif
 
 !         --------------------------------------------------------
 !         Initializes STANDALONE BFM arrays 
 !         --------------------------------------------------------
 
-          call feminit_bio(b1cn,nbfmv1,b2cn,nbfmv2,b2cn_a
-     +			,b2cn_b,b2cn_c,b2cn_d,b3cn,nbfmv3
-     +			,b3cn_a,b3cn_b,b3cn_c)
+          call feminit_bio(b1cn,nbfmv1,b2cn,nbfmv2,b2cn_a &
+     &			,b2cn_b,b2cn_c,b2cn_d,b3cn,nbfmv3 &
+     &			,b3cn_a,b3cn_b,b3cn_c)
 
 !         --------------------------------------------------
 !         Initialize boundary conditions for all state variables
@@ -491,12 +491,12 @@ c------------------------------------------------------
 
 	  call get_first_dtime(dtime0)
           nintp = 2
-          call bnds_init_new('bfm1',dtime0,nintp,nbfmv1,nkn,nlv
-     +                          ,b1bound,idbfm1)
-          call bnds_init_new('bfm2',dtime0,nintp,nbfmv2,nkn,nlv
-     +                          ,b2bound,idbfm2)
-          call bnds_init_new('bfm3',dtime0,nintp,nbfmv3,nkn,nlv
-     +                          ,b3bound,idbfm3)
+          call bnds_init_new('bfm1',dtime0,nintp,nbfmv1,nkn,nlv &
+     &                          ,b1bound,idbfm1)
+          call bnds_init_new('bfm2',dtime0,nintp,nbfmv2,nkn,nlv &
+     &                          ,b2bound,idbfm2)
+          call bnds_init_new('bfm3',dtime0,nintp,nbfmv3,nkn,nlv &
+     &                          ,b3bound,idbfm3)
 
 !         ---------------------------------------------------------
 !         INITIALIZES load
@@ -547,24 +547,24 @@ c------------------------------------------------------
 !$OMP DO SCHEDULE(DYNAMIC)
 
  	do is1=1,nbfmv1
-  	    call scal_adv('bfm_1',is1,b1cn(1,1,is1),idbfm1
-     +                          ,rkpar,wsink,difhv,difv,difmol)
+  	    call scal_adv('bfm_1',is1,b1cn(1,1,is1),idbfm1 &
+     &                          ,rkpar,wsink,difhv,difv,difmol)
  	end do
 
 !$OMP END DO NOWAIT
 !$OMP DO SCHEDULE(DYNAMIC)
 
  	do is2=1,nbfmv2
-  	    call scal_adv('bfm_2',is2,b2cn(1,1,is2),idbfm2
-     +                          ,rkpar,wsink,difhv,difv,difmol)
+  	    call scal_adv('bfm_2',is2,b2cn(1,1,is2),idbfm2 &
+     &                          ,rkpar,wsink,difhv,difv,difmol)
         end do
 
 !$OMP END DO NOWAIT
 !$OMP DO SCHEDULE(DYNAMIC)
 
  	do is3=1,nbfmv3
-  	    call scal_adv('bfm_3',is3,b3cn(1,1,is3),idbfm3
-     +                          ,rkpar,wsink,difhv,difv,difmol)
+  	    call scal_adv('bfm_3',is3,b3cn(1,1,is3),idbfm3 &
+     &                          ,rkpar,wsink,difhv,difv,difmol)
         end do
 
 !$OMP END DO NOWAIT
@@ -572,9 +572,9 @@ c------------------------------------------------------
 
         do is4=1,nbfmv2
             fct=fc2_a(is4)
-            call scal_adv_fact('bfm_4',is4,fct,b2cn_a(1,1,is4),idbfm2
-     +                          ,rkpar,wsink,wsinkv,rload,load
-     +				,difhv,difv,difmol)
+            call scal_adv_fact('bfm_4',is4,fct,b2cn_a(1,1,is4),idbfm2 &
+     &                          ,rkpar,wsink,wsinkv,rload,load &
+     &				,difhv,difv,difmol)
         end do
 
 !$OMP END DO NOWAIT
@@ -582,9 +582,9 @@ c------------------------------------------------------
 
         do is5=1,nbfmv2
             fct=fc2_b(is5)
-            call scal_adv_fact('bfm_5',is5,fct,b2cn_b(1,1,is5),idbfm2
-     +                          ,rkpar,wsink,wsinkv,rload,load
-     +				,difhv,difv,difmol)
+            call scal_adv_fact('bfm_5',is5,fct,b2cn_b(1,1,is5),idbfm2 &
+     &                          ,rkpar,wsink,wsinkv,rload,load &
+     &				,difhv,difv,difmol)
         end do
 
 !$OMP END DO NOWAIT
@@ -592,9 +592,9 @@ c------------------------------------------------------
 
         do is6=2,5
             fct=fc2_c(is6)
-            call scal_adv_fact('bfm_6',is6,fct,b2cn_a(1,1,is6),idbfm2
-     +                          ,rkpar,wsink,wsinkv,rload,load
-     +				,difhv,difv,difmol)
+            call scal_adv_fact('bfm_6',is6,fct,b2cn_a(1,1,is6),idbfm2 &
+     &                          ,rkpar,wsink,wsinkv,rload,load &
+     &				,difhv,difv,difmol)
         end do
 
 !$OMP END DO NOWAIT
@@ -602,23 +602,23 @@ c------------------------------------------------------
 !        do is=1,nbfmv2
             is7 = 2
             fct=fc2_d(is7)
-            call scal_adv_fact('bfm_7',is7,fct,b2cn_d(1,1,is7),idbfm2
-     +                          ,rkpar,wsink,wsinkv,rload,load
-     +				,difhv,difv,difmol)
+            call scal_adv_fact('bfm_7',is7,fct,b2cn_d(1,1,is7),idbfm2 &
+     &                          ,rkpar,wsink,wsinkv,rload,load &
+     &				,difhv,difv,difmol)
 !        end do
 
 !$OMP DO SCHEDULE(DYNAMIC)
 
          do is8=1,3,2
             fct=fc3_a
-            call scal_adv_fact('bfm_8',is8,fct,b3cn_a(1,1,is8),idbfm3
-     +                          ,rkpar,wsink,wsinkv,rload,load
-     +				,difhv,difv,difmol)
+            call scal_adv_fact('bfm_8',is8,fct,b3cn_a(1,1,is8),idbfm3 &
+     &                          ,rkpar,wsink,wsinkv,rload,load &
+     &				,difhv,difv,difmol)
 
             fct=fc3_b
-            call scal_adv_fact('bfm_8',is8,fct,b3cn_b(1,1,is8),idbfm3
-     +                          ,rkpar,wsink,wsinkv,rload,load
-     +				,difhv,difv,difmol)
+            call scal_adv_fact('bfm_8',is8,fct,b3cn_b(1,1,is8),idbfm3 &
+     &                          ,rkpar,wsink,wsinkv,rload,load &
+     &				,difhv,difv,difmol)
          end do
 
 !$OMP END DO NOWAIT
@@ -626,9 +626,9 @@ c------------------------------------------------------
 
          is9 = 3
          fct=fc3_c
-         call scal_adv_fact('bfm_9',is9,fct,b3cn_c(1,1,is9),idbfm3
-     +                          ,rkpar,wsink,wsinkv,rload,load
-     +				,difhv,difv,difmol)
+         call scal_adv_fact('bfm_9',is9,fct,b3cn_c(1,1,is9),idbfm3 &
+     &                          ,rkpar,wsink,wsinkv,rload,load &
+     &				,difhv,difv,difmol)
 
 !------------------------------------------------------
 ! ASSIGN DEPTH TO NODE
@@ -643,8 +643,8 @@ c------------------------------------------------------
 !------------------------------------------------------
 
  	do k=1,nkn
- 	  call do_BFM_ECO(k,b1cn,nbfmv1,b2cn,nbfmv2,b2cn_a
-     +      ,b2cn_b,b2cn_c,b2cn_d,b3cn,nbfmv3,b3cn_a,b3cn_b,b3cn_c)
+ 	  call do_BFM_ECO(k,b1cn,nbfmv1,b2cn,nbfmv2,b2cn_a &
+     &      ,b2cn_b,b2cn_c,b2cn_d,b3cn,nbfmv3,b3cn_a,b3cn_b,b3cn_c)
  	end do
 
 !------------------------------------------------------
@@ -667,13 +667,13 @@ c------------------------------------------------------
 
 	end
 
-c**************************************************************
+!**************************************************************
 
-	subroutine bfm_init(nbfmv1,b1cn,nbfmv2,b2cn
-     +			,b2cn_a,b2cn_b,b2cn_c,b2cn_d,nbfmv3
-     +			,b3cn,b3cn_a,b3cn_b,b3cn_c)
+	subroutine bfm_init(nbfmv1,b1cn,nbfmv2,b2cn &
+     &			,b2cn_a,b2cn_b,b2cn_c,b2cn_d,nbfmv3 &
+     &			,b3cn,b3cn_a,b3cn_b,b3cn_c)
 
-c initializes bfm  arrays
+! initializes bfm  arrays
 
 	use levels, only : nlvdi,nlv
 	use basin, only : nkn,nel,ngr,mbw
@@ -697,13 +697,13 @@ c initializes bfm  arrays
 	real b3cn_b(nlvdim,nkndim,nbfmv3)
 	real b3cn_c(nlvdim,nkndim,nbfmv3)
 
-	save  /fO2o/,/fN1p/,/fN3n/,/fN4n/,/fO4n/,/fN5s/,/fN6r/,
-     + /fB1c/,/fB1n/,/fB1p/,/fP1c/,/fP1n/,/fP1p/,/fP1l/,/fP1s/,
-     + /fP2c/,/fP2n/,/fP2p/,/fP2l/,/fP3c/,/fP3n/,/fP3p/,/fP3l/,
-     + /fP4c/,/fP4n/,/fP4p/,/fP4l/,/fZ3c/,/fZ3n/,/fZ3p/,/fZ4c/,
-     + /fZ4n/,/fZ4p/,/fZ5c/,/fZ5n/,/fZ5p/,/fZ6c/,/fZ6n/,/fZ6p/,
-     + /fR1c/,/fR1n/,/fR1p/,/fR2c/,/fR6c/,/fR6n/,/fR6p/,/fR6s/,
-     + /fR7c/
+	save  /fO2o/,/fN1p/,/fN3n/,/fN4n/,/fO4n/,/fN5s/,/fN6r/, &
+     & /fB1c/,/fB1n/,/fB1p/,/fP1c/,/fP1n/,/fP1p/,/fP1l/,/fP1s/, &
+     & /fP2c/,/fP2n/,/fP2p/,/fP2l/,/fP3c/,/fP3n/,/fP3p/,/fP3l/, &
+     & /fP4c/,/fP4n/,/fP4p/,/fP4l/,/fZ3c/,/fZ3n/,/fZ3p/,/fZ4c/, &
+     & /fZ4n/,/fZ4p/,/fZ5c/,/fZ5n/,/fZ5p/,/fZ6c/,/fZ6n/,/fZ6p/, &
+     & /fR1c/,/fR1n/,/fR1p/,/fR2c/,/fR6c/,/fR6n/,/fR6p/,/fR6s/, &
+     & /fR7c/
 
 	integer l,k,is
 
@@ -783,11 +783,11 @@ c initializes bfm  arrays
   
 	end
   
-c**************************************************************
+!**************************************************************
 
 	subroutine comp_out(ivs1,ivs2,ivs3,itmbfm,idtbfm)
 
-c outputs variables
+! outputs variables
 
 	implicit none
 
@@ -824,7 +824,7 @@ c outputs variables
   
 	end
   
-c**************************************************************
+!**************************************************************
 
 	subroutine write_restart_eco(iunit)
 
@@ -895,7 +895,7 @@ c**************************************************************
 
 	end
 
-c**************************************************************
+!**************************************************************
 
 	subroutine skip_restart_eco(iunit)
 
@@ -921,7 +921,7 @@ c**************************************************************
 
 	end
 
-c**************************************************************
+!**************************************************************
 
 	subroutine read_restart_eco(iunit)
 
@@ -1001,5 +1001,5 @@ c**************************************************************
 
 	end
 
-c**************************************************************
+!**************************************************************
 

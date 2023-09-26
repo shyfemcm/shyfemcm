@@ -37,13 +37,13 @@
 ! 12.01.2023    ggu     adapt also for discharge, avoid div by zero if no data
 ! 30.03.2023    ggu     implement -inclusive option
 
-c*****************************************************************
-c*****************************************************************
-c*****************************************************************
+!*****************************************************************
+!*****************************************************************
+!*****************************************************************
 
 	subroutine tselab
 
-c writes info on ts file
+! writes info on ts file
 
 	use clo
         use elabutil
@@ -89,9 +89,9 @@ c writes info on ts file
 	atime0e = 0.
 	nrec = 0
 
-c--------------------------------------------------------------
-c set command line parameters
-c--------------------------------------------------------------
+!--------------------------------------------------------------
+! set command line parameters
+!--------------------------------------------------------------
 
         call elabutil_init('TS','tselab')
 
@@ -109,9 +109,9 @@ c--------------------------------------------------------------
 	if( factstring /= ' ' ) bout = .true.
 	if( offstring /= ' ' ) bout = .true.
 
-c--------------------------------------------------------------
-c open file
-c--------------------------------------------------------------
+!--------------------------------------------------------------
+! open file
+!--------------------------------------------------------------
 
 	if( bout ) then		!see if we get extra information on time
 	  if( sdate0 /= ' ' ) then
@@ -193,8 +193,8 @@ c--------------------------------------------------------------
 	    if( debug ) write(6,*) 'using absolute date from file'
 	  else if( atime0e /= 0 ) then
 	    atime0 = atime0e
-	    if( debug ) write(6,*) 
-     +			'using absolute date from extra information'
+	    if( debug ) write(6,*)  &
+     &			'using absolute date from extra information'
 	  else
 	    write(6,*) 'no absolute time... cannot convert'
 	    stop 'error stop: missing absolute time'
@@ -210,9 +210,9 @@ c--------------------------------------------------------------
 
         call elabtime_set_inclusive(binclusive)
 
-c--------------------------------------------------------------
-c read first record
-c--------------------------------------------------------------
+!--------------------------------------------------------------
+! read first record
+!--------------------------------------------------------------
 
 	call ts_read_next_record(iunit,nvar,dtime,data,datetime,ierr)
 	if( ierr .ne. 0 ) goto 97
@@ -220,9 +220,9 @@ c--------------------------------------------------------------
 	call dts_convert_to_atime(datetime,dtime,atime)
 	if( datetime(1) == 0 ) atime = atime0 + dtime
 
-c--------------------------------------------------------------
-c close and re-open file
-c--------------------------------------------------------------
+!--------------------------------------------------------------
+! close and re-open file
+!--------------------------------------------------------------
 
 	close(iunit)
 
@@ -232,9 +232,9 @@ c--------------------------------------------------------------
 	call ts_open_file(infile,nvar,datetime,varline,iunit)
 	if( iunit .le. 0 ) stop
 
-c--------------------------------------------------------------
-c loop on all records
-c--------------------------------------------------------------
+!--------------------------------------------------------------
+! loop on all records
+!--------------------------------------------------------------
 
 	nvar0 = nvar
 	nrec = 0
@@ -294,8 +294,8 @@ c--------------------------------------------------------------
 	  if( bverb ) write(6,*) nrec,atime,dline
 
           if( bcheck ) then
-            call fem_check(atime,1,1,nvar,data,flag
-     +                          ,strings,scheck,bquiet)
+            call fem_check(atime,1,1,nvar,data,flag &
+     &                          ,strings,scheck,bquiet)
           end if
 
 	  call handle_timestep(atime,bcheckdt,bskip)
@@ -315,15 +315,15 @@ c--------------------------------------------------------------
 
         if( bcheck ) then       !write final data
           atime = -1.
-          call fem_check(atime,1,1,nvar,data,flag
-     +                          ,strings,scheck,bquiet)
+          call fem_check(atime,1,1,nvar,data,flag &
+     &                          ,strings,scheck,bquiet)
         end if
 
 	if( bcheckrain ) call rain_elab_ts(-1,atime,data)
 
-c--------------------------------------------------------------
-c finish loop - info on time records
-c--------------------------------------------------------------
+!--------------------------------------------------------------
+! finish loop - info on time records
+!--------------------------------------------------------------
 
 	if( bwrite ) then
 	  write(6,*) 'min/max of data: '
@@ -354,8 +354,8 @@ c--------------------------------------------------------------
 
         if( bcheck ) then       !write final message
           atime = -2.
-          call fem_check(atime,1,1,nvar,data,flag
-     +                          ,strings,scheck,bsilent)
+          call fem_check(atime,1,1,nvar,data,flag &
+     &                          ,strings,scheck,bsilent)
         end if
 
 	close(iunit)
@@ -364,9 +364,9 @@ c--------------------------------------------------------------
 	deallocate(data)
 	deallocate(data_minmax)
 
-c--------------------------------------------------------------
-c end of routine
-c--------------------------------------------------------------
+!--------------------------------------------------------------
+! end of routine
+!--------------------------------------------------------------
 
 	return
    96	continue
@@ -380,9 +380,9 @@ c--------------------------------------------------------------
 	stop 'error stop tsinf'
 	end
 
-c*****************************************************************
-c*****************************************************************
-c*****************************************************************
+!*****************************************************************
+!*****************************************************************
+!*****************************************************************
 
         subroutine minmax_ts(nvar,data,data_minmax)
 
@@ -413,7 +413,7 @@ c*****************************************************************
 
         end
 
-c*****************************************************************
+!*****************************************************************
 
 	subroutine parse_varline(varline,nvar,strings,ivars)
 
@@ -438,8 +438,8 @@ c*****************************************************************
 	nvars = nvars - 1	!subtract time column
 
 	if( nvars /= nvar ) then
-	  write(6,*) 'number of variables on varline /= '//
-     +			'number of data columns'
+	  write(6,*) 'number of variables on varline /= '// &
+     &			'number of data columns'
 	  write(6,*) 'varline: ',trim(varline)
 	  write(6,*) 'nvars,nvar: ',nvars,nvar
 	  write(6,*) 'not using varline...'
@@ -462,7 +462,7 @@ c*****************************************************************
 
 	end
 
-c*****************************************************************
+!*****************************************************************
 
 	subroutine rain_elab_ts(npi,atime,data)
 
@@ -544,8 +544,8 @@ c*****************************************************************
             write(6,1001) year,ny,tdays,tot,totyear
  1001	    format(2i8,3f14.2)
 	  else
-            write(6,*) '   year   nrecs          days' //
-     +			'   accumulated        yearly'
+            write(6,*) '   year   nrecs          days' // &
+     &			'   accumulated        yearly'
 	  end if
           ny = 0
 	  tstart = atime
@@ -557,5 +557,5 @@ c*****************************************************************
 
 	end
 
-c*****************************************************************
+!*****************************************************************
 

@@ -213,12 +213,12 @@
 
 	 atold = atime
 
-	 call read_records(id,dtime,nvar,nndim,nlvdi,ivars
-     +				,cv3,cv3all,ierr)
+	 call read_records(id,dtime,nvar,nndim,nlvdi,ivars &
+     &				,cv3,cv3all,ierr)
          if(ierr.ne.0) exit
 
-	 call read_records(id2,dtime2,nvar,nndim,nlvdi,ivars
-     +				,cv4,cv4all,ierr)
+	 call read_records(id2,dtime2,nvar,nndim,nlvdi,ivars &
+     &				,cv4,cv4all,ierr)
          if(ierr.ne.0) exit
 
 	 !if( dtime /= dtime2 ) then

@@ -23,19 +23,19 @@
 !
 !--------------------------------------------------------------------------
 
-c weutro.h: header for weutro.f
-c
-c revision log :
-c
-c 24.08.2004    ggu     some new variables (idbox, wdebug etc)
-c
-c**************************************************************
-c
-c--------------------------------------------------------------
-c--------------------------------------------------------------
-c	EUTRO.CMN	
-c--------------------------------------------------------------
-c--------------------------------------------------------------
+! weutro.h: header for weutro.f
+!
+! revision log :
+!
+! 24.08.2004    ggu     some new variables (idbox, wdebug etc)
+!
+!**************************************************************
+!
+!--------------------------------------------------------------
+!--------------------------------------------------------------
+!	EUTRO.CMN	
+!--------------------------------------------------------------
+!--------------------------------------------------------------
 
 	integer segmax
 	parameter (segmax=1)
@@ -61,9 +61,9 @@ c--------------------------------------------------------------
 	common /eetime/daytime	!changed due to compiler warnings (ggu,13/3/01)
 	save /eetime/
 
-c--------------------------------------------------------------
-c	state variables
-c--------------------------------------------------------------
+!--------------------------------------------------------------
+!	state variables
+!--------------------------------------------------------------
 
 	real NH3,NO3,OPO4,PHYT,CBOD,DO,ON,OP	!8 state variables
 	common /statev/ NH3,NO3,OPO4,PHYT,CBOD,DO,ON,OP
@@ -73,9 +73,9 @@ c--------------------------------------------------------------
 	common /delta/ CD
 	save /delta/
 
-c--------------------------------------------------------------
-c	geometrical and  physical variables set in main1.f
-c--------------------------------------------------------------
+!--------------------------------------------------------------
+!	geometrical and  physical variables set in main1.f
+!--------------------------------------------------------------
 
 	real VOL	!volume of box
 	real H		!depth of box
@@ -88,19 +88,19 @@ c--------------------------------------------------------------
 	common /geom/ VOL,H,SA,VEL,STP,SAL,STP20
 	save /geom/
 
-c depthg()	-> h
-c salin()	-> sal
-c bvol()	-> vol
+! depthg()	-> h
+! salin()	-> sal
+! bvol()	-> vol
 
-c--------------------------------------------------------------
-c	subroutine phyto
-c--------------------------------------------------------------
+!--------------------------------------------------------------
+!	subroutine phyto
+!--------------------------------------------------------------
 
-c------ growth and respiration
-c--------------variables-----
+!------ growth and respiration
+!--------------variables-----
 
-c	the following variables are calculated in phyto.f and used in the 
-c	subroutines written in ()
+!	the following variables are calculated in phyto.f and used in the 
+!	subroutines written in ()
 
 	real GP1	!saturated growth rate of phytop (ammonia)
 	real GPP 	!total growth of phytop (inorganop)
@@ -110,7 +110,7 @@ c	subroutines written in ()
 	real GITMX1	!auxiliar var to compute growth value (smith) 
 	real GITMAX	!auxiliar var to compute growth value (smith)
 
-c-------------parameters---
+!-------------parameters---
 
         real K1RT	!respiration temperature coefficient unitless 
 	real K1RC	!respiration rate constant endogenous term day-1
@@ -121,15 +121,15 @@ c-------------parameters---
      &                ,K1RT,K1RC
 	save /phytog/
 
-c------ decomposition
-c--------------variables----
+!------ decomposition
+!--------------variables----
 
         real DP1	!auxiliar variable to compute decomp value (eutrodmp)
 	real DPP        !phytoplancton decomposition term (ammonia,cbodsv,
 			!inorganp,organicn,organop)
 	real K1D	!K1D=non predatory phytopl. death rate  day-1
 
-c--------------parameters--
+!--------------parameters--
 
 	real KPZDC	!decomp rate constant in sediment at 20 C, per day
 	real KPZDT	!decomposition temperaure coefficient in sediment day-1
@@ -138,8 +138,8 @@ c--------------parameters--
 	save /phytod/
 
 
-c--------nutrients limitation-
-c------------variables-------
+!--------nutrients limitation-
+!------------variables-------
 
 	real PNH3G1	!uptake of nitrogen (adimensional) ammonia preference
 			!(ammonia,dissoxyg,nitrate)
@@ -147,69 +147,69 @@ c------------variables-------
 	real XEMP2	!Michaelis Menten Limitations for  P (eutrodmp)
 	real RNUTR	!auxiliar var to compute nutrient limitation (eutrodmp)
 
-c	real CN		!nutrients concentration values in Michaelis formula N/L
-c			!CN = NH3 + NO3 (local in pphyto)
-c	real DOPO4	!nutrients concentr. in Michaelis formula P/L (local)
+!	real CN		!nutrients concentration values in Michaelis formula N/L
+!			!CN = NH3 + NO3 (local in pphyto)
+!	real DOPO4	!nutrients concentr. in Michaelis formula P/L (local)
 
-c-----------parameters----
+!-----------parameters----
 
 	real KMNG1     	!nitrogen half saturn const for phyto growth microg N/L
 	real KMPG1 	!P  half saturn const for phyt growth microg P/L
 	real NUTLIM	!nutrient limitation option: 0=min, 1=multiple
-c	real CCHL1  	!carbon to clorophyll ratio used only when LGTHSW=1
+!	real CCHL1  	!carbon to clorophyll ratio used only when LGTHSW=1
 			!microg/microg
 	real FOPO4	!spatially variable dissolved fraction of inorganic P	
-c
+!
 	common /phytonp/ PNH3G1,KMNG1,KMPG1,XEMP1,XEMP2,FOPO4,
      &                   RNUTR,NUTLIM
 	save /phytonp/
 C
-c--------grazing------------
-c	set in param.f if zooplankton is a state variable or a forcing:
-c       if graztype=1 simulate
+!--------grazing------------
+!	set in param.f if zooplankton is a state variable or a forcing:
+!       if graztype=1 simulate
 	
-c       grazing from WASP
-c	zooplankton: Time and segment variable herbivorous zooplankton populs
-c	 are described as the product of the time variable population ZOO and 
-c	segment specific ratios ZOOSG
-c
-c-----------parameters for forcing zooplankton (graztype not equal 1)--- ---
+!       grazing from WASP
+!	zooplankton: Time and segment variable herbivorous zooplankton populs
+!	 are described as the product of the time variable population ZOO and 
+!	segment specific ratios ZOOSG
+!
+!-----------parameters for forcing zooplankton (graztype not equal 1)--- ---
 
 	real K1G	!K1G=grazing rate on Phytop. per unit Zoop.L/mgC-day
 	real ZOO	!ZOO=time funct or const (default when set in param.f)
-c			!zooplankton population mg C/L
+!			!zooplankton population mg C/L
 	real ZOOSG(segmax)!ZOOSG=parameter  !fraction of herbivorous zooplankto
 
 	common /phytograz/ K1G,ZOO,ZOOSG
 	save /phytograz/
-c
-c-----variables and--parameters for variable zooplankton (graztype = 1)----
-c-----variables------
+!
+!-----variables and--parameters for variable zooplankton (graztype = 1)----
+!-----variables------
 	real GRZ	!grazing value
 	real zoosk	!sink term of zooplankton, source term for 
 			!organicn and organop
-c-----parameters----
+!-----parameters----
 	real KGRZ	!grazing rate constant
 	real KPHYZ	!half saturation constant for phytop in grazing
 	real EFF	!grazing efficiency for zooplankton growth
 	real KDZ	!death rate for zooplankton
 	common /phytograzv/GRZ,KGRZ,KPHYZ,EFF,KDZ,zoosk 
 	save /phytograzv/
-c--------------------------------------------------------------
-c	subroutine organop, inorganp (P=phosphorous)
-c--------------------------------------------------------------
+!--------------------------------------------------------------
+!	subroutine organop, inorganp (P=phosphorous)
+!--------------------------------------------------------------
 
-c-----------variables---
+!-----------variables---
 
 	real SK58	!sink term of organic P (inorganp,organop)
 	real FPO4(segmax)!sediment flux P [mg/(m**2 day)]
 
-c	real SR5P	! Source of organic P from phytop. resp (organop) 
-c	real SR8P	!Source of organic P from phytop death (inorganp)
-c	real SR8OP	!sink of inorganic P (inorganp) 
-c	real SK8P	!sink term for inorganic P: algal uptake (inorganp)
+!	real SR5P	! Source of organic P from phytop. resp (organop) 
+!	real SR8P	!Source of organic P from phytop death (inorganp)
+!	real SR8OP	!sink of inorganic P (inorganp) 
+!	real SK8P	!sink term for inorganic P: algal uptake (inorganp)
 
-c-----------parameters--
+!-----------parameters--
 	real PCRB 	!P/C ratio mgP/mgC
 	real FOP	!fraction of dead and respired phyto 
 			!recycled to the organic P pool unitless
@@ -223,25 +223,25 @@ c-----------parameters--
      &				K58C,K58T,KOPDC,KOPDT,KPO4,FPO4
 	save /com_phos/
 
-c--------------------------------------------------------------
-c	subroutine organicn, ammonia,nitrate
-c--------------------------------------------------------------
+!--------------------------------------------------------------
+!	subroutine organicn, ammonia,nitrate
+!--------------------------------------------------------------
 
-c-----------variables----
+!-----------variables----
 
-c	real SR13P	!Source of inorganic nitrogen from phyto(ammonia)
-c	real SR13ON	!Source term of ammonia (ammonia)
-c	real SK13P1	!sink term for inorganic N: algal uptake (ammonia)
-c	real SR1413	!source for nitrate (nitrate)
-c	real SK14P1	!sink term for nitretae: algal uptake (nitrate)
-c	real SR10P	!Source of organic nitrogen from phytop (organicn)
+!	real SR13P	!Source of inorganic nitrogen from phyto(ammonia)
+!	real SR13ON	!Source term of ammonia (ammonia)
+!	real SK13P1	!sink term for inorganic N: algal uptake (ammonia)
+!	real SR1413	!source for nitrate (nitrate)
+!	real SK14P1	!sink term for nitretae: algal uptake (nitrate)
+!	real SR10P	!Source of organic nitrogen from phytop (organicn)
 
 	real SK1013	!Sink term of organic Nitrogen (ammonia, organicn)
 	real SK1314	!nitrification term (ammonia,dissoxyg,nitrate)
 	real SK14D	!denitrification term (cbodsv, nitrate)
 	real FNH4(segmax)!sediment flux N [mg/(m**2 day)]
 
-c-----------parameters--
+!-----------parameters--
 
 	real NCRB	!N/C ratio
 	real FON	!fraction of organic Nitrogen
@@ -263,19 +263,19 @@ c-----------parameters--
      &			,FNH4
 	save /comn/ 
 
-c--------------------------------------------------------------
-c	subroutine CBOD 	
-c--------------------------------------------------------------
+!--------------------------------------------------------------
+!	subroutine CBOD 	
+!--------------------------------------------------------------
 
-c------------variables----
+!------------variables----
 
-c	real SR18P	!Source: phyto decomp.(if sedseg) or death (if water c.)
-c	real SK18D	!Sink term: denitrification (cbodsv) 
-c
+!	real SR18P	!Source: phyto decomp.(if sedseg) or death (if water c.)
+!	real SK18D	!Sink term: denitrification (cbodsv) 
+!
 	real DEATH	!Source term: phytop death (cbodsv,organicn,phyto)
 	real SK180	!Sink term: oxidation (cbodsv,dissoxyg)
 
-c----------parameters---
+!----------parameters---
 
 	real OCRB	!O/C ratio
 	real KDC	!oxidation rate in water column
@@ -289,17 +289,17 @@ c----------parameters---
 	common /comcbod/ OCRB,DEATH,SK180,KDC,KDT,KDSC,KDST,KBOD
 	save /comcbod/ 
 
-c--------------------------------------------------------------
-c       subroutine dissoxyg
-c--------------------------------------------------------------
+!--------------------------------------------------------------
+!       subroutine dissoxyg
+!--------------------------------------------------------------
 
-c-------dissoxyg-physical-----
-c
-c------------variables---
+!-------dissoxyg-physical-----
+!
+!------------variables---
 
-c	real TK		!Temperature Kelvin, calculated internally (dissoxyg)
-c	real RLNCS	!ln dissolved oxygen saturation value (dissoxyg)
-c	real CL		!Cl value calc.from salinity value (dissoxyg,eutrodmp)
+!	real TK		!Temperature Kelvin, calculated internally (dissoxyg)
+!	real RLNCS	!ln dissolved oxygen saturation value (dissoxyg)
+!	real CL		!Cl value calc.from salinity value (dissoxyg,eutrodmp)
 
 	integer ITYPE(segmax)	!segment types: (dissoxyg,eutrodmp,main1) 
 			!1=surface water segment
@@ -309,7 +309,7 @@ c	real CL		!Cl value calc.from salinity value (dissoxyg,eutrodmp)
 	real KA		!Reareation rate (auxiliar variable) (dissoxyg,eutrodmp)
 	real CS	!dissolved oxygen saturation valuie (dissoxyg,eutrodmp)
 
-c-----------parameters---
+!-----------parameters---
 
 	real WIND	!wind speed	
 	real XICECVR	!time variable ice cover funct% default =1 no ice cover
@@ -326,21 +326,21 @@ c-----------parameters---
      &			CS, XICECVR
     	save /rearphysic/
 	
-c--------dissoxyg-biological--
-c
-c-----------variables---
+!--------dissoxyg-biological--
+!
+!-----------variables---
 
-c	real SR190	!Source: reareation term
-c	real SR19PA	!Source: phytop. growth using NH3 and CO2
-c	real SR19PB	!Source: phyto growth from N03 and CO2
-c	real SK1913	!Sink term: nitrificatioin 
-c	real SK1918	!Sink term: oxidation of CBOD
-c	real SK19S	!Sink term: Sediment Ox demand
+!	real SR190	!Source: reareation term
+!	real SR19PA	!Source: phytop. growth using NH3 and CO2
+!	real SR19PB	!Source: phyto growth from N03 and CO2
+!	real SK1913	!Sink term: nitrificatioin 
+!	real SK1918	!Sink term: oxidation of CBOD
+!	real SK19S	!Sink term: Sediment Ox demand
 
 	real SR19P	!Source: phytoplankton growth (dissoxyg, eutrodmp)
 	real SK19P	!Sink: algal respiration (dissoxyg, eutrodmp)
 
-c-----------parameters--
+!-----------parameters--
 
 	real SOD1D(segmax)!sediment oxygen demand for segment
 	real SODTA(segmax)!segment specific temperature
@@ -349,13 +349,13 @@ c-----------parameters--
 	common /rearphyto/ SR19P,SK19P,SOD1D,SODTA
 	save /rearphyto/
 
-c--------------------------------------------------------------
-c	light limitation
-c--------------------------------------------------------------
+!--------------------------------------------------------------
+!	light limitation
+!--------------------------------------------------------------
 
-c-------------variables---
+!-------------variables---
 
-c	real GIT1	!growth rate (with light limitation)	
+!	real GIT1	!growth rate (with light limitation)	
 	real RLIGHT	!light limitation computed in smith and ditoro
 
 	integer LGHTSW	!LIGHT SWITCH: 1=Di Toro 2=Smith  3=Steele
@@ -366,18 +366,18 @@ c	real GIT1	!growth rate (with light limitation)
 	common /lightr/ RLIGHT,IS2,IINST
 	save /lighti/,/lightr/
 
-c--------------------------------------------------------------
-c	subroutine ditoro
-c--------------------------------------------------------------
+!--------------------------------------------------------------
+!	subroutine ditoro
+!--------------------------------------------------------------
 
-c KESG(ISEG)	-> SKE
-c KEFN(ISEG)	-> IKE
-c KE(5)		-> SKE = SKE * KE(IKE)
+! KESG(ISEG)	-> SKE
+! KEFN(ISEG)	-> IKE
+! KE(5)		-> SKE = SKE * KE(IKE)
 
-c----------variables---
+!----------variables---
 
 	INTEGER IKE
-c	real SKE	!non algal light att.(SKE=KESG(ISEG)  (ditoro, smith)
+!	real SKE	!non algal light att.(SKE=KESG(ISEG)  (ditoro, smith)
 	real KE(5)	!time var extin coeff funct unitless  (ditoro, smith)
 	real IAVBOT	!auxiliar variable (used in  eutro?) (ditoro, smith)
 	real RLGHTS(0:segmax,2)!RLGHTS(0:SG,2)controllare
@@ -389,10 +389,10 @@ c	real SKE	!non algal light att.(SKE=KESG(ISEG)  (ditoro, smith)
 	real ITOTmp	!incident light intensity during the daylight
 			!capire meglio !!!???!!!
 
-c--------parameters---
+!--------parameters---
 
 	integer KEFN(segmax) !IKE=KEFN=pointer designating time variable
-c	 ext. coeff. (KE) to be used for the segment in wasp KEFN=1,4.
+!	 ext. coeff. (KE) to be used for the segment in wasp KEFN=1,4.
 	real KESG(segmax)!non algal light att.(SKE=KESG(ISEG)
 
 	real FDAY	!fraction of day that is daylight unitless
@@ -404,22 +404,22 @@ c	 ext. coeff. (KE) to be used for the segment in wasp KEFN=1,4.
      &                    IAVBOT,CCHL,IAV,RLGHTS,ITO,KEFN
 	save /comditoro/
 
-c--------------------------------------------------------------
-c	subroutine smith
-c--------------------------------------------------------------c
+!--------------------------------------------------------------
+!	subroutine smith
+!--------------------------------------------------------------c
 
-c----------variables---
+!----------variables---
 
-c	real I0		!time variable incident light intensity just below
+!	real I0		!time variable incident light intensity just below
 	real IAVBOTX(segmax) !(smith)
 			! the surface, assumed to follow a half sin function
 			! over daylight hours, ly/day
-c	real IMAX	!auxiliar variable for I0
-c	real IAVSG	!auxiliar variable for RLIGHT
-c	real SUM	!auxiliar variable for RLIGHT
+!	real IMAX	!auxiliar variable for I0
+!	real IAVSG	!auxiliar variable for RLIGHT
+!	real SUM	!auxiliar variable for RLIGHT
 	real IS1X(segmax) !=IS1
 
-c--------parameters---
+!--------parameters---
 
 	real PI		!3.14
 	real PHIMX	!mg carbon fixed per mole of light quanta absorbed
@@ -434,29 +434,29 @@ c--------parameters---
      &			NEWDAY,IS1X,IAVBOTX
 	save /comsmith/
 
-c--------------------------------------------------------------
-c	subroutine kawind
-c--------------------------------------------------------------
+!--------------------------------------------------------------
+!	subroutine kawind
+!--------------------------------------------------------------
 
-c	common /comwind/ DIFF,TW,VW,VA,TA,PA,PW,WS,RK,WH,SRCD,EF,F1,
-c     &		F2,FP1,FP2,FP3,FP4,N,SRCD2,ERR,US,Z0,RK1,GAMU,RK2,
-c     &		RK3,depth,ut,uc,ze,gam
-c	save /comwind/
+!	common /comwind/ DIFF,TW,VW,VA,TA,PA,PW,WS,RK,WH,SRCD,EF,F1,
+!     &		F2,FP1,FP2,FP3,FP4,N,SRCD2,ERR,US,Z0,RK1,GAMU,RK2,
+!     &		RK3,depth,ut,uc,ze,gam
+!	save /comwind/
 
-c--------------------------------------------------------------
-c	subroutine kaydra
-c--------------------------------------------------------------
+!--------------------------------------------------------------
+!	subroutine kaydra
+!--------------------------------------------------------------
 
-c	real CFOREA 	!set in kahydra  (kahydra)      
-c	real AVDEPE	!depth, H, (kahydra) 
-c	real AVVELE	!abs(vel) water velocity (kahydra)
-c	real REAK	!coefficient for reareation set in kahydra.f 
-c	real EXPREV	!coefficient for reareation set in kahydra.f
-c	real EXPRED	!coefficient for reareation set in kahydra.f
-c	real TRANDP	!auxiliar variable in kahydra
-c	real DIF	!auxiliar variable in kahydra
+!	real CFOREA 	!set in kahydra  (kahydra)      
+!	real AVDEPE	!depth, H, (kahydra) 
+!	real AVVELE	!abs(vel) water velocity (kahydra)
+!	real REAK	!coefficient for reareation set in kahydra.f 
+!	real EXPREV	!coefficient for reareation set in kahydra.f
+!	real EXPRED	!coefficient for reareation set in kahydra.f
+!	real TRANDP	!auxiliar variable in kahydra
+!	real DIF	!auxiliar variable in kahydra
 
-c---------variables----
+!---------variables----
 	real K20	!auxiliar variable in the computation of krear(kahydra)
 			!(kahydra, dissoxyg)
 

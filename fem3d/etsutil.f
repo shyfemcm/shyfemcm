@@ -23,28 +23,28 @@
 !
 !--------------------------------------------------------------------------
 
-c utilities for ETS files
-c
-c revision log :
-c
-c 24.01.2014	ggu	copied from nosutil.f
-c 21.05.2015	ggu	changed VERS_7_1_11
-c 30.05.2015	ggu	new code for reading header 1 and 2 indipendently
-c 17.07.2015	ggu	changed VERS_7_1_53
-c 16.02.2019	ggu	changed VERS_7_5_60
-c
-c***************************************************************
+! utilities for ETS files
+!
+! revision log :
+!
+! 24.01.2014	ggu	copied from nosutil.f
+! 21.05.2015	ggu	changed VERS_7_1_11
+! 30.05.2015	ggu	new code for reading header 1 and 2 indipendently
+! 17.07.2015	ggu	changed VERS_7_1_53
+! 16.02.2019	ggu	changed VERS_7_5_60
+!
+!***************************************************************
 
-c***************************************************************
-c***************************************************************
-c***************************************************************
+!***************************************************************
+!***************************************************************
+!***************************************************************
 
 	subroutine write_ets_header(iu,ilhkv,hlv,hev)
 
-c other variables are stored internally
-c
-c must have been initialized with ets_init
-c all other variables must have already been stored internally (title,date..)
+! other variables are stored internally
+!
+! must have been initialized with ets_init
+! all other variables must have already been stored internally (title,date..)
 
 	implicit none
 
@@ -70,12 +70,12 @@ c all other variables must have already been stored internally (title,date..)
 	stop 'error stop write_ets_header: writing header'
 	end
 
-c***************************************************************
+!***************************************************************
 
-	subroutine read_ets_header(iu,nknddi,nlvddi,ilets,hlv,hets
-     +					,nodes,xg,yg,desc)
+	subroutine read_ets_header(iu,nknddi,nlvddi,ilets,hlv,hets &
+     &					,nodes,xg,yg,desc)
 
-c other variables are stored internally
+! other variables are stored internally
 
 	implicit none
 
@@ -95,16 +95,16 @@ c other variables are stored internally
 
 	call dimets(iu,nknddi,nlvddi)
 
-	call read_ets_header2(iu,nkn,nlv,ilets,hlv,hets
-     +				,nodes,xg,yg,desc)
+	call read_ets_header2(iu,nkn,nlv,ilets,hlv,hets &
+     &				,nodes,xg,yg,desc)
 
 	end
 
-c***************************************************************
+!***************************************************************
 
 	subroutine read_ets_header1(iu,nkn,nlv,nvar)
 
-c reads first header of ets file
+! reads first header of ets file
 
 	implicit none
 
@@ -141,12 +141,12 @@ c reads first header of ets file
 	stop 'error stop read_ets_header1: reading header'
 	end
 
-c***************************************************************
+!***************************************************************
 
-	subroutine read_ets_header2(iu,nkn,nlv,ilets,hlv,hets
-     +					,nodes,xg,yg,desc)
+	subroutine read_ets_header2(iu,nkn,nlv,ilets,hlv,hets &
+     &					,nodes,xg,yg,desc)
 
-c other variables are stored internally
+! other variables are stored internally
 
 	implicit none
 
@@ -165,8 +165,8 @@ c other variables are stored internally
 	real x,y,h
 	character*60 s
 
-	call ets_read_header2(iu,ilets,hlv,hets
-     +				,nodes,xg,yg,desc,ierr)
+	call ets_read_header2(iu,ilets,hlv,hets &
+     &				,nodes,xg,yg,desc,ierr)
 	if( ierr .ne. 0 ) goto 99
 
         write(6,*) 'Available levels: ',nlv
@@ -195,13 +195,13 @@ c other variables are stored internally
  1008   format(i3,1x,a)
 	end
 
-c***************************************************************
-c***************************************************************
-c***************************************************************
+!***************************************************************
+!***************************************************************
+!***************************************************************
 
 	subroutine open_ets_type(type,status,nunit)
 
-c open ETS file with default simulation name and given extension
+! open ETS file with default simulation name and given extension
 
 	implicit none
 
@@ -225,7 +225,7 @@ c open ETS file with default simulation name and given extension
 
 	end
 
-c***************************************************************
+!***************************************************************
 
 	subroutine open_ets_file(name,status,nunit)
 
@@ -251,11 +251,11 @@ c***************************************************************
 
 	end
 
-c***************************************************************
+!***************************************************************
 
         subroutine qopen_ets_file(text,status,nunit)
 
-c asks for name and opens ets file
+! asks for name and opens ets file
 
         implicit none
 
@@ -272,13 +272,13 @@ c asks for name and opens ets file
 
         end
 
-c***************************************************************
-c***************************************************************
-c***************************************************************
+!***************************************************************
+!***************************************************************
+!***************************************************************
 
 	subroutine ets_get_it_start(file,itstart)
 
-c gets it of first record
+! gets it of first record
 
 	implicit none
 
@@ -302,11 +302,11 @@ c gets it of first record
 
 	end
 
-c***************************************************************
+!***************************************************************
 
 	subroutine ets_get_it_end(file,itend)
 
-c gets it of last record
+! gets it of last record
 
 	implicit none
 
@@ -337,7 +337,7 @@ c gets it of last record
 
 	end
 
-c***************************************************************
+!***************************************************************
 
 	subroutine ets_get_vars(nin,nvar,ivars)
 
@@ -365,5 +365,5 @@ c***************************************************************
 	stop 'error stop ets_get_vars: nvar'
 	end
 
-c***************************************************************
+!***************************************************************
 

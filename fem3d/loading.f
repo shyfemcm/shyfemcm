@@ -24,44 +24,44 @@
 !
 !--------------------------------------------------------------------------
 
-c loading routines
-c
-c revision log :
-c
-c 15.06.2004	ggu	written from scratch
+! loading routines
+!
+! revision log :
+!
+! 15.06.2004	ggu	written from scratch
 ! 28.06.2004	dmc	loading factor was wrong: kgs  = 1.e+6
 ! 28.06.2004	dmc	areaload loops now over state variables
-c 14.03.2008	ggu	new routine set_surface_load
-c 23.03.2010	ggu	changed v6.1.1
-c 23.12.2014	ggu	changed VERS_7_0_11
-c 19.01.2015	ggu	changed VERS_7_1_3
-c 17.07.2015	ggu	changed VERS_7_1_80
-c 20.07.2015	ggu	changed VERS_7_1_81
-c 16.02.2019	ggu	changed VERS_7_5_60
-c
-c notes :
-c
-c needed new routine init_load (sets to 0)
-c in setload_new add to load matrix
-c
-c*************************************************************
+! 14.03.2008	ggu	new routine set_surface_load
+! 23.03.2010	ggu	changed v6.1.1
+! 23.12.2014	ggu	changed VERS_7_0_11
+! 19.01.2015	ggu	changed VERS_7_1_3
+! 17.07.2015	ggu	changed VERS_7_1_80
+! 20.07.2015	ggu	changed VERS_7_1_81
+! 16.02.2019	ggu	changed VERS_7_5_60
+!
+! notes :
+!
+! needed new routine init_load (sets to 0)
+! in setload_new add to load matrix
+!
+!*************************************************************
 
 	subroutine setload_new(eload)
 
-c sets up eload which is loading for specified areas
-c
-c the computed loadings in eload are in [g/(m**3 day)] == [mg/(l day)]
-c the specified loadings in areaload are in [kg/day]
-c
-c variables to be specified:
-c
-c nareas        total number of areas for which loading is specified
-c nodes         total number of nodes used to identify all areas
-c karee         node numbers that specify the areas of loading
-c iaree         area numbers for the nodes [1-nareas]
-c areaload      total loadings [kg/day] for areas
-c
-c  the node numbers in karee are external node numbers
+! sets up eload which is loading for specified areas
+!
+! the computed loadings in eload are in [g/(m**3 day)] == [mg/(l day)]
+! the specified loadings in areaload are in [kg/day]
+!
+! variables to be specified:
+!
+! nareas        total number of areas for which loading is specified
+! nodes         total number of nodes used to identify all areas
+! karee         node numbers that specify the areas of loading
+! iaree         area numbers for the nodes [1-nareas]
+! areaload      total loadings [kg/day] for areas
+!
+!  the node numbers in karee are external node numbers
 
 	use levels
 	use basin
@@ -93,44 +93,44 @@ c  the node numbers in karee are external node numbers
 
 	real getpar
 
-c loading is kg/day
-c
-c	1=venezia-giudecca, 2=Murano-S. Erasmo 3=Burano
-c	4=Fusina, 5=Campalto 
-c
-c	loading for areas [kg/day]
-c 	
+! loading is kg/day
+!
+!	1=venezia-giudecca, 2=Murano-S. Erasmo 3=Burano
+!	4=Fusina, 5=Campalto 
+!
+!	loading for areas [kg/day]
+! 	
 
-c	donata inserire cavallino
+!	donata inserire cavallino
 
-c 	prova per controllare punto anomalo cavallino OK
+! 	prova per controllare punto anomalo cavallino OK
 
-c       data areaload/
-c    +    0.,0.,0.,0.,0.,0.,0.,0.,0.
-c    +    ,0.,0.,0.,0.,0.,0.,0.,0.,0.
-c    +    ,0.,0.,0.,0.,0.,0.,0.,0.,0.
-c    +    ,0.,0.,0.,0.,0.,0.,0.,0.,0.
-c    +    ,10000.0,10000.,10000.,10000.,10000.,10000.,10000.,10000.,10000.
-c    +  /
-        data areaload/
-     +    1021.5,255.4,150.7,0.,8936.,0.,0.,0.,0.
-     +   ,71.4,17.8,10.7,0.,595.7,0.,0.,0.,0.
-     +   ,43.9,11.0,6.4,0.,397.2,0.,0.,0.,0.
-     +   ,247.5,742.5,183.2,0.,3132.3,0.,0.,0.,0.
-     +   ,82.5,247.5,61.1,0.,1044.1,0.,0.,0.,0.
-     +  /
+!       data areaload/
+!    +    0.,0.,0.,0.,0.,0.,0.,0.,0.
+!    +    ,0.,0.,0.,0.,0.,0.,0.,0.,0.
+!    +    ,0.,0.,0.,0.,0.,0.,0.,0.,0.
+!    +    ,0.,0.,0.,0.,0.,0.,0.,0.,0.
+!    +    ,10000.0,10000.,10000.,10000.,10000.,10000.,10000.,10000.,10000.
+!    +  /
+        data areaload/ &
+     &    1021.5,255.4,150.7,0.,8936.,0.,0.,0.,0. &
+     &   ,71.4,17.8,10.7,0.,595.7,0.,0.,0.,0. &
+     &   ,43.9,11.0,6.4,0.,397.2,0.,0.,0.,0. &
+     &   ,247.5,742.5,183.2,0.,3132.3,0.,0.,0.,0. &
+     &   ,82.5,247.5,61.1,0.,1044.1,0.,0.,0.,0. &
+     &  /
 
-c       loading elaborazione dati 2003
-c        data areaload /
-c     +  1021.5, 71.4, 43.9, 247.5, 82.5,        !nh3
-c     +  255.4,  17.8,   11.0,   742.5,  247.5,  !nox
-c     +  150.7,  10.7,   6.4,    183.2,  61.1,   !opo4
-c     +  0.,     0.,     0.,     0.,     0.,     !phyto
-c     +  8936.0, 595.7,  397.2,  3132.3, 1044.1, !cbod
-c     +  0.,     0.,     0.,     0.,     0.,     !do
-c     +  0.,     0.,     0.,     0.,     0.,     !on
-c     +  0.,     0.,     0.,     0.,     0.,     !op
-c     +  0.,     0.,     0.,     0.,     0./     !zoo
+!       loading elaborazione dati 2003
+!        data areaload /
+!     +  1021.5, 71.4, 43.9, 247.5, 82.5,        !nh3
+!     +  255.4,  17.8,   11.0,   742.5,  247.5,  !nox
+!     +  150.7,  10.7,   6.4,    183.2,  61.1,   !opo4
+!     +  0.,     0.,     0.,     0.,     0.,     !phyto
+!     +  8936.0, 595.7,  397.2,  3132.3, 1044.1, !cbod
+!     +  0.,     0.,     0.,     0.,     0.,     !do
+!     +  0.,     0.,     0.,     0.,     0.,     !on
+!     +  0.,     0.,     0.,     0.,     0.,     !op
+!     +  0.,     0.,     0.,     0.,     0./     !zoo
 
         integer nnodes1
         parameter(nnodes1=68)
@@ -186,9 +186,9 @@ c     +  0.,     0.,     0.,     0.,     0./     !zoo
         save icall
         data icall / 0 /
 
-c---------------------------------------------------------
-c initialization
-c---------------------------------------------------------
+!---------------------------------------------------------
+! initialization
+!---------------------------------------------------------
 
         if( icall .eq. 0 ) then
           icall = 1
@@ -204,27 +204,27 @@ c---------------------------------------------------------
           call load_add_area(5,nnodes5,nodes5,aree)
         end if
 
-c---------------------------------------------------------
-c conversion factors
-c---------------------------------------------------------
+!---------------------------------------------------------
+! conversion factors
+!---------------------------------------------------------
 
 	litri = 1000.	!litri in m*3
 	kgs  = 1.e+6	!mg in kg               -> bug
 
-c	rlfact = getpar('flbio')
+!	rlfact = getpar('flbio')
 	rlfact = 1.
 
 	fact = rlfact*kgs/litri         ! [kg/m**3] -> [mg/l]
      
-c---------------------------------------------------------
-c compute volumes
-c---------------------------------------------------------
+!---------------------------------------------------------
+! compute volumes
+!---------------------------------------------------------
 
         call load_make_volume(nareas,volume,aree)
 
-c---------------------------------------------------------
-c compute and set loading in eload [g/(m**3 day)] == [mg/(l day]
-c---------------------------------------------------------
+!---------------------------------------------------------
+! compute and set loading in eload [g/(m**3 day)] == [mg/(l day]
+!---------------------------------------------------------
 
         do k=1,nkn
 	  ia = aree(k)
@@ -240,25 +240,25 @@ c---------------------------------------------------------
           end if
 	end do
 
-c---------------------------------------------------------
-c end of routine
-c---------------------------------------------------------
+!---------------------------------------------------------
+! end of routine
+!---------------------------------------------------------
 
 	end
 
-c*************************************************************
+!*************************************************************
 
 	subroutine set_surface_load(eload,sload)
 
-c sets up eload which is loading for total basin
-c
-c eload contains computed loads on return
-c sload contains atmospheric loadings (one value for each state variable)
-c
-c the computed loadings in eload are in [g/(m**3 day)] == [mg/(l day)]
-c the specified loadings in sload are in [kg/day] or [kg/(m**2 day)]
-c
-c please set afact according to the choice of unit of sload (see below)
+! sets up eload which is loading for total basin
+!
+! eload contains computed loads on return
+! sload contains atmospheric loadings (one value for each state variable)
+!
+! the computed loadings in eload are in [g/(m**3 day)] == [mg/(l day)]
+! the specified loadings in sload are in [kg/day] or [kg/(m**2 day)]
+!
+! please set afact according to the choice of unit of sload (see below)
 
 	use basin
 	use levels, only : nlvdi
@@ -292,9 +292,9 @@ c please set afact according to the choice of unit of sload (see below)
         save icall
         data icall / 0 /
 
-c---------------------------------------------------------
-c initialization
-c---------------------------------------------------------
+!---------------------------------------------------------
+! initialization
+!---------------------------------------------------------
 
 	layer = 1			! only surface
 
@@ -317,9 +317,9 @@ c---------------------------------------------------------
 	  fact = kgs/litri		! [kg/m**3] -> [mg/l]
         end if
 
-c---------------------------------------------------------
-c compute load and add to matrix  [g/(m**3 day)] == [mg/(l day)]
-c---------------------------------------------------------
+!---------------------------------------------------------
+! compute load and add to matrix  [g/(m**3 day)] == [mg/(l day)]
+!---------------------------------------------------------
 
 	!afact = 1.			! loadings in [kg/(m**2 day)]
 	afact = 1. / areatot		! loadings in [kg/day]
@@ -334,19 +334,19 @@ c---------------------------------------------------------
 	    end do
 	end do
 
-c---------------------------------------------------------
-c end of routine
-c---------------------------------------------------------
+!---------------------------------------------------------
+! end of routine
+!---------------------------------------------------------
 
         end
 
-c*************************************************************
-c*************************************************************
-c*************************************************************
+!*************************************************************
+!*************************************************************
+!*************************************************************
 
         subroutine load_init_area(nkn,aree)
 
-c initializes area array
+! initializes area array
 
         implicit none
 
@@ -361,11 +361,11 @@ c initializes area array
 
         end
 
-c*************************************************************
+!*************************************************************
 
         subroutine load_add_area(iarea,n,nodes,aree)
 
-c initializes area array
+! initializes area array
 
         implicit none
 
@@ -387,11 +387,11 @@ c initializes area array
 
         end
 
-c*************************************************************
+!*************************************************************
 
         subroutine load_make_volume(nareas,volume,aree)
 
-c makes total volume of areas
+! makes total volume of areas
 
 	use levels
 	use basin, only : nkn,nel,ngr,mbw
@@ -427,6 +427,6 @@ c makes total volume of areas
 
         end
 
-c*************************************************************
+!*************************************************************
 
 

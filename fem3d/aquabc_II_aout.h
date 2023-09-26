@@ -24,9 +24,9 @@
 !
 !--------------------------------------------------------------------------
 
-cccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccc
+!ccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccc
 C     Parameters and arrays for writing state variables to ASCII files for defined nodes 
-cccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccz
+!ccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccz
 
 
 
@@ -54,9 +54,9 @@ C      Output  variables for sediments
 
 
 
-cccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccc
+!ccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccc
 C     Parameters and arrays for writing diagnostics(components of derivatives) to ASCII files for defined nodes 
-cccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccc
+!ccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccc
 
 C WATER COLUMN
 		integer   NDIAGVAR           !Maximum number of different intermediate variables in output.  

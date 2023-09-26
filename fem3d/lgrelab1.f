@@ -122,8 +122,8 @@
         integer ifile,ftype,npr,nvar
 
         INTERFACE
-        subroutine lgr_alloc(nn,nc
-     +          ,id,ty,tt,s,ie,x,y,z,lb,hl,c)
+        subroutine lgr_alloc(nn,nc &
+     &          ,id,ty,tt,s,ie,x,y,z,lb,hl,c)
         integer nn,nc
         integer, allocatable            :: id(:)
         integer, allocatable            :: ty(:)
@@ -147,10 +147,10 @@
 	integer iapini,ifileo
 	integer ifem_open_file
 
-	header = ' nrec         date_and_time  n_active'
-     +                 // '     n_new    n_exit   n_beach    n_type'
+	header = ' nrec         date_and_time  n_active' &
+     &                 // '     n_new    n_exit   n_beach    n_type'
 
-c--------------------------------------------------------------
+!--------------------------------------------------------------
 
         nread  = 0
         nelab  = 0
@@ -159,9 +159,9 @@ c--------------------------------------------------------------
         ifile  = 0
         id     = 0
 
-c--------------------------------------------------------------
-c set command line parameters
-c--------------------------------------------------------------
+!--------------------------------------------------------------
+! set command line parameters
+!--------------------------------------------------------------
 
 	call elabutil_init('LGR','lgrelab')
 
@@ -263,9 +263,9 @@ c--------------------------------------------------------------
           call shyelab_init_output(id,idout,ftype,nvar,ivars)
         end if
 
-c--------------------------------------------------------------
-c loop on data
-c--------------------------------------------------------------
+!--------------------------------------------------------------
+! loop on data
+!--------------------------------------------------------------
 
         atime = atold
         atwrite = -1
@@ -287,10 +287,10 @@ c--------------------------------------------------------------
           call lgr_peek_block_header(iu,dtime,n_act,iwhat,ierr)
           if( ierr > 0 ) write(6,*) 'error in reading file : ',ierr
           if( ierr /= 0 ) exit
-          call lgr_alloc(n_act,ncust
-     +          ,ida,tya,tta,sa,iea,xa,ya,za,lba,hla,ca)
-          call lgr_get_block(iu,n_act,ncust,
-     +                  ida,tya,tta,sa,iea,xa,ya,za,lba,hla,ca)
+          call lgr_alloc(n_act,ncust &
+     &          ,ida,tya,tta,sa,iea,xa,ya,za,lba,hla,ca)
+          call lgr_get_block(iu,n_act,ncust, &
+     &                  ida,tya,tta,sa,iea,xa,ya,za,lba,hla,ca)
 
 
 	  call count_lbeach(n_act,tya,n_bea)
@@ -301,10 +301,10 @@ c--------------------------------------------------------------
           call lgr_peek_block_header(iu,dtime,n_new,iwhat,ierr)
           if( ierr > 0 ) write(6,*) 'error in reading file : ',ierr
           if( ierr /= 0 ) exit
-          call lgr_alloc(n_new,ncust
-     +          ,idn,tyn,ttn,sn,ien,xn,yn,zn,lbn,hln,cn)
-          call lgr_get_block(iu,n_new,ncust,
-     +                  idn,tyn,ttn,sn,ien,xn,yn,zn,lbn,hln,cn)
+          call lgr_alloc(n_new,ncust &
+     &          ,idn,tyn,ttn,sn,ien,xn,yn,zn,lbn,hln,cn)
+          call lgr_get_block(iu,n_new,ncust, &
+     &                  idn,tyn,ttn,sn,ien,xn,yn,zn,lbn,hln,cn)
 
           !----------------------------------------------------------------
           ! skip lgr data block --> exited particles
@@ -312,10 +312,10 @@ c--------------------------------------------------------------
           call lgr_peek_block_header(iu,dtime,n_ext,iwhat,ierr)
           if( ierr > 0 ) write(6,*) 'error in reading file : ',ierr
           if( ierr /= 0 ) exit
-          call lgr_alloc(n_ext,ncust
-     +          ,ide,tye,tte,se,iee,xe,ye,ze,lbe,hle,ce)
-          call lgr_get_block(iu,n_ext,ncust,
-     +                  ide,tye,tte,se,iee,xe,ye,ze,lbe,hle,ce)
+          call lgr_alloc(n_ext,ncust &
+     &          ,ide,tye,tte,se,iee,xe,ye,ze,lbe,hle,ce)
+          call lgr_get_block(iu,n_ext,ncust, &
+     &                  ide,tye,tte,se,iee,xe,ye,ze,lbe,hle,ce)
 
           !----------------------------------------------------------------
           ! time management
@@ -373,8 +373,8 @@ c--------------------------------------------------------------
           n_typ = 0
           if ( n_act > 0 ) n_typ = maxval(tya)
 
-	  if( .not. bquiet ) 
-     +         write(6,100) nrec,aline,n_act,n_new,n_ext,n_bea,n_typ
+	  if( .not. bquiet )  &
+     &         write(6,100) nrec,aline,n_act,n_new,n_ext,n_bea,n_typ
 
           !----------------------------------------------------------------
           ! Compute mean position for active particle based on type
@@ -382,14 +382,14 @@ c--------------------------------------------------------------
           if ( blgmean ) then
             if (n_typ > 0 ) then
               allocate(agem(n_typ))
-              call lgr_alloc(n_typ,ncust
-     +          ,idm,tym,ttm,sm,iem,xm,ym,zm,lbm,hlm,cm)
-              call lgr_mean_posit(n_act,ncust,tya,agea,sa,xa,ya,hla,ca,
-     +                       n_typ,tym,agem,sm,xm,ym,hlm,cm)
+              call lgr_alloc(n_typ,ncust &
+     &          ,idm,tym,ttm,sm,iem,xm,ym,zm,lbm,hlm,cm)
+              call lgr_mean_posit(n_act,ncust,tya,agea,sa,xa,ya,hla,ca, &
+     &                       n_typ,tym,agem,sm,xm,ym,hlm,cm)
               ttm = atime 
 
-              call lgr_write_mean_posit(n_typ,ncust,aline,
-     +                       agem,sm,xm,ym,hlm,cm)
+              call lgr_write_mean_posit(n_typ,ncust,aline, &
+     &                       agem,sm,xm,ym,hlm,cm)
 
               deallocate(agem)
             end if
@@ -400,22 +400,22 @@ c--------------------------------------------------------------
           !----------------------------------------------------------------
           if ( blgdens ) then
             dtime = atime - atime0
-            call lgr_output_conc(idout,ftype,nvar,ivars,dtime,
-     +                  bsphe,n_act,iea,xa,ya,hla,lba,tya,agea)
+            call lgr_output_conc(idout,ftype,nvar,ivars,dtime, &
+     &                  bsphe,n_act,iea,xa,ya,hla,lba,tya,agea)
           end if
 
           deallocate(agea)
 	end do		!time do loop
 
-c--------------------------------------------------------------
-c end of loop on data
-c--------------------------------------------------------------
+!--------------------------------------------------------------
+! end of loop on data
+!--------------------------------------------------------------
 
 	  write(6,'(a)') header
 
-c--------------------------------------------------------------
-c write final message
-c--------------------------------------------------------------
+!--------------------------------------------------------------
+! write final message
+!--------------------------------------------------------------
 
 	if( .not. bsilent ) then
           write(6,*)
@@ -433,9 +433,9 @@ c--------------------------------------------------------------
 
         call shyelab_final_output(id,idout,nvar,ivars)
 
-c--------------------------------------------------------------
-c end of routine
-c--------------------------------------------------------------
+!--------------------------------------------------------------
+! end of routine
+!--------------------------------------------------------------
 
 	return
    85	continue
@@ -455,7 +455,7 @@ c--------------------------------------------------------------
   100   format(i5,a22,5i10)
 	end
 
-c***************************************************************
+!***************************************************************
 
         subroutine count_lbeach(n,ty,nb)
 
@@ -477,8 +477,8 @@ c***************************************************************
 !***************************************************************
 ! Write mean particles position and characteristics
 
-        subroutine lgr_write_mean_posit(nm,nc,aline,
-     +                       agem,sm,xm,ym,hlm,cm)
+        subroutine lgr_write_mean_posit(nm,nc,aline, &
+     &                       agem,sm,xm,ym,hlm,cm)
 
         implicit none
 
@@ -543,8 +543,8 @@ c***************************************************************
 
 	do i = 1,nm
            iu = ium(i)
-           write(iu,format) aline,xm(i),ym(i),hlm(i),agem(i),sm(i),
-     +                   (cm(i,j),j=1,nc)
+           write(iu,format) aline,xm(i),ym(i),hlm(i),agem(i),sm(i), &
+     &                   (cm(i,j),j=1,nc)
         end do
 
         end subroutine lgr_write_mean_posit
@@ -556,8 +556,8 @@ c***************************************************************
 ! if the reg option is used, then the density and age calculations
 ! are performed on regular grid
 
-        subroutine lgr_output_conc(idout,ftype,nvar,ivars,dtime,
-     +			bsphe,na,iea,x,y,hl,lb,ty,age)
+        subroutine lgr_output_conc(idout,ftype,nvar,ivars,dtime, &
+     &			bsphe,na,iea,x,y,hl,lb,ty,age)
 
         use evgeom
         use basin
@@ -745,40 +745,40 @@ c***************************************************************
 
         end if
 	 
-c---------------------------------------------------------
-c scale density
-c---------------------------------------------------------
+!---------------------------------------------------------
+! scale density
+!---------------------------------------------------------
 
 	density = density / 1000000.	!particles per km**2
 
-c---------------------------------------------------------
-c write to file
-c---------------------------------------------------------
+!---------------------------------------------------------
+! write to file
+!---------------------------------------------------------
 
         call shyelab_header_output(idout,ftype,dtime,nvar)
 
         if( outformat == 'shy' .or. outformat == 'native' ) then
 	  do i=1,nvar
 	    ivar = ivars(i)
-            call shy_write_output_record(idout,dtime,ivar
-     +                        ,belem,n,m
-     +                        ,lmax,nlvdi,density(:,:,i))
+            call shy_write_output_record(idout,dtime,ivar &
+     &                        ,belem,n,m &
+     &                        ,lmax,nlvdi,density(:,:,i))
 	  end do
         else if( outformat == 'gis' ) then
 	  do i=1,nvar
-            call gis_write_record(dtime,ivars(i),np,lmax,ilcoord
-     +                         ,density(:,:,i),xcoord,ycoord)
+            call gis_write_record(dtime,ivars(i),np,lmax,ilcoord &
+     &                         ,density(:,:,i),xcoord,ycoord)
 	  end do
         else if( outformat == 'fem' ) then
           iunit = idout
           nvers = 0
 	  do i=1,nvar
             call get_string_description(ivars(i),string)
-            call fem_file_write_data(iformat,iunit
-     +                        ,nvers,np,lmax
-     +                        ,string
-     +                        ,ilcoord,hcoord
-     +                        ,nlvdi,density(:,:,i))
+            call fem_file_write_data(iformat,iunit &
+     &                        ,nvers,np,lmax &
+     &                        ,string &
+     &                        ,ilcoord,hcoord &
+     &                        ,nlvdi,density(:,:,i))
 	  end do
         else if( outformat == 'nc' ) then
           ncid = idout
@@ -793,9 +793,9 @@ c---------------------------------------------------------
           stop 'error stop: outformat not recognized'
         end if
 
-c---------------------------------------------------------
-c end of routine
-c---------------------------------------------------------
+!---------------------------------------------------------
+! end of routine
+!---------------------------------------------------------
 
         end subroutine lgr_output_conc
 
@@ -850,8 +850,8 @@ c---------------------------------------------------------
         allocate(hla(nn))
         allocate(ca(nn,nc))
 
-        call lgr_get_block(iu,nact,ncust
-     +          ,ida,tya,tta,sa,iea,xa,ya,za,lba,hla,ca)
+        call lgr_get_block(iu,nact,ncust &
+     &          ,ida,tya,tta,sa,iea,xa,ya,za,lba,hla,ca)
 
 	ntmax = 0
 	do i=1,nact
