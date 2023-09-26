@@ -167,8 +167,8 @@
 
 !********************************************************************
 
-	subroutine set_hybrid_depth(lmax,zeta,htot &
-     &					,hlv,nsigma,hsigma,hlfem)
+	subroutine set_hybrid_depth(lmax,zeta,htot         &
+           &					,hlv,nsigma,hsigma,hlfem)
 
 ! sets depth structure and passes it back in hlfem
 

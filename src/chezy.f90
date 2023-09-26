@@ -969,7 +969,7 @@
 	 if( ke1 == 0 .and. ke2 == 0 ) then
 	   !no external nodes given
 	   if( busedirection ) then
-             write(6,*) 'section AREA : secondary chezy given ' // &
+             write(6,*) 'section AREA : secondary chezy given ' //      &
      &			' but no nodes specified'
              bstop=.true.
 	   end if
@@ -984,8 +984,7 @@
                bstop=.true.
 	     end if
 	   else
-             write(6,*) 'section AREA : nodes in different domains ' &
-     &						,ke1,ke2
+             write(6,*) 'section AREA : nodes in different domains ',ke1,ke2
 	     id1 = -1
 	     if( ki1 > 0 ) id1 = id_node(ki1)
 	     id2 = -1
@@ -1048,10 +1047,10 @@
 
         do i=ianf,nczdum
             if(czdum(2,i).ne.0.) then			!with two chezy
-                write(iunit,1008) i,czdum(0,i) &
-     &				,czdum(1,i),czdum(2,i) &
-     &                          ,ipext(nint(czdum(3,i))) &
-     &                          ,ipext(nint(czdum(4,i))) &
+                write(iunit,1008) i,czdum(0,i)              &
+     &				,czdum(1,i),czdum(2,i)                    &
+     &                          ,ipext(nint(czdum(3,i)))    &
+     &                          ,ipext(nint(czdum(4,i)))    &
      &                          ,nint(czdum(6,i))
             else					!just one chezy
                 write(iunit,1008) i,czdum(1,i)
