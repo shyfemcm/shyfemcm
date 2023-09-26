@@ -23,25 +23,25 @@
 !
 !--------------------------------------------------------------------------
 
-c utilities for netcdf conversion
-c
-c revision log :
-c
-c 21.01.2013	ggu	routines transfered from ous2nc.f
-c 20.02.2013	ggu	new routines get_period() and check_period()
-c 03.05.2013	ggu	changed VERS_6_1_63
-c 28.01.2014	ggu	changed VERS_6_1_71
-c 23.12.2014	ggu	changed VERS_7_0_11
-c 19.01.2015	ggu	changed VERS_7_1_3
-c 26.02.2015	ggu	changed VERS_7_1_5
-c 17.07.2015	ggu	changed VERS_7_1_80
-c 20.07.2015	ggu	changed VERS_7_1_81
-c 15.04.2016	ggu	changed VERS_7_5_8
-c 28.04.2016	ggu	changed VERS_7_5_9
-c 30.05.2016	ggu	changed VERS_7_5_11
-c 16.02.2019	ggu	changed VERS_7_5_60
-c
-c******************************************************************
+!  utilities for netcdf conversion
+! 
+!  revision log :
+! 
+!  21.01.2013	ggu	routines transfered from ous2nc.f
+!  20.02.2013	ggu	new routines get_period() and check_period()
+!  03.05.2013	ggu	changed VERS_6_1_63
+!  28.01.2014	ggu	changed VERS_6_1_71
+!  23.12.2014	ggu	changed VERS_7_0_11
+!  19.01.2015	ggu	changed VERS_7_1_3
+!  26.02.2015	ggu	changed VERS_7_1_5
+!  17.07.2015	ggu	changed VERS_7_1_80
+!  20.07.2015	ggu	changed VERS_7_1_81
+!  15.04.2016	ggu	changed VERS_7_5_8
+!  28.04.2016	ggu	changed VERS_7_5_9
+!  30.05.2016	ggu	changed VERS_7_5_11
+!  16.02.2019	ggu	changed VERS_7_5_60
+! 
+! ******************************************************************
 
         subroutine write_time(it)
 
@@ -56,7 +56,7 @@ c******************************************************************
 
         end
 
-c******************************************************************
+! ******************************************************************
 
 	subroutine read_date_and_time(date,time)
 
@@ -98,7 +98,7 @@ c******************************************************************
 	stop 'error stop read_date_and_time: date format'
 	end
 
-c******************************************************************
+! ******************************************************************
 
 	subroutine get_period(iperiod,its,ite,nfreq)
 
@@ -161,7 +161,7 @@ c******************************************************************
 	stop 'error stop get_period: date format'
 	end
 
-c******************************************************************
+! ******************************************************************
 
 	subroutine check_period(it,iperiod,its,ite,nfreq,bwrite)
 
@@ -192,11 +192,11 @@ c******************************************************************
 
 	end
 
-c******************************************************************
+! ******************************************************************
 
 	subroutine get_lmax_reg(nx,ny,fm,ilhv,lmax)
 
-c computes max lmax for regular domain
+!  computes max lmax for regular domain
 
 	implicit none
 
@@ -218,13 +218,13 @@ c computes max lmax for regular domain
 
 	end
 
-c******************************************************************
-c******************************************************************
-c******************************************************************
+! ******************************************************************
+! ******************************************************************
+! ******************************************************************
 
 	subroutine get_dimensions(nx,ny,x0,y0,dx,dy)
 
-c gets dimensions for reguar grid
+!  gets dimensions for reguar grid
 
 	use basin
 
@@ -318,7 +318,7 @@ c gets dimensions for reguar grid
 	stop 'error stop get_dimensions: error in nx,ny'
 	end
 
-c******************************************************************
+! ******************************************************************
 
 	subroutine set_reg_xy(nx,ny,x0,y0,dx,dy,xlon,ylat)
 
@@ -341,7 +341,7 @@ c******************************************************************
 
 	end
 
-c******************************************************************
+! ******************************************************************
 
 	subroutine write_dimensions(nx,ny,x0,y0,dx,dy)
 
@@ -362,5 +362,5 @@ c******************************************************************
 
 	end
 
-c******************************************************************
+! ******************************************************************
 
