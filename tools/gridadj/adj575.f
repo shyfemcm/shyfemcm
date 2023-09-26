@@ -23,36 +23,36 @@
 !
 !--------------------------------------------------------------------------
 
-c
-c revision log :
-c
-c 01.01.2003	ggu	written
-c 23.03.2010	ggu	changed v6.1.1
-c 30.03.2012	ggu	changed VERS_6_1_51
-c 19.01.2015	ggu	changed VERS_7_1_2
-c 21.05.2015	ggu	changed VERS_7_1_11
-c 24.07.2015	ggu	changed VERS_7_1_82
-c 30.07.2015	ggu	changed VERS_7_1_83
-c 12.10.2015	ggu	changed VERS_7_3_3
-c 18.12.2018	ggu	changed VERS_7_5_52
-c 21.05.2019	ggu	changed VERS_7_5_62
-c
-c description :
-c
-c 5-7-5 grade routines
-c
-c contents :
-c
-c subroutine elim57(nkn,nel,ngrddi,ngrade,nbound,ngri,nen3v)
-c			eliminates special 575 connections (shell)
-c subroutine elim575(k,nkn,nel,ngrddi,ngrade,nbound,ngri,nen3v)
-c			eliminates 5-7-5 connections
-c
-c***********************************************************
+! 
+!  revision log :
+! 
+!  01.01.2003	ggu	written
+!  23.03.2010	ggu	changed v6.1.1
+!  30.03.2012	ggu	changed VERS_6_1_51
+!  19.01.2015	ggu	changed VERS_7_1_2
+!  21.05.2015	ggu	changed VERS_7_1_11
+!  24.07.2015	ggu	changed VERS_7_1_82
+!  30.07.2015	ggu	changed VERS_7_1_83
+!  12.10.2015	ggu	changed VERS_7_3_3
+!  18.12.2018	ggu	changed VERS_7_5_52
+!  21.05.2019	ggu	changed VERS_7_5_62
+! 
+!  description :
+! 
+!  5-7-5 grade routines
+! 
+!  contents :
+! 
+!  subroutine elim57(nkn,nel,ngrddi,ngrade,nbound,ngri,nen3v)
+! 			eliminates special 575 connections (shell)
+!  subroutine elim575(k,nkn,nel,ngrddi,ngrade,nbound,ngri,nen3v)
+! 			eliminates 5-7-5 connections
+! 
+! ***********************************************************
 
 	subroutine elim57
 
-c eliminates 5-7-5 grades
+!  eliminates 5-7-5 grades
 
 	use mod_adj_grade
 	use basin
@@ -73,13 +73,13 @@ c eliminates 5-7-5 grades
 
 	end
 
-c***********************************************************
+! ***********************************************************
 
 	subroutine elim575(k)
 
-c eliminates 5-7-5 connections
-c
-c create one new node and two new elements
+!  eliminates 5-7-5 connections
+! 
+!  create one new node and two new elements
 
 	use mod_adj_grade
 	use basin
@@ -107,7 +107,7 @@ c create one new node and two new elements
 
 	if( bdebug ) write(6,*) 'elim575 new node: ',k
 
-c make list
+!  make list
 
         n = ngrade(k)
 	if( n > ngrdi ) stop 'error stop elim575: ngrdi'
@@ -124,7 +124,7 @@ c make list
 	  end if
 	end do
 
-c check if exchange is possible
+!  check if exchange is possible
 
 	nc = 0
 	do i=1,n
@@ -134,7 +134,7 @@ c check if exchange is possible
 
 	if( nc .ne. 2 ) return	!if not exactly 2 cannot proceed
 
-c find out distance of 5 grades
+!  find out distance of 5 grades
 
 	nc = 0
 	ip1 = 0
@@ -169,10 +169,10 @@ c find out distance of 5 grades
 	  write(6,'(7i10)') (nbav(i),i=1,7)
 	end if
 
-c	call plosno(k)
+! 	call plosno(k)
 
-c reorder node list
-c node 1 is a 5-grade, and node 5 is a 5-grade
+!  reorder node list
+!  node 1 is a 5-grade, and node 5 is a 5-grade
 
 	ip = ip1
 	if( idp .eq. 3 ) ip = ip2
@@ -186,11 +186,11 @@ c node 1 is a 5-grade, and node 5 is a 5-grade
 	  write(6,'(7i10)') (nbav(i),i=1,7)
 	end if
 
-c new node 
+!  new node 
 
 	call newnod(nkn)
 
-c substitute new node for old one in node index
+!  substitute new node for old one in node index
 
 	do ie=1,nel
 	  do ii=1,3
@@ -204,21 +204,21 @@ c substitute new node for old one in node index
 	  end do
 	end do
 
-c new elements
+!  new elements
 
 	call newele(nel)
 	call setele(nel,ngav(1),nkn,k,nen3v)
 	call newele(nel)
 	call setele(nel,ngav(5),k,nkn,nen3v)
 
-c adjust grade index of old node (5 grade)
+!  adjust grade index of old node (5 grade)
 
 	call delgr(k,ngav(2),ngrdi,ngrade,ngri)
 	call delgr(k,ngav(3),ngrdi,ngrade,ngri)
 	call delgr(k,ngav(4),ngrdi,ngrade,ngri)
 	call insgr(k,ngav(1),nkn,ngrdi,ngrade,ngri)
 
-c adjust grade index of new node (6 grade)
+!  adjust grade index of new node (6 grade)
 
 	do i=1,5
 	  ngri(i,nkn) = ngav(i)
@@ -226,12 +226,12 @@ c adjust grade index of new node (6 grade)
 	ngri(6,nkn) = k
 	ngrade(nkn) = 6
 
-c adjust grade index of 5-5 nodes
+!  adjust grade index of 5-5 nodes
 
 	call insgrb(ngav(1),k,nkn,ngrdi,ngrade,ngri)
 	call insgr(ngav(5),k,nkn,ngrdi,ngrade,ngri)
 
-c substitute new node in grade index of nodes close to new node
+!  substitute new node in grade index of nodes close to new node
 
 	call exchgr(ngav(2),k,nkn,ngrdi,ngrade,ngri)
 	call exchgr(ngav(3),k,nkn,ngrdi,ngrade,ngri)
@@ -244,7 +244,7 @@ c substitute new node in grade index of nodes close to new node
 	  call prgr(ngav(5),ngrdi,ngrade,ngri)
 	end if
 
-c adjust coordinates
+!  adjust coordinates
 
 	xm = 0.5 * ( xgv(ngav(6)) + xgv(ngav(7)) )
 	ym = 0.5 * ( ygv(ngav(6)) + ygv(ngav(7)) )
@@ -256,13 +256,13 @@ c adjust coordinates
 	xgv(nkn) = xm + (2./3.) * ( x - xm )
 	ygv(nkn) = ym + (2./3.) * ( y - ym )
 
-c	call plosel2(nel-1,nel)
+! 	call plosel2(nel-1,nel)
 
-c	call node_debug(k,nkn,nel,nen3v,xgv,ygv)
+! 	call node_debug(k,nkn,nel,nen3v,xgv,ygv)
 
 	end
 
-c*******************************************************
+! *******************************************************
 
 	subroutine node_debug(k,nkn,nel,nen3v,xgv,ygv)
 
@@ -283,5 +283,5 @@ c*******************************************************
 
 	end
 
-c*******************************************************
+! *******************************************************
 

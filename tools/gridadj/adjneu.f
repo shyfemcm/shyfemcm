@@ -23,41 +23,41 @@
 !
 !--------------------------------------------------------------------------
 
-c
-c revision log :
-c
-c 01.01.2003	ggu	written
-c 23.03.2010	ggu	changed v6.1.1
-c 19.01.2015	ggu	changed VERS_7_1_2
-c 24.07.2015	ggu	changed VERS_7_1_82
-c 30.07.2015	ggu	changed VERS_7_1_83
-c 18.12.2018	ggu	changed VERS_7_5_52
-c 21.05.2019	ggu	changed VERS_7_5_62
-c
-c description :
-c
-c node and element utility routines
-c
-c contents :
-c
-c subroutine delele(ie)		deletes element
-c subroutine newele(nnew)	new element
-c subroutine subnod(k,knew)     substitutes node in indices (k subst by knew)
-c subroutine delnod(k)		deletes node
-c subroutine newnod(nnew)	new node
-c
-c function ifindel(k1,k2,k3)
-c               finds element given three nodes
-c subroutine setele(ie,k1,k2,k3,nen3v)
-c               inserts grade in index (in index of node k after node k1)
-c subroutine subval(n,iarray,kold,knew)
-c		substitutes in array iarray kold with knew
-c
-c***********************************************************
+! 
+!  revision log :
+! 
+!  01.01.2003	ggu	written
+!  23.03.2010	ggu	changed v6.1.1
+!  19.01.2015	ggu	changed VERS_7_1_2
+!  24.07.2015	ggu	changed VERS_7_1_82
+!  30.07.2015	ggu	changed VERS_7_1_83
+!  18.12.2018	ggu	changed VERS_7_5_52
+!  21.05.2019	ggu	changed VERS_7_5_62
+! 
+!  description :
+! 
+!  node and element utility routines
+! 
+!  contents :
+! 
+!  subroutine delele(ie)		deletes element
+!  subroutine newele(nnew)	new element
+!  subroutine subnod(k,knew)     substitutes node in indices (k subst by knew)
+!  subroutine delnod(k)		deletes node
+!  subroutine newnod(nnew)	new node
+! 
+!  function ifindel(k1,k2,k3)
+!                finds element given three nodes
+!  subroutine setele(ie,k1,k2,k3,nen3v)
+!                inserts grade in index (in index of node k after node k1)
+!  subroutine subval(n,iarray,kold,knew)
+! 		substitutes in array iarray kold with knew
+! 
+! ***********************************************************
 
 	subroutine delele(ie)
 
-c deletes element
+!  deletes element
 
 	use mod_adj_grade
 	use mod_depth
@@ -83,11 +83,11 @@ c deletes element
 
 	end
 
-c***********************************************************
+! ***********************************************************
 
 	subroutine newele(nnew)
 
-c new element
+!  new element
 
 	use mod_adj_grade
 	use mod_depth
@@ -119,13 +119,13 @@ c new element
 
 	end
 
-c***********************************************************
-c***********************************************************
-c***********************************************************
+! ***********************************************************
+! ***********************************************************
+! ***********************************************************
 
 	subroutine subnod(k,knew)
 
-c substitutes node in indices (k subst by knew)
+!  substitutes node in indices (k subst by knew)
 
 	use mod_adj_grade
 	use mod_depth
@@ -152,11 +152,11 @@ c substitutes node in indices (k subst by knew)
 
 	end
 
-c***********************************************************
+! ***********************************************************
 
 	subroutine delnod(k)
 
-c deletes node
+!  deletes node
 
 	use mod_adj_grade
 	use mod_depth
@@ -211,11 +211,11 @@ c deletes node
 
 	end
 
-c***********************************************************
+! ***********************************************************
 
 	subroutine newnod(nnew)
 
-c new node
+!  new node
 
 	use mod_adj_grade
 	use mod_depth
@@ -247,13 +247,13 @@ c new node
 
 	end
 
-c***********************************************************
-c***********************************************************
-c***********************************************************
+! ***********************************************************
+! ***********************************************************
+! ***********************************************************
 
 	function ifindel(k1,k2,k3)
 
-c finds element given three nodes
+!  finds element given three nodes
 
 	use basin
 
@@ -282,11 +282,11 @@ c finds element given three nodes
 
 	end
 
-c**************************************************************
+! **************************************************************
 
 	subroutine setele(ie,k1,k2,k3,nen3v)
 
-c inserts nodes in index
+!  inserts nodes in index
 
 	implicit none
 
@@ -299,11 +299,11 @@ c inserts nodes in index
 
 	end
 
-c**************************************************************
+! **************************************************************
 
 	subroutine subval(n,iarray,kold,knew)
 
-c substitutes in array iarray kold with knew
+!  substitutes in array iarray kold with knew
 
 	implicit none
 
@@ -318,5 +318,5 @@ c substitutes in array iarray kold with knew
 
 	end
 
-c**************************************************************
+! **************************************************************
 

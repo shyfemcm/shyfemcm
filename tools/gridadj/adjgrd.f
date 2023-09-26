@@ -23,50 +23,50 @@
 !
 !--------------------------------------------------------------------------
 
-c description :
-c
-c grading routines
-c
-c contents :
-c
-c subroutine maxgrd(nkn,nel,nen3v,ngrade,nmax)
-c			computes maximum grade (except boundary)
-c subroutine statgrd(nkn,nmax,nsg,ngrade)
-c			computes statistics on grade
-c subroutine mkbound(nkn,nel,ngrddi,nen3v,ngrade,ngri)
-c			marks boundary nodes and determines exact grade
-c subroutine sortgr(n,iv)
-c			compacts array iv (throws out double numbers)
-c subroutine compat(n,iv)
-c			compacts array iv (throws out double numbers)
-c
-c function nextgr(k,kgr,ngrddi,ngrade,ngri)
-c	               finds next node in grade index
-c subroutine exchgr(k,kold,knew,ngrddi,ngrade,ngri)
-c			exchanges node in grade index
-c subroutine delgr(k,kold,ngrddi,ngrade,ngri)
-c	      	       deletes grade in index (kold from index of node k)
-c subroutine insgr(k,kafter,knew,ngrddi,ngrade,ngri)
-c	               inserts grade in index 
-c subroutine prgr(k,ngrddi,ngrade,ngri)
-c	               prints grade index
-c
-c revision log :
-c
-c 01.01.2003	ggu	written
-c 19.05.2003	ggu	some changes in stats
-c 23.03.2010	ggu	changed v6.1.1
-c 25.10.2013	ggu	changed VERS_6_1_68
-c 24.07.2015	ggu	changed VERS_7_1_82
-c 30.07.2015	ggu	changed VERS_7_1_83
-c 18.12.2018	ggu	changed VERS_7_5_52
-c 21.05.2019	ggu	changed VERS_7_5_62
-c
-c***********************************************************
+!  description :
+! 
+!  grading routines
+! 
+!  contents :
+! 
+!  subroutine maxgrd(nkn,nel,nen3v,ngrade,nmax)
+! 			computes maximum grade (except boundary)
+!  subroutine statgrd(nkn,nmax,nsg,ngrade)
+! 			computes statistics on grade
+!  subroutine mkbound(nkn,nel,ngrddi,nen3v,ngrade,ngri)
+! 			marks boundary nodes and determines exact grade
+!  subroutine sortgr(n,iv)
+! 			compacts array iv (throws out double numbers)
+!  subroutine compat(n,iv)
+! 			compacts array iv (throws out double numbers)
+! 
+!  function nextgr(k,kgr,ngrddi,ngrade,ngri)
+! 	               finds next node in grade index
+!  subroutine exchgr(k,kold,knew,ngrddi,ngrade,ngri)
+! 			exchanges node in grade index
+!  subroutine delgr(k,kold,ngrddi,ngrade,ngri)
+! 	      	       deletes grade in index (kold from index of node k)
+!  subroutine insgr(k,kafter,knew,ngrddi,ngrade,ngri)
+! 	               inserts grade in index 
+!  subroutine prgr(k,ngrddi,ngrade,ngri)
+! 	               prints grade index
+! 
+!  revision log :
+! 
+!  01.01.2003	ggu	written
+!  19.05.2003	ggu	some changes in stats
+!  23.03.2010	ggu	changed v6.1.1
+!  25.10.2013	ggu	changed VERS_6_1_68
+!  24.07.2015	ggu	changed VERS_7_1_82
+!  30.07.2015	ggu	changed VERS_7_1_83
+!  18.12.2018	ggu	changed VERS_7_5_52
+!  21.05.2019	ggu	changed VERS_7_5_62
+! 
+! ***********************************************************
 
 	subroutine maxgrd(nkn,nel,nen3v,nmax)
 
-c computes maximum grade (except boundary -> is one too low)
+!  computes maximum grade (except boundary -> is one too low)
 
 	implicit none
 
@@ -95,11 +95,11 @@ c computes maximum grade (except boundary -> is one too low)
 
 	end
 
-c***********************************************************
+! ***********************************************************
 
 	subroutine setgrd(nkn,nel,nen3v,ngrade)
 
-c computes maximum grade (except boundary -> is one too low)
+!  computes maximum grade (except boundary -> is one too low)
 
 	implicit none
 
@@ -122,11 +122,11 @@ c computes maximum grade (except boundary -> is one too low)
 
 	end
 
-c***********************************************************
+! ***********************************************************
 
 	subroutine statgrd(text,nkn,nmax,ngrade,nbound)
 
-c computes statistics on grade
+!  computes statistics on grade
 
 	use mod_adj_static
 
@@ -175,7 +175,7 @@ c computes statistics on grade
 	  end if
 	end do
 
-c	ntheo = 6*nin + 4*nbn + 6*nis - 6	!theoretical grade
+! 	ntheo = 6*nin + 4*nbn + 6*nis - 6	!theoretical grade
 
 	naux = 6*nin + 4*nbn
 	ndiff = nto-naux	! must be divisible by 6, -6 for no island
@@ -202,11 +202,11 @@ c	ntheo = 6*nin + 4*nbn + 6*nis - 6	!theoretical grade
 
 	end
 
-c***********************************************************
+! ***********************************************************
 
 	subroutine mkbound(nkn,nel,ngrddi,nen3v,ngrade,nbound,ngri)
 
-c marks boundary nodes and determines exact grade
+!  marks boundary nodes and determines exact grade
 
 	implicit none
 
@@ -236,7 +236,7 @@ c marks boundary nodes and determines exact grade
 	    i2 = mod(i1,3) + 1
 	    k  = nen3v(ii,ie)
 	    n = ngrade(k)
-c	    nodes are inserted in counter-clockwise sense
+! 	    nodes are inserted in counter-clockwise sense
 	    if( n + 2 .gt. 2*ngrddi ) goto 99
 	    ngri(n+1,k) = nen3v(i1,ie)
 	    ngri(n+2,k) = nen3v(i2,ie)
@@ -263,11 +263,11 @@ c	    nodes are inserted in counter-clockwise sense
 	stop 'error stop mkbound: ngrddi'
 	end
 
-c***********************************************************
+! ***********************************************************
 
 	subroutine sortgr(n,iv)
 
-c compacts array iv (throws out double numbers)
+!  compacts array iv (throws out double numbers)
 
 	implicit none
 
@@ -282,7 +282,7 @@ c compacts array iv (throws out double numbers)
 	integer i
 	integer iaux(ndim)      !aux array
 
-c initialize
+!  initialize
 
 	ib = ndim/2
 	ie = ib + 1
@@ -292,7 +292,7 @@ c initialize
 	iv(1) = 0
 	iv(2) = 0
 
-c look forward
+!  look forward
 
 	bnew = .true.
 	do while( bnew )
@@ -311,7 +311,7 @@ c look forward
 	  end if
 	end do
 
-c look backward
+!  look backward
 
 	bnew = .true.
 	do while( bnew )
@@ -330,11 +330,11 @@ c look backward
 	  end if
 	end do
 
-c adjust for internal node
+!  adjust for internal node
 
 	if( iaux(ie) .eq. iaux(ib) ) ie = ie - 1
 
-c copy to original array
+!  copy to original array
 
 	n = 0
 	do i=ib,ie
@@ -344,13 +344,13 @@ c copy to original array
 
 	end
 
-c***********************************************************
+! ***********************************************************
 
 	subroutine compat(n,iv)
 
-c compacts array iv (throws out double numbers)
-c
-c not used
+!  compacts array iv (throws out double numbers)
+! 
+!  not used
 
 	implicit none
 
@@ -359,7 +359,7 @@ c not used
 
 	integer ivold,i,idiff,nmax
 
-c set to 0 all double nodes
+!  set to 0 all double nodes
 
 	ivold = iv(1)
 	do i=2,n
@@ -370,7 +370,7 @@ c set to 0 all double nodes
 	  end if
 	end do
 
-c copy remaining nodes to front of array (leave no holes)
+!  copy remaining nodes to front of array (leave no holes)
 
 	idiff = 0
 	nmax = 0
@@ -383,7 +383,7 @@ c copy remaining nodes to front of array (leave no holes)
 	  end if
 	end do
 
-c delete useless entries
+!  delete useless entries
 
 	do i=nmax+1,n
 	  iv(i) = 0
@@ -393,16 +393,16 @@ c delete useless entries
 
 	end
 
-c***********************************************************
-c***********************************************************
-c***********************************************************
+! ***********************************************************
+! ***********************************************************
+! ***********************************************************
 
 	function nextgr(k,kgr,ngrddi,ngrade,ngri)
 
-c finds next node in grade index
-c
-c in grade index of node k find node after kgr
-c does not take into account boundary nodes
+!  finds next node in grade index
+! 
+!  in grade index of node k find node after kgr
+!  does not take into account boundary nodes
 
 	implicit none
 
@@ -437,11 +437,11 @@ c does not take into account boundary nodes
 
 	end
 
-c**************************************************************
+! **************************************************************
 
 	subroutine exchgr(k,kold,knew,ngrddi,ngrade,ngri)
 
-c exchanges node in grade index
+!  exchanges node in grade index
 
 	implicit none
 
@@ -465,11 +465,11 @@ c exchanges node in grade index
 
 	end
 
-c**************************************************************
+! **************************************************************
 
 	subroutine delgr(k,kold,ngrddi,ngrade,ngri)
 
-c deletes grade in index (kold from index of node k)
+!  deletes grade in index (kold from index of node k)
 
 	implicit none
 
@@ -498,11 +498,11 @@ c deletes grade in index (kold from index of node k)
 
 	end
 
-c**************************************************************
+! **************************************************************
 
 	subroutine insgrb(k,kbefor,knew,ngrddi,ngrade,ngri)
 
-c inserts grade in index (knew in index of node k befor node kbefor)
+!  inserts grade in index (knew in index of node k befor node kbefor)
 
 	implicit none
 
@@ -529,11 +529,11 @@ c inserts grade in index (knew in index of node k befor node kbefor)
 
 	end 
 
-c**************************************************************
+! **************************************************************
 
 	subroutine insgr(k,kafter,knew,ngrddi,ngrade,ngri)
 
-c inserts grade in index (knew in index of node k after node kafter)
+!  inserts grade in index (knew in index of node k after node kafter)
 
 	implicit none
 
@@ -560,11 +560,11 @@ c inserts grade in index (knew in index of node k after node kafter)
 
 	end 
 
-c**************************************************************
+! **************************************************************
 
 	subroutine prgr(k,ngrddi,ngrade,ngri)
 
-c prints grade index
+!  prints grade index
 
 	implicit none
 
@@ -581,5 +581,5 @@ c prints grade index
 
 	end 
 
-c**************************************************************
+! **************************************************************
 

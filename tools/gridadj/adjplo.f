@@ -23,40 +23,40 @@
 !
 !--------------------------------------------------------------------------
 
-c description :
-c
-c plotting routines
-c
-c contents :
-c
-c subroutine plobas(nkn,nel,nen3v,ngrade,xgv,ygv)
-c			plots basin
-c subroutine pltgrd(n,k,k1,k2,xgv,ygv)
-c			plots grade in color
-c subroutine pltsgrd(igr,nkn,nel,nen3v,ngrade,xgv,ygv)
-c			plots only special grade
-c subroutine write_grid(file,nkn,nel,xgv,ygv,nen3v)
-c			writes quick and dirty results to file
-c
-c revision log :
-c
-c 01.01.2003	ggu	written
-c 19.05.2003	ggu	plot some more info on debug plot
-c 23.03.2010	ggu	changed v6.1.1
-c 30.03.2012	ggu	changed VERS_6_1_51
-c 19.01.2015	ggu	changed VERS_7_1_2
-c 10.07.2015	ggu	changed VERS_7_1_50
-c 24.07.2015	ggu	changed VERS_7_1_82
-c 30.07.2015	ggu	changed VERS_7_1_83
-c 12.10.2015	ggu	changed VERS_7_3_3
-c 18.12.2018	ggu	changed VERS_7_5_52
-c 21.05.2019	ggu	changed VERS_7_5_62
-c
-c***********************************************************
+!  description :
+! 
+!  plotting routines
+! 
+!  contents :
+! 
+!  subroutine plobas(nkn,nel,nen3v,ngrade,xgv,ygv)
+! 			plots basin
+!  subroutine pltgrd(n,k,k1,k2,xgv,ygv)
+! 			plots grade in color
+!  subroutine pltsgrd(igr,nkn,nel,nen3v,ngrade,xgv,ygv)
+! 			plots only special grade
+!  subroutine write_grid(file,nkn,nel,xgv,ygv,nen3v)
+! 			writes quick and dirty results to file
+! 
+!  revision log :
+! 
+!  01.01.2003	ggu	written
+!  19.05.2003	ggu	plot some more info on debug plot
+!  23.03.2010	ggu	changed v6.1.1
+!  30.03.2012	ggu	changed VERS_6_1_51
+!  19.01.2015	ggu	changed VERS_7_1_2
+!  10.07.2015	ggu	changed VERS_7_1_50
+!  24.07.2015	ggu	changed VERS_7_1_82
+!  30.07.2015	ggu	changed VERS_7_1_83
+!  12.10.2015	ggu	changed VERS_7_3_3
+!  18.12.2018	ggu	changed VERS_7_5_52
+!  21.05.2019	ggu	changed VERS_7_5_62
+! 
+! ***********************************************************
 
 	subroutine plobas
 
-c plots basin
+!  plots basin
 
 	use mod_adj_grade
 	use basin
@@ -81,7 +81,7 @@ c plots basin
 	  call qmove(xgv(k),ygv(k))
 	  do ii=1,3
 	    k = nen3v(ii,ie)
-c	    if( k .gt. 0 ) call qplot(xgv(k),ygv(k))	!HACK
+! 	    if( k .gt. 0 ) call qplot(xgv(k),ygv(k))	!HACK
 	    call qplot(xgv(k),ygv(k))
 	  end do
 	end do
@@ -104,11 +104,11 @@ c	    if( k .gt. 0 ) call qplot(xgv(k),ygv(k))	!HACK
 
 	end
 
-c***********************************************************
+! ***********************************************************
 
 	subroutine pltgrd(n,k,k1,k2,xgv,ygv)
 
-c plots grade in color
+!  plots grade in color
 
 	implicit none
 
@@ -135,11 +135,11 @@ c plots grade in color
 
 	end
 
-c***********************************************************
+! ***********************************************************
 
 	subroutine pltsgrd(igr,nkn,nel,nen3v,ngrade,xgv,ygv)
 
-c plots only special grade
+!  plots only special grade
 
 	implicit none
 
@@ -167,11 +167,11 @@ c plots only special grade
 
 	end
 
-c***********************************************************
+! ***********************************************************
 
 	subroutine wr0grd
 
-c writes quick and dirty results from basin to file
+!  writes quick and dirty results from basin to file
 
 	implicit none
 
@@ -179,11 +179,11 @@ c writes quick and dirty results from basin to file
 
 	end
 
-c***********************************************************
+! ***********************************************************
 
 	subroutine write_grid(file)
 
-c writes quick and dirty results to file
+!  writes quick and dirty results to file
 
 	implicit none
 
@@ -194,13 +194,13 @@ c writes quick and dirty results to file
 
 	end
 
-c***********************************************************
-c***********************************************************
-c***********************************************************
+! ***********************************************************
+! ***********************************************************
+! ***********************************************************
 
 	subroutine plosel2(ie1,ie2)
 
-c plots element
+!  plots element
 
 	use mod_adj_grade
 	use basin
@@ -280,11 +280,11 @@ c plots element
 
 	end
 
-c***********************************************************
+! ***********************************************************
 
 	subroutine plosno(k)
 
-c plots node and neighborhood
+!  plots node and neighborhood
 
 	use mod_adj_grade
 	use basin
@@ -317,11 +317,11 @@ c plots node and neighborhood
 
 	end
 
-c***********************************************************
+! ***********************************************************
 
 	subroutine plosno0(k)
 
-c plots one node
+!  plots one node
 
 	use mod_adj_grade
 	use basin
@@ -346,11 +346,11 @@ c plots one node
 
 	end
 
-c***********************************************************
+! ***********************************************************
 
 	subroutine plonn(k)
 
-c plots node number
+!  plots node number
 
 	use mod_adj_grade
 	use basin
@@ -389,11 +389,11 @@ c plots node number
 
 	end
 
-c******************************************************
+! ******************************************************
 
 	subroutine mnmx0(k,xmin,xmax,ymin,ymax)
 
-c computes min/max of (x,y) of node k and neighbors
+!  computes min/max of (x,y) of node k and neighbors
 
 	use mod_adj_grade
 
@@ -428,12 +428,12 @@ c computes min/max of (x,y) of node k and neighbors
 
 	end
 
-c******************************************************
+! ******************************************************
 
 	subroutine mnmx(k,xmin,xmax,ymin,ymax)
 
-c computes min/max of (x,y) of node k
-c xmin... must be already initialized
+!  computes min/max of (x,y) of node k
+!  xmin... must be already initialized
 
 	use mod_adj_grade
 	use basin
@@ -460,5 +460,5 @@ c xmin... must be already initialized
 
 	end
 
-c******************************************************
+! ******************************************************
 

@@ -23,34 +23,34 @@
 !
 !--------------------------------------------------------------------------
 
-c
-c revision log :
-c
-c 01.01.2003	ggu	written
-c 23.03.2010	ggu	changed v6.1.1
-c 19.01.2015	ggu	changed VERS_7_1_2
-c 24.07.2015	ggu	changed VERS_7_1_82
-c 30.07.2015	ggu	changed VERS_7_1_83
-c 12.10.2015	ggu	changed VERS_7_3_3
-c 18.12.2018	ggu	changed VERS_7_5_52
-c 21.05.2019	ggu	changed VERS_7_5_62
-c
-c description :
-c
-c 4 grade routines
-c
-c contents :
-c
-c subroutine elim4(nkn,nel,ngrddi,ngrade,ngri,nen3v)	eliminates grade=4 nodes
-c subroutine elim4n(k,nel,ngrddi,ngrade,ngri,nen3v)	eliminates node
-c subroutine el4to2(k,k1,k2,ieind,ienew)		four elements to two
-c subroutine unifel(k,ik1,ik2,inew)			unifies two elements
-c
-c***********************************************************
+! 
+!  revision log :
+! 
+!  01.01.2003	ggu	written
+!  23.03.2010	ggu	changed v6.1.1
+!  19.01.2015	ggu	changed VERS_7_1_2
+!  24.07.2015	ggu	changed VERS_7_1_82
+!  30.07.2015	ggu	changed VERS_7_1_83
+!  12.10.2015	ggu	changed VERS_7_3_3
+!  18.12.2018	ggu	changed VERS_7_5_52
+!  21.05.2019	ggu	changed VERS_7_5_62
+! 
+!  description :
+! 
+!  4 grade routines
+! 
+!  contents :
+! 
+!  subroutine elim4(nkn,nel,ngrddi,ngrade,ngri,nen3v)	eliminates grade=4 nodes
+!  subroutine elim4n(k,nel,ngrddi,ngrade,ngri,nen3v)	eliminates node
+!  subroutine el4to2(k,k1,k2,ieind,ienew)		four elements to two
+!  subroutine unifel(k,ik1,ik2,inew)			unifies two elements
+! 
+! ***********************************************************
 
 	subroutine elimlow
 
-c eliminates grade=4 nodes (and less)
+!  eliminates grade=4 nodes (and less)
 
 	use mod_adj_grade
 	use basin
@@ -60,7 +60,7 @@ c eliminates grade=4 nodes (and less)
 	logical b3
 	integer k,n,nc
 
-c iterate over 3 grades as long as there is no 3 grade node left
+!  iterate over 3 grades as long as there is no 3 grade node left
 
 	write(6,*) 'eliminating 3 grades...'
 
@@ -98,11 +98,11 @@ c iterate over 3 grades as long as there is no 3 grade node left
 
 	end
 
-c***********************************************************
+! ***********************************************************
 
 	subroutine elim3(k)
 
-c eliminates node and all attached elements
+!  eliminates node and all attached elements
 
 	use mod_adj_grade
 	use basin
@@ -128,14 +128,14 @@ c eliminates node and all attached elements
 	  ngneib(i) = ngrade(neibs(i))
 	end do
 
-c delete grade from neibors
+!  delete grade from neibors
 
 	do i=1,n
 	  kk = neibs(i)
 	  call delgr(kk,k,ngrdi,ngrade,ngri)
 	end do
 
-c delete elements
+!  delete elements
 
 	ie = ifindel(neibs(1),neibs(2),k)
 	if( ie .eq. 0 ) stop 'error stop elim3: internal error (1)'
@@ -149,17 +149,17 @@ c delete elements
 	if( ie .eq. 0 ) stop 'error stop elim3: internal error (1)'
 	call delele(ie)
 
-c delete node
+!  delete node
 
 	call delnod(k)
 
 	end
 
-c***********************************************************
+! ***********************************************************
 
 	subroutine elim4(k)
 
-c eliminates node
+!  eliminates node
 
 	use mod_adj_grade
 	use basin
@@ -189,8 +189,8 @@ c eliminates node
 	  ngneib(i) = ngrade(neibs(i))
 	end do
 
-c we have two solutions -> eliminate 1/3 or 2/4 connection
-c	can eliminate only if grade on both nodes is at least 6
+!  we have two solutions -> eliminate 1/3 or 2/4 connection
+! 	can eliminate only if grade on both nodes is at least 6
 
 	ipos1 = 0
 	if( ngneib(1) .ge. 6 .and. ngneib(3) .ge. 6 ) ipos1 = 1
@@ -223,12 +223,12 @@ c	can eliminate only if grade on both nodes is at least 6
 
 	if( ipos .eq. 0 ) then
 		write(6,*) 'Cannot eliminate node: ',k
-c		write(6,*) (neibs(i),i=1,4)
-c		write(6,*) (ngneib(i),i=1,4)
+! 		write(6,*) (neibs(i),i=1,4)
+! 		write(6,*) (ngneib(i),i=1,4)
 	else if( ipos1 .eq. ipos2 ) then
-c		write(6,*) 'Both solutions equivalent; first chosen'
+! 		write(6,*) 'Both solutions equivalent; first chosen'
 	else
-c		write(6,*) 'Best solutions: ',ipos
+! 		write(6,*) 'Best solutions: ',ipos
 	end if
 	write(6,*) 'node: ',k,n,ipos
 
@@ -238,11 +238,11 @@ c		write(6,*) 'Best solutions: ',ipos
 	  write(6,*) 'grade: ',(ngneib(i),i=1,n)
 	end if
 
-c now we have the information -> eliminate node
+!  now we have the information -> eliminate node
 
 	if( ipos .eq. 0 ) return
 
-c get element numbers and index -> ielem, ieind
+!  get element numbers and index -> ielem, ieind
 
 	i = 0
 	do ie=1,nel
@@ -266,7 +266,7 @@ c get element numbers and index -> ielem, ieind
 	  end do
 	end do
 
-c make new elements (locally)
+!  make new elements (locally)
 
 	k1 = neibs(ipos)
 	k2 = neibs(ipos+2)
@@ -283,27 +283,27 @@ c make new elements (locally)
 	end do
 	end if
 
-c	write(6,*) '***',1764,(nen3v(ii,1764),ii=1,3)
+! 	write(6,*) '***',1764,(nen3v(ii,1764),ii=1,3)
 
-c copy new elements -> still need to copy hev,...
+!  copy new elements -> still need to copy hev,...
 
 	do i=1,2
 	  ie = ielem(i)
 	  call setele(ie,ienew(1,i),ienew(2,i),ienew(3,i),nen3v)
 	end do
 
-c	write(6,*) '***',1764,(nen3v(ii,1764),ii=1,3)
+! 	write(6,*) '***',1764,(nen3v(ii,1764),ii=1,3)
 
-c nodes that change grade -> adjust
+!  nodes that change grade -> adjust
 
 	do ip=ipos,4,2
 	  kk = neibs(ip)
 	  call delgr(kk,k,ngrdi,ngrade,ngri)
 	end do
 
-c	write(6,*) '***',1764,(nen3v(ii,1764),ii=1,3)
+! 	write(6,*) '***',1764,(nen3v(ii,1764),ii=1,3)
 
-c nodes that do not change grade -> exchange information
+!  nodes that do not change grade -> exchange information
 
 	ipos1 = mod(ipos,2)+1
 	ipos2 = ipos1 + 2
@@ -313,32 +313,32 @@ c nodes that do not change grade -> exchange information
 	call exchgr(k1,k,k2,ngrdi,ngrade,ngri)
 	call exchgr(k2,k,k1,ngrdi,ngrade,ngri)
 
-c	write(6,*) '***',1764,(nen3v(ii,1764),ii=1,3)
+! 	write(6,*) '***',1764,(nen3v(ii,1764),ii=1,3)
 
-c eliminate other two elements
-c here we must count downward, otherwise, if the last element
-c to be eliminated is number nel, we will have a bug
+!  eliminate other two elements
+!  here we must count downward, otherwise, if the last element
+!  to be eliminated is number nel, we will have a bug
 
 	do i=4,3,-1
 	  ie = ielem(i)
 	  call delele(ie)
 	end do
 
-c	write(6,*) '***',1764,(nen3v(ii,1764),ii=1,3)
+! 	write(6,*) '***',1764,(nen3v(ii,1764),ii=1,3)
 
-c eliminate node
+!  eliminate node
 
 	call delnod(k)
 
-c	write(6,*) '***',1764,(nen3v(ii,1764),ii=1,3)
+! 	write(6,*) '***',1764,(nen3v(ii,1764),ii=1,3)
 
 	end
 	
-c***********************************************************
+! ***********************************************************
 
 	subroutine el4to2(k,k1,k2,ieind,ienew)
 
-c four elements to two
+!  four elements to two
 
 	implicit none
 
@@ -378,21 +378,21 @@ c four elements to two
 
 	call unifel(k,ieind(1,ip(1)),ieind(1,ip(2)),ienew(1,2))
 
-c	write(6,*) 'el4to2: ',k,k1,k2
-c	do i=1,4
-c	  write(6,*) (ieind(ii,i),ii=1,3)
-c	end do
-c	do i=1,2
-c	  write(6,*) (ienew(ii,i),ii=1,3)
-c	end do
+! 	write(6,*) 'el4to2: ',k,k1,k2
+! 	do i=1,4
+! 	  write(6,*) (ieind(ii,i),ii=1,3)
+! 	end do
+! 	do i=1,2
+! 	  write(6,*) (ienew(ii,i),ii=1,3)
+! 	end do
 
 	end
 
-c***********************************************************
+! ***********************************************************
 
 	subroutine unifel(k,ik1,ik2,inew)
 
-c unifies two elements with common node k
+!  unifies two elements with common node k
 
 	implicit none
 
@@ -402,7 +402,7 @@ c unifies two elements with common node k
 	integer ikp1,ikp2,in1,in2,ip1,ip2
 	integer ii
 
-c first find node k in elements
+!  first find node k in elements
 
 	ikp1 = 0
 	ikp2 = 0
@@ -436,12 +436,12 @@ c first find node k in elements
 	  stop 'error stop unifel: no second common node'
 	end if
 
-c	write(6,*) 'unifel : ',k
-c	  write(6,*) (ik1(ii),ii=1,3)
-c	  write(6,*) (ik2(ii),ii=1,3)
-c	  write(6,*) (inew(ii),ii=1,3)
+! 	write(6,*) 'unifel : ',k
+! 	  write(6,*) (ik1(ii),ii=1,3)
+! 	  write(6,*) (ik2(ii),ii=1,3)
+! 	  write(6,*) (inew(ii),ii=1,3)
 
 	end
 
-c***********************************************************
+! ***********************************************************
 

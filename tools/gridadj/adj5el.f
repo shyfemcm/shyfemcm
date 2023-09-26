@@ -23,38 +23,38 @@
 !
 !--------------------------------------------------------------------------
 
-c description :
-c
-c 5 grade routines
-c
-c contents :
-c
-c subroutine elim5(nkn,nel,ngrddi,ngrade,nbound,ngri,nen3v)
-c			eliminates low grades
-c subroutine elim55(k,nkn,nel,ngrddi,ngrade,nbound,ngri,nen3v)
-c			eliminates 5-5 connections
-c
-c revision log :
-c
-c 01.01.2003	ggu	written
-c 23.03.2010	ggu	changed v6.1.1
-c 19.01.2015	ggu	changed VERS_7_1_2
-c 21.05.2015	ggu	changed VERS_7_1_11
-c 10.07.2015	ggu	changed VERS_7_1_50
-c 24.07.2015	ggu	changed VERS_7_1_82
-c 30.07.2015	ggu	changed VERS_7_1_83
-c 11.10.2015	ggu	bug fix: fused node was not moved
-c 18.12.2018	ggu	changed VERS_7_5_52
-c 21.05.2019	ggu	changed VERS_7_5_62
-c
-c***********************************************************
+!  description :
+! 
+!  5 grade routines
+! 
+!  contents :
+! 
+!  subroutine elim5(nkn,nel,ngrddi,ngrade,nbound,ngri,nen3v)
+! 			eliminates low grades
+!  subroutine elim55(k,nkn,nel,ngrddi,ngrade,nbound,ngri,nen3v)
+! 			eliminates 5-5 connections
+! 
+!  revision log :
+! 
+!  01.01.2003	ggu	written
+!  23.03.2010	ggu	changed v6.1.1
+!  19.01.2015	ggu	changed VERS_7_1_2
+!  21.05.2015	ggu	changed VERS_7_1_11
+!  10.07.2015	ggu	changed VERS_7_1_50
+!  24.07.2015	ggu	changed VERS_7_1_82
+!  30.07.2015	ggu	changed VERS_7_1_83
+!  11.10.2015	ggu	bug fix: fused node was not moved
+!  18.12.2018	ggu	changed VERS_7_5_52
+!  21.05.2019	ggu	changed VERS_7_5_62
+! 
+! ***********************************************************
 
 	subroutine elim5
 
-c eliminates 5-5 grades
-c
-c the two nodes with 5-5 are fused together
-c the two elements attached to these nodes are deleted
+!  eliminates 5-5 grades
+! 
+!  the two nodes with 5-5 are fused together
+!  the two elements attached to these nodes are deleted
 
 	use mod_adj_grade
 	use basin
@@ -75,11 +75,11 @@ c the two elements attached to these nodes are deleted
 
 	end
 
-c***********************************************************
+! ***********************************************************
 
 	subroutine elim55(k)
 
-c eliminates 5-5 connections
+!  eliminates 5-5 connections
 
 	use mod_adj_grade
 	use basin
@@ -111,11 +111,11 @@ c eliminates 5-5 connections
 	  write(6,*) 'debug of new node: ',k
 	end if
 
-c make circular list
-c
-c ngav 	node numbers around k
-c ngrv	grades of node numbers around k
-c nbav	boundary  flag for nodes around k
+!  make circular list
+! 
+!  ngav 	node numbers around k
+!  ngrv	grades of node numbers around k
+!  nbav	boundary  flag for nodes around k
 
         n = ngrade(k)
 	ngav(0) = ngri(n,k)
@@ -133,7 +133,7 @@ c nbav	boundary  flag for nodes around k
 	  end if
 	end do
 
-c check if exchange is possible
+!  check if exchange is possible
 
 	nc = 0		!how many of this nmax value
 	nmax = 0	!maximum sum of grades -> must be at least 3
@@ -167,11 +167,11 @@ c check if exchange is possible
 
 	write(6,*) k,n,nmax,nc,ip
 
-c nc gives number of occurences of this value of nmax ...
-c ip is the pointer to the node to be exchanged
-c we know that is tis not a boundary node, so we can shift it
-c
-c k is eliminated, ngav(ip) is retained
+!  nc gives number of occurences of this value of nmax ...
+!  ip is the pointer to the node to be exchanged
+!  we know that is tis not a boundary node, so we can shift it
+! 
+!  k is eliminated, ngav(ip) is retained
 
 	ks = ngav(ip)		! node to be shifted
 
@@ -184,7 +184,7 @@ c k is eliminated, ngav(ip) is retained
 	    call plosno(ngav(ip))
 	end if
 
-c find elements that have to be deleted
+!  find elements that have to be deleted
 
 	ie1 = ifindel(k,ngav(ip),ngav(ip+1))
 	ie2 = ifindel(k,ngav(ip-1),ngav(ip))
@@ -202,7 +202,7 @@ c find elements that have to be deleted
 	  call plosel2(ie1,ie2)
 	end if
 
-c delete elements
+!  delete elements
 
 	if( ie1 .gt. ie2 ) then		!to avoid bug
 	  call delele(ie1)
@@ -220,12 +220,12 @@ c delete elements
 	  call prgr(ngav(ip+1),ngrdi,ngrade,ngri)
 	end if
 
-c new coordinates for node
+!  new coordinates for node
 
 	xgv(ks) = 0.5 * ( xgv(k) + xgv(ks) )
 	ygv(ks) = 0.5 * ( ygv(k) + ygv(ks) )
 
-c substitute all occurrences of k with ks
+!  substitute all occurrences of k with ks
 
 	call subnod(k,ks)
 
@@ -236,7 +236,7 @@ c substitute all occurrences of k with ks
 	  call prgr(ngav(ip+1),ngrdi,ngrade,ngri)
 	end if
 
-c adjourn grade (delete) for nodes ip-1, ip+1
+!  adjourn grade (delete) for nodes ip-1, ip+1
 
 	call delgr(ngav(ip-1),ngav(ip),ngrdi,ngrade,ngri)
 	call delgr(ngav(ip+1),ngav(ip),ngrdi,ngrade,ngri)
@@ -248,7 +248,7 @@ c adjourn grade (delete) for nodes ip-1, ip+1
 	  call prgr(ngav(ip+1),ngrdi,ngrade,ngri)
 	end if
 
-c adjourn grade index for ip and delete node k finally
+!  adjourn grade index for ip and delete node k finally
 
 	call delgr(ngav(ip),ngav(ip),ngrdi,ngrade,ngri)
 	call delnod(k)

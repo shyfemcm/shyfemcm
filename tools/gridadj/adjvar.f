@@ -23,38 +23,38 @@
 !
 !--------------------------------------------------------------------------
 
-c description :
-c
-c various utility routines for adj
-c
-c contents :
-c
-c subroutine smooth_grid(npass,omega,nkn,nel,nen3v,nbound,xgv,ygv,dx,dy,ic)
-c               smoothing of internal nodes
-c subroutine chkgrd
-c               check of grid
-c
-c revision log :
-c
-c 01.01.2003	ggu	written
-c 19.05.2003	ggu	some more utility routines
-c 10.03.2010	ggu	area computation changed in checkarea (bug in 64 bit)
-c 23.03.2010	ggu	changed v6.1.1
-c 25.10.2013	ggu	changed VERS_6_1_68
-c 19.01.2015	ggu	changed VERS_7_1_2
-c 10.07.2015	ggu	changed VERS_7_1_50
-c 24.07.2015	ggu	changed VERS_7_1_82
-c 30.07.2015	ggu	changed VERS_7_1_83
-c 12.10.2015	ggu	changed VERS_7_3_3
-c 19.10.2015	ggu	changed VERS_7_3_6
-c 18.12.2018	ggu	changed VERS_7_5_52
-c 21.05.2019	ggu	changed VERS_7_5_62
-c
-c**************************************************************
+!  description :
+! 
+!  various utility routines for adj
+! 
+!  contents :
+! 
+!  subroutine smooth_grid(npass,omega,nkn,nel,nen3v,nbound,xgv,ygv,dx,dy,ic)
+!                smoothing of internal nodes
+!  subroutine chkgrd
+!                check of grid
+! 
+!  revision log :
+! 
+!  01.01.2003	ggu	written
+!  19.05.2003	ggu	some more utility routines
+!  10.03.2010	ggu	area computation changed in checkarea (bug in 64 bit)
+!  23.03.2010	ggu	changed v6.1.1
+!  25.10.2013	ggu	changed VERS_6_1_68
+!  19.01.2015	ggu	changed VERS_7_1_2
+!  10.07.2015	ggu	changed VERS_7_1_50
+!  24.07.2015	ggu	changed VERS_7_1_82
+!  30.07.2015	ggu	changed VERS_7_1_83
+!  12.10.2015	ggu	changed VERS_7_3_3
+!  19.10.2015	ggu	changed VERS_7_3_6
+!  18.12.2018	ggu	changed VERS_7_5_52
+!  21.05.2019	ggu	changed VERS_7_5_62
+! 
+! **************************************************************
 
 	subroutine smooth_grid(npass,omega)
 
-c smoothing of internal nodes
+!  smoothing of internal nodes
 
 	use mod_adj_grade
 	use basin
@@ -79,7 +79,7 @@ c smoothing of internal nodes
 	  !if( mod(n,10) .eq. 0 ) write(6,*) 'smoothing... pass ',n
 	  if( mod(n,1) .eq. 0 ) write(6,*) 'smoothing... pass ',n
 
-c initialize
+!  initialize
 
 	  do k=1,nkn
 	    dx(k) = 0.
@@ -87,7 +87,7 @@ c initialize
 	    ic(k) = 0
 	  end do
 
-c loop over elements -> accumulate
+!  loop over elements -> accumulate
 
 	  do ie=1,nel
 	    xm = 0.
@@ -107,7 +107,7 @@ c loop over elements -> accumulate
 	    end do
 	  end do
 
-c change coordinate
+!  change coordinate
 
 	  do k=1,nkn
 	    if( ic(k) .gt. 0 ) then
@@ -116,7 +116,7 @@ c change coordinate
 	    end if
 	  end do
 
-c check area
+!  check area
 
 	  call checkarea('during smoothing')
 
@@ -127,11 +127,11 @@ c check area
 
 	end
 
-c**************************************************************
+! **************************************************************
 
 	subroutine mkstatic(nkn,ianv,nbound)
 
-c marks nodes as static (not moveable)
+!  marks nodes as static (not moveable)
 
 	use mod_adj_static
 
@@ -152,13 +152,13 @@ c marks nodes as static (not moveable)
 
         end
 
-c**************************************************************
+! **************************************************************
 
 	subroutine chkgrd(text)
 
-c check of grid
-c
-c checks consistency of node and grade index
+!  check of grid
+! 
+!  checks consistency of node and grade index
 
 	use mod_adj_grade
 	use mod_adj_static
@@ -182,9 +182,9 @@ c checks consistency of node and grade index
 
 	bstop = .false.
 
-c--------------------------------------------------
-c check element index for unknown nodes
-c--------------------------------------------------
+! --------------------------------------------------
+!  check element index for unknown nodes
+! --------------------------------------------------
 
 	if( text .ne. ' ' ) write(6,*) 'chkgrd: '//trim(text)
 
@@ -206,9 +206,9 @@ c--------------------------------------------------
 		stop 'error stop chkgrd (1)'
 	end if
 
-c--------------------------------------------------
-c check grades for strange grades
-c--------------------------------------------------
+! --------------------------------------------------
+!  check grades for strange grades
+! --------------------------------------------------
 
         if( bverb ) write(6,*) 'checking for strange grades ...'
 
@@ -226,9 +226,9 @@ c--------------------------------------------------
 		stop 'error stop chkgrd (2)'
 	end if
 
-c--------------------------------------------------
-c check grade index for unknown nodes
-c--------------------------------------------------
+! --------------------------------------------------
+!  check grade index for unknown nodes
+! --------------------------------------------------
 
         if( bverb ) write(6,*) 'checking grade index for nodes ...'
 
@@ -249,9 +249,9 @@ c--------------------------------------------------
 		stop 'error stop chkgrd (3)'
 	end if
 
-c--------------------------------------------------
-c check consistency of grade index
-c--------------------------------------------------
+! --------------------------------------------------
+!  check consistency of grade index
+! --------------------------------------------------
 
         if( bverb ) write(6,*) 'consistency check  ...'
 
@@ -277,9 +277,9 @@ c--------------------------------------------------
 		stop 'error stop chkgrd (4)'
 	end if
 
-c--------------------------------------------------
-c is grade still ok?
-c--------------------------------------------------
+! --------------------------------------------------
+!  is grade still ok?
+! --------------------------------------------------
 
         if( bverb ) write(6,*) 'checking for final grades ...'
 
@@ -319,26 +319,26 @@ c--------------------------------------------------
 		stop 'error stop chkgrd (5)'
 	end if
 
-c--------------------------------------------------
-c checking area
-c--------------------------------------------------
+! --------------------------------------------------
+!  checking area
+! --------------------------------------------------
 
 	call checkarea(text)
 
-c--------------------------------------------------
-c end of routine
-c--------------------------------------------------
+! --------------------------------------------------
+!  end of routine
+! --------------------------------------------------
 
         if( bverb ) write(6,*) 'check ok ...'
 
 	end
 
-c*******************************************************
+! *******************************************************
 
 	subroutine nshift(ip,n,nga,iau)
 
-c shifts array - index ip will be first index
-c iau is auxiliary array
+!  shifts array - index ip will be first index
+!  iau is auxiliary array
 
 	implicit none
 
@@ -359,11 +359,11 @@ c iau is auxiliary array
 
 	end
 
-c*******************************************************
+! *******************************************************
 
 	subroutine checkarea(text)
 
-c check if area is positive
+!  check if area is positive
 
 	use basin
 
@@ -393,8 +393,8 @@ c check if area is positive
 	  aj = areat(x1,y1,x2,y2,x3,y3)
 	  if( aj .le. 0. ) then
             call eint2ext(ie,ieext)
-	    write(6,*) 'element ',ie,' (extern ',ieext
-     +                          ,') has negative area...'
+	    write(6,*) 'element ',ie,' (extern ',ieext &
+     &                          ,') has negative area...'
 	    call elem_info(ie)
 	    bstop = .true.
 	  end if
@@ -409,7 +409,7 @@ c check if area is positive
 
 	end
 
-c*******************************************************
+! *******************************************************
 
 	subroutine elem_info(ie)
 
@@ -431,11 +431,11 @@ c*******************************************************
 
 	end
 
-c*******************************************************
+! *******************************************************
 
 	subroutine node_info(k)
 
-c writes info on node
+!  writes info on node
 
 	use mod_adj_grade
 	use basin
@@ -457,14 +457,14 @@ c writes info on node
 
 	end
 
-c****************************************************************
+! ****************************************************************
 
 	function rangle(k1,k2,k3)
 
-c gives angle between nodes
-c
-c rangle	angle [degrees] ,     rangle < 180 => right turn
-c k1,k2,k3	node numbers
+!  gives angle between nodes
+! 
+!  rangle	angle [degrees] ,     rangle < 180 => right turn
+!  k1,k2,k3	node numbers
 
 	use basin
 
@@ -487,7 +487,7 @@ c k1,k2,k3	node numbers
 
 	end
 
-c************************************************************
+! ************************************************************
 
         subroutine nint2ext(kint,kext)
 
@@ -502,7 +502,7 @@ c************************************************************
 
         end
 
-c************************************************************
+! ************************************************************
 
         subroutine eint2ext(ieint,ieext)
 
@@ -517,5 +517,5 @@ c************************************************************
 
         end
 
-c************************************************************
+! ************************************************************
 

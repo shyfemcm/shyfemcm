@@ -24,43 +24,43 @@
 !
 !--------------------------------------------------------------------------
 
-c description :
-c
-c main for mesh adjustment
-c
-c contents :
-c
-c shyadj			main
-c
-c revision log :
-c
-c 01.01.2003	ggu	written
-c 19.05.2003	ggu	some more checks
-c 02.12.2004	ggu	some more debug checks (version 1.41)
-c 02.12.2004	ggu	copyright statement added
-c 20.03.2007	ggu	fake version
-c 16.04.2008	ggu	new Makefile structure
-c 09.12.2008	ggu	small changes to Makefile
-c 26.01.2009	ggu	makedepend, compiler warnings
-c 06.04.2009	ggu	new param.h, include basin.h, better error handling
-c 24.04.2009	ggu	new call to rdgrd()
-c 30.03.2012	ggu	new call to node_info() (was bug)
-c 12.10.2015	ggu	changed VERS_7_3_3
-c 25.05.2017	ggu	changed VERS_7_5_28
-c 16.10.2018	ggu	changed VERS_7_5_50
-c 18.12.2018	ggu	changed VERS_7_5_52
-c 21.05.2019	ggu	changed VERS_7_5_62
-c 14.02.2022	ggu	set all depth values to flag
-c
-c notes :
-c
-c to use static (non moveable) nodes please consult ls mod_adj_static
-c
-c***************************************************************
+!  description :
+! 
+!  main for mesh adjustment
+! 
+!  contents :
+! 
+!  shyadj			main
+! 
+!  revision log :
+! 
+!  01.01.2003	ggu	written
+!  19.05.2003	ggu	some more checks
+!  02.12.2004	ggu	some more debug checks (version 1.41)
+!  02.12.2004	ggu	copyright statement added
+!  20.03.2007	ggu	fake version
+!  16.04.2008	ggu	new Makefile structure
+!  09.12.2008	ggu	small changes to Makefile
+!  26.01.2009	ggu	makedepend, compiler warnings
+!  06.04.2009	ggu	new param.h, include basin.h, better error handling
+!  24.04.2009	ggu	new call to rdgrd()
+!  30.03.2012	ggu	new call to node_info() (was bug)
+!  12.10.2015	ggu	changed VERS_7_3_3
+!  25.05.2017	ggu	changed VERS_7_5_28
+!  16.10.2018	ggu	changed VERS_7_5_50
+!  18.12.2018	ggu	changed VERS_7_5_52
+!  21.05.2019	ggu	changed VERS_7_5_62
+!  14.02.2022	ggu	set all depth values to flag
+! 
+!  notes :
+! 
+!  to use static (non moveable) nodes please consult ls mod_adj_static
+! 
+! ***************************************************************
 
 	program shyadj
 
-c adjusts elements after automatic mesh generator
+!  adjusts elements after automatic mesh generator
 
 	use mod_adj_grade
 	use mod_depth
@@ -86,7 +86,7 @@ c adjusts elements after automatic mesh generator
 	integer, allocatable :: ipaux(:)
 	integer, allocatable :: iaux(:)
 	real, allocatable :: raux(:)
-c------------------------------------------------------- end declaration
+! ------------------------------------------------------- end declaration
 
 	kspecial = 0		!set to 0 for no debug
 
@@ -94,17 +94,17 @@ c------------------------------------------------------- end declaration
 	ner = 6
 	bstop = .false.
 
-c-------------------------------------------------------------------
+! -------------------------------------------------------------------
 
 	call shyfem_copyright('shyadj - regularize finite element grids')
 
-c-------------------------------------------------------------------
+! -------------------------------------------------------------------
 
-c parse command line
+!  parse command line
 
         call shyadj_init(file,bplot,nsmooth,asmooth)
 
-c read grid file with nodes and elements
+!  read grid file with nodes and elements
 
 	call grd_read(file)
 	call grd_get_params(nk,ne,nl,nne,nnl)
@@ -119,7 +119,7 @@ c read grid file with nodes and elements
 	allocate(ipaux(nkn),iaux(nel))
 	allocate(raux(nel))
 
-c save depth information in elements to nodes
+!  save depth information in elements to nodes
 
 	call mod_depth_init(nkn,nel)
 	call grd_get_depth(nk,ne,hkv,hev)
@@ -134,7 +134,7 @@ c save depth information in elements to nodes
 	  call hev2hkv
 	end if
 
-c determine grade
+!  determine grade
 
 	call maxgrd(nkn,nel,nen3v,ngr)
 
@@ -145,7 +145,7 @@ c determine grade
 
 	call stats('first call')
 
-c make boundary nodes (flag nbound)
+!  make boundary nodes (flag nbound)
 
 	call mkbound(nkn,nel,ngrdi,nen3v,ngrade,nbound,ngri)
         call mkstatic(nkn,ianv,nbound)
@@ -153,7 +153,7 @@ c make boundary nodes (flag nbound)
 
 	call node_info(kspecial)
 
-c plot grade
+!  plot grade
 
 	if( bplot ) call qopen
 
@@ -161,7 +161,7 @@ c plot grade
 
         !call smooth_grid(nsmooth,asmooth)	!only for debug
 
-c eliminate 4- grades
+!  eliminate 4- grades
 
         write(6,*) '================================='
         write(6,*) 'first cycle...'
@@ -175,7 +175,7 @@ c eliminate 4- grades
 	call stats('first cycle - 4- grades')
 	call node_info(kspecial)
 
-c eliminate 8+ grades
+!  eliminate 8+ grades
 
 	call chkgrd('checking before 8+')
 	call elimhigh(8)
@@ -185,7 +185,7 @@ c eliminate 8+ grades
 	call chkgrd('checking after 8+')
 	call node_info(kspecial)
 
-c eliminate 7+ grades
+!  eliminate 7+ grades
 
 	call chkgrd('checking before 7+')
 	call elimhigh(7)
@@ -195,7 +195,7 @@ c eliminate 7+ grades
 	call chkgrd('checking after 7+')
 	call node_info(kspecial)
 
-c smoothing
+!  smoothing
 
 	!call write_grid('new_nosmooth.grd')
 
@@ -205,7 +205,7 @@ c smoothing
 
 	!call write_grid('new_smooth1.grd')
 
-c again ...
+!  again ...
 
         write(6,*) '================================='
         write(6,*) 'second cycle...'
@@ -219,7 +219,7 @@ c again ...
 	call stats('second cycle - after elimhigh')
 	call node_info(kspecial)
 
-c eliminate 5 grades
+!  eliminate 5 grades
 
 	!call write_grid('new_help.grd')
 
@@ -231,7 +231,7 @@ c eliminate 5 grades
 	call chkgrd('checking after 5')
 	call node_info(kspecial)
 
-c eliminate 5-5 grades
+!  eliminate 5-5 grades
 
 	call write_grid('new_help1.grd')
 
@@ -242,7 +242,7 @@ c eliminate 5-5 grades
 	call chkgrd('checking after 5-5')
 	call node_info(kspecial)
 
-c one more time
+!  one more time
 
         write(6,*) '================================='
         write(6,*) 'third cycle...'
@@ -259,7 +259,7 @@ c one more time
 	call chkgrd('checking after high, 5, 57')
 	call node_info(kspecial)
 
-c smoothing
+!  smoothing
 
 	call write_grid('final_before_smoothing.grd')
 
@@ -271,7 +271,7 @@ c smoothing
 	if( bplot ) call plobas
 	call node_info(kspecial)
 
-c write to grd file
+!  write to grd file
 
         write(6,*) '================================='
         write(6,*) 'writing to grid...'
@@ -288,8 +288,8 @@ c write to grd file
 
 	call qclose	!this is safe to call
 
-	write(6,*) 'Successful completion.'//
-     +			' Output has been written to adjust.grd'
+	write(6,*) 'Successful completion.'// &
+     &			' Output has been written to adjust.grd'
 
 	stop
    97	continue
@@ -300,13 +300,13 @@ c write to grd file
 	stop 'error stop ex2in'
 	end
 
-c***********************************************************
-c***********************************************************
-c***********************************************************
+! ***********************************************************
+! ***********************************************************
+! ***********************************************************
 
 	subroutine hev2hkv
 
-c saves information about depth to nodes
+!  saves information about depth to nodes
 
 	use mod_depth
 	use basin
@@ -337,7 +337,7 @@ c saves information about depth to nodes
 
 	end
 
-c***********************************************************
+! ***********************************************************
 
 	subroutine stats(text)
 
@@ -352,7 +352,7 @@ c***********************************************************
 
 	end
 
-c***********************************************************
+! ***********************************************************
 
 	subroutine show_strange_grades
 
@@ -376,7 +376,7 @@ c***********************************************************
 
 	end
 
-c***********************************************************
+! ***********************************************************
 
         subroutine shyadj_init(grdfile,bplot,nsmooth,asmooth)
 
@@ -434,5 +434,5 @@ c***********************************************************
 
         end
 
-c***********************************************************
+! ***********************************************************
 

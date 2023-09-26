@@ -23,35 +23,35 @@
 !
 !--------------------------------------------------------------------------
 
-c description :
-c
-c 7 grade routines
-c
-c contents :
-c
-c subroutine elimh(nmax,nkn,nel,ngrddi,ngrade,nbound,ngri,nen3v)
-c               eliminates high grades
-c subroutine elim77(k,nkn,nel,ngrddi,ngrade,nbound,ngri,nen3v)
-c               eliminates high grades
-c
-c revision log :
-c
-c 01.01.2003	ggu	written
-c 19.05.2003	ggu	in elim77 check angle of diagonals to exchange (area<0)
-c 23.03.2010	ggu	changed v6.1.1
-c 19.01.2015	ggu	changed VERS_7_1_2
-c 24.07.2015	ggu	changed VERS_7_1_82
-c 30.07.2015	ggu	changed VERS_7_1_83
-c 12.10.2015	ggu	changed VERS_7_3_3
-c 18.12.2018	ggu	changed VERS_7_5_52
-c 13.03.2019	ggu	changed VERS_7_5_61
-c 21.05.2019	ggu	changed VERS_7_5_62
-c
-c***********************************************************
+!  description :
+! 
+!  7 grade routines
+! 
+!  contents :
+! 
+!  subroutine elimh(nmax,nkn,nel,ngrddi,ngrade,nbound,ngri,nen3v)
+!                eliminates high grades
+!  subroutine elim77(k,nkn,nel,ngrddi,ngrade,nbound,ngri,nen3v)
+!                eliminates high grades
+! 
+!  revision log :
+! 
+!  01.01.2003	ggu	written
+!  19.05.2003	ggu	in elim77 check angle of diagonals to exchange (area<0)
+!  23.03.2010	ggu	changed v6.1.1
+!  19.01.2015	ggu	changed VERS_7_1_2
+!  24.07.2015	ggu	changed VERS_7_1_82
+!  30.07.2015	ggu	changed VERS_7_1_83
+!  12.10.2015	ggu	changed VERS_7_3_3
+!  18.12.2018	ggu	changed VERS_7_5_52
+!  13.03.2019	ggu	changed VERS_7_5_61
+!  21.05.2019	ggu	changed VERS_7_5_62
+! 
+! ***********************************************************
 
 	subroutine elimhigh(nmax)
 
-c eliminates high grades
+!  eliminates high grades
 
 	use mod_adj_grade
 	use basin
@@ -75,11 +75,11 @@ c eliminates high grades
 
 	end
 
-c***********************************************************
+! ***********************************************************
 
 	subroutine elim77(k)
 
-c eliminates high grades by switching diagonal
+!  eliminates high grades by switching diagonal
 
 	use mod_adj_grade
 	use basin
@@ -107,7 +107,7 @@ c eliminates high grades by switching diagonal
 	bdebug = .true.
 	bdebug = .false.
 
-c make circular list
+!  make circular list
 
         n = ngrade(k)
 	ngav(0) = ngri(n,k)
@@ -132,7 +132,7 @@ c make circular list
 	  call plosno(k)
 	end if
 
-c check if exchange is possible
+!  check if exchange is possible
 
 	nc = 0
 	nmax = 0
@@ -166,7 +166,7 @@ c check if exchange is possible
 
 	if( nmax .ge. 3 ) write(6,*) k,n,nmax,nc,ip
 
-c we decide to take the first choice
+!  we decide to take the first choice
 
 	if( nmax .ge. 3 ) then
 
@@ -211,5 +211,5 @@ c we decide to take the first choice
 
 	end
 
-c************************************************
+! ************************************************
 
