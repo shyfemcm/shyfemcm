@@ -26,72 +26,72 @@
 !
 !--------------------------------------------------------------------------
 
-c parameter changing area routines
-c
-c contents :
-c
-c function cdf(h,z0)		computes cd from h and z0
-c
-c subroutine rdarea		reads area section (chezy) from STR file
-c subroutine ckarea		checks values for chezy parameters
-c subroutine prarea		prints chezy values to log file
-c subroutine tsarea		prints test message to terminal
-c subroutine inarea		initializes chezy values
-c
-c revision log :
-c
-c 31.08.1988	ggu	(writes real chezy on czv)
-c 29.11.1988	ggu	(new chezy, iarv array)
-c 12.04.1990	ggu	(href)
-c 03.06.1990	ggu	(austausch)
-c 26.06.1997	ggu	(implicit none, useless parts deleted)
-c 25.05.1998	ggu	documentation started
-c 21.08.1998	ggu	xv eliminated
-c 25.05.1999	ggu	new routine bofric
-c 20.01.2000	ggu	common block /dimdim/ eliminated
-c 09.08.2003	ggu	bofric now returns array with friction
-c 10.08.2003	ggu	completely restructured, counter from 0 to nczdum
-c 04.09.2003	ggu	bug fix for missing return in get_chezy_values
-c 11.01.2005	ggu	ausv eliminated (was not used anymore)
-c 02.04.2007	ggu	in check -> warning only for cz=0 and Chezy/Strickler
-c 10.12.2008	ggu	re-organized, deleted sp135r(), use bottom_friction()
-c 29.01.2009	ggu	ausdef eliminated (chezy(5,.) is not used anymore)
-c 23.03.2010	ggu	changed v6.1.1
-c 16.02.2011	ggu	new routines to deal with nodal area code
-c 14.04.2011	ggu	changed VERS_6_1_22
-c 21.06.2012	ggu&aar	new friction for mud module
-c 26.06.2012	ggu	changed VERS_6_1_55
-c 25.10.2013	ggu	changed VERS_6_1_68
-c 18.06.2014	ggu	changed VERS_6_1_77
-c 23.12.2014	ggu	changed VERS_7_0_11
-c 19.01.2015	ggu	changed VERS_7_1_3
-c 28.04.2015	ggu	czdef is default for all areas not given
-c 12.05.2015	ggu	rewritten with modules and allocatable
-c 21.05.2015	ggu	changed VERS_7_1_11
-c 17.07.2015	ggu	changed VERS_7_1_80
-c 20.07.2015	ggu	changed VERS_7_1_81
-c 24.07.2015	ggu	changed VERS_7_1_82
-c 15.04.2016	ggu	changed VERS_7_5_8
-c 30.09.2016	ggu	changed VERS_7_5_18
-c 10.04.2017	ggu	compute cd, normalized bottom stress and bottom stress
-c 09.05.2017	ggu	bug fix for computing bottom stress
-c 03.11.2017	mbj	new documentation for ireib
-c 05.12.2017	ggu	changed VERS_7_5_39
-c 26.04.2018	ggu	area code adjusted for mpi
-c 11.05.2018	ggu	changed VERS_7_5_47
-c 14.02.2019	ggu	changed VERS_7_5_56
-c 16.02.2019	ggu	changed VERS_7_5_60
-c 12.03.2019	mbj	new friction ireib=10
-c 05.03.2020	ggu	documentation upgraded
-c 02.04.2022	ggu	revisited for mpi, actual chezy now at position 0
-c 02.04.2022	ggu	adjust_chezy() adjusted for multi-domain
-c 12.04.2022	ggu	global bdebug and iczunit variable for debugging
-c 22.03.2023	ggu	relax error conditions for nodes not in same domain
-c 03.05.2023	ggu	avoid out of bound error in ckarea()
-c
-c***********************************************************
-c***********************************************************
-c***********************************************************
+! parameter changing area routines
+!
+! contents :
+!
+! function cdf(h,z0)		computes cd from h and z0
+!
+! subroutine rdarea		reads area section (chezy) from STR file
+! subroutine ckarea		checks values for chezy parameters
+! subroutine prarea		prints chezy values to log file
+! subroutine tsarea		prints test message to terminal
+! subroutine inarea		initializes chezy values
+!
+! revision log :
+!
+! 31.08.1988	ggu	(writes real chezy on czv)
+! 29.11.1988	ggu	(new chezy, iarv array)
+! 12.04.1990	ggu	(href)
+! 03.06.1990	ggu	(austausch)
+! 26.06.1997	ggu	(implicit none, useless parts deleted)
+! 25.05.1998	ggu	documentation started
+! 21.08.1998	ggu	xv eliminated
+! 25.05.1999	ggu	new routine bofric
+! 20.01.2000	ggu	common block /dimdim/ eliminated
+! 09.08.2003	ggu	bofric now returns array with friction
+! 10.08.2003	ggu	completely restructured, counter from 0 to nczdum
+! 04.09.2003	ggu	bug fix for missing return in get_chezy_values
+! 11.01.2005	ggu	ausv eliminated (was not used anymore)
+! 02.04.2007	ggu	in check -> warning only for cz=0 and Chezy/Strickler
+! 10.12.2008	ggu	re-organized, deleted sp135r(), use bottom_friction()
+! 29.01.2009	ggu	ausdef eliminated (chezy(5,.) is not used anymore)
+! 23.03.2010	ggu	changed v6.1.1
+! 16.02.2011	ggu	new routines to deal with nodal area code
+! 14.04.2011	ggu	changed VERS_6_1_22
+! 21.06.2012	ggu&aar	new friction for mud module
+! 26.06.2012	ggu	changed VERS_6_1_55
+! 25.10.2013	ggu	changed VERS_6_1_68
+! 18.06.2014	ggu	changed VERS_6_1_77
+! 23.12.2014	ggu	changed VERS_7_0_11
+! 19.01.2015	ggu	changed VERS_7_1_3
+! 28.04.2015	ggu	czdef is default for all areas not given
+! 12.05.2015	ggu	rewritten with modules and allocatable
+! 21.05.2015	ggu	changed VERS_7_1_11
+! 17.07.2015	ggu	changed VERS_7_1_80
+! 20.07.2015	ggu	changed VERS_7_1_81
+! 24.07.2015	ggu	changed VERS_7_1_82
+! 15.04.2016	ggu	changed VERS_7_5_8
+! 30.09.2016	ggu	changed VERS_7_5_18
+! 10.04.2017	ggu	compute cd, normalized bottom stress and bottom stress
+! 09.05.2017	ggu	bug fix for computing bottom stress
+! 03.11.2017	mbj	new documentation for ireib
+! 05.12.2017	ggu	changed VERS_7_5_39
+! 26.04.2018	ggu	area code adjusted for mpi
+! 11.05.2018	ggu	changed VERS_7_5_47
+! 14.02.2019	ggu	changed VERS_7_5_56
+! 16.02.2019	ggu	changed VERS_7_5_60
+! 12.03.2019	mbj	new friction ireib=10
+! 05.03.2020	ggu	documentation upgraded
+! 02.04.2022	ggu	revisited for mpi, actual chezy now at position 0
+! 02.04.2022	ggu	adjust_chezy() adjusted for multi-domain
+! 12.04.2022	ggu	global bdebug and iczunit variable for debugging
+! 22.03.2023	ggu	relax error conditions for nodes not in same domain
+! 03.05.2023	ggu	avoid out of bound error in ckarea()
+!
+!***********************************************************
+!***********************************************************
+!***********************************************************
 
 !==================================================================
         module chezy
@@ -142,108 +142,108 @@ c***********************************************************
         end module chezy
 !==================================================================
 
-c
-c-------------------------------------------------------------------
-c
-c DOCS  START   P_friction
-c
-c DOCS  FRICTION		Bottom friction
-c
-c The friction term in the momentum equations can be written as
-c $Ru$ and $Rv$ where $R$ is the variable friction coefficient and
-c $u,v$ are the velocities in $x,y$ direction respectively.
-c The form of $R$ can be specified in various ways. The value of 
-c |ireib| is choosing between the formulations. In the parameter
-c input file a value $\lambda$ is specified that is used in 
-c the formulas below. In a 2D simulation the Strickler (2) or the Chezy (3)
-c formulation is the preferred option, while for a 3D simulation is is
-c recommended to use the drag coefficient (5) or the roughness length
-c formulation (6).
-c
-c |ireib|	Type of friction used (default 0):
-c		\begin{description}
-c		\item[0] No friction used
-c		\item[1] $R=\lambda$ is constant
-c		\item[2] $\lambda$ is the Strickler coefficient.
-c			 In this formulation $R$ is written as
-c			 $R = \frac{g}{C^2} \frac{\vert u \vert}{H}$
-c			 with $C=k_s H^{1/6}$ and $\lambda=k_s$ is
-c			 the Strickler coefficient. In the above
-c			 formula $g$ is the gravitational acceleration,
-c			 $\vert u \vert$ the modulus of the current velocity
-c			 and $H$ the total water depth.
-c		\item[3] $\lambda$ is the Chezy coefficient.
-c			 In this formulation $R$ is written as
-c			 $R = \frac{g}{C^2} \frac{\vert u \vert}{H}$
-c			 and $\lambda=C$ is the Chezy coefficient.
-c		\item[4] $R=\lambda/H$ with $H$ the total water depth. 
-c			 This corresponds to a linear bottom friction.
-c		\item[5] $\lambda$ is a constant drag coefficient and $R$ is
-c			 computed as $R=\lambda\frac{\vert u \vert}{H}$.
-c			 This corresponds to a quadratic bottom friction.
-c		\item[6] $\lambda$ is the bottom roughness length and $R$ is
-c			 computed through the formula
-c			 $R=C\frac{\vert u \vert}{H}$ with 
-c			 $C=\big(\frac{0.4}{log(\frac{\lambda+0.5H}
-c			 {\lambda})}\big)^2$
-c		\item[7] If $\lambda \geq 1$ it specifies the Strickler 
-c			 coefficient (|ireib=2|), otherwise it specifies a 
-c			 constant drag coefficient (|ireib=5|).
-c		\item[8] The bottom roughness length computed with
-c			 sedtrans (sediment transport module) is used
-c			 to compute the friction (similar to 6).
-c		\item[9] Experimental for fluid mud (no documentation).
-c		\item[10] Hybrid formulation switching between quadratic (5)
-c			  and linear (4) bottom friction. The velocity 
-c			  below which linear friction is used has to be 
-c			  given in |uvmin|.
-c		\end{description}
-c |czdef|	The default value for the friction parameter $\lambda$.
-c		Depending on the value of |ireib| the coefficient $\lambda$
-c		is representing linear friction, a constant drag coefficient,
-c		the Chezy or Strickler parameter, or the roughness length.
-c		(default 0)
-c |iczv|	Normally the bottom friction coefficient 
-c		(such as Strickler, Chezy, etc.)
-c		is evaluated at every time step (|iczv| = 1).
-c		If for some reason this behavior is not desirable,
-c		|iczv| = 0 evaluates this value only before the
-c		first time step, keeping it constant for the
-c		rest of the simulation. Please note that this is
-c		only relevant if you have given more than one bottom
-c		friction value (inflow/outflow) for an area. The
-c		final value of $R$ is computed at every time step
-c		anyway. (default 1)
-c |uvmin|	Critical velocity for |ireib|=10 below which bottom friction
-c		will be used as linear. (Default 0.2)
-c
-c The value of $\lambda$ may be specified for the whole basin through
-c the value of |czdef|. For more control over the friction parameter
-c it can be also specified in section |area| where the friction
-c parameter depending on the type of the element may be varied. Please
-c see the paragraph on section |area| for more information.
-c
-c DOCS  END
-c
-c next are experimental settings
-c
-c		\item[8] As ireib = 6 but using a bottom roughness length 
-c			computed by Sedtrans
-c		\item[9] As ireib = 6 but using a bottom roughness length 
-c			computed by the fluid mud module
-c
-c-------------------------------------------------------------------
-c
-c***********************************************************
+!
+!-------------------------------------------------------------------
+!
+! DOCS  START   P_friction
+!
+! DOCS  FRICTION		Bottom friction
+!
+! The friction term in the momentum equations can be written as
+! $Ru$ and $Rv$ where $R$ is the variable friction coefficient and
+! $u,v$ are the velocities in $x,y$ direction respectively.
+! The form of $R$ can be specified in various ways. The value of 
+! |ireib| is choosing between the formulations. In the parameter
+! input file a value $\lambda$ is specified that is used in 
+! the formulas below. In a 2D simulation the Strickler (2) or the Chezy (3)
+! formulation is the preferred option, while for a 3D simulation is is
+! recommended to use the drag coefficient (5) or the roughness length
+! formulation (6).
+!
+! |ireib|	Type of friction used (default 0):
+!		\begin{description}
+!		\item[0] No friction used
+!		\item[1] $R=\lambda$ is constant
+!		\item[2] $\lambda$ is the Strickler coefficient.
+!			 In this formulation $R$ is written as
+!			 $R = \frac{g}{C^2} \frac{\vert u \vert}{H}$
+!			 with $C=k_s H^{1/6}$ and $\lambda=k_s$ is
+!			 the Strickler coefficient. In the above
+!			 formula $g$ is the gravitational acceleration,
+!			 $\vert u \vert$ the modulus of the current velocity
+!			 and $H$ the total water depth.
+!		\item[3] $\lambda$ is the Chezy coefficient.
+!			 In this formulation $R$ is written as
+!			 $R = \frac{g}{C^2} \frac{\vert u \vert}{H}$
+!			 and $\lambda=C$ is the Chezy coefficient.
+!		\item[4] $R=\lambda/H$ with $H$ the total water depth. 
+!			 This corresponds to a linear bottom friction.
+!		\item[5] $\lambda$ is a constant drag coefficient and $R$ is
+!			 computed as $R=\lambda\frac{\vert u \vert}{H}$.
+!			 This corresponds to a quadratic bottom friction.
+!		\item[6] $\lambda$ is the bottom roughness length and $R$ is
+!			 computed through the formula
+!			 $R=C\frac{\vert u \vert}{H}$ with 
+!			 $C=\big(\frac{0.4}{log(\frac{\lambda+0.5H}
+!			 {\lambda})}\big)^2$
+!		\item[7] If $\lambda \geq 1$ it specifies the Strickler 
+!			 coefficient (|ireib=2|), otherwise it specifies a 
+!			 constant drag coefficient (|ireib=5|).
+!		\item[8] The bottom roughness length computed with
+!			 sedtrans (sediment transport module) is used
+!			 to compute the friction (similar to 6).
+!		\item[9] Experimental for fluid mud (no documentation).
+!		\item[10] Hybrid formulation switching between quadratic (5)
+!			  and linear (4) bottom friction. The velocity 
+!			  below which linear friction is used has to be 
+!			  given in |uvmin|.
+!		\end{description}
+! |czdef|	The default value for the friction parameter $\lambda$.
+!		Depending on the value of |ireib| the coefficient $\lambda$
+!		is representing linear friction, a constant drag coefficient,
+!		the Chezy or Strickler parameter, or the roughness length.
+!		(default 0)
+! |iczv|	Normally the bottom friction coefficient 
+!		(such as Strickler, Chezy, etc.)
+!		is evaluated at every time step (|iczv| = 1).
+!		If for some reason this behavior is not desirable,
+!		|iczv| = 0 evaluates this value only before the
+!		first time step, keeping it constant for the
+!		rest of the simulation. Please note that this is
+!		only relevant if you have given more than one bottom
+!		friction value (inflow/outflow) for an area. The
+!		final value of $R$ is computed at every time step
+!		anyway. (default 1)
+! |uvmin|	Critical velocity for |ireib|=10 below which bottom friction
+!		will be used as linear. (Default 0.2)
+!
+! The value of $\lambda$ may be specified for the whole basin through
+! the value of |czdef|. For more control over the friction parameter
+! it can be also specified in section |area| where the friction
+! parameter depending on the type of the element may be varied. Please
+! see the paragraph on section |area| for more information.
+!
+! DOCS  END
+!
+! next are experimental settings
+!
+!		\item[8] As ireib = 6 but using a bottom roughness length 
+!			computed by Sedtrans
+!		\item[9] As ireib = 6 but using a bottom roughness length 
+!			computed by the fluid mud module
+!
+!-------------------------------------------------------------------
+!
+!***********************************************************
 
 	subroutine bottom_friction
 
-c computes bottom friction
-c
-c rfric is given value (in czv)
-c rcd is drag coefficient ( tau = rho * rcd * u**2 )
-c
-c for some formulations no rcd might exists
+! computes bottom friction
+!
+! rfric is given value (in czv)
+! rcd is drag coefficient ( tau = rho * rcd * u**2 )
+!
+! for some formulations no rcd might exists
 
 	use mod_fluidmud
 	use mod_layer_thickness
@@ -269,24 +269,24 @@ c for some formulations no rcd might exists
 	real getpar,cdf
 	real uvmin
 
-c-------------------------------------------------------------------
-c get variables
-c-------------------------------------------------------------------
+!-------------------------------------------------------------------
+! get variables
+!-------------------------------------------------------------------
 
 	hzoff = getpar('hzoff')
 	ireib = nint(getpar('ireib'))
 	uvmin = getpar('uvmin')
 	rho0 = rowass
 
-c-------------------------------------------------------------------
-c loop on elements
-c-------------------------------------------------------------------
+!-------------------------------------------------------------------
+! loop on elements
+!-------------------------------------------------------------------
 
 	do ie=1,nel
 
-c         ----------------------------------------------------------
-c	  get transport in layer
-c         ----------------------------------------------------------
+!         ----------------------------------------------------------
+!	  get transport in layer
+!         ----------------------------------------------------------
 
 	  lmax = ilhv(ie)
 
@@ -294,22 +294,22 @@ c         ----------------------------------------------------------
           vso = vtlov(lmax,ie)
 	  uv = sqrt(uso*uso+vso*vso)
 
-c         ----------------------------------------------------------
-c	  set total depth
-c         ----------------------------------------------------------
+!         ----------------------------------------------------------
+!	  set total depth
+!         ----------------------------------------------------------
 
 	  hzg = hdeov(lmax,ie)
           if( hzg .lt. hzoff ) hzg = hzoff
 
-c         ----------------------------------------------------------
-c	  get friction parameter
-c         ----------------------------------------------------------
+!         ----------------------------------------------------------
+!	  get friction parameter
+!         ----------------------------------------------------------
 
 	  rfric = czv(ie)
 
-c         ----------------------------------------------------------
-c	  compute friction
-c         ----------------------------------------------------------
+!         ----------------------------------------------------------
+!	  compute friction
+!         ----------------------------------------------------------
 
 	  if(ireib.eq.0) then
 		rr = 0.
@@ -392,17 +392,17 @@ c         ----------------------------------------------------------
 
 	end do
 
-c-------------------------------------------------------------------
-c end of routine
-c-------------------------------------------------------------------
+!-------------------------------------------------------------------
+! end of routine
+!-------------------------------------------------------------------
 
 	end
 
-c***********************************************************
+!***********************************************************
 
         function cdf(h,z0)
 
-c computes cd from h and z0
+! computes cd from h and z0
 
         implicit none
 
@@ -419,11 +419,11 @@ c computes cd from h and z0
 
         end
 
-c***********************************************************
+!***********************************************************
 
 	subroutine init_nodal_area_code
 
-c interpolates area codes from elements to nodes (min or max)
+! interpolates area codes from elements to nodes (min or max)
 
 	use basin
 	use shympi
@@ -469,7 +469,7 @@ c interpolates area codes from elements to nodes (min or max)
 
 	end
 
-c***********************************************************
+!***********************************************************
 
 	subroutine get_nodal_area_code(k,ncode)
 
@@ -484,11 +484,11 @@ c***********************************************************
 
 	end
 
-c***********************************************************
-c***********************************************************
-c***********************************************************
-c***********************************************************
-c***********************************************************
+!***********************************************************
+!***********************************************************
+!***********************************************************
+!***********************************************************
+!***********************************************************
 
 	subroutine n_chezy_values(nareas)
 
@@ -502,7 +502,7 @@ c***********************************************************
 
 	end
 
-c***********************************************************
+!***********************************************************
 
 	subroutine get_chezy_values(iar,valin,valout)
 
@@ -524,7 +524,7 @@ c***********************************************************
 	stop 'error stop get_chezy_values'
 	end
 
-c***********************************************************
+!***********************************************************
 
 	subroutine set_chezy_values(iar,valin,valout)
 
@@ -546,15 +546,15 @@ c***********************************************************
 	stop 'error stop set_chezy_values'
 	end
 
-c***********************************************************
-c***********************************************************
-c***********************************************************
-c***********************************************************
-c***********************************************************
+!***********************************************************
+!***********************************************************
+!***********************************************************
+!***********************************************************
+!***********************************************************
 
 	subroutine set_chezy
 
-c initializes chezy arrays
+! initializes chezy arrays
 
 	use mod_diff_visc_fric
 	use basin
@@ -577,11 +577,11 @@ c initializes chezy arrays
 
 	end
 
-c***********************************************************
+!***********************************************************
 
 	subroutine init_chezy
 
-c initializes chezy arrays
+! initializes chezy arrays
 
 	use chezy
 
@@ -602,11 +602,11 @@ c initializes chezy arrays
 
 	end
 
-c***********************************************************
+!***********************************************************
 
 	subroutine adjust_chezy
 
-c adjusts chezy arrays
+! adjusts chezy arrays
 
 	use mod_hydro_print
 	use basin
@@ -713,11 +713,11 @@ c adjusts chezy arrays
 
 	end
 
-c***********************************************************
+!***********************************************************
 
 	subroutine print_chezy
 
-c prints chezy arrays
+! prints chezy arrays
 
 	use chezy
 	use shympi
@@ -739,11 +739,11 @@ c prints chezy arrays
 
 	end
 
-c***********************************************************
+!***********************************************************
 
 	subroutine check_chezy
 
-c checks chezy arrays
+! checks chezy arrays
 
 	use basin
 	use chezy
@@ -787,15 +787,15 @@ c checks chezy arrays
 	stop 'error stop check_chezy: error in values (2)'
 	end
 
-c***********************************************************
-c***********************************************************
-c***********************************************************
-c***********************************************************
-c***********************************************************
+!***********************************************************
+!***********************************************************
+!***********************************************************
+!***********************************************************
+!***********************************************************
 
 	subroutine rdarea
 
-c reads area section (chezy) from STR file
+! reads area section (chezy) from STR file
 
 	use nls
 	use chezy
@@ -816,11 +816,11 @@ c reads area section (chezy) from STR file
 
 	end
 
-c***********************************************************
+!***********************************************************
 
 	subroutine parse_area
 
-c parses area section (chezy) from STR file
+! parses area section (chezy) from STR file
 
 	use chezy
 
@@ -872,11 +872,11 @@ c parses area section (chezy) from STR file
         stop 'error stop : rdarea'
 	end
 
-c***********************************************************
+!***********************************************************
 
 	subroutine ckarea
 
-c checks values for chezy parameters and sets up czdum
+! checks values for chezy parameters and sets up czdum
 
 	use basin
 	use chezy
@@ -895,7 +895,7 @@ c checks values for chezy parameters and sets up czdum
 
 	bstop = .false.
 
-c get default values
+! get default values
 
         ireib=nint(getpar('ireib'))
 	!if( ireib .le. 0 ) return
@@ -904,7 +904,7 @@ c get default values
 
         czdef=getpar('czdef')
 
-c compute maximum value of area code
+! compute maximum value of area code
 
 	nczmax = 0
 	do i=1,nel
@@ -912,13 +912,13 @@ c compute maximum value of area code
         end do
 	nczmax = shympi_max(nczmax)
 
-c allocate and parse arrays
+! allocate and parse arrays
 
 	call chezy_init(nczmax)
 	call parse_area
 	call shympi_syncronize
 
-c check read in values
+! check read in values
 
         do i=0,nczdum
 
@@ -969,8 +969,8 @@ c check read in values
 	 if( ke1 == 0 .and. ke2 == 0 ) then
 	   !no external nodes given
 	   if( busedirection ) then
-             write(6,*) 'section AREA : secondary chezy given ' //
-     +			' but no nodes specified'
+             write(6,*) 'section AREA : secondary chezy given ' //      &
+     &			' but no nodes specified'
              bstop=.true.
 	   end if
 	 else if( ke1 > 0 .and. ke2 > 0 ) then
@@ -984,8 +984,7 @@ c check read in values
                bstop=.true.
 	     end if
 	   else
-             write(6,*) 'section AREA : nodes in different domains '
-     +						,ke1,ke2
+             write(6,*) 'section AREA : nodes in different domains ',ke1,ke2
 	     id1 = -1
 	     if( ki1 > 0 ) id1 = id_node(ki1)
 	     id2 = -1
@@ -1020,11 +1019,11 @@ c check read in values
 
 	end
 
-c***********************************************************
+!***********************************************************
 
 	subroutine prarea
 
-c prints chezy values to log file
+! prints chezy values to log file
 
 	use chezy
 	use shympi
@@ -1048,11 +1047,11 @@ c prints chezy values to log file
 
         do i=ianf,nczdum
             if(czdum(2,i).ne.0.) then			!with two chezy
-                write(iunit,1008) i,czdum(0,i)
-     +				,czdum(1,i),czdum(2,i)
-     +                          ,ipext(nint(czdum(3,i)))
-     +                          ,ipext(nint(czdum(4,i)))
-     +                          ,nint(czdum(6,i))
+                write(iunit,1008) i,czdum(0,i)              &
+     &				,czdum(1,i),czdum(2,i)                    &
+     &                          ,ipext(nint(czdum(3,i)))    &
+     &                          ,ipext(nint(czdum(4,i)))    &
+     &                          ,nint(czdum(6,i))
             else					!just one chezy
                 write(iunit,1008) i,czdum(1,i)
             end if
@@ -1065,11 +1064,11 @@ c prints chezy values to log file
  1008   format(i5,3e12.4,3i7)
 	end
 
-c***********************************************************
+!***********************************************************
 
 	subroutine tsarea
 
-c prints test message to terminal
+! prints test message to terminal
 
 	use chezy
 
@@ -1085,11 +1084,11 @@ c prints test message to terminal
 
 	end
 
-c***********************************************************
+!***********************************************************
 
 	subroutine inarea
 
-c initializes chezy values
+! initializes chezy values
 
 	use chezy
 	use shympi
@@ -1100,5 +1099,5 @@ c initializes chezy values
 
 	end
 
-c***********************************************************
+!***********************************************************
 
