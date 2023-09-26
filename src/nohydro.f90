@@ -25,38 +25,38 @@
 !
 !--------------------------------------------------------------------------
 
-c routines for non hydrostatic terms
-c
-c revision log :
-c
-c 18.02.1991	ggu	(from scratch)
-c 04.06.1991	ggu	(c=(1) : friction term has been corrected)
-c 01.10.1992	ggu	(staggered FE - completely restructured)
-c 12.01.2001	ggu	solve for znv and not level difference (ZNEW)
-c 10.05.2013	dbf	written from scratch
-c 31.05.2013	dbf	written from scratch
-c 12.09.2013	ggu	changed VERS_6_1_67
-c 18.06.2014	ggu	changed VERS_6_1_77
-c 19.12.2014	ggu	changed VERS_7_0_10
-c 23.12.2014	ggu	changed VERS_7_0_11
-c 19.01.2015	ggu	changed VERS_7_1_3
-c 30.04.2015	ggu	changed VERS_7_1_9
-c 14.06.2016	ggu	changed VERS_7_5_14
-c 17.06.2016	ggu&wmk	adapted to new version
-c 18.12.2018	dbf&wmk	adapted to last version and inserted in develop
-c 14.02.2019	ggu	changed VERS_7_5_56
-c 16.02.2019	ggu	changed VERS_7_5_60
-c 13.03.2019	ggu	changed VERS_7_5_61
-c 21.05.2019	ggu	changed VERS_7_5_62
-c 13.03.2021	clr&ggu	adapted for petsc solver
-c 23.04.2021    clr     alternative implementation to replace pragma directives
-c 20.03.2022	ggu	upgraded to da_out
-c
-c********************************************************************
+! routines for non hydrostatic terms
+!
+! revision log :
+!
+! 18.02.1991	ggu	(from scratch)
+! 04.06.1991	ggu	(c=(1) : friction term has been corrected)
+! 01.10.1992	ggu	(staggered FE - completely restructured)
+! 12.01.2001	ggu	solve for znv and not level difference (ZNEW)
+! 10.05.2013	dbf	written from scratch
+! 31.05.2013	dbf	written from scratch
+! 12.09.2013	ggu	changed VERS_6_1_67
+! 18.06.2014	ggu	changed VERS_6_1_77
+! 19.12.2014	ggu	changed VERS_7_0_10
+! 23.12.2014	ggu	changed VERS_7_0_11
+! 19.01.2015	ggu	changed VERS_7_1_3
+! 30.04.2015	ggu	changed VERS_7_1_9
+! 14.06.2016	ggu	changed VERS_7_5_14
+! 17.06.2016	ggu&wmk	adapted to new version
+! 18.12.2018	dbf&wmk	adapted to last version and inserted in develop
+! 14.02.2019	ggu	changed VERS_7_5_56
+! 16.02.2019	ggu	changed VERS_7_5_60
+! 13.03.2019	ggu	changed VERS_7_5_61
+! 21.05.2019	ggu	changed VERS_7_5_62
+! 13.03.2021	clr&ggu	adapted for petsc solver
+! 23.04.2021    clr     alternative implementation to replace pragma directives
+! 20.03.2022	ggu	upgraded to da_out
+!
+!********************************************************************
 
 	subroutine nonhydro_init
 
-c initializes non hydrostatic pressure terms
+! initializes non hydrostatic pressure terms
 
         use mod_system !DWNH
         use mod_nohyd !DWNH
@@ -76,9 +76,9 @@ c initializes non hydrostatic pressure terms
 	!  stop 'error stop nonhydro_init: cannot run non-hydrostatic'
 	!end if
 
-c       --------------------------------------------
-c       initialize variables
-c       --------------------------------------------
+!       --------------------------------------------
+!       initialize variables
+!       --------------------------------------------
 
         bnohydro = ( inohyd /= 0 ) !DWNH
 
@@ -90,7 +90,7 @@ c       --------------------------------------------
 
 	end
 
-c********************************************************************
+!********************************************************************
 
 	subroutine nonhydro_get_flag(bnohyd)
 
@@ -104,11 +104,11 @@ c********************************************************************
 
 	end
 
-c********************************************************************
+!********************************************************************
 
 	subroutine nonhydro_adjust
 
-c integrates non hydrostatic adjustment to equations
+! integrates non hydrostatic adjustment to equations
 
         use mod_hydro
         use mod_nohyd
@@ -119,29 +119,29 @@ c integrates non hydrostatic adjustment to equations
 
         implicit none
 
-c local
+! local
         integer k,l,lmax
         integer iw,inhadj
         real aq
         real qvmax
         real getpar
 
-c        non-hydrostatic semi-implicit weight
+!        non-hydrostatic semi-implicit weight
         aq = getpar('aqpar')
        
-c        parameter for how to adjust u,v,eta after computation of NH pressure
+!        parameter for how to adjust u,v,eta after computation of NH pressure
         inhadj = nint(getpar('inhadj'))
 
-c        solve for NH pressure q
+!        solve for NH pressure q
         call system_init
         call nonhydro_prepare_matrix
 	call system_solve_3d(nkn,nlvdi,nlv,qpnv)
 	!call system_adjust_3d(nkn,nlvdi,nlv,qpnv)
 	call system_get_3d(nkn,nlvdi,nlv,qpnv) !DWNH
 	
-c        Compute NH u,v,eta
+!        Compute NH u,v,eta
         if (inhadj .eq. 1) then
-c          recompute u,v,eta using updated NH pressure
+!          recompute u,v,eta using updated NH pressure
 	  do 
 	    call hydro_transports
 	    call setnod		
@@ -159,7 +159,7 @@ c          recompute u,v,eta using updated NH pressure
 	  end do
 	  call hydro_transports_final
         else
-c          make NH correction to u,v,eta using updated NH pressure
+!          make NH correction to u,v,eta using updated NH pressure
           call nonhydro_correct_uveta
         endif
 
@@ -169,7 +169,7 @@ c          make NH correction to u,v,eta using updated NH pressure
   	call make_new_depth 
 	call check_volume
 
-c        Finally adjust NH pressure q
+!        Finally adjust NH pressure q
         qvmax=0.0
         do k = 1,nkn
           lmax = ilhkv(k)
@@ -182,11 +182,11 @@ c        Finally adjust NH pressure q
 
 	end
 
-c********************************************************************
+!********************************************************************
 
 	subroutine nonhydro_copy
 
-c copies new values of q to old time step
+! copies new values of q to old time step
 
         use mod_hydro
         use mod_nohyd
@@ -200,11 +200,11 @@ c copies new values of q to old time step
         
         end
 
-c********************************************************************
+!********************************************************************
 
 	subroutine sp256wnh 
 
-c solves for w using momentum equation
+! solves for w using momentum equation
 
         use mod_hydro
         use mod_nohyd
@@ -221,11 +221,11 @@ c solves for w using momentum equation
 
         implicit none
 
-c parameters
+! parameters
         include 'pkonst.h'
         include 'femtime.h'
 
-c local
+! local
 	logical blast
         integer k,ie,ii,l
         integer ilevel,lmax
@@ -257,39 +257,39 @@ c local
         real hdn,hdpn,hdo,hdpo
         real getpar
 
-c--------------------------------------------------------
-c initialize parameters	
-c--------------------------------------------------------
+!--------------------------------------------------------
+! initialize parameters	
+!--------------------------------------------------------
 
         call get_timestep(dt)
 
-c        non-hydrostatic semi-implicit weight       
+!        non-hydrostatic semi-implicit weight       
         aq = getpar('aqpar')
         aqt = 1. - aq
 	az = getpar('azpar')
 	azt = 1. - az
 
-c        horizontal viscosity parameter
+!        horizontal viscosity parameter
         ahpar = getpar('ahpar')
 
-c        horizontal advection method (upwind flux scheme/averaging)
+!        horizontal advection method (upwind flux scheme/averaging)
         inhflx = nint(getpar('inhflx'))
 
-c        vertical advection method (upwind/finite diff)
+!        vertical advection method (upwind/finite diff)
         ivwadv = nint(getpar('ivwadv'))
 
-c--------------------------------------------------------
-c initialize arrays	
-c--------------------------------------------------------
+!--------------------------------------------------------
+! initialize arrays	
+!--------------------------------------------------------
 
         wrhs   = 0. 
         wdiagt = 0.
         wdiag  = 0.
         wdiagb = 0.
 
-c----------------------------------------------------------
-c loop over elements to compute contributions 
-c----------------------------------------------------------
+!----------------------------------------------------------
+! loop over elements to compute contributions 
+!----------------------------------------------------------
         do ie=1,nel
           ilevel=ilhv(ie)
           do ii=1,3
@@ -302,9 +302,9 @@ c----------------------------------------------------------
           aj=ev(10,ie) !area of triangle / 12
           aj4=4.*aj
 
-c         --------------------------------------------------
-c 	  set vertical velocities in element
-c         --------------------------------------------------
+!         --------------------------------------------------
+! 	  set vertical velocities in element
+!         --------------------------------------------------
 	
 	  do l=0,ilevel
 	    do ii=1,3
@@ -313,14 +313,14 @@ c         --------------------------------------------------
 	    end do
 	  end do
 
-c         --------------------------------------------------
-c 	  loop over levels
-c         --------------------------------------------------
+!         --------------------------------------------------
+! 	  loop over levels
+!         --------------------------------------------------
           do l=1,ilevel
 
 	    blast = l .eq. ilevel
 
-c            Set layer thicknesses, transport and viscosity values
+!            Set layer thicknesses, transport and viscosity values
 	    hdn = hdenv(l,ie)
             hdo = hdeov(l,ie)
             utn=utlnv(l,ie)
@@ -347,7 +347,7 @@ c            Set layer thicknesses, transport and viscosity values
             dzn = 0.5 * (hdn+hdpn)
             dzo = 0.5 * (hdo+hdpo)
 
-c            semi-implicit (weighted) transport
+!            semi-implicit (weighted) transport
             us=0.5*(az*(utn+ubn)/dzn+azt*(uto+ubo)/dzo)
             vs=0.5*(az*(vtn+vbn)/dzn+azt*(vto+vbo)/dzo)
             wb = 0.0
@@ -367,9 +367,9 @@ c            semi-implicit (weighted) transport
 	    end do
 
             if (inhflx .eq. 1) then
-c	      ----------------------------------------
-c	      compute horizontal fluxes on top and bottom interface
-c	      ----------------------------------------
+!	      ----------------------------------------
+!	      compute horizontal fluxes on top and bottom interface
+!	      ----------------------------------------
               if(itot.eq.1) then
 	        do ii=1,3
 	          fl(ii) = f(ii) * wl(l,isum)
@@ -390,9 +390,9 @@ c	      ----------------------------------------
             do ii=1,3
 
               k=kn(ii)
-c	      ----------------------------------------
-c	      explicit non-hydrostatic pressure
-c	      ----------------------------------------
+!	      ----------------------------------------
+!	      explicit non-hydrostatic pressure
+!	      ----------------------------------------
 
 	      if( blast ) then
 		wq = 0.0
@@ -400,14 +400,14 @@ c	      ----------------------------------------
 	        wq = - aqt * qdistv(k) * (qpov(l,k) - qpov(l+1,k))/dzo
 	      end if
 
-c             ----------------------------------------
-c             vertical advection term
-c             ----------------------------------------
+!             ----------------------------------------
+!             vertical advection term
+!             ----------------------------------------
 
 	      wadvv = 0.
               if (ivwadv .ge. 1) then
                 if (ivwadv .eq. 1) then
-c                  vertical advection computed using upwind scheme
+!                  vertical advection computed using upwind scheme
                   if (blast) then
                     wadvv = 0.0
                   else
@@ -425,7 +425,7 @@ c                  vertical advection computed using upwind scheme
 	            end if
                   end if
                 else         
-c                  vertical advection computed using finite differencing
+!                  vertical advection computed using finite differencing
                   if (blast) then
                     wadvv = 0.0
                   else
@@ -434,14 +434,14 @@ c                  vertical advection computed using finite differencing
                 end if
               end if
 
-c	      ----------------------------------------
-c	      horizontal diffusion
-c	      ----------------------------------------
+!	      ----------------------------------------
+!	      horizontal diffusion
+!	      ----------------------------------------
 	      wdifh = - 3. * anu * (  wb * b(ii) + wc * c(ii) )
 
-c	      ----------------------------------------
-c	      horizontal advection
-c	      ----------------------------------------
+!	      ----------------------------------------
+!	      horizontal advection
+!	      ----------------------------------------
 
               if (inhflx .eq. 1) then
 	        wadvh = - 3. * fl(ii)
@@ -449,43 +449,43 @@ c	      ----------------------------------------
 	        wadvh = - (b(ii) * us + c(ii) * vs) * wsum 
               end if
 
-c	      ----------------------------------------
-c	      complete explicit contribution
-c	      ----------------------------------------
+!	      ----------------------------------------
+!	      complete explicit contribution
+!	      ----------------------------------------
 
 	      wr = dzn * ( wlov(l,k) + dt * (wq + wdifh - wadvh - wadvv))
 
-c             ----------------------------------------
-c             define tri-diagonal coefficients
-c             ----------------------------------------
+!             ----------------------------------------
+!             define tri-diagonal coefficients
+!             ----------------------------------------
 	      wrhs(l,k)   = wrhs(l,k) + aj4  * wr
 
               if (blast) then
-c                set w to zero on bottom layer 
+!                set w to zero on bottom layer 
        	        wdiag(l,k)  = 1.0
 	        wdiagt(l,k) = 0.0
 	        wdiagb(l,k) = 0.0
                 wrhs(l,k) = 0.0
               else
                 rnu=visv(l,k)
-		wdiag(l,k)  = wdiag(l,k) + dzn * aj4 + dt*aj4*rnu
-     +                       * ( 1./hdn + 1./hdpn )
+		wdiag(l,k)  = wdiag(l,k) + dzn * aj4 + dt*aj4*rnu &
+     &                       * ( 1./hdn + 1./hdpn )
 	        wdiagt(l,k) = wdiagt(l,k) - dt*aj4*rnu/hdn 
 	        wdiagb(l,k) = wdiagb(l,k) - dt*aj4*rnu/hdpn
               end if
-c              output to check contributions 
-c              if (k .eq. 1801) then
-c                if (l.eq.1.or.l.eq.26.or.l.eq.51.or.l.eq.76) then
-c                  write(688,*) t_act,l,wrhs(l,k),wq,wdifh,wadvh,wadvv
-c                end if
-c              end if
+!              output to check contributions 
+!              if (k .eq. 1801) then
+!                if (l.eq.1.or.l.eq.26.or.l.eq.51.or.l.eq.76) then
+!                  write(688,*) t_act,l,wrhs(l,k),wq,wdifh,wadvh,wadvv
+!                end if
+!              end if
             end do
           end do
         end do
 
-c-----------------------------------------------------------
-c solve tri-diagonal system
-c-----------------------------------------------------------
+!-----------------------------------------------------------
+! solve tri-diagonal system
+!-----------------------------------------------------------
         wmax=0.0
         wvmax=0.0
 	do k=1,nkn
@@ -497,7 +497,7 @@ c-----------------------------------------------------------
               wcen(l)=wdiag(l,k)
               wlrhs(l)=wrhs(l,k)
             enddo
-c            call tridiag(wtop,wcen,wbot,wlrhs,wsol,lmax-1,werr)
+!            call tridiag(wtop,wcen,wbot,wlrhs,wsol,lmax-1,werr)
 	    call tridag(wtop,wcen,wbot,wlrhs,wsol,wgam,lmax-1)
             do l=1,lmax-1
               wlnv(l,k)=wsol(l)
@@ -507,25 +507,25 @@ c            call tridiag(wtop,wcen,wbot,wlrhs,wsol,lmax-1,werr)
 	    wlnv(1,k) = 0.0 
 	    werr = 0.0
 	  endif
-c          wmax=max(werr,wmax)
-c	  wlnv(0,k) = ( znv(k) - zov(k) ) / dt
+!          wmax=max(werr,wmax)
+!	  wlnv(0,k) = ( znv(k) - zov(k) ) / dt
    	  wlnv(0,k) = 0.0
           wlnv(lmax,k) = 0.0                    
         end do
 
         write(6,*) 'wmax=',wvmax
 
-c--------------------------------------------------------
-c end of routine
-c--------------------------------------------------------
+!--------------------------------------------------------
+! end of routine
+!--------------------------------------------------------
 
 	end
 
-c********************************************************************
+!********************************************************************
 
 	subroutine nonhydro_set_explicit 
 
-c adds explicit part of non hydrostatic pressure to explict terms
+! adds explicit part of non hydrostatic pressure to explict terms
 
         use mod_hydro
         use mod_nohyd
@@ -540,7 +540,7 @@ c adds explicit part of non hydrostatic pressure to explict terms
         include 'pkonst.h'
         include 'femtime.h'
 
-c local
+! local
         integer k,l,ie,ii,lmax
         real hhio,hhin
         real qxonh,qyonh ! non hydrostatic pressure gradient old time
@@ -550,7 +550,7 @@ c local
         real aq,aqt
         real getpar
 
-c        non-hydrostatic semi-implicit weight       
+!        non-hydrostatic semi-implicit weight       
         aq = getpar('aqpar')
         aqt = 1. - aq
 
@@ -575,25 +575,25 @@ c        non-hydrostatic semi-implicit weight
             hhio = hdeov(l,ie)  
             hhin = hdenv(l,ie)
 
-            fxv(l,ie) = fxv(l,ie) + aqt * hhio * qxonh 
-     +                            + aq  * hhin * qxnnh 
-            fyv(l,ie) = fyv(l,ie) + aqt * hhio * qyonh
-     +                            + aq  * hhin * qynnh 
+            fxv(l,ie) = fxv(l,ie) + aqt * hhio * qxonh  &
+     &                            + aq  * hhin * qxnnh 
+            fyv(l,ie) = fyv(l,ie) + aqt * hhio * qyonh &
+     &                            + aq  * hhin * qynnh 
 
           end do
         end do
 
 	end 
 
-c********************************************************************
+!********************************************************************
 
 	subroutine nonhydro_prepare_matrix
 
-c assembles linear system matrix
-c
-c vqv		flux boundary condition vector
-c
-c semi-implicit scheme for 3d model
+! assembles linear system matrix
+!
+! vqv		flux boundary condition vector
+!
+! semi-implicit scheme for 3d model
 
 	use mod_internal
 	use mod_depth
@@ -644,25 +644,25 @@ c semi-implicit scheme for 3d model
 
 	hldaux = 0.
 
-c        non-hydrostatic semi-implicit weights
+!        non-hydrostatic semi-implicit weights
         aq = getpar('aqpar')
         aqt= 1. - aq
 
-c        transport terms semi-implicit weights
+!        transport terms semi-implicit weights
 	az = getpar('azpar')
 	azt = 1. - az
 
         call get_timestep(dt)
 
-c-------------------------------------------------------------
-c loop over elements
-c-------------------------------------------------------------
+!-------------------------------------------------------------
+! loop over elements
+!-------------------------------------------------------------
 
 	do ie=1,nel
 
-c	  ------------------------------------------------------
-c	  initialize element values
-c	  ------------------------------------------------------
+!	  ------------------------------------------------------
+!	  initialize element values
+!	  ------------------------------------------------------
 	  hldaux(1:nlv)=hdenv(1:nlv,ie)
 	  aj=ev(10,ie)
           aj4=4.*aj
@@ -674,9 +674,9 @@ c	  ------------------------------------------------------
 	    c(i)=ev(i+6,ie)
 	  end do
 
-c	  ------------------------------------------------------
-c	  set element matrix and RHS
-c	  ------------------------------------------------------
+!	  ------------------------------------------------------
+!	  set element matrix and RHS
+!	  ------------------------------------------------------
 
 	  lmax = ilhv(ie)
 	  do l=1,lmax
@@ -718,9 +718,9 @@ c	  ------------------------------------------------------
 
 	    end do
 
-c	    ------------------------------------------------------
-c	    boundary conditions
-c	    ------------------------------------------------------
+!	    ------------------------------------------------------
+!	    boundary conditions
+!	    ------------------------------------------------------
 
             if (l == 1) then
   	      do i=1,3
@@ -730,9 +730,9 @@ c	    ------------------------------------------------------
 	      end do
 	    end if
 
-c	    ------------------------------------------------------
-c	    in hia(i,j),hik(i),i,j=1,3 is system
-c	    ------------------------------------------------------
+!	    ------------------------------------------------------
+!	    in hia(i,j),hik(i),i,j=1,3 is system
+!	    ------------------------------------------------------
 
 	    call system_assemble_3d(ie,l,nlv,kn,hia3d,hik)
 
@@ -740,25 +740,25 @@ c	    ------------------------------------------------------
 
 	end do
 
-c-------------------------------------------------------------
-c end of loop over elements
-c-------------------------------------------------------------
+!-------------------------------------------------------------
+! end of loop over elements
+!-------------------------------------------------------------
 
 	call system_adjust_matrix_3d	
 
-c-------------------------------------------------------------
-c end of routine
-c-------------------------------------------------------------
+!-------------------------------------------------------------
+! end of routine
+!-------------------------------------------------------------
 
 	end
 
-c********************************************************************
+!********************************************************************
 
         subroutine nonhydro_adjust_value
 
 	end
 
-c********************************************************************
+!********************************************************************
 
 	subroutine nonhydro_correct_uveta
 
@@ -775,7 +775,7 @@ c********************************************************************
 
         include 'pkonst.h'
 
-c local
+! local
         integer kn(3)
         integer ie,l,ilevel,ii,k,lmax
         real b(3),c(3)
@@ -784,28 +784,28 @@ c local
         real getpar
         real aq
 
-c        non-hydrostatic semi-implicit weight  
+!        non-hydrostatic semi-implicit weight  
         aq = getpar('aqpar')
 
         call get_timestep(dt)
 
-c        compute NH correction to znv
+!        compute NH correction to znv
         do k = 1,nkn
           zqaux=qdistv(k)*qpnv(1,k) / grav
           znv(k) = znv(k) + zqaux
         enddo
 
-c        compute NH correction to w
-c        do  k = 1,nkn
-c          lmax = ilhkv(k)
-c          do l=1,lmax-1
-c            dzcc = (hdknv(l+1,k)+hdknv(l,k))/2.
-c	    wlnv(l,k)=wlnv(l,k) - aq * dt * (qpnv(l,k)-qpnv(l+1,k))/dzcc
-c          enddo
-c          wlnv(0,k)=(znv(k)-zov(k))/dt
-c        enddo
+!        compute NH correction to w
+!        do  k = 1,nkn
+!          lmax = ilhkv(k)
+!          do l=1,lmax-1
+!            dzcc = (hdknv(l+1,k)+hdknv(l,k))/2.
+!	    wlnv(l,k)=wlnv(l,k) - aq * dt * (qpnv(l,k)-qpnv(l+1,k))/dzcc
+!          enddo
+!          wlnv(0,k)=(znv(k)-zov(k))/dt
+!        enddo
 
-c        compute NH correction to eta, u,v
+!        compute NH correction to eta, u,v
         do ie=1,nel
           do ii=1,3
             k=nen3v(ii,ie)
@@ -829,7 +829,7 @@ c        compute NH correction to eta, u,v
         
 	end
 
-c********************************************************************
+!********************************************************************
 
 	subroutine nh_handle_output(dtime)
 
@@ -844,9 +844,9 @@ c********************************************************************
 
 	real getpar
 
-c       --------------------------------------------
-c	initialize output files
-c	--------------------------------------------
+!       --------------------------------------------
+!	initialize output files
+!	--------------------------------------------
 
         if(icall.eq.0) then	!first time
 
@@ -859,23 +859,23 @@ c	--------------------------------------------
 
 	end if
 
-c       ----------------------------------------------------------
-c       write results to file
-c       ----------------------------------------------------------
+!       ----------------------------------------------------------
+!       write results to file
+!       ----------------------------------------------------------
 
 	call nh_write_output(dtime,da_out,iwvel,iqpnv)
 
-c       ----------------------------------------------------------
-c       end of routine
-c       ----------------------------------------------------------
+!       ----------------------------------------------------------
+!       end of routine
+!       ----------------------------------------------------------
 
 	end
 
-c********************************************************************
+!********************************************************************
 
 	subroutine nh_open_output(da_out,iwvel,iqpnv)
 	
-c opens output of w/q
+! opens output of w/q
 
 	use levels
 
@@ -902,11 +902,11 @@ c opens output of w/q
 
 	end
 
-c*******************************************************************	
+!*******************************************************************	
 
 	subroutine nh_write_output(dtime,da_out,iwvel,iqpnv)
 
-c writes output of wvel and qpnv
+! writes output of wvel and qpnv
 
 	use levels
 	use mod_hydro_vel
@@ -960,22 +960,22 @@ c writes output of wvel and qpnv
 
 	end
 
-c********************************************************************
+!********************************************************************
 
         subroutine qhdist(qdist)
 
-c makes distance array from open boundaries for NH pressure
-c
-c qdist is contained between 0 and 1
-c if nqdist (=d) is not given qdist = 1 (default)
-c otherwise the first d2=d/2 rows of nodes have qdist = 0
-c and then the next ones have qdist = i/d with i = d2+1, d2+d
-c the rest has again qdist = 1
-c
-c example: nqdist = d = 4,   d2 = d/2 = 2
-c
-c   row i:   1   2   3   4   5   6   7   8   ...
-c   qdist:   0   0  1/4 2/4 3/4  1   1   1   ...
+! makes distance array from open boundaries for NH pressure
+!
+! qdist is contained between 0 and 1
+! if nqdist (=d) is not given qdist = 1 (default)
+! otherwise the first d2=d/2 rows of nodes have qdist = 0
+! and then the next ones have qdist = i/d with i = d2+1, d2+d
+! the rest has again qdist = 1
+!
+! example: nqdist = d = 4,   d2 = d/2 = 2
+!
+!   row i:   1   2   3   4   5   6   7   8   ...
+!   qdist:   0   0  1/4 2/4 3/4  1   1   1   ...
 
 	use basin
 
@@ -983,7 +983,7 @@ c   qdist:   0   0  1/4 2/4 3/4  1   1   1   ...
 
         real qdist(nkn)
 
-c local variables
+! local variables
 
         integer idist(nkn)
 
@@ -996,9 +996,9 @@ c local variables
         integer nbnds,itybnd,nkbnds,kbnds
         real getpar
 
-c-----------------------------------------------------------------
-c get parameters
-c-----------------------------------------------------------------
+!-----------------------------------------------------------------
+! get parameters
+!-----------------------------------------------------------------
 
         do k=1,nkn
           qdist(k) = 1.
@@ -1007,9 +1007,9 @@ c-----------------------------------------------------------------
 
         nqdist = nint(getpar('nqdist'))		!global value
 
-c-----------------------------------------------------------------
-c gather open boundary nodes
-c-----------------------------------------------------------------
+!-----------------------------------------------------------------
+! gather open boundary nodes
+!-----------------------------------------------------------------
 
         n = 0
 
@@ -1031,24 +1031,24 @@ c-----------------------------------------------------------------
           end if
         end do
 
-c-----------------------------------------------------------------
-c make distance
-c-----------------------------------------------------------------
+!-----------------------------------------------------------------
+! make distance
+!-----------------------------------------------------------------
 
         write(6,*) 'Making distance qdist'
         call mkdist_new(nkn,idist,qdist)
 
-c-----------------------------------------------------------------
-c write dist (nos) file
-c-----------------------------------------------------------------
+!-----------------------------------------------------------------
+! write dist (nos) file
+!-----------------------------------------------------------------
  
 	!old call... please adjourn
         !call wrnos2d('dist','distance from boundary nodes',qdist)
 
-c-----------------------------------------------------------------
-c end of routine
-c-----------------------------------------------------------------
+!-----------------------------------------------------------------
+! end of routine
+!-----------------------------------------------------------------
 
         end
 
-c********************************************************************
+!********************************************************************

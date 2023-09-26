@@ -24,74 +24,74 @@
 !
 !--------------------------------------------------------------------------
 
-c utility routines for flux computations
-c
-c contents :
-c
-c subroutine flxscs(n,kflux,iflux,az,fluxes)	flux through sections
-c subroutine flxsec(n,kflux,iflux,az,fluxes)	flux through section
-c
-c subroutine flxini				initializes flux routines
-c subroutine flx_init(kfluxm,kflux,nsect,iflux)	sets up array iflux
-c subroutine flxinf(m,kflux,iflux)		sets up one info structure
-c function igtnsc(k1,k2)			gets number of internal section
-c
-c revision log :
-c
-c 09.05.2013	ggu	separated from subflxa.f
-c 14.05.2013	ggu	deleted error check between 2d and 3d computation
-c 13.06.2013	ggu	changed VERS_6_1_65
-c 19.01.2015	ggu	changed VERS_7_1_2
-c 19.01.2015	ggu	changed VERS_7_1_3
-c 10.07.2015	ggu	changed VERS_7_1_50
-c 17.07.2015	ggu	changed VERS_7_1_80
-c 20.07.2015	ggu	changed VERS_7_1_81
-c 16.12.2015	ggu	changed VERS_7_3_16
-c 18.12.2015	ggu	changed VERS_7_3_17
-c 15.04.2016	ggu	changed VERS_7_5_8
-c 26.10.2016	ccf	bug fix in flxsec
-c 12.01.2017	ggu	changed VERS_7_5_21
-c 30.03.2017	ggu	changed accumulator to time step dt, not number of calls
-c 04.02.2018	ggu	new routines with accumulator in double
-c 22.02.2018	ggu	changed VERS_7_5_42
-c 03.04.2018	ggu	changed VERS_7_5_43
-c 16.02.2019	ggu	changed VERS_7_5_60
-c 27.05.2022	ggu	prepared for mpi use, fluxes now double
-c
-c notes :
-c
-c These routines can also be used internally to compute the flux
-c over various sections. The following calling sequence must be respected:
-c
-c call flx_init(kfluxm,kflux,nsect,iflux)		initializes iflux
-c
-c call flxscs(kfluxm,kflux,iflux,az,fluxes) computes fluxes 
-c
-c Initialization can be done anytime.
-c
-c******************************************************************
-c******************************************************************
-c******************************************************************
-c******************************************************************
-c******************************************************************
+! utility routines for flux computations
+!
+! contents :
+!
+! subroutine flxscs(n,kflux,iflux,az,fluxes)	flux through sections
+! subroutine flxsec(n,kflux,iflux,az,fluxes)	flux through section
+!
+! subroutine flxini				initializes flux routines
+! subroutine flx_init(kfluxm,kflux,nsect,iflux)	sets up array iflux
+! subroutine flxinf(m,kflux,iflux)		sets up one info structure
+! function igtnsc(k1,k2)			gets number of internal section
+!
+! revision log :
+!
+! 09.05.2013	ggu	separated from subflxa.f
+! 14.05.2013	ggu	deleted error check between 2d and 3d computation
+! 13.06.2013	ggu	changed VERS_6_1_65
+! 19.01.2015	ggu	changed VERS_7_1_2
+! 19.01.2015	ggu	changed VERS_7_1_3
+! 10.07.2015	ggu	changed VERS_7_1_50
+! 17.07.2015	ggu	changed VERS_7_1_80
+! 20.07.2015	ggu	changed VERS_7_1_81
+! 16.12.2015	ggu	changed VERS_7_3_16
+! 18.12.2015	ggu	changed VERS_7_3_17
+! 15.04.2016	ggu	changed VERS_7_5_8
+! 26.10.2016	ccf	bug fix in flxsec
+! 12.01.2017	ggu	changed VERS_7_5_21
+! 30.03.2017	ggu	changed accumulator to time step dt, not number of calls
+! 04.02.2018	ggu	new routines with accumulator in double
+! 22.02.2018	ggu	changed VERS_7_5_42
+! 03.04.2018	ggu	changed VERS_7_5_43
+! 16.02.2019	ggu	changed VERS_7_5_60
+! 27.05.2022	ggu	prepared for mpi use, fluxes now double
+!
+! notes :
+!
+! These routines can also be used internally to compute the flux
+! over various sections. The following calling sequence must be respected:
+!
+! call flx_init(kfluxm,kflux,nsect,iflux)		initializes iflux
+!
+! call flxscs(kfluxm,kflux,iflux,az,fluxes) computes fluxes 
+!
+! Initialization can be done anytime.
+!
+!******************************************************************
+!******************************************************************
+!******************************************************************
+!******************************************************************
+!******************************************************************
 
 
-c******************************************************************
-c******************************************************************
-c******************************************************************
-c******************************************************************
-c******************************************************************
+!******************************************************************
+!******************************************************************
+!******************************************************************
+!******************************************************************
+!******************************************************************
 
 
-c******************************************************************
-c******************************************************************
-c******************************************************************
-c******************************************************************
-c******************************************************************
+!******************************************************************
+!******************************************************************
+!******************************************************************
+!******************************************************************
+!******************************************************************
 
 	subroutine fluxes_init(nlvddi,nsect,nlayers,tr,masst)
 
-c initializes nr and masst
+! initializes nr and masst
 
 	implicit none
 
@@ -107,11 +107,11 @@ c initializes nr and masst
 
 	end
 
-c******************************************************************
+!******************************************************************
 
 	subroutine fluxes_accum(nlvddi,nsect,nlayers,dt,tr,masst,fluxes)
 
-c accumulates fluxes into masst
+! accumulates fluxes into masst
 
 	implicit none
 
@@ -127,11 +127,11 @@ c accumulates fluxes into masst
 
 	end
 
-c******************************************************************
+!******************************************************************
 
 	subroutine fluxes_aver(nlvddi,nsect,nlayers,tr,masst,fluxes)
 
-c averages masst and puts result into fluxes
+! averages masst and puts result into fluxes
 
 	implicit none
 
@@ -146,13 +146,13 @@ c averages masst and puts result into fluxes
 
 	end
 
-c******************************************************************
-c******************************************************************
-c******************************************************************
+!******************************************************************
+!******************************************************************
+!******************************************************************
 
 	subroutine fluxes_init_d(nlvddi,nsect,nlayers,tr,masst)
 
-c initializes nr and masst
+! initializes nr and masst
 
 	implicit none
 
@@ -168,11 +168,11 @@ c initializes nr and masst
 
 	end
 
-c******************************************************************
+!******************************************************************
 
 	subroutine fluxes_accum_d(nlvddi,nsect,nlayers,dt,tr,masst,fluxes)
 
-c accumulates fluxes into masst
+! accumulates fluxes into masst
 
 	implicit none
 
@@ -188,11 +188,11 @@ c accumulates fluxes into masst
 
 	end
 
-c******************************************************************
+!******************************************************************
 
 	subroutine fluxes_aver_d(nlvddi,nsect,nlayers,tr,masst,fluxes)
 
-c averages masst and puts result into fluxes
+! averages masst and puts result into fluxes
 
 	implicit none
 
@@ -207,17 +207,17 @@ c averages masst and puts result into fluxes
 
 	end
 
-c******************************************************************
-c******************************************************************
-c******************************************************************
-c******************************************************************
-c******************************************************************
+!******************************************************************
+!******************************************************************
+!******************************************************************
+!******************************************************************
+!******************************************************************
 
 	subroutine flxscs(kfluxm,kflux,iflux,az,fluxes,is,scalar)
 
-c computes flux through all sections and returns them in fluxes
-c
-c flux are divided into total, positive and negative
+! computes flux through all sections and returns them in fluxes
+!
+! flux are divided into total, positive and negative
 
 	use levels, only : nlvdi,nlv
 
@@ -242,17 +242,17 @@ c flux are divided into total, positive and negative
 	  ns = ns + 1
 	  ntotal = ilast - ifirst + 1
 	  !write(66,*) 'section ',ns,ntotal,is
-	  call flxsec(ntotal,kflux(ifirst),iflux(1,ifirst),az
-     +				,fluxes(0,1,ns),is,scalar)
+	  call flxsec(ntotal,kflux(ifirst),iflux(1,ifirst),az &
+     &				,fluxes(0,1,ns),is,scalar)
 	end do
 
 	end
 
-c******************************************************************
+!******************************************************************
 
 	subroutine flxsec(n,kflux,iflux,az,fluxes,is,scalar)
 
-c computes flux through one section and returns it in fluxes
+! computes flux through one section and returns it in fluxes
 
 	use levels, only : nlvdi,nlv
 
@@ -309,13 +309,13 @@ c computes flux through one section and returns it in fluxes
 
 	end
 	  
-c******************************************************************
-c******************************************************************
-c******************************************************************
+!******************************************************************
+!******************************************************************
+!******************************************************************
 
 	subroutine flx_init(kfluxm,kflux,nsect,iflux)
 
-c does basic checks and sets up array iflux
+! does basic checks and sets up array iflux
 
 	implicit none
 
@@ -329,9 +329,9 @@ c does basic checks and sets up array iflux
 	integer klineck
 	logical nextline
 
-c----------------------------------------------------------
-c check nodes for compatibility
-c----------------------------------------------------------
+!----------------------------------------------------------
+! check nodes for compatibility
+!----------------------------------------------------------
 
 	nsect = klineck(kfluxm,kflux)
 
@@ -340,9 +340,9 @@ c----------------------------------------------------------
 	  stop 'error stop : flx_init'
 	end if
 
-c----------------------------------------------------------
-c now set info structure for sections
-c----------------------------------------------------------
+!----------------------------------------------------------
+! now set info structure for sections
+!----------------------------------------------------------
 
 	ns = 0
 	nnode = 0
@@ -351,21 +351,21 @@ c----------------------------------------------------------
 	do while( nextline(kflux,kfluxm,nnode,ifirst,ilast) )
 	  ns = ns + 1
 	  ntotal = ilast - ifirst + 1
-c	  write(6,*) kfluxm,nnode,ifirst,ilast,ntotal
+!	  write(6,*) kfluxm,nnode,ifirst,ilast,ntotal
 	  call flxinf(ns,ntotal,kflux(ifirst),iflux(1,ifirst))
 	end do
 
-c----------------------------------------------------------
-c end of routine
-c----------------------------------------------------------
+!----------------------------------------------------------
+! end of routine
+!----------------------------------------------------------
 
 	end
 
-c******************************************************************
+!******************************************************************
 
 	subroutine flxinf(ns,n,kflux,iflux)
 
-c sets up info structure iflux(3,1) for one section
+! sets up info structure iflux(3,1) for one section
 
 	implicit none
 
@@ -417,11 +417,11 @@ c sets up info structure iflux(3,1) for one section
 
 	end
 
-c******************************************************************
+!******************************************************************
 
 	function igtnsc(k1,k2)
 
-c gets number of internal section in link index of k1
+! gets number of internal section in link index of k1
 
 	use mod_geom
 
@@ -437,12 +437,12 @@ c gets number of internal section in link index of k1
 
 	call get_elems_around(k1,maxlnk,n,elems)
 
-c	deal with no section given
+!	deal with no section given
 
 	igtnsc = 0
 	if( k2 .le. 0 ) return
 
-c	section in the middle
+!	section in the middle
 
 	do i=1,n
 	  igtnsc = i
@@ -451,7 +451,7 @@ c	section in the middle
 	  if( k .eq. k2 ) return
 	end do
 
-c	in case we are on the boundary
+!	in case we are on the boundary
 
 	i = n
 	igtnsc = igtnsc + 1
@@ -459,7 +459,7 @@ c	in case we are on the boundary
 	k = kbhnd(k1,ie)
 	if( k .eq. k2 ) return
 
-c	no node found
+!	no node found
 
 	write(6,*) k1,k2
 	write(6,*) k1,n
@@ -470,15 +470,15 @@ c	no node found
 	stop 'error stop igtnsc: internal error (2)'
 	end
 	      
-c**********************************************************************
-c**********************************************************************
-c**********************************************************************
-c**********************************************************************
-c**********************************************************************
+!**********************************************************************
+!**********************************************************************
+!**********************************************************************
+!**********************************************************************
+!**********************************************************************
 
 	subroutine get_nlayers(kfluxm,kflux,nsect,nlayers,nlmax)
 
-c computes maximum numer of layers for sections
+! computes maximum numer of layers for sections
 
 	use levels
 
@@ -521,9 +521,9 @@ c computes maximum numer of layers for sections
 
 	end
 
-c**********************************************************************
-c**********************************************************************
-c**********************************************************************
-c**********************************************************************
-c**********************************************************************
+!**********************************************************************
+!**********************************************************************
+!**********************************************************************
+!**********************************************************************
+!**********************************************************************
 

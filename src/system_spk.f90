@@ -106,10 +106,10 @@
 	call shympi_barrier
 
 	if( bmpi ) then			!only needed if not explicit !FIXME
-          call mod_system_init(nkn_global,nel_global,ngr_global
-     +				,mbw,nlv,g_matrix)
-	  call mod_system_insert_elem_index(nel_global,nen3v_global
-     +					,g_matrix)
+          call mod_system_init(nkn_global,nel_global,ngr_global &
+     &				,mbw,nlv,g_matrix)
+	  call mod_system_insert_elem_index(nel_global,nen3v_global &
+     &					,g_matrix)
 	  call mod_system_set_global(g_matrix)
 	  call spk_initialize_system(g_matrix)		!calls coo_init_new
 	  call system_setup_global

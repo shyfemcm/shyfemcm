@@ -27,262 +27,262 @@
 !
 !--------------------------------------------------------------------------
 
-c assembling linear system routine
-c
-c contents :
-c
-c subroutine hydro			administrates one time step
-c subroutine hydro_zeta(vqv)		assemble matrix
-c subroutine hydro_transports		computes transports (temporary)
-c subroutine hydro_transports_final	computes transports (final)
-c subroutine hydro_vertical(dzeta)	computes vertical velocities
-c subroutine correct_zeta(dzeta)	corrects zeta values
-c
-c notes :
-c
-c look for "!ccc" to see important changes
-c
-c ASYM			passage to asymmetrix matrix
-c ASYM_OPSPLT		new version without operator splitting (can leave)
-c ASYM_OPSPLT_CH	new version -> change here
-c
-c nknddi	dimension for total number of nodes
-c nelddi	dimension for total number of elements
-c nrbddi	dimension for total number of boundary condition nodes
-c nbcddi	dimension for total number of open boundaries
-c mbwddi	dimension for bandwidth
-c ngrddi	dimension for grade of nodes (number of elements attached
-c		...to one node)
-c narddi	dimension for total number of area codes
-c nexddi	dimension for total number of extra nodes for output
-c
-c nkn,nel	total number of nodes/elements
-c nrz,nrq	total number of nodes with water level/flux boundary conditions
-c nrb		total number of nodes with boundary conditions
-c nbc		total number of open boundaries
-c ngr		maximum grade of nodes
-c mbw		bandwidth of system matrix
-c flag		flag value (to recognize boundary conditions)
-c grav,dcor	gravitational accel./medium latitude of basin
-c rowass,roluft	density of water/air
-c idt,nits	time step/total iterations to go
-c niter,it	actual number of iterations/actual time
-c nlvdi,nlv	dimension for levels, number of used levels
-c
-c nen3v(..,ie)	element index - node numbers (3) of element ie
-c
-c ipv(k)	external node number of node k
-c ipev(ie)	external element number of element ie
-c
-c rqv(k),rzv(k)	flux/water level boundary conditions for node k
-c		...if(rzv(k).eq.flag) --> no b.c. is specified for node k
-c bnd(..,ib)	specification of boundary conditions for open boundary ib
-c ev(..,ie)	geometric parameters for element ie
-c		...1-3 = area, 4-6 = b, 7-9 = c, 10 = Aomega, 11-13 = angle
-c uov(ie)	depth integrated transport (old time level)
-c vov(ie)	...
-c unv(ie)	depth integrated transport (new time level)
-c vnv(ie)	...
-c zov(k)	water level of old/new time level
-c znv(k)	...
-c ulov(l,ie)	velocity of old time level in x direction of layer l and elem ie
-c vlov(l,ie)	velocity of old time level in y direction of layer l and elem ie
-c wlov(l,i)	velocity of old time level in z direction of layer l and node i
-c ulnv(l,ie)	velocity of new time level in x direction of layer l and elem ie
-c vlnv(l,ie)	velocity of new time level in y direction of layer l and elem ie
-c wlnv(l,i)	velocity of new time level in z direction of layer l and node i
-c utlov(l,ie)	transport of old time level in x direction of layer l and el. ie
-c vtlov(l,ie)	transport of old time level in y direction of layer l and el. ie
-c utlnv(l,ie)	transport of new time level in x direction of layer l and el. ie
-c vtlnv(l,ie)	transport of new time level in y direction of layer l and el. ie
-c uprv(l,k)	velocity (averaged) in x direction of layer l and node k
-c vprv(l,k)	velocity (averaged) in y direction of layer l and node k
-c wprv(l,k)	velocity (averaged) in z direction of layer l and node k
-c up0v(k)	total velocity (averaged) in x direction of node k
-c vp0v(k)	total velocity (averaged) in y direction of node k
-c tauxnv(k)	normalized stress in x-direction at node k
-c tauynv(k)	normalized stress in y-direction at node k
-c rhov(l,k)	density for level l and node k
-c fcorv(ie)	coriolis parameter for elem ie
-c
-c visv(l,k)	vertical turbulent viscosity for layer l and node k (alv)
-c difv(l,k)	vertical turbulent diffusivity for layer l and node k (slv)
-c
-c xgv(k),ygv(k)	coordinates of node k
-c
-c hldv(l)	thickness of layer l
-c hlv(l)	absolute depth of bottom of layer l
-c ilhv(ie)	number of levels for element ie
-c ilhkv(k)	number of levels for node k
-c hlhv(ie)	thickness of last layer for element ie
-c hev(ie)	total depth at element ie (no water level)
-c hkv(k)	total depth at node k (no water level)
-c hm3v(3,ie)	depth of three nodes in element ie
-c
-c v1v,v2v...	auxiliary vectors
-c rmat		band matrix for one vertical system (as above)
-c rvec		constant vector for vertical system
-c
-c $$h1new	use new water level to compute velocities
-c		(only for printing velocities important, but
-c		algorithm has to be checked if consistent)
-c $$rtmax	use maximal friction coefficient of rdt (=1./dt)
-c
-c revision log :
-c
-c 27.07.1988	ggu	(from sp159f)
-c 18.02.1991	ggu	(from scratch)
-c 04.06.1991	ggu	(c=(1) : friction term has been corrected) (hydro_zeta)
-c 27.08.1991	ggu	(from scratch) (hydro_vertical)
-c 01.10.1992	ggu	(staggered FE - completely restructured) (hydro_zeta)
-c 01.07.1993	ggu	$$UVBARO - u/vov introduced for	iteration on rad cond
-c 03.11.1993	ggu	$$cmplerr - compiler warnings hydro
-c 05.11.1993	ggu	$$fric - normal friction
-c 05.11.1993	ggu	$$crador - crador call commented
-c 05.11.1993	ggu	subroutine crador in file newcra.f
-c 05.11.1993	ggu	$$VBARO-ERR - unv(ie)=vov(ie)
-c 28.08.1995	ggu	$$BAROC_AREA - do baroc only for iarv(ie) = 0
-c 30.08.1995	ggu	$$AUST - austausch coefficient introduced
-c 01.09.1995	ggu	$$AWEIGH - area weighting of austausch coefficient
-c 06.03.1996	ggu	$$BAROC_AREA0 - introduced baroc0
-c 06.03.1996	ggu	$$VERT_AUST_ADJUST - adjustment of vert. aust. coef.
-c 06.06.1996	ggu	$$BCHAO - modifications for vel. profile (temp.)
-c 10.06.1996	ggu	$$UVPADV - modifications for advective term
-c 23.07.1997	ggu	(from scratch) (hydro_transports_final)
-c 14.08.1998	ggu	set w = 0 at open boundary nodes
-c 20.08.1998	ggu	some documentation for sp256w
-c 08.04.1999	ggu	equilibrium tide introduced (zeqv)
-c 20.04.1999	ggu	converted to stress instead of wind (tauxnv...)
-c 24.06.1999	ggu	call to rescur commented (use 2D call resid)
-c 07.03.2000	ggu	eliminated VERT_AUST_ADJUST
-c 07.03.2000	ggu	arrays for vertical turbulent diffusion coefficient
-c 12.01.2001	ggu	solve for znv and not z difference (ZNEW) (hydro_zeta)
-c 09.11.2001	ggu	BCHAO commented out, no compiler directives
-c 14.11.2001	ggu	all compiler directives eliminated
-c 10.08.2003	ggu	deleted commented parts (radiation, etc..)
-c 10.08.2003	ggu	some code in new subroutines: make_prvel, copy_uvz
-c 13.08.2003	ggu	delete useless vars (nrand, epsit), no iteration
-c 13.08.2003	ggu	call setnod, set_link_info
-c 10.03.2004	ggu	RQVDT - value in rqv is now discharge [m**3/s]
-c 10.01.2005	ggu	BAROC_DIST - scale baroclinic term with distance
-c 25.01.2005	ggu	BUGADV - bugfix for advective terms
-c 24.02.2005	ggu	new reynolds stresses -> green
-c 15.03.2005	ggu	austv,aust eliminated, austau() in diff_h_set()
-c 29.04.2005	ggu	semi-lagrangian advection (backadv)
-c 29.04.2005	ggu	no baroclinic terms close to step (ilevmin)
-c 04.11.2005	ggu	use itlin to decide about semi-lagrangian advection
-c 23.03.2006	ggu	changed time step to real
-c 31.05.2006	ggu	new friction type ireib=7
-c 18.10.2006	ccf	radx,rady for radiation stress introduced
-c 28.11.2006	ggu	in u/vadv is now difference and not absolute transport
-c 02.04.2007	ggu	new algorithm (look for ASYM)
-c 08.06.2007	ggu&dbf	restructured for new explicit terms
-c 28.09.2007	ggu	deleted chao, semi-lagrange to newexp.f, no indov
-c 24.06.2008	ggu	bpresv deleted
-c 10.10.2008	ggu&mbj	prepared for pardiso -> modify system (gguexclude)
-c 10.12.2008	ggu	use rfricv for bottom friction -> other can be deleted
-c 18.12.2008	ggu	more debug info for error in vertical system
-c 13.01.2009	ggu	Pardiso lib integrated
-c 04.03.2009	ggu	matrix amat deleted from file -> only locally used
-c 27.03.2009	ggu	call new routine adjust_mass_flux() for dry nodes
-c 06.04.2009	ggu	deleted routine write_elem_vel_info()
-c 07.05.2009	ggu	new routines for scalar interpolation (not finished)
-c 10.03.2010	ggu	bug fix in sp256w() for ibtyp=2
-c 11.03.2010	ggu	new routine check_volume() to check for negative vol
-c 23.03.2010	ggu	changed v6.1.1
-c 12.04.2010	ggu	ad hoc routine for Yaron
-c 22.04.2010	ggu	changed VERS_6_1_5
-c 08.10.2010	ggu	changed VERS_6_1_13
-c 15.12.2010	ggu	changed VERS_6_1_14
-c 16.12.2010	ggu	in sp256w() account for changing volume (sigma)
-c 19.02.2011	ccf	3D radiation stress
-c 01.03.2011	ggu	changed VERS_6_1_20
-c 31.05.2011	ggu	changed VERS_6_1_23
-c 18.10.2011	ggu	changed VERS_6_1_33
-c 04.11.2011	ggu	deleted computation of firction term (in subn35.f)
-c 29.03.2012	ggu	cleaned up, sp256v prepared for OpenMP
-c 10.05.2013	dbf&ggu	new routines for non-hydro
-c 13.06.2013	ggu	changed VERS_6_1_65
-c 12.09.2013	ggu	changed VERS_6_1_67
-c 25.10.2013	ggu	changed VERS_6_1_68
-c 29.10.2013	ggu	nudging implemented
-c 12.11.2013	ggu	changed VERS_6_1_69
-c 29.11.2013	ggu	zeta correction
-c 05.12.2013	ggu	changed VERS_6_1_70
-c 25.03.2014	ggu	new offline
-c 10.04.2014	ggu	cleaning up of a lot of stuff
-c 05.05.2014	ggu	changed VERS_6_1_74
-c 18.06.2014	ggu	changed VERS_6_1_77
-c 05.11.2014	ggu	changed VERS_7_0_5
-c 05.12.2014	ggu	changed VERS_7_0_8
-c 12.12.2014	ggu	changed VERS_7_0_9
-c 19.12.2014	ggu	changed VERS_7_0_10
-c 23.12.2014	ggu	changed VERS_7_0_11
-c 19.01.2015	ggu	changed VERS_7_1_3
-c 05.05.2015	ggu	changed VERS_7_1_10
-c 06.05.2015	ggu	cleaning up of sp256f
-c 20.05.2015	ggu&erp	sp256v parallelized
-c 05.06.2015	ggu	changed VERS_7_1_12
-c 10.07.2015	ggu	changed VERS_7_1_50
-c 13.07.2015	ggu	changed VERS_7_1_51
-c 17.07.2015	ggu	changed VERS_7_1_80
-c 20.07.2015	ggu	changed VERS_7_1_81
-c 24.07.2015	ggu	changed VERS_7_1_82
-c 17.09.2015	ggu	sp256w renamed to hydro_vertical
-c 17.09.2015	ggu	sp259f renamed to hydro
-c 18.09.2015	ggu	sp256 renamed to hydro_transports, file cleaned
-c 10.10.2015	ggu	changed VERS_7_3_2
-c 22.10.2015	ggu	changed VERS_7_3_7
-c 05.11.2015	ggu	changed VERS_7_3_12
-c 20.11.2015	ggu&erp	chunk size introduced, omp finalized
-c 16.12.2015	ggu	changed VERS_7_3_16
-c 10.03.2016	ggu	in sp256v_intern() b/cpres in double precision
-c 11.03.2016	ggu	most variables passed in double precision
-c 14.06.2016	ggu	changed VERS_7_5_14
-c 17.06.2016	ggu	changed VERS_7_5_15
-c 31.10.2016	ggu	parallel part modified
-c 12.01.2017	ggu	changed VERS_7_5_21
-c 24.03.2017	ggu	new treatment for afix in sp256v_intern()
-c 31.03.2017	ggu	changed VERS_7_5_24
-c 04.11.2017	ggu	changed VERS_7_5_34
-c 05.12.2017	ggu	changed VERS_7_5_39
-c 24.01.2018	ggu	changed VERS_7_5_41
-c 03.04.2018	ggu	changed VERS_7_5_43
-c 19.04.2018	ggu	changed VERS_7_5_45
-c 26.04.2018	ggu	changed VERS_7_5_46
-c 11.05.2018	ggu	changed VERS_7_5_47
-c 18.12.2018	ggu	changed VERS_7_5_52
-c 19.12.2018	ggu	error in experimental code with penta solver
-c 18.01.2019	ggu	finished implementing and testing penta solver
-c 14.02.2019	ggu	changed VERS_7_5_56
-c 16.02.2019	ggu	changed VERS_7_5_60
-c 13.03.2019	ggu	changed VERS_7_5_61
-c 16.04.2019	ggu	introduced rcomputev for excluding elements (rcomp)
-c 21.05.2019	ggu	changed VERS_7_5_62
-c 02.07.2019	ggu	switched completely to penta solver
-c 04.07.2019	ccf	for offline also compute horizontal diffusion params
-c 16.07.2019	ggu	rmsdiff was not set to 0 (bug)
-c 26.03.2020	ggu	adjust viscosity in case of closure (rcomp)
-c 26.05.2020	ggu	new variable ruseterm to shut off selected terms
-c 04.06.2020	ggu	debug_new3di() for selected debug
-c 30.03.2021	ggu	copy to old into shyfem routine
-c 30.04.2021    clr&ggu adapted for petsc solver
-c 31.05.2021    ggu	eleminated bug for closing in hydro_transports_final()
-c 17.07.2021    ggu	introduced ifricv and call to turbine()
-c 07.04.2022    ggu	ie_mpi introduced in computing vertical velocities
-c 10.04.2022    ggu	ie_mpi introduced for trans, debug code, hydro_debug()
-c 18.05.2022    ggu	cpu_time routines introduced
-c 08.06.2022    ggu	debug routines inserted (ggu_vertical)
-c 11.10.2022    ggu	debug section inserted in wlnv computing
-c 02.05.2023    ggu     fix mpi bug for nlv==1
-c 09.05.2023    lrp     introduce top layer index variable
-c 08.06.2023    ggu     new zeta_debug(), cleaned, call to compute_dry_elements
-c
-c******************************************************************
+! assembling linear system routine
+!
+! contents :
+!
+! subroutine hydro			administrates one time step
+! subroutine hydro_zeta(vqv)		assemble matrix
+! subroutine hydro_transports		computes transports (temporary)
+! subroutine hydro_transports_final	computes transports (final)
+! subroutine hydro_vertical(dzeta)	computes vertical velocities
+! subroutine correct_zeta(dzeta)	corrects zeta values
+!
+! notes :
+!
+! look for "!ccc" to see important changes
+!
+! ASYM			passage to asymmetrix matrix
+! ASYM_OPSPLT		new version without operator splitting (can leave)
+! ASYM_OPSPLT_CH	new version -> change here
+!
+! nknddi	dimension for total number of nodes
+! nelddi	dimension for total number of elements
+! nrbddi	dimension for total number of boundary condition nodes
+! nbcddi	dimension for total number of open boundaries
+! mbwddi	dimension for bandwidth
+! ngrddi	dimension for grade of nodes (number of elements attached
+!		...to one node)
+! narddi	dimension for total number of area codes
+! nexddi	dimension for total number of extra nodes for output
+!
+! nkn,nel	total number of nodes/elements
+! nrz,nrq	total number of nodes with water level/flux boundary conditions
+! nrb		total number of nodes with boundary conditions
+! nbc		total number of open boundaries
+! ngr		maximum grade of nodes
+! mbw		bandwidth of system matrix
+! flag		flag value (to recognize boundary conditions)
+! grav,dcor	gravitational accel./medium latitude of basin
+! rowass,roluft	density of water/air
+! idt,nits	time step/total iterations to go
+! niter,it	actual number of iterations/actual time
+! nlvdi,nlv	dimension for levels, number of used levels
+!
+! nen3v(..,ie)	element index - node numbers (3) of element ie
+!
+! ipv(k)	external node number of node k
+! ipev(ie)	external element number of element ie
+!
+! rqv(k),rzv(k)	flux/water level boundary conditions for node k
+!		...if(rzv(k).eq.flag) --> no b.c. is specified for node k
+! bnd(..,ib)	specification of boundary conditions for open boundary ib
+! ev(..,ie)	geometric parameters for element ie
+!		...1-3 = area, 4-6 = b, 7-9 = c, 10 = Aomega, 11-13 = angle
+! uov(ie)	depth integrated transport (old time level)
+! vov(ie)	...
+! unv(ie)	depth integrated transport (new time level)
+! vnv(ie)	...
+! zov(k)	water level of old/new time level
+! znv(k)	...
+! ulov(l,ie)	velocity of old time level in x direction of layer l and elem ie
+! vlov(l,ie)	velocity of old time level in y direction of layer l and elem ie
+! wlov(l,i)	velocity of old time level in z direction of layer l and node i
+! ulnv(l,ie)	velocity of new time level in x direction of layer l and elem ie
+! vlnv(l,ie)	velocity of new time level in y direction of layer l and elem ie
+! wlnv(l,i)	velocity of new time level in z direction of layer l and node i
+! utlov(l,ie)	transport of old time level in x direction of layer l and el. ie
+! vtlov(l,ie)	transport of old time level in y direction of layer l and el. ie
+! utlnv(l,ie)	transport of new time level in x direction of layer l and el. ie
+! vtlnv(l,ie)	transport of new time level in y direction of layer l and el. ie
+! uprv(l,k)	velocity (averaged) in x direction of layer l and node k
+! vprv(l,k)	velocity (averaged) in y direction of layer l and node k
+! wprv(l,k)	velocity (averaged) in z direction of layer l and node k
+! up0v(k)	total velocity (averaged) in x direction of node k
+! vp0v(k)	total velocity (averaged) in y direction of node k
+! tauxnv(k)	normalized stress in x-direction at node k
+! tauynv(k)	normalized stress in y-direction at node k
+! rhov(l,k)	density for level l and node k
+! fcorv(ie)	coriolis parameter for elem ie
+!
+! visv(l,k)	vertical turbulent viscosity for layer l and node k (alv)
+! difv(l,k)	vertical turbulent diffusivity for layer l and node k (slv)
+!
+! xgv(k),ygv(k)	coordinates of node k
+!
+! hldv(l)	thickness of layer l
+! hlv(l)	absolute depth of bottom of layer l
+! ilhv(ie)	number of levels for element ie
+! ilhkv(k)	number of levels for node k
+! hlhv(ie)	thickness of last layer for element ie
+! hev(ie)	total depth at element ie (no water level)
+! hkv(k)	total depth at node k (no water level)
+! hm3v(3,ie)	depth of three nodes in element ie
+!
+! v1v,v2v...	auxiliary vectors
+! rmat		band matrix for one vertical system (as above)
+! rvec		constant vector for vertical system
+!
+! $$h1new	use new water level to compute velocities
+!		(only for printing velocities important, but
+!		algorithm has to be checked if consistent)
+! $$rtmax	use maximal friction coefficient of rdt (=1./dt)
+!
+! revision log :
+!
+! 27.07.1988	ggu	(from sp159f)
+! 18.02.1991	ggu	(from scratch)
+! 04.06.1991	ggu	(c=(1) : friction term has been corrected) (hydro_zeta)
+! 27.08.1991	ggu	(from scratch) (hydro_vertical)
+! 01.10.1992	ggu	(staggered FE - completely restructured) (hydro_zeta)
+! 01.07.1993	ggu	$$UVBARO - u/vov introduced for	iteration on rad cond
+! 03.11.1993	ggu	$$cmplerr - compiler warnings hydro
+! 05.11.1993	ggu	$$fric - normal friction
+! 05.11.1993	ggu	$$crador - crador call commented
+! 05.11.1993	ggu	subroutine crador in file newcra.f
+! 05.11.1993	ggu	$$VBARO-ERR - unv(ie)=vov(ie)
+! 28.08.1995	ggu	$$BAROC_AREA - do baroc only for iarv(ie) = 0
+! 30.08.1995	ggu	$$AUST - austausch coefficient introduced
+! 01.09.1995	ggu	$$AWEIGH - area weighting of austausch coefficient
+! 06.03.1996	ggu	$$BAROC_AREA0 - introduced baroc0
+! 06.03.1996	ggu	$$VERT_AUST_ADJUST - adjustment of vert. aust. coef.
+! 06.06.1996	ggu	$$BCHAO - modifications for vel. profile (temp.)
+! 10.06.1996	ggu	$$UVPADV - modifications for advective term
+! 23.07.1997	ggu	(from scratch) (hydro_transports_final)
+! 14.08.1998	ggu	set w = 0 at open boundary nodes
+! 20.08.1998	ggu	some documentation for sp256w
+! 08.04.1999	ggu	equilibrium tide introduced (zeqv)
+! 20.04.1999	ggu	converted to stress instead of wind (tauxnv...)
+! 24.06.1999	ggu	call to rescur commented (use 2D call resid)
+! 07.03.2000	ggu	eliminated VERT_AUST_ADJUST
+! 07.03.2000	ggu	arrays for vertical turbulent diffusion coefficient
+! 12.01.2001	ggu	solve for znv and not z difference (ZNEW) (hydro_zeta)
+! 09.11.2001	ggu	BCHAO commented out, no compiler directives
+! 14.11.2001	ggu	all compiler directives eliminated
+! 10.08.2003	ggu	deleted commented parts (radiation, etc..)
+! 10.08.2003	ggu	some code in new subroutines: make_prvel, copy_uvz
+! 13.08.2003	ggu	delete useless vars (nrand, epsit), no iteration
+! 13.08.2003	ggu	call setnod, set_link_info
+! 10.03.2004	ggu	RQVDT - value in rqv is now discharge [m**3/s]
+! 10.01.2005	ggu	BAROC_DIST - scale baroclinic term with distance
+! 25.01.2005	ggu	BUGADV - bugfix for advective terms
+! 24.02.2005	ggu	new reynolds stresses -> green
+! 15.03.2005	ggu	austv,aust eliminated, austau() in diff_h_set()
+! 29.04.2005	ggu	semi-lagrangian advection (backadv)
+! 29.04.2005	ggu	no baroclinic terms close to step (ilevmin)
+! 04.11.2005	ggu	use itlin to decide about semi-lagrangian advection
+! 23.03.2006	ggu	changed time step to real
+! 31.05.2006	ggu	new friction type ireib=7
+! 18.10.2006	ccf	radx,rady for radiation stress introduced
+! 28.11.2006	ggu	in u/vadv is now difference and not absolute transport
+! 02.04.2007	ggu	new algorithm (look for ASYM)
+! 08.06.2007	ggu&dbf	restructured for new explicit terms
+! 28.09.2007	ggu	deleted chao, semi-lagrange to newexp.f, no indov
+! 24.06.2008	ggu	bpresv deleted
+! 10.10.2008	ggu&mbj	prepared for pardiso -> modify system (gguexclude)
+! 10.12.2008	ggu	use rfricv for bottom friction -> other can be deleted
+! 18.12.2008	ggu	more debug info for error in vertical system
+! 13.01.2009	ggu	Pardiso lib integrated
+! 04.03.2009	ggu	matrix amat deleted from file -> only locally used
+! 27.03.2009	ggu	call new routine adjust_mass_flux() for dry nodes
+! 06.04.2009	ggu	deleted routine write_elem_vel_info()
+! 07.05.2009	ggu	new routines for scalar interpolation (not finished)
+! 10.03.2010	ggu	bug fix in sp256w() for ibtyp=2
+! 11.03.2010	ggu	new routine check_volume() to check for negative vol
+! 23.03.2010	ggu	changed v6.1.1
+! 12.04.2010	ggu	ad hoc routine for Yaron
+! 22.04.2010	ggu	changed VERS_6_1_5
+! 08.10.2010	ggu	changed VERS_6_1_13
+! 15.12.2010	ggu	changed VERS_6_1_14
+! 16.12.2010	ggu	in sp256w() account for changing volume (sigma)
+! 19.02.2011	ccf	3D radiation stress
+! 01.03.2011	ggu	changed VERS_6_1_20
+! 31.05.2011	ggu	changed VERS_6_1_23
+! 18.10.2011	ggu	changed VERS_6_1_33
+! 04.11.2011	ggu	deleted computation of firction term (in subn35.f)
+! 29.03.2012	ggu	cleaned up, sp256v prepared for OpenMP
+! 10.05.2013	dbf&ggu	new routines for non-hydro
+! 13.06.2013	ggu	changed VERS_6_1_65
+! 12.09.2013	ggu	changed VERS_6_1_67
+! 25.10.2013	ggu	changed VERS_6_1_68
+! 29.10.2013	ggu	nudging implemented
+! 12.11.2013	ggu	changed VERS_6_1_69
+! 29.11.2013	ggu	zeta correction
+! 05.12.2013	ggu	changed VERS_6_1_70
+! 25.03.2014	ggu	new offline
+! 10.04.2014	ggu	cleaning up of a lot of stuff
+! 05.05.2014	ggu	changed VERS_6_1_74
+! 18.06.2014	ggu	changed VERS_6_1_77
+! 05.11.2014	ggu	changed VERS_7_0_5
+! 05.12.2014	ggu	changed VERS_7_0_8
+! 12.12.2014	ggu	changed VERS_7_0_9
+! 19.12.2014	ggu	changed VERS_7_0_10
+! 23.12.2014	ggu	changed VERS_7_0_11
+! 19.01.2015	ggu	changed VERS_7_1_3
+! 05.05.2015	ggu	changed VERS_7_1_10
+! 06.05.2015	ggu	cleaning up of sp256f
+! 20.05.2015	ggu&erp	sp256v parallelized
+! 05.06.2015	ggu	changed VERS_7_1_12
+! 10.07.2015	ggu	changed VERS_7_1_50
+! 13.07.2015	ggu	changed VERS_7_1_51
+! 17.07.2015	ggu	changed VERS_7_1_80
+! 20.07.2015	ggu	changed VERS_7_1_81
+! 24.07.2015	ggu	changed VERS_7_1_82
+! 17.09.2015	ggu	sp256w renamed to hydro_vertical
+! 17.09.2015	ggu	sp259f renamed to hydro
+! 18.09.2015	ggu	sp256 renamed to hydro_transports, file cleaned
+! 10.10.2015	ggu	changed VERS_7_3_2
+! 22.10.2015	ggu	changed VERS_7_3_7
+! 05.11.2015	ggu	changed VERS_7_3_12
+! 20.11.2015	ggu&erp	chunk size introduced, omp finalized
+! 16.12.2015	ggu	changed VERS_7_3_16
+! 10.03.2016	ggu	in sp256v_intern() b/cpres in double precision
+! 11.03.2016	ggu	most variables passed in double precision
+! 14.06.2016	ggu	changed VERS_7_5_14
+! 17.06.2016	ggu	changed VERS_7_5_15
+! 31.10.2016	ggu	parallel part modified
+! 12.01.2017	ggu	changed VERS_7_5_21
+! 24.03.2017	ggu	new treatment for afix in sp256v_intern()
+! 31.03.2017	ggu	changed VERS_7_5_24
+! 04.11.2017	ggu	changed VERS_7_5_34
+! 05.12.2017	ggu	changed VERS_7_5_39
+! 24.01.2018	ggu	changed VERS_7_5_41
+! 03.04.2018	ggu	changed VERS_7_5_43
+! 19.04.2018	ggu	changed VERS_7_5_45
+! 26.04.2018	ggu	changed VERS_7_5_46
+! 11.05.2018	ggu	changed VERS_7_5_47
+! 18.12.2018	ggu	changed VERS_7_5_52
+! 19.12.2018	ggu	error in experimental code with penta solver
+! 18.01.2019	ggu	finished implementing and testing penta solver
+! 14.02.2019	ggu	changed VERS_7_5_56
+! 16.02.2019	ggu	changed VERS_7_5_60
+! 13.03.2019	ggu	changed VERS_7_5_61
+! 16.04.2019	ggu	introduced rcomputev for excluding elements (rcomp)
+! 21.05.2019	ggu	changed VERS_7_5_62
+! 02.07.2019	ggu	switched completely to penta solver
+! 04.07.2019	ccf	for offline also compute horizontal diffusion params
+! 16.07.2019	ggu	rmsdiff was not set to 0 (bug)
+! 26.03.2020	ggu	adjust viscosity in case of closure (rcomp)
+! 26.05.2020	ggu	new variable ruseterm to shut off selected terms
+! 04.06.2020	ggu	debug_new3di() for selected debug
+! 30.03.2021	ggu	copy to old into shyfem routine
+! 30.04.2021    clr&ggu adapted for petsc solver
+! 31.05.2021    ggu	eleminated bug for closing in hydro_transports_final()
+! 17.07.2021    ggu	introduced ifricv and call to turbine()
+! 07.04.2022    ggu	ie_mpi introduced in computing vertical velocities
+! 10.04.2022    ggu	ie_mpi introduced for trans, debug code, hydro_debug()
+! 18.05.2022    ggu	cpu_time routines introduced
+! 08.06.2022    ggu	debug routines inserted (ggu_vertical)
+! 11.10.2022    ggu	debug section inserted in wlnv computing
+! 02.05.2023    ggu     fix mpi bug for nlv==1
+! 09.05.2023    lrp     introduce top layer index variable
+! 08.06.2023    ggu     new zeta_debug(), cleaned, call to compute_dry_elements
+!
+!******************************************************************
 
 	subroutine hydro
 
-c administrates one hydrodynamic time step for system to solve
+! administrates one hydrodynamic time step for system to solve
 
 	use mod_depth
 	use mod_bound_dynamic
@@ -323,9 +323,9 @@ c administrates one hydrodynamic time step for system to solve
 
 	if( nint(getpar('ihydro')) <= 0 ) return	!only for debug
 
-c-----------------------------------------------------------------
-c set parameter for hydro or non hydro 
-c-----------------------------------------------------------------
+!-----------------------------------------------------------------
+! set parameter for hydro or non hydro 
+!-----------------------------------------------------------------
 
 	call nonhydro_get_flag(bnohyd)
         iwvel = nint(getpar('iwvel')) !DWNH
@@ -339,30 +339,30 @@ c-----------------------------------------------------------------
 	  call system_set_explicit
 	end if
 
-c-----------------------------------------------------------------
-c dry areas
-c-----------------------------------------------------------------
+!-----------------------------------------------------------------
+! dry areas
+!-----------------------------------------------------------------
 
 	iw=0
 	call close_handle(iw)
 
-c-----------------------------------------------------------------
-c set diffusivity
-c-----------------------------------------------------------------
+!-----------------------------------------------------------------
+! set diffusivity
+!-----------------------------------------------------------------
 
 	call set_diffusivity	!horizontal viscosity/diffusivity (needs uvprv)
 
-c-----------------------------------------------------------------
-c offline
-c-----------------------------------------------------------------
+!-----------------------------------------------------------------
+! offline
+!-----------------------------------------------------------------
 
 	call is_offline(1,boff)
 	!if( boff ) write(6,*) 'hydro reading from offline...'
 	if( boff ) return
 
-c-----------------------------------------------------------------
-c solve for hydrodynamic variables
-c-----------------------------------------------------------------
+!-----------------------------------------------------------------
+! solve for hydrodynamic variables
+!-----------------------------------------------------------------
 
 	iloop = 0
 
@@ -397,9 +397,9 @@ c-----------------------------------------------------------------
 
 	call hydro_transports_final	!final transports (also barotropic)
 
-c-----------------------------------------------------------------
-c end of soulution for hydrodynamic variables
-c-----------------------------------------------------------------
+!-----------------------------------------------------------------
+! end of soulution for hydrodynamic variables
+!-----------------------------------------------------------------
 
         call setzev			!copy znv to zenv
         call setuvd			!set velocities in dry areas
@@ -409,9 +409,9 @@ c-----------------------------------------------------------------
 	call check_volume		!checks for negative volume 
         call arper
 
-c-----------------------------------------------------------------
-c vertical velocities and non-hydrostatic step
-c-----------------------------------------------------------------
+!-----------------------------------------------------------------
+! vertical velocities and non-hydrostatic step
+!-----------------------------------------------------------------
 
 	if (bnohyd) then
 	  call sp256wnh
@@ -424,9 +424,9 @@ c-----------------------------------------------------------------
 	  call nh_handle_output(dtime)!DWNH
 	end if
 
-c-----------------------------------------------------------------
-c correction for zeta
-c-----------------------------------------------------------------
+!-----------------------------------------------------------------
+! correction for zeta
+!-----------------------------------------------------------------
 
 	bzcorr = .true.
 	bzcorr = .false.
@@ -437,22 +437,22 @@ c-----------------------------------------------------------------
 	  call hydro_vertical(dzeta)		!$$VERVEL
 	end if
 
-c-----------------------------------------------------------------
-c some checks
-c-----------------------------------------------------------------
+!-----------------------------------------------------------------
+! some checks
+!-----------------------------------------------------------------
 
 	call vol_mass(1)		!computes and writes total volume
 	call mass_conserve		!check mass balance
 
-c-----------------------------------------------------------------
-c compute velocities on elements and nodes
-c-----------------------------------------------------------------
+!-----------------------------------------------------------------
+! compute velocities on elements and nodes
+!-----------------------------------------------------------------
 
 	call compute_velocities
 
-c-----------------------------------------------------------------
-c end of routine
-c-----------------------------------------------------------------
+!-----------------------------------------------------------------
+! end of routine
+!-----------------------------------------------------------------
 
 	return
    99	continue
@@ -460,15 +460,15 @@ c-----------------------------------------------------------------
 	stop 'error stop hydro: not yet ready'
 	end
 
-c******************************************************************
+!******************************************************************
 
 	subroutine hydro_zeta(vqv)
 
-c assembles linear system matrix
-c
-c vqv		flux boundary condition vector
-c
-c semi-implicit scheme for 3d model
+! assembles linear system matrix
+!
+! vqv		flux boundary condition vector
+!
+! semi-implicit scheme for 3d model
 
 	use mod_nudging
 	use mod_internal
@@ -531,7 +531,7 @@ c semi-implicit scheme for 3d model
 	double precision ut,vt,uhat,vhat
 	double precision dbb,dbc,dcb,dcc,abn,acn
 
-c	data amatr / 2.,1.,1.,1.,2.,1.,1.,1.,2. /	!original
+!	data amatr / 2.,1.,1.,1.,2.,1.,1.,1.,2. /	!original
 	data amatr / 4.,0.,0.,0.,4.,0.,0.,0.,4. /	!lumped
 
         integer locsps,loclp
@@ -542,9 +542,9 @@ c	data amatr / 2.,1.,1.,1.,2.,1.,1.,1.,2. /	!original
         !iskout(k) = inodv(k).eq.-2
         iseout(ie) = iwegv(ie).ne.0
 
-c-------------------------------------------------------------
-c initialization
-c-------------------------------------------------------------
+!-------------------------------------------------------------
+! initialization
+!-------------------------------------------------------------
 
 	bcolin=nint(getpar('iclin')).ne.0
 
@@ -557,9 +557,9 @@ c-------------------------------------------------------------
 
 	ngl=nkn
 
-c-------------------------------------------------------------
-c loop over elements
-c-------------------------------------------------------------
+!-------------------------------------------------------------
+! loop over elements
+!-------------------------------------------------------------
 
         if(trim(solver_type)=='PETSc')then
           nel_loop=nel_unique
@@ -575,9 +575,9 @@ c-------------------------------------------------------------
           endif
 	!write(6,*) ie_mpi,ie,ipev(ie),nel
 
-c	------------------------------------------------------
-c	compute level gradient
-c	------------------------------------------------------
+!	------------------------------------------------------
+!	compute level gradient
+!	------------------------------------------------------
 
 	zm=0.
 	do i=1,3
@@ -606,9 +606,9 @@ c	------------------------------------------------------
 
         delta=ddt*ddt*az*am*grav*afix         !ASYM_OPSPLT        !chao dbf
 
-c	------------------------------------------------------
-c	compute contribution from H^x and H^y
-c	------------------------------------------------------
+!	------------------------------------------------------
+!	compute contribution from H^x and H^y
+!	------------------------------------------------------
 
 	dbb = 0.
 	dbc = 0.
@@ -623,9 +623,9 @@ c	------------------------------------------------------
 	  dcc = dcc + ddyv(jv,ie)
 	end do
 
-c	------------------------------------------------------
-c	compute barotropic transport
-c	------------------------------------------------------
+!	------------------------------------------------------
+!	compute barotropic transport
+!	------------------------------------------------------
 
 	uold = 0.
 	vold = 0.
@@ -642,9 +642,9 @@ c	------------------------------------------------------
 	ut = az * uhat + (1.-az) * uold
 	vt = az * vhat + (1.-az) * vold
 
-c	------------------------------------------------------
-c	set element matrix and RHS
-c	------------------------------------------------------
+!	------------------------------------------------------
+!	set element matrix and RHS
+!	------------------------------------------------------
 
 	do n=1,3
 	  do m=1,3
@@ -659,9 +659,9 @@ c	------------------------------------------------------
 	  hik(n) = acu + andg + 12.*aj*ddt*( ut*b(n) + vt*c(n) )	!ZNEW
 	end do
 
-c	------------------------------------------------------
-c	level boundary conditions
-c	------------------------------------------------------
+!	------------------------------------------------------
+!	level boundary conditions
+!	------------------------------------------------------
 
 	do i=1,3
 	  if(rzv(kn(i)).ne.flag) then
@@ -681,9 +681,9 @@ c	------------------------------------------------------
 	  !call handle_ship_boundary(it,i,k,hia,hik)
 	end do
 
-c	------------------------------------------------------
-c	excluded areas
-c	------------------------------------------------------
+!	------------------------------------------------------
+!	excluded areas
+!	------------------------------------------------------
 
           if( iseout(ie) ) then	!ZEONV
             hh999=aj*12.
@@ -705,9 +705,9 @@ c	------------------------------------------------------
             end do
           end if
 
-c	------------------------------------------------------
-c	in hia(i,j),hik(i),i,j=1,3 is system
-c	------------------------------------------------------
+!	------------------------------------------------------
+!	in hia(i,j),hik(i),i,j=1,3 is system
+!	------------------------------------------------------
 	  !call system_assemble(ie,nkn,mbw,kn,hia,hik)
 	  call system_assemble(ie)
 
@@ -715,23 +715,23 @@ c	------------------------------------------------------
 
 	end do
 
-c-------------------------------------------------------------
-c end of loop over elements
-c-------------------------------------------------------------
+!-------------------------------------------------------------
+! end of loop over elements
+!-------------------------------------------------------------
 
-c-------------------------------------------------------------
-c Add additional flux boundary condition values to the rhs vector
-c-------------------------------------------------------------
+!-------------------------------------------------------------
+! Add additional flux boundary condition values to the rhs vector
+!-------------------------------------------------------------
 
 	call system_add_rhs(dt,nkn,vqv)
 
-c-------------------------------------------------------------
-c end of routine
-c-------------------------------------------------------------
+!-------------------------------------------------------------
+! end of routine
+!-------------------------------------------------------------
 
 	end
 
-c******************************************************************
+!******************************************************************
 
 	subroutine hydro_transports
 
@@ -762,9 +762,9 @@ c******************************************************************
 	!integer openmp_get_num_threads,openmp_get_thread_num
 	real getpar
 
-c-------------------------------------------------------------
-c initialize
-c-------------------------------------------------------------
+!-------------------------------------------------------------
+! initialize
+!-------------------------------------------------------------
 
 	ibaroc = nint(getpar('ibarcl'))		! baroclinic contributions
         vismol  = getpar('vismol')		! molecular viscosity
@@ -792,18 +792,18 @@ c-------------------------------------------------------------
 	rrho0=1./rowass
 	if( .not. baroc ) rrho0 = 0.
 
-c-------------------------------------------------------------
-c computation of explicit part (sets arrays fxv(l,ie),fyv(l,ie)
-c-------------------------------------------------------------
+!-------------------------------------------------------------
+! computation of explicit part (sets arrays fxv(l,ie),fyv(l,ie)
+!-------------------------------------------------------------
 
 	call bottom_friction	!set bottom friction
 	call turbine		!routine to compute turbines flow
         call set_explicit       !new HYDRO dbf
 	!call set_yaron
 
-c-------------------------------------------------------------
-c loop over elements
-c-------------------------------------------------------------
+!-------------------------------------------------------------
+! loop over elements
+!-------------------------------------------------------------
 
 !$OMP PARALLEL 
 !$OMP SINGLE
@@ -821,8 +821,8 @@ c-------------------------------------------------------------
  	  if(iend .gt. nel) iend = nel
 
  	  do ies=ie,iend
-	    call hydro_intern(ies,bcolin,baroc,az,am,af,at,radv
-     +			,vismol,rrho0,dt,rmsdif)
+	    call hydro_intern(ies,bcolin,baroc,az,am,af,at,radv &
+     &			,vismol,rrho0,dt,rmsdif)
 	    rmsmax = max(rmsmax,rmsdif)
 	  end do
 
@@ -839,27 +839,27 @@ c-------------------------------------------------------------
 !$OMP TASKWAIT	
 !$OMP END PARALLEL      
 
-c-------------------------------------------------------------
-c end of loop over elements
-c-------------------------------------------------------------
+!-------------------------------------------------------------
+! end of loop over elements
+!-------------------------------------------------------------
 
-ccc	call get_clock_count_diff(count0,dcount)
-ccc	write(6,*) 'count: ',dcount
+!cc	call get_clock_count_diff(count0,dcount)
+!cc	write(6,*) 'count: ',dcount
 
-c-------------------------------------------------------------
-c end of routine
-c-------------------------------------------------------------
+!-------------------------------------------------------------
+! end of routine
+!-------------------------------------------------------------
 
 	end
 
-c******************************************************************
+!******************************************************************
 
-	subroutine hydro_intern(ie,bcolin,baroc,az,am,af,at,radv
-     +			,vismol,rrho0,dt,rmsdif)
+	subroutine hydro_intern(ie,bcolin,baroc,az,am,af,at,radv &
+     &			,vismol,rrho0,dt,rmsdif)
 
-c assembles vertical system matrix
-c
-c semi-implicit scheme for 3d model
+! assembles vertical system matrix
+!
+! semi-implicit scheme for 3d model
 
 	use tide
 	use mod_meteo
@@ -888,13 +888,13 @@ c semi-implicit scheme for 3d model
 	real dt
 	double precision rmsdif
 
-c parameters
+! parameters
 	double precision drittl
 	parameter (drittl=1./3.)
-c common
+! common
 	include 'mkonst.h'
 	include 'pkonst.h'
-c local
+! local
 
 	logical bbaroc,barea0                  !$$BAROC_AREA0
 	logical bnewpenta
@@ -938,11 +938,11 @@ c local
 	double precision vis
 	double precision uuadv,uvadv,vuadv,vvadv
 
-c-----------------------------------------
+!-----------------------------------------
 	real hact(0:nlvdi+1)
 	real rhact(0:nlvdi+1)
 	real alev(0:nlvdi)
-c-----------------------------------------
+!-----------------------------------------
 	double precision rmat(10*nlvdi)
 	double precision smat(-2:2,2*nlvdi)
 	double precision s2dmat(-1:1,2)		!for 2D
@@ -950,16 +950,16 @@ c-----------------------------------------
 	double precision rvecp(6*nlvdi)		!ASYM (3 systems to solve)
 	double precision solv(6*nlvdi)		!ASYM (3 systems to solve)
 	double precision ppx,ppy
-c-----------------------------------------
-c function
+!-----------------------------------------
+! function
 	integer locssp
 
         real epseps
         parameter (epseps = 1.e-6)
 
-c-------------------------------------------------------------
-c initialization and baroclinic terms
-c-------------------------------------------------------------
+!-------------------------------------------------------------
+! initialization and baroclinic terms
+!-------------------------------------------------------------
 
 	bnewpenta = .true.
 	bdebug=.false.
@@ -971,9 +971,9 @@ c-------------------------------------------------------------
 	  if( iarv(ie) .ne. 0 ) bbaroc = .false.
         end if
 
-c-------------------------------------------------------------
-c dimensions of vertical system
-c-------------------------------------------------------------
+!-------------------------------------------------------------
+! dimensions of vertical system
+!-------------------------------------------------------------
 
 	ilevel=ilhv(ie)
 	jlevel=jlhv(ie)
@@ -983,9 +983,9 @@ c-------------------------------------------------------------
 	if(ngl.eq.2) mbb=1
 	b2d = (ngl == 2)
 
-c-------------------------------------------------------------
-c compute barotropic terms (wind, atmospheric pressure, water level
-c-------------------------------------------------------------
+!-------------------------------------------------------------
+! compute barotropic terms (wind, atmospheric pressure, water level
+!-------------------------------------------------------------
 
         rdist = rdistv(ie)		!use terms (distance from OB)
 	rcomp = rcomputev(ie)		!use terms (custom elements)
@@ -1023,19 +1023,19 @@ c-------------------------------------------------------------
 	taux=rcomp*taux*drittl
 	tauy=rcomp*tauy*drittl
 
-c-------------------------------------------------------------
-c coriolis parameter
-c-------------------------------------------------------------
+!-------------------------------------------------------------
+! coriolis parameter
+!-------------------------------------------------------------
 
 	gammat=fcorv(ie)*ruseterm
         gamma=af*dt*gammat
 
-c-------------------------------------------------------------
-c reset vertical system 
-c
-c may be not the whole matrix every time
-c ...size of matrix : ngl*(2*mbw+1) with mbw=2
-c-------------------------------------------------------------
+!-------------------------------------------------------------
+! reset vertical system 
+!
+! may be not the whole matrix every time
+! ...size of matrix : ngl*(2*mbw+1) with mbw=2
+!-------------------------------------------------------------
 
 	do ii=1,ngl*5
 	  rmat(ii)=0.
@@ -1048,9 +1048,9 @@ c-------------------------------------------------------------
 	rvec = 0.
 	solv = 0.
 
-c-------------------------------------------------------------
-c compute layer thicknes and store in hact and rhact
-c-------------------------------------------------------------
+!-------------------------------------------------------------
+! compute layer thicknes and store in hact and rhact
+!-------------------------------------------------------------
 
 	hact(0) = 0.
 	do l=1,ilevel
@@ -1071,9 +1071,9 @@ c-------------------------------------------------------------
 	  end if
 	end do
 
-c-------------------------------------------------------------
-c compute element averaged turbulent viscosity
-c-------------------------------------------------------------
+!-------------------------------------------------------------
+! compute element averaged turbulent viscosity
+!-------------------------------------------------------------
 
 	k1 = nen3v(1,ie)
 	k2 = nen3v(2,ie)
@@ -1086,23 +1086,23 @@ c-------------------------------------------------------------
 	    alev(l) = vis
 	end do
 
-c-------------------------------------------------------------
-c start of vertical loop
-c
-c first set depth values
-c
-c hhi/hhip/hhim		thickness of i/i+1/i-1 layer
-c uui/uuip/uuim		transport in x in i/i+1/i-1 layer
-c vvi/vvip/vvim		transport in y in i/i+1/i-1 layer
-c
-c in case of a layer that does not exist (i-1 of first layer) give any
-c ...value because the corrisponding a/b/c will be 0
-c
-c l starts from 1: for practical implementation reasons
-c we keep in the matrix removed top layers (with identity sub-matrix)
-c For such layers, momentum update is fake: IU=0 -> U=0  
-c By the way the solution is unused
-c-------------------------------------------------------------
+!-------------------------------------------------------------
+! start of vertical loop
+!
+! first set depth values
+!
+! hhi/hhip/hhim		thickness of i/i+1/i-1 layer
+! uui/uuip/uuim		transport in x in i/i+1/i-1 layer
+! vvi/vvip/vvim		transport in y in i/i+1/i-1 layer
+!
+! in case of a layer that does not exist (i-1 of first layer) give any
+! ...value because the corrisponding a/b/c will be 0
+!
+! l starts from 1: for practical implementation reasons
+! we keep in the matrix removed top layers (with identity sub-matrix)
+! For such layers, momentum update is fake: IU=0 -> U=0  
+! By the way the solution is unused
+!-------------------------------------------------------------
 
 	do l=1,ilevel
 
@@ -1124,9 +1124,9 @@ c-------------------------------------------------------------
 	hhip = hact(l+1)
 	hhim = hact(l-1)
 
-c	------------------------------------------------------
-c	set up contributions of vertical viscosity
-c	------------------------------------------------------
+!	------------------------------------------------------
+!	set up contributions of vertical viscosity
+!	------------------------------------------------------
 
 	rhp = 0.
 	rhm = 0.
@@ -1139,8 +1139,8 @@ c	------------------------------------------------------
 	  end if
 	end if
         
-c	aus = afact * alev(l)
-c	aux = dt * at * aus
+!	aus = afact * alev(l)
+!	aux = dt * at * aus
 
 	aus = 1.
 	aux = dt * at
@@ -1152,9 +1152,9 @@ c	aux = dt * at * aus
 	cc  = aux * rhact(l-1) * rhm
 	cct = aus * rhact(l-1) * rhm
 
-c	------------------------------------------------------
-c	boundary conditions for stress on surface and bottom
-c	------------------------------------------------------
+!	------------------------------------------------------
+!	boundary conditions for stress on surface and bottom
+!	------------------------------------------------------
 
 	ppx = 0.
 	ppy = 0.
@@ -1172,9 +1172,9 @@ c	------------------------------------------------------
 	aa  = aa + dt * ifricv(l,ie)		!internal friction for turbines
 	aat = aat + ifricv(l,ie)
 
-c	------------------------------------------------------
-c	implicit advective contribution
-c	------------------------------------------------------
+!	------------------------------------------------------
+!	implicit advective contribution
+!	------------------------------------------------------
 
 	uuadv = 0.
 	uvadv = 0.
@@ -1205,9 +1205,9 @@ c	------------------------------------------------------
 
 	end if
 
-c	------------------------------------------------------
-c	explicit contribution (non-linear, baroclinic, diffusion)
-c	------------------------------------------------------
+!	------------------------------------------------------
+!	explicit contribution (non-linear, baroclinic, diffusion)
+!	------------------------------------------------------
         
         xexpl = fxv(l,ie)			!explicit terms
         yexpl = fyv(l,ie)
@@ -1221,22 +1221,22 @@ c	------------------------------------------------------
 	gravx = rcomp * grav*hhi*bz		!barotropic pressure
 	gravy = rcomp * grav*hhi*cz
 
-c	------------------------------------------------------
-c	ppx/ppy is contribution on the left side of equation
-c	ppx corresponds to -F^x_l in the documentation
-c	ppy corresponds to -F^y_l in the documentation
-c	------------------------------------------------------
+!	------------------------------------------------------
+!	ppx/ppy is contribution on the left side of equation
+!	ppx corresponds to -F^x_l in the documentation
+!	ppy corresponds to -F^y_l in the documentation
+!	------------------------------------------------------
 
-	ppx = ppx + aat*uui - bbt*uuip - cct*uuim - gammat*vvi 
-     +			+ gravx + (hhi/rowass)*presx + xexpl 
-     +  		+ wavex
-	ppy = ppy + aat*vvi - bbt*vvip - cct*vvim + gammat*uui 
-     +			+ gravy + (hhi/rowass)*presy + yexpl 
-     +  		+ wavey
+	ppx = ppx + aat*uui - bbt*uuip - cct*uuim - gammat*vvi  &
+     &			+ gravx + (hhi/rowass)*presx + xexpl  &
+     &  		+ wavex
+	ppy = ppy + aat*vvi - bbt*vvip - cct*vvim + gammat*uui  &
+     &			+ gravy + (hhi/rowass)*presy + yexpl  &
+     &  		+ wavey
 
-c	------------------------------------------------------
-c	set up matrix A
-c	------------------------------------------------------
+!	------------------------------------------------------
+!	set up matrix A
+!	------------------------------------------------------
 
 	jv=l+l
 	ju=jv-1
@@ -1273,16 +1273,16 @@ c	------------------------------------------------------
 		smat(-2,jv) = -cc
         end if
 
-c	------------------------------------------------------
-c	set up right hand side -F^x and -F^y 
-c	------------------------------------------------------
+!	------------------------------------------------------
+!	set up right hand side -F^x and -F^y 
+!	------------------------------------------------------
 
 	rvec(ju) = ppx
 	rvec(jv) = ppy
 
-c	------------------------------------------------------
-c	set up H^x and H^y
-c	------------------------------------------------------
+!	------------------------------------------------------
+!	set up H^x and H^y
+!	------------------------------------------------------
 
 	rvec(ngl+ju) = hhi		!ASYM_OPSPLT
 	rvec(ngl+jv) = 0.d+0
@@ -1291,17 +1291,17 @@ c	------------------------------------------------------
 
 	end do
 
-c-------------------------------------------------------------
-c end of vertical loop
-c-------------------------------------------------------------
+!-------------------------------------------------------------
+! end of vertical loop
+!-------------------------------------------------------------
 
-c-------------------------------------------------------------
-c solution of vertical system (we solve 3 systems in one call)
-c-------------------------------------------------------------
+!-------------------------------------------------------------
+! solution of vertical system (we solve 3 systems in one call)
+!-------------------------------------------------------------
 
-c	----------------------------
-c	new solution with penta
-c	----------------------------
+!	----------------------------
+!	new solution with penta
+!	----------------------------
 
 	rvecp = rvec
 	if( b2d ) then
@@ -1313,17 +1313,17 @@ c	----------------------------
 	  call penta_solve(ngl,smat,rvecp(2*ngl+1),solv(2*ngl+1))
 	end if
 
-c	----------------------------
-c	old solution with dgelb
-c	----------------------------
+!	----------------------------
+!	old solution with dgelb
+!	----------------------------
 
         !call gelb(rvec,rmat,ngl,1,mbb,mbb,epseps,ier)
         !call dgelb(rvec,rmat,ngl,1,mbb,mbb,epseps,ier)
         !call dgelb(rvec,rmat,ngl,3,mbb,mbb,epseps,ier)		!ASYM_OPSPLT
 
-c	----------------------------
-c	check difference
-c	----------------------------
+!	----------------------------
+!	check difference
+!	----------------------------
 
 	rmsdif = 0.
 	!rmsdif = sum((rvec-solv)**2)
@@ -1332,24 +1332,24 @@ c	----------------------------
 	!  write(6,*) 'rmsdif: ',ie,b2d,ngl,ilevel,rmsdif
 	!end if
 
-c	----------------------------
-c	copy new solution
-c	----------------------------
+!	----------------------------
+!	copy new solution
+!	----------------------------
 
 	rvec = solv
 
-c	----------------------------
-c	check for error
-c	----------------------------
+!	----------------------------
+!	check for error
+!	----------------------------
 
 	!if(ier.ne.0) then
 	!  call vel_matrix_error(ier,ie,ilevel,rvec,rmat,hact,alev)
 	!  stop 'error stop hydro_intern: inverting vertical matrix'
 	!end if
 
-c-------------------------------------------------------------
-c compute u^hat (negative sign because ppx/ppy was -F^x/-F^y)
-c-------------------------------------------------------------
+!-------------------------------------------------------------
+! compute u^hat (negative sign because ppx/ppy was -F^x/-F^y)
+!-------------------------------------------------------------
 
         afix=1-iuvfix(ie)       !chao dbf
 
@@ -1363,30 +1363,30 @@ c-------------------------------------------------------------
 	  !ierr = ieee_handler( 'set', 'exception', SIGFPE_ABORT )
 	end if
 
-c-------------------------------------------------------------
-c save contribution A^{-1} H^x and A^{-1} H^y
-c-------------------------------------------------------------
+!-------------------------------------------------------------
+! save contribution A^{-1} H^x and A^{-1} H^y
+!-------------------------------------------------------------
 
 	do l=1,ngl						!ASYM_OPSPLT
 	  ddxv(l,ie) = rvec(ngl+l)
 	  ddyv(l,ie) = rvec(2*ngl+l)
 	end do
 
-c-------------------------------------------------------------
-c special information
-c-------------------------------------------------------------
+!-------------------------------------------------------------
+! special information
+!-------------------------------------------------------------
 
 	if( ie .eq. 1 .and. barea0 .and. baroc ) then  !$$BAROC_AREA0
 	  write(6,*) 'hydro_intern: BAROC_AREA0 active '
 	end if
 
-c-------------------------------------------------------------
-c end of routine
-c-------------------------------------------------------------
+!-------------------------------------------------------------
+! end of routine
+!-------------------------------------------------------------
 
 	end
 
-c******************************************************************
+!******************************************************************
 
 	subroutine vel_matrix_error(ier,ie,lmax,rvec,rmat,hact,alev)
 
@@ -1434,11 +1434,11 @@ c******************************************************************
 
 	end
 
-c******************************************************************
+!******************************************************************
 
 	subroutine hydro_transports_final
 
-c post processing of time step
+! post processing of time step
 
 	use mod_internal
 	use mod_depth
@@ -1465,12 +1465,12 @@ c post processing of time step
 	double precision dz
 	double precision du,dv
 	double precision rfix,rcomp
-c function
+! function
 	real getpar
 
-c-------------------------------------------------------------
-c initialize
-c-------------------------------------------------------------
+!-------------------------------------------------------------
+! initialize
+!-------------------------------------------------------------
 
 	bcolin=nint(getpar('iclin')).ne.0	! linearized conti
 	bdebug = .false.
@@ -1482,9 +1482,9 @@ c-------------------------------------------------------------
 
 	beta = dt * grav * am 
 
-c-------------------------------------------------------------
-c start loop on elements
-c-------------------------------------------------------------
+!-------------------------------------------------------------
+! start loop on elements
+!-------------------------------------------------------------
 
 	do ie_mpi=1,nel
 
@@ -1498,9 +1498,9 @@ c-------------------------------------------------------------
 	!rfix = afix * rcomp		!bug for closing
 	rfix = afix
 
-c	------------------------------------------------------
-c	compute barotropic pressure term
-c	------------------------------------------------------
+!	------------------------------------------------------
+!	compute barotropic pressure term
+!	------------------------------------------------------
 
 	bz=0.
 	cz=0.
@@ -1511,9 +1511,9 @@ c	------------------------------------------------------
 	  cz = cz + dz * ev(ii+6,ie)
 	end do
 
-c	------------------------------------------------------
-c	new transports from u/v hat variable
-c	------------------------------------------------------
+!	------------------------------------------------------
+!	new transports from u/v hat variable
+!	------------------------------------------------------
 
 	do l=jlevel,ilevel
 
@@ -1528,9 +1528,9 @@ c	------------------------------------------------------
 
 	end do
 
-c	------------------------------------------------------
-c	barotropic transports
-c	------------------------------------------------------
+!	------------------------------------------------------
+!	barotropic transports
+!	------------------------------------------------------
 
 	um = 0.
 	vm = 0.
@@ -1543,41 +1543,41 @@ c	------------------------------------------------------
 
 	end do
 
-c-------------------------------------------------------------
-c end of routine
-c-------------------------------------------------------------
+!-------------------------------------------------------------
+! end of routine
+!-------------------------------------------------------------
 
 	end
 
-c******************************************************************
+!******************************************************************
 
 	subroutine hydro_vertical(dzeta)
 
-c computes vertical velocities
-c
-c velocities are computed on S/T points (top and bottom of layer)
-c bottom velocity of the whole column is assumed to be 0
-c -> maybe change this
-c
-c computes volume differences and from these computes vertical
-c velocities at every time step so that the computed velocities
-c satisfy the continuity equation for every single time step
-c
-c wlnv is computed horizontally at a node and vertically
-c it is at the center of the layer -> there are nlv velocities
-c computed
-c
-c b,c are 1/m, (phi is dimensionless)
-c aj is m**2
-c utlnv... is m**2/s
-c dvol is in m**3/s
-c vv is m**2 (area)
-c
-c wlnv is first used to accumulate volume difference -> dvol
-c at the end it receives the vertical velocity
-c
-c wlnv (dvol)   aux array for volume difference
-c vv            aux array for area
+! computes vertical velocities
+!
+! velocities are computed on S/T points (top and bottom of layer)
+! bottom velocity of the whole column is assumed to be 0
+! -> maybe change this
+!
+! computes volume differences and from these computes vertical
+! velocities at every time step so that the computed velocities
+! satisfy the continuity equation for every single time step
+!
+! wlnv is computed horizontally at a node and vertically
+! it is at the center of the layer -> there are nlv velocities
+! computed
+!
+! b,c are 1/m, (phi is dimensionless)
+! aj is m**2
+! utlnv... is m**2/s
+! dvol is in m**3/s
+! vv is m**2 (area)
+!
+! wlnv is first used to accumulate volume difference -> dvol
+! at the end it receives the vertical velocity
+!
+! wlnv (dvol)   aux array for volume difference
+! vv            aux array for area
 
 	use mod_bound_geom
 	use mod_geom_dynamic
@@ -1592,9 +1592,9 @@ c vv            aux array for area
 
 	implicit none
 
-c arguments
+! arguments
 	real dzeta(nkn)
-c local
+! local
 	logical debug
 	integer k,ie,ii,kk,l,lmax,lmin,ie_mpi
 	integer ilevel,jlevel
@@ -1608,7 +1608,7 @@ c local
 	real dzmax,dz
 	real, allocatable :: vf(:,:)
 	real, allocatable :: va(:,:)
-c statement functions
+! statement functions
 
 	logical is_zeta_bound
 	integer ipint
@@ -1616,13 +1616,13 @@ c statement functions
 
 	kint = 0
 
-c 2d -> nothing to be done
+! 2d -> nothing to be done
 
 	dzeta = 0.
 	wlnv = 0.
 	if( nlv_global == 1 ) return	!MPI_bug
 
-c initialize
+! initialize
 
 	call getazam(azpar,ampar)
 	az=azpar
@@ -1634,10 +1634,10 @@ c initialize
 	vf = 0.
 	va = 0.
 
-c compute difference of velocities for each layer
-c
-c f(ii) > 0 ==> flux into node ii
-c aj * ff -> [m**3/s]     ( ff -> [m/s]   aj -> [m**2]    b,c -> [1/m] )
+! compute difference of velocities for each layer
+!
+! f(ii) > 0 ==> flux into node ii
+! aj * ff -> [m**3/s]     ( ff -> [m/s]   aj -> [m**2]    b,c -> [1/m] )
 
 	do ie_mpi=1,nel
          ie = ip_sort_elem(ie_mpi)
@@ -1667,16 +1667,16 @@ c aj * ff -> [m**3/s]     ( ff -> [m/s]   aj -> [m**2]    b,c -> [1/m] )
           call shympi_exchange_and_sum_3d_nodes(va)
 	end if
 
-c from vel difference get absolute velocity (w_bottom = 0)
-c	-> wlnv(nlv,k) is already in place !
-c	-> wlnv(nlv,k) = 0 + wlnv(nlv,k)
-c w of bottom of last layer must be 0 ! -> shift everything up
-c wlnv(nlv,k) is always 0
-c
-c dividing wlnv [m**3/s] by area [vv] gives vertical velocity
-c
-c in va(l,k) is the area of the upper interface: a(l) = a_i(l-1)
-c =>  w(l-1) = flux(l-1) / a_i(l-1)  =>  w(l-1) = flux(l-1) / a(l)
+! from vel difference get absolute velocity (w_bottom = 0)
+!	-> wlnv(nlv,k) is already in place !
+!	-> wlnv(nlv,k) = 0 + wlnv(nlv,k)
+! w of bottom of last layer must be 0 ! -> shift everything up
+! wlnv(nlv,k) is always 0
+!
+! dividing wlnv [m**3/s] by area [vv] gives vertical velocity
+!
+! in va(l,k) is the area of the upper interface: a(l) = a_i(l-1)
+! =>  w(l-1) = flux(l-1) / a_i(l-1)  =>  w(l-1) = flux(l-1) / a(l)
 
 	dzmax = 0.
 
@@ -1730,9 +1730,9 @@ c =>  w(l-1) = flux(l-1) / a_i(l-1)  =>  w(l-1) = flux(l-1) / a(l)
 	  end do
 	end do
 
-c set w to zero at open boundary nodes (new 14.08.1998)
-c
-c FIXME	-> only for ibtyp = 1,2 !!!!
+! set w to zero at open boundary nodes (new 14.08.1998)
+!
+! FIXME	-> only for ibtyp = 1,2 !!!!
 
 	do k=1,nkn
           !if( is_external_boundary(k) ) then	!bug fix 10.03.2010
@@ -1752,7 +1752,7 @@ c FIXME	-> only for ibtyp = 1,2 !!!!
 
 	end
 
-c*******************************************************************
+!*******************************************************************
 
 	subroutine correct_zeta(dzeta)
 
@@ -1767,7 +1767,7 @@ c*******************************************************************
 
 	end
 
-c*******************************************************************
+!*******************************************************************
 
 	subroutine debug_new3di(text,k,ie,hia,hik)
 
@@ -1848,7 +1848,7 @@ c*******************************************************************
 	  
 	end
 
-c*******************************************************************
+!*******************************************************************
 
 	subroutine hydro_debug(iwhat)
 
@@ -1888,7 +1888,7 @@ c*******************************************************************
 
 	end
 
-c******************************************************************
+!******************************************************************
 
 	subroutine test_nan(kn,hia,hik)
 
@@ -1918,9 +1918,9 @@ c******************************************************************
 
 	end
 
-c******************************************************************
-c******************************************************************
-c******************************************************************
+!******************************************************************
+!******************************************************************
+!******************************************************************
 
 	subroutine zeta_debug(iloop,iwhat,dtime)
 
@@ -1997,7 +1997,7 @@ c******************************************************************
 
 	end
 
-c******************************************************************
+!******************************************************************
 
 	subroutine debug_test_node_array(iu,iloop,iwhat,ra)
 
@@ -2024,7 +2024,7 @@ c******************************************************************
 
 	end
 
-c******************************************************************
+!******************************************************************
 
 	subroutine debug_test_elem_array(iu,iloop,iwhat,ifix,ra)
 
@@ -2051,5 +2051,5 @@ c******************************************************************
 
 	end
 
-c******************************************************************
+!******************************************************************
 

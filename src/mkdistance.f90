@@ -24,56 +24,56 @@
 !
 !--------------------------------------------------------------------------
 
-c distance routines
-c
-c contents :
-c
-c subroutine shdist(rdist)
-c                       makes distance array from open boundaries
-c subroutine mkdist(nkn,idist,rdist)
-c                       makes distance array from given nodes
-c
-c revision log :
-c
-c 20.08.2003	ggu	new routine wr2dn()
-c 05.01.2005	ggu	routines for writing nos file into subnsoa.f
-c 07.01.2005	ggu	documentation for shdist
-c 28.04.2009	ggu	links re-structured
-c 23.03.2010	ggu	changed v6.1.1
-c 13.12.2013	ggu	make local distances using boundary parameter nad
-c 28.01.2014	ggu	changed VERS_6_1_71
-c 23.12.2014	ggu	changed VERS_7_0_11
-c 19.01.2015	ggu	changed VERS_7_1_2
-c 19.01.2015	ggu	changed VERS_7_1_3
-c 17.07.2015	ggu	changed VERS_7_1_52
-c 17.07.2015	ggu	changed VERS_7_1_80
-c 20.07.2015	ggu	changed VERS_7_1_81
-c 16.12.2015	ggu	changed VERS_7_3_16
-c 18.12.2015	ggu	changed VERS_7_3_17
-c 09.10.2017	ggu	changed VERS_7_5_33
-c 05.12.2017	ggu	changed VERS_7_5_39
-c 06.07.2018	ggu	changed VERS_7_5_48
-c 14.02.2019	ggu	changed VERS_7_5_56
-c 16.02.2019	ggu	changed VERS_7_5_60
-c 26.05.2020	ggu	rdist is now defined on elements
-c 21.03.2022	ggu	disable writing of dist.shy
-c 28.05.2022	ggu	better error handling in mkdist_new()
-c 12.12.2022	ggu	new routine mkdist_mpi() -> results will change
-c 16.12.2022	ggu	nadist now running with mpi
-c
-c****************************************************************
+! distance routines
+!
+! contents :
+!
+! subroutine shdist(rdist)
+!                       makes distance array from open boundaries
+! subroutine mkdist(nkn,idist,rdist)
+!                       makes distance array from given nodes
+!
+! revision log :
+!
+! 20.08.2003	ggu	new routine wr2dn()
+! 05.01.2005	ggu	routines for writing nos file into subnsoa.f
+! 07.01.2005	ggu	documentation for shdist
+! 28.04.2009	ggu	links re-structured
+! 23.03.2010	ggu	changed v6.1.1
+! 13.12.2013	ggu	make local distances using boundary parameter nad
+! 28.01.2014	ggu	changed VERS_6_1_71
+! 23.12.2014	ggu	changed VERS_7_0_11
+! 19.01.2015	ggu	changed VERS_7_1_2
+! 19.01.2015	ggu	changed VERS_7_1_3
+! 17.07.2015	ggu	changed VERS_7_1_52
+! 17.07.2015	ggu	changed VERS_7_1_80
+! 20.07.2015	ggu	changed VERS_7_1_81
+! 16.12.2015	ggu	changed VERS_7_3_16
+! 18.12.2015	ggu	changed VERS_7_3_17
+! 09.10.2017	ggu	changed VERS_7_5_33
+! 05.12.2017	ggu	changed VERS_7_5_39
+! 06.07.2018	ggu	changed VERS_7_5_48
+! 14.02.2019	ggu	changed VERS_7_5_56
+! 16.02.2019	ggu	changed VERS_7_5_60
+! 26.05.2020	ggu	rdist is now defined on elements
+! 21.03.2022	ggu	disable writing of dist.shy
+! 28.05.2022	ggu	better error handling in mkdist_new()
+! 12.12.2022	ggu	new routine mkdist_mpi() -> results will change
+! 16.12.2022	ggu	nadist now running with mpi
+!
+!****************************************************************
 
         subroutine shdist(redist)
 
-c makes distance array from open boundaries
-c
-c nad of single boundaries can be either 0 or nadist global
-c if nadist is not given, it will be set to maximum of nad on single boundaries
-c
-c rdist is contained between 0 and 1
-c rdist==1 means computation of all terms, rdist=0 excludes non-linear terms
-c
-c if nadist (=d) is not given rdist = 1 (default)
+! makes distance array from open boundaries
+!
+! nad of single boundaries can be either 0 or nadist global
+! if nadist is not given, it will be set to maximum of nad on single boundaries
+!
+! rdist is contained between 0 and 1
+! rdist==1 means computation of all terms, rdist=0 excludes non-linear terms
+!
+! if nadist (=d) is not given rdist = 1 (default)
 
 
 	use basin
@@ -83,7 +83,7 @@ c if nadist (=d) is not given rdist = 1 (default)
 
         real redist(nel)
 
-c local variables
+! local variables
 
 	logical, parameter :: bwrite = .false.		! write bdist.grd file
         integer i,k,kk,ie,ii,kext
@@ -102,9 +102,9 @@ c local variables
         integer nbnds,itybnd,nkbnds,kbnds
         real getpar
 
-c-----------------------------------------------------------------
-c get parameters
-c-----------------------------------------------------------------
+!-----------------------------------------------------------------
+! get parameters
+!-----------------------------------------------------------------
 
         redist = 1.
 
@@ -140,9 +140,9 @@ c-----------------------------------------------------------------
         idist = 0
         rdist = 1.
 
-c-----------------------------------------------------------------
-c run over open boundary nodes and set idist
-c-----------------------------------------------------------------
+!-----------------------------------------------------------------
+! run over open boundary nodes and set idist
+!-----------------------------------------------------------------
 
         do ibc=1,nbc
           itype = itybnd(ibc)
@@ -159,20 +159,20 @@ c-----------------------------------------------------------------
           end if
         end do
 
-c	now idist is either 0 or nad if on boundary and nadist is set
+!	now idist is either 0 or nad if on boundary and nadist is set
 
-c-----------------------------------------------------------------
-c make distance
-c-----------------------------------------------------------------
+!-----------------------------------------------------------------
+! make distance
+!-----------------------------------------------------------------
 
         write(6,*) 'Making distance rdist'
         !call mkdist(nadist,nkn,idist,rdist)		!old version
         !call mkdist_new(nkn,idist,rdist)		!new non-mpi version
         call mkdist_mpi(idist,rdist)			!mpi-version
 
-c-----------------------------------------------------------------
-c compute value of rdist on elements
-c-----------------------------------------------------------------
+!-----------------------------------------------------------------
+! compute value of rdist on elements
+!-----------------------------------------------------------------
 
 	do ie=1,nel
 	  r = 0.
@@ -183,20 +183,20 @@ c-----------------------------------------------------------------
 	  redist(ie) = r / 3.
 	end do
 
-c-----------------------------------------------------------------
-c write dist (nos) file
-c-----------------------------------------------------------------
+!-----------------------------------------------------------------
+! write dist (nos) file
+!-----------------------------------------------------------------
  
 	if( bwrite ) then
 	  allocate(ieaux(nel))
 	  ieaux = 0
-	  call write_grd_general('bdist.grd','distance from boundary'
-     +				,idist,ieaux,rdist,redist)
+	  call write_grd_general('bdist.grd','distance from boundary' &
+     &				,idist,ieaux,rdist,redist)
 	end if
 
-c-----------------------------------------------------------------
-c end of routine
-c-----------------------------------------------------------------
+!-----------------------------------------------------------------
+! end of routine
+!-----------------------------------------------------------------
 
 	return
    99	continue
@@ -207,13 +207,13 @@ c-----------------------------------------------------------------
 	stop 'error stop shdist: incongruent nadist and local nad values'
         end
 
-c*************************************************************************** 
+!*************************************************************************** 
                          
         subroutine mkdist(nadist,nkn,idist,rdist)
 
-c makes distance array from given nodes
-c
-c can olny deal with one global value
+! makes distance array from given nodes
+!
+! can olny deal with one global value
 
 	use mod_geom
 
@@ -230,17 +230,17 @@ c can olny deal with one global value
 	integer nodes(maxlnk)
         real r,d,d2
 
-c----------------------------------------------------------
-c initialize with first level
-c----------------------------------------------------------
+!----------------------------------------------------------
+! initialize with first level
+!----------------------------------------------------------
 
 	stop 'error stop mkdist: please use mkdist_new'
 
-c       idist is already initialized with first level
+!       idist is already initialized with first level
 
-c----------------------------------------------------------
-c loop on levels
-c----------------------------------------------------------
+!----------------------------------------------------------
+! loop on levels
+!----------------------------------------------------------
 
         idact = 1
         nfound = nkn
@@ -269,17 +269,17 @@ c----------------------------------------------------------
 
         end do
 
-c----------------------------------------------------------
-c set real value
-c----------------------------------------------------------
+!----------------------------------------------------------
+! set real value
+!----------------------------------------------------------
 
         do k=1,nkn
           rdist(k) = idist(k)
         end do
 
-c----------------------------------------------------------
-c adjust distance
-c----------------------------------------------------------
+!----------------------------------------------------------
+! adjust distance
+!----------------------------------------------------------
 
         d = nadist
         d2 = d / 2.
@@ -295,29 +295,29 @@ c----------------------------------------------------------
           rdist(k) = r
         end do
 
-c----------------------------------------------------------
-c end of routine
-c----------------------------------------------------------
+!----------------------------------------------------------
+! end of routine
+!----------------------------------------------------------
 
         end
 
-c*************************************************************************** 
+!*************************************************************************** 
                          
         subroutine mkdist_new(nkn,idist,rdist)
 
-c makes distance array from given nodes
-c
-c d = nadist or nad
-c d2=d/2 rows of nodes have rdist = 0
-c and then the next ones have rdist = i/d with i = d2+1, d2+d
-c the rest has again rdist = 1
-c
-c example: nadist = d = 4,   d2 = d/2 = 2
-c
-c   row i:   1   2   3   4   5   6   7   8   ...
-c   rdist:   0   0  1/4 2/4 3/4  1   1   1   ...
-c
-c routine is too complicated, and cannot deal with mpi
+! makes distance array from given nodes
+!
+! d = nadist or nad
+! d2=d/2 rows of nodes have rdist = 0
+! and then the next ones have rdist = i/d with i = d2+1, d2+d
+! the rest has again rdist = 1
+!
+! example: nadist = d = 4,   d2 = d/2 = 2
+!
+!   row i:   1   2   3   4   5   6   7   8   ...
+!   rdist:   0   0  1/4 2/4 3/4  1   1   1   ...
+!
+! routine is too complicated, and cannot deal with mpi
 
 	use mod_geom
 	use shympi
@@ -335,9 +335,9 @@ c routine is too complicated, and cannot deal with mpi
 	integer nodes(maxlnk)
 	real r
 
-c----------------------------------------------------------
-c initialize with first level
-c----------------------------------------------------------
+!----------------------------------------------------------
+! initialize with first level
+!----------------------------------------------------------
 
 	ic = count(idist>0)
 	ic = shympi_sum(ic)
@@ -351,17 +351,17 @@ c----------------------------------------------------------
 	  rdist(k) = -1.
 	end do
 
-c----------------------------------------------------------
-c loop on levels
-c----------------------------------------------------------
+!----------------------------------------------------------
+! loop on levels
+!----------------------------------------------------------
 
 	do k=1,nkn
 	  if( idist(k) .gt. 0 .and. rdist(k) .eq. -1. ) then
 	    nanew = idist(k)
 	    na = nanew
 	    do ka=1,nkn		!mark first row
-	      if( idist(ka) .eq. nanew 
-     +			.and. rdist(ka) .eq. -1. ) then
+	      if( idist(ka) .eq. nanew  &
+     &			.and. rdist(ka) .eq. -1. ) then
 	         rdist(ka) = 0.
 	      end if
 	    end do
@@ -385,9 +385,9 @@ c----------------------------------------------------------
 	  end if
 	end do
 
-c----------------------------------------------------------
-c set real value
-c----------------------------------------------------------
+!----------------------------------------------------------
+! set real value
+!----------------------------------------------------------
 
         do k=1,nkn
           if( rdist(k) .lt. 0. ) rdist(k) = 1.
@@ -407,23 +407,23 @@ c----------------------------------------------------------
 	  stop 'error stop mdist_new: values out of bound'
 	end if
 
-c----------------------------------------------------------
-c end of routine
-c----------------------------------------------------------
+!----------------------------------------------------------
+! end of routine
+!----------------------------------------------------------
 
         end
 
-c*************************************************************************** 
+!*************************************************************************** 
 
         subroutine mkdist_mpi(idist,rdist)
 
-c makes distance array from given nodes
-c
-c can deal with global and local values
-c
-c idist is 0 or nad if on boundary and nadist is set
-c first set idist over all nodes
-c then convert idist to rdist
+! makes distance array from given nodes
+!
+! can deal with global and local values
+!
+! idist is 0 or nad if on boundary and nadist is set
+! first set idist over all nodes
+! then convert idist to rdist
 
 	use basin
 	use mod_geom
@@ -444,9 +444,9 @@ c then convert idist to rdist
 	integer, allocatable :: iaux(:)
 	real frac
 
-c----------------------------------------------------------
-c initialize with first level
-c----------------------------------------------------------
+!----------------------------------------------------------
+! initialize with first level
+!----------------------------------------------------------
 
 	allocate(iaux(nkn))
 
@@ -457,9 +457,9 @@ c----------------------------------------------------------
 	nadmax = shympi_max(nadmax)
 	!write(6,*) 'using nadmax = ',nadmax
 
-c----------------------------------------------------------
-c loop on levels and set idist
-c----------------------------------------------------------
+!----------------------------------------------------------
+! loop on levels and set idist
+!----------------------------------------------------------
 
 	call shympi_barrier
 
@@ -497,9 +497,9 @@ c----------------------------------------------------------
 
 	call shympi_barrier
 
-c----------------------------------------------------------
-c set real value rdist
-c----------------------------------------------------------
+!----------------------------------------------------------
+! set real value rdist
+!----------------------------------------------------------
 
 	rdist = 0
 	nad2 = (nadmax+1) / 2
@@ -518,11 +518,11 @@ c----------------------------------------------------------
 
 	rdist = 1. - rdist
 
-c----------------------------------------------------------
-c end of routine
-c----------------------------------------------------------
+!----------------------------------------------------------
+! end of routine
+!----------------------------------------------------------
 
         end
 
-c*************************************************************************** 
+!*************************************************************************** 
 

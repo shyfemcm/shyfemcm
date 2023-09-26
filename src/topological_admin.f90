@@ -23,75 +23,75 @@
 !
 !--------------------------------------------------------------------------
 
-c topological set up routines
-c
-c contents :
-c
-c subroutine nknel(nnkn,nnel,nnbn,nnli,nnis,nnod)
-c			 computes parameters about total numbers
-c subroutine newlnk
-c			 administrates new topological routines
-c function winkk(k)
-c			 total angle at node k
-c subroutine setnar(nar)
-c			 sets number of areas
-c subroutine setwnk(wink)
-c			 sets total angle at boundary nodes
-c subroutine arper
-c			 computes statistics about area of submerged zones
-c
-c revision log :
-c
-c 01.08.2003	ggu	created from sublnk.f
-c 13.08.2003	ggu	new name set_link_info for newlnk
-c 17.02.2006	ggu	do not all anymore zvbnds()
-c 28.04.2009	ggu	links re-structured
-c 23.03.2010	ggu	changed v6.1.1
-c 31.05.2011	ggu	changed VERS_6_1_23
-c 19.12.2014	ggu	changed VERS_7_0_10
-c 23.12.2014	ggu	changed VERS_7_0_11
-c 19.01.2015	ggu	changed VERS_7_1_2
-c 19.01.2015	ggu	changed VERS_7_1_3
-c 05.05.2015	ggu	changed VERS_7_1_10
-c 17.07.2015	ggu	changed VERS_7_1_80
-c 20.07.2015	ggu	changed VERS_7_1_81
-c 16.12.2015	ggu	changed VERS_7_3_16
-c 18.12.2015	ggu	changed VERS_7_3_17
-c 28.04.2016	ggu	changed VERS_7_5_9
-c 27.06.2016	ggu	changed VERS_7_5_16
-c 05.12.2017	ggu	changed VERS_7_5_39
-c 03.04.2018	ggu	changed VERS_7_5_43
-c 11.05.2018	ggu	changed VERS_7_5_47
-c 16.02.2019	ggu	changed VERS_7_5_60
-c 06.11.2019	ggu	eliminated femtime
-c 06.06.2023	ggu	do not write newlnk - not working in MPI
-c
-c*****************************************************************
+! topological set up routines
+!
+! contents :
+!
+! subroutine nknel(nnkn,nnel,nnbn,nnli,nnis,nnod)
+!			 computes parameters about total numbers
+! subroutine newlnk
+!			 administrates new topological routines
+! function winkk(k)
+!			 total angle at node k
+! subroutine setnar(nar)
+!			 sets number of areas
+! subroutine setwnk(wink)
+!			 sets total angle at boundary nodes
+! subroutine arper
+!			 computes statistics about area of submerged zones
+!
+! revision log :
+!
+! 01.08.2003	ggu	created from sublnk.f
+! 13.08.2003	ggu	new name set_link_info for newlnk
+! 17.02.2006	ggu	do not all anymore zvbnds()
+! 28.04.2009	ggu	links re-structured
+! 23.03.2010	ggu	changed v6.1.1
+! 31.05.2011	ggu	changed VERS_6_1_23
+! 19.12.2014	ggu	changed VERS_7_0_10
+! 23.12.2014	ggu	changed VERS_7_0_11
+! 19.01.2015	ggu	changed VERS_7_1_2
+! 19.01.2015	ggu	changed VERS_7_1_3
+! 05.05.2015	ggu	changed VERS_7_1_10
+! 17.07.2015	ggu	changed VERS_7_1_80
+! 20.07.2015	ggu	changed VERS_7_1_81
+! 16.12.2015	ggu	changed VERS_7_3_16
+! 18.12.2015	ggu	changed VERS_7_3_17
+! 28.04.2016	ggu	changed VERS_7_5_9
+! 27.06.2016	ggu	changed VERS_7_5_16
+! 05.12.2017	ggu	changed VERS_7_5_39
+! 03.04.2018	ggu	changed VERS_7_5_43
+! 11.05.2018	ggu	changed VERS_7_5_47
+! 16.02.2019	ggu	changed VERS_7_5_60
+! 06.11.2019	ggu	eliminated femtime
+! 06.06.2023	ggu	do not write newlnk - not working in MPI
+!
+!*****************************************************************
 
         subroutine nknel(nnkn,nnel,nnbn,nnli,nnis,nnod)
 
-c computes parameters about total numbers
-c
-c all numbers are refered to actual elements and nodes inside system
-c
-c nnkn   total number of nodes
-c nnel   total number of elements
-c nnbn   total number of boundary nodes
-c nnli   total number of links
-c nnis   total number of islands
-c nnod   total number of not allowed junctions (should be 0)
-c
-c formulas :
-c
-c nel = 2*nkn - nbn - 2 + 2*nis - nod = nbn - 2 + 2*nin + 2*nis - nod
-c nin = nkn - nbn
-c nli = ( 3*nel + nbn + nod ) / 2
-c
-c the following is always true:
-c
-c nel < 2*nkn
-c nli = nel + (1/2)*nel + nbn < nel + nkn + nbn <= nel + 2*nkn   so
-c nli < 2*nkn + nel
+! computes parameters about total numbers
+!
+! all numbers are refered to actual elements and nodes inside system
+!
+! nnkn   total number of nodes
+! nnel   total number of elements
+! nnbn   total number of boundary nodes
+! nnli   total number of links
+! nnis   total number of islands
+! nnod   total number of not allowed junctions (should be 0)
+!
+! formulas :
+!
+! nel = 2*nkn - nbn - 2 + 2*nis - nod = nbn - 2 + 2*nin + 2*nis - nod
+! nin = nkn - nbn
+! nli = ( 3*nel + nbn + nod ) / 2
+!
+! the following is always true:
+!
+! nel < 2*nkn
+! nli = nel + (1/2)*nel + nbn < nel + nkn + nbn <= nel + 2*nkn   so
+! nli < 2*nkn + nel
 
 	use mod_geom
 	use mod_geom_dynamic
@@ -100,13 +100,13 @@ c nli < 2*nkn + nel
 
         implicit none
 
-c arguments
+! arguments
         integer nnkn,nnel,nnbn,nnli,nnis,nnod
-c local
+! local
         integer k,ie,n,i,ne,ntot
 	integer elems(maxlnk)
         logical bin
-c statement functions
+! statement functions
         logical iskbnd,iskins,iseins
         iskbnd(k) = inodv(k).ne.0 .and. inodv(k).ne.-2
         iskins(k) = inodv(k).ne.-2
@@ -155,13 +155,13 @@ c statement functions
 
         end
 
-c****************************************************************
+!****************************************************************
 
         subroutine set_link_info
 
-c administrates new topological routines
-c
-c ... iwegv has already been set
+! administrates new topological routines
+!
+! ... iwegv has already been set
 
 	use mod_geom
 	use basin, only : nkn,nel,ngr,mbw
@@ -169,13 +169,13 @@ c ... iwegv has already been set
 
         implicit none
 
-c local
+! local
         character*80 nam,dir,file
         real wink
         integer nnkn,nnel,nnbn,nnli,nnis,nnod,nnar,nnnis,nnnel
-c function
+! function
         integer iround,ifileo
-c save
+! save
         integer, save :: iuinfo = 0
 	logical, save :: binfo = .false.
 
@@ -196,21 +196,21 @@ c save
         nnnel=2*nnkn-nnbn+2*(nnnis-nnar)-nnod
 
         if(shympi_is_master()) then
-          write(iuinfo,'(a,10i6)') ' newlnk: '
-     +          ,nnkn,nnel,nnbn,nnli,nnis,nnod,nnar
-     +          ,nnnis,nnnel-nnel,nel_global-nnel
+          write(iuinfo,'(a,10i6)') ' newlnk: ' &
+     &          ,nnkn,nnel,nnbn,nnli,nnis,nnod,nnar &
+     &          ,nnnis,nnnel-nnel,nel_global-nnel
 	end if
 
         end
 
-c****************************************************************
+!****************************************************************
 
         function winkk(k)
 
-c total angle at node k
-c
-c k       node to links
-c
+! total angle at node k
+!
+! k       node to links
+!
 	use mod_geom
 	use mod_geom_dynamic
 	use evgeom
@@ -218,14 +218,14 @@ c
 
         implicit none
 
-c arguments
+! arguments
 	real winkk
         integer k
-c local
+! local
         integer i,n,ie
 	integer elems(maxlnk)
         double precision w
-c functions
+! functions
         integer ithis
 
 	call get_elems_around(k,maxlnk,n,elems)
@@ -242,35 +242,35 @@ c functions
 
         end
 
-c****************************************************************
-c
+!****************************************************************
+!
         subroutine setnar(nar)
-c
-c sets number of areas
-c
-c nar   number of areas (return)
-c
+!
+! sets number of areas
+!
+! nar   number of areas (return)
+!
 	use mod_geom
 	use mod_geom_dynamic
 	use basin
 	use shympi
 
         implicit none
-c
-c arguments
+!
+! arguments
         integer nar
-c local
+! local
         integer i,ie,ieo,ien,n1,n2
         logical btest
-c functions
+! functions
         integer inext
-c data
+! data
         data btest /.false./
-c
+!
         do ie=1,nel
           if(iwegv(ie).gt.0) iwegv(ie)=iwegv(ie)+3
         end do
-c
+!
         n1=0
         n2=0
         nar=0
@@ -283,8 +283,8 @@ c
               i=mod(i,3)+1
               ien=ieltv(i,ieo)
               n1=n1+1
-c              write(6,*) ieo,iwegv(ieo),i,ien,iwegv(ien)
-c              read(5,'(i10)') n
+!              write(6,*) ieo,iwegv(ieo),i,ien,iwegv(ien)
+!              read(5,'(i10)') n
               if(ien.gt.0) then !possible to enter
                if(iwegv(ien).lt.3) then !possible to enter
                 if(iwegv(ien).eq.0.or.iwegv(ieo).eq.3) then !may enter
@@ -298,7 +298,7 @@ c              read(5,'(i10)') n
             nar=nar+1
           end if
         end do
-c
+!
         if(btest) then
           write(6,*) nar,n1,n2
           write(6,*)
@@ -314,36 +314,36 @@ c
           end if
           iwegv(ie)=iwegv(ie)-3
         end do
-c
+!
         return
         end
-c
-c****************************************************************
-c
+!
+!****************************************************************
+!
         subroutine setwnk(wink)
-c
-c sets total angle at boundary nodes
-c
-c wink  total angle (return)
-c
+!
+! sets total angle at boundary nodes
+!
+! wink  total angle (return)
+!
 	use mod_geom_dynamic
 	use evgeom
 	use basin
 	use shympi
 
         implicit none
-c
-c arguments
+!
+! arguments
         real wink
-c local
+! local
         integer ie,ii,k
         double precision w
-c functions
+! functions
         logical iskbnd
         iskbnd(k) = inodv(k).ne.0 .and. inodv(k).ne.-2
-c
-c sum angles
-c
+!
+! sum angles
+!
         w=0.
         do ie=1,nel
           if(iwegv(ie).eq.0) then !element is in system
@@ -362,24 +362,24 @@ c
         return
         end
 
-c****************************************************************
-c
+!****************************************************************
+!
         subroutine arper
-c
-c computes statistics about area of submerged zones
-c
-c ... iwegv has already been set
-c
+!
+! computes statistics about area of submerged zones
+!
+! ... iwegv has already been set
+!
 	use mod_geom_dynamic
 	use evgeom
 	use basin, only : nkn,nel,ngr,mbw
 
         implicit none
-c
-c local
+!
+! local
         real arin,arout,artot,area
         integer ie
-c functions
+! functions
         logical isein
         isein(ie) = iwegv(ie).eq.0
 
@@ -401,9 +401,9 @@ c functions
         arout=100.*arout/artot
         artot=12.*artot
 
-c        write(88,'(i8,f12.3,2f12.2,e12.4)') dtime,arin,arout,artot
+!        write(88,'(i8,f12.3,2f12.2,e12.4)') dtime,arin,arout,artot
 
         end
 
-c****************************************************************
+!****************************************************************
 

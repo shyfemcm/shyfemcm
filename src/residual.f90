@@ -24,68 +24,68 @@
 !
 !--------------------------------------------------------------------------
 
-c residual currents
-c
-c contents :
-c
-c subroutine resid		computes residual currents
-c subroutine rmsvel		computes rms currents
-c subroutine dischar		computes discharge (old)
-c function resi(zov,znv,n)	computes residuum
-c subroutine tsmed 		computes average of scalar values
-c
-c revision log :
-c
-c 21.12.1993	ggu	written residual currents
-c 15.05.1997	ggu	$$IDTRMS - new parameters for RMS velocity
-c 21.05.1997	ggu	$$AVERZR - average zr for dry/wet algorithm
-c 21.05.1997	ggu	$$HREFBUG - bug in getting href, hzoff
-c 16.06.1997	ggu	$$RESCU - not used subroutine rescu deleted
-c 28.04.1998	ggu	dischar deleted
-c 20.05.1998	ggu	use ifileo to open file
-c 26.01.1999	ggu	use 3D NOS routines for rms velocity
-c 18.10.1999	ggu	function resi copied from newres
-c 08.10.2002	ggu	subroutine tsmed to compute average of T/S
-c 10.10.2002	ggu	subroutine tsmed to compute min/max of T/S
-c 19.08.2003	ggu	some cleanup in subroutine rmsvel
-c 19.08.2003	ggu	new routines cmed_init, cmed_accum, ts_shell
-c 04.03.2004	ggu	bug fix in cmed_accum() for array with more variables
-c 10.08.2004	ggu	cmed_init, cmed_accum adjusted also for 2D
-c 25.11.2004	ggu	resid converted to 3D (not tested)
-c 09.10.2008	ggu	new call to confop
-c 23.03.2010	ggu	changed v6.1.1
-c 20.01.2014	ggu	new calls to ous routines
-c 28.01.2014	ggu	changed VERS_6_1_71
-c 26.11.2014	ggu	changed VERS_7_0_7
-c 19.12.2014	ggu	changed VERS_7_0_10
-c 23.12.2014	ggu	changed VERS_7_0_11
-c 19.01.2015	ggu	changed VERS_7_1_3
-c 05.06.2015	ggu	changed VERS_7_1_12
-c 10.07.2015	ggu	changed VERS_7_1_50
-c 13.07.2015	ggu	changed VERS_7_1_51
-c 17.07.2015	ggu	changed VERS_7_1_80
-c 20.07.2015	ggu	changed VERS_7_1_81
-c 18.09.2015	ggu	changed VERS_7_2_3
-c 23.09.2015	ggu	changed VERS_7_2_4
-c 28.04.2016	ggu	changed VERS_7_5_9
-c 17.05.2016	ggu	in ts_shell() save isvect/itvect
-c 25.05.2016	ggu	changed VERS_7_5_10
-c 31.10.2016	ggu	new output format in rms files
-c 12.01.2017	ggu	changed VERS_7_5_21
-c 03.04.2018	ggu	changed VERS_7_5_43
-c 11.05.2018	ggu	changed VERS_7_5_47
-c 14.02.2019	ggu	changed VERS_7_5_56
-c 16.02.2019	ggu	changed VERS_7_5_60
-c 15.07.2021	ggu	do not use -> it must be converted to dtime
-c 21.03.2022	ggu	new version with da_out
-c 22.03.2022	ggu	cmed routines removed and put into subconutil.f
-c
-c********************************************************************
-c
+! residual currents
+!
+! contents :
+!
+! subroutine resid		computes residual currents
+! subroutine rmsvel		computes rms currents
+! subroutine dischar		computes discharge (old)
+! function resi(zov,znv,n)	computes residuum
+! subroutine tsmed 		computes average of scalar values
+!
+! revision log :
+!
+! 21.12.1993	ggu	written residual currents
+! 15.05.1997	ggu	$$IDTRMS - new parameters for RMS velocity
+! 21.05.1997	ggu	$$AVERZR - average zr for dry/wet algorithm
+! 21.05.1997	ggu	$$HREFBUG - bug in getting href, hzoff
+! 16.06.1997	ggu	$$RESCU - not used subroutine rescu deleted
+! 28.04.1998	ggu	dischar deleted
+! 20.05.1998	ggu	use ifileo to open file
+! 26.01.1999	ggu	use 3D NOS routines for rms velocity
+! 18.10.1999	ggu	function resi copied from newres
+! 08.10.2002	ggu	subroutine tsmed to compute average of T/S
+! 10.10.2002	ggu	subroutine tsmed to compute min/max of T/S
+! 19.08.2003	ggu	some cleanup in subroutine rmsvel
+! 19.08.2003	ggu	new routines cmed_init, cmed_accum, ts_shell
+! 04.03.2004	ggu	bug fix in cmed_accum() for array with more variables
+! 10.08.2004	ggu	cmed_init, cmed_accum adjusted also for 2D
+! 25.11.2004	ggu	resid converted to 3D (not tested)
+! 09.10.2008	ggu	new call to confop
+! 23.03.2010	ggu	changed v6.1.1
+! 20.01.2014	ggu	new calls to ous routines
+! 28.01.2014	ggu	changed VERS_6_1_71
+! 26.11.2014	ggu	changed VERS_7_0_7
+! 19.12.2014	ggu	changed VERS_7_0_10
+! 23.12.2014	ggu	changed VERS_7_0_11
+! 19.01.2015	ggu	changed VERS_7_1_3
+! 05.06.2015	ggu	changed VERS_7_1_12
+! 10.07.2015	ggu	changed VERS_7_1_50
+! 13.07.2015	ggu	changed VERS_7_1_51
+! 17.07.2015	ggu	changed VERS_7_1_80
+! 20.07.2015	ggu	changed VERS_7_1_81
+! 18.09.2015	ggu	changed VERS_7_2_3
+! 23.09.2015	ggu	changed VERS_7_2_4
+! 28.04.2016	ggu	changed VERS_7_5_9
+! 17.05.2016	ggu	in ts_shell() save isvect/itvect
+! 25.05.2016	ggu	changed VERS_7_5_10
+! 31.10.2016	ggu	new output format in rms files
+! 12.01.2017	ggu	changed VERS_7_5_21
+! 03.04.2018	ggu	changed VERS_7_5_43
+! 11.05.2018	ggu	changed VERS_7_5_47
+! 14.02.2019	ggu	changed VERS_7_5_56
+! 16.02.2019	ggu	changed VERS_7_5_60
+! 15.07.2021	ggu	do not use -> it must be converted to dtime
+! 21.03.2022	ggu	new version with da_out
+! 22.03.2022	ggu	cmed routines removed and put into subconutil.f
+!
+!********************************************************************
+!
 	subroutine resid
-c
-c computes residual currents
-c
+!
+! computes residual currents
+!
 	use mod_depth
 	use mod_hydro
 	use levels
@@ -93,9 +93,9 @@ c
 
 	implicit none
 
-c common
+! common
 	include 'simul.h'
-c local
+! local
 	character*80 nam,dir,file
 	integer ierr,ii,ie,k,id
         integer nvers,lmax,l
@@ -105,14 +105,14 @@ c local
 	double precision dtime
 	character*80 title,femver
 	character*20 aline
-c function
+! function
 	integer iround
 	integer wfout,wrout,ifileo
 	real getpar
 	double precision dgetpar
 	integer ifemop
 	logical has_output_d,is_over_output_d,next_output_d
-c save
+! save
 	real, save, allocatable :: ur(:,:)
 	real, save, allocatable :: vr(:,:)
 	real, save, allocatable :: znr(:)
@@ -126,9 +126,9 @@ c save
 
 	if(icall.eq.-1) return
 
-c---------------------------------------------------------------------
-c initialize routine and variables
-c---------------------------------------------------------------------
+!---------------------------------------------------------------------
+! initialize routine and variables
+!---------------------------------------------------------------------
 
 	if(icall.eq.0) then
           call init_output_d('itmres','idtres',da_out)
@@ -157,9 +157,9 @@ c---------------------------------------------------------------------
 	  zer = 0.
 	end if
 
-c---------------------------------------------------------------------
-c already ready for adding?
-c---------------------------------------------------------------------
+!---------------------------------------------------------------------
+! already ready for adding?
+!---------------------------------------------------------------------
 
 	icall=icall+1
 
@@ -171,9 +171,9 @@ c---------------------------------------------------------------------
 	   bfirst = .false.
 	end if
 
-c---------------------------------------------------------------------
-c sum transports
-c---------------------------------------------------------------------
+!---------------------------------------------------------------------
+! sum transports
+!---------------------------------------------------------------------
 
 	nr=nr+1
 	do ie=1,nel
@@ -190,15 +190,15 @@ c---------------------------------------------------------------------
 	  znr(k)=znr(k)+znv(k)
 	end do
 
-c---------------------------------------------------------------------
-c is it time to write file ?
-c---------------------------------------------------------------------
+!---------------------------------------------------------------------
+! is it time to write file ?
+!---------------------------------------------------------------------
 
 	if( .not. next_output_d(da_out) ) return
 
-c---------------------------------------------------------------------
-c write results into file
-c---------------------------------------------------------------------
+!---------------------------------------------------------------------
+! write results into file
+!---------------------------------------------------------------------
 
 	if( bfirst ) then
 	   call get_act_timeline(aline)
@@ -223,12 +223,12 @@ c---------------------------------------------------------------------
 
           id = nint(da_out(4))
           call get_act_dtime(dtime)
-          call shy_write_hydro_records(id,dtime,nlvdi,znr,zer
-     +                                  ,ur,vr)
+          call shy_write_hydro_records(id,dtime,nlvdi,znr,zer &
+     &                                  ,ur,vr)
 
-c---------------------------------------------------------------------
-c reset variables
-c---------------------------------------------------------------------
+!---------------------------------------------------------------------
+! reset variables
+!---------------------------------------------------------------------
 
 	  nr=0
 	  ur = 0.
@@ -236,9 +236,9 @@ c---------------------------------------------------------------------
 	  znr = 0.
 	  zer = 0.
 
-c---------------------------------------------------------------------
-c end of routine
-c---------------------------------------------------------------------
+!---------------------------------------------------------------------
+! end of routine
+!---------------------------------------------------------------------
 
 	return
    97   continue
@@ -255,13 +255,13 @@ c---------------------------------------------------------------------
 	write(6,*) 'Error writing data record of residual file: ',ierr
 	stop 'error stop : resid'
 	end
-c
-c********************************************************************
-c
+!
+!********************************************************************
+!
 	subroutine rmsvel
-c
-c computes rms currents
-c
+!
+! computes rms currents
+!
 	use mod_hydro_baro
 	use mod_hydro
 	use levels
@@ -270,9 +270,9 @@ c
 
 	implicit none
 
-c common
+! common
 	include 'simul.h'
-c local
+! local
 	double precision rr,dtime
 	logical bout
 	integer ii,ie,k,id,idc
@@ -283,10 +283,10 @@ c local
 	real rmsn(nlvdi,nkn)
 	real aux(nlvdi,nkn)
 	character*20 aline
-c function
+! function
 	real getpar
 	logical has_output_d,is_over_output_d,next_output_d
-c save
+! save
 	double precision, save, allocatable :: rms(:,:)
 	logical, save :: bdebug
 	double precision, save :: da_out(4)
@@ -295,9 +295,9 @@ c save
 
 	if(icall.eq.-1) return
 
-c-----------------------------------------------------------
-c initialization
-c-----------------------------------------------------------
+!-----------------------------------------------------------
+! initialization
+!-----------------------------------------------------------
 
 	if(icall.eq.0) then
           call init_output_d('itmrms','idtrms',da_out)
@@ -320,18 +320,18 @@ c-----------------------------------------------------------
 	  rms = 0.
 	end if
 
-c-----------------------------------------------------------
-c see if we have to start summing
-c-----------------------------------------------------------
+!-----------------------------------------------------------
+! see if we have to start summing
+!-----------------------------------------------------------
 
 	icall=icall+1
 
 	bout = is_over_output_d(da_out)
 	if( .not. bout ) return
 
-c-----------------------------------------------------------
-c sum transports
-c-----------------------------------------------------------
+!-----------------------------------------------------------
+! sum transports
+!-----------------------------------------------------------
 
 	nr=nr+1
 	do ie=1,nel
@@ -344,9 +344,9 @@ c-----------------------------------------------------------
 	  end do
 	end do
 
-c-----------------------------------------------------------
-c if time write output to rms file
-c-----------------------------------------------------------
+!-----------------------------------------------------------
+! if time write output to rms file
+!-----------------------------------------------------------
 
 	bout = next_output_d(da_out)
 	if( bout ) then
@@ -370,17 +370,17 @@ c-----------------------------------------------------------
 	  rms = 0.
 	end if
 
-c-----------------------------------------------------------
-c end of routine
-c-----------------------------------------------------------
+!-----------------------------------------------------------
+! end of routine
+!-----------------------------------------------------------
 
 	end
 
-c********************************************************************
+!********************************************************************
 
         function resi(zov,znv,n)
 
-c computes residuum
+! computes residuum
 
         implicit none
 
@@ -407,5 +407,5 @@ c computes residuum
 
         end
 
-c********************************************************************
+!********************************************************************
 

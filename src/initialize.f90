@@ -24,124 +24,124 @@
 !
 !--------------------------------------------------------------------------
 
-c routines for initialization
-c
-c contents :
-c
-c subroutine inicfil(name,var,nvar)
-c				initializes nodal value variable from file
-c subroutine inic2fil(name,var,nvar)
-c				initializes nodal value variable from file (2D)
-c
-c revision log :
-c
-c 20.08.1998	ggu	initialization routines copied from subn11/new11
-c 20.08.1998	ggu	new routine inicfil to init nodal values from file
-c 06.11.1998	ggu	computation of hkv/hev taken out of sp211 -> cstset
-c 22.10.1999	ggu	igrv, ngrv eliminated (subst by ilinkv, lenkv)
-c 07.03.2000	ggu	arrays for vertical turbulent diffusion coefficient
-c 07.03.2000	ggu	useless parts commented
-c 20.06.2000	ggu	useless parts deleted
-c 21.06.2000	ggu	dzreg introduced
-c 08.08.2000	ggu	hlvmin is now percentage of last layer thickness
-c 25.03.2003	ggu	voldist adjusted for 3D, new routine surinl
-c 07.08.2003	ggu	deleted sp212
-c 09.08.2003	ggu	cleaned up (sp211 is completely different)
-c 14.08.2003	ggu	error in check_ilevels (integer instead of real)
-c 14.08.2003	ggu	error in check_ilevels (must test .lt.)
-c 14.08.2003	ggu	new routine set_depth -> transferred from cstcheck
-c 14.08.2003	ggu	renamed sp211 into init_vertical and init_others
-c 14.08.2003	ggu	new routines init_z, init_const_z, init_file_z
-c 14.08.2003	ggu	new routines init_uvt
-c 02.09.2003	ggu	routine inicfil restructured for lmax=0
-c 03.09.2003	ggu	some more checks for check_ilevels
-c 04.03.2004	ggu	change in inicfil() for more variables
-c 05.03.2004	ggu	LMAX - changed bound from 0 to 1
-c 02.09.2004	ggu	rdrst transfered to subrst.f
-c 15.03.2005	ggu	set_austausch() and check_austausch() eliminated
-c 05.04.2005	ggu	minimum levels (for baroclinic terms) -> set_min_levels
-c 28.11.2005	ggu	in set_depth use makehkv to compute hkv
-c 16.02.2006	ggu	describe file format in inicfil()
-c 15.11.2006	ggu	new parameters to construct streched vert. coordinates
-c 27.08.2007	ccf	variable coriolis from spherical coordinates (isphe)
-c 17.03.2008	ggu	better error message if missing levels
-c 07.04.2008	ggu	deleted surinl, volinl, voldist
-c 12.11.2008	ggu	set_last_layer() rewritten, new adjust_k_depth()
-c 06.12.2008	ggu&ccf	small bug fix in set_last_layer()
-c 21.01.2009	ggu	cleaned up, new read_scalar()
-c 27.01.2009	ggu	mzreg and hlvmax deleted (not used)
-c 24.03.2009	ggu	bug fix: in set_last_layer() do not adjust for 2D
-c 21.04.2009	ggu	new routine inic2fil()
-c 23.03.2010	ggu	changed v6.1.1
-c 09.04.2010	ggu	changed v6.1.3
-c 28.09.2010	ggu	bug fix in init_coriolis() for isphe=1
-c 08.10.2010	ggu	bug fix in init_coriolis() -> ym not set for isphe=1
-c 16.12.2010	ggu	big restructering for sigma levels (look for bsigma)
-c 27.01.2011	ggu	changed VERS_6_1_17
-c 21.02.2011	ggu	error check for dzreg, nsigma and levels
-c 01.03.2011	ggu	changed VERS_6_1_20
-c 23.03.2011	ggu	new routine adjust_spherical(), error check isphe
-c 14.04.2011	ggu	changed VERS_6_1_22
-c 24.08.2011	ggu	eliminated hbot for sigma due to run time error
-c 25.10.2011	ggu	hlhv eliminated
-c 04.11.2011	ggu	adapted for hybrid coordinates
-c 10.11.2011	ggu	changed VERS_6_1_36
-c 11.11.2011	ggu	bug fix in adjust_levels: for zeta levels set nlv
-c 22.11.2011	ggu	changed VERS_6_1_37
-c 12.12.2011	ggu	changed VERS_6_1_39
-c 29.08.2012	ggu	changed VERS_6_1_56
-c 10.05.2013	ggu	changed VERS_6_1_64
-c 13.06.2013	ggu	changed VERS_6_1_65
-c 23.08.2013	ggu	renamed adjust_k_depth() to make_hkv() -> to subdep
-c 23.08.2013	ggu	depth routines to subdep.f
-c 05.09.2013	ggu	in adjust_levels() allow for nlv==1
-c 12.09.2013	ggu	changed VERS_6_1_67
-c 25.10.2013	ggu	changed VERS_6_1_68
-c 31.10.2014	ccf	initi_z0 for zos and zob
-c 05.11.2014	ggu	changed VERS_7_0_5
-c 05.12.2014	ggu	changed VERS_7_0_8
-c 12.12.2014	ggu	changed VERS_7_0_9
-c 23.12.2014	ggu	changed VERS_7_0_11
-c 19.01.2015	ggu	changed VERS_7_1_2
-c 19.01.2015	ggu	changed VERS_7_1_3
-c 30.04.2015	ggu	changed VERS_7_1_9
-c 21.05.2015	ggu	changed VERS_7_1_11
-c 25.05.2015	ggu	file cleaned and prepared for module
-c 05.06.2015	ggu	changed VERS_7_1_12
-c 10.07.2015	ggu	changed VERS_7_1_50
-c 13.07.2015	ggu	changed VERS_7_1_51
-c 17.07.2015	ggu	changed VERS_7_1_80
-c 20.07.2015	ggu	changed VERS_7_1_81
-c 10.10.2015	ggu	changed VERS_7_3_2
-c 05.11.2015	ggu	can now initialize z,u,v from file
-c 28.04.2016	ggu	changed VERS_7_5_9
-c 30.05.2016	ggu	changes in set_last_layer(), possible bug fix ilytyp==1
-c 28.06.2016	ggu	coriolis computation changed -> yc=(ymax-ymin)/2.
-c 05.10.2016	ggu	changed VERS_7_5_19
-c 05.12.2017	ggu	changed VERS_7_5_39
-c 24.01.2018	ggu	changed VERS_7_5_41
-c 03.04.2018	ggu	changed VERS_7_5_43
-c 19.04.2018	ggu	changed VERS_7_5_45
-c 11.05.2018	ggu	new exchange_vertical() to compute global nlv,hlv
-c 06.07.2018	ggu	changed VERS_7_5_48
-c 14.02.2019	ggu	changed VERS_7_5_56
-c 16.02.2019	ggu	changed VERS_7_5_60
-c 13.03.2019	ggu	changed VERS_7_5_61
-c 12.02.2020	ggu	better error messages in set_last_layer()
-c 02.06.2021	ggu	call levels_reinit() changed to levels_hlv_reinit()
-c 20.07.2021	ggu	test if file has been opened for velocities
-c 21.10.2022	ggu	in init_vertical() bug fix - update sigma_info (GGUBS)
-c 28.04.2023	ggu	possible nkn=nel bug flagged with GGU_NKN_NEL
-c
-c notes :
-c
-c for information on hybrid levels see adjust_levels()
-c
-c**************************************************************
+! routines for initialization
+!
+! contents :
+!
+! subroutine inicfil(name,var,nvar)
+!				initializes nodal value variable from file
+! subroutine inic2fil(name,var,nvar)
+!				initializes nodal value variable from file (2D)
+!
+! revision log :
+!
+! 20.08.1998	ggu	initialization routines copied from subn11/new11
+! 20.08.1998	ggu	new routine inicfil to init nodal values from file
+! 06.11.1998	ggu	computation of hkv/hev taken out of sp211 -> cstset
+! 22.10.1999	ggu	igrv, ngrv eliminated (subst by ilinkv, lenkv)
+! 07.03.2000	ggu	arrays for vertical turbulent diffusion coefficient
+! 07.03.2000	ggu	useless parts commented
+! 20.06.2000	ggu	useless parts deleted
+! 21.06.2000	ggu	dzreg introduced
+! 08.08.2000	ggu	hlvmin is now percentage of last layer thickness
+! 25.03.2003	ggu	voldist adjusted for 3D, new routine surinl
+! 07.08.2003	ggu	deleted sp212
+! 09.08.2003	ggu	cleaned up (sp211 is completely different)
+! 14.08.2003	ggu	error in check_ilevels (integer instead of real)
+! 14.08.2003	ggu	error in check_ilevels (must test .lt.)
+! 14.08.2003	ggu	new routine set_depth -> transferred from cstcheck
+! 14.08.2003	ggu	renamed sp211 into init_vertical and init_others
+! 14.08.2003	ggu	new routines init_z, init_const_z, init_file_z
+! 14.08.2003	ggu	new routines init_uvt
+! 02.09.2003	ggu	routine inicfil restructured for lmax=0
+! 03.09.2003	ggu	some more checks for check_ilevels
+! 04.03.2004	ggu	change in inicfil() for more variables
+! 05.03.2004	ggu	LMAX - changed bound from 0 to 1
+! 02.09.2004	ggu	rdrst transfered to subrst.f
+! 15.03.2005	ggu	set_austausch() and check_austausch() eliminated
+! 05.04.2005	ggu	minimum levels (for baroclinic terms) -> set_min_levels
+! 28.11.2005	ggu	in set_depth use makehkv to compute hkv
+! 16.02.2006	ggu	describe file format in inicfil()
+! 15.11.2006	ggu	new parameters to construct streched vert. coordinates
+! 27.08.2007	ccf	variable coriolis from spherical coordinates (isphe)
+! 17.03.2008	ggu	better error message if missing levels
+! 07.04.2008	ggu	deleted surinl, volinl, voldist
+! 12.11.2008	ggu	set_last_layer() rewritten, new adjust_k_depth()
+! 06.12.2008	ggu&ccf	small bug fix in set_last_layer()
+! 21.01.2009	ggu	cleaned up, new read_scalar()
+! 27.01.2009	ggu	mzreg and hlvmax deleted (not used)
+! 24.03.2009	ggu	bug fix: in set_last_layer() do not adjust for 2D
+! 21.04.2009	ggu	new routine inic2fil()
+! 23.03.2010	ggu	changed v6.1.1
+! 09.04.2010	ggu	changed v6.1.3
+! 28.09.2010	ggu	bug fix in init_coriolis() for isphe=1
+! 08.10.2010	ggu	bug fix in init_coriolis() -> ym not set for isphe=1
+! 16.12.2010	ggu	big restructering for sigma levels (look for bsigma)
+! 27.01.2011	ggu	changed VERS_6_1_17
+! 21.02.2011	ggu	error check for dzreg, nsigma and levels
+! 01.03.2011	ggu	changed VERS_6_1_20
+! 23.03.2011	ggu	new routine adjust_spherical(), error check isphe
+! 14.04.2011	ggu	changed VERS_6_1_22
+! 24.08.2011	ggu	eliminated hbot for sigma due to run time error
+! 25.10.2011	ggu	hlhv eliminated
+! 04.11.2011	ggu	adapted for hybrid coordinates
+! 10.11.2011	ggu	changed VERS_6_1_36
+! 11.11.2011	ggu	bug fix in adjust_levels: for zeta levels set nlv
+! 22.11.2011	ggu	changed VERS_6_1_37
+! 12.12.2011	ggu	changed VERS_6_1_39
+! 29.08.2012	ggu	changed VERS_6_1_56
+! 10.05.2013	ggu	changed VERS_6_1_64
+! 13.06.2013	ggu	changed VERS_6_1_65
+! 23.08.2013	ggu	renamed adjust_k_depth() to make_hkv() -> to subdep
+! 23.08.2013	ggu	depth routines to subdep.f
+! 05.09.2013	ggu	in adjust_levels() allow for nlv==1
+! 12.09.2013	ggu	changed VERS_6_1_67
+! 25.10.2013	ggu	changed VERS_6_1_68
+! 31.10.2014	ccf	initi_z0 for zos and zob
+! 05.11.2014	ggu	changed VERS_7_0_5
+! 05.12.2014	ggu	changed VERS_7_0_8
+! 12.12.2014	ggu	changed VERS_7_0_9
+! 23.12.2014	ggu	changed VERS_7_0_11
+! 19.01.2015	ggu	changed VERS_7_1_2
+! 19.01.2015	ggu	changed VERS_7_1_3
+! 30.04.2015	ggu	changed VERS_7_1_9
+! 21.05.2015	ggu	changed VERS_7_1_11
+! 25.05.2015	ggu	file cleaned and prepared for module
+! 05.06.2015	ggu	changed VERS_7_1_12
+! 10.07.2015	ggu	changed VERS_7_1_50
+! 13.07.2015	ggu	changed VERS_7_1_51
+! 17.07.2015	ggu	changed VERS_7_1_80
+! 20.07.2015	ggu	changed VERS_7_1_81
+! 10.10.2015	ggu	changed VERS_7_3_2
+! 05.11.2015	ggu	can now initialize z,u,v from file
+! 28.04.2016	ggu	changed VERS_7_5_9
+! 30.05.2016	ggu	changes in set_last_layer(), possible bug fix ilytyp==1
+! 28.06.2016	ggu	coriolis computation changed -> yc=(ymax-ymin)/2.
+! 05.10.2016	ggu	changed VERS_7_5_19
+! 05.12.2017	ggu	changed VERS_7_5_39
+! 24.01.2018	ggu	changed VERS_7_5_41
+! 03.04.2018	ggu	changed VERS_7_5_43
+! 19.04.2018	ggu	changed VERS_7_5_45
+! 11.05.2018	ggu	new exchange_vertical() to compute global nlv,hlv
+! 06.07.2018	ggu	changed VERS_7_5_48
+! 14.02.2019	ggu	changed VERS_7_5_56
+! 16.02.2019	ggu	changed VERS_7_5_60
+! 13.03.2019	ggu	changed VERS_7_5_61
+! 12.02.2020	ggu	better error messages in set_last_layer()
+! 02.06.2021	ggu	call levels_reinit() changed to levels_hlv_reinit()
+! 20.07.2021	ggu	test if file has been opened for velocities
+! 21.10.2022	ggu	in init_vertical() bug fix - update sigma_info (GGUBS)
+! 28.04.2023	ggu	possible nkn=nel bug flagged with GGU_NKN_NEL
+!
+! notes :
+!
+! for information on hybrid levels see adjust_levels()
+!
+!**************************************************************
 
 	subroutine init_vertical
 
-c set up time independent vertical vectors
+! set up time independent vertical vectors
 
 	use levels
 	use basin, only : nkn,nel,ngr,mbw
@@ -157,9 +157,9 @@ c set up time independent vertical vectors
 
 	write(6,*) 'setting up vertical structure'
 
-c------------------------------------------------------------------
-c sanity check
-c------------------------------------------------------------------
+!------------------------------------------------------------------
+! sanity check
+!------------------------------------------------------------------
 
 	call get_hmax_global(hmax)
 	write(6,*) 'maximum depth: ',hmax
@@ -181,15 +181,15 @@ c------------------------------------------------------------------
 	  deallocate(hlv_aux)
 	end if
 
-c------------------------------------------------------------------
-c levels read in from $levels section
-c------------------------------------------------------------------
+!------------------------------------------------------------------
+! levels read in from $levels section
+!------------------------------------------------------------------
 
 	call adjust_levels(hmax)	!sets hlv, hldv, nlv, sigma_info, etc.
 
-c------------------------------------------------------------------
-c set up layer vectors
-c------------------------------------------------------------------
+!------------------------------------------------------------------
+! set up layer vectors
+!------------------------------------------------------------------
 
 	call set_ilhv		!sets nlv, ilhv (elemental)
 	call set_last_layer	!adjusts nlv, ilhv, hm3v
@@ -198,17 +198,17 @@ c------------------------------------------------------------------
 	call exchange_levels	!copies from other domains and sets nlv
 	call set_ilmv		!sets ilmv (elemental)
 
-c------------------------------------------------------------------
-c compute final nlv
-c------------------------------------------------------------------
+!------------------------------------------------------------------
+! compute final nlv
+!------------------------------------------------------------------
 
 	nlv_e = maxval(ilhv)
 	nlv_k = maxval(ilhkv)
 	nlv = max(nlv_e,nlv_k)
 
-c------------------------------------------------------------------
-c check data structure
-c------------------------------------------------------------------
+!------------------------------------------------------------------
+! check data structure
+!------------------------------------------------------------------
 
 	call get_sigma_info(nlvaux,nsigma,hsigma) !to change nlv info !GGUBS
 	call set_sigma_info(nlv,nsigma,hsigma)
@@ -221,13 +221,13 @@ c------------------------------------------------------------------
 
 	write(6,*) 'init_vertical: nlvdi = ',nlvdi,'  nlv = ',nlv
 
-c------------------------------------------------------------------
-c end of routine
-c------------------------------------------------------------------
+!------------------------------------------------------------------
+! end of routine
+!------------------------------------------------------------------
 
 	end
 
-c**************************************************************
+!**************************************************************
 
 	subroutine exchange_vertical(nlv,hlv)
 
@@ -273,32 +273,32 @@ c**************************************************************
 
 	end
 
-c**************************************************************
+!**************************************************************
 
 	subroutine init_others
 
-c set up various arrays (coriolis, eddy)
+! set up various arrays (coriolis, eddy)
 
 	implicit none
 
-c------------------------------------------------------------------
-c set others
-c------------------------------------------------------------------
+!------------------------------------------------------------------
+! set others
+!------------------------------------------------------------------
 
 	call init_coriolis
 	call set_eddy
 
-c------------------------------------------------------------------
-c end of routine
-c------------------------------------------------------------------
+!------------------------------------------------------------------
+! end of routine
+!------------------------------------------------------------------
 
 	end
 
-c*****************************************************************
+!*****************************************************************
 
 	subroutine set_eddy
 
-c sets vertical eddy coefficient
+! sets vertical eddy coefficient
 
 	use mod_diff_visc_fric
 	use levels, only : nlvdi,nlv
@@ -311,31 +311,31 @@ c sets vertical eddy coefficient
 
 	real getpar
 
-c------------------------------------------------------------------
-c get parameters
-c------------------------------------------------------------------
+!------------------------------------------------------------------
+! get parameters
+!------------------------------------------------------------------
 
 	vistur=getpar('vistur')
 	diftur=getpar('diftur')
 
-c------------------------------------------------------------------
-c set eddy coefficient
-c------------------------------------------------------------------
+!------------------------------------------------------------------
+! set eddy coefficient
+!------------------------------------------------------------------
 
 	visv=vistur
 	difv=diftur
 
-c------------------------------------------------------------------
-c end of routine
-c------------------------------------------------------------------
+!------------------------------------------------------------------
+! end of routine
+!------------------------------------------------------------------
 
 	end
 
-c*****************************************************************
+!*****************************************************************
 
 	subroutine check_eddy
 
-c checks vertical eddy coefficient
+! checks vertical eddy coefficient
 
 	use mod_diff_visc_fric
 	use levels, only : nlvdi,nlv
@@ -346,9 +346,9 @@ c checks vertical eddy coefficient
 	integer k,l
 	real v,d
 
-c------------------------------------------------------------------
-c check eddy coefficient
-c------------------------------------------------------------------
+!------------------------------------------------------------------
+! check eddy coefficient
+!------------------------------------------------------------------
 
 	do k=1,nkn
 	  do l=0,nlv
@@ -359,9 +359,9 @@ c------------------------------------------------------------------
 	  end do
 	end do
 
-c------------------------------------------------------------------
-c end of routine
-c------------------------------------------------------------------
+!------------------------------------------------------------------
+! end of routine
+!------------------------------------------------------------------
 
 	return
    99	continue
@@ -369,11 +369,11 @@ c------------------------------------------------------------------
 	stop 'error stop check_eddy: error in values'
 	end
 
-c*****************************************************************
+!*****************************************************************
 
 	subroutine check_vertical
 
-c checks arrays containing vertical structure
+! checks arrays containing vertical structure
 
 	use levels
 	use shympi
@@ -394,7 +394,7 @@ c checks arrays containing vertical structure
 
 	end
 
-c*****************************************************************
+!*****************************************************************
 
 	subroutine check_hlv
 
@@ -409,11 +409,11 @@ c*****************************************************************
 
 	end
 
-c*****************************************************************
+!*****************************************************************
 
 	subroutine check_nlv
 
-c checks nlv and associated parameters
+! checks nlv and associated parameters
 
 	use levels, only : nlvdi,nlv
 
@@ -425,11 +425,11 @@ c checks nlv and associated parameters
 
 	end
 
-c*****************************************************************
+!*****************************************************************
 
 	subroutine estimate_nlv(nlv_est,hmax)
 
-c estimates maximum value for nlv
+! estimates maximum value for nlv
 
 	use basin
 
@@ -456,31 +456,31 @@ c estimates maximum value for nlv
 
 	end
 
-c*****************************************************************
+!*****************************************************************
 
 	subroutine adjust_levels(hmax)
 
-c adjusts levels read in from $levels section
-c
-c creates hlv if not set
-c from hlv creates hldv
-c needs hm3v to compute hmax
-c
-c strategy:
-c
-c set hsigma < hmax to ask for hybrid levels
-c set nsigma > 1 to ask for sigma coordinates
-c set dzreg > 0. to ask for regular zeta levels
-c
-c only nsigma				only sigma levels
-c only dzreg				only regular zeta levels
-c nsigma, dzreg and hsigma		hybrid levels
-c
-c only sigma levels			only sigma levels
-c only zeta levels			only zeta levels
-c sigma levels, dzreg and hsigma	hybrid levels
-c zeta levels, nsigma and hsigma	hybrid levels
-c sigma and zeta levels and hsigma	hybrid levels
+! adjusts levels read in from $levels section
+!
+! creates hlv if not set
+! from hlv creates hldv
+! needs hm3v to compute hmax
+!
+! strategy:
+!
+! set hsigma < hmax to ask for hybrid levels
+! set nsigma > 1 to ask for sigma coordinates
+! set dzreg > 0. to ask for regular zeta levels
+!
+! only nsigma				only sigma levels
+! only dzreg				only regular zeta levels
+! nsigma, dzreg and hsigma		hybrid levels
+!
+! only sigma levels			only sigma levels
+! only zeta levels			only zeta levels
+! sigma levels, dzreg and hsigma	hybrid levels
+! zeta levels, nsigma and hsigma	hybrid levels
+! sigma and zeta levels and hsigma	hybrid levels
 
 	use levels
 	use basin
@@ -498,9 +498,9 @@ c sigma and zeta levels and hsigma	hybrid levels
 
 	write(6,*) 'adjust layer structure'
 
-c--------------------------------------------------------------
-c create hlv values
-c--------------------------------------------------------------
+!--------------------------------------------------------------
+! create hlv values
+!--------------------------------------------------------------
 
 	second = 2
 	dzreg = getpar('dzreg')
@@ -593,9 +593,9 @@ c--------------------------------------------------------------
 	call set_sigma(nsigma,hsigma)		!uses putpar
 	call set_sigma_info(nlv,nsigma,hsigma)	!sets internal data structure
 
-c--------------------------------------------------------------
-c create hldv values
-c--------------------------------------------------------------
+!--------------------------------------------------------------
+! create hldv values
+!--------------------------------------------------------------
 
 	hldv(1)=hlv(1)
 	do l=2,nlv
@@ -610,9 +610,9 @@ c--------------------------------------------------------------
 	write(6,'(5g14.6)') 'hlv:  ',(hlv(l),l=1,nlv)
 	write(6,'(5g14.6)') 'hldv: ',(hldv(l),l=1,nlv)
 
-c--------------------------------------------------------------
-c check hlv and hldv values
-c--------------------------------------------------------------
+!--------------------------------------------------------------
+! check hlv and hldv values
+!--------------------------------------------------------------
 
 	hbot = hlv(nlv)
 	if( hbot /= -1. .and. hmax > hbot ) goto 87
@@ -621,9 +621,9 @@ c--------------------------------------------------------------
 
 	write(6,*) 'finished adjusting layer structure ',nlv
 
-c--------------------------------------------------------------
-c end of routine
-c--------------------------------------------------------------
+!--------------------------------------------------------------
+! end of routine
+!--------------------------------------------------------------
 
 	return
    86	continue
@@ -680,17 +680,17 @@ c--------------------------------------------------------------
 	stop 'error stop adjust_levels: dzreg = 0'
 	end
 
-c*****************************************************************
+!*****************************************************************
 
 	subroutine check_levels
 
-c checks arrays hlv and hldv
+! checks arrays hlv and hldv
 
 	use levels
 
 	implicit none
 
-c local
+! local
 	logical bstop,bsigma
 	integer l,nsigma,levmin
 	real h,hd,fact,hsigma
@@ -701,9 +701,9 @@ c local
 
 	bstop = .false.
 
-c--------------------------------------------------------------
-c check hlv values
-c--------------------------------------------------------------
+!--------------------------------------------------------------
+! check hlv values
+!--------------------------------------------------------------
 
 	if( nsigma .gt. 0 ) then
 	  h = hlv(nsigma)
@@ -737,9 +737,9 @@ c--------------------------------------------------------------
 
 	if( bstop ) stop 'error stop check_levels: level error'
 
-c--------------------------------------------------------------
-c check hldv values
-c--------------------------------------------------------------
+!--------------------------------------------------------------
+! check hldv values
+!--------------------------------------------------------------
 
 	hbot = hlv(1)
 	do l=2,nlv
@@ -756,17 +756,17 @@ c--------------------------------------------------------------
 	end do
 	if( bstop ) stop 'error stop check_levels: dlevel error'
 
-c--------------------------------------------------------------
-c end of routine
-c--------------------------------------------------------------
+!--------------------------------------------------------------
+! end of routine
+!--------------------------------------------------------------
 
 	end
 
-c*****************************************************************
+!*****************************************************************
 
 	subroutine exchange_levels
 
-c exchanges level info with other domains - sets nlv
+! exchanges level info with other domains - sets nlv
 
 	use levels
 	use shympi
@@ -780,18 +780,18 @@ c exchanges level info with other domains - sets nlv
 
 	end
 
-c*****************************************************************
+!*****************************************************************
 
 	subroutine set_ilhv
 
-c sets nlv and ilhv - only needs hm3v and hlv, hev is temporary array
+! sets nlv and ilhv - only needs hm3v and hlv, hev is temporary array
 
 	use levels
 	use basin
 
 	implicit none
 
-c local
+! local
 	logical bsigma
 	integer ie,ii,l,lmax,nsigma
 	real hsigma
@@ -849,11 +849,11 @@ c local
 	stop 'error stop set_ilhv: not enough layers'
 	end
 
-c*****************************************************************
+!*****************************************************************
 
 	subroutine set_ilhkv
 
-c set ilhkv array - only needs ilhv
+! set ilhkv array - only needs ilhv
 
 	use levels
 	use basin
@@ -884,11 +884,11 @@ c set ilhkv array - only needs ilhv
 
 	end
 
-c*****************************************************************
+!*****************************************************************
 
 	subroutine set_ilmkv
 
-c set minimum number of levels for node
+! set minimum number of levels for node
 
 	use levels
 	use basin
@@ -926,11 +926,11 @@ c set minimum number of levels for node
 
 	end
 
-c*****************************************************************
+!*****************************************************************
 
 	subroutine set_ilmv
 
-c set minimum number of levels for elems
+! set minimum number of levels for elems
 
 	use levels
 	use basin
@@ -950,11 +950,11 @@ c set minimum number of levels for elems
 
 	end
 
-c*****************************************************************
+!*****************************************************************
 
 	subroutine check_ilevels
 
-c checks arrays ilhv and ilhkv
+! checks arrays ilhv and ilhkv
 
 	use levels
 	use basin
@@ -1014,13 +1014,13 @@ c checks arrays ilhv and ilhkv
 	stop 'error stop check_ilevels: error in vertical structure (1)'
 	end
 
-c*****************************************************************
+!*****************************************************************
 
 	subroutine set_last_layer
 
-c sets last layer thickness
-c
-c adjusts nlv, hm3v, ilhv
+! sets last layer thickness
+!
+! adjusts nlv, hm3v, ilhv
 
 	use levels
 	use basin
@@ -1046,43 +1046,43 @@ c adjusts nlv, hm3v, ilhv
 
 	bwrite = .false.
 
-c------------------------------------------------------------
-c see if 2D application
-c------------------------------------------------------------
+!------------------------------------------------------------
+! see if 2D application
+!------------------------------------------------------------
 
 	b2d = nlv .eq. 1			!2D application
 
-c------------------------------------------------------------
-c check if sigma levels
-c------------------------------------------------------------
+!------------------------------------------------------------
+! check if sigma levels
+!------------------------------------------------------------
 
 	call get_sigma(nsigma,hsigma)
 	bsigma = nsigma .gt. 0
 
-c	if( bsigma ) then		!sigma layers
-c	  write(6,*) 'set_last_layer (nlv used) : ',nlv
-c	  write(6,*) 'sigma layers detected'
-c	  return
-c	end if
+!	if( bsigma ) then		!sigma layers
+!	  write(6,*) 'set_last_layer (nlv used) : ',nlv
+!	  write(6,*) 'sigma layers detected'
+!	  return
+!	end if
 
-c------------------------------------------------------------
-c set hlvmin
-c------------------------------------------------------------
+!------------------------------------------------------------
+! set hlvmin
+!------------------------------------------------------------
 
-c	ilytyp: 
-c	  0=no adjustment  
-c	  1=adjust to full layers (change depth)
-c         2=adjust to full layers only if h<hlvmin (change depth)
-c         3=add to last layer if h<hlvmin (keep depth but change layer)
+!	ilytyp: 
+!	  0=no adjustment  
+!	  1=adjust to full layers (change depth)
+!         2=adjust to full layers only if h<hlvmin (change depth)
+!         3=add to last layer if h<hlvmin (keep depth but change layer)
 
 	hlvmin = getpar('hlvmin')		!min percentage of last layer
 	ilytyp = nint(getpar('ilytyp'))
 
 	if( hlvmin .gt. 1. .or. hlvmin .lt. 0. ) goto 98
 
-c------------------------------------------------------------
-c adjust last layer thickness
-c------------------------------------------------------------
+!------------------------------------------------------------
+! adjust last layer thickness
+!------------------------------------------------------------
 
 	ic1 = 0
 	ic2 = 0
@@ -1112,7 +1112,7 @@ c------------------------------------------------------------
 
 	  if( l .gt. 1 ) then			!only for more than 1 layer
 	    if( ilytyp .eq. 0 ) then
-c		no adjustment
+!		no adjustment
 	    else if( ilytyp .eq. 1 ) then
 	      if( h < hlast ) then		!last layer not full layer
 		bdepth = .true.
@@ -1166,22 +1166,22 @@ c		no adjustment
 	  if( l .eq. 1 ) ic3 = ic3 + 1
 	end do
 
-c------------------------------------------------------------
-c adjust nlv and write final statistics
-c------------------------------------------------------------
+!------------------------------------------------------------
+! adjust nlv and write final statistics
+!------------------------------------------------------------
 
 	nlv=lmax
 
 	write(6,*) 'set_last_layer (nlv used) : ',nlv
-	write(6,*) 'Total number of elements with adjusted depth: '
-     +			,ihtot
+	write(6,*) 'Total number of elements with adjusted depth: ' &
+     &			,ihtot
 	write(6,*) 'Incomplete depth:     ',ic1
 	write(6,*) 'Differing last layer: ',ic2
 	write(6,*) 'One layer elements:   ',ic3
 
-c------------------------------------------------------------
-c end of routine
-c------------------------------------------------------------
+!------------------------------------------------------------
+! end of routine
+!------------------------------------------------------------
 
 	return
    98	continue
@@ -1202,11 +1202,11 @@ c------------------------------------------------------------
 	stop 'error stop set_last_layer: layer depth <=0 (internal error)'
 	end
 
-c*****************************************************************
+!*****************************************************************
 
 	subroutine init_coriolis
 
-c sets coriolis parameter
+! sets coriolis parameter
 
 	use mod_internal
 	use basin
@@ -1232,24 +1232,24 @@ c sets coriolis parameter
 	real getpar
 	real, dimension(nkn)	:: yaux
 
-c if coordinates are cartesian (isphe=0) then icor determines 
-c how Coriolis is used:
-c
-c 0:	no Coriolis (default)
-c 1:	beta-plane (linear varying Coriolis parameter)
-c 2:	f-plane (constant Coriolis parameter)
-c
-c please note that in case of icor=1 or 2 also the parameter dlat (the average 
-c latitude of the basin) has to be set
-c
-c with spherical coordinates (isphe=1) the default is to always use
-c Coriolis with latitude read from basin. If you really do not want to 
-c use Coriolis, then please set icor = -1. The parameter dlat is not needed.
+! if coordinates are cartesian (isphe=0) then icor determines 
+! how Coriolis is used:
+!
+! 0:	no Coriolis (default)
+! 1:	beta-plane (linear varying Coriolis parameter)
+! 2:	f-plane (constant Coriolis parameter)
+!
+! please note that in case of icor=1 or 2 also the parameter dlat (the average 
+! latitude of the basin) has to be set
+!
+! with spherical coordinates (isphe=1) the default is to always use
+! Coriolis with latitude read from basin. If you really do not want to 
+! use Coriolis, then please set icor = -1. The parameter dlat is not needed.
 
-c with cartesian coordinates (isphe=0) the default is to use a constant 
-c latitude (dlat) for Coriolis (icor > 0). If you want a spatially varying 
-c Coriolis parameter you have to convert the cartesian coordinates to 
-c spherical setting the basin projection (iproj > 0)
+! with cartesian coordinates (isphe=0) the default is to use a constant 
+! latitude (dlat) for Coriolis (icor > 0). If you want a spatially varying 
+! Coriolis parameter you have to convert the cartesian coordinates to 
+! spherical setting the basin projection (iproj > 0)
 
 	icor=nint(getpar('icor'))	!flag how to use Coriolis
 	call get_coords_ev(isphe)
@@ -1315,11 +1315,11 @@ c spherical setting the basin projection (iproj > 0)
 
 	end
 
-c*****************************************************************
+!*****************************************************************
 
 	subroutine check_coriolis
 
-c checks coriolis parameter
+! checks coriolis parameter
 
 	use mod_internal
 	use basin, only : nkn,nel,ngr,mbw
@@ -1341,13 +1341,13 @@ c checks coriolis parameter
 
 	end
 
-c*****************************************************************
-c*****************************************************************
-c*****************************************************************
+!*****************************************************************
+!*****************************************************************
+!*****************************************************************
 
 	subroutine inicfil(name,var,nvar)
 
-c initializes nodal value variable from file
+! initializes nodal value variable from file
 
 	use levels, only : nlvdi,nlv
 	use basin, only : nkn,nel,ngr,mbw
@@ -1372,11 +1372,11 @@ c initializes nodal value variable from file
 
 	end
 
-c*****************************************************************
+!*****************************************************************
 
 	subroutine inic2fil(name,var,nvar)
 
-c initializes nodal value variable from file (2D version)
+! initializes nodal value variable from file (2D version)
 
 	use basin, only : nkn,nel,ngr,mbw
 
@@ -1401,13 +1401,13 @@ c initializes nodal value variable from file (2D version)
 
 	end
 
-c*****************************************************************
-c*****************************************************************
-c*****************************************************************
+!*****************************************************************
+!*****************************************************************
+!*****************************************************************
 
 	subroutine init_z(zconst)
 
-c initializes water levels (znv and zenv)
+! initializes water levels (znv and zenv)
 
 	implicit none
 
@@ -1416,21 +1416,21 @@ c initializes water levels (znv and zenv)
 	character*80 name
 	logical rst_use_restart
 
-c--------------------------------------------------------
-c see if we already have hydro restart data
-c--------------------------------------------------------
+!--------------------------------------------------------
+! see if we already have hydro restart data
+!--------------------------------------------------------
 
 	if( rst_use_restart(1) ) return
 
-c--------------------------------------------------------
-c get name of file
-c--------------------------------------------------------
+!--------------------------------------------------------
+! get name of file
+!--------------------------------------------------------
 
         call getfnm('zinit',name)
 
-c--------------------------------------------------------
-c initialize from file or with constant
-c--------------------------------------------------------
+!--------------------------------------------------------
+! initialize from file or with constant
+!--------------------------------------------------------
 
 	if(name.ne.' ') then
 	  call init_file_z(name)
@@ -1438,23 +1438,23 @@ c--------------------------------------------------------
 	  call init_const_z(zconst)
 	end if
 
-c--------------------------------------------------------
-c transfer nodal values to element values
-c--------------------------------------------------------
+!--------------------------------------------------------
+! transfer nodal values to element values
+!--------------------------------------------------------
 
 	call setzev
 
-c--------------------------------------------------------
-c end of routine
-c--------------------------------------------------------
+!--------------------------------------------------------
+! end of routine
+!--------------------------------------------------------
 
 	end
 
-c*****************************************************************
+!*****************************************************************
 
 	subroutine init_const_z(zconst)
 
-c initializes water level with constant
+! initializes water level with constant
 
 	use mod_hydro
 	use basin, only : nkn,nel,ngr,mbw
@@ -1472,11 +1472,11 @@ c initializes water level with constant
 
 	end
 
-c*******************************************************************
+!*******************************************************************
 
 	subroutine init_file_z(name)
 
-c initializes water level from file
+! initializes water level from file
 
 	use mod_hydro
 	use basin, only : nkn,nel,ngr,mbw
@@ -1505,8 +1505,8 @@ c initializes water level from file
         zconst = 0.
 
 	write(6,'(a)') 'Initializing water levels...'
-        call iff_init(dtime,name,nvar,np,lmax,nintp
-     +                          ,nodes,zconst,idzeta)
+        call iff_init(dtime,name,nvar,np,lmax,nintp &
+     &                          ,nodes,zconst,idzeta)
         call iff_set_description(idzeta,ibc,what)
 
         lmax = 1
@@ -1520,13 +1520,13 @@ c initializes water level from file
 
 	end
 
-c*******************************************************************
-c*******************************************************************
-c*******************************************************************
+!*******************************************************************
+!*******************************************************************
+!*******************************************************************
 
 	subroutine init_uvt
 
-c initializes transport in levels
+! initializes transport in levels
 
 	use mod_hydro
 
@@ -1535,21 +1535,21 @@ c initializes transport in levels
 	character*80 name
 	logical rst_use_restart
 
-c--------------------------------------------------------
-c see if we already have hydro restart data
-c--------------------------------------------------------
+!--------------------------------------------------------
+! see if we already have hydro restart data
+!--------------------------------------------------------
 
 	if( rst_use_restart(1) ) return
 
-c--------------------------------------------------------
-c get name of file
-c--------------------------------------------------------
+!--------------------------------------------------------
+! get name of file
+!--------------------------------------------------------
 
         call getfnm('uvinit',name)
 
-c--------------------------------------------------------
-c initialize from file or with constant
-c--------------------------------------------------------
+!--------------------------------------------------------
+! initialize from file or with constant
+!--------------------------------------------------------
 
 	if(name.ne.' ') then
 	  call init_file_uv(name)
@@ -1560,17 +1560,17 @@ c--------------------------------------------------------
 	  call ttov
 	end if
 
-c--------------------------------------------------------
-c end of routine
-c--------------------------------------------------------
+!--------------------------------------------------------
+! end of routine
+!--------------------------------------------------------
 
 	end
 
-c*******************************************************************
+!*******************************************************************
 
 	subroutine init_file_uv(name)
 
-c initializes water level from file
+! initializes water level from file
 
 	use mod_hydro
 	use mod_hydro_vel
@@ -1626,8 +1626,8 @@ c initializes water level from file
 	  stop 'error stop init_file_uv: np'
 	end if
 
-        call iff_init(dtime,name,nvar,np,lmax,nintp
-     +                          ,nodes,uvconst,idvel)
+        call iff_init(dtime,name,nvar,np,lmax,nintp &
+     &                          ,nodes,uvconst,idvel)
         call iff_set_description(idvel,ibc,what)
 
         call iff_read_and_interpolate(idvel,dtime)
@@ -1649,13 +1649,13 @@ c initializes water level from file
 
 	end
 
-c*******************************************************************
-c*******************************************************************
-c*******************************************************************
+!*******************************************************************
+!*******************************************************************
+!*******************************************************************
 
 	subroutine init_z0
 
-c initializes surface z0sk(k) and bottom z0bn(k) roughness 
+! initializes surface z0sk(k) and bottom z0bn(k) roughness 
 
 	use mod_roughness
 
@@ -1666,9 +1666,9 @@ c initializes surface z0sk(k) and bottom z0bn(k) roughness
 
 	end
 
-c*******************************************************************
-c*******************************************************************
-c*******************************************************************
+!*******************************************************************
+!*******************************************************************
+!*******************************************************************
 
 	subroutine set_spherical
 
@@ -1682,7 +1682,7 @@ c*******************************************************************
 
 	end
 
-c*******************************************************************
+!*******************************************************************
 
 	subroutine adjust_spherical
 
@@ -1697,7 +1697,7 @@ c*******************************************************************
 
 	end
 
-c*******************************************************************
+!*******************************************************************
 
         subroutine print_spherical
 
@@ -1720,5 +1720,5 @@ c*******************************************************************
 
         end
 
-c*******************************************************************
+!*******************************************************************
 

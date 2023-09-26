@@ -24,63 +24,63 @@
 !
 !--------------------------------------------------------------------------
 
-c utility routines for 2d/3d model
-c
-c contents :
-c
-c getxy(k,x,y)					coordinates x/y for node k
-c getexy(ie,x,y)				coordinates x/y for element ie
-c
-c real function areael(ie)			area for element ie
-c real function areavl(k)			area for finite volume k
-c
-c function flxnod(k)            		discharge around node k
-c
-c subroutine energ(ielem,kenerg,penerg)		kinetic & potential energy
-c
-c subroutine stmima(a,nkn,nlvdi,ilhkv,amin,amax)
-c                                       computes min/max of 3d field
-c subroutine n2ebar(cn,ce)
-c		copies concentrations from node value to element value
-c
-c revision log :
-c
-c 19.08.1998	ggu	new routines volco0, volno0
-c 26.08.1998	ggu	subroutine stmima transferred from newbcl0
-c 18.12.1999	ggu	/iweich/ -> /iwegv/ (bug)
-c 29.03.2000	ggu	new routine getxy and getexy
-c 16.05.2000	ggu	routine volel removed
-c 28.04.2009	ggu	links re-structured
-c 23.03.2010	ggu	changed v6.1.1
-c 08.06.2010	ggu	new routine for computing 3D kin/pot energy
-c 22.07.2010	ggu	changed VERS_6_1_9
-c 15.12.2010	ggu	changed VERS_6_1_14
-c 07.07.2011	ggu	bug fix in areael (unstable computation)
-c 14.07.2011	ggu	changed VERS_6_1_27
-c 23.12.2014	ggu	changed VERS_7_0_11
-c 19.01.2015	ggu	changed VERS_7_1_2
-c 19.01.2015	ggu	changed VERS_7_1_3
-c 01.04.2015	ggu	changed VERS_7_1_7
-c 29.04.2015	ggu	energy now in Joule
-c 21.05.2015	ggu	changed VERS_7_1_11
-c 05.06.2015	ggu	changed VERS_7_1_12
-c 10.07.2015	ggu	changed VERS_7_1_50
-c 17.07.2015	ggu	changed VERS_7_1_80
-c 20.07.2015	ggu	changed VERS_7_1_81
-c 24.07.2015	ggu	changed VERS_7_1_82
-c 16.12.2015	ggu	changed VERS_7_3_16
-c 18.12.2015	ggu	changed VERS_7_3_17
-c 05.12.2017	ggu	changed VERS_7_5_39
-c 22.02.2018	ggu	changed VERS_7_5_42
-c 19.04.2018	ggu	changed VERS_7_5_45
-c 16.02.2019	ggu	changed VERS_7_5_60
-c 09.05.2023    lrp     introduce top layer index variable
-c
-c******************************************
+! utility routines for 2d/3d model
+!
+! contents :
+!
+! getxy(k,x,y)					coordinates x/y for node k
+! getexy(ie,x,y)				coordinates x/y for element ie
+!
+! real function areael(ie)			area for element ie
+! real function areavl(k)			area for finite volume k
+!
+! function flxnod(k)            		discharge around node k
+!
+! subroutine energ(ielem,kenerg,penerg)		kinetic & potential energy
+!
+! subroutine stmima(a,nkn,nlvdi,ilhkv,amin,amax)
+!                                       computes min/max of 3d field
+! subroutine n2ebar(cn,ce)
+!		copies concentrations from node value to element value
+!
+! revision log :
+!
+! 19.08.1998	ggu	new routines volco0, volno0
+! 26.08.1998	ggu	subroutine stmima transferred from newbcl0
+! 18.12.1999	ggu	/iweich/ -> /iwegv/ (bug)
+! 29.03.2000	ggu	new routine getxy and getexy
+! 16.05.2000	ggu	routine volel removed
+! 28.04.2009	ggu	links re-structured
+! 23.03.2010	ggu	changed v6.1.1
+! 08.06.2010	ggu	new routine for computing 3D kin/pot energy
+! 22.07.2010	ggu	changed VERS_6_1_9
+! 15.12.2010	ggu	changed VERS_6_1_14
+! 07.07.2011	ggu	bug fix in areael (unstable computation)
+! 14.07.2011	ggu	changed VERS_6_1_27
+! 23.12.2014	ggu	changed VERS_7_0_11
+! 19.01.2015	ggu	changed VERS_7_1_2
+! 19.01.2015	ggu	changed VERS_7_1_3
+! 01.04.2015	ggu	changed VERS_7_1_7
+! 29.04.2015	ggu	energy now in Joule
+! 21.05.2015	ggu	changed VERS_7_1_11
+! 05.06.2015	ggu	changed VERS_7_1_12
+! 10.07.2015	ggu	changed VERS_7_1_50
+! 17.07.2015	ggu	changed VERS_7_1_80
+! 20.07.2015	ggu	changed VERS_7_1_81
+! 24.07.2015	ggu	changed VERS_7_1_82
+! 16.12.2015	ggu	changed VERS_7_3_16
+! 18.12.2015	ggu	changed VERS_7_3_17
+! 05.12.2017	ggu	changed VERS_7_5_39
+! 22.02.2018	ggu	changed VERS_7_5_42
+! 19.04.2018	ggu	changed VERS_7_5_45
+! 16.02.2019	ggu	changed VERS_7_5_60
+! 09.05.2023    lrp     introduce top layer index variable
+!
+!******************************************
 
 	subroutine getxy(k,x,y)
 
-c gets coordinates x/y for node k
+! gets coordinates x/y for node k
 
 	use basin
 
@@ -94,11 +94,11 @@ c gets coordinates x/y for node k
 
 	end
 
-c******************************************
+!******************************************
 
 	subroutine getexy(ie,x,y)
 
-c gets coordinates x/y for element ie
+! gets coordinates x/y for element ie
 
 	use basin
 
@@ -117,22 +117,22 @@ c gets coordinates x/y for element ie
 
 	end
 
-c******************************************
+!******************************************
 
 	function areael(ie)
 
-c area for element ie
-c
-c double precision version - bug fix 07.07.2011
+! area for element ie
+!
+! double precision version - bug fix 07.07.2011
 
 	use basin
 
 	implicit none
 
-c arguments
+! arguments
 	real areael
 	integer ie
-c local
+! local
 	integer kn1,kn2,kn3
 	real*8 x1,x2,x3,y1,y2,y3
 	real*8 a1,a2,a3
@@ -160,11 +160,11 @@ c local
 
 	end
 
-c******************************************
+!******************************************
 
 	function areavl(k)
 
-c area for finite volume k
+! area for finite volume k
 
 	use mod_geom
 	use evgeom
@@ -172,10 +172,10 @@ c area for finite volume k
 
 	implicit none
 
-c arguments
+! arguments
 	real areavl
 	integer k
-c local
+! local
 	logical blink
 	integer ie,ii,i,nl
 	integer elems(maxlnk)
@@ -209,17 +209,17 @@ c local
 
 	end
 
-c*****************************************************************
+!*****************************************************************
 
         function flxnod(k)
 
-c computes discharge (m**3/sec) into finite volume around node k
-c ... value flxnod has to be multiplied by dt to obtain total volume
-c
-c depending on value of blink uses link structure or not
-c
-c discharge into node n:     Q = 12 * aj * ( b(n)*U + c(n)*V )
-c volume difference:         dV = dt * Q
+! computes discharge (m**3/sec) into finite volume around node k
+! ... value flxnod has to be multiplied by dt to obtain total volume
+!
+! depending on value of blink uses link structure or not
+!
+! discharge into node n:     Q = 12 * aj * ( b(n)*U + c(n)*V )
+! volume difference:         dV = dt * Q
 
 	use mod_geom
 	use mod_hydro_baro
@@ -228,20 +228,20 @@ c volume difference:         dV = dt * Q
 
         implicit none
 
-c arguments
+! arguments
         real flxnod
         integer k
-c local
+! local
         real flux
         integer i,nl,ie,ii
 	integer elems(maxlnk)
         logical blink
-c function
+! function
         integer ithis
-c statement function
+! statement function
         real fflux
-        fflux(ii,ie) = ev(10,ie) *
-     +                  ( unv(ie)*ev(3+ii,ie) + vnv(ie)*ev(6+ii,ie) )
+        fflux(ii,ie) = ev(10,ie) * &
+     &                  ( unv(ie)*ev(3+ii,ie) + vnv(ie)*ev(6+ii,ie) )
 
         blink = .true.
         flux=0.
@@ -272,14 +272,14 @@ c statement function
 
         end
 
-c*****************************************************************
+!*****************************************************************
 
 	subroutine energ(ielem,kenerg,penerg)
 
-c computation of kinetic & potential energy [Joule]
-c
-c	pot = (g/2) * rho * area * z*z
-c	kin = (1/2) * rho * area * (U*U+V*V)/H
+! computation of kinetic & potential energy [Joule]
+!
+!	pot = (g/2) * rho * area * z*z
+!	kin = (1/2) * rho * area * (U*U+V*V)/H
 
 	use mod_depth
 	use mod_hydro_baro
@@ -324,14 +324,14 @@ c	kin = (1/2) * rho * area * (U*U+V*V)/H
 
 	end
 
-c***************************************************************
+!***************************************************************
 
 	subroutine energ3d(kenergy,penergy,ksurf,ia_ignore)
 
-c computation of kinetic & potential energy [Joule]
-c
-c	pot = (g/2) * rho * area * z*z
-c	kin = (1/2) * rho * area * (U*U+V*V)/H
+! computation of kinetic & potential energy [Joule]
+!
+!	pot = (g/2) * rho * area * z*z
+!	kin = (1/2) * rho * area * (U*U+V*V)/H
 
 	use mod_layer_thickness
 	use mod_ts
@@ -404,20 +404,20 @@ c	kin = (1/2) * rho * area * (U*U+V*V)/H
 
 	end
 
-c***************************************************************
+!***************************************************************
 
         subroutine stmima(a,nkn,nlvddi,ilhkv,amin,amax)
 
-c computes min/max of 3d field
+! computes min/max of 3d field
 
         implicit none
 
-c arguments
+! arguments
         integer nkn,nlvddi
         real a(nlvddi,nkn)
         integer ilhkv(nkn)
         real amin,amax
-c local
+! local
         integer lmax,k,l
 
         amin=a(1,1)
@@ -433,11 +433,11 @@ c local
 
         end
 
-c**********************************************************************
+!**********************************************************************
 
         subroutine n2ebar(cn,ce)
 
-c copies concentrations from node value to element value (only wet areas)
+! copies concentrations from node value to element value (only wet areas)
 
 	use mod_geom_dynamic
 	use evgeom

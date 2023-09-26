@@ -24,76 +24,76 @@
 !
 !--------------------------------------------------------------------------
 
-c subroutines for computing discharge / flux
-c
-c contents :
-c
-c function flxnov(k,ibefor,iafter,istype,az)	flux through volume k
-c subroutine mkweig(n,istype,is,weight)	 	computes weight
-c
-c function flxtype(k)				determines type of node k (1-5)
-c subroutine make_fluxes(k,itype,n,rflux,tflux)	computes fluxes over sides
-c
-c revision log :
-c
-c 30.04.1998	ggu	newly written routines (subpor deleted)
-c 07.05.1998	ggu	check nrdveci on return for error
-c 08.05.1998	ggu	restructured with new comodity routines
-c 13.09.1999	ggu	type of node computed in own routine flxtype
-c 19.11.1999	ggu	iskadj into sublin
-c 20.01.2000	ggu	old routines substituted, new routine extrsect
-c 20.01.2000	ggu	common block /dimdim/ eliminated
-c 20.01.2000	ggu	common block /dimdim/ eliminated
-c 01.09.2002	ggu	ggu99 -> bug in flx routines (how to reproduce?)
-c 26.05.2003	ggu	in flxnov substituted a,b with b,c
-c 26.05.2003	ggu	new routine make_fluxes (for lagrangian)
-c 10.08.2003	ggu	do not call setweg, setnod, setkan
-c 23.03.2006	ggu	changed time step to real
-c 28.09.2007	ggu	use testbndo to determine boundary node in flxtype
-c 28.04.2009	ggu	links re-structured
-c 23.02.2011	ggu	new routine call write_node_fluxes() for special output
-c 01.06.2011	ggu	documentation to flxscs() changed
-c 21.09.2011	ggu	low-level routines copied from subflxa.f
-c 07.10.2011	ggu	implemented 3d flux routines
-c 18.10.2011	ggu	changed VERS_6_1_33
-c 20.10.2011	ggu	restructured, flx3d_k(), make_fluxes_3d()
-c 16.12.2011	ggu	bug fix: in make_fluxes_2/3d() r/tflux was integer
-c 24.01.2012	ggu	changed VERS_6_1_41
-c 04.05.2012	ggu	bug fix: in flx3d_k correct for flux boundary
-c 01.06.2012	ggu	changed VERS_6_1_53
-c 13.06.2013	ggu	changed VERS_6_1_65
-c 19.12.2014	ggu	changed VERS_7_0_10
-c 19.01.2015	ggu	changed VERS_7_1_2
-c 19.01.2015	ggu	changed VERS_7_1_3
-c 10.07.2015	ggu	changed VERS_7_1_50
-c 17.07.2015	ggu	changed VERS_7_1_80
-c 20.07.2015	ggu	changed VERS_7_1_81
-c 16.12.2015	ggu	changed VERS_7_3_16
-c 18.12.2015	ggu	changed VERS_7_3_17
-c 03.04.2018	ggu	changed VERS_7_5_43
-c 16.02.2019	ggu	changed VERS_7_5_60
-c 16.02.2020	ggu	femtime eliminated
-c 05.03.2020	ggu	do not print flux divergence
-c 21.04.2023	ggu	avoid access of node 0 in flxtype()
-c
-c******************************************************************
-c******************************************************************
-c******************************************************************
-c******************************************************************
-c******************************************************************
+! subroutines for computing discharge / flux
+!
+! contents :
+!
+! function flxnov(k,ibefor,iafter,istype,az)	flux through volume k
+! subroutine mkweig(n,istype,is,weight)	 	computes weight
+!
+! function flxtype(k)				determines type of node k (1-5)
+! subroutine make_fluxes(k,itype,n,rflux,tflux)	computes fluxes over sides
+!
+! revision log :
+!
+! 30.04.1998	ggu	newly written routines (subpor deleted)
+! 07.05.1998	ggu	check nrdveci on return for error
+! 08.05.1998	ggu	restructured with new comodity routines
+! 13.09.1999	ggu	type of node computed in own routine flxtype
+! 19.11.1999	ggu	iskadj into sublin
+! 20.01.2000	ggu	old routines substituted, new routine extrsect
+! 20.01.2000	ggu	common block /dimdim/ eliminated
+! 20.01.2000	ggu	common block /dimdim/ eliminated
+! 01.09.2002	ggu	ggu99 -> bug in flx routines (how to reproduce?)
+! 26.05.2003	ggu	in flxnov substituted a,b with b,c
+! 26.05.2003	ggu	new routine make_fluxes (for lagrangian)
+! 10.08.2003	ggu	do not call setweg, setnod, setkan
+! 23.03.2006	ggu	changed time step to real
+! 28.09.2007	ggu	use testbndo to determine boundary node in flxtype
+! 28.04.2009	ggu	links re-structured
+! 23.02.2011	ggu	new routine call write_node_fluxes() for special output
+! 01.06.2011	ggu	documentation to flxscs() changed
+! 21.09.2011	ggu	low-level routines copied from subflxa.f
+! 07.10.2011	ggu	implemented 3d flux routines
+! 18.10.2011	ggu	changed VERS_6_1_33
+! 20.10.2011	ggu	restructured, flx3d_k(), make_fluxes_3d()
+! 16.12.2011	ggu	bug fix: in make_fluxes_2/3d() r/tflux was integer
+! 24.01.2012	ggu	changed VERS_6_1_41
+! 04.05.2012	ggu	bug fix: in flx3d_k correct for flux boundary
+! 01.06.2012	ggu	changed VERS_6_1_53
+! 13.06.2013	ggu	changed VERS_6_1_65
+! 19.12.2014	ggu	changed VERS_7_0_10
+! 19.01.2015	ggu	changed VERS_7_1_2
+! 19.01.2015	ggu	changed VERS_7_1_3
+! 10.07.2015	ggu	changed VERS_7_1_50
+! 17.07.2015	ggu	changed VERS_7_1_80
+! 20.07.2015	ggu	changed VERS_7_1_81
+! 16.12.2015	ggu	changed VERS_7_3_16
+! 18.12.2015	ggu	changed VERS_7_3_17
+! 03.04.2018	ggu	changed VERS_7_5_43
+! 16.02.2019	ggu	changed VERS_7_5_60
+! 16.02.2020	ggu	femtime eliminated
+! 05.03.2020	ggu	do not print flux divergence
+! 21.04.2023	ggu	avoid access of node 0 in flxtype()
+!
+!******************************************************************
+!******************************************************************
+!******************************************************************
+!******************************************************************
+!******************************************************************
 
 	subroutine flx2d_k(k,istype,az,n,transp,ne,elems)
 
-c computes fluxes through finite volume k (2D version)
-c
-c returns n and flux corrected fluxes transp
-c on return transp(i) contains fluxes into finite volume (FV)
-c n is total number of internal sections of FV
-c ne is the total number of elements attached to the FV
-c in case of an internal nodes n == ne
-c for a boundary node n == ne + 1
-c in any case it is the number of internal sections that is returned
-c for a boundary node, transp(n) = 0
+! computes fluxes through finite volume k (2D version)
+!
+! returns n and flux corrected fluxes transp
+! on return transp(i) contains fluxes into finite volume (FV)
+! n is total number of internal sections of FV
+! ne is the total number of elements attached to the FV
+! in case of an internal nodes n == ne
+! for a boundary node n == ne + 1
+! in any case it is the number of internal sections that is returned
+! for a boundary node, transp(n) = 0
 
 	use mod_geom
 	use mod_hydro_baro
@@ -120,9 +120,9 @@ c for a boundary node, transp(n) = 0
 
 	integer ithis
 
-c---------------------------------------------------------
-c get parameters
-c---------------------------------------------------------
+!---------------------------------------------------------
+! get parameters
+!---------------------------------------------------------
 
 	bdebug = k .eq. 6615
 	bdebug = k .eq. 0
@@ -131,9 +131,9 @@ c---------------------------------------------------------
 	call get_timestep(dt)
 	azt = 1. - az
 
-c---------------------------------------------------------
-c initialize variables
-c---------------------------------------------------------
+!---------------------------------------------------------
+! initialize variables
+!---------------------------------------------------------
 
 	n = ne
 	if( istype .gt. 1 ) n = n + 1		!boundary
@@ -141,10 +141,10 @@ c---------------------------------------------------------
 
         transp(n) = 0.                !BUG FIX 29.5.2004
 
-c---------------------------------------------------------
-c compute transports into finite volume of node k -> transp
-c computed transports are divergence corrected
-c---------------------------------------------------------
+!---------------------------------------------------------
+! compute transports into finite volume of node k -> transp
+! computed transports are divergence corrected
+!---------------------------------------------------------
 
 	do i=1,ne
 	  ie = elems(i)
@@ -171,14 +171,14 @@ c---------------------------------------------------------
 
 	end
 
-c******************************************************************
+!******************************************************************
 
 	subroutine flx2d(k,ibefor,iafter,istype,az,flux)
 
-c computes flux through section of finite volume k (2D version)
-c
-c internal section is defined by:  kbefor - k - kafter
-c passed in are pointers to these section in lnk structure
+! computes flux through section of finite volume k (2D version)
+!
+! internal section is defined by:  kbefor - k - kafter
+! passed in are pointers to these section in lnk structure
 
 	use mod_geom
 	use evgeom
@@ -203,9 +203,9 @@ c passed in are pointers to these section in lnk structure
 	bdebug = k .eq. 6615
 	bdebug = k .eq. 0
 
-c---------------------------------------------------------
-c compute transport through finite volume k
-c---------------------------------------------------------
+!---------------------------------------------------------
+! compute transport through finite volume k
+!---------------------------------------------------------
 
 	n = maxlnk
 	call get_elems_around(k,maxlnk,ne,elems)
@@ -217,9 +217,9 @@ c---------------------------------------------------------
 	  write(88,*) '---------------------------------'
 	end if
 
-c---------------------------------------------------------
-c compute transport through section in finite volume k
-c---------------------------------------------------------
+!---------------------------------------------------------
+! compute transport through section in finite volume k
+!---------------------------------------------------------
 
 	tt = 0.
 
@@ -237,23 +237,23 @@ c---------------------------------------------------------
 
 	flux = tt
 
-c---------------------------------------------------------
-c end of routine
-c---------------------------------------------------------
+!---------------------------------------------------------
+! end of routine
+!---------------------------------------------------------
 
 	end
 	
-c******************************************************************
-c******************************************************************
-c******************************************************************
+!******************************************************************
+!******************************************************************
+!******************************************************************
 
 	subroutine flx3d_k(k,istype,azr,lkmax,n,transp,ne,elems)
 
-c computes fluxes through finite volume k (3D version)
-c
-c if we are on a flux boundary this is not working
-c we should exclude mfluxv from the divergence computation
-c -> has been done - other sources of mfluxv (rain, etc.) are also eliminated
+! computes fluxes through finite volume k (3D version)
+!
+! if we are on a flux boundary this is not working
+! we should exclude mfluxv from the divergence computation
+! -> has been done - other sources of mfluxv (rain, etc.) are also eliminated
 
 	use mod_bound_geom
 	use mod_geom
@@ -291,9 +291,9 @@ c -> has been done - other sources of mfluxv (rain, etc.) are also eliminated
 	integer ithis
 	real areanode,volnode
 
-c---------------------------------------------------------
-c get parameters
-c---------------------------------------------------------
+!---------------------------------------------------------
+! get parameters
+!---------------------------------------------------------
 
 	bdebug = k .eq. 6615
 	bdebug = k .eq. 0
@@ -305,9 +305,9 @@ c---------------------------------------------------------
 	az = azr
 	azt = 1. - az
 
-c---------------------------------------------------------
-c initialize variables
-c---------------------------------------------------------
+!---------------------------------------------------------
+! initialize variables
+!---------------------------------------------------------
 
 	n = ne
 	if( istype .gt. 1 ) n = n + 1		!boundary
@@ -321,11 +321,11 @@ c---------------------------------------------------------
 	end do
 	areal(lkmax+1) = 0.
 
-c---------------------------------------------------------
-c compute transports into finite volume of node k -> transp
-c computed transports are divergence corrected
-c note: lkmax is always greater or equal than lmax
-c---------------------------------------------------------
+!---------------------------------------------------------
+! compute transports into finite volume of node k -> transp
+! computed transports are divergence corrected
+! note: lkmax is always greater or equal than lmax
+!---------------------------------------------------------
 
 	do i=1,ne
 	  ie = elems(i)
@@ -360,14 +360,14 @@ c---------------------------------------------------------
 
 	end
 
-c******************************************************************
+!******************************************************************
 
 	subroutine flx3d(k,ibefor,iafter,istype,az,lkmax,flux)
 
-c computes flux through section of finite volume k (3D version)
-c
-c internal section is defined by:  kbefor - k - kafter
-c passed in are pointers to these section in lnk structure
+! computes flux through section of finite volume k (3D version)
+!
+! internal section is defined by:  kbefor - k - kafter
+! passed in are pointers to these section in lnk structure
 
 	use mod_geom
 	use evgeom
@@ -402,9 +402,9 @@ c passed in are pointers to these section in lnk structure
 	bdiverg = .true.
 	bdiverg = .false.
 
-c---------------------------------------------------------
-c compute transport through finite volume k
-c---------------------------------------------------------
+!---------------------------------------------------------
+! compute transport through finite volume k
+!---------------------------------------------------------
 
 	n = maxlnk
 	call get_elems_around(k,maxlnk,ne,elems)
@@ -415,9 +415,9 @@ c---------------------------------------------------------
 	  write(88,*) (transp(1,i),i=1,n)
 	end if
 
-c---------------------------------------------------------
-c check if transport is really divergence free
-c---------------------------------------------------------
+!---------------------------------------------------------
+! check if transport is really divergence free
+!---------------------------------------------------------
 
 	if( istype .le. 2 ) then	!no open boundary
 	  do l=1,lkmax
@@ -439,9 +439,9 @@ c---------------------------------------------------------
 	  write(88,*) '---------------------------------'
 	end if
 
-c---------------------------------------------------------
-c compute transport through section in finite volume k
-c---------------------------------------------------------
+!---------------------------------------------------------
+! compute transport through section in finite volume k
+!---------------------------------------------------------
 
 	do l=1,lkmax
 	  tt(l) = 0.
@@ -467,24 +467,24 @@ c---------------------------------------------------------
 	  flux(l) = tt(l)
 	end do
 
-c---------------------------------------------------------
-c end of routine
-c---------------------------------------------------------
+!---------------------------------------------------------
+! end of routine
+!---------------------------------------------------------
 
 	end
 	
-c******************************************************************
-c******************************************************************
-c******************************************************************
+!******************************************************************
+!******************************************************************
+!******************************************************************
 
 	subroutine mkweig(n,istype,is,weight)
 
-c computes weight over internal section in one finite volume
-c
-c n		dimension (grade of node)
-c istype	type of node (inner, border, ...)
-c is		number of internal section to compute
-c weigth	weights (return)
+! computes weight over internal section in one finite volume
+!
+! n		dimension (grade of node)
+! istype	type of node (inner, border, ...)
+! is		number of internal section to compute
+! weigth	weights (return)
 
 	implicit none
 
@@ -505,7 +505,7 @@ c weigth	weights (return)
 	end do
 
 	if( is .eq. 0 ) then		!no section given
-c	  nothing
+!	  nothing
 	else if( istype .eq. 1 ) then
 	  start = -0.5 * (n-1)
 	  fact = 1./n
@@ -554,14 +554,14 @@ c	  nothing
 
 	end
 
-c******************************************************************
+!******************************************************************
 
 	function flxtype(k)
 
-c determines type of node k (1-5)
-c
-c uses inodv only for determination of open bounday nodes
-c else uses kantv
+! determines type of node k (1-5)
+!
+! uses inodv only for determination of open bounday nodes
+! else uses kantv
 
 	use mod_bound_geom
 	use mod_geom
@@ -611,17 +611,17 @@ c else uses kantv
 
 	end
 
-c**********************************************************************
-c**********************************************************************
-c**********************************************************************
+!**********************************************************************
+!**********************************************************************
+!**********************************************************************
 
 	subroutine make_fluxes_3d(k,itype,lkmax,n,rflux,tflux)
 
-c computes fluxes over sides (tflux) from fluxes into node (rflux)
-c
-c 3d version
-c
-c if on boundary (itype>1) rflux(n) is not used (because not defined)
+! computes fluxes over sides (tflux) from fluxes into node (rflux)
+!
+! 3d version
+!
+! if on boundary (itype>1) rflux(n) is not used (because not defined)
 
 	use levels, only : nlvdi,nlv
 	use basin
@@ -655,13 +655,13 @@ c if on boundary (itype>1) rflux(n) is not used (because not defined)
 
 	end
 
-c**********************************************************************
+!**********************************************************************
 
 	subroutine make_fluxes_2d(k,itype,n,rflux,tflux)
 
-c computes fluxes over sides (tflux) from fluxes into node (rflux)
-c
-c if on boundary (itype>1) rflux(n) is not used (because not defined)
+! computes fluxes over sides (tflux) from fluxes into node (rflux)
+!
+! if on boundary (itype>1) rflux(n) is not used (because not defined)
 
 	implicit none
 
@@ -722,5 +722,5 @@ c if on boundary (itype>1) rflux(n) is not used (because not defined)
 
 	end
 
-c**********************************************************************
+!**********************************************************************
 

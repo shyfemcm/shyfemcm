@@ -23,111 +23,111 @@
 !
 !--------------------------------------------------------------------------
 
-c utility routines to read/write EXT file - file type 71
-c
-c contents :
-c
-c revision log :
-c
-c 20.05.1998	ggu	cleaned up a bit
-c 04.02.2000	ggu	wrrc77 from newpr to here
-c 23.03.2010	ggu	changed v6.1.1
-c 14.09.2015	ggu	some more helper routines
-c 05.10.2015	ggu	handle error in backspace smoothly
-c 12.10.2015	ggu	changed VERS_7_3_3
-c 18.12.2015	ggu	changed VERS_7_3_17
-c 05.10.2017	ggu	file 7 substituted with EXT file in output
-c 20.10.2017	ggu	completely restructured for version 7
-c 04.11.2017	ggu	changed VERS_7_5_34
-c 30.08.2018	ggu	new version 8 to avoid implicit do
-c 09.11.2018	ggu	more general version of linear routines
-c 18.12.2018	ggu	changed VERS_7_5_52
-c 16.02.2019	ggu	changed VERS_7_5_60
-c
-c notes :
-c
-c variables used:
-c
-c	ierr		error code (0: ok,  <0: EOF,  >0: error)
-c	iunit		file unit
-c
-c	mtype		type of file (id)
-c	nvers		version of file
-c	knausm		number of nodes written
-c	lmax		vertical dimension
-c	nvar		number of rvariable records (+1)
-c
-c	atime0		reference time (absolute)
-c	href		reference level for water level
-c	hzmin		minimum total water depth
-c	title		title of run
-c	femver		version of shyfem
-c
-c	knaus(knausm)	external number of nodes
-c	hdep(knausm)	depth at nodes
-c	ilhkv(knausm)	vertical levels of node
-c	x(knausm)	x coordinate of nodes
-c	y(knausm)	y coordinate of nodes
-c	strings(knausm)	description of node
-c	hlv(lmax)	level depth
-c
-c	atime		time of record (absolute)
-c	ivar		indicator of variable (0 for barotropic u,v,z)
-c	m		number of variables 
-c				(3 for ivar=0, 2 for ivar=2, else 1)
-c	lm		vertical levels contained in record
-c				(lm=1 for ivar=0, else lm=lmax)
-c	vals(lmax,knausm,3)	value of variables
-c
-c	u,v,z		for record 0 barotropic velocity and water level
-c
-c format of file:
-c
-c version 8
-c
-c	as version 7, but records are written as
-c
-c	atime,ivar,m,lm,nlin,vals(1:nlin)
-c
-c version 7
-c
-c	mtype,nvers
-c	knausm,lmax,nvar
-c
-c	atime0
-c	href,hzmin
-c	title,femver
-c	knaus,hdep,ilhkv,x,y,strings
-c	hlv
-c
-c	atime,ivar,m,lm,vals
-c
-c version 3-6
-c
-c 	nvers
-c	knausm,(knaus(i),i=1,knausm),(hdep(i),i=1,knausm),href,hzmin,title
-c
-c	it,(u(i),i=1,knausm),(v(i),i=1,knausm),(z(i),i=1,knausm)
-c
-c version 2
-c
-c 	nvers
-c	knausm,(knaus(i),i=1,knausm),(hdep(i),i=1,knausm),href,hzmin,title
-c
-c	float(it),(u(i),i=1,knausm),(v(i),i=1,knausm),(z(i),i=1,knausm)
-c
-c version 1
-c
-c	knausm,(knaus(i),i=1,knausm)
-c
-c	float(it),(u(i),i=1,knausm),(v(i),i=1,knausm),(z(i),i=1,knausm)
-c
-c*********************************************************
-c*********************************************************
-c*********************************************************
-c*********************************************************
-c*********************************************************
-c*********************************************************
+! utility routines to read/write EXT file - file type 71
+!
+! contents :
+!
+! revision log :
+!
+! 20.05.1998	ggu	cleaned up a bit
+! 04.02.2000	ggu	wrrc77 from newpr to here
+! 23.03.2010	ggu	changed v6.1.1
+! 14.09.2015	ggu	some more helper routines
+! 05.10.2015	ggu	handle error in backspace smoothly
+! 12.10.2015	ggu	changed VERS_7_3_3
+! 18.12.2015	ggu	changed VERS_7_3_17
+! 05.10.2017	ggu	file 7 substituted with EXT file in output
+! 20.10.2017	ggu	completely restructured for version 7
+! 04.11.2017	ggu	changed VERS_7_5_34
+! 30.08.2018	ggu	new version 8 to avoid implicit do
+! 09.11.2018	ggu	more general version of linear routines
+! 18.12.2018	ggu	changed VERS_7_5_52
+! 16.02.2019	ggu	changed VERS_7_5_60
+!
+! notes :
+!
+! variables used:
+!
+!	ierr		error code (0: ok,  <0: EOF,  >0: error)
+!	iunit		file unit
+!
+!	mtype		type of file (id)
+!	nvers		version of file
+!	knausm		number of nodes written
+!	lmax		vertical dimension
+!	nvar		number of rvariable records (+1)
+!
+!	atime0		reference time (absolute)
+!	href		reference level for water level
+!	hzmin		minimum total water depth
+!	title		title of run
+!	femver		version of shyfem
+!
+!	knaus(knausm)	external number of nodes
+!	hdep(knausm)	depth at nodes
+!	ilhkv(knausm)	vertical levels of node
+!	x(knausm)	x coordinate of nodes
+!	y(knausm)	y coordinate of nodes
+!	strings(knausm)	description of node
+!	hlv(lmax)	level depth
+!
+!	atime		time of record (absolute)
+!	ivar		indicator of variable (0 for barotropic u,v,z)
+!	m		number of variables 
+!				(3 for ivar=0, 2 for ivar=2, else 1)
+!	lm		vertical levels contained in record
+!				(lm=1 for ivar=0, else lm=lmax)
+!	vals(lmax,knausm,3)	value of variables
+!
+!	u,v,z		for record 0 barotropic velocity and water level
+!
+! format of file:
+!
+! version 8
+!
+!	as version 7, but records are written as
+!
+!	atime,ivar,m,lm,nlin,vals(1:nlin)
+!
+! version 7
+!
+!	mtype,nvers
+!	knausm,lmax,nvar
+!
+!	atime0
+!	href,hzmin
+!	title,femver
+!	knaus,hdep,ilhkv,x,y,strings
+!	hlv
+!
+!	atime,ivar,m,lm,vals
+!
+! version 3-6
+!
+! 	nvers
+!	knausm,(knaus(i),i=1,knausm),(hdep(i),i=1,knausm),href,hzmin,title
+!
+!	it,(u(i),i=1,knausm),(v(i),i=1,knausm),(z(i),i=1,knausm)
+!
+! version 2
+!
+! 	nvers
+!	knausm,(knaus(i),i=1,knausm),(hdep(i),i=1,knausm),href,hzmin,title
+!
+!	float(it),(u(i),i=1,knausm),(v(i),i=1,knausm),(z(i),i=1,knausm)
+!
+! version 1
+!
+!	knausm,(knaus(i),i=1,knausm)
+!
+!	float(it),(u(i),i=1,knausm),(v(i),i=1,knausm),(z(i),i=1,knausm)
+!
+!*********************************************************
+!*********************************************************
+!*********************************************************
+!*********************************************************
+!*********************************************************
+!*********************************************************
 
 !==================================================================
         module extfile
@@ -167,7 +167,7 @@ c*********************************************************
 
 	end
 
-c*********************************************************
+!*********************************************************
 
 	subroutine ext_is_ext_file(iunit,nvers)
 
@@ -183,9 +183,9 @@ c*********************************************************
 
 	end
 
-c*********************************************************
-c*********************************************************
-c*********************************************************
+!*********************************************************
+!*********************************************************
+!*********************************************************
 
 	subroutine ext_peek_header(iunit,nvers,knausm,lmax,nvar,ierr)
 
@@ -197,7 +197,7 @@ c*********************************************************
 
 	end
 
-c*********************************************************
+!*********************************************************
 
 	subroutine ext_peek_record(iunit,nvers,atime,ivar,ierr)
 
@@ -228,11 +228,11 @@ c*********************************************************
 
 	end
 
-c*********************************************************
+!*********************************************************
 
 	subroutine ext_check_header(iunit,nvers,knausm,lmax,nvar,ierr)
 
-c checks version of ext file and returns number of points
+! checks version of ext file and returns number of points
 
 	implicit none
 
@@ -244,11 +244,11 @@ c checks version of ext file and returns number of points
 
 	end
 
-c*********************************************************
+!*********************************************************
 
 	subroutine ext_check_new_header(iunit,nvers,knausm,lmax,nvar,ierr)
 
-c checks version of ext file and returns number of points ( nvers > 6 )
+! checks version of ext file and returns number of points ( nvers > 6 )
 
 	use extfile
 
@@ -281,11 +281,11 @@ c checks version of ext file and returns number of points ( nvers > 6 )
 	stop 'error stop ext_check_new_header: internal error (1)'
 	end
 
-c*********************************************************
+!*********************************************************
 
 	subroutine ext_check_old_header(iunit,nvers,knausm,lmax,nvar,ierr)
 
-c checks version of ext file and returns number of points ( nvers <= 6 )
+! checks version of ext file and returns number of points ( nvers <= 6 )
 
 	implicit none
 
@@ -306,12 +306,12 @@ c checks version of ext file and returns number of points ( nvers <= 6 )
 	if( nvers < 1 .or. nvers > 6 ) goto 99
 
 	if(nvers.ge.2.and.nvers.le.6) then
-	  read(iunit,iostat=ios)   knausm
-     +                                  ,(kaux,j=1,knausm)
-     +                                  ,(haux,j=1,knausm)
-     +                                  ,haux
-     +                                  ,haux
-     +                                  ,title
+	  read(iunit,iostat=ios)   knausm &
+     &                                  ,(kaux,j=1,knausm) &
+     &                                  ,(haux,j=1,knausm) &
+     &                                  ,haux &
+     &                                  ,haux &
+     &                                  ,title
 	else
 	  ios = 1
 	end if
@@ -332,9 +332,9 @@ c checks version of ext file and returns number of points ( nvers <= 6 )
 	return
 	end
 
-c*********************************************************
-c*********************************************************
-c*********************************************************
+!*********************************************************
+!*********************************************************
+!*********************************************************
 
 	subroutine ext_read_header(iunit,nvers,knausm,lmax,nvar,ierr)
 
@@ -354,13 +354,13 @@ c*********************************************************
 
 	end
 
-c*********************************************************
+!*********************************************************
 
-	subroutine ext_read_header2(iunit,nvers,knausm,lmax
-     +                          ,atime0
-     +                          ,href,hzmin,nzadapt,title,femver
-     +                          ,knaus,hdep,ilhkv,x,y,strings,hlv
-     +				,ierr)
+	subroutine ext_read_header2(iunit,nvers,knausm,lmax &
+     &                          ,atime0 &
+     &                          ,href,hzmin,nzadapt,title,femver &
+     &                          ,knaus,hdep,ilhkv,x,y,strings,hlv &
+     &				,ierr)
 
 	implicit none
 
@@ -381,8 +381,8 @@ c*********************************************************
 
 	if( nvers <= 6 ) then
 	  ndim = knausm
-	  ierr = read7(iunit,ndim,nvers,knausm,knaus,hdep
-     +                          ,href,hzmin,title)
+	  ierr = read7(iunit,ndim,nvers,knausm,knaus,hdep &
+     &                          ,href,hzmin,title)
 	  if( ierr /= 0 ) return
 	  femver = ' '
 	  ilhkv = 1
@@ -405,10 +405,10 @@ c*********************************************************
 
 	end
 
-c*********************************************************
+!*********************************************************
 
-	subroutine ext_read_record(iunit,nvers,atime,knausm,lmax
-     +					,ivar,m,ilhkv,vals,ierr)
+	subroutine ext_read_record(iunit,nvers,atime,knausm,lmax &
+     &					,ivar,m,ilhkv,vals,ierr)
 
 	implicit none
 
@@ -463,7 +463,7 @@ c*********************************************************
 	stop 'error stop ext_read_record: m > 3'
 	end
 
-c*********************************************************
+!*********************************************************
 
 	subroutine ext_write_header(iunit,nvers,knausm,lmax,nvar,ierr)
 
@@ -491,13 +491,13 @@ c*********************************************************
 
 	end
 
-c*********************************************************
+!*********************************************************
 
-	subroutine ext_write_header2(iunit,nvers,knausm,lmax
-     +                          ,atime0
-     +                          ,href,hzmin,nzadapt,title,femver
-     +                          ,knaus,hdep,ilhkv,x,y,strings,hlv
-     +				,ierr)
+	subroutine ext_write_header2(iunit,nvers,knausm,lmax &
+     &                          ,atime0 &
+     &                          ,href,hzmin,nzadapt,title,femver &
+     &                          ,knaus,hdep,ilhkv,x,y,strings,hlv &
+     &				,ierr)
 
 	implicit none
 
@@ -526,10 +526,10 @@ c*********************************************************
 
 	end
 
-c*********************************************************
+!*********************************************************
 
-	subroutine ext_write_record(iunit,nvers,atime,knausm,lmax
-     +					,ivar,m,ilhkv,vals,ierr)
+	subroutine ext_write_record(iunit,nvers,atime,knausm,lmax &
+     &					,ivar,m,ilhkv,vals,ierr)
 
 	implicit none
 
@@ -546,10 +546,10 @@ c*********************************************************
 
 	if( ivar == 0 ) then
 	  lm = 1
-	  write(iunit,iostat=ierr) atime,ivar,m,lm
-     +				,((vals(1,j,i)
-     +				,j=1,knausm)
-     +				,i=1,m)
+	  write(iunit,iostat=ierr) atime,ivar,m,lm &
+     &				,((vals(1,j,i) &
+     &				,j=1,knausm) &
+     &				,i=1,m)
 	else
 !	  write(iunit,iostat=ierr) atime,ivar,m,lmax
 !     +				,(((vals(l,j,i)
@@ -559,45 +559,45 @@ c*********************************************************
 	  nlin = lmax*knausm*m
 	  allocate(rlin(nlin))
           call vals2linear(lmax,knausm,m,ilhkv,vals,rlin,nlin)
-	  write(iunit,iostat=ierr) atime,ivar,m,lmax,nlin
-     +                                  ,(rlin(i),i=1,nlin)
+	  write(iunit,iostat=ierr) atime,ivar,m,lmax,nlin &
+     &                                  ,(rlin(i),i=1,nlin)
 	end if
 
 	end
 
-c*********************************************************
-c*********************************************************
-c*********************************************************
-c old routines - needed to read/write until version 6
-c*********************************************************
-c*********************************************************
-c*********************************************************
+!*********************************************************
+!*********************************************************
+!*********************************************************
+! old routines - needed to read/write until version 6
+!*********************************************************
+!*********************************************************
+!*********************************************************
 
-	function read7(iunit,ndim,nvers,knausm,knaus,hdep
-     +                          ,href,hzmin,title)
-c
-c reads first record of file 7
-c
-c error codes 11 21 31 35 41 61 71
-c
+	function read7(iunit,ndim,nvers,knausm,knaus,hdep &
+     &                          ,href,hzmin,title)
+!
+! reads first record of file 7
+!
+! error codes 11 21 31 35 41 61 71
+!
 	character*80 title
 	integer knaus(ndim)
 	real hdep(ndim)
-c
+!
 	nvermx = 6
-c
+!
 	rewind(iunit,iostat=ios)
-c
+!
 	if(ios.ne.0) then
 		write(6,*) 'Cannot rewind file for unit :',iunit
 		read7=71.
 		return
 	end if
-c
-c first record
-c
+!
+! first record
+!
 	read(iunit,iostat=ios) nvers
-c
+!
 	if(ios.eq.0) then       ! no read error ==> first version
 !
 	else if(ios.lt.0) then  !eof
@@ -607,9 +607,9 @@ c
 		read7=21.
 		return
 	end if
-c
-c second record
-c
+!
+! second record
+!
 	if(nvers.eq.1) then
 		hzmin=0.05
 		title=' '
@@ -617,18 +617,18 @@ c
 		hdep(j)=100000.         !no dry areas
 		end do
 	else if(nvers.ge.2.and.nvers.le.nvermx) then
-		read(iunit,iostat=ios)   knausm
-     +                                  ,(knaus(j),j=1,knausm)
-     +                                  ,(hdep(j),j=1,knausm)
-     +                                  ,href
-     +                                  ,hzmin
-     +                                  ,title
+		read(iunit,iostat=ios)   knausm &
+     &                                  ,(knaus(j),j=1,knausm) &
+     &                                  ,(hdep(j),j=1,knausm) &
+     &                                  ,href &
+     &                                  ,hzmin &
+     &                                  ,title
 	else
 		write(6,*) 'version not recognized : ',nvers
 		read7=11.
 		return
 	end if
-c
+!
 	if(ios.gt.0) then       !error
 		write(6,*) 'error while reading'
 		write(6,*) 'second record of EXT header'
@@ -648,75 +648,75 @@ c
 		read7=41.
 		return
 	end if
-c
+!
 	read7=0.
-c
+!
 	return
 	end
-c
-c*********************************************************
-c
-	function writ7(iunit,ndim,nvers,knausm,knaus,hdep
-     +                          ,href,hzmin,title)
-c
-c writes first record of file 7
-c
-c error codes 11
-c ndim is dummy argument
-c
+!
+!*********************************************************
+!
+	function writ7(iunit,ndim,nvers,knausm,knaus,hdep &
+     &                          ,href,hzmin,title)
+!
+! writes first record of file 7
+!
+! error codes 11
+! ndim is dummy argument
+!
 	character*80 title
 	integer knaus(ndim)
 	real hdep(ndim)
-c
+!
 	idummy=ndim        
 	idummy=2*idummy
-c
+!
 	nvermx = 6
-c
+!
 	rewind iunit
-c
+!
 	if(nvers.eq.1) then
-		write(iunit)             knausm
-     +                                  ,(knaus(j),j=1,knausm)
+		write(iunit)             knausm &
+     &                                  ,(knaus(j),j=1,knausm)
 	else if(nvers.ge.2.and.nvers.le.nvermx) then
 		write(iunit)             nvers
-		write(iunit)             knausm
-     +                                  ,(knaus(j),j=1,knausm)
-     +                                  ,(hdep(j),j=1,knausm)
-     +                                  ,href
-     +                                  ,hzmin
-     +                                  ,title
+		write(iunit)             knausm &
+     &                                  ,(knaus(j),j=1,knausm) &
+     &                                  ,(hdep(j),j=1,knausm) &
+     &                                  ,href &
+     &                                  ,hzmin &
+     &                                  ,title
 	else
 		write(6,*) 'version not recognized : ',nvers
 		writ7=11.
 		return
 	end if
-c
+!
 	writ7=0.
-c
+!
 	return
 	end
-c
-c*********************************************************
-c
+!
+!*********************************************************
+!
 	function rdrc7(iunit,nvers,it,knausm,xv)
-c
-c reads data record of file 7
-c
-c error codes 11 35
-c EOF -1
-c
+!
+! reads data record of file 7
+!
+! error codes 11 35
+! EOF -1
+!
 	real xv(3*knausm)
-c
+!
 	nvermx = 6
-c
+!
 	if(nvers.ge.1.and.nvers.le.2) then
-		read(iunit,iostat=ios)  tt
-     +                                  ,(xv(i),i=1,3*knausm)
+		read(iunit,iostat=ios)  tt &
+     &                                  ,(xv(i),i=1,3*knausm)
 		it=iround(tt)
 	else if(nvers.ge.3.and.nvers.le.nvermx) then
-		read(iunit,iostat=ios)  it
-     +                                  ,(xv(i),i=1,3*knausm)
+		read(iunit,iostat=ios)  it &
+     &                                  ,(xv(i),i=1,3*knausm)
 	else
 		write(6,*) 'version not recognized : ',nvers
 		rdrc7=11.
@@ -735,29 +735,29 @@ c
 		rdrc7=-1.
 		return
 	end if
-c
+!
 	rdrc7=0.
-c
+!
 	return
 	end
-c
-c************************************************************
-c
+!
+!************************************************************
+!
 	function skrc7(iunit,nvers,it,knausm,xv)
-c
-c skips one data record of file 7
-c
-c error codes 11 35
-c EOF -1
-c
+!
+! skips one data record of file 7
+!
+! error codes 11 35
+! EOF -1
+!
 	real xv(3*knausm)
-c
+!
 	idummy=knausm        
 	dummy=xv(1)
 	dummy=idummy*dummy
-c
+!
 	nvermx = 6
-c
+!
 	if(nvers.ge.1.and.nvers.le.2) then
 		read(iunit,iostat=ios)  tt
 		it=iround(tt)
@@ -768,7 +768,7 @@ c
 		skrc7=11.
 		return
 	end if
-c
+!
 	if(ios.gt.0) then       !error
 		write(6,*) 'error while skipping'
 		write(6,*) 'data record of EXT file'
@@ -778,67 +778,67 @@ c
 		skrc7=-1.
 		return
 	end if
-c
+!
 	skrc7=0.
-c
+!
 	return
 	end
-c
-c************************************************************
-c
+!
+!************************************************************
+!
 	function wrrc7(iunit,nvers,it,knausm,knaus,xv)
-c
-c writes data record of float tracking file
-c
-c error codes 11
-c
+!
+! writes data record of float tracking file
+!
+! error codes 11
+!
 	integer knaus(knausm)
 	real xv(*)
-c
+!
 	nvermx = 6
-c
+!
 	if(nvers.ge.1.and.nvers.le.2) then
-		write(iunit)    float(it)
-     +                          ,((xv(3*(knaus(j)-1)+i)
-     +                          ,j=1,knausm)
-     +                          ,i=1,3)
+		write(iunit)    float(it) &
+     &                          ,((xv(3*(knaus(j)-1)+i) &
+     &                          ,j=1,knausm) &
+     &                          ,i=1,3)
 	else if(nvers.ge.3.and.nvers.le.nvermx) then
-		write(iunit)    it
-     +                          ,((xv(3*(knaus(j)-1)+i)
-     +                          ,j=1,knausm)
-     +                          ,i=1,3)
+		write(iunit)    it &
+     &                          ,((xv(3*(knaus(j)-1)+i) &
+     &                          ,j=1,knausm) &
+     &                          ,i=1,3)
 	else
 		write(6,*) 'version not recognized : ',nvers
 		wrrc7=11.
 		return
 	end if
-c
+!
 	wrrc7=0.
-c
+!
 	return
 	end
-c
-c************************************************************
+!
+!************************************************************
 
         function wrrc77(iunit,nvers,it,knausm,knaus,u,v,z)
-c
-c writes data record of extra point file
-c
-c error codes 11
-c
+!
+! writes data record of extra point file
+!
+! error codes 11
+!
         dimension knaus(*),u(*),v(*),z(knausm)
-c
-                write(iunit)    it
-     +                          ,( u(knaus(j)),j=1,knausm )
-     +                          ,( v(knaus(j)),j=1,knausm )
-     +                          ,( z(knaus(j)),j=1,knausm )
-c
+!
+                write(iunit)    it &
+     &                          ,( u(knaus(j)),j=1,knausm ) &
+     &                          ,( v(knaus(j)),j=1,knausm ) &
+     &                          ,( z(knaus(j)),j=1,knausm )
+!
         wrrc77=0.
-c
+!
         return
         end
 
-c************************************************************
-c************************************************************
-c************************************************************
+!************************************************************
+!************************************************************
+!************************************************************
 

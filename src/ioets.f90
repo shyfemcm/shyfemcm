@@ -23,133 +23,133 @@
 !
 !--------------------------------------------------------------------------
 
-c utility routines to read/write ETS file - file type 161
-c
-c contents :
-c
-c	 subroutine iniets
-c	 subroutine setets(iunit,nvers,nkn,nlv,nvar)
-c	 subroutine getets(iunit,nvers,nkn,nlv,nvar)
-c	 subroutine delets(iunit)
-c	 subroutine dimets(iunit,nknddi,nlvddi)
-c
-c        subroutine errets(iunit,routine,text)
-c        subroutine findets_err(iunit,routine,text,n)
-c        function findets(iunit)
-c        subroutine infoets(iunit,iout)
-c
-c        subroutine ets_init(iunit,nversion)
-c        subroutine ets_close(iunit)
-c        subroutine ets_check_dimension(iunit,nknddi,nlvddi)
-c
-c        subroutine ets_get_date(iunit,date,time)
-c        subroutine ets_set_date(iunit,date,time)
-c        subroutine ets_get_title(iunit,title)
-c        subroutine ets_set_title(iunit,title)
-c        subroutine ets_get_femver(iunit,femver)
-c        subroutine ets_set_femver(iunit,femver)
-c        subroutine ets_get_params(iunit,nkn,nlv,nvar)
-c        subroutine ets_set_params(iunit,nkn,nlv,nvar)
-c        subroutine ets_clone_params(iu_from,iu_to)
-c
-c	 subroutine ets_is_ets_file(iunit,nvers)
-c
-c	 subroutine ets_peek_header(iunit,nkn,nlv,nvar,ierr)
-c        subroutine ets_read_header(iunit,nkn,nlv,nvar,ierr)
-c        subroutine ets_write_header(iunit,nkn,nlv,nvar,ierr)
-c        subroutine ets_read_header2(iu,ilhkv,hlv,hkv
-c     +					,nodes,xg,yg,desc,ierr)
-c        subroutine ets_write_header2(iunit,ilhkv,hlv,hkv
-c     +					,nodes,xg,yg,desc,ierr)
-c        subroutine ets_read_record(iu,it,ivar,nlvddi,ilhkv,c,ierr)
-c        subroutine ets_write_record(iunit,it,ivar,nlvddi,ilhkv,c,ierr)
-c
-c        subroutine ets_next_record(iunit,it,ivar,ierr)
-c        subroutine ets_back_record(iunit)
-c        subroutine ets_skip_header(iunit,nvar,ierr)
-c        subroutine ets_skip_record(iunit,it,ivar,ierr)
-c
-c revision log :
-c
-c 24.01.2014	ggu	copied from subnos.f
-c 30.10.2014	ggu	changed VERS_7_0_4
-c 10.07.2015	ggu	changed VERS_7_1_50
-c 24.07.2015	ggu	changed VERS_7_1_82
-c 19.02.2016	ggu	changed VERS_7_5_2
-c 02.09.2017	ggu	changed VERS_7_5_31
-c 04.11.2017	ggu	changed VERS_7_5_34
-c 18.12.2018	ggu	changed VERS_7_5_52
-c 16.02.2019	ggu	changed VERS_7_5_60
-c
-c notes :
-c
-c Usage writing:
-c
-c	open file
-c	call ets_init
-c	call ets_set_title	(not obligatory)
-c	call ets_set_date	(not obligatory)
-c	call ets_set_femver	(not obligatory)
-c	call ets_write_header
-c	call ets_write_header2
-c	call ets_write_record
-c	...
-c	call ets_close
-c
-c Usage reading:
-c
-c	open file
-c	call ets_init
-c	call ets_read_header
-c	call dimets
-c	call ets_get_title	(not obligatory)
-c	call ets_get_date	(not obligatory)
-c	call ets_get_femver	(not obligatory)
-c	call ets_read_header2
-c	call ets_read_record
-c	...
-c	call ets_close
-c
-c format of file:
-c
-c version 1
-c
-c	ftype,nvers
-c	nkn,nlv,nvar
-c	title
-c	date,time				(version 4)
-c	femver					(version 5)
-c
-c	(ilhkv(k),k=1,nkn)			empty if nlv <= 1
-c	(hlv(k),k=1,nlv)			empty if nlv <= 1
-c	(hkv(k),k=1,nkn)
-c	
-c	it,ivar,lmax
-c	(c(1,k),k=1,nkn)			if nlv <= 1 or lmax <= 1
-c	((c(l,k),l=1,ilhkv(k)),k=1,nkn)		if nlv > 1
-c
-c variable types:
-c
-c	 1	zeta
-c	 6	x-vel
-c	 7	y-vel
-c	10	conz
-c	11	salt
-c	12	temp
-c	15	oxygen
-c	18	rms
-c
-c************************************************************
-c************************************************************
-c************************************************************
-c internal routines
-c************************************************************
-c************************************************************
-c************************************************************
+! utility routines to read/write ETS file - file type 161
+!
+! contents :
+!
+!	 subroutine iniets
+!	 subroutine setets(iunit,nvers,nkn,nlv,nvar)
+!	 subroutine getets(iunit,nvers,nkn,nlv,nvar)
+!	 subroutine delets(iunit)
+!	 subroutine dimets(iunit,nknddi,nlvddi)
+!
+!        subroutine errets(iunit,routine,text)
+!        subroutine findets_err(iunit,routine,text,n)
+!        function findets(iunit)
+!        subroutine infoets(iunit,iout)
+!
+!        subroutine ets_init(iunit,nversion)
+!        subroutine ets_close(iunit)
+!        subroutine ets_check_dimension(iunit,nknddi,nlvddi)
+!
+!        subroutine ets_get_date(iunit,date,time)
+!        subroutine ets_set_date(iunit,date,time)
+!        subroutine ets_get_title(iunit,title)
+!        subroutine ets_set_title(iunit,title)
+!        subroutine ets_get_femver(iunit,femver)
+!        subroutine ets_set_femver(iunit,femver)
+!        subroutine ets_get_params(iunit,nkn,nlv,nvar)
+!        subroutine ets_set_params(iunit,nkn,nlv,nvar)
+!        subroutine ets_clone_params(iu_from,iu_to)
+!
+!	 subroutine ets_is_ets_file(iunit,nvers)
+!
+!	 subroutine ets_peek_header(iunit,nkn,nlv,nvar,ierr)
+!        subroutine ets_read_header(iunit,nkn,nlv,nvar,ierr)
+!        subroutine ets_write_header(iunit,nkn,nlv,nvar,ierr)
+!        subroutine ets_read_header2(iu,ilhkv,hlv,hkv
+!     +					,nodes,xg,yg,desc,ierr)
+!        subroutine ets_write_header2(iunit,ilhkv,hlv,hkv
+!     +					,nodes,xg,yg,desc,ierr)
+!        subroutine ets_read_record(iu,it,ivar,nlvddi,ilhkv,c,ierr)
+!        subroutine ets_write_record(iunit,it,ivar,nlvddi,ilhkv,c,ierr)
+!
+!        subroutine ets_next_record(iunit,it,ivar,ierr)
+!        subroutine ets_back_record(iunit)
+!        subroutine ets_skip_header(iunit,nvar,ierr)
+!        subroutine ets_skip_record(iunit,it,ivar,ierr)
+!
+! revision log :
+!
+! 24.01.2014	ggu	copied from subnos.f
+! 30.10.2014	ggu	changed VERS_7_0_4
+! 10.07.2015	ggu	changed VERS_7_1_50
+! 24.07.2015	ggu	changed VERS_7_1_82
+! 19.02.2016	ggu	changed VERS_7_5_2
+! 02.09.2017	ggu	changed VERS_7_5_31
+! 04.11.2017	ggu	changed VERS_7_5_34
+! 18.12.2018	ggu	changed VERS_7_5_52
+! 16.02.2019	ggu	changed VERS_7_5_60
+!
+! notes :
+!
+! Usage writing:
+!
+!	open file
+!	call ets_init
+!	call ets_set_title	(not obligatory)
+!	call ets_set_date	(not obligatory)
+!	call ets_set_femver	(not obligatory)
+!	call ets_write_header
+!	call ets_write_header2
+!	call ets_write_record
+!	...
+!	call ets_close
+!
+! Usage reading:
+!
+!	open file
+!	call ets_init
+!	call ets_read_header
+!	call dimets
+!	call ets_get_title	(not obligatory)
+!	call ets_get_date	(not obligatory)
+!	call ets_get_femver	(not obligatory)
+!	call ets_read_header2
+!	call ets_read_record
+!	...
+!	call ets_close
+!
+! format of file:
+!
+! version 1
+!
+!	ftype,nvers
+!	nkn,nlv,nvar
+!	title
+!	date,time				(version 4)
+!	femver					(version 5)
+!
+!	(ilhkv(k),k=1,nkn)			empty if nlv <= 1
+!	(hlv(k),k=1,nlv)			empty if nlv <= 1
+!	(hkv(k),k=1,nkn)
+!	
+!	it,ivar,lmax
+!	(c(1,k),k=1,nkn)			if nlv <= 1 or lmax <= 1
+!	((c(l,k),l=1,ilhkv(k)),k=1,nkn)		if nlv > 1
+!
+! variable types:
+!
+!	 1	zeta
+!	 6	x-vel
+!	 7	y-vel
+!	10	conz
+!	11	salt
+!	12	temp
+!	15	oxygen
+!	18	rms
+!
+!************************************************************
+!************************************************************
+!************************************************************
+! internal routines
+!************************************************************
+!************************************************************
+!************************************************************
 
 	subroutine iniets
 
-c sets up initial common block - internal routine
+! sets up initial common block - internal routine
 
 	implicit none
 
@@ -178,11 +178,11 @@ c sets up initial common block - internal routine
 
 	end
 
-c************************************************************
+!************************************************************
 
 	subroutine setets(iunit,nvers,nkn,nlv,nvar)
 
-c sets up parameter common block - internal routine
+! sets up parameter common block - internal routine
 
 	implicit none
 
@@ -193,8 +193,8 @@ c sets up parameter common block - internal routine
 	integer n
 	integer findets
 
-c we do not check if unit has already been opened -> open with ifileo
-c changed -> before calling this ets_init has to be called
+! we do not check if unit has already been opened -> open with ifileo
+! changed -> before calling this ets_init has to be called
 
 	n = findets(iunit)
 
@@ -209,11 +209,11 @@ c changed -> before calling this ets_init has to be called
 
 	end
 
-c************************************************************
+!************************************************************
 
 	subroutine getets(iunit,nvers,nkn,nlv,nvar)
 
-c gets parameter common block - internal routine
+! gets parameter common block - internal routine
 
 	implicit none
 
@@ -236,13 +236,13 @@ c gets parameter common block - internal routine
 
 	end
 
-c************************************************************
+!************************************************************
 
 	subroutine delets(iunit)
 
-c closes ets file internal structure - internal routine
-c
-c please note that the file has still to be closed manually
+! closes ets file internal structure - internal routine
+!
+! please note that the file has still to be closed manually
 
 	implicit none
 
@@ -252,8 +252,8 @@ c please note that the file has still to be closed manually
 
 	integer n,i
 
-	call findets_err(iunit,'delets'
-     +			,'File is not open, cannot close.',n)
+	call findets_err(iunit,'delets' &
+     &			,'File is not open, cannot close.',n)
 
 	do i=0,nitdim
 	  etsvar(i,n) = 0
@@ -264,11 +264,11 @@ c please note that the file has still to be closed manually
 
 	end
 
-c************************************************************
+!************************************************************
 
 	subroutine dimets(iunit,nknddi,nlvddi)
 
-c checks dimension of arrays - internal routine
+! checks dimension of arrays - internal routine
 
 	implicit none
 
@@ -288,13 +288,13 @@ c checks dimension of arrays - internal routine
         stop 'error stop dimets: dimension error'
 	end
 
-c************************************************************
-c************************************************************
-c************************************************************
+!************************************************************
+!************************************************************
+!************************************************************
 
 	subroutine errets(iunit,routine,text)
 
-c error routine for ets - internal routine
+! error routine for ets - internal routine
 
 	implicit none
 
@@ -307,11 +307,11 @@ c error routine for ets - internal routine
 
 	end
 
-c************************************************************
+!************************************************************
 
 	subroutine findets_err(iunit,routine,text,n)
 
-c finds entry for iunit -> returns it in n or stops with error
+! finds entry for iunit -> returns it in n or stops with error
 
 	implicit none
 
@@ -331,11 +331,11 @@ c finds entry for iunit -> returns it in n or stops with error
 
 	end
 
-c************************************************************
+!************************************************************
 
 	function findets(iunit)
 
-c finds entry for iunit - internal routine
+! finds entry for iunit - internal routine
 
 	implicit none
 
@@ -357,11 +357,11 @@ c finds entry for iunit - internal routine
 
 	end
 
-c************************************************************
+!************************************************************
 
 	subroutine infoets(iunit,iout)
 
-c writes info for unit - internal routine
+! writes info for unit - internal routine
 
 	implicit none
 
@@ -381,13 +381,13 @@ c writes info for unit - internal routine
 
 	end
 
-c************************************************************
-c************************************************************
-c************************************************************
-c public routines
-c************************************************************
-c************************************************************
-c************************************************************
+!************************************************************
+!************************************************************
+!************************************************************
+! public routines
+!************************************************************
+!************************************************************
+!************************************************************
 
 	subroutine ets_init(iunit,nversion)
 
@@ -443,7 +443,7 @@ c************************************************************
 
 	end
 
-c************************************************************
+!************************************************************
 
 	subroutine ets_close(iunit)
 
@@ -455,7 +455,7 @@ c************************************************************
 
 	end
 
-c************************************************************
+!************************************************************
 
 	subroutine ets_check_dimension(iunit,nknddi,nlvddi)
 
@@ -467,9 +467,9 @@ c************************************************************
 
 	end
 
-c************************************************************
-c************************************************************
-c************************************************************
+!************************************************************
+!************************************************************
+!************************************************************
 
 	subroutine ets_get_date(iunit,date,time)
 
@@ -489,7 +489,7 @@ c************************************************************
 
 	end
 
-c************************************************************
+!************************************************************
 
 	subroutine ets_set_date(iunit,date,time)
 
@@ -509,7 +509,7 @@ c************************************************************
 
 	end
 
-c************************************************************
+!************************************************************
 
 	subroutine ets_get_title(iunit,title)
 
@@ -528,7 +528,7 @@ c************************************************************
 
 	end
 
-c************************************************************
+!************************************************************
 
 	subroutine ets_set_title(iunit,title)
 
@@ -547,7 +547,7 @@ c************************************************************
 
 	end
 
-c************************************************************
+!************************************************************
 
 	subroutine ets_get_femver(iunit,femver)
 
@@ -566,7 +566,7 @@ c************************************************************
 
 	end
 
-c************************************************************
+!************************************************************
 
 	subroutine ets_set_femver(iunit,femver)
 
@@ -585,7 +585,7 @@ c************************************************************
 
 	end
 
-c************************************************************
+!************************************************************
 
 	subroutine ets_get_params(iunit,nkn,nlv,nvar)
 
@@ -602,7 +602,7 @@ c************************************************************
 
 	end
 
-c************************************************************
+!************************************************************
 
 	subroutine ets_set_params(iunit,nkn,nlv,nvar)
 
@@ -617,14 +617,14 @@ c************************************************************
 
 	end
 
-c************************************************************
+!************************************************************
 
 	subroutine ets_clone_params(iu_from,iu_to)
 
-c clones data from one to other file 
-c
-c second file must have already been opened and initialized with ets_init
-c should be only used to write file -> nvers should be max version
+! clones data from one to other file 
+!
+! second file must have already been opened and initialized with ets_init
+! should be only used to write file -> nvers should be max version
 
 	implicit none
 
@@ -635,10 +635,10 @@ c should be only used to write file -> nvers should be max version
 
 	integer i,nf,nt
 
-	call findets_err(iu_from,'ets_clone_params'
-     +				,'Cannot find entry.',nf)
-	call findets_err(iu_to,'ets_clone_params'
-     +				,'Cannot find entry.',nt)
+	call findets_err(iu_from,'ets_clone_params' &
+     &				,'Cannot find entry.',nf)
+	call findets_err(iu_to,'ets_clone_params' &
+     &				,'Cannot find entry.',nt)
 
 	do i=2,nitdim		!unit and version are not cloned
 	  etsvar(i,nt) = etsvar(i,nf)
@@ -649,17 +649,17 @@ c should be only used to write file -> nvers should be max version
 
 	end
 
-c************************************************************
-c************************************************************
-c************************************************************
+!************************************************************
+!************************************************************
+!************************************************************
 
         subroutine ets_is_ets_file(iunit,nvers)
 
-c checks if iunit is open on ets file - returns nvers
-c
-c nvers == 0    no nos file (ntype is different) or read error
-c nvers < 0     version number is wrong
-c nvers > 0     good nos file
+! checks if iunit is open on ets file - returns nvers
+!
+! nvers == 0    no nos file (ntype is different) or read error
+! nvers < 0     version number is wrong
+! nvers > 0     good nos file
 
         implicit none
 
@@ -681,9 +681,9 @@ c nvers > 0     good nos file
 
 	end
 
-c************************************************************
-c************************************************************
-c************************************************************
+!************************************************************
+!************************************************************
+!************************************************************
 
 	subroutine ets_peek_header(iunit,nkn,nlv,nvar,ierr)
 
@@ -700,17 +700,17 @@ c************************************************************
 
 	call iniets
 
-c first record - find out what version
+! first record - find out what version
 
 	irec = 1
 	read(iunit,end=91,err=99) ntype,nvers
 
-c control version number and type of file
+! control version number and type of file
 
 	if( ntype .ne. ftype ) goto 97
 	if( nvers .le. 0 .or. nvers .gt. maxvers ) goto 98
 
-c next records
+! next records
 
 	irec = 2
 	if( nvers .ge. 1 ) then
@@ -748,11 +748,11 @@ c next records
 	return
 	end
 
-c************************************************************
+!************************************************************
 
 	subroutine ets_read_header(iunit,nkn,nlv,nvar,ierr)
 
-c before this ets_init has to be called
+! before this ets_init has to be called
 
 	implicit none
 
@@ -771,17 +771,17 @@ c before this ets_init has to be called
 
 	call findets_err(iunit,'ets_read_header','Cannot find entry.',n)
 
-c first record - find out what version
+! first record - find out what version
 
 	irec = 1
 	read(iunit,end=91,err=99) ntype,nvers
 
-c control version number and type of file
+! control version number and type of file
 
 	if( ntype .ne. ftype ) goto 97
 	if( nvers .le. 0 .or. nvers .gt. maxvers ) goto 98
 
-c next records
+! next records
 
 	date = 0
 	time = 0
@@ -829,11 +829,11 @@ c next records
 	return
 	end
 
-c********************************************************************
+!********************************************************************
 
 	subroutine ets_write_header(iunit,nkn,nlv,nvar,ierr)
 
-c writes first header of ETS file
+! writes first header of ETS file
 
 	implicit none
 
@@ -868,12 +868,12 @@ c writes first header of ETS file
 
 	end
 
-c************************************************************
+!************************************************************
 
-	subroutine ets_read_header2(iu,ilhkv,hlv,hkv
-     +					,nodes,xg,yg,desc,ierr)
+	subroutine ets_read_header2(iu,ilhkv,hlv,hkv &
+     &					,nodes,xg,yg,desc,ierr)
 
-c reads second record of ETS file
+! reads second record of ETS file
 
 	implicit none
 
@@ -912,7 +912,7 @@ c reads second record of ETS file
 	  nlv = 0
 	end if
 
-c read records
+! read records
 
 	irec = 1
 	if( nvers .ge. 1 ) then
@@ -943,12 +943,12 @@ c read records
 	return
 	end
 
-c************************************************************
+!************************************************************
 
-	subroutine ets_write_header2(iunit,ilhkv,hlv,hkv
-     +					,nodes,xg,yg,desc,ierr)
+	subroutine ets_write_header2(iunit,ilhkv,hlv,hkv &
+     &					,nodes,xg,yg,desc,ierr)
 
-c writes second record of ETS file
+! writes second record of ETS file
 
 	implicit none
 
@@ -967,7 +967,7 @@ c writes second record of ETS file
 
 	call getets(iunit,nvers,nkn,nlv,nvar)
 
-c only one layer
+! only one layer
 
 	nkni = nkn
 	if( nlv .le. 1 ) then
@@ -975,7 +975,7 @@ c only one layer
 	  nkni = 0
 	end if
 
-c write records
+! write records
 
 	write(iunit) (ilhkv(k),k=1,nkni)
 	write(iunit) (hlv(l),l=1,nlv)
@@ -989,21 +989,21 @@ c write records
 
 	end
 
-c************************************************************
+!************************************************************
 
 	subroutine ets_read_record(iu,it,ivar,nlvddi,ilhkv,c,ierr)
 
-c reads data record of ETS file
+! reads data record of ETS file
 
 	implicit none
 
-c arguments
+! arguments
 	integer iu,it,ivar
 	integer nlvddi
 	integer ilhkv(1)
 	real c(nlvddi,1)
 	integer ierr
-c local
+! local
 	integer l,k,lmax
 	integer nvers,nkn,nlv,nvar
 	integer iunit
@@ -1054,21 +1054,21 @@ c local
 	return
 	end
 
-c************************************************************
+!************************************************************
 
 	subroutine ets_write_record(iunit,it,ivar,nlvddi,ilhkv,c,ierr)
 
-c writes data record of ETS file
+! writes data record of ETS file
 
 	implicit none
 
-c arguments
+! arguments
 	integer iunit,it,ivar
 	integer nlvddi
 	integer ilhkv(*)
 	real c(nlvddi,*)
 	integer ierr
-c local
+! local
 	integer l,k,lmax
 	integer nvers,nkn,nlv,nvar
 
@@ -1091,13 +1091,13 @@ c local
 	return
 	end
 
-c************************************************************
-c************************************************************
-c************************************************************
+!************************************************************
+!************************************************************
+!************************************************************
 
 	subroutine ets_next_record(iunit,it,ivar,ierr)
 
-c skips data record - only reads header of record
+! skips data record - only reads header of record
 
 	implicit none
 
@@ -1112,11 +1112,11 @@ c skips data record - only reads header of record
 
 	end
 
-c************************************************************
+!************************************************************
 
 	subroutine ets_back_record(iunit)
 
-c skips back one data record (contains two reads)
+! skips back one data record (contains two reads)
 
 	implicit none
 
@@ -1127,7 +1127,7 @@ c skips back one data record (contains two reads)
 
 	end
 
-c************************************************************
+!************************************************************
 
 	subroutine ets_skip_header(iunit,nvar,ierr)
 
@@ -1145,12 +1145,12 @@ c************************************************************
 
 	call ets_read_header(iunit,nkn,nlv,nvar,ierr)
 	if( ierr .ne. 0 ) return
-	call ets_read_header2(-iunit,ilhkv,hlv,hkv
-     +					,nodes,xg,yg,desc,ierr)
+	call ets_read_header2(-iunit,ilhkv,hlv,hkv &
+     &					,nodes,xg,yg,desc,ierr)
 
 	end
 
-c************************************************************
+!************************************************************
 
 	subroutine ets_skip_record(iunit,it,ivar,ierr)
 
@@ -1162,13 +1162,13 @@ c************************************************************
 
 	end
 
-c************************************************************
-c************************************************************
-c************************************************************
+!************************************************************
+!************************************************************
+!************************************************************
 
 	subroutine infets(ivar,name)
 
-c returns description of variable id
+! returns description of variable id
 
 	implicit none
 
@@ -1189,5 +1189,5 @@ c returns description of variable id
 
 	end
 
-c************************************************************
+!************************************************************
 

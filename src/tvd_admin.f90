@@ -779,8 +779,8 @@
 
 !*****************************************************************
 
-	subroutine vertical_flux_ie(btvdv,ie,lmax,lmin,dt,wsink
-     +					,cl,wvel,hold,vflux)
+	subroutine vertical_flux_ie(btvdv,ie,lmax,lmin,dt,wsink &
+     &					,cl,wvel,hold,vflux)
 
 ! computes vertical fluxes of concentration - element version
 

@@ -24,36 +24,36 @@
 !
 !--------------------------------------------------------------------------
 
-c routines for k-epsilon model
-c
-c revision log :
-c
-c 25.02.1999	ggu	finished writing routines
-c 10.04.2008	ggu&ccf	new gotm routine call integrated
-c 23.03.2010	ggu	changed v6.1.1
-c 01.06.2011	ggu&cpb	call to do_gotm_turb was wrong (BUG)
-c 30.03.2012	ggu	changed VERS_6_1_51
-c 10.02.2015	ggu	in gotm call to do_gotm_turb() with ddt and not dt
-c 26.02.2015	ggu	changed VERS_7_1_5
-c 18.12.2015	ggu	changed VERS_7_3_17
-c 31.08.2018	ggu	changed VERS_7_5_49
-c 16.02.2019	ggu	changed VERS_7_5_60
-c
-c notes :
-c
-c u,v,rho are evaluated at the center of the layer
-c other variables (k,eps,rkm,rkt) at the top and bottom of the layers
-c
-c********************************************************************
+! routines for k-epsilon model
+!
+! revision log :
+!
+! 25.02.1999	ggu	finished writing routines
+! 10.04.2008	ggu&ccf	new gotm routine call integrated
+! 23.03.2010	ggu	changed v6.1.1
+! 01.06.2011	ggu&cpb	call to do_gotm_turb was wrong (BUG)
+! 30.03.2012	ggu	changed VERS_6_1_51
+! 10.02.2015	ggu	in gotm call to do_gotm_turb() with ddt and not dt
+! 26.02.2015	ggu	changed VERS_7_1_5
+! 18.12.2015	ggu	changed VERS_7_3_17
+! 31.08.2018	ggu	changed VERS_7_5_49
+! 16.02.2019	ggu	changed VERS_7_5_60
+!
+! notes :
+!
+! u,v,rho are evaluated at the center of the layer
+! other variables (k,eps,rkm,rkt) at the top and bottom of the layers
+!
+!********************************************************************
 
-	subroutine gotm(lmax,dt,rho0,taus,taub,dl,u,v,rho
-     +				,rkm,rkt,k,eps,len)
+	subroutine gotm(lmax,dt,rho0,taus,taub,dl,u,v,rho &
+     &				,rkm,rkt,k,eps,len)
 
-c computes turbulent diffusion coefficients through gotm
+! computes turbulent diffusion coefficients through gotm
 
 	implicit none
 
-c arguments
+! arguments
 	integer lmax		!number of levels [1...lmax]
 	real dt			!time step
 	real rho0		!reference density
@@ -105,11 +105,11 @@ c arguments
 	z0s = 0.03
 	z0b = 0.03
 
-c compute level differences
-c
-c z0 is height of surface -> if highly variable -> pass into routine
-c
-c dzk == dz        dzr == dZ  (Langland and Liou, MWR, May 1996, 905-918)
+! compute level differences
+!
+! z0 is height of surface -> if highly variable -> pass into routine
+!
+! dzk == dz        dzr == dZ  (Langland and Liou, MWR, May 1996, 905-918)
 
 	z0 = 0.
 	dzk(1) = dl(1) - z0
@@ -130,7 +130,7 @@ c dzk == dz        dzr == dZ  (Langland and Liou, MWR, May 1996, 905-918)
 	dzl(l) = dzk(l)
 	dzk(l) = 1. / dzk(l)		!last level -> l = lmax
 
-c compute b(uoyancy) and Brunt-Vaisala frequency n2 (N^2)
+! compute b(uoyancy) and Brunt-Vaisala frequency n2 (N^2)
 
 	aux = -g / rho0
 	do l = 1,lmax
@@ -144,7 +144,7 @@ c compute b(uoyancy) and Brunt-Vaisala frequency n2 (N^2)
 	  n2(l) = max(0.D+0,n2(l))
 	end do
 
-c compute horizontal shear m2 (M^2)
+! compute horizontal shear m2 (M^2)
 
 	do l = 1,lmax1
 	  ud = ( u(l) - u(l+1) ) * dzr(l)
@@ -152,7 +152,7 @@ c compute horizontal shear m2 (M^2)
 	  m2(l) = ud*ud + vd*vd
 	end do
 
-c prepare data for gotm call
+! prepare data for gotm call
 
 	do l=1,lmax
 	  lp = lmax - l + 1
@@ -178,12 +178,12 @@ c prepare data for gotm call
 	  rlen(lp) = len(l)
 	end do
 
-c	call gotmturb(lmax,ddt,hh,NN,SS,num,nuh
-c     +			,rkin,reps,rlen,u_taus,u_taub)
+!	call gotmturb(lmax,ddt,hh,NN,SS,num,nuh
+!     +			,rkin,reps,rlen,u_taus,u_taub)
 
-	call do_gotm_turb(lmax,ddt,depth,u_taus,u_taub,z0s,z0b
-     +			,hh,NN,SS,num,nuh
-     +			,rkin,reps,rlen)
+	call do_gotm_turb(lmax,ddt,depth,u_taus,u_taub,z0s,z0b &
+     &			,hh,NN,SS,num,nuh &
+     &			,rkin,reps,rlen)
 
 	do l=0,lmax
 	  lp = lmax-l
@@ -196,15 +196,15 @@ c     +			,rkin,reps,rlen,u_taus,u_taub)
 
 	end
 
-c********************************************************************
+!********************************************************************
 
 	subroutine ma(lmax,dt,rho0,taus,taub,dl,u,v,rho,rkm,rkt)
 
-c computes turbulent diffusion coefficients with Munk-Anderson theory
+! computes turbulent diffusion coefficients with Munk-Anderson theory
 
 	implicit none
 
-c arguments
+! arguments
 	integer lmax		!number of levels [1...lmax]
 	real dt			!time step
 	real rho0		!reference density
@@ -242,11 +242,11 @@ c arguments
 
 	lmax1 = lmax - 1
 
-c compute level differences
-c
-c z0 is height of surface -> if highly variable -> pass into routine
-c
-c dzk == dz        dzr == dZ  (Langland and Liou, MWR, May 1996, 905-918)
+! compute level differences
+!
+! z0 is height of surface -> if highly variable -> pass into routine
+!
+! dzk == dz        dzr == dZ  (Langland and Liou, MWR, May 1996, 905-918)
 
 	z0 = 0.
 	dzk(1) = dl(1) - z0
@@ -265,7 +265,7 @@ c dzk == dz        dzr == dZ  (Langland and Liou, MWR, May 1996, 905-918)
 	end do
 	dzk(l) = 1. / dzk(l)		!last level -> l = lmax
 
-c compute b(uoyancy) and Brunt-Vaisala frequency n2 (N^2)
+! compute b(uoyancy) and Brunt-Vaisala frequency n2 (N^2)
 
 	aux = -g / rho0
 	do l = 1,lmax
@@ -277,7 +277,7 @@ c compute b(uoyancy) and Brunt-Vaisala frequency n2 (N^2)
 	  n2(l) = max(0.,n2(l))
 	end do
 
-c compute horizontal shear m2 (M^2)
+! compute horizontal shear m2 (M^2)
 
 	do l = 1,lmax1
 	  ud = ( u(l) - u(l+1) ) * dzr(l)
@@ -285,7 +285,7 @@ c compute horizontal shear m2 (M^2)
 	  m2(l) = ud*ud + vd*vd
 	end do
 
-c compute new turbulent viscosities and diffusivities
+! compute new turbulent viscosities and diffusivities
 
 	do l=1,lmax1
 	  ri = 0.
@@ -295,7 +295,7 @@ c compute new turbulent viscosities and diffusivities
 	  !write(6,*) '*** ',l,n2(l),m2(l),ri,rkm(l),rkt(l)
 	end do
 
-c boundary conditions
+! boundary conditions
 
 	rkm(0) = rkm(1)
 	rkt(0) = rkt(1)
@@ -304,15 +304,15 @@ c boundary conditions
 
 	end
 
-c********************************************************************
+!********************************************************************
 
 	subroutine keps(lmax,dt,rho0,taus,taub,dh,u,v,rho,rkm,rkt,k,eps)
 
-c computes turbulent diffusion coefficients with k-epsilon theorie
+! computes turbulent diffusion coefficients with k-epsilon theorie
 
 	implicit none
 
-c arguments
+! arguments
 	integer lmax		!number of levels [1...lmax]
 	real dt			!time step
 	real rho0		!reference density
@@ -327,8 +327,8 @@ c arguments
 	real rkt(0:lmax)	!eddy coefficient for scalar quantities (out)
 	real k(0:lmax)		!turbulent kinetic energy		(out)
 	real eps(0:lmax)	!turbulent dissipation			(out)
-c parameters
-c	include 'param.h'
+! parameters
+!	include 'param.h'
 	integer nlevdi
 	parameter(nlevdi=200)
 
@@ -345,17 +345,17 @@ c	include 'param.h'
 	parameter(g=9.81,karman=0.4)
 	parameter(avumol=1.3e-6,avtmol=1.4e-7,avsmol=1.1e-9)
 	parameter(kmin=1.e-10,epsmin=1.e-12)
-c	parameter(kmin=3.e-6,epsmin=5.e-10)
-c---------------------------------------------------------------- Patrick
-c	parameter(cmu=0.091,sqrtcmu=0.3)
-c	parameter(sigmak=1.0,sigmae=1.3)
-c	parameter(ceps1=1.51,ceps2=1.92)
-c	parameter(ceps3p=0.2,ceps3n=1.0,ceps3f=ceps1)
-c	parameter(cmu0=1.0,cmu03=cmu0**3,cmu06=cmu03**2)
-c	parameter(amin=-1.37,amax=20.4)
-c	parameter(a0=0.023,a1=1.0,a2=0.714,a3=0.067)
-c	parameter(b0=0.125,b1=1.0,b2=0.603)
-c---------------------------------------------------------------- Hans
+!	parameter(kmin=3.e-6,epsmin=5.e-10)
+!---------------------------------------------------------------- Patrick
+!	parameter(cmu=0.091,sqrtcmu=0.3)
+!	parameter(sigmak=1.0,sigmae=1.3)
+!	parameter(ceps1=1.51,ceps2=1.92)
+!	parameter(ceps3p=0.2,ceps3n=1.0,ceps3f=ceps1)
+!	parameter(cmu0=1.0,cmu03=cmu0**3,cmu06=cmu03**2)
+!	parameter(amin=-1.37,amax=20.4)
+!	parameter(a0=0.023,a1=1.0,a2=0.714,a3=0.067)
+!	parameter(b0=0.125,b1=1.0,b2=0.603)
+!---------------------------------------------------------------- Hans
 	parameter(cmu=0.091,sqrtcmu=0.3)
 	parameter(sigmak=1.0,sigmae=1.08)
 	parameter(ceps1=1.44,ceps2=1.92)
@@ -364,8 +364,8 @@ c---------------------------------------------------------------- Hans
 	parameter(amin=-0.0466,amax=0.56)
 	parameter(a0=2.182,a1=1.0,a2=20.40,a3=53.12)
 	parameter(b0=0.6985,b1=1.0,b2=17.34)
-c----------------------------------------------------------------
-c local variables
+!----------------------------------------------------------------
+! local variables
 	logical bdebug
 	integer l,lmax1,lm1
 	real aux,ud,vd
@@ -388,15 +388,15 @@ c local variables
 	real*8 gam(0:nlevdi)		!...
 	real*8 gam1(0:nlevdi)		!...
 
-c u,v,rho are evaluated at the center of the layer
-c other variables (k,eps,rkm,rkt) at the top and bottom of the layers
-c
-c dh(1) contains already surface level variation
-c dzk == dz        dzr == dZ  (Langland and Liou, MWR, May 1996, 905-918)
+! u,v,rho are evaluated at the center of the layer
+! other variables (k,eps,rkm,rkt) at the top and bottom of the layers
+!
+! dh(1) contains already surface level variation
+! dzk == dz        dzr == dZ  (Langland and Liou, MWR, May 1996, 905-918)
 
-c---------------------------------------------------------------------
-c start of code
-c---------------------------------------------------------------------
+!---------------------------------------------------------------------
+! start of code
+!---------------------------------------------------------------------
 
 	if( lmax .gt. nlevdi ) stop 'error stop: nlevdi'
 
@@ -405,9 +405,9 @@ c---------------------------------------------------------------------
 	lmax1 = lmax - 1
 	lm1 = lmax + 1
 
-c---------------------------------------------------------------------
-c compute level differences
-c---------------------------------------------------------------------
+!---------------------------------------------------------------------
+! compute level differences
+!---------------------------------------------------------------------
 
 	dzk(1) = dh(1)
 	dzr(0) = 0.
@@ -424,10 +424,10 @@ c---------------------------------------------------------------------
 	end do
 	dzk(l) = 1. / dzk(l)		!last level -> l = lmax
 
-c---------------------------------------------------------------------
-c set eddy coefficient for k and eps diffusion
-c rkm(0) and rkm(lmax) may not be set -> avoid using them
-c---------------------------------------------------------------------
+!---------------------------------------------------------------------
+! set eddy coefficient for k and eps diffusion
+! rkm(0) and rkm(lmax) may not be set -> avoid using them
+!---------------------------------------------------------------------
 
 	rkk(1) = rkm(1) / sigmak
 	rke(1) = rkm(1) / sigmae
@@ -439,9 +439,9 @@ c---------------------------------------------------------------------
 	rkk(lmax) = rkm(lmax1) / sigmak
 	rke(lmax) = rkm(lmax1) / sigmae
 
-c---------------------------------------------------------------------
-c compute b(uoyancy) and Brunt-Vaisala frequency n2 (N^2)
-c---------------------------------------------------------------------
+!---------------------------------------------------------------------
+! compute b(uoyancy) and Brunt-Vaisala frequency n2 (N^2)
+!---------------------------------------------------------------------
 
 	aux = -g / rho0
 	do l = 1,lmax
@@ -453,9 +453,9 @@ c---------------------------------------------------------------------
 	  n2(l) = max(0.,n2(l))
 	end do
 
-c---------------------------------------------------------------------
-c compute horizontal shear m2 (M^2)
-c---------------------------------------------------------------------
+!---------------------------------------------------------------------
+! compute horizontal shear m2 (M^2)
+!---------------------------------------------------------------------
 
 	do l = 1,lmax1
 	  ud = ( u(l) - u(l+1) ) * dzr(l)
@@ -463,9 +463,9 @@ c---------------------------------------------------------------------
 	  m2(l) = ud*ud + vd*vd
 	end do
 
-c---------------------------------------------------------------------
-c turbulent dissipation (eps)
-c---------------------------------------------------------------------
+!---------------------------------------------------------------------
+! turbulent dissipation (eps)
+!---------------------------------------------------------------------
 
 	do l = 1,lmax-1
 
@@ -478,9 +478,9 @@ c---------------------------------------------------------------------
 	    ceps3 = ceps3f * ceps3n
 	  end if
 
-	  forc = ( dt / k(l) ) * ( 
-     +		ceps1 * ps + ceps3 * gg - ceps2 * eps(l)
-     +				 )
+	  forc = ( dt / k(l) ) * (  &
+     &		ceps1 * ps + ceps3 * gg - ceps2 * eps(l) &
+     &				 )
 	  aux = dt*dzr(l)
 	  aa(l) = - aux * (rke(l)*dzk(l))
 	  bb(l) = 1. + aux * ( rke(l)*dzk(l) + rke(l+1)*dzk(l+1) )
@@ -495,9 +495,9 @@ c---------------------------------------------------------------------
 	end do
 	if( bdebug ) write(6,*) 'keps 17'
 
-c	---------------------------------
-c	impose boundary conditions
-c	---------------------------------
+!	---------------------------------
+!	impose boundary conditions
+!	---------------------------------
 
 	aa(0) = 0.
 	bb(0) = 1.
@@ -509,19 +509,19 @@ c	---------------------------------
 	cc(lmax) = 0.
 	rr(lmax) = (taub/rho(lmax))**1.5 / (dzk(lmax)*karman)
 
-c	---------------------------------
-c	solve system
-c	---------------------------------
+!	---------------------------------
+!	solve system
+!	---------------------------------
 
-c	call tridag(aa(1),bb(1),cc(1),rr(1),eps(1),gam(1),lmax-1)
+!	call tridag(aa(1),bb(1),cc(1),rr(1),eps(1),gam(1),lmax-1)
 	call tridagd(aa(0),bb(0),cc(0),rr(0),eps(0),gam1(0),gam(0),lm1)
 
 	!eps(0) = eps(1)
 	!eps(lmax) = eps(lmax1)
 
-c---------------------------------------------------------------------
-c turbulent kinetic energy (k)
-c---------------------------------------------------------------------
+!---------------------------------------------------------------------
+! turbulent kinetic energy (k)
+!---------------------------------------------------------------------
 
 	do l = 1,lmax1
 
@@ -542,9 +542,9 @@ c---------------------------------------------------------------------
 
 	end do
 
-c	---------------------------------
-c	impose boundary conditions
-c	---------------------------------
+!	---------------------------------
+!	impose boundary conditions
+!	---------------------------------
 
 	aa(0) = 0.
 	bb(0) = 1.
@@ -555,19 +555,19 @@ c	---------------------------------
 	cc(lmax) = 0.
 	rr(lmax) = taub / ( rho(lmax)*sqrtcmu )
 
-c	---------------------------------
-c	solve system
-c	---------------------------------
+!	---------------------------------
+!	solve system
+!	---------------------------------
 
-c	call tridag(aa,bb,cc,rr,k,gam,lmax+1)
+!	call tridag(aa,bb,cc,rr,k,gam,lmax+1)
 	call tridagd(aa,bb,cc,rr,k,gam1,gam,lmax+1)
 
-c---------------------------------------------------------------------
-c limit k and epsilon
-c
-c we need first condition for wind driven layer, second for emergency
-c   when no stratification is present
-c---------------------------------------------------------------------
+!---------------------------------------------------------------------
+! limit k and epsilon
+!
+! we need first condition for wind driven layer, second for emergency
+!   when no stratification is present
+!---------------------------------------------------------------------
 
 	do l=0,lmax
 	  k(l) = max(k(l),kmin)
@@ -578,9 +578,9 @@ c---------------------------------------------------------------------
           end if
 	end do
 
-c---------------------------------------------------------------------
-c compute the turbulent mixing coefficients from k, eps and n2
-c---------------------------------------------------------------------
+!---------------------------------------------------------------------
+! compute the turbulent mixing coefficients from k, eps and n2
+!---------------------------------------------------------------------
 
 	do l = 1,lmax1
 	  k2 = k(l) * k(l)
@@ -605,18 +605,18 @@ c---------------------------------------------------------------------
 	rkt(0) = 0.
 	rkt(lmax) = 0.
 
-c---------------------------------------------------------------------
-c end of routine
-c---------------------------------------------------------------------
+!---------------------------------------------------------------------
+! end of routine
+!---------------------------------------------------------------------
 
 	end
 
-c************************************************************************
+!************************************************************************
 
-	subroutine kepsin(lmax,k,eps,len,rkm,rkt
-     +			,kold,epsold,lenold,rkmold,rktold)
+	subroutine kepsin(lmax,k,eps,len,rkm,rkt &
+     &			,kold,epsold,lenold,rkmold,rktold)
 
-c initializes arrays for keps routine
+! initializes arrays for keps routine
 
 	implicit none
 
@@ -628,7 +628,7 @@ c initializes arrays for keps routine
 
 	real kmin,epsmin,lenmin
         real avumol,avtmol,avsmol
-c	parameter(kmin=1.e-10,epsmin=1.e-12,lenmin=0.01)
+!	parameter(kmin=1.e-10,epsmin=1.e-12,lenmin=0.01)
 	parameter(kmin=3.e-6,epsmin=5.e-10,lenmin=0.01)
         parameter(avumol=1.3e-6,avtmol=1.4e-7,avsmol=1.1e-9)
 
@@ -655,7 +655,7 @@ c	parameter(kmin=1.e-10,epsmin=1.e-12,lenmin=0.01)
 
 	end
 
-c************************************************************************
+!************************************************************************
 
         subroutine keps_compile_test
 
@@ -670,14 +670,14 @@ c************************************************************************
 
 	lmax = 1
 
-	call kepsin(lmax,k,eps,len,rkm,rkt
-     +			,kold,epsold,lenold,rkmold,rktold)
+	call kepsin(lmax,k,eps,len,rkm,rkt &
+     &			,kold,epsold,lenold,rkmold,rktold)
 	call keps(lmax,dt,rho0,taus,taub,dl,u,v,rho,rkm,rkt,k,eps)
 
         end
 
-c********************************************************************
-c        call keps_compile_test
-c        end
-c********************************************************************
+!********************************************************************
+!        call keps_compile_test
+!        end
+!********************************************************************
 

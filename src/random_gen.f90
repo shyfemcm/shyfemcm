@@ -23,31 +23,31 @@
 !
 !--------------------------------------------------------------------------
 
-c routines for random number generation
-c
-c contents :
-c
-c function grand(idum)
-c function ran(idum)
-c
-c function ran0(idum)		!shuffling random results
-c function ran1(idum)		!best random number generator
-c function ran2(idum)		!good enough random number generator
-c function ran3(idum)		!different method (Knuth)
-c function ran4(idum)		!using des
-c
-c revision log :
-c
-c 19.11.1998	ggu	routines copied from numerical receipies
-c 23.11.1998	ggu	test routines and comments
-c 30.03.2000	ggu	pause statement eliminated, variables saved (bug)
-c 11.12.2007	ggu	new routine ggrand
-c 23.03.2010	ggu	changed v6.1.1
-c 30.03.2012	ggu	changed VERS_6_1_51
-c 14.02.2019	ggu	changed VERS_7_5_56
-c 16.02.2019	ggu	changed VERS_7_5_60
-c
-c******************************************************
+! routines for random number generation
+!
+! contents :
+!
+! function grand(idum)
+! function ran(idum)
+!
+! function ran0(idum)		!shuffling random results
+! function ran1(idum)		!best random number generator
+! function ran2(idum)		!good enough random number generator
+! function ran3(idum)		!different method (Knuth)
+! function ran4(idum)		!using des
+!
+! revision log :
+!
+! 19.11.1998	ggu	routines copied from numerical receipies
+! 23.11.1998	ggu	test routines and comments
+! 30.03.2000	ggu	pause statement eliminated, variables saved (bug)
+! 11.12.2007	ggu	new routine ggrand
+! 23.03.2010	ggu	changed v6.1.1
+! 30.03.2012	ggu	changed VERS_6_1_51
+! 14.02.2019	ggu	changed VERS_7_5_56
+! 16.02.2019	ggu	changed VERS_7_5_60
+!
+!******************************************************
 
 	function grand(idum)
 
@@ -55,11 +55,11 @@ c******************************************************
 
 	end
 
-c******************************************************
+!******************************************************
 
 	function ggrand(init)
 
-c works for initialization and normal call
+! works for initialization and normal call
 
 	integer icall,idum
 	save icall,idum
@@ -74,7 +74,7 @@ c works for initialization and normal call
 
 	end
 
-c******************************************************
+!******************************************************
 
 	function ran00(idum)
 
@@ -82,7 +82,7 @@ c******************************************************
 
 	end
 
-c******************************************************
+!******************************************************
 
       function ran0(idum)
       dimension v(97)
@@ -108,7 +108,7 @@ c******************************************************
       return
       end
 
-c******************************************************
+!******************************************************
 
       function ran1(idum)
       dimension r(97)
@@ -141,7 +141,7 @@ c******************************************************
       return
       end
 
-c******************************************************
+!******************************************************
 
       function ran2(idum)
       parameter (m=714025,ia=1366,ic=150889,rm=1.4005112e-6)
@@ -167,11 +167,11 @@ c******************************************************
       return
       end
 
-c******************************************************
+!******************************************************
 
       function ran3(idum)
-c         implicit real*4(m)
-c         parameter (mbig=4000000.,mseed=1618033.,mz=0.,fac=2.5e-7)
+!         implicit real*4(m)
+!         parameter (mbig=4000000.,mseed=1618033.,mz=0.,fac=2.5e-7)
       parameter (mbig=1000000000,mseed=161803398,mz=0,fac=1.e-9)
       dimension ma(55)
       data iff /0/
@@ -209,7 +209,7 @@ c         parameter (mbig=4000000.,mseed=1618033.,mz=0.,fac=2.5e-7)
       return
       end
 
-c******************************************************
+!******************************************************
 
       function ran4(idum)
       parameter (im=11979,ia=430,ic=2531,nacc=24)
@@ -246,21 +246,21 @@ c******************************************************
       return
       end
 
-c******************************************************
-c******************************************************
-c            dummy and test routines
-c******************************************************
-c******************************************************
+!******************************************************
+!******************************************************
+!            dummy and test routines
+!******************************************************
+!******************************************************
 
 	subroutine des(inp,key,newkey,i,jot)
         integer inp(1),jot(1),key(1)
 	end
 
-c******************************************************
+!******************************************************
 
 	subroutine rndtest(n,ndim,icount)
 
-c tests random routine
+! tests random routine
 
 	implicit none
 
@@ -288,11 +288,11 @@ c tests random routine
 
 	end
 
-c******************************************************
+!******************************************************
 
 	subroutine rndprnt(n,ndim,icount)
 
-c prints result of random test
+! prints result of random test
 
 	implicit none
 
@@ -313,14 +313,14 @@ c prints result of random test
 
 	end
 
-c******************************************************
+!******************************************************
 
 	subroutine rnddrv(n,k)
 
-c driver for random test
-c
-c n	total number of iterations / test
-c k	total number of tests
+! driver for random test
+!
+! n	total number of iterations / test
+! k	total number of tests
 
 	implicit none
 
@@ -350,14 +350,14 @@ c k	total number of tests
 
 	end
 
-c******************************************************
-c
-c uncomment next lines to run test on random number generator
-c
-c	program test
-c	call rnddrv(1000000,10)
-c	end
-c
-c******************************************************
+!******************************************************
+!
+! uncomment next lines to run test on random number generator
+!
+!	program test
+!	call rnddrv(1000000,10)
+!	end
+!
+!******************************************************
 	
 

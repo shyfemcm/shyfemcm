@@ -488,8 +488,8 @@
 	!write(6,*) 'hl ',hl(1:lmax)
 	!write(6,*) 'dwd2 ',dwd2(1:lmax)
             dwd2(lmax) = dwd2(lmax-1)
-            if ( lmax > 2 ) dwd2(lmax) = dwd2(lmax-1) + 
-     +  		(dwd2(lmax-1)-dwd2(lmax-2))/hl(lmax-1)*hl(lmax)
+            if ( lmax > 2 ) dwd2(lmax) = dwd2(lmax-1) +  &
+     &  		(dwd2(lmax-1)-dwd2(lmax-2))/hl(lmax-1)*hl(lmax)
   
 	!write(6,*) 'dwd2 ',dwd2(1:lmax)
    	    dmax = maxval(abs(dwd2(1:lmax)))
@@ -654,11 +654,11 @@
 
 	end subroutine rgauss
 
-c*****************************************************************
-c******************************************************************
-c	OLD ROUTINES
-c******************************************************************
-c******************************************************************
+!*****************************************************************
+!******************************************************************
+!	OLD ROUTINES
+!******************************************************************
+!******************************************************************
 
         subroutine lag_diff(ie,bdy,x,y)
 
@@ -716,7 +716,7 @@ c******************************************************************
         ie=ienew
 	 
         end 
-c*******************************************************************
+!*******************************************************************
        
         subroutine lag_rand(k,ttime,dx,dy)
 
@@ -741,15 +741,15 @@ c*******************************************************************
 
         end
 
-c*********************************************************************
+!*********************************************************************
 
         FUNCTION gasdev(idum)
 
         INTEGER idum
         REAL gasdev
-c Returns a normally distributed deviate with zero mean and unit variance, using
-C ran1(idum)
-c as the source of uniform deviates.
+! Returns a normally distributed deviate with zero mean and unit variance, using
+! ran1(idum)
+! as the source of uniform deviates.
         INTEGER iset
         REAL fac,gset,rsq,v1,v2,ran1
         SAVE iset,gset
@@ -772,4 +772,4 @@ c as the source of uniform deviates.
         return
         END
 
-c**************************************************************************
+!**************************************************************************

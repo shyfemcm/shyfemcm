@@ -26,54 +26,54 @@
 !
 !--------------------------------------------------------------------------
 
-c handles insertion and output of particles
-c
-c revision log :
-c
-c 05.02.2009	ggu	copied from lagrange_cont.f and integrated from others
-c 23.03.2010	ggu	changed v6.1.1
-c 16.12.2011	ggu	initialization with body id
-c 23.01.2012	ggu	new call to insert_particle, new id_body
-c 01.10.2012	ggu	output concentrations only for one station
-c 08.10.2012	ggu	changed VERS_6_1_58
-c 28.03.2014	ggu	bug fix for insert with ie=0, area in concentrations
-c 23.04.2014	ggu	new 3d insertion, new version of lgr file, new copy
-c 05.05.2014	ggu	changed VERS_6_1_74
-c 19.12.2014	ggu	changed VERS_7_0_10
-c 23.12.2014	ggu	changed VERS_7_0_11
-c 19.01.2015	ggu	changed VERS_7_1_3
-c 01.04.2015	ggu	changed VERS_7_1_7
-c 23.04.2015	ggu	changed VERS_7_1_8
-c 06.05.2015	ccf	write relative total depth and type to output
-c 07.05.2015	ccf	assign settling velocity to particles
-c 21.05.2015	ggu	changed VERS_7_1_11
-c 17.07.2015	ggu	changed VERS_7_1_52
-c 17.07.2015	ggu	changed VERS_7_1_80
-c 20.07.2015	ggu	changed VERS_7_1_81
-c 24.07.2015	ggu	changed VERS_7_1_82
-c 07.10.2015	mcg	seed 3d between surface and l_bot 
-c 16.11.2015	ggu	changed VERS_7_3_14
-c 15.02.2016	ggu&fdp	new release type ipvert=-1
-c 22.02.2016	ggu	changed VERS_7_5_4
-c 31.03.2017	ggu	changed VERS_7_5_24
-c 09.05.2017	ggu	changed VERS_7_5_26
-c 27.11.2017	ggu	inserted code to start from lgr files
-c 05.12.2017	ggu	changed VERS_7_5_39
-c 20.07.2018	ccf	new output file format
-c 25.10.2018	ggu	changed VERS_7_5_51
-c 16.02.2019	ggu	changed VERS_7_5_60
-c 13.03.2019	ggu	changed VERS_7_5_61
-c
-c*******************************************************************
+! handles insertion and output of particles
+!
+! revision log :
+!
+! 05.02.2009	ggu	copied from lagrange_cont.f and integrated from others
+! 23.03.2010	ggu	changed v6.1.1
+! 16.12.2011	ggu	initialization with body id
+! 23.01.2012	ggu	new call to insert_particle, new id_body
+! 01.10.2012	ggu	output concentrations only for one station
+! 08.10.2012	ggu	changed VERS_6_1_58
+! 28.03.2014	ggu	bug fix for insert with ie=0, area in concentrations
+! 23.04.2014	ggu	new 3d insertion, new version of lgr file, new copy
+! 05.05.2014	ggu	changed VERS_6_1_74
+! 19.12.2014	ggu	changed VERS_7_0_10
+! 23.12.2014	ggu	changed VERS_7_0_11
+! 19.01.2015	ggu	changed VERS_7_1_3
+! 01.04.2015	ggu	changed VERS_7_1_7
+! 23.04.2015	ggu	changed VERS_7_1_8
+! 06.05.2015	ccf	write relative total depth and type to output
+! 07.05.2015	ccf	assign settling velocity to particles
+! 21.05.2015	ggu	changed VERS_7_1_11
+! 17.07.2015	ggu	changed VERS_7_1_52
+! 17.07.2015	ggu	changed VERS_7_1_80
+! 20.07.2015	ggu	changed VERS_7_1_81
+! 24.07.2015	ggu	changed VERS_7_1_82
+! 07.10.2015	mcg	seed 3d between surface and l_bot 
+! 16.11.2015	ggu	changed VERS_7_3_14
+! 15.02.2016	ggu&fdp	new release type ipvert=-1
+! 22.02.2016	ggu	changed VERS_7_5_4
+! 31.03.2017	ggu	changed VERS_7_5_24
+! 09.05.2017	ggu	changed VERS_7_5_26
+! 27.11.2017	ggu	inserted code to start from lgr files
+! 05.12.2017	ggu	changed VERS_7_5_39
+! 20.07.2018	ccf	new output file format
+! 25.10.2018	ggu	changed VERS_7_5_51
+! 16.02.2019	ggu	changed VERS_7_5_60
+! 13.03.2019	ggu	changed VERS_7_5_61
+!
+!*******************************************************************
 
 	subroutine insert_particle(ie,ity,lb,rtime,x,y,z)
 
-c inserts particle at position x,y
-c
-c this is the ultimate routine that is called for insertion
-c
-c tin is insert time - compute with rtime
-c z = 0.5 (corresponding to larva in water) 
+! inserts particle at position x,y
+!
+! this is the ultimate routine that is called for insertion
+!
+! tin is insert time - compute with rtime
+! z = 0.5 (corresponding to larva in water) 
 
 	use mod_lagrange
         use basin, only : neldi,iarv
@@ -96,9 +96,9 @@ c z = 0.5 (corresponding to larva in water)
 	logical bdebug
 	logical lmytype			!use element type for particle type
 
-c rtime is the relative time position when the particle is inserted
-c 0 inserts at the beginning of the time step - advection for full time step
-c 1 inserts at end of time step - no advection for this time step needed
+! rtime is the relative time position when the particle is inserted
+! 0 inserts at the beginning of the time step - advection for full time step
+! 1 inserts at end of time step - no advection for this time step needed
 
 	integer ip
 	double precision xx,yy,xi(3)
@@ -174,7 +174,7 @@ c 1 inserts at end of time step - no advection for this time step needed
 	stop 'error stop insert_particle: nbdy'
 	end
 
-c*******************************************************************
+!*******************************************************************
 
 	subroutine xi_init_particle(ie,x,y,xi)
 
@@ -193,12 +193,12 @@ c*******************************************************************
 
 	end
 
-c*******************************************************************
+!*******************************************************************
 
 	subroutine xi_move_inside(ie,xi)
 
-c moves particle a small distance inside the element
-c this is done to not fall onto the side or vertex
+! moves particle a small distance inside the element
+! this is done to not fall onto the side or vertex
 
 	integer ie
 	double precision xi(3)
@@ -240,7 +240,7 @@ c this is done to not fall onto the side or vertex
 
 	end
 
-c*******************************************************************
+!*******************************************************************
 
 	subroutine insert_particle_3d(ie,ity,rtime,x,y)
 
@@ -254,11 +254,11 @@ c*******************************************************************
 	real :: rtime	!fraction of time step to be inserted (0 for all) [0-1]
 	real :: x,y	!coordinates of particle to be inserted
 
-c n = abs(itype)
-c itype == 0	release one particle in surface layer
-c itype > 0	release n particles regularly
-c itype < 0	release n particles randomly
-c itype == -1	release particles in every layer
+! n = abs(itype)
+! itype == 0	release one particle in surface layer
+! itype > 0	release n particles regularly
+! itype < 0	release n particles randomly
+! itype == -1	release particles in every layer
 
 	logical b2d,bdebug
 	integer n,lmax,l,i
@@ -346,7 +346,7 @@ c itype == -1	release particles in every layer
 
 	end
 
-c*******************************************************************
+!*******************************************************************
 
 	subroutine insert_particle_surface(ie,ity,rtime,x,y)
 
@@ -367,11 +367,11 @@ c*******************************************************************
 
 	end
 
-c*******************************************************************
+!*******************************************************************
 
 	subroutine find_vertical_position(lmax,hl,hact,lb,z)
 
-c finds vertical position for depth hact
+! finds vertical position for depth hact
 
 	implicit none
 
@@ -406,11 +406,11 @@ c finds vertical position for depth hact
 	stop 'error stop find_vertical_position: hact > hbot'
 	end
 
-c*******************************************************************
+!*******************************************************************
 
 	subroutine copy_particle(ifrom,ito)
 
-c copies particle from ifrom to ito
+! copies particle from ifrom to ito
 
 	use mod_lagrange
 
@@ -445,11 +445,11 @@ c copies particle from ifrom to ito
 
 	end
 
-c*******************************************************************
+!*******************************************************************
 
 	subroutine delete_particle(ip)
 
-c deletes particle ip
+! deletes particle ip
 
 	use mod_lagrange
 
@@ -461,11 +461,11 @@ c deletes particle ip
 
 	end
 
-c*******************************************************************
+!*******************************************************************
 
 	subroutine ntot_particles(ntot)
 
-c returns total number of particles
+! returns total number of particles
 
 	use mod_lagrange
 
@@ -477,9 +477,9 @@ c returns total number of particles
 
 	end
 
-c*******************************************************************
-c*******************************************************************
-c*******************************************************************
+!*******************************************************************
+!*******************************************************************
+!*******************************************************************
 
 	subroutine lgr_insert_particle(i,id,z,ie,lb,ty,c,tin)
 
@@ -506,8 +506,8 @@ c*******************************************************************
 
 	end
 
-c*******************************************************************
-c TO BE DONE
+!*******************************************************************
+! TO BE DONE
 	subroutine lgr_input_shell
 
 	use mod_lagrange
@@ -539,8 +539,8 @@ c TO BE DONE
 	character*80 			:: ifile
 
         INTERFACE
-        subroutine lgr_alloc(nn,nc
-     +          ,id,ty,tt,s,ie,x,y,z,lb,hl,c)
+        subroutine lgr_alloc(nn,nc &
+     &          ,id,ty,tt,s,ie,x,y,z,lb,hl,c)
         integer nn,nc
         integer, allocatable            :: id(:)
         integer, allocatable            :: ty(:)
@@ -578,10 +578,10 @@ c TO BE DONE
           call lgr_peek_block_header(iu,ditime,n_act,iwhat,ierr)
           if( ierr > 0 ) write(6,*) 'error in reading file : ',ierr
           if( ierr /= 0 ) exit
-          call lgr_alloc(n_act,ncust
-     +          ,ida,tya,tta,sa,iea,xa,ya,za,lba,hla,ca)
-          call lgr_get_block(iu,n_act,ncust,
-     +                  ida,tya,tta,sa,iea,xa,ya,za,lba,hla,ca)
+          call lgr_alloc(n_act,ncust &
+     &          ,ida,tya,tta,sa,iea,xa,ya,za,lba,hla,ca)
+          call lgr_get_block(iu,n_act,ncust, &
+     &                  ida,tya,tta,sa,iea,xa,ya,za,lba,hla,ca)
           if( ditime == dtlgin ) exit
           !----------------------------------------------------------------
           ! skip data block --> inserted particles
@@ -658,7 +658,7 @@ c TO BE DONE
 	stop 'error stop lgr_input_shell: open file'
 	end
 
-c*******************************************************************
+!*******************************************************************
 
         subroutine lgr_write_header(iu,nlv,ncust)
 
@@ -679,19 +679,19 @@ c*******************************************************************
 
 	end subroutine lgr_write_header
 
-c*******************************************************************
+!*******************************************************************
 
 	subroutine lgr_output(iu,dtime)
 
-c outputs particles to file
-c
-c if body has exited the element number is negativ (last element)
-c once it has been written to output with negative ie, it is set to 0
+! outputs particles to file
+!
+! if body has exited the element number is negativ (last element)
+! once it has been written to output with negative ie, it is set to 0
 
-c mcg : 15/10/2015 write in v.5  hl = effective absolute depth 
-c mcg : need to add more start info: level depth custom 
-c mcg : suggests to write for each release a small file_ini.lgr
-c ccf : new output format
+! mcg : 15/10/2015 write in v.5  hl = effective absolute depth 
+! mcg : need to add more start info: level depth custom 
+! mcg : suggests to write for each release a small file_ini.lgr
+! ccf : new output format
 
 	use mod_lagrange
 	use mod_layer_thickness
@@ -720,9 +720,9 @@ c ccf : new output format
         double precision dgetpar
         integer, save 		:: icall = 0
 
-c----------------------------------------------------------------
-c count inserted, active and exited particles
-c----------------------------------------------------------------
+!----------------------------------------------------------------
+! count inserted, active and exited particles
+!----------------------------------------------------------------
 
         if (nbdy == 0 ) return
 
@@ -751,9 +751,9 @@ c----------------------------------------------------------------
 	  end if
 	end do
 
-c----------------------------------------------------------------
-c write to file - active particles, iwhat = 0
-c----------------------------------------------------------------
+!----------------------------------------------------------------
+! write to file - active particles, iwhat = 0
+!----------------------------------------------------------------
 	
 	iwhat = 0
 	write(iu) dtime,n_act,iwhat
@@ -782,9 +782,9 @@ c----------------------------------------------------------------
 	  write(iu) (c(ii), ii=1,ncust)
 	end do
 
-c----------------------------------------------------------------
-c write to file - inserted particles, iwhat = -1
-c----------------------------------------------------------------
+!----------------------------------------------------------------
+! write to file - inserted particles, iwhat = -1
+!----------------------------------------------------------------
 	
 	iwhat = -1
 	write(iu) dtime,n_new,iwhat
@@ -816,11 +816,11 @@ c----------------------------------------------------------------
 	   !should we deleted the init information after writing it?
 	end do
 
-c----------------------------------------------------------------
-c write to file - exited particles, iwhat = 1
-c particles are then deleted by routine compress_particles 
-c bcompress must be set to true
-c----------------------------------------------------------------
+!----------------------------------------------------------------
+! write to file - exited particles, iwhat = 1
+! particles are then deleted by routine compress_particles 
+! bcompress must be set to true
+!----------------------------------------------------------------
 	
 	iwhat = 1
 	write(iu) dtime,n_ext,iwhat
@@ -851,13 +851,13 @@ c----------------------------------------------------------------
 	  !particles are deletedexit particles information after writing it
 	end do
 
-c----------------------------------------------------------------
-c end of routine
-c----------------------------------------------------------------
+!----------------------------------------------------------------
+! end of routine
+!----------------------------------------------------------------
 
 	end
 
-c*******************************************************************
+!*******************************************************************
 
 	subroutine lgr_compute_depths(ie,lb,z,hl,ht,hr)
 
@@ -895,13 +895,13 @@ c*******************************************************************
 
 	end
 
-c*******************************************************************
-c*******************************************************************
-c*******************************************************************
+!*******************************************************************
+!*******************************************************************
+!*******************************************************************
 
 	subroutine print_elements(text)
 
-c writes element numbers of particles to terminal
+! writes element numbers of particles to terminal
 
 	use mod_lagrange
 
@@ -919,11 +919,11 @@ c writes element numbers of particles to terminal
 
 	end
 
-c*******************************************************************
+!*******************************************************************
 	
 	subroutine compress_particles
 
-c deletes particles not in system and compresses array
+! deletes particles not in system and compresses array
 
 	use mod_lagrange
 
@@ -963,9 +963,9 @@ c deletes particles not in system and compresses array
 
 	nbdy = ifree - 1
 
-c--------------------------------------------------------------
-c check particle structure
-c--------------------------------------------------------------
+!--------------------------------------------------------------
+! check particle structure
+!--------------------------------------------------------------
 
 	!write(lunit,*) 'compress_particles: ',it,nbefore,nbdy,nbefore-nbdy
 
@@ -987,11 +987,11 @@ c--------------------------------------------------------------
 
 	end
 
-c*******************************************************************
+!*******************************************************************
 
 	subroutine test_compress
 
-c tests compress routine
+! tests compress routine
 
 	implicit none
 
@@ -1027,8 +1027,8 @@ c tests compress routine
 
 	end
 
-c*******************************************************************
-c	call test_compress
-c	end
-c*******************************************************************
+!*******************************************************************
+!	call test_compress
+!	end
+!*******************************************************************
 

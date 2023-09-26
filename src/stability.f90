@@ -24,80 +24,80 @@
 !
 !--------------------------------------------------------------------------
 
-c routines for stability computations
-c
-c revision log :
-c
-c 19.02.2010	ggu	new file to contain stability computations
-c 26.02.2010	ggu	internal_stability restructured (on element)
-c 08.03.2010	ggu	run only down to avail layers in stability (bug fix)
-c 23.03.2010	ggu	changed v6.1.1
-c 26.01.2011	ggu	robs for nudging implemented
-c 16.02.2011	ggu	pass robs to subroutines, write stb-ind to nos file
-c 20.05.2011	ggu	allow for elimination of elems due to high rstab
-c 31.05.2011	ggu	changed VERS_6_1_23
-c 01.06.2011	ggu	wsink for stability integrated
-c 12.07.2011	ggu	new routine output_stability()
-c 14.07.2011	ggu	new routine output_stability_node()
-c 21.06.2012	ggu&ccf	variable vertical sinking velocity integrated
-c 07.03.2014	ggu	changed VERS_6_1_72
-c 08.04.2014	ggu	use rlin to determine advective stability
-c 05.05.2014	ggu	changed VERS_6_1_74
-c 26.11.2014	ggu	changed VERS_7_0_7
-c 23.12.2014	ggu	changed VERS_7_0_11
-c 09.01.2015	ggu	changed VERS_7_0_12
-c 19.01.2015	ggu	changed VERS_7_1_3
-c 20.05.2015	ggu	always compute stability, call to conzstab changed
-c 05.06.2015	ggu	changed VERS_7_1_12
-c 13.07.2015	ggu	changed VERS_7_1_51
-c 17.07.2015	ggu	changed VERS_7_1_80
-c 20.07.2015	ggu	changed VERS_7_1_81
-c 23.09.2015	ggu	changed VERS_7_2_4
-c 20.10.2015	ggu	in output_stability() bug that icall was not adjouned
-c 23.10.2015	ggu	changed VERS_7_3_9
-c 09.11.2015	ggu	changed VERS_7_3_13
-c 25.05.2016	ggu	changed VERS_7_5_10
-c 20.10.2016	ccf	pass rtauv for differential nudging
-c 12.01.2017	ggu	changed VERS_7_5_21
-c 05.12.2017	ggu	changed VERS_7_5_39
-c 13.04.2018	ggu	re-structured, included gravity wave stability
-c 16.04.2018	ggu	use also ilin to compute stability
-c 16.02.2019	ggu	changed VERS_7_5_60
-c 06.11.2019	ggu	femtime eliminated
-c 30.03.2021	ggu	better error output
-c 20.03.2022	ggu	upgraded to da_out
-c 01.06.2022	ggu	in gravity_wave_stability() set hz to min 0
-c 29.03.2023	ggu	exchange rindex,tindex,gindex, write to info file
-c 02.04.2023    ggu     only master writes to iuinfo
-c 09.05.2023    lrp     introduce top layer index variable
-c 24.05.2023    ggu     debug section introduced in hydro_internal_stability()
-c
-c*****************************************************************
-c*****************************************************************
-c*****************************************************************
-c
-c typical usage :
-c
-c call scalar_stability before advection of similar variables
-c
-c notes :
-c
-c	scal3sh							newcon
-c		scalar_info_stability				newstab
-c		scalar_stability				newstab
-c			scalar_compute_stability		newstab
-c				conzstab			newcon
-c
-c	set_timestep						subtime
-c		hydro_stability					newstab
-c			hydro_internal_stability		newstab
-c				momentum_advective_stability	newexpl
-c				momentum_viscous_stability	newexpl
-c				gravity_wave_stability		newstab
-c
-c saux is never computed in conzstab - may be a bug		!FIXME
-c
-c*****************************************************************
+! routines for stability computations
+!
+! revision log :
+!
+! 19.02.2010	ggu	new file to contain stability computations
+! 26.02.2010	ggu	internal_stability restructured (on element)
+! 08.03.2010	ggu	run only down to avail layers in stability (bug fix)
+! 23.03.2010	ggu	changed v6.1.1
+! 26.01.2011	ggu	robs for nudging implemented
+! 16.02.2011	ggu	pass robs to subroutines, write stb-ind to nos file
+! 20.05.2011	ggu	allow for elimination of elems due to high rstab
+! 31.05.2011	ggu	changed VERS_6_1_23
+! 01.06.2011	ggu	wsink for stability integrated
+! 12.07.2011	ggu	new routine output_stability()
+! 14.07.2011	ggu	new routine output_stability_node()
+! 21.06.2012	ggu&ccf	variable vertical sinking velocity integrated
+! 07.03.2014	ggu	changed VERS_6_1_72
+! 08.04.2014	ggu	use rlin to determine advective stability
+! 05.05.2014	ggu	changed VERS_6_1_74
+! 26.11.2014	ggu	changed VERS_7_0_7
+! 23.12.2014	ggu	changed VERS_7_0_11
+! 09.01.2015	ggu	changed VERS_7_0_12
+! 19.01.2015	ggu	changed VERS_7_1_3
+! 20.05.2015	ggu	always compute stability, call to conzstab changed
+! 05.06.2015	ggu	changed VERS_7_1_12
+! 13.07.2015	ggu	changed VERS_7_1_51
+! 17.07.2015	ggu	changed VERS_7_1_80
+! 20.07.2015	ggu	changed VERS_7_1_81
+! 23.09.2015	ggu	changed VERS_7_2_4
+! 20.10.2015	ggu	in output_stability() bug that icall was not adjouned
+! 23.10.2015	ggu	changed VERS_7_3_9
+! 09.11.2015	ggu	changed VERS_7_3_13
+! 25.05.2016	ggu	changed VERS_7_5_10
+! 20.10.2016	ccf	pass rtauv for differential nudging
+! 12.01.2017	ggu	changed VERS_7_5_21
+! 05.12.2017	ggu	changed VERS_7_5_39
+! 13.04.2018	ggu	re-structured, included gravity wave stability
+! 16.04.2018	ggu	use also ilin to compute stability
+! 16.02.2019	ggu	changed VERS_7_5_60
+! 06.11.2019	ggu	femtime eliminated
+! 30.03.2021	ggu	better error output
+! 20.03.2022	ggu	upgraded to da_out
+! 01.06.2022	ggu	in gravity_wave_stability() set hz to min 0
+! 29.03.2023	ggu	exchange rindex,tindex,gindex, write to info file
+! 02.04.2023    ggu     only master writes to iuinfo
+! 09.05.2023    lrp     introduce top layer index variable
+! 24.05.2023    ggu     debug section introduced in hydro_internal_stability()
+!
+!*****************************************************************
+!*****************************************************************
+!*****************************************************************
+!
+! typical usage :
+!
+! call scalar_stability before advection of similar variables
+!
+! notes :
+!
+!	scal3sh							newcon
+!		scalar_info_stability				newstab
+!		scalar_stability				newstab
+!			scalar_compute_stability		newstab
+!				conzstab			newcon
+!
+!	set_timestep						subtime
+!		hydro_stability					newstab
+!			hydro_internal_stability		newstab
+!				momentum_advective_stability	newexpl
+!				momentum_viscous_stability	newexpl
+!				gravity_wave_stability		newstab
+!
+! saux is never computed in conzstab - may be a bug		!FIXME
+!
+!*****************************************************************
 
 !==================================================================
         module stab
@@ -113,10 +113,10 @@ c*****************************************************************
         end module stab
 !==================================================================
 
-	subroutine scalar_compute_stability(robs,rtauv,wsink,wsinkv
-     +					,rkpar,azpar,rindex,saux)
+	subroutine scalar_compute_stability(robs,rtauv,wsink,wsinkv &
+     &					,rkpar,azpar,rindex,saux)
 
-c computes stability index
+! computes stability index
 
 	use mod_diff_visc_fric
 	use levels, only : nlvdi,nlv
@@ -141,9 +141,9 @@ c computes stability index
 
         real getpar
 
-c----------------------------------------------------------------
-c set parameters
-c----------------------------------------------------------------
+!----------------------------------------------------------------
+! set parameters
+!----------------------------------------------------------------
 
 	adpar=getpar('adpar')
 	aapar=getpar('aapar')
@@ -154,32 +154,32 @@ c----------------------------------------------------------------
 	ddt = 1.		!always for 1 sec
 	rindex = 0.
 
-c----------------------------------------------------------------
-c call conzstab
-c----------------------------------------------------------------
+!----------------------------------------------------------------
+! call conzstab
+!----------------------------------------------------------------
 
-        call conzstab(
-     +          ddt,robs,rtauv,wsink,wsinkv,rkpar,difhv,difv
-     +		,difmol,azpar,adpar,aapar
-     +          ,rindex,istot,isact,nlvdi,nlv)
+        call conzstab( &
+     &          ddt,robs,rtauv,wsink,wsinkv,rkpar,difhv,difv &
+     &		,difmol,azpar,adpar,aapar &
+     &          ,rindex,istot,isact,nlvdi,nlv)
 
-c----------------------------------------------------------------
-c propagate to all domains
-c----------------------------------------------------------------
+!----------------------------------------------------------------
+! propagate to all domains
+!----------------------------------------------------------------
 
 	rindex = shympi_max(rindex)
 
-c----------------------------------------------------------------
-c end of routine
-c----------------------------------------------------------------
+!----------------------------------------------------------------
+! end of routine
+!----------------------------------------------------------------
 
 	end
 
-c*****************************************************************
+!*****************************************************************
 
         subroutine scalar_basic_stability(dt,rkpar,rindex)
 
-c computes scalar stability without nudging and sinking
+! computes scalar stability without nudging and sinking
 
 	use levels, only : nlvdi,nlv
 	use basin
@@ -209,17 +209,17 @@ c computes scalar stability without nudging and sinking
 	wsink = 0.
 
 	call getaz(azpar)
-	call scalar_compute_stability(robs,rtauv,wsink,wsinkv,rkpar,azpar,
-     +					rindex,saux)
+	call scalar_compute_stability(robs,rtauv,wsink,wsinkv,rkpar,azpar, &
+     &					rindex,saux)
 
 	end
 
-c*****************************************************************
+!*****************************************************************
 
-        subroutine scalar_stability(dt,robs,rtauv,wsink,wsinkv
-     +					,rkpar,rindex,istot,saux)
+        subroutine scalar_stability(dt,robs,rtauv,wsink,wsinkv &
+     &					,rkpar,rindex,istot,saux)
 
-c gets stability index (if necessary computes it)
+! gets stability index (if necessary computes it)
 
 	use levels, only : nlvdi,nlv
 	use basin
@@ -238,35 +238,35 @@ c gets stability index (if necessary computes it)
 
 	real azpar
 
-c----------------------------------------------------------------
-c compute stability index
-c----------------------------------------------------------------
+!----------------------------------------------------------------
+! compute stability index
+!----------------------------------------------------------------
 
 	call getaz(azpar)
-	call scalar_compute_stability(robs,rtauv,wsink,wsinkv,rkpar,azpar,
-     +					rindex,saux)
+	call scalar_compute_stability(robs,rtauv,wsink,wsinkv,rkpar,azpar, &
+     &					rindex,saux)
 
-c----------------------------------------------------------------
-c scale to real time step dt
-c----------------------------------------------------------------
+!----------------------------------------------------------------
+! scale to real time step dt
+!----------------------------------------------------------------
 
 	rindex = dt * rindex
 	istot = 1 + rindex
 
-c----------------------------------------------------------------
-c end of routine
-c----------------------------------------------------------------
+!----------------------------------------------------------------
+! end of routine
+!----------------------------------------------------------------
 
         end
 
-c*****************************************************************
+!*****************************************************************
 
-        subroutine scalar_info_stability(dt,robs,rtauv,wsink,wsinkv
-     +					,rkpar,rindex,istot,saux)
+        subroutine scalar_info_stability(dt,robs,rtauv,wsink,wsinkv &
+     &					,rkpar,rindex,istot,saux)
 
-c gets stability index (if necessary computes it)
-c
-c it is assumed that the program will exit after this call
+! gets stability index (if necessary computes it)
+!
+! it is assumed that the program will exit after this call
 
 	use levels, only : nlvdi,nlv
 	use basin, only : nkn,nel,ngr,mbw
@@ -289,19 +289,19 @@ c it is assumed that the program will exit after this call
 	real aindex
 	real azpar
 
-c----------------------------------------------------------------
-c compute stability index
-c----------------------------------------------------------------
+!----------------------------------------------------------------
+! compute stability index
+!----------------------------------------------------------------
 
 	call getaz(azpar)
-	call scalar_compute_stability(robs,rtauv,wsink,wsinkv,rkpar,azpar,
-     +					rindex,saux)
+	call scalar_compute_stability(robs,rtauv,wsink,wsinkv,rkpar,azpar, &
+     &					rindex,saux)
 	rindex = dt * rindex
 	istot = 1 + rindex
 
-c----------------------------------------------------------------
-c write to terminal
-c----------------------------------------------------------------
+!----------------------------------------------------------------
+! write to terminal
+!----------------------------------------------------------------
 
 	ia = 1
 	aindex = saux(1,1)
@@ -315,28 +315,28 @@ c----------------------------------------------------------------
 	  end do
 	end do
 
-cggu protect
+!ggu protect
 	write(6,*) 'scalar_info_stability:'
 	write(6,*) rkpar,azpar,rindex,istot
 	write(6,*) ia,aindex,dt*aindex
 	id = 0
 	call get_act_dtime(dtime)
 	call shy_write_scalar(id,'sta',dtime,1,778,nlvdi,saux)
-cggu protect
+!ggu protect
 
-c----------------------------------------------------------------
-c end of routine
-c----------------------------------------------------------------
+!----------------------------------------------------------------
+! end of routine
+!----------------------------------------------------------------
 
 	end
 
-c*****************************************************************
-c*****************************************************************
-c*****************************************************************
+!*****************************************************************
+!*****************************************************************
+!*****************************************************************
 
         subroutine hydro_stability(dt,rindex)
 
-c computes stability index for hydro timestep - no error output
+! computes stability index for hydro timestep - no error output
 
         implicit none
 
@@ -347,13 +347,13 @@ c computes stability index for hydro timestep - no error output
 
 	end
 
-c**********************************************************************
+!**********************************************************************
 
         subroutine error_stability(dt,rindex)
 
-c computes stability index for hydro timestep - with error output
-c
-c after this call the program should abort
+! computes stability index for hydro timestep - with error output
+!
+! after this call the program should abort
 
         implicit none
 
@@ -364,11 +364,11 @@ c after this call the program should abort
 
 	end
 
-c**********************************************************************
+!**********************************************************************
 
         subroutine eliminate_stability(rmax)
 
-c eliminates elements with stability index higher than rmax
+! eliminates elements with stability index higher than rmax
 
         implicit none
 
@@ -384,15 +384,15 @@ c eliminates elements with stability index higher than rmax
 
 	end
 
-c**********************************************************************
+!**********************************************************************
 
         subroutine hydro_internal_stability(mode,dt,rindex)
 
-c computes stability index for hydro timestep (internal)
-c
-c mode = 0		normal call, compute stability
-c mode = 1		error call, compute stability and write error message
-c mode = 2		eliminate elements with r>rindex
+! computes stability index for hydro timestep (internal)
+!
+! mode = 0		normal call, compute stability
+! mode = 1		error call, compute stability and write error message
+! mode = 2		eliminate elements with r>rindex
 
 	use levels
 	use basin, only : nkn,nel,ngr,mbw
@@ -518,13 +518,13 @@ c mode = 2		eliminate elements with r>rindex
 
         end
 
-c*****************************************************************
-c*****************************************************************
-c*****************************************************************
+!*****************************************************************
+!*****************************************************************
+!*****************************************************************
 
         subroutine output_errout_stability(dt,sauxe)
 
-c outputs stability index for hydro timestep (internal) (error handling)
+! outputs stability index for hydro timestep (internal) (error handling)
 
 	use levels
 	use basin, only : nkn,nel,ngr,mbw
@@ -564,17 +564,17 @@ c outputs stability index for hydro timestep (internal) (error handling)
 	ie = iemax
 	iee = ieext(ie)
 	write(6,*) 'errout_stability: '
-	write(6,*) '  ie-intern   ie-extern' //
-     +			'   stab-index    dt*stab-index'
+	write(6,*) '  ie-intern   ie-extern' // &
+     &			'   stab-index    dt*stab-index'
 	write(6,*) ie,iee,tindex,tindex*dt
 
 	end
 
-c*****************************************************************
+!*****************************************************************
 
         subroutine output_stability_node(dt,cwrite)
 
-c outputs stability index for hydro timestep (internal)
+! outputs stability index for hydro timestep (internal)
 
 	use levels
 	use basin
@@ -644,11 +644,11 @@ c outputs stability index for hydro timestep (internal)
 
 	end
 
-c*****************************************************************
+!*****************************************************************
 
         subroutine output_stability(dt,sauxe)
 
-c outputs stability index for hydro timestep (internal)
+! outputs stability index for hydro timestep (internal)
 
 	use levels
 	use basin
@@ -674,9 +674,9 @@ c outputs stability index for hydro timestep (internal)
 
 	real getpar
 
-c	idtsti = 3600
-c	idtsti = 0
-c	itmsti = -1
+!	idtsti = 3600
+!	idtsti = 0
+!	itmsti = -1
 
 	if( icall .lt. 0 ) return
 
@@ -728,9 +728,9 @@ c	itmsti = -1
 
 	end
 
-c*****************************************************************
-c*****************************************************************
-c*****************************************************************
+!*****************************************************************
+!*****************************************************************
+!*****************************************************************
 
 	subroutine gravity_wave_stability(gindex,garray)
 
@@ -821,13 +821,13 @@ c*****************************************************************
 	stop 'error stop gravity_wave_stability: az and am'
 	end
 
-c*****************************************************************
-c*****************************************************************
-c*****************************************************************
+!*****************************************************************
+!*****************************************************************
+!*****************************************************************
 
 	subroutine parallel_test
 
-c tests parallel implementation
+! tests parallel implementation
 
 	use levels, only : nlvdi,nlv
 	use basin
@@ -847,11 +847,11 @@ c tests parallel implementation
 	rtauv = 0.
 
 	write(6,*) 'parallel test...'
-	call scalar_compute_stability(robs,rtauv,wsink,wsinkv,rkpar,azpar,
-     +					rindex,saux)
+	call scalar_compute_stability(robs,rtauv,wsink,wsinkv,rkpar,azpar, &
+     &					rindex,saux)
 	write(6,*) 'parallel is ok.'
 
 	end
 
-c*****************************************************************
+!*****************************************************************
 

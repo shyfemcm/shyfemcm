@@ -23,23 +23,23 @@
 !
 !--------------------------------------------------------------------------
 
-c routines dealing with histogram
-c
-c contents :
-c
-c subroutine histo_init(nbin,bin0,dbin,rbin)
-c subroutine histo_insert(value)
-c subroutine histo_final(ic)
-c 
-c revision log :
-c
-c 16.03.2004	ggu	routines written from scratch
-c 23.03.2010	ggu	changed v6.1.1
-c 31.05.2011	ggu	changed VERS_6_1_23
-c 09.01.2015	ggu	changed VERS_7_0_12
-c 16.02.2019	ggu	changed VERS_7_5_60
-c
-c****************************************************************
+! routines dealing with histogram
+!
+! contents :
+!
+! subroutine histo_init(nbin,bin0,dbin,rbin)
+! subroutine histo_insert(value)
+! subroutine histo_final(ic)
+! 
+! revision log :
+!
+! 16.03.2004	ggu	routines written from scratch
+! 23.03.2010	ggu	changed v6.1.1
+! 31.05.2011	ggu	changed VERS_6_1_23
+! 09.01.2015	ggu	changed VERS_7_0_12
+! 16.02.2019	ggu	changed VERS_7_5_60
+!
+!****************************************************************
 
         subroutine histo_init(nbin,bin0,dbin,rbin)
 
@@ -73,7 +73,7 @@ c****************************************************************
 
         end
 
-c****************************************************************
+!****************************************************************
 
         subroutine histo_insert(value)
 
@@ -97,7 +97,7 @@ c****************************************************************
 
         end
 
-c****************************************************************
+!****************************************************************
 
         subroutine histo_final(ic)
 
@@ -115,5 +115,5 @@ c****************************************************************
 
         end
 
-c****************************************************************
+!****************************************************************
 

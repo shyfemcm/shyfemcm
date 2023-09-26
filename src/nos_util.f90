@@ -23,33 +23,33 @@
 !
 !--------------------------------------------------------------------------
 
-c auxiliar nos routines
-c
-c contents :
-c
-c wrnos2d(name,title,value)             write 2d nos file
-c
-c revision log :
-c
-c 05.01.2005	ggu	new routine wrnos2d() to write 2d nos file
-c 28.09.2006	ggu	new routines wrnos2d_it, wrnos2d_index, extract_level
-c 23.03.2010	ggu	changed v6.1.1
-c 28.01.2014	ggu	changed VERS_6_1_71
-c 23.12.2014	ggu	changed VERS_7_0_11
-c 19.01.2015	ggu	changed VERS_7_1_3
-c 10.02.2015	ggu	some new routines for writing...
-c 26.02.2015	ggu	changed VERS_7_1_5
-c 05.05.2015	ggu	changed VERS_7_1_10
-c 10.07.2015	ggu	changed VERS_7_1_50
-c 17.07.2015	ggu	changed VERS_7_1_80
-c 20.07.2015	ggu	changed VERS_7_1_81
-c 16.02.2019	ggu	changed VERS_7_5_60
-c
-c***************************************************************************
+! auxiliar nos routines
+!
+! contents :
+!
+! wrnos2d(name,title,value)             write 2d nos file
+!
+! revision log :
+!
+! 05.01.2005	ggu	new routine wrnos2d() to write 2d nos file
+! 28.09.2006	ggu	new routines wrnos2d_it, wrnos2d_index, extract_level
+! 23.03.2010	ggu	changed v6.1.1
+! 28.01.2014	ggu	changed VERS_6_1_71
+! 23.12.2014	ggu	changed VERS_7_0_11
+! 19.01.2015	ggu	changed VERS_7_1_3
+! 10.02.2015	ggu	some new routines for writing...
+! 26.02.2015	ggu	changed VERS_7_1_5
+! 05.05.2015	ggu	changed VERS_7_1_10
+! 10.07.2015	ggu	changed VERS_7_1_50
+! 17.07.2015	ggu	changed VERS_7_1_80
+! 20.07.2015	ggu	changed VERS_7_1_81
+! 16.02.2019	ggu	changed VERS_7_5_60
+!
+!***************************************************************************
 
         subroutine wrnos2d(name,title,value)
 
-c write 2d nos file
+! write 2d nos file
 
         implicit none
 
@@ -63,11 +63,11 @@ c write 2d nos file
 
 	end
 
-c***************************************************************************
+!***************************************************************************
 
         subroutine wrnos2d_it(it,name,title,value)
 
-c write one 2d nos file
+! write one 2d nos file
 
         implicit none
 
@@ -87,11 +87,11 @@ c write one 2d nos file
 
 	end
 
-c***************************************************************************
+!***************************************************************************
 
         subroutine wrnos2d_open(nb,name,title)
 
-c write 2d nos file
+! write 2d nos file
 
 	use mod_depth
 	use basin, only : nkn,nel,ngr,mbw
@@ -112,9 +112,9 @@ c write 2d nos file
 
         integer ifileo
 
-c-----------------------------------------------------------------
-c initialize variables
-c-----------------------------------------------------------------
+!-----------------------------------------------------------------
+! initialize variables
+!-----------------------------------------------------------------
 
         nvers = 3
         nvar = 1
@@ -122,9 +122,9 @@ c-----------------------------------------------------------------
 
         ptitle = title
 
-c-----------------------------------------------------------------
-c writing header
-c-----------------------------------------------------------------
+!-----------------------------------------------------------------
+! writing header
+!-----------------------------------------------------------------
 
         pfile = name
         call filext(pfile,'.nos')
@@ -137,9 +137,9 @@ c-----------------------------------------------------------------
         call wsnos(nb,ilhkv,hlv,hev,ierr)
         if(ierr.ne.0) goto 99
 
-c-----------------------------------------------------------------
-c end of routine
-c-----------------------------------------------------------------
+!-----------------------------------------------------------------
+! end of routine
+!-----------------------------------------------------------------
 
         return
    98   continue
@@ -152,11 +152,11 @@ c-----------------------------------------------------------------
         stop 'error stop wrnos2d_open: writing header'
         end
 
-c***************************************************************************
+!***************************************************************************
 
 	subroutine wrnos2d_record(nb,it,ivar,value)
 
-c write 2d nos file
+! write 2d nos file
 
         implicit none
 
@@ -178,7 +178,7 @@ c write 2d nos file
         stop 'error stop wrnos2d_record: writing record'
         end
 
-c***************************************************************************
+!***************************************************************************
 
         subroutine wrnos2d_index(it,index,name,title,value)
 
@@ -214,7 +214,7 @@ c***************************************************************************
 	stop 'error stop wrnos2d_index: index'
 	end
 
-c***************************************************************************
+!***************************************************************************
 
 	subroutine extract_level(nlvddi,nkn,level,v3,v2)
 
@@ -234,5 +234,5 @@ c***************************************************************************
 
 	end
 
-c***************************************************************************
+!***************************************************************************
 

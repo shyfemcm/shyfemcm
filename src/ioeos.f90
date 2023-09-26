@@ -23,96 +23,96 @@
 !
 !--------------------------------------------------------------------------
 
-c utility routines to read/write EOS file - file type 167
-c
-c contents :
-c
-c subroutine inieos
-c subroutine seteos(iunit,nvers,nkn,nel,nlv,nvar)
-c subroutine geteos(iunit,nvers,nkn,nel,nlv,nvar)
-c
-c subroutine dimeos(iunit,nknddi,nelddi,nlvddi)
-c
-c subroutine rfeos(iunit,nvers,nkn,nel,nlv,nvar,title,ierr)
-c subroutine wfeos(iunit,nvers,nkn,nel,nlv,nvar,title,ierr)
-c subroutine rseos(iunit,ilhv,hlv,hev,ierr)
-c subroutine wseos(iunit,ilhv,hlv,hev,ierr)
-c subroutine rdeos(iunit,it,ivar,nlvddi,ilhv,c,ierr)
-c subroutine wreos(iunit,it,ivar,nlvddi,ilhv,c,ierr)
-c
-c revision log :
-c
-c 31.08.2011	ggu	new routines EOS
-c 01.09.2011	ggu	changed VERS_6_1_32
-c 06.10.2011	ggu	bug fix for ilhv -> nel_lev
-c 18.10.2011	ggu	changed VERS_6_1_33
-c 10.07.2015	ggu	changed VERS_7_1_50
-c 18.12.2018	ggu	changed VERS_7_5_52
-c 16.02.2019	ggu	changed VERS_7_5_60
-c
-c notes :
-c
-c format of file:
-c
-c version 3
-c
-c	mtype,nvers
-c	nkn,nel,nlv,nvar
-c	title
-c
-c	(ilhv(k),k=1,nel)			empty if nlv <= 1
-c	(hlv(k),k=1,nlv)			empty if nlv <= 1
-c	(hev(k),k=1,nel)
-c	
-c	it,ivar
-c	((c(l,ie),l=1,ilhv(ie)),ie=1,nel)	if nlv > 1
-c	(c(1,ie),ie=1,nel)			if nlv <= 1
-c
-c version 2	not existing
-c
-c version 1	not existing
-c
-c variable types:
-c
-c	10	conz
-c	11	salt
-c	12	temp
-c	15	oxygen
-c	18	rms
-c
-c todo :
-c
-c - routine to close file (read and write) -> cleos()
-c - remove data structure from eosvar when closed -> iunit=0
-c - in seteos look for first available iunit
-c - in seteos check if iunit is already open
-c
-c************************************************************
+! utility routines to read/write EOS file - file type 167
+!
+! contents :
+!
+! subroutine inieos
+! subroutine seteos(iunit,nvers,nkn,nel,nlv,nvar)
+! subroutine geteos(iunit,nvers,nkn,nel,nlv,nvar)
+!
+! subroutine dimeos(iunit,nknddi,nelddi,nlvddi)
+!
+! subroutine rfeos(iunit,nvers,nkn,nel,nlv,nvar,title,ierr)
+! subroutine wfeos(iunit,nvers,nkn,nel,nlv,nvar,title,ierr)
+! subroutine rseos(iunit,ilhv,hlv,hev,ierr)
+! subroutine wseos(iunit,ilhv,hlv,hev,ierr)
+! subroutine rdeos(iunit,it,ivar,nlvddi,ilhv,c,ierr)
+! subroutine wreos(iunit,it,ivar,nlvddi,ilhv,c,ierr)
+!
+! revision log :
+!
+! 31.08.2011	ggu	new routines EOS
+! 01.09.2011	ggu	changed VERS_6_1_32
+! 06.10.2011	ggu	bug fix for ilhv -> nel_lev
+! 18.10.2011	ggu	changed VERS_6_1_33
+! 10.07.2015	ggu	changed VERS_7_1_50
+! 18.12.2018	ggu	changed VERS_7_5_52
+! 16.02.2019	ggu	changed VERS_7_5_60
+!
+! notes :
+!
+! format of file:
+!
+! version 3
+!
+!	mtype,nvers
+!	nkn,nel,nlv,nvar
+!	title
+!
+!	(ilhv(k),k=1,nel)			empty if nlv <= 1
+!	(hlv(k),k=1,nlv)			empty if nlv <= 1
+!	(hev(k),k=1,nel)
+!	
+!	it,ivar
+!	((c(l,ie),l=1,ilhv(ie)),ie=1,nel)	if nlv > 1
+!	(c(1,ie),ie=1,nel)			if nlv <= 1
+!
+! version 2	not existing
+!
+! version 1	not existing
+!
+! variable types:
+!
+!	10	conz
+!	11	salt
+!	12	temp
+!	15	oxygen
+!	18	rms
+!
+! todo :
+!
+! - routine to close file (read and write) -> cleos()
+! - remove data structure from eosvar when closed -> iunit=0
+! - in seteos look for first available iunit
+! - in seteos check if iunit is already open
+!
+!************************************************************
 
 	subroutine inieos
 
-c sets up initial common block - internal routine
+! sets up initial common block - internal routine
 
 	implicit none
 
-c parameters
+! parameters
 	integer ftype,maxvers
 	parameter(ftype=167,maxvers=3)
 	integer ndim,nitdim
 	parameter(ndim=30,nitdim=5)
-c common
+! common
 	integer mtype,maxver
 	common /eoscom/ mtype,maxver
 	integer eositem,eosvar(0:nitdim,ndim)
 	common /eosvar/eositem,eosvar
-c local
+! local
 	integer i,n
-c save
+! save
 	logical binit
 	save binit
 	save /eoscom/
 	save /eosvar/
-c data
+! data
 	data binit /.false./
 
 	if( binit ) return
@@ -131,26 +131,26 @@ c data
 
 	end
 
-c************************************************************
+!************************************************************
 
 	subroutine seteos(iunit,nvers,nkn,nel,nlv,nvar)
 
-c sets up parameter common block - internal routine
+! sets up parameter common block - internal routine
 
 	implicit none
 
-c arguments
+! arguments
 	integer iunit,nvers,nkn,nel,nlv,nvar
-c parameters
+! parameters
 	integer ndim,nitdim
 	parameter(ndim=30,nitdim=5)
-c common
+! common
 	integer eositem,eosvar(0:nitdim,ndim)
 	common /eosvar/eositem,eosvar
-c local
+! local
 	integer n
 
-c we do not check if unit has already been opened -> open with ifileo
+! we do not check if unit has already been opened -> open with ifileo
 
 	do n=1,eositem
 	  if( eosvar(0,n) .eq. 0 ) goto 1
@@ -176,20 +176,20 @@ c we do not check if unit has already been opened -> open with ifileo
 	stop 'error stop seteos: unit already open - please close first'
 	end
 
-c************************************************************
+!************************************************************
 
 	subroutine geteos(iunit,nvers,nkn,nel,nlv,nvar)
 
-c gets parameter common block - internal routine
+! gets parameter common block - internal routine
 
 	implicit none
 
-c arguments
+! arguments
 	integer iunit,nvers,nkn,nel,nlv,nvar
-c parameters
+! parameters
 	integer ndim,nitdim
 	parameter(ndim=30,nitdim=5)
-c common
+! common
 	integer eositem,eosvar(0:nitdim,ndim)
 	common /eosvar/eositem,eosvar
 
@@ -212,22 +212,22 @@ c common
 
 	end
 
-c************************************************************
+!************************************************************
 
 	subroutine deleos(iunit)
 
-c closes eos file internal structure - internal routine
-c
-c please note that the file has still to be closed manually
+! closes eos file internal structure - internal routine
+!
+! please note that the file has still to be closed manually
 
 	implicit none
 
-c arguments
+! arguments
 	integer iunit
-c parameters
+! parameters
 	integer ndim,nitdim
 	parameter(ndim=30,nitdim=5)
-c common
+! common
 	integer eositem,eosvar(0:nitdim,ndim)
 	common /eosvar/eositem,eosvar
 
@@ -246,17 +246,17 @@ c common
 
 	end
 
-c************************************************************
+!************************************************************
 
 	subroutine dimeos(iunit,nknddi,nelddi,nlvddi)
 
-c checks dimension of arrays
+! checks dimension of arrays
 
 	implicit none
 
-c arguments
+! arguments
 	integer iunit,nknddi,nelddi,nlvddi
-c local
+! local
 	integer nvers,nkn,nel,nlv,nvar
 
 	call geteos(iunit,nvers,nkn,nel,nlv,nvar)
@@ -273,64 +273,64 @@ c local
         stop 'error stop dimeos: dimension error'
 	end
 
-c************************************************************
-c************************************************************
-c************************************************************
-c************************************************************
-c************************************************************
+!************************************************************
+!************************************************************
+!************************************************************
+!************************************************************
+!************************************************************
 
-	subroutine rfeos	(iunit,nvers
-     +				,nkn,nel,nlv,nvar
-     +				,title
-     +				,ierr
-     +				)
+	subroutine rfeos	(iunit,nvers &
+     &				,nkn,nel,nlv,nvar &
+     &				,title &
+     &				,ierr &
+     &				)
 
-c reads first record of EOS file
-c
-c nvers		on entry maximal version that can be read
-c		-> must be an input, used to check the corectness
-c		.. of the call parameters
-c		on return actual version read
+! reads first record of EOS file
+!
+! nvers		on entry maximal version that can be read
+!		-> must be an input, used to check the corectness
+!		.. of the call parameters
+!		on return actual version read
 
 	implicit none
 
-c arguments
+! arguments
 	integer iunit,nvers
 	integer nkn,nel,nlv,nvar
 	character*(*) title
 	integer ierr
-c common
+! common
 	integer mtype,maxver
 	common /eoscom/ mtype,maxver
-c local
+! local
 	integer ntype,irec
 	character*80 line
 
-c initialize
+! initialize
 
 	call inieos
 
 	line = ' '		!must be 80 chars
 
-c control newest version number for call
+! control newest version number for call
 
 	if( maxver .ne. nvers ) goto 95
 
-c rewind file
+! rewind file
 
 	rewind(iunit,err=96)
 
-c first record - find out what version
+! first record - find out what version
 
 	irec = 1
 	read(iunit,end=91,err=99) ntype,nvers
 
-c control version number and type of file
+! control version number and type of file
 
 	if( ntype .ne. mtype ) goto 97
 	if( nvers .le. 0 .or. nvers .gt. maxver ) goto 98
 
-c next records
+! next records
 
 	irec = 2
 	if( nvers .eq. 3 ) then
@@ -379,28 +379,28 @@ c next records
 	return
 	end
 
-c********************************************************************
+!********************************************************************
 
-	subroutine wfeos	(iunit,nvers
-     +				,nkn,nel,nlv,nvar
-     +				,title
-     +				,ierr
-     +				)
+	subroutine wfeos	(iunit,nvers &
+     &				,nkn,nel,nlv,nvar &
+     &				,title &
+     &				,ierr &
+     &				)
 
-c writes first record of EOS file
-c
-c nvers		on entry maximal version
-c		-> must be an input, used to check the corectness
-c		.. of the call parameters
+! writes first record of EOS file
+!
+! nvers		on entry maximal version
+!		-> must be an input, used to check the corectness
+!		.. of the call parameters
 
 	implicit none
 
-c arguments
+! arguments
 	integer iunit,nvers
 	integer nkn,nel,nlv,nvar
 	character*(*) title
 	integer ierr
-c common
+! common
 	integer mtype,maxver
 	common /eoscom/ mtype,maxver
 
@@ -409,11 +409,11 @@ c common
         line = ' '
         line = title            !must be 80 chars
 
-c initialize
+! initialize
 
 	call inieos
 
-c control newest version number for call
+! control newest version number for call
 
 	if( nvers.ne.maxver ) goto 95
 
@@ -436,31 +436,31 @@ c control newest version number for call
 	return
 	end
 
-c************************************************************
+!************************************************************
 
 	subroutine rseos(iunit,ilhv,hlv,hev,ierr)
 
-c reads second record of EOS file
+! reads second record of EOS file
 
 	implicit none
 
-c arguments
+! arguments
 	integer iunit
 	integer ilhv(1)
 	real hlv(1)
 	real hev(1)
 	integer ierr
-c common
+! common
 	integer mtype,maxver
 	common /eoscom/ mtype,maxver
-c local
+! local
 	integer l,ie
 	integer nvers,nkn,nel,nlv,nvar
 	integer nel_lev
 
 	call geteos(iunit,nvers,nkn,nel,nlv,nvar)
 
-c only one layer
+! only one layer
 
 	nel_lev = nel
 	if( nlv .le. 1 ) then
@@ -473,7 +473,7 @@ c only one layer
 	  nlv = 0
 	end if
 
-c read records
+! read records
 
 	if( nvers .eq. 3 ) then
 	  read(iunit,err=99) (ilhv(ie),ie=1,nel_lev)
@@ -494,31 +494,31 @@ c read records
 	return
 	end
 
-c************************************************************
+!************************************************************
 
 	subroutine wseos(iunit,ilhv,hlv,hev,ierr)
 
-c writes second record of EOS file
+! writes second record of EOS file
 
 	implicit none
 
-c arguments
+! arguments
 	integer iunit
 	integer ilhv(1)
 	real hlv(1)
 	real hev(1)
 	integer ierr
-c common
+! common
 	integer mtype,maxver
 	common /eoscom/ mtype,maxver
-c local
+! local
 	integer l,ie
 	integer nvers,nkn,nel,nlv,nvar
 	integer nel_lev
 
 	call geteos(iunit,nvers,nkn,nel,nlv,nvar)
 
-c only one layer
+! only one layer
 
 	nel_lev = nel
 	if( nlv .le. 1 ) then
@@ -526,7 +526,7 @@ c only one layer
 	  nel_lev = 0
 	end if
 
-c write records
+! write records
 
 	write(iunit) (ilhv(ie),ie=1,nel_lev)
 	write(iunit) (hlv(l),l=1,nlv)
@@ -537,24 +537,24 @@ c write records
 	return
 	end
 
-c************************************************************
+!************************************************************
 
 	subroutine rdeos(iunit,it,ivar,nlvddi,ilhv,c,ierr)
 
-c reads data record of EOS file
+! reads data record of EOS file
 
 	implicit none
 
-c arguments
+! arguments
 	integer iunit,it,ivar
 	integer nlvddi
 	integer ilhv(1)
 	real c(nlvddi,1)
 	integer ierr
-c common
+! common
 	integer mtype,maxver
 	common /eoscom/ mtype,maxver
-c local
+! local
 	integer l,ie
 	integer nvers,nkn,nel,nlv,nvar
 
@@ -593,24 +593,24 @@ c local
 	return
 	end
 
-c************************************************************
+!************************************************************
 
 	subroutine wreos(iunit,it,ivar,nlvddi,ilhv,c,ierr)
 
-c writes data record of EOS file
+! writes data record of EOS file
 
 	implicit none
 
-c arguments
+! arguments
 	integer iunit,it,ivar
 	integer nlvddi
 	integer ilhv(1)
 	real c(nlvddi,1)
 	integer ierr
-c common
+! common
 	integer mtype,maxver
 	common /eoscom/ mtype,maxver
-c local
+! local
 	integer l,ie
 	integer nvers,nkn,nel,nlv,nvar
 
@@ -631,25 +631,25 @@ c local
 	return
 	end
 
-c************************************************************
+!************************************************************
 
-	subroutine rheos	(iunit,nvers
-     +				,nknddi,nelddi,nlvddi
-     +				,nkn,nel,nlv,nvar
-     +				,ilhv,hlv,hev
-     +				,title
-     +				)
+	subroutine rheos	(iunit,nvers &
+     &				,nknddi,nelddi,nlvddi &
+     &				,nkn,nel,nlv,nvar &
+     &				,ilhv,hlv,hev &
+     &				,title &
+     &				)
 
-c reads all headers of EOS file
-c
-c nvers		on entry maximal version that can be read
-c		-> must be an input, used to check the corectness
-c		.. of the call parameters
-c		on return actual version read
+! reads all headers of EOS file
+!
+! nvers		on entry maximal version that can be read
+!		-> must be an input, used to check the corectness
+!		.. of the call parameters
+!		on return actual version read
 
 	implicit none
 
-c arguments
+! arguments
 	integer iunit,nvers
 	integer nknddi,nelddi,nlvddi
 	integer nkn,nel,nlv,nvar
@@ -657,7 +657,7 @@ c arguments
 	real hlv(1)
 	real hev(1)
 	character*(*) title
-c local
+! local
 	integer ierr,l
 
         call rfeos(iunit,nvers,nkn,nel,nlv,nvar,title,ierr)
@@ -685,23 +685,23 @@ c local
 	stop 'error stop rheos: error reading first header'
 	end
 
-c************************************************************
+!************************************************************
 
-        subroutine wheos        (iunit,nvers
-     +                          ,nkn,nel,nlv,nvar
-     +				,ilhv,hlv,hev
-     +                          ,title
-     +                          )
+        subroutine wheos        (iunit,nvers &
+     &                          ,nkn,nel,nlv,nvar &
+     &				,ilhv,hlv,hev &
+     &                          ,title &
+     &                          )
 
-c writes all headers of EOS file
-c
-c nvers         on entry maximal version
-c               -> must be an input, used to check the corectness
-c               .. of the call parameters
+! writes all headers of EOS file
+!
+! nvers         on entry maximal version
+!               -> must be an input, used to check the corectness
+!               .. of the call parameters
 
         implicit none
 
-c arguments
+! arguments
         integer iunit,nvers
         integer nkn,nel,nlv,nvar
 	integer ilhv(1)
@@ -723,5 +723,5 @@ c arguments
 	stop 'error stop wheos'
 	end
 
-c************************************************************
+!************************************************************
 

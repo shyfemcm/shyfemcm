@@ -24,34 +24,34 @@
 !
 !--------------------------------------------------------------------------
 
-c subroutines for lagrangian backtracing
-c
-c revision log :
-c
-c 00.00.2005	aac	from scratch
-c 24.03.2006	aac	use flxtype in lagr_vel to avoid backtracing at OB
-c 12.06.2006	ggu	integrated in new version
-c 29.11.2006	ggu	new version with different backtrace possibilities
-c 27.01.2009	aac	inertial effects from high vel to low vel
-c 04.02.2009	aac	cleaned up
-c 23.03.2010	ggu	changed v6.1.1
-c 23.03.2012	aac	new calling for track_body (id)
-c 30.03.2012	ggu	changed VERS_6_1_51
-c 23.12.2014	ggu	changed VERS_7_0_11
-c 19.01.2015	ggu	changed VERS_7_1_3
-c 01.04.2015	ggu	changed VERS_7_1_7
-c 21.05.2015	ggu	changed VERS_7_1_11
-c 17.07.2015	ggu	changed VERS_7_1_80
-c 20.07.2015	ggu	changed VERS_7_1_81
-c 16.11.2015	ggu	changed VERS_7_3_14
-c 25.10.2018	ggu	changed VERS_7_5_51
-c 16.02.2019	ggu	changed VERS_7_5_60
-c
-c**********************************************************************
+! subroutines for lagrangian backtracing
+!
+! revision log :
+!
+! 00.00.2005	aac	from scratch
+! 24.03.2006	aac	use flxtype in lagr_vel to avoid backtracing at OB
+! 12.06.2006	ggu	integrated in new version
+! 29.11.2006	ggu	new version with different backtrace possibilities
+! 27.01.2009	aac	inertial effects from high vel to low vel
+! 04.02.2009	aac	cleaned up
+! 23.03.2010	ggu	changed v6.1.1
+! 23.03.2012	aac	new calling for track_body (id)
+! 30.03.2012	ggu	changed VERS_6_1_51
+! 23.12.2014	ggu	changed VERS_7_0_11
+! 19.01.2015	ggu	changed VERS_7_1_3
+! 01.04.2015	ggu	changed VERS_7_1_7
+! 21.05.2015	ggu	changed VERS_7_1_11
+! 17.07.2015	ggu	changed VERS_7_1_80
+! 20.07.2015	ggu	changed VERS_7_1_81
+! 16.11.2015	ggu	changed VERS_7_3_14
+! 25.10.2018	ggu	changed VERS_7_5_51
+! 16.02.2019	ggu	changed VERS_7_5_60
+!
+!**********************************************************************
 
 	subroutine back_trace(uadv,vadv)
 
-c handles lagrangian backtracing
+! handles lagrangian backtracing
 
 	use mod_lagrange
 	use basin, only : nkn,nel,ngr,mbw
@@ -76,11 +76,11 @@ c handles lagrangian backtracing
         
 	end
 
-c****************************************************************
+!****************************************************************
         
         subroutine bar_ie
 
-c initializes particles at baricenter
+! initializes particles at baricenter
 
 	use mod_lagrange
 
@@ -100,7 +100,7 @@ c initializes particles at baricenter
 
         end 
 
-c**********************************************************************
+!**********************************************************************
 
 	subroutine drogue_back
 
@@ -138,11 +138,11 @@ c**********************************************************************
 
 	end	
 
-c**********************************************************************
+!**********************************************************************
 
         subroutine lagr_vel(uadv,vadv)
 
-c interpolation of velocities on the points that have been backtraced
+! interpolation of velocities on the points that have been backtraced
         
 	use mod_lagrange
 	use mod_depth
@@ -178,9 +178,9 @@ c interpolation of velocities on the points that have been backtraced
 
         do ie=1,nel
 
-c	 --------------------------------------
-c	 first compute values in central point of actual element
-c	 --------------------------------------
+!	 --------------------------------------
+!	 first compute values in central point of actual element
+!	 --------------------------------------
 
 	 uc = 0.
 	 vc = 0.
@@ -196,9 +196,9 @@ c	 --------------------------------------
 	 zc = zc / 3.
 	 zc = zc + hev(ie)
 
-c	 --------------------------------------
-c	 no do the same for point of back-advection
-c	 --------------------------------------
+!	 --------------------------------------
+!	 no do the same for point of back-advection
+!	 --------------------------------------
 
          uadv(ie) = 0
          vadv(ie) = 0
@@ -222,9 +222,9 @@ c	 --------------------------------------
 	   zp = zp + hev(i)
  	   if( blimit .and. zp .ge. zc ) zp = zc
 
-c	   --------------------------------------
-c	   in u/vadv we now store the difference of transport
-c	   --------------------------------------
+!	   --------------------------------------
+!	   in u/vadv we now store the difference of transport
+!	   --------------------------------------
 
 	   ib = ibtype
 
@@ -255,7 +255,7 @@ c	   --------------------------------------
 
          end if
 
-c        check if we are on open boundary -> no backtracking
+!        check if we are on open boundary -> no backtracking
 
          do ii=1,3
           k=nen3v(ii,ie)                 
@@ -269,5 +269,5 @@ c        check if we are on open boundary -> no backtracking
        
         end 
 
-c**********************************************************************
+!**********************************************************************
 

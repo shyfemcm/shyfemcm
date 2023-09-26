@@ -40,58 +40,58 @@
 !
 !--------------------------------------------------------------------------
 
-      subroutine runrc(n,rhs,sol,ipar,fpar,wk,guess,a,ja,ia,
-     +     au,jau,ju,solver)
+      subroutine runrc(n,rhs,sol,ipar,fpar,wk,guess,a,ja,ia, &
+     &     au,jau,ju,solver)
       implicit none
       integer n,ipar(16),ia(n+1),ja(*),ju(*),jau(*)
       real*8 fpar(16),rhs(n),sol(n),guess(n),wk(*),a(*),au(*)
       external solver
-c-----------------------------------------------------------------------
-c     the actual tester. It starts the iterative linear system solvers
-c     with a initial guess suppied by the user.
-c
-c     The structure {au, jau, ju} is assumed to have the output from
-c     the ILU* routines in ilut.f.
-c
-c-----------------------------------------------------------------------
-c     local variables
-c
+!-----------------------------------------------------------------------
+!     the actual tester. It starts the iterative linear system solvers
+!     with a initial guess suppied by the user.
+!
+!     The structure {au, jau, ju} is assumed to have the output from
+!     the ILU* routines in ilut.f.
+!
+!-----------------------------------------------------------------------
+!     local variables
+!
       integer i, iou, its
       real*8 res, dnrm2
-c     real dtime, dt(2), time
-c     external dtime
+!     real dtime, dt(2), time
+!     external dtime
       external dnrm2
       save its,res
-c
-c     ipar(2) can be 0, 1, 2, please don''t use 3
-c
+!
+!     ipar(2) can be 0, 1, 2, please don''t use 3
+!
       if (ipar(2).gt.2) then
          print *, 'I can not do both left and right preconditioning.'
          return
       endif
-c
-c     normal execution
-c
+!
+!     normal execution
+!
       its = 0
       res = 0.0D0
-c
+!
       do i = 1, n
          sol(i) = guess(i)
       enddo
-c
+!
       iou = 6
       ipar(1) = 0
-c     time = dtime(dt)
+!     time = dtime(dt)
  10   call solver(n,rhs,sol,ipar,fpar,wk)
-c
-c     output the residuals
-c
+!
+!     output the residuals
+!
       if (ipar(7).ne.its) then
          !write (iou, *) its, real(res)	!ggu
          its = ipar(7)
       endif
       res = fpar(5)
-c
+!
       if (ipar(1).eq.1) then
          call amux(n, wk(ipar(8)), wk(ipar(9)), a, ja, ia)
          goto 10
@@ -119,14 +119,14 @@ c
             print *, 'Iterative solver terminated. code =', ipar(1)
          endif
       endif
-c     time = dtime(dt)
+!     time = dtime(dt)
 !      write (iou, *) ipar(7), real(fpar(6))		!ggu
 !      write (iou, *) '# retrun code =', ipar(1),	!ggu
 !     +     '	convergence rate =', fpar(7)		!ggu
-c     write (iou, *) '# total execution time (sec)', time
-c
-c     check the error
-c
+!     write (iou, *) '# total execution time (sec)', time
+!
+!     check the error
+!
       call amux(n,sol,wk,a,ja,ia)
       do i = 1, n
          wk(n+i) = sol(i) -1.0D0
@@ -134,12 +134,12 @@ c
       enddo
       !write (iou, *) '# the actual residual norm is', dnrm2(n,wk,1)	!ggu
       !write (iou, *) '# the error norm is', dnrm2(n,wk(1+n),1)		!ggu
-c
+!
       if (iou.ne.6) close(iou)
       return
       end
-c-----end-of-runrc
-c-----------------------------------------------------------------------
+!-----end-of-runrc
+!-----------------------------------------------------------------------
       function distdot(n,x,ix,y,iy)
       integer n, ix, iy
       real*8 distdot, x(*), y(*), ddot
@@ -147,9 +147,9 @@ c-----------------------------------------------------------------------
       distdot = ddot(n,x,ix,y,iy)
       return
       end
-c-----end-of-distdot
-c-----------------------------------------------------------------------
-c
+!-----end-of-distdot
+!-----------------------------------------------------------------------
+!
       function afun (x,y,z)
       real*8 afun, x,y, z 
       afun = -1.0D0
@@ -224,19 +224,19 @@ c
       endif
       return
       end
-c-----------------------------------------------------------------------
-c     functions for the block PDE''s 
-c-----------------------------------------------------------------------
+!-----------------------------------------------------------------------
+!     functions for the block PDE''s 
+!-----------------------------------------------------------------------
       subroutine afunbl (nfree,x,y,z,coeff)
       return
       end
-c     
+!     
       subroutine bfunbl (nfree,x,y,z,coeff)
       return 
       end
       
       subroutine cfunbl (nfree,x,y,z,coeff)
-c     
+!     
       return 
       end
       
@@ -244,15 +244,15 @@ c
       
       return
       end
-c     
+!     
       subroutine efunbl (nfree,x,y,z,coeff)
       return 
       end
-c     
+!     
       subroutine ffunbl (nfree,x,y,z,coeff)
       return 
       end
-c     
+!     
       subroutine gfunbl (nfree,x,y,z,coeff)
       return 
       end

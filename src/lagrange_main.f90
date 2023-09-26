@@ -25,108 +25,108 @@
 !
 !--------------------------------------------------------------------------
 
-c subroutines for computing lagrangian trajectories
-c
-c contents :
-c
-c subroutine lagrange
-c
-c       read str
-c       subroutine set_input
-c       subroutine nbody
-c       subroutine setup_fluxes         initializes flux2d
-c
-c       subroutine drogue(it)           compute trajectories
-c
-c       subroutine set_output
-c
-c subroutine back_trace
-c
-c	subroutine setbar		initial t,x,y floats
-c       subroutine setup_fluxes         initializes flux2d
-c       subroutine drogue(it)           compute trajectories
-c       subroutine lagr_vel
-c
-c subroutine drogue(it)			compute trajectories
-c
-c       do                           	loop on floats
-c         subroutine dtime           	decay -> out of loop
-c         subroutine track_body
-c             subroutine track_orig
-c             subroutine track_line
-c       end do
-c
-c subroutine setup_fluxes        	initializes flux2d
-c
-c       subroutine getaz
-c       do
-c         function flxtype
-c	  subroutine get_elem_linkp
-c         subroutine mk_rflux           flux through volume k
-c         subroutine mk_tflux           flux through vertexes
-c         subroutine setup_fx           set up flux2d(3,nel)
-c       end do
-c       subroutine setup_vl
-c
-c revision log :
-c
-c 00.00.2003	aac	routines written from scratch
-c 29.04.2005	ggu	routines cleaned
-c 01.10.2005	aac	diffusion routines written
-c 07.11.2005	ggu	diffusion integrated
-c 20.12.2005	aac&ggu	bug in track_body corrected
-c 19.06.2006	aac	bugs in lagrange.f corrected
-c 20.06.2006	aac	2D lagrangian code stable 
-c 22.06.2006	aac	lagrangian custom routine introduced
-c 29.11.2006	ggu	lots of small changes, integrated into main model
-c 06.06.2007	ggu	use of lcust commented (?)
-c 10.11.2007	ggu	new routine ggrand, new call to lagr_release
-c 23.04.2008	ggu	drogue() parallelized
-c 29.04.2008	ggu	bug fix for parallel version
-c 24.06.2008	ggu	new z var, new initialization
-c 10.07.2008	aac	final stable version with new diffusion
-c 29.01.2009	aac	changes in write to file
-c 05.02.2009	ggu	re-arranged whole lagrangian module
-c 15.02.2009	ggu	call to track_body has changed -> pass time to advect
-c 11.09.2009	ggu	little bug fix for output and release of particles
-c 23.03.2010	ggu	changed v6.1.1
-c 19.10.2011	ggu	fx renamed to flux2d
-c 16.12.2011	ggu	new file .lgi, compress_particles()
-c 23.01.2012	ggu	various changes in call to track_body (id, etc..)
-c 24.01.2012	ggu	adapted for parallel OMP
-c 24.02.2012	ggu	changed VERS_6_1_46
-c 28.08.2012	ggu	change logic for release, time frame for release
-c 08.10.2012	ggu	changed VERS_6_1_58
-c 22.10.2012	ggu	call connectivity also after diffusion
-c 22.10.2012	ggu	limit release to itranf/end
-c 28.03.2014	ggu	code cleaned - connectivity
-c 10.04.2014	ggu	new code for lagr_count
-c 05.05.2014	ggu	changed VERS_6_1_74
-c 19.12.2014	ggu	changed VERS_7_0_10
-c 23.12.2014	ggu	changed VERS_7_0_11
-c 19.01.2015	ggu	changed VERS_7_1_3
-c 01.04.2015	ggu	changed VERS_7_1_7
-c 23.04.2015	ggu	internal coordinates implemented (blgrxi)
-c 30.04.2015	ggu	changed VERS_7_1_9
-c 21.05.2015	ggu	changed VERS_7_1_11
-c 17.07.2015	ggu	changed VERS_7_1_80
-c 20.07.2015	ggu	changed VERS_7_1_81
-c 16.11.2015	ggu	changed VERS_7_3_14
-c 20.11.2015	ggu	changed VERS_7_3_15
-c 19.02.2016	ggu	changed VERS_7_5_2
-c 09.05.2017	ggu	changed VERS_7_5_26
-c 26.05.2017	ccf	integrate vertical diffusion
-c 05.12.2017	ggu	changed VERS_7_5_39
-c 10.07.2018	ccf	new data structures
-c 23.08.2018	ccf	including particle beaching
-c 25.10.2018	ggu	changed VERS_7_5_51
-c 16.02.2019	ggu	changed VERS_7_5_60
-c
-c****************************************************************            
+! subroutines for computing lagrangian trajectories
+!
+! contents :
+!
+! subroutine lagrange
+!
+!       read str
+!       subroutine set_input
+!       subroutine nbody
+!       subroutine setup_fluxes         initializes flux2d
+!
+!       subroutine drogue(it)           compute trajectories
+!
+!       subroutine set_output
+!
+! subroutine back_trace
+!
+!	subroutine setbar		initial t,x,y floats
+!       subroutine setup_fluxes         initializes flux2d
+!       subroutine drogue(it)           compute trajectories
+!       subroutine lagr_vel
+!
+! subroutine drogue(it)			compute trajectories
+!
+!       do                           	loop on floats
+!         subroutine dtime           	decay -> out of loop
+!         subroutine track_body
+!             subroutine track_orig
+!             subroutine track_line
+!       end do
+!
+! subroutine setup_fluxes        	initializes flux2d
+!
+!       subroutine getaz
+!       do
+!         function flxtype
+!	  subroutine get_elem_linkp
+!         subroutine mk_rflux           flux through volume k
+!         subroutine mk_tflux           flux through vertexes
+!         subroutine setup_fx           set up flux2d(3,nel)
+!       end do
+!       subroutine setup_vl
+!
+! revision log :
+!
+! 00.00.2003	aac	routines written from scratch
+! 29.04.2005	ggu	routines cleaned
+! 01.10.2005	aac	diffusion routines written
+! 07.11.2005	ggu	diffusion integrated
+! 20.12.2005	aac&ggu	bug in track_body corrected
+! 19.06.2006	aac	bugs in lagrange.f corrected
+! 20.06.2006	aac	2D lagrangian code stable 
+! 22.06.2006	aac	lagrangian custom routine introduced
+! 29.11.2006	ggu	lots of small changes, integrated into main model
+! 06.06.2007	ggu	use of lcust commented (?)
+! 10.11.2007	ggu	new routine ggrand, new call to lagr_release
+! 23.04.2008	ggu	drogue() parallelized
+! 29.04.2008	ggu	bug fix for parallel version
+! 24.06.2008	ggu	new z var, new initialization
+! 10.07.2008	aac	final stable version with new diffusion
+! 29.01.2009	aac	changes in write to file
+! 05.02.2009	ggu	re-arranged whole lagrangian module
+! 15.02.2009	ggu	call to track_body has changed -> pass time to advect
+! 11.09.2009	ggu	little bug fix for output and release of particles
+! 23.03.2010	ggu	changed v6.1.1
+! 19.10.2011	ggu	fx renamed to flux2d
+! 16.12.2011	ggu	new file .lgi, compress_particles()
+! 23.01.2012	ggu	various changes in call to track_body (id, etc..)
+! 24.01.2012	ggu	adapted for parallel OMP
+! 24.02.2012	ggu	changed VERS_6_1_46
+! 28.08.2012	ggu	change logic for release, time frame for release
+! 08.10.2012	ggu	changed VERS_6_1_58
+! 22.10.2012	ggu	call connectivity also after diffusion
+! 22.10.2012	ggu	limit release to itranf/end
+! 28.03.2014	ggu	code cleaned - connectivity
+! 10.04.2014	ggu	new code for lagr_count
+! 05.05.2014	ggu	changed VERS_6_1_74
+! 19.12.2014	ggu	changed VERS_7_0_10
+! 23.12.2014	ggu	changed VERS_7_0_11
+! 19.01.2015	ggu	changed VERS_7_1_3
+! 01.04.2015	ggu	changed VERS_7_1_7
+! 23.04.2015	ggu	internal coordinates implemented (blgrxi)
+! 30.04.2015	ggu	changed VERS_7_1_9
+! 21.05.2015	ggu	changed VERS_7_1_11
+! 17.07.2015	ggu	changed VERS_7_1_80
+! 20.07.2015	ggu	changed VERS_7_1_81
+! 16.11.2015	ggu	changed VERS_7_3_14
+! 20.11.2015	ggu	changed VERS_7_3_15
+! 19.02.2016	ggu	changed VERS_7_5_2
+! 09.05.2017	ggu	changed VERS_7_5_26
+! 26.05.2017	ccf	integrate vertical diffusion
+! 05.12.2017	ggu	changed VERS_7_5_39
+! 10.07.2018	ccf	new data structures
+! 23.08.2018	ccf	including particle beaching
+! 25.10.2018	ggu	changed VERS_7_5_51
+! 16.02.2019	ggu	changed VERS_7_5_60
+!
+!****************************************************************            
 
 	subroutine lagrange
 
-c lagranian main routine
+! lagranian main routine
 
 	use mod_lagrange
 	use basin, only : nkn,nel,ngr,mbw
@@ -163,24 +163,24 @@ c lagranian main routine
         
         if( icall == -1 ) return
         
-c---------------------------------------------------------------
-c set some parameters
-c---------------------------------------------------------------
+!---------------------------------------------------------------
+! set some parameters
+!---------------------------------------------------------------
 
-c pps and ppv have to be set in STR file as lgrpps (section BOUND)
-c lgrpps > 0 => pps
-c lgrpps < 0 => ppv
-c
-c the following parameters have to be set in section lagrg
-c
-c tdecay	ldecay
-c boilsim	ioil
-c blarvae	ilarv
-c bconnect	iconnect
+! pps and ppv have to be set in STR file as lgrpps (section BOUND)
+! lgrpps > 0 => pps
+! lgrpps < 0 => ppv
+!
+! the following parameters have to be set in section lagrg
+!
+! tdecay	ldecay
+! boilsim	ioil
+! blarvae	ilarv
+! bconnect	iconnect
 
-c---------------------------------------------------------------
-c initialization
-c---------------------------------------------------------------
+!---------------------------------------------------------------
+! initialization
+!---------------------------------------------------------------
 
         if( icall .eq. 0 ) then
 
@@ -226,20 +226,20 @@ c---------------------------------------------------------------
 
 	  call lagr_init_common
 
-c	  if( boilsim ) call init_diff_oil
+!	  if( boilsim ) call init_diff_oil
 
-c         ------------------------------------------------------
-c	  lagrangian module
-c         ------------------------------------------------------
+!         ------------------------------------------------------
+!	  lagrangian module
+!         ------------------------------------------------------
 
 	  if( dtlanf == -1.d0 ) dtlanf = dtanf
 	  if( dtlend == -1.d0 ) dtlend = dtend
 	  if( dtlanf < dtanf ) dtlanf = dtanf
 	  if( dtlend > dtend ) dtlend = dtend
 
-c         ------------------------------------------------------
-c	  new release
-c         ------------------------------------------------------
+!         ------------------------------------------------------
+!	  new release
+!         ------------------------------------------------------
 
 	  if( dtranf == -1.d0 ) dtranf = dtlanf
 	  if( dtrend == -1.d0 ) dtrend = dtlend
@@ -249,15 +249,15 @@ c         ------------------------------------------------------
 	  if( ddtl == 0.d0 ) ddtl = dtlend - dtlanf + 1	!release once at start
 	  if( ddtl < 0.d0 ) dtrnext = dtend + 1		!never release
 
-c         ------------------------------------------------------
-c	  initialize particle distribtuion from lgr file 
-c         ------------------------------------------------------
+!         ------------------------------------------------------
+!	  initialize particle distribtuion from lgr file 
+!         ------------------------------------------------------
 
 	  call lgr_input_shell
 
-c         ------------------------------------------------------
-c	  open output file and write ncust
-c         ------------------------------------------------------
+!         ------------------------------------------------------
+!	  open output file and write ncust
+!         ------------------------------------------------------
 
           call init_output_d('itmlgr','idtlgr',da_lgr)
           if( has_output_d(da_lgr) ) then
@@ -268,9 +268,9 @@ c         ------------------------------------------------------
           end if
 	end if
          
-c---------------------------------------------------------------
-c run lagrangian 
-c---------------------------------------------------------------
+!---------------------------------------------------------------
+! run lagrangian 
+!---------------------------------------------------------------
 
         call get_act_dtime(dtime)
 
@@ -278,9 +278,9 @@ c---------------------------------------------------------------
 
 	bback = .false.		!do not do backtracking
 
-c---------------------------------------------------------------
-c new release of particles (more release event, homogeneous or lines)
-c---------------------------------------------------------------
+!---------------------------------------------------------------
+! new release of particles (more release event, homogeneous or lines)
+!---------------------------------------------------------------
 	
 	if( dtime >= dtrnext .and. dtime <= dtrend ) then
           call get_timeline(dtime,aline)
@@ -291,24 +291,24 @@ c---------------------------------------------------------------
 	  write(6,*) 'new particles released: ',nbdy,'at time: ',aline
         end if           
 
-c---------------------------------------------------------------
-c new release of particles (on points along trajectory)
-c---------------------------------------------------------------
+!---------------------------------------------------------------
+! new release of particles (on points along trajectory)
+!---------------------------------------------------------------
 
         call lgr_init_traj(dtime)
 
-c---------------------------------------------------------------
-c one time step of particle tracking
-c---------------------------------------------------------------
+!---------------------------------------------------------------
+! one time step of particle tracking
+!---------------------------------------------------------------
 
         call lagr_setup_timestep
 	
-c	if( boilsim ) call set_diff_oil
+!	if( boilsim ) call set_diff_oil
 
-c---------------------------------------------------------------
-c continuous release from boundary or points
-c lgrpps or lgrppv defined in boundary section
-c---------------------------------------------------------------
+!---------------------------------------------------------------
+! continuous release from boundary or points
+! lgrpps or lgrppv defined in boundary section
+!---------------------------------------------------------------
 
 	brelease = dtime >= dtranf .and. dtime <= dtrend
 
@@ -319,39 +319,39 @@ c---------------------------------------------------------------
         call lagr_connect_continuous_points(brelease)
 	call lagr_count_init 
 
-c---------------------------------------------------------------
-c Compute vertical diffusivity in element and random walk time step
-c---------------------------------------------------------------
+!---------------------------------------------------------------
+! Compute vertical diffusivity in element and random walk time step
+!---------------------------------------------------------------
 
  	call lag_vdiff_ele
 
-c---------------------------------------------------------------
-c transport of particles 
-c---------------------------------------------------------------
+!---------------------------------------------------------------
+! transport of particles 
+!---------------------------------------------------------------
 
  	call drogue(dtime)
 
-c---------------------------------------------------------------
-c sediment module
-c---------------------------------------------------------------
+!---------------------------------------------------------------
+! sediment module
+!---------------------------------------------------------------
 
 	if( bsedim ) call lgr_sediment
 
-c---------------------------------------------------------------
-c larval module
-c---------------------------------------------------------------
+!---------------------------------------------------------------
+! larval module
+!---------------------------------------------------------------
 
 	if( blarvae ) call lgr_larvae
 
-c---------------------------------------------------------------
-c decay
-c---------------------------------------------------------------
+!---------------------------------------------------------------
+! decay
+!---------------------------------------------------------------
 
 	call lagrange_decay(ldecay)
 
-c---------------------------------------------------------------
-c output : connectivity matrix or trajectiories
-c---------------------------------------------------------------
+!---------------------------------------------------------------
+! output : connectivity matrix or trajectiories
+!---------------------------------------------------------------
 
         if( next_output_d(da_lgr) ) then
 	  call lgr_output(iu,dtime)
@@ -362,26 +362,26 @@ c---------------------------------------------------------------
           call lagr_count_out(dtime,dtlend)
         end if
 
-c---------------------------------------------------------------
-c compress to save space: only in contiunous release mode! 
-c CCF STILL TO BE CHECKED
-c---------------------------------------------------------------
+!---------------------------------------------------------------
+! compress to save space: only in contiunous release mode! 
+! CCF STILL TO BE CHECKED
+!---------------------------------------------------------------
 
 	if( bcompress ) then 
 	  call compress_particles	!only after output of particles
 	endif 
 
-c---------------------------------------------------------------
-c end of routine
-c---------------------------------------------------------------
+!---------------------------------------------------------------
+! end of routine
+!---------------------------------------------------------------
 
 	end
 
-c**********************************************************************
+!**********************************************************************
 
 	subroutine lagr_init_common
 
-c initializes common block
+! initializes common block
 
 	use mod_lagrange
 	use levels
@@ -408,25 +408,25 @@ c initializes common block
 
 	blgrdebug = .false.
 
-c ilagr = 1	surface lagrangian
-c ilagr = 2	2d lagrangian (without vertical adv and diff)
-c ilagr = 3	3d lagrangian
+! ilagr = 1	surface lagrangian
+! ilagr = 2	2d lagrangian (without vertical adv and diff)
+! ilagr = 3	3d lagrangian
 
 	blgrsurf = ilagr == 1
 	blgr2d = ilagr == 2
 
-c no vertical diffusion for surface lagrangian
+! no vertical diffusion for surface lagrangian
 	if ( blgrsurf .or. blgr2d ) bvdiff = .false.
 
-c vertical distribution of particles
-c n = abs(ipvert)
-c ipvert == 0    release one particle in surface layer
-c ipvert > 0     release n particles regularly
-c ipvert < 0     release n particles randomly
+! vertical distribution of particles
+! n = abs(ipvert)
+! ipvert == 0    release one particle in surface layer
+! ipvert > 0     release n particles regularly
+! ipvert < 0     release n particles randomly
 
         ipvert = nint(getpar('ipvert'))
 
-c lintop and linbot= top and bottom layer between perform the release
+! lintop and linbot= top and bottom layer between perform the release
 
         lintop =  getpar('lintop') 
         linbot =  getpar('linbot')   
@@ -434,9 +434,9 @@ c lintop and linbot= top and bottom layer between perform the release
 
 	end
 
-c**********************************************************************
+!**********************************************************************
 
-c*******************************************************************
+!*******************************************************************
 ! set properties of particles
 !   - settling velocity [m/s]
 !   - particle type 
@@ -467,7 +467,7 @@ c*******************************************************************
 
         end subroutine lgr_set_properties
 
-c*******************************************************************
+!*******************************************************************
 
 	subroutine drogue(dtime)
 
@@ -523,15 +523,15 @@ c*******************************************************************
         tempo = openmp_get_wtime() - tempo
 !        write(88,*) 'tempo = ',tempo
 
-c	write(lunit,*) 'lagrangian: (tot,out,in) ',nbdy,nf,nbdy-nf
-c	write(lunit,'(a,i10,12i5)') 'parallel: ',nbdy,(ic(ii),ii=0,n-1)
+!	write(lunit,*) 'lagrangian: (tot,out,in) ',nbdy,nf,nbdy-nf
+!	write(lunit,'(a,i10,12i5)') 'parallel: ',nbdy,(ic(ii),ii=0,n-1)
 
 	write(iuinfo,*) 'lagrange_nbdy: ',nbdy
 	!write(6,*) 'lagrange_nbdy: ',nbdy
 
 	end
 
-c**********************************************************************
+!**********************************************************************
 
 	subroutine track_single(i,dt,dtime)
 
@@ -558,9 +558,9 @@ c**********************************************************************
 !       call lagr_func(i) !lcust in str varying the variable typ(i) to check
 !	call lagr_surv(i)
 
-c---------------------------------------------------------------
-c Get particle properties
-c---------------------------------------------------------------
+!---------------------------------------------------------------
+! Get particle properties
+!---------------------------------------------------------------
 
         ie = lgr_ar(i)%actual%ie
 	do ii=1,3
@@ -575,9 +575,9 @@ c---------------------------------------------------------------
 	id = lgr_ar(i)%id 
 	ty = lgr_ar(i)%type
 
-c---------------------------------------------------------------
-c Return if element is dry or negative first layer (offline problem)
-c---------------------------------------------------------------
+!---------------------------------------------------------------
+! Return if element is dry or negative first layer (offline problem)
+!---------------------------------------------------------------
 
         if( ie <= 0 ) return            !return if particle out of domain
         if( iwegv(ie) /= 0 ) return	!return if particle on dry element
@@ -585,17 +585,17 @@ c---------------------------------------------------------------
         call lagr_layer_thickness(ie,lmax,hl,htot,htotz)
 	if ( hl(1) .lt. 0. ) return
 
-c---------------------------------------------------------------
-c Get travel time for particle
-c---------------------------------------------------------------
+!---------------------------------------------------------------
+! Get travel time for particle
+!---------------------------------------------------------------
 
 	tmax = dtime - lgr_ar(i)%actual%time
 	if( tmax .lt. 0. ) stop 'error stop drogue: internal error'
 	ttime = min(tmax,dt) 		!residual time for particle
 
-c---------------------------------------------------------------
-c Compute advection and diffusion
-c---------------------------------------------------------------
+!---------------------------------------------------------------
+! Compute advection and diffusion
+!---------------------------------------------------------------
 
 	if( lb > 0 ) then
 	  if( blgrxi ) then		!use internal coordinates
@@ -608,9 +608,9 @@ c---------------------------------------------------------------
 	  end if
 	end if
 
-c---------------------------------------------------------------
-c Assign new coordinatates to particle
-c---------------------------------------------------------------
+!---------------------------------------------------------------
+! Assign new coordinatates to particle
+!---------------------------------------------------------------
 
         lgr_ar(i)%actual%ie = ie
 	do ii=1,3
@@ -623,11 +623,11 @@ c---------------------------------------------------------------
 
 	end	
 
-c**********************************************************************
+!**********************************************************************
 
         subroutine track_body_xi(i,id,ty,x,y,z,sv,xi,iel,lb,time)
 
-c tracks one particle - uses internal coordinates
+! tracks one particle - uses internal coordinates
 
 	use mod_lagrange
 	use basin
@@ -659,17 +659,17 @@ c tracks one particle - uses internal coordinates
 
         if(iel <= 0 .or. ty < 0) return	!particle out of domain or beached
 
-c---------------------------------------------------------------
-c initialize
-c---------------------------------------------------------------
+!---------------------------------------------------------------
+! initialize
+!---------------------------------------------------------------
 
         n = 100		!maximum loop count
 	zz = z
 	ttime = time*dripar	!accout for drifter inertia
 	
-c---------------------------------------------------------------
-c track particle
-c---------------------------------------------------------------
+!---------------------------------------------------------------
+! track particle
+!---------------------------------------------------------------
 
 	do while ( ttime > 0 .and. n > 0 )
 	  torig = ttime 		!time do advect
@@ -699,9 +699,9 @@ c---------------------------------------------------------------
 	  write(6,*) 'lgrggu: ',xi
 	end if
 
-c---------------------------------------------------------------
-c special treatment and finish up
-c---------------------------------------------------------------
+!---------------------------------------------------------------
+! special treatment and finish up
+!---------------------------------------------------------------
 
 	if( ttime > 0. ) then 		!not finished advecting
 	  if( n == 0 ) then
@@ -724,9 +724,9 @@ c---------------------------------------------------------------
           if( iel.gt.0 .and. iarv(iel).eq.artype ) iel = -iel
 	end if
 
-c---------------------------------------------------------------
-c end of routine
-c---------------------------------------------------------------
+!---------------------------------------------------------------
+! end of routine
+!---------------------------------------------------------------
 
  1000	format(a,3i10,2f10.2)
 	end
@@ -762,17 +762,17 @@ c---------------------------------------------------------------
 
 	end
 
-c**********************************************************************
+!**********************************************************************
 
         subroutine track_body(i,id,x,y,z,lb,iel,ttime)
 
-c tracks one particle
-c
-c uses two routines:
-c
-c TRACK_ORIG if the particle is inside an element (first call)
-c
-c TRACK_LINE if the particle is on one side (normal situation)
+! tracks one particle
+!
+! uses two routines:
+!
+! TRACK_ORIG if the particle is inside an element (first call)
+!
+! TRACK_LINE if the particle is on one side (normal situation)
 
 	use mod_lagrange
 	use basin
@@ -799,9 +799,9 @@ c TRACK_LINE if the particle is on one side (normal situation)
 
         if(iel.le.0) return	!particle out of domain
 
-c---------------------------------------------------------------
-c initialize
-c---------------------------------------------------------------
+!---------------------------------------------------------------
+! initialize
+!---------------------------------------------------------------
 
         nl = 100		!maximum loop count
 	ltbdy = 0
@@ -811,9 +811,9 @@ c---------------------------------------------------------------
 	zn = z
 	ly = lb
 
-c---------------------------------------------------------------
-c track particle
-c---------------------------------------------------------------
+!---------------------------------------------------------------
+! track particle
+!---------------------------------------------------------------
 
         torig = ttime
         ieold = iel     !element the particle is in or leaving
@@ -861,9 +861,9 @@ c---------------------------------------------------------------
 
 	end if
 
-c---------------------------------------------------------------
-c error condition (infinite loop)
-c---------------------------------------------------------------
+!---------------------------------------------------------------
+! error condition (infinite loop)
+!---------------------------------------------------------------
 
         if( nl .eq. 0 ) then
           print*, 'inifinite loop in track_line'
@@ -872,9 +872,9 @@ c---------------------------------------------------------------
 	  ttime = 0.
         end if
 
-c---------------------------------------------------------------
-c diffusion
-c---------------------------------------------------------------
+!---------------------------------------------------------------
+! diffusion
+!---------------------------------------------------------------
 
        if( .not. bback .and. iel .gt. 0 .and. rwhpar .gt. 0 ) then
 	  ! the time spent in elemets due to diffusion is not considered
@@ -886,9 +886,9 @@ c---------------------------------------------------------------
 	  endif
         end if     
 
-c---------------------------------------------------------------
-c special treatment and finish up
-c---------------------------------------------------------------
+!---------------------------------------------------------------
+! special treatment and finish up
+!---------------------------------------------------------------
 
         if( .not. bback ) then
           if( iel.gt.0 .and. iarv(iel).eq.artype ) iel = -iel
@@ -899,15 +899,15 @@ c---------------------------------------------------------------
 	z = zn
 	lb = ly
 
-c---------------------------------------------------------------
-c end of routine
-c---------------------------------------------------------------
+!---------------------------------------------------------------
+! end of routine
+!---------------------------------------------------------------
 
 	end
 
-c**********************************************************************
-c**********************************************************************
-c**********************************************************************
+!**********************************************************************
+!**********************************************************************
+!**********************************************************************
 
 	subroutine lagr_count_init
 
@@ -925,7 +925,7 @@ c**********************************************************************
 
 	end
 
-c**********************************************************************
+!**********************************************************************
 
 	subroutine lagr_count(i,ie_to,ie_from,time)
 
@@ -950,13 +950,13 @@ c**********************************************************************
 
 	end
 
-c**********************************************************************
+!**********************************************************************
 
 	subroutine lagr_count_out(dtime,dtlend)
 
-c write a map of total number of particles passed in each element or total time spent
-c aux index = time average spent in each element 
-c TODO -> normalization
+! write a map of total number of particles passed in each element or total time spent
+! aux index = time average spent in each element 
+! TODO -> normalization
 
 	use mod_lagrange
 	use basin, only : nkn,nel,ngr,mbw
@@ -987,13 +987,13 @@ c TODO -> normalization
 
 	end
 
-c**********************************************************************
+!**********************************************************************
 
 	subroutine lagr_count_out_eos(it)
 
-c write an eos of total number of particle passed in each element or total time spent
-c aux index = time average spent in each element 
-c TODO -> normalization
+! write an eos of total number of particle passed in each element or total time spent
+! aux index = time average spent in each element 
+! TODO -> normalization
 
 	use mod_lagrange
 	use basin, only : nkn,nel,ngr,mbw
@@ -1035,11 +1035,11 @@ c TODO -> normalization
         iunit = ifileo(0,file,'unform','new')
 
         title ='particle in element '
-        call wheos(iunit,nvers
-     +             ,nkn,nel,nlv,nvar
-     +             ,ilhv,hlv,hev
-     +             ,title
-     +             )
+        call wheos(iunit,nvers &
+     &             ,nkn,nel,nlv,nvar &
+     &             ,ilhv,hlv,hev &
+     &             ,title &
+     &             )
         endif
 
         icall = 1
@@ -1057,5 +1057,5 @@ c TODO -> normalization
         enddo
         end
 
-c**********************************************************************
+!**********************************************************************
 

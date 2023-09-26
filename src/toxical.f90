@@ -25,54 +25,54 @@
 !
 !--------------------------------------------------------------------------
 
-c atoxi3d - Toxical routines from ARPAV - shell
-c
-c contents :
-c
-c revision log :
-c
-c 15.02.2006	ggu&fdp	new routine atoxi3d for ARPAV (from bio3d)
-c 23.03.2006	ggu	ntot eliminated
-c 23.03.2006	ggu	changed time step to real
-c 17.04.2008	ggu	new open boundary conditions 
-c 22.04.2008	ggu	advection parallelized
-c 23.04.2008	ggu	call to bnds_set_def() changed
-c 09.10.2008	ggu	new call to confop
-c 23.03.2010	ggu	changed v6.1.1
-c 30.03.2012	ggu	changed VERS_6_1_51
-c 21.10.2014	ggu	converted to new boundary treatment
-c 23.12.2014	ggu	changed VERS_7_0_11
-c 19.01.2015	ggu	changed VERS_7_1_3
-c 26.02.2015	ggu	changed VERS_7_1_5
-c 17.07.2015	ggu	changed VERS_7_1_53
-c 17.07.2015	ggu	changed VERS_7_1_80
-c 20.07.2015	ggu	changed VERS_7_1_81
-c 30.07.2015	ggu	changed VERS_7_1_83
-c 03.04.2018	ggu	changed VERS_7_5_43
-c 16.02.2019	ggu	changed VERS_7_5_60
-c 21.03.2022	ggu	upgraded to da_out
-c 22.03.2022	ggu	upgraded to new cmed
-c
-c notes :
-c
-c State variables used: (Wasp)
-c
-c todo :
-c
-c - * FIXME -> number of levels nlvdim, and not 1 (done)
-c - wind speed and air temp is not available -> introduce (wmeteo)
-c
-c********************************************************************
-c********************************************************************
-c********************************************************************
-c********************************************************************
-c********************************************************************
-c
-c***********************************************
+! atoxi3d - Toxical routines from ARPAV - shell
+!
+! contents :
+!
+! revision log :
+!
+! 15.02.2006	ggu&fdp	new routine atoxi3d for ARPAV (from bio3d)
+! 23.03.2006	ggu	ntot eliminated
+! 23.03.2006	ggu	changed time step to real
+! 17.04.2008	ggu	new open boundary conditions 
+! 22.04.2008	ggu	advection parallelized
+! 23.04.2008	ggu	call to bnds_set_def() changed
+! 09.10.2008	ggu	new call to confop
+! 23.03.2010	ggu	changed v6.1.1
+! 30.03.2012	ggu	changed VERS_6_1_51
+! 21.10.2014	ggu	converted to new boundary treatment
+! 23.12.2014	ggu	changed VERS_7_0_11
+! 19.01.2015	ggu	changed VERS_7_1_3
+! 26.02.2015	ggu	changed VERS_7_1_5
+! 17.07.2015	ggu	changed VERS_7_1_53
+! 17.07.2015	ggu	changed VERS_7_1_80
+! 20.07.2015	ggu	changed VERS_7_1_81
+! 30.07.2015	ggu	changed VERS_7_1_83
+! 03.04.2018	ggu	changed VERS_7_5_43
+! 16.02.2019	ggu	changed VERS_7_5_60
+! 21.03.2022	ggu	upgraded to da_out
+! 22.03.2022	ggu	upgraded to new cmed
+!
+! notes :
+!
+! State variables used: (Wasp)
+!
+! todo :
+!
+! - * FIXME -> number of levels nlvdim, and not 1 (done)
+! - wind speed and air temp is not available -> introduce (wmeteo)
+!
+!********************************************************************
+!********************************************************************
+!********************************************************************
+!********************************************************************
+!********************************************************************
+!
+!***********************************************
 
 	subroutine atoxi3d
 
-c toxi module ARPAV
+! toxi module ARPAV
 
 	use mod_diff_visc_fric
 	use levels
@@ -151,20 +151,20 @@ c toxi module ARPAV
 	real rkpar,difmol
 	save rkpar,difmol
 
-c------------------------------------------------------------------
-c	initial and boundary conditions  [mg/l]			??
-c
-c 	 data einit /0.0, 0., 0.0, 0.0, 0.,   0.,0.,0.0,0.0/
+!------------------------------------------------------------------
+!	initial and boundary conditions  [mg/l]			??
+!
+! 	 data einit /0.0, 0., 0.0, 0.0, 0.,   0.,0.,0.0,0.0/
  	 data einit /0.0/
  	 data ebound /0.0/
-c
-c------------------------------------------------------------------
+!
+!------------------------------------------------------------------
 
         what = 'toxi'
 
-c-------------------------------------------------------------------
-c initialization
-c-------------------------------------------------------------------
+!-------------------------------------------------------------------
+! initialization
+!-------------------------------------------------------------------
 
 	if( icall .le. -1 ) return
 
@@ -176,9 +176,9 @@ c-------------------------------------------------------------------
 
 	  stop 'error stop atoxi3d: not adapted yet for new framework'
 
-c         --------------------------------------------------
-c	  initialize state variables with einit
-c         --------------------------------------------------
+!         --------------------------------------------------
+!	  initialize state variables with einit
+!         --------------------------------------------------
 
 	  do k=1,nkn		!loop on nodes
             lmax = ilhkv(k)
@@ -189,15 +189,15 @@ c         --------------------------------------------------
 	    end do
           end do
 
-c         --------------------------------------------------
-c	  initialize state variables from external file
-c         --------------------------------------------------
+!         --------------------------------------------------
+!	  initialize state variables from external file
+!         --------------------------------------------------
 
           call inicfil('toxi',e,nstate)
 
-c         --------------------------------------------------
-c	  set boundary conditions for all state variables
-c         --------------------------------------------------
+!         --------------------------------------------------
+!	  set boundary conditions for all state variables
+!         --------------------------------------------------
 
           nbc = nbnds()
           allocate(idtoxi(nbc))
@@ -206,29 +206,29 @@ c         --------------------------------------------------
 	  call get_first_dtime(dtime0)
 	  nintp = 2
 	  nvar = nstate
-          call bnds_init_new(what,dtime0,nintp,nvar,nkn,nlv
-     +                          ,ebound,idtoxi)
+          call bnds_init_new(what,dtime0,nintp,nvar,nkn,nlv &
+     &                          ,ebound,idtoxi)
 
 	  !call bnds_init(what,tox3dn,nintp,nstate,nb3dim,toxiarr,ebound)
 	  !call bnds_set_def(what,nb3dim,toxiarr) !nvar != 1
 	  !call bnds_print('init of '//what,nb3dim,toxiarr)
 
-c         --------------------------------------------------
-c	  initialize eco model
-c         --------------------------------------------------
+!         --------------------------------------------------
+!	  initialize eco model
+!         --------------------------------------------------
 
 	  call atoxi_ini
 
-c         --------------------------------------------------
-c	  parameters for transport/diffusion resolution
-c         --------------------------------------------------
+!         --------------------------------------------------
+!	  parameters for transport/diffusion resolution
+!         --------------------------------------------------
 
           rkpar=getpar('chpar')
           difmol=getpar('difmol')
 
-c         --------------------------------------------------
-c	  initialize output 
-c         --------------------------------------------------
+!         --------------------------------------------------
+!	  initialize output 
+!         --------------------------------------------------
 
           call init_output_d('itmcon','idtcon',da_out)
 	  !call increase_output_d(da_out)
@@ -242,9 +242,9 @@ c         --------------------------------------------------
 
 	end if
 
-c-------------------------------------------------------------------
-c normal call
-c-------------------------------------------------------------------
+!-------------------------------------------------------------------
+! normal call
+!-------------------------------------------------------------------
 
 	kspec = -100
 	!kspec = 930
@@ -252,18 +252,18 @@ c-------------------------------------------------------------------
 	bcheck = .false.
 	wsink = 0.
 
-c	-------------------------------------------------------------------
-c	time management
-c	-------------------------------------------------------------------
+!	-------------------------------------------------------------------
+!	time management
+!	-------------------------------------------------------------------
 
 	t0 = 0.
 	call get_act_dtime(dtime)
 	call get_timestep(dt)
 	tsec = dtime
 
-c	-------------------------------------------------------------------
-c	loop on nodes for biological reactor
-c	-------------------------------------------------------------------
+!	-------------------------------------------------------------------
+!	loop on nodes for biological reactor
+!	-------------------------------------------------------------------
 
         mode = +1               !new time level for volume and depth
 
@@ -295,9 +295,9 @@ c	-------------------------------------------------------------------
 
 	end do
 
-c	-------------------------------------------------------------------
-c	advection and diffusion
-c	-------------------------------------------------------------------
+!	-------------------------------------------------------------------
+!	advection and diffusion
+!	-------------------------------------------------------------------
 
 	if( bcheck ) call check_toxi('before advection',e)
 
@@ -308,10 +308,10 @@ c	-------------------------------------------------------------------
 
 	do is=1,nstate
 
-          call scal_adv(what,is
-     +                          ,e(1,1,is),idtoxi
-     +                          ,rkpar,wsink
-     +                          ,difhv,difv,difmol)
+          call scal_adv(what,is &
+     &                          ,e(1,1,is),idtoxi &
+     &                          ,rkpar,wsink &
+     &                          ,difhv,difv,difmol)
 
           call tsmass (e(1,1,is),1,nlvdim,tstot(is)) !mass control
 
@@ -323,9 +323,9 @@ c	-------------------------------------------------------------------
 	if( bcheck ) call check_toxi('after advection',e)
 	!write(86,*) dtime,tstot(1)
 
-c	-------------------------------------------------------------------
-c	write of results (file BIO)
-c	-------------------------------------------------------------------
+!	-------------------------------------------------------------------
+!	write of results (file BIO)
+!	-------------------------------------------------------------------
 
         if( next_output_d(da_out) ) then
           id = nint(da_out(4))
@@ -336,30 +336,30 @@ c	-------------------------------------------------------------------
 	  end do
         end if
 
-c	call toxi_av_shell(e)		!aver/min/max of state vars
+!	call toxi_av_shell(e)		!aver/min/max of state vars
 
 	if( bcheck ) call check_toxi('at end',e)
 
-c	-------------------------------------------------------------------
-c	debug output
-c	-------------------------------------------------------------------
+!	-------------------------------------------------------------------
+!	debug output
+!	-------------------------------------------------------------------
 
-c        k = 100
-c        l = 1
-c        call getts(l,k,t,s)
-c        call writeet(95,it,k,l,e,t,s,nlvdim,nkndim,nstate)
+!        k = 100
+!        l = 1
+!        call getts(l,k,t,s)
+!        call writeet(95,it,k,l,e,t,s,nlvdim,nkndim,nstate)
 
-c	-------------------------------------------------------------------
-c	end of routine
-c	-------------------------------------------------------------------
+!	-------------------------------------------------------------------
+!	end of routine
+!	-------------------------------------------------------------------
 
 	end
 
-c*************************************************************
+!*************************************************************
 
 	subroutine writeet(iunit,it,k,l,e,t,s,nlvdim,nknddi,nstate)
 
-c formatted write for debug
+! formatted write for debug
 
 	implicit none
 
@@ -372,46 +372,46 @@ c formatted write for debug
 
 	integer i
 
-	write(iunit,'(i10,11f12.4)') it,
-     +			(e(l,k,i),i=1,nstate),
-     +			t,s
+	write(iunit,'(i10,11f12.4)') it, &
+     &			(e(l,k,i),i=1,nstate), &
+     &			t,s
 
 	end
 
-c*************************************************************
+!*************************************************************
 
 	subroutine toxi_av_shell(e)
 
-c computes and writes average/min/max of bio variables
-c
-c id = 260
-c
-c e(1) average	== 261
-c e(1) min	== 262
-c e(1) max	== 263
-c e(2) average	== 264
-c ...
+! computes and writes average/min/max of bio variables
+!
+! id = 260
+!
+! e(1) average	== 261
+! e(1) min	== 262
+! e(1) max	== 263
+! e(2) average	== 264
+! ...
 
 	use levels
 	use basin, only : nkn,nel,ngr,mbw
 
 	implicit none
 
-c parameter
+! parameter
 
 	integer, parameter :: nstate = 1
 
 	real e(nlvdi,nkn,nstate)	!state vector
 
-c local
+! local
 	integer itsmed
 	integer id,nvar,idc,is
 	double precision dtime
 	double precision rr
-c function
+! function
 	real getpar
 	logical has_output_d,is_over_output_d,next_output_d
-c save
+! save
         double precision, save :: da_out(4)
         double precision, save, allocatable :: bioacu(:,:,:)
         real, save, allocatable :: biomin(:,:,:)
@@ -444,8 +444,8 @@ c save
           allocate(raux(nlvdi,nkn))
 
 	  do is=1,nstate
-            call cmed_reset(nr,bioacu(:,:,is)
-     +			,biomin(:,:,is),biomax(:,:,is))
+            call cmed_reset(nr,bioacu(:,:,is) &
+     &			,biomin(:,:,is),biomax(:,:,is))
 	  end do
 
 	  icall = 1
@@ -455,8 +455,8 @@ c save
 
         nr = nr + 1
 	do is=1,nstate
-          call cmed_accum(e(:,:,is),bioacu(:,:,is)
-     +			,biomin(:,:,is),biomax(:,:,is))
+          call cmed_accum(e(:,:,is),bioacu(:,:,is) &
+     &			,biomin(:,:,is),biomax(:,:,is))
 	end do
 
         if( .not. next_output_d(da_out) ) return
@@ -477,17 +477,17 @@ c save
 	end do
 
 	do is=1,nstate
-          call cmed_reset(nr,bioacu(:,:,is)
-     +			,biomin(:,:,is),biomax(:,:,is))
+          call cmed_reset(nr,bioacu(:,:,is) &
+     &			,biomin(:,:,is),biomax(:,:,is))
 	end do
 
 	end
 
-c*************************************************************
+!*************************************************************
 
 	subroutine check_toxi(title,e)
 
-c checks bio vars
+! checks bio vars
 
 	use levels, only : nlvdi,nlv
 	use basin, only : nkn,nel,ngr,mbw
@@ -516,5 +516,5 @@ c checks bio vars
 
 	end
 
-c*************************************************************
+!*************************************************************
 

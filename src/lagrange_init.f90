@@ -24,38 +24,38 @@
 !
 !--------------------------------------------------------------------------
 
-c initialization routines
-c
-c revision log :
-c
-c 12.12.2007	ggu	written from scratch
-c 11.09.2009	ggu	more checks for initial seeding (linepoint_in_element)
-c 11.03.2010	ggu	small bug fix in lagbound_seed_particles() -> init np
-c 11.03.2010	ggu	in lgr_init_line() check if at least one line is read
-c 23.03.2010	ggu	changed v6.1.1
-c 06.10.2011	ggu	in check_elements() initialize iout, icheck (bug)
-c 18.10.2011	ggu	changed VERS_6_1_33
-c 24.01.2012	ggu	changed VERS_6_1_41
-c 16.02.2012	ggu	bug fix reading lines
-c 23.12.2014	ggu	changed VERS_7_0_11
-c 19.01.2015	ggu	changed VERS_7_1_3
-c 23.04.2015	ggu	changed VERS_7_1_8
-c 20.05.2015	ccf	give type to released particles
-c 17.07.2015	ggu	changed VERS_7_1_80
-c 20.07.2015	ggu	changed VERS_7_1_81
-c 23.09.2015	ggu	changed VERS_7_2_4
-c 16.11.2015	ggu	changed VERS_7_3_14
-c 15.02.2016	ggu	handle negative areas (line given clockwise)
-c 01.04.2016	ggu	changed VERS_7_5_7
-c 31.03.2017	ggu	changed VERS_7_5_24
-c 25.10.2018	ggu	changed VERS_7_5_51
-c 16.02.2019	ggu	changed VERS_7_5_60
-c
-c*******************************************************************
+! initialization routines
+!
+! revision log :
+!
+! 12.12.2007	ggu	written from scratch
+! 11.09.2009	ggu	more checks for initial seeding (linepoint_in_element)
+! 11.03.2010	ggu	small bug fix in lagbound_seed_particles() -> init np
+! 11.03.2010	ggu	in lgr_init_line() check if at least one line is read
+! 23.03.2010	ggu	changed v6.1.1
+! 06.10.2011	ggu	in check_elements() initialize iout, icheck (bug)
+! 18.10.2011	ggu	changed VERS_6_1_33
+! 24.01.2012	ggu	changed VERS_6_1_41
+! 16.02.2012	ggu	bug fix reading lines
+! 23.12.2014	ggu	changed VERS_7_0_11
+! 19.01.2015	ggu	changed VERS_7_1_3
+! 23.04.2015	ggu	changed VERS_7_1_8
+! 20.05.2015	ccf	give type to released particles
+! 17.07.2015	ggu	changed VERS_7_1_80
+! 20.07.2015	ggu	changed VERS_7_1_81
+! 23.09.2015	ggu	changed VERS_7_2_4
+! 16.11.2015	ggu	changed VERS_7_3_14
+! 15.02.2016	ggu	handle negative areas (line given clockwise)
+! 01.04.2016	ggu	changed VERS_7_5_7
+! 31.03.2017	ggu	changed VERS_7_5_24
+! 25.10.2018	ggu	changed VERS_7_5_51
+! 16.02.2019	ggu	changed VERS_7_5_60
+!
+!*******************************************************************
 
 	subroutine lgr_init_shell
 
-c manages release of particles
+! manages release of particles
 
 	implicit none
 
@@ -84,11 +84,11 @@ c manages release of particles
 
 	end
 
-c*******************************************************************
+!*******************************************************************
 
 	subroutine lgr_init_total(npoints)
 
-c manages release of particles over whole domain
+! manages release of particles over whole domain
 
 	implicit none
 
@@ -107,12 +107,12 @@ c manages release of particles over whole domain
 
 	end
 
-c*******************************************************************
+!*******************************************************************
 
 	subroutine lgr_init_line(npoints)
 
-c manages release of particles inside polygon(s)
-c particles in different polygons have different types
+! manages release of particles inside polygon(s)
+! particles in different polygons have different types
 
 	implicit none
 
@@ -154,12 +154,12 @@ c particles in different polygons have different types
 
 	end
 
-c*******************************************************************
+!*******************************************************************
 
 	subroutine lgr_init_traj(dtime)
 
-c manages release of particles at specific time and positions
-c particles in different points have different types
+! manages release of particles at specific time and positions
+! particles in different points have different types
 
         use mod_lagrange
 
@@ -253,13 +253,13 @@ c particles in different points have different types
 
         end subroutine lgr_init_traj	
 
-c*******************************************************************
-c*******************************************************************
-c*******************************************************************
+!*******************************************************************
+!*******************************************************************
+!*******************************************************************
 
 	subroutine lagbound_get_area(arealine)
 
-c computes area of polygon(s)
+! computes area of polygon(s)
 
 	implicit none
 
@@ -301,9 +301,9 @@ c computes area of polygon(s)
 
 	end
 
-c*******************************************************************
-c*******************************************************************
-c*******************************************************************
+!*******************************************************************
+!*******************************************************************
+!*******************************************************************
 
 	subroutine lagbound_open_file(iunit)
 
@@ -320,7 +320,7 @@ c*******************************************************************
 
 	end
 
-c*******************************************************************
+!*******************************************************************
 
 	subroutine lagbound_close_file(iunit)
 
@@ -332,11 +332,11 @@ c*******************************************************************
 
 	end
 
-c*******************************************************************
+!*******************************************************************
 
 	function lagbound_read_next(iunit,ndim,n,x,y)
 
-c reads polygons from file
+! reads polygons from file
 
 	implicit none
 
@@ -401,13 +401,13 @@ c reads polygons from file
 
 	end
 
-c*******************************************************************
-c*******************************************************************
-c*******************************************************************
+!*******************************************************************
+!*******************************************************************
+!*******************************************************************
 
 	subroutine lagbound_seed_particles(dxy,iln,n,x,y)
 
-c release in partial area
+! release in partial area
 
 	use mod_lagrange
 	use basin, only : nkn,nel,ngr,mbw
@@ -434,9 +434,9 @@ c release in partial area
 	integer intri
 	logical inpoly
 
-c-----------------------------------------------------------------
-c get central node (x0,y0)
-c-----------------------------------------------------------------
+!-----------------------------------------------------------------
+! get central node (x0,y0)
+!-----------------------------------------------------------------
 
 	if( n .lt. 0 ) then	!total domain
 	  call basin_center(x0,y0)
@@ -444,15 +444,15 @@ c-----------------------------------------------------------------
 	  call xy_center(n,x,y,x0,y0)
 	end if
 
-c-----------------------------------------------------------------
-c flag elements as internal (1), external (-1) and on border (0)
-c-----------------------------------------------------------------
+!-----------------------------------------------------------------
+! flag elements as internal (1), external (-1) and on border (0)
+!-----------------------------------------------------------------
 
 	call check_elements(n,x,y,ieflag,ikflag)
 
-c-----------------------------------------------------------------
-c some statistics
-c-----------------------------------------------------------------
+!-----------------------------------------------------------------
+! some statistics
+!-----------------------------------------------------------------
 
 	do i=-1,1
 	  nc(i) = 0
@@ -468,9 +468,9 @@ c-----------------------------------------------------------------
 
 	write(6,*) 'lagbound_seed_particles: ',nel,n,nc
 
-c-----------------------------------------------------------------
-c loop on elements
-c-----------------------------------------------------------------
+!-----------------------------------------------------------------
+! loop on elements
+!-----------------------------------------------------------------
 
 	np = 0
         do ie=1,nel
@@ -504,19 +504,19 @@ c-----------------------------------------------------------------
     1	  continue
         end do
 
-c-----------------------------------------------------------------
-c end of routine
-c-----------------------------------------------------------------
+!-----------------------------------------------------------------
+! end of routine
+!-----------------------------------------------------------------
 
         write(6,*) 'lagr_init_all: ',np,' particles inserted'
 
 	end
 
-c*******************************************************************
+!*******************************************************************
 
 	subroutine lgr_init_all(dxy)
 
-c release in total area
+! release in total area
 
 	use basin, only : nkn,nel,ngr,mbw
 
@@ -535,9 +535,9 @@ c release in total area
 	integer intri
 	integer, parameter :: ity=0	!particle type = 0 everywere
 
-c------------------------------------------------------------------
-c compute regular mesh and insert particles
-c------------------------------------------------------------------
+!------------------------------------------------------------------
+! compute regular mesh and insert particles
+!------------------------------------------------------------------
 
 	nin = 0
 	call basin_center(x0,y0)
@@ -569,11 +569,11 @@ c------------------------------------------------------------------
 
 	write(6,*) 'lagr_init_all: ',nin,' particles inserted'
 
-c------------------------------------------------------------------
-c end of routine
-c------------------------------------------------------------------
+!------------------------------------------------------------------
+! end of routine
+!------------------------------------------------------------------
 
 	end
 
-c*******************************************************************
+!*******************************************************************
 

@@ -23,45 +23,45 @@
 !
 !--------------------------------------------------------------------------
 
-c sort routines
-c
-c contents :
-c
-c subroutine sortir(ipoint,value,ndim)	indirect sort of real array
-c subroutine sortii(ipoint,ivalue,ndim)	indirect sort of interger array
-c
-c subroutine sort(n,ra)			heapsort, real, direct
-c subroutine sort_int(n,ra)		heapsort, integer, direct
-c subroutine isort(n,ra,index)		heapsort, integer, indirect
-c
-c function locate(n,ixx,index,ix)	locates index for ix in array ixx
-c
-c revision log :
-c
-c 15.03.1999	ggu	routines written from scratch (Numerical receipes)
-c 23.03.2010	ggu	changed v6.1.1
-c 10.07.2015	ggu	changed VERS_7_1_50
-c 16.12.2015	ggu	changed VERS_7_3_16
-c 09.11.2018	ggu	test routines introduced
-c 21.12.2018	ggu	changed VERS_7_5_53
-c 16.02.2019	ggu	changed VERS_7_5_60
-c 02.07.2019	ggu	new routines for indirect real sort, locater_all()
-c 05.07.2019	ggu	new routine create_permutation()
-c
-c***********************************************************
-c
-c please do not use the first two routines
-c they are slow and buggy
-c
-c***********************************************************
+! sort routines
+!
+! contents :
+!
+! subroutine sortir(ipoint,value,ndim)	indirect sort of real array
+! subroutine sortii(ipoint,ivalue,ndim)	indirect sort of interger array
+!
+! subroutine sort(n,ra)			heapsort, real, direct
+! subroutine sort_int(n,ra)		heapsort, integer, direct
+! subroutine isort(n,ra,index)		heapsort, integer, indirect
+!
+! function locate(n,ixx,index,ix)	locates index for ix in array ixx
+!
+! revision log :
+!
+! 15.03.1999	ggu	routines written from scratch (Numerical receipes)
+! 23.03.2010	ggu	changed v6.1.1
+! 10.07.2015	ggu	changed VERS_7_1_50
+! 16.12.2015	ggu	changed VERS_7_3_16
+! 09.11.2018	ggu	test routines introduced
+! 21.12.2018	ggu	changed VERS_7_5_53
+! 16.02.2019	ggu	changed VERS_7_5_60
+! 02.07.2019	ggu	new routines for indirect real sort, locater_all()
+! 05.07.2019	ggu	new routine create_permutation()
+!
+!***********************************************************
+!
+! please do not use the first two routines
+! they are slow and buggy
+!
+!***********************************************************
 
 	subroutine sortir(ipoint,value,ndim)
 
-c indirect sort of real array (direct comparison)
-c
-c ipoint	pointer to values (must be already defined)
-c value		values to be sorted
-c ndim		total number of values to be sorted
+! indirect sort of real array (direct comparison)
+!
+! ipoint	pointer to values (must be already defined)
+! value		values to be sorted
+! ndim		total number of values to be sorted
 
 	implicit none
 
@@ -84,16 +84,16 @@ c ndim		total number of values to be sorted
 
 	end
 
-c***********************************************************
+!***********************************************************
 
 	subroutine sortii(ipoint,ivalue,ndim)
-c
-c indirect sort of interger array (direct comparison)
-c
-c ipoint	pointer to values (must be already defined)
-c ivalue	values to be sorted
-c ndim		total number of values to be sorted
-c
+!
+! indirect sort of interger array (direct comparison)
+!
+! ipoint	pointer to values (must be already defined)
+! ivalue	values to be sorted
+! ndim		total number of values to be sorted
+!
 	implicit none
 
 	integer ndim
@@ -114,23 +114,23 @@ c
 
 	end
 
-c***********************************************************
-c***********************************************************
-c***********************************************************
+!***********************************************************
+!***********************************************************
+!***********************************************************
 
       subroutine sort(n,ra)
 
-c heapsort (real, direct)
+! heapsort (real, direct)
 
       implicit none
 
       integer n
       real ra(n)
-c      integer ra(n)
+!      integer ra(n)
 
       integer i,ir,j,l
       real rra
-c      integer rra
+!      integer rra
 
       if(n.lt.2) return
 
@@ -168,20 +168,20 @@ c      integer rra
 
       end
 
-c***********************************************************
+!***********************************************************
 
       subroutine sort_int(n,ra)
 
-c heapsort (integer, direct)
+! heapsort (integer, direct)
 
       implicit none
 
       integer n
-c      real ra(n)
+!      real ra(n)
       integer ra(n)
 
       integer i,ir,j,l
-c      real rra
+!      real rra
       integer rra
 
       if(n.lt.2) return
@@ -220,11 +220,11 @@ c      real rra
 
       end
 
-c******************************************************************
+!******************************************************************
 
       subroutine isort(n,ra,index)
 
-c heapsort (integer, indirect)
+! heapsort (integer, indirect)
 
       implicit none
 
@@ -276,11 +276,11 @@ c heapsort (integer, indirect)
 
       end
 
-c******************************************************************
+!******************************************************************
 
       subroutine isortr(n,ra,index)
 
-c heapsort (real, indirect)
+! heapsort (real, indirect)
 
       implicit none
 
@@ -333,9 +333,9 @@ c heapsort (real, indirect)
 
       end
 
-c******************************************************************
-c******************************************************************
-c******************************************************************
+!******************************************************************
+!******************************************************************
+!******************************************************************
 
 	subroutine sort_invert(n,ia)
 
@@ -355,11 +355,11 @@ c******************************************************************
 
 	end
 
-c******************************************************************
+!******************************************************************
 
       function locate(n,ixx,index,ix)
 
-c locates index for ix in array ixx ( ixx(index(i)) is sorted )
+! locates index for ix in array ixx ( ixx(index(i)) is sorted )
 
       implicit none
 
@@ -394,11 +394,11 @@ c locates index for ix in array ixx ( ixx(index(i)) is sorted )
       return
       end
 
-c******************************************************************
+!******************************************************************
 
       function locater(n,rxx,index,rx)
 
-c locates index for rx in array rxx ( rxx(index(i)) is sorted )
+! locates index for rx in array rxx ( rxx(index(i)) is sorted )
 
       implicit none
 
@@ -433,12 +433,12 @@ c locates index for rx in array rxx ( rxx(index(i)) is sorted )
       return
       end
 
-c**********************************************************
+!**********************************************************
 
       subroutine locater_all(n,rxx,index,rx,ju1,ju2)
 
-c locates index for rx in array rxx ( rxx(index(i)) is sorted )
-c all indices are located, they lie between ju1 and ju2
+! locates index for rx in array rxx ( rxx(index(i)) is sorted )
+! all indices are located, they lie between ju1 and ju2
 
       implicit none
 
@@ -477,7 +477,7 @@ c all indices are located, they lie between ju1 and ju2
 	return
       end if
 
-c now look for other possible indices
+! now look for other possible indices
 
       do ju=ju-1,1,-1
         if(rx.eq.rxx(index(ju))) ju1 = ju
@@ -490,7 +490,7 @@ c now look for other possible indices
       return
       end
 
-c**********************************************************
+!**********************************************************
 
 	subroutine create_permutation(n,index)
 
@@ -533,7 +533,7 @@ c**********************************************************
 
 	end
 
-c**********************************************************
+!**********************************************************
 
 	subroutine permute_r(n,index,array)
 
@@ -559,7 +559,7 @@ c**********************************************************
 
 	end
 
-c**********************************************************
+!**********************************************************
 
 	function is_permutation(n,index)
 
@@ -592,13 +592,13 @@ c**********************************************************
 
 	end
 
-c**********************************************************
-c**********************************************************
-c**********************************************************
-c testing
-c**********************************************************
-c**********************************************************
-c**********************************************************
+!**********************************************************
+!**********************************************************
+!**********************************************************
+! testing
+!**********************************************************
+!**********************************************************
+!**********************************************************
 
 	subroutine test_permutation(n)
 
@@ -613,7 +613,7 @@ c**********************************************************
 
 	end
 
-c**********************************************************
+!**********************************************************
 
 	subroutine test_sort_real_indirect(n)
 
@@ -650,7 +650,7 @@ c**********************************************************
 
 	end
 
-c**********************************************************
+!**********************************************************
 
 	subroutine test_sort_int_indirect(n)
 
@@ -687,7 +687,7 @@ c**********************************************************
 
 	end
 
-c**********************************************************
+!**********************************************************
 
 	subroutine test_sort_int_direct(n)
 
@@ -721,7 +721,7 @@ c**********************************************************
 
 	end
 
-c**********************************************************
+!**********************************************************
 
 	subroutine test_sort_real_direct(n)
 
@@ -755,7 +755,7 @@ c**********************************************************
 
 	end
 
-c**********************************************************
+!**********************************************************
 
 	subroutine test_sort_all
 
@@ -774,9 +774,9 @@ c**********************************************************
 
 	end
 
-c**********************************************************
-c	program test_sort_main
-c	call test_sort_all
-c	end
-c**********************************************************
+!**********************************************************
+!	program test_sort_main
+!	call test_sort_all
+!	end
+!**********************************************************
 

@@ -23,24 +23,24 @@
 !
 !--------------------------------------------------------------------------
 
-c ecological dummy module
-c
-c revision log :
-c
-c 29.04.2008	ggu	bfm model integrated in main branch
-c 18.02.2011	ggu	general framework for ecological model
-c 17.02.2012	ggu	changed VERS_6_1_45
-c 24.02.2012	ggu	changed VERS_6_1_46
-c 19.12.2014	ggu	changed VERS_7_0_10
-c 09.09.2016	ggu	changed VERS_7_5_17
-c 03.04.2018	ggu	changed VERS_7_5_43
-c 16.02.2019	ggu	changed VERS_7_5_60
-c
-c**************************************************************
+! ecological dummy module
+!
+! revision log :
+!
+! 29.04.2008	ggu	bfm model integrated in main branch
+! 18.02.2011	ggu	general framework for ecological model
+! 17.02.2012	ggu	changed VERS_6_1_45
+! 24.02.2012	ggu	changed VERS_6_1_46
+! 19.12.2014	ggu	changed VERS_7_0_10
+! 09.09.2016	ggu	changed VERS_7_5_17
+! 03.04.2018	ggu	changed VERS_7_5_43
+! 16.02.2019	ggu	changed VERS_7_5_60
+!
+!**************************************************************
 
         subroutine ecological_module
 
-c general interface to ecological module
+! general interface to ecological module
 
         implicit none
 
@@ -73,7 +73,7 @@ c general interface to ecological module
 
         end
 
-c**************************************************************
+!**************************************************************
 
         subroutine write_restart_eco(iunit)
         implicit none
@@ -98,5 +98,5 @@ c**************************************************************
 	call skip_restart_eco(iunit)
 	end
 
-c**************************************************************
+!**************************************************************
 

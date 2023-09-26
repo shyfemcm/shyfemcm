@@ -73,80 +73,80 @@
 ! 09.05.2023    lrp     introduce top layer index variable
 !
 !**************************************************************
-c DOCS  START   S_wave
-c
-c SHYFEM could be coupled with:
-c \begin{itemize}
-c \item empirical prediction equations
-c \item spectral wind wave unstructured model WWMIII
-c \item unstructured WAVEWATCH III model (WW3)
-c \end{itemize}
-c
-c The wave module writes in the WAV file the following output:
-c \begin{itemize}
-c \item significant wave height [m], variable 231
-c \item mean wave period [s], variable 232
-c \item mean wave direction [deg], variable 233
-c \end{itemize}
-c
-c The time step and start time for writing to file WAV 
-c are defined by the parameters |idtwav| and |itmwav| in the |waves|
-c section. These parameter are the same used for writting tracer
-c concentration, salinity and water temperature. If |idtwav| is not
-c defined, then the wave module does not write any results. The wave 
-c results can be plotted using |plots -wav|.
-c
-c \subsubsection{Empirical wave model}
-c This empirical wave module is used to calculate the wave height 
-c and period from wind speed, fetch and depth using the EMPIRICAL 
-c PREDICTION EQUATIONS FOR SHALLOW WATER \cite{shoreprot:84}.
-c
-c \subsubsection{Wind wave model WWMIII}
-c WWMIII is not provided in the SHYFEM distribution.
-c The coupling of SHYFEM with WWMIII is done through the FIFO PIPE 
-c mechanism. The numerical mesh need to be converted to the GR3 
-c format using the bas2wwm program. WWMIII needs its own input 
-c parameter file (wwminput.nml). The use of the coupled SHYFEM-WWMIII
-c model require additional software which is not described here.
-c
-c In case of SHYFEM-WWMIII coupling several variables are exchanged 
-c between the two models:
-c \begin{itemize}
-c \item SHYFEM sends to WWMIII:
-c  \begin{itemize}
-c   \item surface velocities
-c   \item water level
-c   \item bathymetry and number of vertical layers
-c   \item 3D layer depths
-c   \item wind components$^{**}$
-c  \end{itemize}
-c \item SHYFEM reads from WWMIII:
-c  \begin{itemize}
-c   \item gradient of the radiation stresses
-c   \item significant wave height
-c   \item mean period
-c   \item significant wave direction
-c   \item wave supported stress
-c   \item peak period
-c   \item wave length
-c   \item orbital velocity
-c   \item stokes velocities
-c   \item wind drag coefficient
-c   \item wave pressure
-c   \item wave dissipation
-c   \item wind components$^{**}$
-c \end{itemize}
-c \end{itemize}
-c
-c $^{**}$Wind could be either read from SHYFEM or WWMIII, see parameter 
-c |iwave| in Appendix C.
-c For more information about WWMIII and its couling with SHYFEM please refer
-c to Roland et al. \cite{roland:coupled09} and Ferrarin et al. 
-c \cite{ferrarin:morpho08}.
-c DOCS  END
+! DOCS  START   S_wave
+!
+! SHYFEM could be coupled with:
+! \begin{itemize}
+! \item empirical prediction equations
+! \item spectral wind wave unstructured model WWMIII
+! \item unstructured WAVEWATCH III model (WW3)
+! \end{itemize}
+!
+! The wave module writes in the WAV file the following output:
+! \begin{itemize}
+! \item significant wave height [m], variable 231
+! \item mean wave period [s], variable 232
+! \item mean wave direction [deg], variable 233
+! \end{itemize}
+!
+! The time step and start time for writing to file WAV 
+! are defined by the parameters |idtwav| and |itmwav| in the |waves|
+! section. These parameter are the same used for writting tracer
+! concentration, salinity and water temperature. If |idtwav| is not
+! defined, then the wave module does not write any results. The wave 
+! results can be plotted using |plots -wav|.
+!
+! \subsubsection{Empirical wave model}
+! This empirical wave module is used to calculate the wave height 
+! and period from wind speed, fetch and depth using the EMPIRICAL 
+! PREDICTION EQUATIONS FOR SHALLOW WATER \cite{shoreprot:84}.
+!
+! \subsubsection{Wind wave model WWMIII}
+! WWMIII is not provided in the SHYFEM distribution.
+! The coupling of SHYFEM with WWMIII is done through the FIFO PIPE 
+! mechanism. The numerical mesh need to be converted to the GR3 
+! format using the bas2wwm program. WWMIII needs its own input 
+! parameter file (wwminput.nml). The use of the coupled SHYFEM-WWMIII
+! model require additional software which is not described here.
+!
+! In case of SHYFEM-WWMIII coupling several variables are exchanged 
+! between the two models:
+! \begin{itemize}
+! \item SHYFEM sends to WWMIII:
+!  \begin{itemize}
+!   \item surface velocities
+!   \item water level
+!   \item bathymetry and number of vertical layers
+!   \item 3D layer depths
+!   \item wind components$^{**}$
+!  \end{itemize}
+! \item SHYFEM reads from WWMIII:
+!  \begin{itemize}
+!   \item gradient of the radiation stresses
+!   \item significant wave height
+!   \item mean period
+!   \item significant wave direction
+!   \item wave supported stress
+!   \item peak period
+!   \item wave length
+!   \item orbital velocity
+!   \item stokes velocities
+!   \item wind drag coefficient
+!   \item wave pressure
+!   \item wave dissipation
+!   \item wind components$^{**}$
+! \end{itemize}
+! \end{itemize}
+!
+! $^{**}$Wind could be either read from SHYFEM or WWMIII, see parameter 
+! |iwave| in Appendix C.
+! For more information about WWMIII and its couling with SHYFEM please refer
+! to Roland et al. \cite{roland:coupled09} and Ferrarin et al. 
+! \cite{ferrarin:morpho08}.
+! DOCS  END
 
 
-c**************************************************************
+!**************************************************************
 
         subroutine init_wave
 
@@ -289,11 +289,11 @@ c**************************************************************
 
         implicit none
 
-c common
+! common
 	include 'param.h'
 	include 'pkonst.h'
 
-c local
+! local
         double precision, allocatable :: stokesx(:,:)	!stokes velocity x
         double precision, allocatable :: stokesy(:,:)	!stokes velocity y
         real, allocatable	      :: wavejb(:)	!wave pressure
@@ -758,20 +758,20 @@ c local
 
         implicit none
 
-c parameters
+! parameters
         !include 'param.h'
 
-c arguments
+! arguments
         double precision stokesx(nlv,nkn) !x stokes velocity
         double precision stokesy(nlv,nkn) !y stokes velocity
         real wavejb(nkn)             	!wave pressure
         real wavefx(nlv,nel)		!x wave forcing term
 	real wavefy(nlv,nel)		!y wave forcing term
 
-c common
+! common
 	include 'pkonst.h'
 
-c local
+! local
         real, allocatable :: stokesz(:,:)	!z stokes velocity on node k
 	real, allocatable :: hk(:)		!layer tickness on nodes
 	real, allocatable :: stxe(:,:)		!x stokes transport on elements
@@ -926,9 +926,9 @@ c local
 
         implicit none
 
-c parameters
+! parameters
         include 'param.h'
-c arguments
+! arguments
         real vf(nlv,nkn)		!auxiliary array
         real va(nlv,nkn)		!auxiliary array
 	real stxe(nlv,nel)	!x stokes transport on elements
@@ -936,7 +936,7 @@ c arguments
 	real auxstz(nlv,nkn) 	!z stokes velocity on node k for plot
 	real stokesze(0:nlv,nel)	!z stokes velocity on elements
 
-c local
+! local
 	real, allocatable :: stokesz(:,:) 	!z stokes velocity on node k
         logical debug
         integer k,ie,ii,kk,l,lmax
@@ -945,7 +945,7 @@ c local
 	real aj,ff,atop,acu
         logical is_zeta_bound,is_boundary_node
 
-c initialize
+! initialize
 
 	allocate(stokesz(0:nlv,nkn))
         vf = 0.
@@ -953,7 +953,7 @@ c initialize
         stokesz = 0.
 	auxstz = 0.
 
-c compute difference of velocities for each layer
+! compute difference of velocities for each layer
 
         do ie=1,nel
           aj=4.*ev(10,ie)               !area of triangle / 3
@@ -970,16 +970,16 @@ c compute difference of velocities for each layer
           end do
         end do
 
-c from vel difference get absolute velocity (w_bottom = 0)
-c       -> stokesz(nlv,k) is already in place !
-c       -> stokesz(nlv,k) = 0 + stokesz(nlv,k)
-c w of bottom of last layer must be 0 ! -> shift everything up
-c stokesz(nlv,k) is always 0
-c
-c dividing stokesz [m**3/s] by area [vv] gives vertical velocity
-c
-c in vv(l,k) is the area of the upper interface: a(l) = a_i(l-1)
-c =>  w(l-1) = flux(l-1) / a_i(l-1)  =>  w(l-1) = flux(l-1) / a(l)
+! from vel difference get absolute velocity (w_bottom = 0)
+!       -> stokesz(nlv,k) is already in place !
+!       -> stokesz(nlv,k) = 0 + stokesz(nlv,k)
+! w of bottom of last layer must be 0 ! -> shift everything up
+! stokesz(nlv,k) is always 0
+!
+! dividing stokesz [m**3/s] by area [vv] gives vertical velocity
+!
+! in vv(l,k) is the area of the upper interface: a(l) = a_i(l-1)
+! =>  w(l-1) = flux(l-1) / a_i(l-1)  =>  w(l-1) = flux(l-1) / a(l)
 
         do k=1,nkn
           lmax = ilhkv(k)
@@ -1005,7 +1005,7 @@ c =>  w(l-1) = flux(l-1) / a_i(l-1)  =>  w(l-1) = flux(l-1) / a(l)
 	  auxstz(lmax,k) = stokesz(lmax,k)
         end do
 
-c set w to zero at open boundary nodes (new 14.08.1998)
+! set w to zero at open boundary nodes (new 14.08.1998)
 
         do k=1,nkn
             !if( is_zeta_bound(k) ) then
@@ -1017,9 +1017,9 @@ c set w to zero at open boundary nodes (new 14.08.1998)
             end if
         end do
 
-c-----------------------------------------------------------
-c convert values to elelemts
-c-----------------------------------------------------------
+!-----------------------------------------------------------
+! convert values to elelemts
+!-----------------------------------------------------------
 
         do ie=1,nel
           lmax = ilhv(ie)
@@ -1037,55 +1037,55 @@ c-----------------------------------------------------------
         return
         end
 
-c******************************************************************
-c******************************************************************
-c******************************************************************
-c******************************************************************
-c******************************************************************
-c
-c This routine is used to calculate the wave height and period
-c from wind speed, fetch and depth using the EMPIRICAL PREDICTION
-c EQUATIONS FOR SHALLOW WATER (Shore Protection Manual, 1984).
-c It considers a homogeneous wind field all over the domain.
-c It works only with cartesian coordinate system.
-c
-c notes :
-c
-c Hs            significant wave height
-c Tm            mean period
-c Hrms          rms height (Hrms = Hs/sqrt(2))
-c Tp            peak period (Tm = 0.781 Tp)
-c
-c Tm = 11 sqrt(Hs/g)    if no info on Tm is available
-c
-c for sediment transport use T=Tp and Uw = sqrt(2) Urms
-c
-c Uw            orbital velocity
-c Urms          std. dev. of orbital velocity
-c
-c Dispersion relation:
-c
-c o             omega, frequency, o = 2 pi / T
-c k             wave number, k = 2 pi / L
-c L             wave length
-c
-c o**2 = gk tanh(kh)    dispersion relation
-c
-c zeta = o**2 h / g
-c eta = k h
-c
-c ==> zeta = eta tanh(eta)
-c
-c easy computation (better than 1 %)
-c
-c zeta < 1      eta = sqrt(zeta) * (1 + 0.2 * zeta)
-c zeta > 1      eta = zeta( 1 + 0.2 * exp(2 - 2 * zeta)
-c
-c Orbital velocity:
-c
-c Uw = pi H / (T sinh(kh))
-c
-c**************************************************************
+!******************************************************************
+!******************************************************************
+!******************************************************************
+!******************************************************************
+!******************************************************************
+!
+! This routine is used to calculate the wave height and period
+! from wind speed, fetch and depth using the EMPIRICAL PREDICTION
+! EQUATIONS FOR SHALLOW WATER (Shore Protection Manual, 1984).
+! It considers a homogeneous wind field all over the domain.
+! It works only with cartesian coordinate system.
+!
+! notes :
+!
+! Hs            significant wave height
+! Tm            mean period
+! Hrms          rms height (Hrms = Hs/sqrt(2))
+! Tp            peak period (Tm = 0.781 Tp)
+!
+! Tm = 11 sqrt(Hs/g)    if no info on Tm is available
+!
+! for sediment transport use T=Tp and Uw = sqrt(2) Urms
+!
+! Uw            orbital velocity
+! Urms          std. dev. of orbital velocity
+!
+! Dispersion relation:
+!
+! o             omega, frequency, o = 2 pi / T
+! k             wave number, k = 2 pi / L
+! L             wave length
+!
+! o**2 = gk tanh(kh)    dispersion relation
+!
+! zeta = o**2 h / g
+! eta = k h
+!
+! ==> zeta = eta tanh(eta)
+!
+! easy computation (better than 1 %)
+!
+! zeta < 1      eta = sqrt(zeta) * (1 + 0.2 * zeta)
+! zeta > 1      eta = zeta( 1 + 0.2 * exp(2 - 2 * zeta)
+!
+! Orbital velocity:
+!
+! Uw = pi H / (T sinh(kh))
+!
+!**************************************************************
 
 !==============================================================
 	module mod_parwaves
@@ -1096,14 +1096,14 @@ c**************************************************************
         real, parameter :: z0 = 5.e-4
         real, parameter :: awice = 1.	!use wave reduction due to ice cover
 
-c --- input variable
+! --- input variable
 
         real, save, allocatable :: winds(:) !wind speed at 10m [m/s]
         real, save, allocatable :: windd(:) !wind direction [degree north]
         real, save, allocatable :: fet(:)   !wind fetch length [m]
         real, save, allocatable :: daf(:)   !averaged depth along the fetch [m]
 
-c --- output variable
+! --- output variable
 
         real, save, allocatable :: waeh(:)	!wave height [m]
         real, save, allocatable :: waep(:)	!wave period [s]
@@ -1115,7 +1115,7 @@ c --- output variable
 
         subroutine parwaves
 
-c called for iwave == 1
+! called for iwave == 1
 
 	use mod_meteo
 	use mod_waves
@@ -1124,12 +1124,12 @@ c called for iwave == 1
 
         implicit none
 
-c --- aux variable
+! --- aux variable
 
         real, save, allocatable :: v1v(:)	!aux variable
         real, save, allocatable :: icecover(:)	!ice cover
 
-c --- local variable
+! --- local variable
 
 	logical debug
         real depele             !element depth function [m]
@@ -1148,17 +1148,17 @@ c --- local variable
 
         real ah1,ah2,ah3,eh1,eh2,eh3,eh4
         real at1,at2,at3,et1,et2,et3,et4
-c------------------------------------------------------ Hurdle and Stive
-c        parameter(ah1=0.25,ah2=0.6,eh1=0.75)
-c        parameter(eh2=0.5,ah3=4.3e-05,eh3=1.,eh4=2.)
-c        parameter(at1=8.3,at2=0.76,et1=0.375)
-c        parameter(et2=1./3.,at3=4.1e-05,et3=1.,et4=3.)
-c------------------------------------------------------ SPM
+!------------------------------------------------------ Hurdle and Stive
+!        parameter(ah1=0.25,ah2=0.6,eh1=0.75)
+!        parameter(eh2=0.5,ah3=4.3e-05,eh3=1.,eh4=2.)
+!        parameter(at1=8.3,at2=0.76,et1=0.375)
+!        parameter(et2=1./3.,at3=4.1e-05,et3=1.,et4=3.)
+!------------------------------------------------------ SPM
         parameter(ah1=0.283,ah2=0.53,eh1=3./4.)
         parameter(eh2=1.,ah3=0.00565,eh3=1./2.,eh4=1.)
         parameter(at1=7.54,at2=0.833,et1=3./8.)
         parameter(et2=1.,at3=0.0379,et3=1./3.,et4=1.)
-c------------------------------------------------------
+!------------------------------------------------------
 
         real getpar
 
@@ -1169,17 +1169,17 @@ c------------------------------------------------------
 	debug = .true.
 	debug = .false.
 
-c ----------------------------------------------------------
-c Initialization
-c ----------------------------------------------------------
+! ----------------------------------------------------------
+! Initialization
+! ----------------------------------------------------------
 
         if( icall .le. -1 ) return
 
         if( icall .eq. 0 ) then
 
-c         --------------------------------------------------
-c         Initialize state variables
-c         --------------------------------------------------
+!         --------------------------------------------------
+!         Initialize state variables
+!         --------------------------------------------------
 
           iwave = nint(getpar('iwave'))
           if( iwave .le. 0 ) icall = -1
@@ -1197,9 +1197,9 @@ c         --------------------------------------------------
 	  allocate(fet(nel),daf(nel))
 	  allocate(icecover(nkn),v1v(nkn))
 
-c         --------------------------------------------------
-c         Initialize output
-c         --------------------------------------------------
+!         --------------------------------------------------
+!         Initialize output
+!         --------------------------------------------------
 
 	  nvar = 3
           call init_output_d('itmwav','idtwav',da_wav)
@@ -1212,15 +1212,15 @@ c         --------------------------------------------------
           icall = 1
         endif
 
-c -------------------------------------------------------------------
-c normal call
-c -------------------------------------------------------------------
+! -------------------------------------------------------------------
+! normal call
+! -------------------------------------------------------------------
 
 	call get_ice_cover_all(icecover)
 
-c       -------------------------------------------------------------
-c	get wind speed and direction
-c       -------------------------------------------------------------
+!       -------------------------------------------------------------
+!	get wind speed and direction
+!       -------------------------------------------------------------
 
 	do ie=1,nel
 	  wx = 0.
@@ -1236,9 +1236,9 @@ c       -------------------------------------------------------------
           call c2p(wx,wy,winds(ie),windd(ie))
 	end do
 
-c       -------------------------------------------------------------
-c	get wind fetch (fet is fetch on elements)
-c       -------------------------------------------------------------
+!       -------------------------------------------------------------
+!	get wind fetch (fet is fetch on elements)
+!       -------------------------------------------------------------
 
         call fetch(windd,fet,daf)
 
@@ -1252,33 +1252,33 @@ c       -------------------------------------------------------------
 	  write(155,*) '----------------------------------------'
 	end if
 
-c       -------------------------------------------------------------------
-c       start loop on elements
-c       -------------------------------------------------------------------
+!       -------------------------------------------------------------------
+!       start loop on elements
+!       -------------------------------------------------------------------
 
         do ie = 1,nel
 
           icount = 1
 
-c         -----------------------------------------------------------------
-c	  get averaged depth along the fetch
-c         -----------------------------------------------------------------
+!         -----------------------------------------------------------------
+!	  get averaged depth along the fetch
+!         -----------------------------------------------------------------
 
           dep = daf(ie)
           depe = depele(ie,+1)
           dep = depele(ie,+1)
 10        continue
 
-c         -----------------------------------------------------------------
-c	  calculate wave height, period and direction
-c         -----------------------------------------------------------------
+!         -----------------------------------------------------------------
+!	  calculate wave height, period and direction
+!         -----------------------------------------------------------------
 
 	  wis = winds(ie)
 	  wid = windd(ie)
 
-c         -----------------------------------------------------------------
-c	  method of SPM
-c         -----------------------------------------------------------------
+!         -----------------------------------------------------------------
+!	  method of SPM
+!         -----------------------------------------------------------------
 
 	  if( wis > 0. ) then
             gh = (g*dep)/(wis**2.)
@@ -1305,36 +1305,36 @@ c         -----------------------------------------------------------------
 	    waep(ie) = 0.
 	  end if
 
-c          waeh(ie) = 0.283 * tanh(0.530*(gh**(3./4.)))*
-c     %            tanh((0.00565*(gx**0.5))/
-c     %            (tanh(0.530*(gh**(3./4.)))))*((wis**2)/g)
-c
-c          waep(ie) = 7.54*tanh(0.833*(gh**(3./8.)))*
-c     %            tanh((0.0379*(gx**(1./3.)))/
-c     %            (tanh(0.833*(gh**(3./8.)))))*(wis/g)
-c
+!          waeh(ie) = 0.283 * tanh(0.530*(gh**(3./4.)))*
+!     %            tanh((0.00565*(gx**0.5))/
+!     %            (tanh(0.530*(gh**(3./4.)))))*((wis**2)/g)
+!
+!          waep(ie) = 7.54*tanh(0.833*(gh**(3./8.)))*
+!     %            tanh((0.0379*(gx**(1./3.)))/
+!     %            (tanh(0.833*(gh**(3./8.)))))*(wis/g)
+!
 
-c         -----------------------------------------------------------------
-c	  method of hurdle and stive
-c         -----------------------------------------------------------------
+!         -----------------------------------------------------------------
+!	  method of hurdle and stive
+!         -----------------------------------------------------------------
 
-c          waeh(ie) = (tanh(auxh))**eh4
-c          waeh(ie) = (ah3*gx**eh3) / waeh(ie)
-c          waeh(ie) = (tanh(waeh(ie)))**eh2
-c          waeh(ie) = ah1*tanh(auxh)*waeh(ie)
-c          waeh(ie) = waeh(ie) * wis**2 / g
+!          waeh(ie) = (tanh(auxh))**eh4
+!          waeh(ie) = (ah3*gx**eh3) / waeh(ie)
+!          waeh(ie) = (tanh(waeh(ie)))**eh2
+!          waeh(ie) = ah1*tanh(auxh)*waeh(ie)
+!          waeh(ie) = waeh(ie) * wis**2 / g
          
-c          waep(ie) = (tanh(auxt1))**et4
-c          waep(ie) = (at3*gx**et3) / waep(ie)
-c          waep(ie) = (tanh(waep(ie)))**et2
-c          waep(ie) = at1*tanh(auxt)*waep(ie)
-c          waep(ie) = waep(ie) * wis / g
+!          waep(ie) = (tanh(auxt1))**et4
+!          waep(ie) = (at3*gx**et3) / waep(ie)
+!          waep(ie) = (tanh(waep(ie)))**et2
+!          waep(ie) = at1*tanh(auxt)*waep(ie)
+!          waep(ie) = waep(ie) * wis / g
 
           waed(ie) = wid
 
-c         -----------------------------------------------------------------
-c	  limiting wave height
-c         -----------------------------------------------------------------
+!         -----------------------------------------------------------------
+!	  limiting wave height
+!         -----------------------------------------------------------------
 
           hbr = 0.50*depe
           if( waeh(ie).gt.hbr ) then
@@ -1356,9 +1356,9 @@ c         -----------------------------------------------------------------
 	!hzero = count( waeh == 0. )
 	!write(6,*) 'wmin/wmax: ',wmin,wmax,czero,hzero
 
-c       -------------------------------------------------------------------
-c       copy to global values and write of results (file WAV)
-c       -------------------------------------------------------------------
+!       -------------------------------------------------------------------
+!       copy to global values and write of results (file WAV)
+!       -------------------------------------------------------------------
 
         call e2n2d(waeh,waveh,v1v)
         call e2n2d(waep,wavep,v1v)
@@ -1375,20 +1375,20 @@ c       -------------------------------------------------------------------
 	  call shy_sync(id)
 	end if
 
-c       -------------------------------------------------------------------
-c       end of routine
-c       -------------------------------------------------------------------
+!       -------------------------------------------------------------------
+!       end of routine
+!       -------------------------------------------------------------------
 
         end
 
-c**************************************************************
-c**************************************************************
-c**************************************************************
+!**************************************************************
+!**************************************************************
+!**************************************************************
 
         subroutine fetch(windd,fet,daf)
 
-c This subroutine computes the wind fetch for each element of the
-c grid given the wind direction.
+! This subroutine computes the wind fetch for each element of the
+! grid given the wind direction.
 
 	use basin, only : nkn,nel,ngr,mbw
 	use coordinates
@@ -1413,7 +1413,7 @@ c grid given the wind direction.
 	icaver = 0
 	icmax = 0
 
-c --- loop over elements
+! --- loop over elements
 
         do ie = 1,nel
           
@@ -1449,12 +1449,12 @@ c --- loop over elements
 
 	end
 
-c**************************************************************
+!**************************************************************
 
         subroutine fetch_element(ie,xein,yein,wdir,fff,ddd,ierr)
 
-c This subroutine computes the wind fetch for element ie
-c given the wind direction.
+! This subroutine computes the wind fetch for element ie
+! given the wind direction.
 
 	use basin, only : nkn,nel,ngr,mbw
 
@@ -1485,7 +1485,7 @@ c given the wind direction.
 	xe = xein
 	ye = yein
 
-c --- calculate fetch and averaged depth along the fetch
+! --- calculate fetch and averaged depth along the fetch
 
 	if( bdebug ) then
 	  write(156,*) '=========================='
@@ -1529,12 +1529,12 @@ c --- calculate fetch and averaged depth along the fetch
 	return
         end
            
-c******************************************************************
+!******************************************************************
 
         subroutine intersect(iie,x,y,wdir,ien,xn,yn,ieold,bdebug)
 
-c this routine computes the coordinate of the intersection beetwen the
-c line and one of the border line of the element
+! this routine computes the coordinate of the intersection beetwen the
+! line and one of the border line of the element
 
 	use mod_geom
 	use basin
@@ -1636,14 +1636,14 @@ c line and one of the border line of the element
 
         end
 
-c******************************************************************
-c******************************************************************
-c******************************************************************
+!******************************************************************
+!******************************************************************
+!******************************************************************
 
         subroutine get_wave_values(k,wh,wmp,wpp,wd)
 
-c returns significant wave heigh, wave periods (mean and peak) and 
-c mean wave direction
+! returns significant wave heigh, wave periods (mean and peak) and 
+! mean wave direction
 
 	use mod_waves
 
@@ -1666,7 +1666,7 @@ c mean wave direction
 
         function has_waves() 
 
-c gives indication if waves are computed
+! gives indication if waves are computed
 
 	use mod_waves
 

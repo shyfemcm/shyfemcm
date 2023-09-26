@@ -23,37 +23,37 @@
 !
 !--------------------------------------------------------------------------
 
-c utility routines to read/write FLX file - file type 537
-c
-c contents :
-c
-c	subroutine rfflx	(iunit,nvers
-c     +				,nscddi,nfxddi,nlvddi
-c     +				,nsect,kfluxm,idtflx,nlmax
-c     +				,kflux
-c     +				,nlayers
-c     +				)
-c	subroutine wfflx	(iunit,nvers
-c     +				,nsect,kfluxm,idtflx,nlmax
-c     +				,kflux
-c     +				,nlayers
-c     +				)
-c	subroutine rdflx(iunit,it,nlvddi,nsect,nlayers,fluxes,ierr)
-c	subroutine wrflx(iunit,it,nlvddi,nsect,nlayers,fluxes)
-c
-c revision log :
-c
-c 18.10.2011	ggu	created from subnos.f
-c 10.07.2015	ggu	changed VERS_7_1_50
-c 24.07.2015	ggu	changed VERS_7_1_82
-c 10.10.2015	ggu	new routines for new flx framework
-c 18.12.2015	ggu	changed VERS_7_3_17
-c 04.11.2017	ggu	changed VERS_7_5_34
-c 03.03.2018	ggu	determine nvar for versions < 6
-c 03.04.2018	ggu	changed VERS_7_5_43
-c 16.02.2019	ggu	changed VERS_7_5_60
-c
-c************************************************************
+! utility routines to read/write FLX file - file type 537
+!
+! contents :
+!
+!	subroutine rfflx	(iunit,nvers
+!     +				,nscddi,nfxddi,nlvddi
+!     +				,nsect,kfluxm,idtflx,nlmax
+!     +				,kflux
+!     +				,nlayers
+!     +				)
+!	subroutine wfflx	(iunit,nvers
+!     +				,nsect,kfluxm,idtflx,nlmax
+!     +				,kflux
+!     +				,nlayers
+!     +				)
+!	subroutine rdflx(iunit,it,nlvddi,nsect,nlayers,fluxes,ierr)
+!	subroutine wrflx(iunit,it,nlvddi,nsect,nlayers,fluxes)
+!
+! revision log :
+!
+! 18.10.2011	ggu	created from subnos.f
+! 10.07.2015	ggu	changed VERS_7_1_50
+! 24.07.2015	ggu	changed VERS_7_1_82
+! 10.10.2015	ggu	new routines for new flx framework
+! 18.12.2015	ggu	changed VERS_7_3_17
+! 04.11.2017	ggu	changed VERS_7_5_34
+! 03.03.2018	ggu	determine nvar for versions < 6
+! 03.04.2018	ggu	changed VERS_7_5_43
+! 16.02.2019	ggu	changed VERS_7_5_60
+!
+!************************************************************
 
 !==================================================================
         module flxfile
@@ -76,9 +76,9 @@ c************************************************************
         end module flxfile
 !==================================================================
 
-c************************************************************
-c************************************************************
-c************************************************************
+!************************************************************
+!************************************************************
+!************************************************************
 
 	function check_flx_file(file)
 
@@ -95,15 +95,15 @@ c************************************************************
 
         nb = ifileo(0,file,'unform','old')
         if( nb .le. 0 ) return
-	call flx_check_header(nb,nvers,nsect,kfluxm,idtflx
-     +					,nlmax,nvar,ierr)
+	call flx_check_header(nb,nvers,nsect,kfluxm,idtflx &
+     &					,nlmax,nvar,ierr)
         close(nb)
 
         check_flx_file = ( ierr == 0 )
 
 	end
 
-c*********************************************************
+!*********************************************************
 
 	subroutine flx_is_flx_file(iunit,nvers)
 
@@ -114,19 +114,19 @@ c*********************************************************
 	integer ierr
 	integer nsect,kfluxm,idtflx,nlmax,nvar
 
-	call flx_check_header(iunit,nvers,nsect,kfluxm,idtflx
-     +					,nlmax,nvar,ierr)
+	call flx_check_header(iunit,nvers,nsect,kfluxm,idtflx &
+     &					,nlmax,nvar,ierr)
 
 	if( ierr .ne. 0 ) nvers = 0
 
 	end
 
-c*********************************************************
-c*********************************************************
-c*********************************************************
+!*********************************************************
+!*********************************************************
+!*********************************************************
 
-	subroutine flx_peek_header(iunit,nvers,nsect,kfluxm,idtflx
-     +					,nlmax,nvar,ierr)
+	subroutine flx_peek_header(iunit,nvers,nsect,kfluxm,idtflx &
+     &					,nlmax,nvar,ierr)
 
 	implicit none
 
@@ -134,12 +134,12 @@ c*********************************************************
 	integer nsect,kfluxm,idtflx,nlmax,nvar
 	integer ierr
 
-	call flx_check_header(iunit,nvers,nsect,kfluxm,idtflx
-     +					,nlmax,nvar,ierr)
+	call flx_check_header(iunit,nvers,nsect,kfluxm,idtflx &
+     &					,nlmax,nvar,ierr)
 
 	end
 
-c*********************************************************
+!*********************************************************
 
 	subroutine flx_peek_record(iunit,nvers,atime,ivar,ierr)
 
@@ -170,9 +170,9 @@ c*********************************************************
 
 	end
 
-c*********************************************************
-c*********************************************************
-c*********************************************************
+!*********************************************************
+!*********************************************************
+!*********************************************************
 
 	subroutine flx_skip_header(iunit,nvers)
 
@@ -192,7 +192,7 @@ c*********************************************************
 	
 	end
 
-c*********************************************************
+!*********************************************************
 
 	subroutine flx_skip_record(iunit,nvers,atime,ivar)
 
@@ -213,9 +213,9 @@ c*********************************************************
 	
 	end
 	
-c*********************************************************
-c*********************************************************
-c*********************************************************
+!*********************************************************
+!*********************************************************
+!*********************************************************
 
 	subroutine flx_determine_nvar(iunit,nvers,nvar)
 
@@ -243,14 +243,14 @@ c*********************************************************
 
 	end
 
-c*********************************************************
-c*********************************************************
-c*********************************************************
+!*********************************************************
+!*********************************************************
+!*********************************************************
 
-	subroutine flx_check_header(iunit,nvers,nsect,kfluxm,idtflx
-     +					,nlmax,nvar,ierr)
+	subroutine flx_check_header(iunit,nvers,nsect,kfluxm,idtflx &
+     &					,nlmax,nvar,ierr)
 
-c checks version of flx file and returns number of points
+! checks version of flx file and returns number of points
 
 	use flxfile
 
@@ -277,7 +277,7 @@ c checks version of flx file and returns number of points
 	ierr = 99
 	if( nvers .le. 0 .or. nvers .gt. flx_maxvers ) goto 99
 
-c next records
+! next records
 
 	if( nvers .le. 3 ) then
 	   read(iunit,iostat=ierr)	 nsect,kfluxm,idtflx
@@ -301,12 +301,12 @@ c next records
 
 	end
 
-c*********************************************************
-c*********************************************************
-c*********************************************************
+!*********************************************************
+!*********************************************************
+!*********************************************************
 
-	subroutine flx_read_header(iunit,nvers,nsect,kfluxm,idtflx
-     +					,nlmax,nvar,ierr)
+	subroutine flx_read_header(iunit,nvers,nsect,kfluxm,idtflx &
+     &					,nlmax,nvar,ierr)
 
 	use flxfile
 
@@ -317,8 +317,8 @@ c*********************************************************
 
 	integer iskip,i
 
-	call flx_check_header(iunit,nvers,nsect,kfluxm,idtflx
-     +					,nlmax,nvar,ierr)
+	call flx_check_header(iunit,nvers,nsect,kfluxm,idtflx &
+     &					,nlmax,nvar,ierr)
 	if( ierr /= 0 ) return
 
 	! the above call rewinds - we will have to skip the header
@@ -330,11 +330,11 @@ c*********************************************************
 
 	end
 
-c*********************************************************
+!*********************************************************
 
-	subroutine flx_read_header2(iunit,nvers,nsect,kfluxm
-     +				,kflux,nlayers
-     +				,atime0,title,femver,strings,ierr)
+	subroutine flx_read_header2(iunit,nvers,nsect,kfluxm &
+     &				,kflux,nlayers &
+     &				,atime0,title,femver,strings,ierr)
 
 	implicit none
 
@@ -382,11 +382,11 @@ c*********************************************************
 	return
 	end
 
-c*********************************************************
+!*********************************************************
 
-	subroutine flx_read_record(iunit,nvers,atime
-     +			,nlvddi,nsect,ivar
-     +			,nlayers,fluxes,ierr)
+	subroutine flx_read_record(iunit,nvers,atime &
+     &			,nlvddi,nsect,ivar &
+     &			,nlayers,fluxes,ierr)
 
 	implicit none
 
@@ -400,24 +400,24 @@ c*********************************************************
 	integer it,i,j,l
 
 	if( nvers .le. 2 ) then
-          read(iunit,end=88,err=99) it,nsect
-     +                  ,(fluxes(0,1,i),i=1,nsect)
-     +                  ,(fluxes(0,2,i),fluxes(0,3,i),i=1,nsect)
+          read(iunit,end=88,err=99) it,nsect &
+     &                  ,(fluxes(0,1,i),i=1,nsect) &
+     &                  ,(fluxes(0,2,i),fluxes(0,3,i),i=1,nsect)
 	else if( nvers .le. 4 ) then
-          read(iunit,end=88,err=99) it,nsect
-     +                  ,(nlayers(i)
-     +                  ,((fluxes(l,j,i),l=0,nlayers(i)),j=1,3)
-     +                  ,i=1,nsect)
+          read(iunit,end=88,err=99) it,nsect &
+     &                  ,(nlayers(i) &
+     &                  ,((fluxes(l,j,i),l=0,nlayers(i)),j=1,3) &
+     &                  ,i=1,nsect)
 	else if( nvers .eq. 5 ) then
-          read(iunit,end=88,err=99) it,nsect,ivar
-     +                  ,(nlayers(i)
-     +                  ,((fluxes(l,j,i),l=0,nlayers(i)),j=1,3)
-     +                  ,i=1,nsect)
+          read(iunit,end=88,err=99) it,nsect,ivar &
+     &                  ,(nlayers(i) &
+     &                  ,((fluxes(l,j,i),l=0,nlayers(i)),j=1,3) &
+     &                  ,i=1,nsect)
 	else if( nvers .eq. 6 ) then
-          read(iunit,end=88,err=99) atime,nsect,ivar
-     +                  ,(nlayers(i)
-     +                  ,((fluxes(l,j,i),l=0,nlayers(i)),j=1,3)
-     +                  ,i=1,nsect)
+          read(iunit,end=88,err=99) atime,nsect,ivar &
+     &                  ,(nlayers(i) &
+     &                  ,((fluxes(l,j,i),l=0,nlayers(i)),j=1,3) &
+     &                  ,i=1,nsect)
 	else
 	   stop 'error stop rdflx: internal error (1)'
 	end if
@@ -435,10 +435,10 @@ c*********************************************************
 	return
 	end
 
-c*********************************************************
+!*********************************************************
 
-	subroutine flx_write_header(iunit,nvers,nsect,kfluxm,idtflx
-     +					,nlmax,nvar,ierr)
+	subroutine flx_write_header(iunit,nvers,nsect,kfluxm,idtflx &
+     &					,nlmax,nvar,ierr)
 
 	use flxfile
 
@@ -465,11 +465,11 @@ c*********************************************************
 
 	end
 
-c*********************************************************
+!*********************************************************
 
-	subroutine flx_write_header2(iunit,nvers,nsect,kfluxm
-     +				,kflux,nlayers
-     +				,atime0,title,femver,strings,ierr)
+	subroutine flx_write_header2(iunit,nvers,nsect,kfluxm &
+     &				,kflux,nlayers &
+     &				,atime0,title,femver,strings,ierr)
 
 	implicit none
 
@@ -497,11 +497,11 @@ c*********************************************************
 
 	end
 
-c*********************************************************
+!*********************************************************
 
-	subroutine flx_write_record(iunit,nvers,atime
-     +			,nlvddi,nsect,ivar
-     +			,nlayers,fluxes,ierr)
+	subroutine flx_write_record(iunit,nvers,atime &
+     &			,nlvddi,nsect,ivar &
+     &			,nlayers,fluxes,ierr)
 
 	implicit none
 
@@ -514,73 +514,73 @@ c*********************************************************
 
 	integer i,j,l
 
-        write(iunit,iostat=ierr) atime,nsect,ivar
-     +                  ,(nlayers(i)
-     +                  ,((fluxes(l,j,i),l=0,nlayers(i)),j=1,3)
-     +                  ,i=1,nsect)
+        write(iunit,iostat=ierr) atime,nsect,ivar &
+     &                  ,(nlayers(i) &
+     &                  ,((fluxes(l,j,i),l=0,nlayers(i)),j=1,3) &
+     &                  ,i=1,nsect)
 
 	end
 
-c*********************************************************
+!*********************************************************
 
 	
-c*********************************************************
-c*********************************************************
-c*********************************************************
-c old routines ... can be deleted
-c************************************************************
-c************************************************************
-c************************************************************
+!*********************************************************
+!*********************************************************
+!*********************************************************
+! old routines ... can be deleted
+!************************************************************
+!************************************************************
+!************************************************************
 
-	subroutine rfflx	(iunit,nvers
-     +				,nscddi,nfxddi,nlvddi
-     +				,nsect,kfluxm,idtflx,nlmax
-     +				,kflux
-     +				,nlayers
-     +				)
+	subroutine rfflx	(iunit,nvers &
+     &				,nscddi,nfxddi,nlvddi &
+     &				,nsect,kfluxm,idtflx,nlmax &
+     &				,kflux &
+     &				,nlayers &
+     &				)
 
-c reads first record of FLX file
-c
-c nvers		on entry maximal version that can be read
-c		-> must be an input, used to check the corectness
-c		.. of the call parameters
-c		on return actual version read
+! reads first record of FLX file
+!
+! nvers		on entry maximal version that can be read
+!		-> must be an input, used to check the corectness
+!		.. of the call parameters
+!		on return actual version read
 
 	use flxfile
 
 	implicit none
 
-c arguments
+! arguments
 	integer iunit,nvers
 	integer nscddi,nfxddi,nlvddi
 	integer nsect,kfluxm,idtflx,nlmax
 	integer kflux(kfluxm)
 	integer nlayers(nsect)
-c local
+! local
 	integer ntype,irec,i
 
-c initialize
+! initialize
 
-c control newest version number for call
+! control newest version number for call
 
 	if( flx_maxvers .ne. nvers ) goto 95
 
-c rewind file
+! rewind file
 
 	rewind(iunit,err=96)
 
-c first record - find out what version
+! first record - find out what version
 
 	irec = 1
 	read(iunit,end=91,err=99) ntype,nvers
 
-c control version number and type of file
+! control version number and type of file
 
 	if( ntype .ne. flx_type ) goto 97
 	if( nvers .le. 0 .or. nvers .gt. flx_maxvers ) goto 98
 	flx_vers = nvers
 
-c next records
+! next records
 
 	irec = 2
 	if( nvers .le. 3 ) then
@@ -644,33 +644,33 @@ c next records
 	stop 'error stop rfflx: error 91'
 	end
 
-c********************************************************************
+!********************************************************************
 
-	subroutine wfflx	(iunit,nvers
-     +				,nsect,kfluxm,idtflx,nlmax
-     +				,kflux
-     +				,nlayers
-     +				)
+	subroutine wfflx	(iunit,nvers &
+     &				,nsect,kfluxm,idtflx,nlmax &
+     &				,kflux &
+     &				,nlayers &
+     &				)
 
-c writes first record of FLX file
-c
-c nvers		on entry maximal version
-c		-> must be an input, used to check the corectness
-c		.. of the call parameters
+! writes first record of FLX file
+!
+! nvers		on entry maximal version
+!		-> must be an input, used to check the corectness
+!		.. of the call parameters
 
 	use flxfile
 
 	implicit none
 
-c arguments
+! arguments
 	integer iunit,nvers
 	integer nsect,kfluxm,idtflx,nlmax
 	integer kflux(kfluxm)
 	integer nlayers(nsect)
-c local
+! local
 	integer i
 
-c control newest version number for call
+! control newest version number for call
 
 	if( nvers.ne.flx_maxvers ) goto 95
 
@@ -689,17 +689,17 @@ c control newest version number for call
 	stop 'error stop wfflx: old version'
 	end
 
-c************************************************************
+!************************************************************
 
 	subroutine rdflx(iunit,it,nlvddi,nsect,ivar,nlayers,fluxes,ierr)
 
-c reads data record of FLX file
+! reads data record of FLX file
 
 	use flxfile
 
 	implicit none
 
-c arguments
+! arguments
 	integer iunit,it
 	integer nlvddi
 	integer nsect
@@ -707,7 +707,7 @@ c arguments
 	integer nlayers(nsect)
 	real fluxes(0:nlvddi,3,nsect)
 	integer ierr
-c local
+! local
 	integer i,l,j
 	integer nvers
 
@@ -715,19 +715,19 @@ c local
 	ivar = 0
 
 	if( nvers .le. 2 ) then
-          read(iunit,end=88,err=99) it,nsect
-     +                  ,(fluxes(0,1,i),i=1,nsect)
-     +                  ,(fluxes(0,2,i),fluxes(0,3,i),i=1,nsect)
+          read(iunit,end=88,err=99) it,nsect &
+     &                  ,(fluxes(0,1,i),i=1,nsect) &
+     &                  ,(fluxes(0,2,i),fluxes(0,3,i),i=1,nsect)
 	else if( nvers .le. 4 ) then
-          read(iunit,end=88,err=99) it,nsect
-     +                  ,(nlayers(i)
-     +                  ,((fluxes(l,j,i),l=0,nlayers(i)),j=1,3)
-     +                  ,i=1,nsect)
+          read(iunit,end=88,err=99) it,nsect &
+     &                  ,(nlayers(i) &
+     &                  ,((fluxes(l,j,i),l=0,nlayers(i)),j=1,3) &
+     &                  ,i=1,nsect)
 	else if( nvers .ge. 5 ) then
-          read(iunit,end=88,err=99) it,nsect,ivar
-     +                  ,(nlayers(i)
-     +                  ,((fluxes(l,j,i),l=0,nlayers(i)),j=1,3)
-     +                  ,i=1,nsect)
+          read(iunit,end=88,err=99) it,nsect,ivar &
+     &                  ,(nlayers(i) &
+     &                  ,((fluxes(l,j,i),l=0,nlayers(i)),j=1,3) &
+     &                  ,i=1,nsect)
 	else
 	   stop 'error stop rdflx: internal error (1)'
 	end if
@@ -746,31 +746,31 @@ c local
 	return
 	end
 
-c************************************************************
+!************************************************************
 
 	subroutine wrflx(iunit,it,nlvddi,nsect,ivar,nlayers,fluxes)
 
-c writes data record of FLX file
+! writes data record of FLX file
 
 	implicit none
 
-c arguments
+! arguments
 	integer iunit,it
 	integer nlvddi
 	integer nsect
 	integer ivar
 	integer nlayers(nsect)
 	real fluxes(0:nlvddi,3,nsect)
-c local
+! local
 	integer i,l,j
 
-        write(iunit) it,nsect,ivar
-     +                  ,(nlayers(i)
-     +                  ,((fluxes(l,j,i),l=0,nlayers(i)),j=1,3)
-     +                  ,i=1,nsect)
+        write(iunit) it,nsect,ivar &
+     &                  ,(nlayers(i) &
+     &                  ,((fluxes(l,j,i),l=0,nlayers(i)),j=1,3) &
+     &                  ,i=1,nsect)
 
 	return
 	end
 
-c************************************************************
+!************************************************************
 

@@ -23,48 +23,48 @@
 !
 !--------------------------------------------------------------------------
 
-c subroutines for line manipolations
-c
-c contents :
-c
-c function klineck(n,kline)			checks compatibility of kline
-c subroutine linedbl(n,kline,bstop)		tests for uniqueness
-c subroutine lineadj(n,kline,bstop)		tests for adjacency
-c function iskadj(k1,k2)			tests for adjacency of nodes
-c
-c function nextline(inode,ndim,nnode,ifirst,ilast)	gets next line
-c function extrline(inode,ndim,nline,ifirst,ilast)	extracts line from array
-c
-c subroutine revline(n,kline)			reverses line
-c
-c revision log :
-c
-c 19.11.1999	ggu	isolated from subflxa
-c 02.12.1999	ggu	new routine extrline, nextline substitutes extrli
-c 20.01.2000	ggu	new routine revline
-c 28.04.2009	ggu	links re-structured
-c 23.03.2010	ggu	changed v6.1.1
-c 18.10.2011	ggu	changed VERS_6_1_33
-c 19.01.2015	ggu	changed VERS_7_1_2
-c 19.01.2015	ggu	changed VERS_7_1_3
-c 05.05.2015	ggu	changed VERS_7_1_10
-c 17.07.2015	ggu	changed VERS_7_1_80
-c 20.07.2015	ggu	changed VERS_7_1_81
-c 16.12.2015	ggu	changed VERS_7_3_16
-c 18.12.2015	ggu	changed VERS_7_3_17
-c 06.06.2016	ggu	module added, new routines for bnd and grd lines
-c 16.02.2019	ggu	changed VERS_7_5_60
-c 27.05.2022	ggu	prepared for mpi
-c
-c note :
-c
-c line nodes are stored consecutive in inode (dimension ndim)
-c a value of zero devides lines from each other
-c any number of zeros between lines (and leading and trailing) are allowed
-c
-c******************************************************************
-c******************************************************************
-c******************************************************************
+! subroutines for line manipolations
+!
+! contents :
+!
+! function klineck(n,kline)			checks compatibility of kline
+! subroutine linedbl(n,kline,bstop)		tests for uniqueness
+! subroutine lineadj(n,kline,bstop)		tests for adjacency
+! function iskadj(k1,k2)			tests for adjacency of nodes
+!
+! function nextline(inode,ndim,nnode,ifirst,ilast)	gets next line
+! function extrline(inode,ndim,nline,ifirst,ilast)	extracts line from array
+!
+! subroutine revline(n,kline)			reverses line
+!
+! revision log :
+!
+! 19.11.1999	ggu	isolated from subflxa
+! 02.12.1999	ggu	new routine extrline, nextline substitutes extrli
+! 20.01.2000	ggu	new routine revline
+! 28.04.2009	ggu	links re-structured
+! 23.03.2010	ggu	changed v6.1.1
+! 18.10.2011	ggu	changed VERS_6_1_33
+! 19.01.2015	ggu	changed VERS_7_1_2
+! 19.01.2015	ggu	changed VERS_7_1_3
+! 05.05.2015	ggu	changed VERS_7_1_10
+! 17.07.2015	ggu	changed VERS_7_1_80
+! 20.07.2015	ggu	changed VERS_7_1_81
+! 16.12.2015	ggu	changed VERS_7_3_16
+! 18.12.2015	ggu	changed VERS_7_3_17
+! 06.06.2016	ggu	module added, new routines for bnd and grd lines
+! 16.02.2019	ggu	changed VERS_7_5_60
+! 27.05.2022	ggu	prepared for mpi
+!
+! note :
+!
+! line nodes are stored consecutive in inode (dimension ndim)
+! a value of zero devides lines from each other
+! any number of zeros between lines (and leading and trailing) are allowed
+!
+!******************************************************************
+!******************************************************************
+!******************************************************************
 
 !==================================================================
 	module lines
@@ -315,13 +315,13 @@ c******************************************************************
 	end module lines
 !==================================================================
 
-c******************************************************************
-c******************************************************************
-c******************************************************************
+!******************************************************************
+!******************************************************************
+!******************************************************************
 
 	function klineck(n,kline)
 
-c checks compatibility of kline -> returns number of lines or -1 (error)
+! checks compatibility of kline -> returns number of lines or -1 (error)
 
 	implicit none
 
@@ -354,11 +354,11 @@ c checks compatibility of kline -> returns number of lines or -1 (error)
 
 	end
 
-c******************************************************************
+!******************************************************************
 
 	subroutine linedbl(n,kline,bstop)
 
-c tests for uniqueness
+! tests for uniqueness
 
 	implicit none
 
@@ -387,11 +387,11 @@ c tests for uniqueness
 
 	end
 
-c******************************************************************
+!******************************************************************
 
 	subroutine lineadj(n,kline,bstop)
 
-c tests for adjacency
+! tests for adjacency
 
 	implicit none
 
@@ -419,11 +419,11 @@ c tests for adjacency
 
 	end
 
-c******************************************************************
+!******************************************************************
 
 	function iskadj(k1,k2)
 
-c tests for adjacency between nodes
+! tests for adjacency between nodes
 
 	use mod_geom
 	use basin
@@ -451,22 +451,22 @@ c tests for adjacency between nodes
 
 	end
 
-c**********************************************************************
+!**********************************************************************
 
 	function nextline(inode,ndim,nnode,ifirst,ilast)
 
-c gets next line from array
-c
-c on entry:
-c           nnode points to first node to be analysed
-c on return inode(ifirst) is first node of line and
-c           inode(ilast)  is last  node of line
-c           nnode points to first node to be analysed on next entry
-c
-c on first call nnode must be 0, afterwards nnode gets set by algorithm
-c node list must contain zeros to devide lines from each other
-c any number of consecutive zeros can be used
-c leading and trailing zeros are allowed
+! gets next line from array
+!
+! on entry:
+!           nnode points to first node to be analysed
+! on return inode(ifirst) is first node of line and
+!           inode(ilast)  is last  node of line
+!           nnode points to first node to be analysed on next entry
+!
+! on first call nnode must be 0, afterwards nnode gets set by algorithm
+! node list must contain zeros to devide lines from each other
+! any number of consecutive zeros can be used
+! leading and trailing zeros are allowed
 
 	implicit none
 
@@ -504,7 +504,7 @@ c leading and trailing zeros are allowed
 	    i = i + 1
 	end do
 
-c end last line if not already done
+! end last line if not already done
 
 	if( iw .eq. 0 ) ilast = ndim		!last line
 
@@ -518,14 +518,14 @@ c end last line if not already done
 
 	end
 
-c**********************************************************************
+!**********************************************************************
 
 	function extrline(inode,ndim,nline,ifirst,ilast)
 
-c extracts given line number from array
-c
-c on return inode(ifirst) is first node of line and
-c           inode(ilast)  is last  node of line
+! extracts given line number from array
+!
+! on return inode(ifirst) is first node of line and
+!           inode(ilast)  is last  node of line
 
 	implicit none
 
@@ -544,10 +544,10 @@ c           inode(ilast)  is last  node of line
 	nlines = 0
 	bfound = .false.
 
-c loop until no more line or line found
+! loop until no more line or line found
 
-	do while( nextline(inode,ndim,nnode,ifirst,ilast) .and. 
-     +				.not. bfound )
+	do while( nextline(inode,ndim,nnode,ifirst,ilast) .and.  &
+     &				.not. bfound )
 	  nlines = nlines + 1
 	  if( nline .eq. nlines ) bfound = .true.
 	end do
@@ -556,11 +556,11 @@ c loop until no more line or line found
 
 	end
 
-c**********************************************************************
+!**********************************************************************
 
 	subroutine revline(n,kline)
 
-c reverses line
+! reverses line
 
 	implicit none
 
@@ -578,9 +578,9 @@ c reverses line
 
 	end
 
-c**********************************************************************
-c**********************************************************************
-c**********************************************************************
+!**********************************************************************
+!**********************************************************************
+!**********************************************************************
 
 	subroutine bnd_internal_file(file,binsert,nli,nnodes,xv,yv,ind)
 
@@ -622,7 +622,7 @@ c**********************************************************************
 	nli = -1
 	end
 
-c**********************************************************************
+!**********************************************************************
 
 	subroutine bnd_read_file(file,nli,nnodes,xv,yv,ind)
 
@@ -639,7 +639,7 @@ c**********************************************************************
 
 	end
 
-c**********************************************************************
+!**********************************************************************
 
 	subroutine bnd_test_file(file,nli,nnodes)
 
@@ -657,7 +657,7 @@ c**********************************************************************
 
 	end
 
-c**********************************************************************
+!**********************************************************************
 
 	function bnd_is_bnd_file(file)
 
@@ -675,9 +675,9 @@ c**********************************************************************
 
 	end
 
-c**********************************************************************
-c**********************************************************************
-c**********************************************************************
+!**********************************************************************
+!**********************************************************************
+!**********************************************************************
 
 	subroutine bnd_insert_lines(file,id)
 
@@ -713,15 +713,15 @@ c**********************************************************************
 	do il=1,nli
 	  is = ind(il)
 	  n = ind(il+1) - is
-	  call lines_set_line(id,il,il,it,n,d
-     +				,nodes,xv(is:),yv(is:))
+	  call lines_set_line(id,il,il,it,n,d &
+     &				,nodes,xv(is:),yv(is:))
 	end do
 
 	deallocate(xv,yv,nodes,ind)
 
 	end
 
-c**********************************************************************
+!**********************************************************************
 
 	subroutine grd_insert_lines(file,id)
 
@@ -756,7 +756,7 @@ c**********************************************************************
 
 	end
 
-c**********************************************************************
+!**********************************************************************
 
 	subroutine read_lines(file,id)
 
@@ -778,5 +778,5 @@ c**********************************************************************
 	
 	end
 
-c**********************************************************************
+!**********************************************************************
 

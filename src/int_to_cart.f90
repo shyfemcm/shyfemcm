@@ -24,28 +24,28 @@
 !
 !--------------------------------------------------------------------------
 
-c xi routines
-c
-c contents :
-c
-c
-c revision log :
-c
-c 21.01.2015	ggu	new routine compute_cartesian_coords()
-c 01.04.2015	ggu	changed VERS_7_1_7
-c 23.04.2015	ggu	compute s value for particle path
-c 16.05.2015	ccf	add some more check in xit_start_end for small numbers
-c 31.03.2017	ggu	changed VERS_7_5_24
-c 16.02.2019	ggu	changed VERS_7_5_60
-c
-c***********************************************************
-c***********************************************************
-c***********************************************************
-c***********************************************************
+! xi routines
+!
+! contents :
+!
+!
+! revision log :
+!
+! 21.01.2015	ggu	new routine compute_cartesian_coords()
+! 01.04.2015	ggu	changed VERS_7_1_7
+! 23.04.2015	ggu	compute s value for particle path
+! 16.05.2015	ccf	add some more check in xit_start_end for small numbers
+! 31.03.2017	ggu	changed VERS_7_5_24
+! 16.02.2019	ggu	changed VERS_7_5_60
+!
+!***********************************************************
+!***********************************************************
+!***********************************************************
+!***********************************************************
 
 	subroutine xy2xit(xx,yy,x,y,xi)
 
-c given x/y returns internal coordinates xi
+! given x/y returns internal coordinates xi
 
 	implicit none
 
@@ -64,11 +64,11 @@ c given x/y returns internal coordinates xi
 
 	end
 	
-c***********************************************************
+!***********************************************************
 
 	subroutine xit2xy(xx,yy,x,y,xi)
 
-c given internal coordinates xi returns x/y
+! given internal coordinates xi returns x/y
 
 	implicit none
 
@@ -123,13 +123,13 @@ c given internal coordinates xi returns x/y
 	stop 'error stop xi2xy: det == 0'
 	end
 	
-c***********************************************************
+!***********************************************************
 
 	subroutine xit_abc(xx,yy,a,b,c)
 
-c returns a,b,c to compute xi
-c
-c natural coordinates in triangle:   xi(i) = a(i) + b(i)*x + c(i)*y    i=1,3
+! returns a,b,c to compute xi
+!
+! natural coordinates in triangle:   xi(i) = a(i) + b(i)*x + c(i)*y    i=1,3
 
 	implicit none
 
@@ -164,13 +164,13 @@ c natural coordinates in triangle:   xi(i) = a(i) + b(i)*x + c(i)*y    i=1,3
 
 	end
 
-c***********************************************************
+!***********************************************************
 
 	subroutine xit_check(xx,yy,area,reg)
 
-c checks triangle for regularity
-c
-c natural coordinates in triangle:   xi(i) = a(i) + b(i)*x + c(i)*y    i=1,3
+! checks triangle for regularity
+!
+! natural coordinates in triangle:   xi(i) = a(i) + b(i)*x + c(i)*y    i=1,3
 
 	implicit none
 
@@ -207,13 +207,13 @@ c natural coordinates in triangle:   xi(i) = a(i) + b(i)*x + c(i)*y    i=1,3
 
 	end
 
-c***********************************************************
+!***********************************************************
 
 	subroutine xit_start_end(iflux,alpha,xip,xis,xie,s)
 
-c find start and end point of line through point xip
-c
-c natural coordinates in triangle:   xi(i) = a(i) + b(i)*x + c(i)*y    i=1,3
+! find start and end point of line through point xip
+!
+! natural coordinates in triangle:   xi(i) = a(i) + b(i)*x + c(i)*y    i=1,3
 
 	implicit none
 
@@ -311,5 +311,5 @@ c natural coordinates in triangle:   xi(i) = a(i) + b(i)*x + c(i)*y    i=1,3
 
 	end
 
-c***********************************************************
+!***********************************************************
 

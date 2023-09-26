@@ -24,115 +24,115 @@
 !
 !--------------------------------------------------------------------------
 
-c time management routines
-c
-c contents :
-c
-c
-c revision log :
-c
-c 23.09.1997	ggu	boundn deleted -> no access to data structure
-c 20.03.1998	ggu	minor changes to priout
-c 29.04.1998	ggu	new module for semi-implicit time-step
-c 07.05.1998	ggu	check for error on return of nrdvecr
-c 19.06.1998	ggu	version number is character
-c 22.01.1999	ggu	oxygen section added
-c 26.01.1999	ggu	new comp3d added
-c 11.08.1999	ggu	new compatibility array hlhv initialized
-c 19.11.1999	ggu	new routines for section vol
-c 20.01.2000	ggu	common block /dimdim/ eliminated
-c 04.02.2000	ggu	no priout, dobefor/after, pritime, endtime
-c 15.05.2000	ggu	hm3v substituted
-c 26.05.2000	ggu	copright statement adjourned
-c 21.11.2001	ggu	routines to handle advective index (aix)
-c 27.11.2001	ggu	routine to handle info file (getinfo)
-c 11.10.2002	ggu	aix routines deleted
-c 07.02.2003	ggu	routine added: changeimp, getaz; deleted getaza
-c 10.08.2003	ggu	call adjust_chezy instead sp135r
-c 14.08.2003	ggu	femver transfered to subver, not called in nlsh2d
-c 20.08.2003	ggu	tsmed substituted by ts_shell
-c 01.09.2003	ggu	call wrousa
-c 03.09.2004	ggu	call admrst, comp3d renamed to init_3d (not used)
-c 03.09.2004	ggu	nlv, hlv initialized in nlsh2d (FIXME)
-c 28.09.2004	ggu	read lagrangian section
-c 01.12.2004	ggu	new routine set_timestep for variable time step
-c 17.01.2005	ggu	get_stab_index to newcon.f, error stop in set_timestep
-c 14.03.2005	ggu	syncronize idt with end of simulation (set_timestep)
-c 07.11.2005	ggu	handle new section sedtr for sediments
-c 23.03.2006	ggu	changed time step to real
-c 23.05.2007	ggu	recall variable time step pars at every time step
-c 02.10.2007	ggu	bug fix in set_timestep for very small rindex
-c 10.04.2008	ccf	output in netcdf format
-c 28.04.2008	ggu	in set_timestep new call to advect_stability()
-c 03.09.2008	ggu	in nlsh2d different error message
-c 20.11.2008	ggu	init_3d deleted, nlv initialized to 0
-c 18.11.2009	ggu	new format in pritime (write also time step)
-c 22.02.2010	ggu	new call to hydro_stability to compute time step
-c 22.02.2010	ccf	new routine for tidal pot. (tideforc), locaus deleted
-c 26.02.2010	ggu	in set_timestep compute and write ri with old dt
-c 22.03.2010	ggu	some comments for better readability
-c 29.04.2010	ggu	new routine set_output_frequency() ... not finished
-c 04.05.2010	ggu	shell to compute energy
-c 22.02.2011	ggu	in pritime() new write to terminal
-c 20.05.2011	ggu	changes in set_timestep(), element removal, idtmin
-c 31.05.2011	ggu	changes for BFM
-c 01.06.2011	ggu	idtmin introduced
-c 12.07.2011	ggu	new routine next_output(), revised set_output_frequency
-c 14.07.2011	ggu	new routines for original time step
-c 13.09.2011	ggu	better error check, rdtitl() more robust
-c 23.01.2012	ggu	new section "proj"
-c 24.01.2012	ggu	new routine setup_parallel()
-c 10.02.2012	ggu	new routines to initialize and access time common block
-c 05.03.2014	ggu	code prepared to repeat time step (irepeat) - not ready
-c 05.03.2014	ggu	new routines get_last/first_time()
-c 10.04.2014	ccf	new section "wrt" for water renewal time
-c 29.10.2014	ggu	do_() routines transfered from newpri.f
-c 10.11.2014	ggu	time management routines transfered to this file
-c 26.11.2014	ggu	changed VERS_7_0_7
-c 05.12.2014	ggu	changed VERS_7_0_8
-c 12.12.2014	ggu	changed VERS_7_0_9
-c 19.12.2014	ggu	accept date also as string
-c 23.12.2014	ggu	fractional time step introduced
-c 07.01.2015	ggu	fractional time step without rounding (itsplt=3)
-c 26.02.2015	ggu	changed VERS_7_1_5
-c 30.04.2015	ggu	changed VERS_7_1_9
-c 23.09.2015	ggu	time step is now working with dt as double
-c 10.10.2015	ggu	use bsync as global to check for syncronization
-c 23.09.2016	ggu	cleaned set_timestep()
-c 30.09.2016	ggu	changed VERS_7_5_18
-c 20.10.2017	ggu	new get_absolute_act_time(),get_absolute_ref_time()
-c 04.11.2017	ggu	changed VERS_7_5_34
-c 05.12.2017	ggu	changed VERS_7_5_39
-c 22.02.2018	ggu	changed VERS_7_5_42
-c 23.02.2018	ggu	most parts converted from int to double
-c 29.03.2018	ggu	bug fix for syncronization step
-c 03.04.2018	ggu	changed VERS_7_5_43
-c 03.04.2018	ggu	changed VERS_7_5_44
-c 13.04.2018	ggu	hydro_stability includes explicit gravity wave
-c 13.04.2018	ggu	set_timestep now is working with mpi
-c 16.04.2018	ggu	write warning if time step is over recommended one
-c 09.02.2019	ggu	bug fix for syncronization of last time step
-c 16.02.2019	ggu	changed VERS_7_5_60
-c 21.05.2019	ggu	changed VERS_7_5_62
-c 15.09.2019	ggu	small changes to account for synchorization time step
-c 08.02.2020	ggu	utility routines copied to new file
-c 16.02.2020	ggu	itunit eliminated
-c 16.03.2020	ggu	write also dtime to terminal
-c 31.05.2021	ggu	write stability index to inf file
-c 15.07.2021	ggu	do not set it (for climatological runs)
-c 16.02.2022	ggu	cosmetic changes
-c 20.03.2022	ggu	eliminated convert_time -> convert_time_d
-c 21.03.2022	ggu	bug in set_timestep: dtmin is real, now use ddtmin as dp
-c 28.03.2022	ggu	bug fix: ddtmin was not saved
-c 02.04.2023    ggu     only master writes to iuinfo
-c
-c**********************************************************************
-c**********************************************************************
-c**********************************************************************
+! time management routines
+!
+! contents :
+!
+!
+! revision log :
+!
+! 23.09.1997	ggu	boundn deleted -> no access to data structure
+! 20.03.1998	ggu	minor changes to priout
+! 29.04.1998	ggu	new module for semi-implicit time-step
+! 07.05.1998	ggu	check for error on return of nrdvecr
+! 19.06.1998	ggu	version number is character
+! 22.01.1999	ggu	oxygen section added
+! 26.01.1999	ggu	new comp3d added
+! 11.08.1999	ggu	new compatibility array hlhv initialized
+! 19.11.1999	ggu	new routines for section vol
+! 20.01.2000	ggu	common block /dimdim/ eliminated
+! 04.02.2000	ggu	no priout, dobefor/after, pritime, endtime
+! 15.05.2000	ggu	hm3v substituted
+! 26.05.2000	ggu	copright statement adjourned
+! 21.11.2001	ggu	routines to handle advective index (aix)
+! 27.11.2001	ggu	routine to handle info file (getinfo)
+! 11.10.2002	ggu	aix routines deleted
+! 07.02.2003	ggu	routine added: changeimp, getaz; deleted getaza
+! 10.08.2003	ggu	call adjust_chezy instead sp135r
+! 14.08.2003	ggu	femver transfered to subver, not called in nlsh2d
+! 20.08.2003	ggu	tsmed substituted by ts_shell
+! 01.09.2003	ggu	call wrousa
+! 03.09.2004	ggu	call admrst, comp3d renamed to init_3d (not used)
+! 03.09.2004	ggu	nlv, hlv initialized in nlsh2d (FIXME)
+! 28.09.2004	ggu	read lagrangian section
+! 01.12.2004	ggu	new routine set_timestep for variable time step
+! 17.01.2005	ggu	get_stab_index to newcon.f, error stop in set_timestep
+! 14.03.2005	ggu	syncronize idt with end of simulation (set_timestep)
+! 07.11.2005	ggu	handle new section sedtr for sediments
+! 23.03.2006	ggu	changed time step to real
+! 23.05.2007	ggu	recall variable time step pars at every time step
+! 02.10.2007	ggu	bug fix in set_timestep for very small rindex
+! 10.04.2008	ccf	output in netcdf format
+! 28.04.2008	ggu	in set_timestep new call to advect_stability()
+! 03.09.2008	ggu	in nlsh2d different error message
+! 20.11.2008	ggu	init_3d deleted, nlv initialized to 0
+! 18.11.2009	ggu	new format in pritime (write also time step)
+! 22.02.2010	ggu	new call to hydro_stability to compute time step
+! 22.02.2010	ccf	new routine for tidal pot. (tideforc), locaus deleted
+! 26.02.2010	ggu	in set_timestep compute and write ri with old dt
+! 22.03.2010	ggu	some comments for better readability
+! 29.04.2010	ggu	new routine set_output_frequency() ... not finished
+! 04.05.2010	ggu	shell to compute energy
+! 22.02.2011	ggu	in pritime() new write to terminal
+! 20.05.2011	ggu	changes in set_timestep(), element removal, idtmin
+! 31.05.2011	ggu	changes for BFM
+! 01.06.2011	ggu	idtmin introduced
+! 12.07.2011	ggu	new routine next_output(), revised set_output_frequency
+! 14.07.2011	ggu	new routines for original time step
+! 13.09.2011	ggu	better error check, rdtitl() more robust
+! 23.01.2012	ggu	new section "proj"
+! 24.01.2012	ggu	new routine setup_parallel()
+! 10.02.2012	ggu	new routines to initialize and access time common block
+! 05.03.2014	ggu	code prepared to repeat time step (irepeat) - not ready
+! 05.03.2014	ggu	new routines get_last/first_time()
+! 10.04.2014	ccf	new section "wrt" for water renewal time
+! 29.10.2014	ggu	do_() routines transfered from newpri.f
+! 10.11.2014	ggu	time management routines transfered to this file
+! 26.11.2014	ggu	changed VERS_7_0_7
+! 05.12.2014	ggu	changed VERS_7_0_8
+! 12.12.2014	ggu	changed VERS_7_0_9
+! 19.12.2014	ggu	accept date also as string
+! 23.12.2014	ggu	fractional time step introduced
+! 07.01.2015	ggu	fractional time step without rounding (itsplt=3)
+! 26.02.2015	ggu	changed VERS_7_1_5
+! 30.04.2015	ggu	changed VERS_7_1_9
+! 23.09.2015	ggu	time step is now working with dt as double
+! 10.10.2015	ggu	use bsync as global to check for syncronization
+! 23.09.2016	ggu	cleaned set_timestep()
+! 30.09.2016	ggu	changed VERS_7_5_18
+! 20.10.2017	ggu	new get_absolute_act_time(),get_absolute_ref_time()
+! 04.11.2017	ggu	changed VERS_7_5_34
+! 05.12.2017	ggu	changed VERS_7_5_39
+! 22.02.2018	ggu	changed VERS_7_5_42
+! 23.02.2018	ggu	most parts converted from int to double
+! 29.03.2018	ggu	bug fix for syncronization step
+! 03.04.2018	ggu	changed VERS_7_5_43
+! 03.04.2018	ggu	changed VERS_7_5_44
+! 13.04.2018	ggu	hydro_stability includes explicit gravity wave
+! 13.04.2018	ggu	set_timestep now is working with mpi
+! 16.04.2018	ggu	write warning if time step is over recommended one
+! 09.02.2019	ggu	bug fix for syncronization of last time step
+! 16.02.2019	ggu	changed VERS_7_5_60
+! 21.05.2019	ggu	changed VERS_7_5_62
+! 15.09.2019	ggu	small changes to account for synchorization time step
+! 08.02.2020	ggu	utility routines copied to new file
+! 16.02.2020	ggu	itunit eliminated
+! 16.03.2020	ggu	write also dtime to terminal
+! 31.05.2021	ggu	write stability index to inf file
+! 15.07.2021	ggu	do not set it (for climatological runs)
+! 16.02.2022	ggu	cosmetic changes
+! 20.03.2022	ggu	eliminated convert_time -> convert_time_d
+! 21.03.2022	ggu	bug in set_timestep: dtmin is real, now use ddtmin as dp
+! 28.03.2022	ggu	bug fix: ddtmin was not saved
+! 02.04.2023    ggu     only master writes to iuinfo
+!
+!**********************************************************************
+!**********************************************************************
+!**********************************************************************
 
 	subroutine print_time
 
-c prints time after time step
+! prints time after time step
 
 	use shympi
 
@@ -163,9 +163,9 @@ c prints time after time step
 	real, save :: cpu_time_old = 0.
 	real, parameter :: cpu_time_max = 1.	!max seconds before flush
 
-c---------------------------------------------------------------
-c set parameters and compute percentage of simulation
-c---------------------------------------------------------------
+!---------------------------------------------------------------
+! set parameters and compute percentage of simulation
+!---------------------------------------------------------------
 
 	if( icall .eq. 0 ) then
           isplit = nint(dgetpar('itsplt'))
@@ -182,9 +182,9 @@ c---------------------------------------------------------------
         !perc = (100.*(it-itanf))/(itend-itanf)
         perc = (100.*(dtime-dtanf))/(dtend-dtanf)
 
-c---------------------------------------------------------------
-c compute total number of iterations
-c---------------------------------------------------------------
+!---------------------------------------------------------------
+! compute total number of iterations
+!---------------------------------------------------------------
 
 	nit1 = 0
 	idtfrac = 0
@@ -226,9 +226,9 @@ c---------------------------------------------------------------
 
 	icall = icall + 1
 
-c---------------------------------------------------------------
-c write to terminal
-c---------------------------------------------------------------
+!---------------------------------------------------------------
+! write to terminal
+!---------------------------------------------------------------
 
 	if( .not. shympi_is_master() ) return
 
@@ -259,9 +259,9 @@ c---------------------------------------------------------------
             write(6,1006) dline,frac,niter,nits,perc
 	  end if
 
-c---------------------------------------------------------------
-c flush if maximum time has passed
-c---------------------------------------------------------------
+!---------------------------------------------------------------
+! flush if maximum time has passed
+!---------------------------------------------------------------
 
 	call cpu_time(cpu_time_new)
 	if( cpu_time_new - cpu_time_old > cpu_time_max ) then
@@ -270,9 +270,9 @@ c---------------------------------------------------------------
 	  if( iuinfo > 0 ) flush(iuinfo)
 	end if
 
-c---------------------------------------------------------------
-c end of routine
-c---------------------------------------------------------------
+!---------------------------------------------------------------
+! end of routine
+!---------------------------------------------------------------
 
 	return
  1004   format(17x,a4,12x,'dtime',4x,'dt',12x,'iterations',5x,'percent')
@@ -282,11 +282,11 @@ c---------------------------------------------------------------
  1009   format(1x,a20,1x,f16.2, f9.2,    i10,' /',i10,f8.3,' %')
 	end
 
-c********************************************************************
+!********************************************************************
 
 	subroutine print_end_time	!FIXME
 
-c prints stats after last time step
+! prints stats after last time step
 
 	use shympi
 
@@ -301,13 +301,13 @@ c prints stats after last time step
 
 	end
 
-c********************************************************************
-c********************************************************************
-c********************************************************************
+!********************************************************************
+!********************************************************************
+!********************************************************************
 
 	subroutine setup_time
 
-c setup and check time parameters
+! setup and check time parameters
 
 	implicit none
 
@@ -369,11 +369,11 @@ c setup and check time parameters
 
 	end
 
-c********************************************************************
+!********************************************************************
 
 	subroutine setup_date
 
-c setup and check date parameter
+! setup and check date parameter
 
 	implicit none
 
@@ -427,7 +427,7 @@ c setup and check date parameter
 	stop 'error stop ckdate: date'
 	end
 
-c********************************************************************
+!********************************************************************
 
 	subroutine get_date_time(date,time)
 
@@ -442,13 +442,13 @@ c********************************************************************
 
 	end
 
-c********************************************************************
-c********************************************************************
-c********************************************************************
+!********************************************************************
+!********************************************************************
+!********************************************************************
 
         subroutine check_timestep(irepeat)
 
-c still to be implemented
+! still to be implemented
 
 	implicit none
 
@@ -458,13 +458,13 @@ c still to be implemented
 
 	end
 
-c********************************************************************
-c********************************************************************
-c********************************************************************
+!********************************************************************
+!********************************************************************
+!********************************************************************
 
         subroutine set_timestep
 
-c controls time step and adjusts it
+! controls time step and adjusts it
 
 	use shympi
 
@@ -522,19 +522,19 @@ c controls time step and adjusts it
 
         icall = icall + 1
 
-c----------------------------------------------------------------------
-c        idtsync = 0             !time step for syncronization
-c        cmax = 1.0              !maximal Courant number permitted
-c        isplit = -1             !mode for variable time step:
-c                                ! -1:  time step fixed, 
-c                                !      no computation of rindex
-c                                !  0:  time step fixed
-c                                !  1:  split time step
-c                                !  2:  optimize time step (no multiple)
-c                                !  3:  optimize time step (fractional)
-c	 idtmin = 1		 !minimum time step allowed
-c	 tfact = 0		 !factor of maximum decrease of time step
-c----------------------------------------------------------------------
+!----------------------------------------------------------------------
+!        idtsync = 0             !time step for syncronization
+!        cmax = 1.0              !maximal Courant number permitted
+!        isplit = -1             !mode for variable time step:
+!                                ! -1:  time step fixed, 
+!                                !      no computation of rindex
+!                                !  0:  time step fixed
+!                                !  1:  split time step
+!                                !  2:  optimize time step (no multiple)
+!                                !  3:  optimize time step (fractional)
+!	 idtmin = 1		 !minimum time step allowed
+!	 tfact = 0		 !factor of maximum decrease of time step
+!----------------------------------------------------------------------
 
 	call check_time('in set_timestep start')
 
@@ -547,17 +547,17 @@ c----------------------------------------------------------------------
           rindex = 0.
         end if
 
-c----------------------------------------------------------------------
-c syncronize stability index between domains if running in mpi mode
-c----------------------------------------------------------------------
+!----------------------------------------------------------------------
+! syncronize stability index between domains if running in mpi mode
+!----------------------------------------------------------------------
 
 	!write(6,*) 'time domains: ',my_id,rindex,1./rindex,cmax
 	rindex = shympi_max(rindex)
 	!write(6,*) 'time final: ',my_id,rindex,1./rindex,cmax
 
-c----------------------------------------------------------------------
-c split time step
-c----------------------------------------------------------------------
+!----------------------------------------------------------------------
+! split time step
+!----------------------------------------------------------------------
 
 	istot = 0
 	idtfrac = 0
@@ -605,12 +605,12 @@ c----------------------------------------------------------------------
 
 	call check_time('in set_timestep 1')
 
-c----------------------------------------------------------------------
-c dt	 is proposed new time step
-c idts   is time step with which to syncronize
-c istot  is number of internal time steps (only for isplit = 1)
-c rindex is computed stability index (refers to time step == 1)
-c----------------------------------------------------------------------
+!----------------------------------------------------------------------
+! dt	 is proposed new time step
+! idts   is time step with which to syncronize
+! istot  is number of internal time steps (only for isplit = 1)
+! rindex is computed stability index (refers to time step == 1)
+!----------------------------------------------------------------------
 
 	if( rindex > 0. ) then
 	  dt_recom = 1. / rindex
@@ -624,9 +624,9 @@ c----------------------------------------------------------------------
 	  end if
 	end if
 
-c----------------------------------------------------------------------
-c	syncronize time step
-c----------------------------------------------------------------------
+!----------------------------------------------------------------------
+!	syncronize time step
+!----------------------------------------------------------------------
 
 	dtmax = dt
 	dtime = t_act
@@ -656,11 +656,11 @@ c----------------------------------------------------------------------
 
 	call check_time('in set_timestep 2')
 
-c----------------------------------------------------------------------
-c ri     is stability index for computed time step
-c dtmin  is minimum time step allowed
-c dt	 is the computed time step
-c----------------------------------------------------------------------
+!----------------------------------------------------------------------
+! ri     is stability index for computed time step
+! dtmin  is minimum time step allowed
+! dt	 is the computed time step
+!----------------------------------------------------------------------
 
         ri = dt*rindex
 
@@ -684,9 +684,9 @@ c----------------------------------------------------------------------
           stop 'error stop set_timestep: time step too small'
         end if
 
-c----------------------------------------------------------------------
-c set new values
-c----------------------------------------------------------------------
+!----------------------------------------------------------------------
+! set new values
+!----------------------------------------------------------------------
 
         niter=niter+1
 
@@ -714,8 +714,8 @@ c----------------------------------------------------------------------
 	if( bsync ) iss = 1
 
 	if( iuinfo > 0 ) then
-          write(iuinfo,1004) 'timestep: ',aline_act
-     +				,t_act,istot,iss,dt,perc
+          write(iuinfo,1004) 'timestep: ',aline_act &
+     &				,t_act,istot,iss,dt,perc
 	  flush(iuinfo)	
 	end if
 
@@ -730,7 +730,7 @@ c----------------------------------------------------------------------
  1004   format(a,a20,f18.4,i5,i3,2f10.2)
         end
 
-c**********************************************************************
+!**********************************************************************
 
         subroutine sync_step(dtanf,dtsync,dtime,dt,bsync)
 
@@ -759,13 +759,13 @@ c**********************************************************************
 
         end
 
-c**********************************************************************
+!**********************************************************************
 
 	subroutine split_equal(rindex,cmax,dt,istot)
 
-c split time step (macro timestep) into equal parts
-c
-c dt is the new time step, all the rest can be computed from dt
+! split time step (macro timestep) into equal parts
+!
+! dt is the new time step, all the rest can be computed from dt
 
 	implicit none
 
@@ -800,9 +800,9 @@ c dt is the new time step, all the rest can be computed from dt
 
 	end
 
-c**********************************************************************
-c**********************************************************************
-c**********************************************************************
+!**********************************************************************
+!**********************************************************************
+!**********************************************************************
 
 	subroutine check_time(text)
 
@@ -839,9 +839,9 @@ c**********************************************************************
 
 	end
 
-c********************************************************************
-c********************************************************************
-c********************************************************************
+!********************************************************************
+!********************************************************************
+!********************************************************************
 
         subroutine test_sync
 

@@ -25,68 +25,68 @@
 !
 !--------------------------------------------------------------------------
 
-c depth utility routines
-c
-c contents :
-c
-c function igtdep(k,f)                  get depth for node
-c function igtdpa(mode,h)               gets unique depth for all nodes
-c subroutine huniqu(hev,hkv)            make depth unique for every node
-c subroutine makehev(hev)		makes hev (elementwise depth)
-c subroutine makehkv(hkv)		makes hkv (nodewise depth)
-c subroutine depadj(hmin,hmax,href)	adjusts depth to ref/min/max values
-c
-c revision log :
-c
-c 02.02.1994	ggu	$$nmax - check error condtion nmax
-c 29.06.1997	ggu	$$ndim - dimension of f is passed
-c 29.06.1997	ggu	depth routines in one file
-c 06.11.1998	ggu	new huniqu to compute hev and hkv
-c 19.10.1999	ggu	new routine makehv from subutl
-c 25.03.2002	ggu	new routines makehkv (before makehv) and makehev
-c 28.11.2005	ggu	makehkv changed (uses real aux value, area weight)
-c 24.02.2006	ggu	bug in makehkv -> haux was integer
-c 18.10.2006	ccf	bug in makehkv -> no area multiplication
-c 23.03.2010	ggu	changed v6.1.1
-c 16.12.2010	ggu	in depadj() do not set hm3v to constant
-c 17.05.2011	ggu	new routines to adjourn depth
-c 31.05.2011	ggu	changed VERS_6_1_23
-c 18.10.2011	ggu	changed VERS_6_1_33
-c 18.11.2011	ggu	new routine makehkv_minmax()
-c 05.09.2013	ggu	new routine set_sigma_hkv_and_hev() from newsig.f
-c 12.09.2013	ggu	changed VERS_6_1_67
-c 25.06.2014	ggu	computa also hkv_min and hkv_max
-c 12.12.2014	ggu	changed VERS_7_0_9
-c 23.12.2014	ggu	changed VERS_7_0_11
-c 19.01.2015	ggu	changed VERS_7_1_3
-c 05.05.2015	ggu	changed VERS_7_1_10
-c 21.05.2015	ggu	changed VERS_7_1_11
-c 25.05.2015	ggu	some changes in depth computation
-c 05.06.2015	ggu	changed VERS_7_1_12
-c 17.07.2015	ggu	changed VERS_7_1_80
-c 20.07.2015	ggu	changed VERS_7_1_81
-c 18.12.2015	ggu	changed VERS_7_3_17
-c 25.05.2016	ggu	changed VERS_7_5_10
-c 05.12.2017	ggu	changed VERS_7_5_39
-c 19.04.2018	ggu	changed VERS_7_5_45
-c 16.02.2019	ggu	changed VERS_7_5_60
-c 13.03.2019	ggu	changed VERS_7_5_61
-c 21.05.2019	ggu	changed VERS_7_5_62
-c 05.12.2022	ggu	use ie_mpi for accumulation and computation of hkv
-c
-c********************************************************************
+! depth utility routines
+!
+! contents :
+!
+! function igtdep(k,f)                  get depth for node
+! function igtdpa(mode,h)               gets unique depth for all nodes
+! subroutine huniqu(hev,hkv)            make depth unique for every node
+! subroutine makehev(hev)		makes hev (elementwise depth)
+! subroutine makehkv(hkv)		makes hkv (nodewise depth)
+! subroutine depadj(hmin,hmax,href)	adjusts depth to ref/min/max values
+!
+! revision log :
+!
+! 02.02.1994	ggu	$$nmax - check error condtion nmax
+! 29.06.1997	ggu	$$ndim - dimension of f is passed
+! 29.06.1997	ggu	depth routines in one file
+! 06.11.1998	ggu	new huniqu to compute hev and hkv
+! 19.10.1999	ggu	new routine makehv from subutl
+! 25.03.2002	ggu	new routines makehkv (before makehv) and makehev
+! 28.11.2005	ggu	makehkv changed (uses real aux value, area weight)
+! 24.02.2006	ggu	bug in makehkv -> haux was integer
+! 18.10.2006	ccf	bug in makehkv -> no area multiplication
+! 23.03.2010	ggu	changed v6.1.1
+! 16.12.2010	ggu	in depadj() do not set hm3v to constant
+! 17.05.2011	ggu	new routines to adjourn depth
+! 31.05.2011	ggu	changed VERS_6_1_23
+! 18.10.2011	ggu	changed VERS_6_1_33
+! 18.11.2011	ggu	new routine makehkv_minmax()
+! 05.09.2013	ggu	new routine set_sigma_hkv_and_hev() from newsig.f
+! 12.09.2013	ggu	changed VERS_6_1_67
+! 25.06.2014	ggu	computa also hkv_min and hkv_max
+! 12.12.2014	ggu	changed VERS_7_0_9
+! 23.12.2014	ggu	changed VERS_7_0_11
+! 19.01.2015	ggu	changed VERS_7_1_3
+! 05.05.2015	ggu	changed VERS_7_1_10
+! 21.05.2015	ggu	changed VERS_7_1_11
+! 25.05.2015	ggu	some changes in depth computation
+! 05.06.2015	ggu	changed VERS_7_1_12
+! 17.07.2015	ggu	changed VERS_7_1_80
+! 20.07.2015	ggu	changed VERS_7_1_81
+! 18.12.2015	ggu	changed VERS_7_3_17
+! 25.05.2016	ggu	changed VERS_7_5_10
+! 05.12.2017	ggu	changed VERS_7_5_39
+! 19.04.2018	ggu	changed VERS_7_5_45
+! 16.02.2019	ggu	changed VERS_7_5_60
+! 13.03.2019	ggu	changed VERS_7_5_61
+! 21.05.2019	ggu	changed VERS_7_5_62
+! 05.12.2022	ggu	use ie_mpi for accumulation and computation of hkv
+!
+!********************************************************************
 
 	function igtdep(k,f,ndim)
 
-c gets depth given a node number
-c if different values of depth are associated
-c with a node, it returns all these values
-c
-c k             node number (internal)
-c f             vector in which the depth values are
-c               ...stored at return
-c ndim		dimension of f
-c igtdep        number of different values found
+! gets depth given a node number
+! if different values of depth are associated
+! with a node, it returns all these values
+!
+! k             node number (internal)
+! f             vector in which the depth values are
+!               ...stored at return
+! ndim		dimension of f
+! igtdep        number of different values found
 
 	use basin
 	use shympi
@@ -124,21 +124,21 @@ c igtdep        number of different values found
 	stop 'error stop igtdep : nmax'		!$$nmax
 	end
 
-c********************************************************************
+!********************************************************************
 
 	function igtdpa(mode,h)
 
-c gets unique depth for all nodes
-c
-c mode          switch
-c               1       deepest value is returned
-c               -1      most shallow value
-c h             vector in which the depth values are
-c               ...stored (return value)
-c igtdpa        return status
-c               1       unique depth
-c               0       no unique depth
-c               -1      error
+! gets unique depth for all nodes
+!
+! mode          switch
+!               1       deepest value is returned
+!               -1      most shallow value
+! h             vector in which the depth values are
+!               ...stored (return value)
+! igtdpa        return status
+!               1       unique depth
+!               0       no unique depth
+!               -1      error
 
 	use basin
 
@@ -201,15 +201,15 @@ c               -1      error
 
 	end
 
-c********************************************************************
+!********************************************************************
 
 	subroutine huniqu(hev,hkv)
 
-c make depth unique for every node (changes hm3v)
-c nodal values are the highest (deepest) value
-c
-c hev		element averaged depth values
-c hkv            array with unique depth values
+! make depth unique for every node (changes hm3v)
+! nodal values are the highest (deepest) value
+!
+! hev		element averaged depth values
+! hkv            array with unique depth values
 
 	use basin
 
@@ -224,7 +224,7 @@ c hkv            array with unique depth values
 
 	integer ipext
 
-c flag nodal values
+! flag nodal values
 
 	flag = -999.
 
@@ -232,7 +232,7 @@ c flag nodal values
 	  hkv(k) = flag
 	end do
 
-c create element averaged depth values and assign to nodal values
+! create element averaged depth values and assign to nodal values
 
 	do ie=1,nel
 	  hm = 0.
@@ -254,7 +254,7 @@ c create element averaged depth values and assign to nodal values
 	  end do
 	end do
 
-c check if all depth values are available
+! check if all depth values are available
 
 	bstop = .false.
 
@@ -269,21 +269,21 @@ c check if all depth values are available
 
 	end
 
-c********************************************************************
-c********************************************************************
-c********************************************************************
+!********************************************************************
+!********************************************************************
+!********************************************************************
 
         subroutine makehev(hev)
 
-c makes hev (elementwise depth)
+! makes hev (elementwise depth)
 
 	use basin
 
         implicit none
 
-c arguments
+! arguments
         real hev(nel)
-c local
+! local
         integer ie,ii
 	double precision hm
 
@@ -297,20 +297,20 @@ c local
 
         end
 
-c********************************************************************
+!********************************************************************
 
         subroutine makehkv(hkv)
 
-c makes hkv (nodewise depth)
+! makes hkv (nodewise depth)
 
 	use basin
 	use shympi
 
         implicit none
 
-c arguments
+! arguments
         real hkv(nkn)
-c local
+! local
         integer ie,ii,k,kn,ie_mpi
 	real weight
         real haux(nkn)   !aux array -> bug - was integer
@@ -346,13 +346,13 @@ c local
 
         end
 
-c********************************************************************
+!********************************************************************
 
         subroutine makehkv_minmax(hkv,itype)
 
-c makes hkv (nodewise depth)
-c
-c itype:  -1: min  0: aver  +1: max
+! makes hkv (nodewise depth)
+!
+! itype:  -1: min  0: aver  +1: max
 
 	use basin
 	use shympi
@@ -365,9 +365,9 @@ c itype:  -1: min  0: aver  +1: max
         integer k,ie,ii
         real hinit,h
 
-c-------------------------------------------------------
-c initialize
-c-------------------------------------------------------
+!-------------------------------------------------------
+! initialize
+!-------------------------------------------------------
 
 	if( itype .eq. 0 ) then
           call makehkv(hkv)
@@ -384,9 +384,9 @@ c-------------------------------------------------------
           hkv(k) = hinit
         end do
 
-c-------------------------------------------------------
-c set hkv
-c-------------------------------------------------------
+!-------------------------------------------------------
+! set hkv
+!-------------------------------------------------------
 
         do ie=1,nel
           do ii=1,3
@@ -412,19 +412,19 @@ c-------------------------------------------------------
           call shympi_exchange_2d_node(hkv)
 	end if
 
-c-------------------------------------------------------
-c end of routine
-c-------------------------------------------------------
+!-------------------------------------------------------
+! end of routine
+!-------------------------------------------------------
 
         end
 
-c********************************************************************
-c********************************************************************
-c********************************************************************
+!********************************************************************
+!********************************************************************
+!********************************************************************
 
 	subroutine depadj(hmin,hmax,href)
 
-c adjusts depth to reference and min/max values - only hm3v is changed
+! adjusts depth to reference and min/max values - only hm3v is changed
 
 	use basin
 
@@ -435,10 +435,10 @@ c adjusts depth to reference and min/max values - only hm3v is changed
 	integer iaux,ie,ii
 	real hmed
 
-c adjust depth to constant in element %%%%%%%%%%%%%%%%%%%%%%
+! adjust depth to constant in element %%%%%%%%%%%%%%%%%%%%%%
 
 
-c adjust depth to minimum depth %%%%%%%%%%%%%%%%%%%%%%%%%%%%
+! adjust depth to minimum depth %%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
 	iaux=0
 	do ie=1,nel
@@ -461,7 +461,7 @@ c adjust depth to minimum depth %%%%%%%%%%%%%%%%%%%%%%%%%%%%
 	  write(6,*) '***********************************************'
 	end if
 
-c adjust depth to maximum depth %%%%%%%%%%%%%%%%%%%%%%%%%%%%
+! adjust depth to maximum depth %%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
 	iaux=0
 	do ie=1,nel
@@ -484,7 +484,7 @@ c adjust depth to maximum depth %%%%%%%%%%%%%%%%%%%%%%%%%%%%
 	  write(6,*) '***********************************************'
 	end if
 
-c adjust depth to reference level %%%%%%%%%%%%%%%%%%%%%%%%%%%%
+! adjust depth to reference level %%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
 	do ie=1,nel
 	 do ii=1,3
@@ -494,18 +494,18 @@ c adjust depth to reference level %%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
 	end
 
-c********************************************************************
+!********************************************************************
 
 	subroutine adjust_depth
 
-c adjusts depth values - only hm3v is changed
+! adjusts depth values - only hm3v is changed
 
 	implicit none
 
 	real hmin,hmax,href
 	real getpar
 
-c       call bocche     !FIXME
+!       call bocche     !FIXME
 
         hmin=getpar('hmin')
         hmax=getpar('hmax')
@@ -515,9 +515,9 @@ c       call bocche     !FIXME
 
 	end
 
-c********************************************************************
-c********************************************************************
-c********************************************************************
+!********************************************************************
+!********************************************************************
+!********************************************************************
 
 	subroutine get_hmax_global(hmax)
 
@@ -536,13 +536,13 @@ c********************************************************************
 
 	end
 
-c********************************************************************
-c********************************************************************
-c********************************************************************
+!********************************************************************
+!********************************************************************
+!********************************************************************
 
 	subroutine set_depth
 
-c sets up depth arrays
+! sets up depth arrays
 
 	implicit none
 
@@ -567,11 +567,11 @@ c sets up depth arrays
 
 	end
 
-c********************************************************************
+!********************************************************************
 
 	subroutine exchange_depth
 
-c exchanges nodal depth values between domains
+! exchanges nodal depth values between domains
 
 	use mod_depth
 	use shympi
@@ -594,11 +594,11 @@ c exchanges nodal depth values between domains
 	end
 
 
-c********************************************************************
+!********************************************************************
 
 	subroutine flatten_hm3v(hsigma)
 
-c flattens bottom below hsigma - only hsigma is used, hm3v is changed
+! flattens bottom below hsigma - only hsigma is used, hm3v is changed
 
 	use basin
 
@@ -624,11 +624,11 @@ c flattens bottom below hsigma - only hsigma is used, hm3v is changed
 
 	end
 
-c********************************************************************
+!********************************************************************
 
 	subroutine make_hkv
 
-c adjusts nodal depth values
+! adjusts nodal depth values
 
 	use mod_depth
 	use basin, only : nkn,nel,ngr,mbw
@@ -641,11 +641,11 @@ c adjusts nodal depth values
 
 	end
 
-c********************************************************************
+!********************************************************************
 
 	subroutine make_hev
 
-c adjusts elemental depth values
+! adjusts elemental depth values
 
 	use mod_depth
 
@@ -655,13 +655,13 @@ c adjusts elemental depth values
 
 	end
 
-c********************************************************************
-c********************************************************************
-c********************************************************************
+!********************************************************************
+!********************************************************************
+!********************************************************************
 
 	subroutine adjourne_depth_from_hm3v
 
-c adjourns hev and hkv from hm3v (if it has been changed)
+! adjourns hev and hkv from hm3v (if it has been changed)
 
 	use mod_depth
 	use shympi
@@ -676,11 +676,11 @@ c adjourns hev and hkv from hm3v (if it has been changed)
 
 	end
 
-c********************************************************************
+!********************************************************************
 
 	subroutine adjourn_depth_from_hev
 
-c adjourns hev and hkv from hm3v (if it has been changed)
+! adjourns hev and hkv from hm3v (if it has been changed)
 
 	use mod_depth
 	use basin
@@ -700,14 +700,14 @@ c adjourns hev and hkv from hm3v (if it has been changed)
 
 	end
 
-c********************************************************************
-c********************************************************************
-c********************************************************************
+!********************************************************************
+!********************************************************************
+!********************************************************************
 
 	subroutine check_sigma_hsigma
 
-c checks hkv and hsigma
-c uses information about sigma layers and hsigma (hybrid)
+! checks hkv and hsigma
+! uses information about sigma layers and hsigma (hybrid)
 
 	use basin
 
@@ -722,9 +722,9 @@ c uses information about sigma layers and hsigma (hybrid)
 	real hsigma
 	real hkv(nkn)		!local
 
-c-------------------------------------------------------
-c initialize
-c-------------------------------------------------------
+!-------------------------------------------------------
+! initialize
+!-------------------------------------------------------
 
 	call get_sigma_info(nlv,nsigma,hsigma)
 
@@ -739,9 +739,9 @@ c-------------------------------------------------------
 	berror = .false.
 	inc = 0
 
-c-------------------------------------------------------
-c set if hkv is continuous in sigma layers
-c-------------------------------------------------------
+!-------------------------------------------------------
+! set if hkv is continuous in sigma layers
+!-------------------------------------------------------
 
 	do ie=1,nel
 
@@ -774,9 +774,9 @@ c-------------------------------------------------------
 	  stop 'error stop set_hkv_and_hev: depth not unique'
 	end if
 
-c-------------------------------------------------------
-c check hsigma crossing
-c-------------------------------------------------------
+!-------------------------------------------------------
+! check hsigma crossing
+!-------------------------------------------------------
 
         do ie=1,nel
           ihmin = 0
@@ -800,15 +800,15 @@ c-------------------------------------------------------
 	  stop 'error stop set_hkv_and_hev: hsigma crossing'
 	end if
 
-c-------------------------------------------------------
-c end of routine
-c-------------------------------------------------------
+!-------------------------------------------------------
+! end of routine
+!-------------------------------------------------------
 
 	end
 
-c********************************************************************
-c********************************************************************
-c********************************************************************
+!********************************************************************
+!********************************************************************
+!********************************************************************
 
 	subroutine read_in_hev(file)
 
@@ -840,7 +840,7 @@ c********************************************************************
 
 	end
 
-c********************************************************************
+!********************************************************************
 
 	subroutine write_out_hev(file)
 
@@ -858,5 +858,5 @@ c********************************************************************
 
 	end
 
-c********************************************************************
+!********************************************************************
 

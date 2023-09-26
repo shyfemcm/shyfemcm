@@ -24,136 +24,136 @@
 !
 !--------------------------------------------------------------------------
 
-c utility routines to read/write OUS file - file type 161
-c
-c contents :
-c
-c        subroutine inious
-c        subroutine setous(iunit,nvers,nkn,nel,nlv)
-c        subroutine getous(iunit,nvers,nkn,nel,nlv)
-c        subroutine delous(iunit)
-c        subroutine dimous(iunit,nknddi,nelddi,nlvddi)
-c
-c        subroutine errous(iunit,routine,text)
-c        subroutine findous_err(iunit,routine,text,n)
-c        function findous(iunit)
-c        subroutine infoous(iunit,iout)
-c
-c        subroutine ous_init(iunit,nversion)
-c        subroutine ous_close(iunit)
-c        subroutine ous_check_dimension(iunit,nknddi,nelddi,nlvddi)
-c
-c        subroutine ous_get_date(iunit,date,time)
-c        subroutine ous_set_date(iunit,date,time)
-c        subroutine ous_get_title(iunit,title)
-c        subroutine ous_set_title(iunit,title)
-c        subroutine ous_get_femver(iunit,femver)
-c        subroutine ous_set_femver(iunit,femver)
-c        subroutine ous_get_params(iunit,nkn,nel,nlv)
-c        subroutine ous_set_params(iunit,nkn,nel,nlv)
-c        subroutine ous_get_hparams(iunit,href,hzmin)
-c        subroutine ous_set_hparams(iunit,href,hzmin)
-c        subroutine ous_clone_params(iu_from,iu_to)
-c
-c	 subroutine ous_is_ous_file(iunit,nvers)
-c
-c        subroutine ous_read_header(iunit,nkn,nel,nlv,ierr)
-c        subroutine ous_write_header(iunit,nkn,nel,nlv,ierr)
-c        subroutine ous_read_header2(iu,ilhv,hlv,hev,ierr)
-c        subroutine ous_write_header2(iunit,ilhv,hlv,hev,ierr)
-c	 subroutine ous_read_record(iu,it,nlvddi,ilhv,z,ze,ut,vt,ierr)
-c	 subroutine ous_write_record(iunit,it,nlvddi,ilhv,z,ze,ut,vt,ierr)
-c
-c        subroutine ous_next_record(iunit,it,ierr)
-c        subroutine ous_back_record(iunit)
-c        subroutine ous_skip_header(iunit,ierr)
-c        subroutine ous_skip_record(iunit,it,ierr)
-c
-c revision log :
-c
-c 21.08.2003	ggu	version 1 implemented
-c 01.09.2003	ggu	first revision
-c 02.09.2003	ggu	last bug fixes (nvers=3 -> nvers=1)
-c 22.09.2004	ggu	bug fix in rdous/wrous -> ie instead of k
-c 23.03.2010	ggu	changed v6.1.1
-c 22.07.2010	ggu	changed VERS_6_1_9
-c 08.06.2011	ggu	new routine delous(), check for end in read
-c 18.01.2014	ggu	restructured, new date,time,femver
-c 28.01.2014	ggu	changed VERS_6_1_71
-c 29.10.2014	ggu	new routine ous_is_ous_file()
-c 30.04.2015	ggu	changed VERS_7_1_9
-c 05.06.2015	ggu	changed VERS_7_1_12
-c 10.07.2015	ggu	changed VERS_7_1_50
-c 30.07.2015	ggu	changed VERS_7_1_83
-c 14.09.2015	ggu	changed VERS_7_2_2
-c 05.11.2015	ggu	changed VERS_7_3_12
-c 18.12.2015	ggu	changed VERS_7_3_17
-c 04.11.2017	ggu	changed VERS_7_5_34
-c 14.11.2017	ggu	changed VERS_7_5_36
-c 18.12.2018	ggu	changed VERS_7_5_52
-c 16.02.2019	ggu	changed VERS_7_5_60
-c
-c notes :
-c
-c Usage writing:
-c
-c       open file
-c       call ous_init
-c       call ous_set_title      (not obligatory)
-c       call ous_set_date       (not obligatory)
-c       call ous_set_femver     (not obligatory)
-c       call ous_write_header
-c       call ous_write_header2
-c       call ous_write_record
-c       ...
-c       call ous_close
-c
-c Usage reading:
-c
-c       open file
-c       call ous_init
-c       call ous_read_header
-c       call dimous
-c       call ous_get_title      (not obligatory)
-c       call ous_get_date       (not obligatory)
-c       call ous_get_femver     (not obligatory)
-c       call ous_read_header2
-c       call ous_read_record
-c       ...
-c       call ous_close
-c
-c format of file:
-c
-c versions 1 and greater
-c
-c	ftype,nvers
-c	nkn,nel,nlv
-c	href,hzmin
-c	title
-c       date,time				(version 2)
-c       femver					(version 2)
-c
-c	(ilhv(ie),ie=1,nel)
-c	(hlv(l),l=1,nlv)
-c	(hev(ie),ie=1,nel)
-c	
-c	it
-c	(z(k),k=1,nkn)
-c	(ze(i),i=1,3*nel)
-c	((ut(l,ie),l=1,ilhv(k)),ie=1,nel)
-c	((vt(l,ie),l=1,ilhv(k)),ie=1,nel)
-c
-c************************************************************
-c************************************************************
-c************************************************************
-c internal routines
-c************************************************************
-c************************************************************
-c************************************************************
+! utility routines to read/write OUS file - file type 161
+!
+! contents :
+!
+!        subroutine inious
+!        subroutine setous(iunit,nvers,nkn,nel,nlv)
+!        subroutine getous(iunit,nvers,nkn,nel,nlv)
+!        subroutine delous(iunit)
+!        subroutine dimous(iunit,nknddi,nelddi,nlvddi)
+!
+!        subroutine errous(iunit,routine,text)
+!        subroutine findous_err(iunit,routine,text,n)
+!        function findous(iunit)
+!        subroutine infoous(iunit,iout)
+!
+!        subroutine ous_init(iunit,nversion)
+!        subroutine ous_close(iunit)
+!        subroutine ous_check_dimension(iunit,nknddi,nelddi,nlvddi)
+!
+!        subroutine ous_get_date(iunit,date,time)
+!        subroutine ous_set_date(iunit,date,time)
+!        subroutine ous_get_title(iunit,title)
+!        subroutine ous_set_title(iunit,title)
+!        subroutine ous_get_femver(iunit,femver)
+!        subroutine ous_set_femver(iunit,femver)
+!        subroutine ous_get_params(iunit,nkn,nel,nlv)
+!        subroutine ous_set_params(iunit,nkn,nel,nlv)
+!        subroutine ous_get_hparams(iunit,href,hzmin)
+!        subroutine ous_set_hparams(iunit,href,hzmin)
+!        subroutine ous_clone_params(iu_from,iu_to)
+!
+!	 subroutine ous_is_ous_file(iunit,nvers)
+!
+!        subroutine ous_read_header(iunit,nkn,nel,nlv,ierr)
+!        subroutine ous_write_header(iunit,nkn,nel,nlv,ierr)
+!        subroutine ous_read_header2(iu,ilhv,hlv,hev,ierr)
+!        subroutine ous_write_header2(iunit,ilhv,hlv,hev,ierr)
+!	 subroutine ous_read_record(iu,it,nlvddi,ilhv,z,ze,ut,vt,ierr)
+!	 subroutine ous_write_record(iunit,it,nlvddi,ilhv,z,ze,ut,vt,ierr)
+!
+!        subroutine ous_next_record(iunit,it,ierr)
+!        subroutine ous_back_record(iunit)
+!        subroutine ous_skip_header(iunit,ierr)
+!        subroutine ous_skip_record(iunit,it,ierr)
+!
+! revision log :
+!
+! 21.08.2003	ggu	version 1 implemented
+! 01.09.2003	ggu	first revision
+! 02.09.2003	ggu	last bug fixes (nvers=3 -> nvers=1)
+! 22.09.2004	ggu	bug fix in rdous/wrous -> ie instead of k
+! 23.03.2010	ggu	changed v6.1.1
+! 22.07.2010	ggu	changed VERS_6_1_9
+! 08.06.2011	ggu	new routine delous(), check for end in read
+! 18.01.2014	ggu	restructured, new date,time,femver
+! 28.01.2014	ggu	changed VERS_6_1_71
+! 29.10.2014	ggu	new routine ous_is_ous_file()
+! 30.04.2015	ggu	changed VERS_7_1_9
+! 05.06.2015	ggu	changed VERS_7_1_12
+! 10.07.2015	ggu	changed VERS_7_1_50
+! 30.07.2015	ggu	changed VERS_7_1_83
+! 14.09.2015	ggu	changed VERS_7_2_2
+! 05.11.2015	ggu	changed VERS_7_3_12
+! 18.12.2015	ggu	changed VERS_7_3_17
+! 04.11.2017	ggu	changed VERS_7_5_34
+! 14.11.2017	ggu	changed VERS_7_5_36
+! 18.12.2018	ggu	changed VERS_7_5_52
+! 16.02.2019	ggu	changed VERS_7_5_60
+!
+! notes :
+!
+! Usage writing:
+!
+!       open file
+!       call ous_init
+!       call ous_set_title      (not obligatory)
+!       call ous_set_date       (not obligatory)
+!       call ous_set_femver     (not obligatory)
+!       call ous_write_header
+!       call ous_write_header2
+!       call ous_write_record
+!       ...
+!       call ous_close
+!
+! Usage reading:
+!
+!       open file
+!       call ous_init
+!       call ous_read_header
+!       call dimous
+!       call ous_get_title      (not obligatory)
+!       call ous_get_date       (not obligatory)
+!       call ous_get_femver     (not obligatory)
+!       call ous_read_header2
+!       call ous_read_record
+!       ...
+!       call ous_close
+!
+! format of file:
+!
+! versions 1 and greater
+!
+!	ftype,nvers
+!	nkn,nel,nlv
+!	href,hzmin
+!	title
+!       date,time				(version 2)
+!       femver					(version 2)
+!
+!	(ilhv(ie),ie=1,nel)
+!	(hlv(l),l=1,nlv)
+!	(hev(ie),ie=1,nel)
+!	
+!	it
+!	(z(k),k=1,nkn)
+!	(ze(i),i=1,3*nel)
+!	((ut(l,ie),l=1,ilhv(k)),ie=1,nel)
+!	((vt(l,ie),l=1,ilhv(k)),ie=1,nel)
+!
+!************************************************************
+!************************************************************
+!************************************************************
+! internal routines
+!************************************************************
+!************************************************************
+!************************************************************
 
 	subroutine inious
 
-c sets up initial common block - internal routine
+! sets up initial common block - internal routine
 
 	implicit none
 
@@ -185,11 +185,11 @@ c sets up initial common block - internal routine
 
 	end
 
-c************************************************************
+!************************************************************
 
 	subroutine setous(iunit,nvers,nkn,nel,nlv)
 
-c sets up parameter common block - internal routine
+! sets up parameter common block - internal routine
 
 	implicit none
 
@@ -200,8 +200,8 @@ c sets up parameter common block - internal routine
 	integer n
 	integer findous
 
-c we do not check if unit has already been opened -> open with ifileo
-c changed -> before calling this ous_init has to be called
+! we do not check if unit has already been opened -> open with ifileo
+! changed -> before calling this ous_init has to be called
 
 	n = findous(iunit)
 
@@ -221,11 +221,11 @@ c changed -> before calling this ous_init has to be called
 
 	end
 
-c************************************************************
+!************************************************************
 
 	subroutine getous(iunit,nvers,nkn,nel,nlv)
 
-c gets parameter common block - internal routine
+! gets parameter common block - internal routine
 
 	implicit none
 
@@ -248,13 +248,13 @@ c gets parameter common block - internal routine
 
 	end
 
-c************************************************************
+!************************************************************
 
         subroutine delous(iunit)
 
-c closes ous file internal structure - internal routine
-c
-c please note that the file has still to be closed manually
+! closes ous file internal structure - internal routine
+!
+! please note that the file has still to be closed manually
 
         implicit none
 
@@ -264,8 +264,8 @@ c please note that the file has still to be closed manually
 
         integer n,i
 
-        call findous_err(iunit,'delous'
-     +                  ,'File is not open, cannot close.',n)
+        call findous_err(iunit,'delous' &
+     &                  ,'File is not open, cannot close.',n)
 
         do i=0,nitdim
           ousvar(i,n) = 0
@@ -279,11 +279,11 @@ c please note that the file has still to be closed manually
 
         end
 
-c************************************************************
+!************************************************************
 
 	subroutine dimous(iunit,nknddi,nelddi,nlvddi)
 
-c checks dimension of arrays
+! checks dimension of arrays
 
 	implicit none
 
@@ -305,13 +305,13 @@ c checks dimension of arrays
         stop 'error stop dimous: dimension error'
 	end
 
-c************************************************************
-c************************************************************
-c************************************************************
+!************************************************************
+!************************************************************
+!************************************************************
 
         subroutine errous(iunit,routine,text)
 
-c error routine for ous - internal routine
+! error routine for ous - internal routine
 
         implicit none
 
@@ -324,11 +324,11 @@ c error routine for ous - internal routine
 
         end
 
-c************************************************************
+!************************************************************
 
         subroutine findous_err(iunit,routine,text,n)
 
-c finds entry for iunit -> returns it in n or stops with error
+! finds entry for iunit -> returns it in n or stops with error
 
         implicit none
 
@@ -348,11 +348,11 @@ c finds entry for iunit -> returns it in n or stops with error
 
         end
 
-c************************************************************
+!************************************************************
 
         function findous(iunit)
 
-c finds entry for iunit - internal routine
+! finds entry for iunit - internal routine
 
         implicit none
 
@@ -374,11 +374,11 @@ c finds entry for iunit - internal routine
 
         end
 
-c************************************************************
+!************************************************************
 
         subroutine infoous(iunit,iout)
 
-c writes info for unit - internal routine
+! writes info for unit - internal routine
 
         implicit none
 
@@ -407,13 +407,13 @@ c writes info for unit - internal routine
 
         end
 
-c************************************************************
-c************************************************************
-c************************************************************
-c public routines
-c************************************************************
-c************************************************************
-c************************************************************
+!************************************************************
+!************************************************************
+!************************************************************
+! public routines
+!************************************************************
+!************************************************************
+!************************************************************
 
         subroutine ous_init(iunit,nversion)
 
@@ -469,7 +469,7 @@ c************************************************************
 
         end
 
-c************************************************************
+!************************************************************
 
         subroutine ous_close(iunit)
 
@@ -481,7 +481,7 @@ c************************************************************
 
         end
 
-c************************************************************
+!************************************************************
 
         subroutine ous_check_dimension(iunit,nknddi,nelddi,nlvddi)
 
@@ -493,9 +493,9 @@ c************************************************************
 
         end
 
-c************************************************************
-c************************************************************
-c************************************************************
+!************************************************************
+!************************************************************
+!************************************************************
 
         subroutine ous_get_date(iunit,date,time)
 
@@ -515,7 +515,7 @@ c************************************************************
 
         end
 
-c************************************************************
+!************************************************************
 
         subroutine ous_set_date(iunit,date,time)
 
@@ -535,7 +535,7 @@ c************************************************************
 
         end
 
-c************************************************************
+!************************************************************
 
         subroutine ous_get_title(iunit,title)
 
@@ -554,7 +554,7 @@ c************************************************************
 
         end
 
-c************************************************************
+!************************************************************
 
         subroutine ous_set_title(iunit,title)
 
@@ -573,7 +573,7 @@ c************************************************************
 
         end
 
-c************************************************************
+!************************************************************
 
         subroutine ous_get_femver(iunit,femver)
 
@@ -592,7 +592,7 @@ c************************************************************
 
         end
 
-c************************************************************
+!************************************************************
 
         subroutine ous_set_femver(iunit,femver)
 
@@ -611,7 +611,7 @@ c************************************************************
 
         end
 
-c************************************************************
+!************************************************************
 
         subroutine ous_get_params(iunit,nkn,nel,nlv)
 
@@ -628,7 +628,7 @@ c************************************************************
 
         end
 
-c************************************************************
+!************************************************************
 
         subroutine ous_set_params(iunit,nkn,nel,nlv)
 
@@ -643,7 +643,7 @@ c************************************************************
 
         end
 
-c************************************************************
+!************************************************************
 
         subroutine ous_get_hparams(iunit,href,hzmin)
 
@@ -663,7 +663,7 @@ c************************************************************
 
 	end
 
-c************************************************************
+!************************************************************
 
         subroutine ous_set_hparams(iunit,href,hzmin)
 
@@ -684,14 +684,14 @@ c************************************************************
 	end
 
 
-c************************************************************
+!************************************************************
 
         subroutine ous_clone_params(iu_from,iu_to)
 
-c clones data from one to other file
-c
-c second file must have already been opened and initialized with ous_init
-c should be only used to write file -> nvers should be max version
+! clones data from one to other file
+!
+! second file must have already been opened and initialized with ous_init
+! should be only used to write file -> nvers should be max version
 
         implicit none
 
@@ -702,10 +702,10 @@ c should be only used to write file -> nvers should be max version
 
         integer i,nf,nt
 
-        call findous_err(iu_from,'ous_clone_params'
-     +                          ,'Cannot find entry.',nf)
-        call findous_err(iu_to,'ous_clone_params'
-     +                          ,'Cannot find entry.',nt)
+        call findous_err(iu_from,'ous_clone_params' &
+     &                          ,'Cannot find entry.',nf)
+        call findous_err(iu_to,'ous_clone_params' &
+     &                          ,'Cannot find entry.',nt)
 
         do i=2,nitdim           !unit and version are not cloned
           ousvar(i,nt) = ousvar(i,nf)
@@ -719,18 +719,18 @@ c should be only used to write file -> nvers should be max version
 
         end
 
-c************************************************************
-c************************************************************
-c************************************************************
+!************************************************************
+!************************************************************
+!************************************************************
 
 
         subroutine ous_is_ous_file(iunit,nvers)
 
-c checks if iunit is open on ous file - returns nvers
-c
-c nvers == 0    no ous file (ntype is different) or read error
-c nvers < 0     version number is wrong
-c nvers > 0     good ous file
+! checks if iunit is open on ous file - returns nvers
+!
+! nvers == 0    no ous file (ntype is different) or read error
+! nvers < 0     version number is wrong
+! nvers > 0     good ous file
 
         implicit none
 
@@ -756,13 +756,13 @@ c nvers > 0     good ous file
 
         end
 
-c************************************************************
-c************************************************************
-c************************************************************
+!************************************************************
+!************************************************************
+!************************************************************
 
 	subroutine ous_read_header(iunit,nkn,nel,nlv,ierr)
 
-c before this ous_init has to be called
+! before this ous_init has to be called
 
 	implicit none
 
@@ -778,23 +778,23 @@ c before this ous_init has to be called
 	real href,hzmin
 	character*80 line
 
-c initialize
+! initialize
 
 	call inious
 
         call findous_err(iunit,'ous_read_header','Cannot find entry.',n)
 
-c first record - find out what version
+! first record - find out what version
 
 	irec = 1
 	read(iunit,end=91,err=99) ntype,nvers
 
-c control version number and type of file
+! control version number and type of file
 
 	if( ntype .ne. ftype ) goto 97
 	if( nvers .le. 0 .or. nvers .gt. maxvers ) goto 98
 
-c next records
+! next records
 
 	date = 0
 	time = 0
@@ -845,11 +845,11 @@ c next records
 	return
 	end
 
-c********************************************************************
+!********************************************************************
 
 	subroutine ous_write_header(iunit,nkn,nel,nlv,ierr)
 
-c writes first record of OUS file
+! writes first record of OUS file
 
 	implicit none
 
@@ -887,11 +887,11 @@ c writes first record of OUS file
 
 	end
 
-c************************************************************
+!************************************************************
 
 	subroutine ous_read_header2(iu,ilhv,hlv,hev,ierr)
 
-c reads second record of OUS file
+! reads second record of OUS file
 
 	implicit none
 
@@ -928,7 +928,7 @@ c reads second record of OUS file
           nlv = 0
         end if
 
-c read records
+! read records
 
 	if( nvers .ge. 1 ) then
 	  read(iunit,err=99) (ilhv(ie),ie=1,neli)
@@ -948,11 +948,11 @@ c read records
 	return
 	end
 
-c************************************************************
+!************************************************************
 
 	subroutine ous_write_header2(iunit,ilhv,hlv,hev,ierr)
 
-c writes second record of OUS file
+! writes second record of OUS file
 
 	implicit none
 
@@ -969,7 +969,7 @@ c writes second record of OUS file
 
 	call getous(iunit,nvers,nkn,nel,nlv)
 
-c only one layer
+! only one layer
 
 	neli = nel
         if( nlv .le. 1 ) then
@@ -977,7 +977,7 @@ c only one layer
           neli = 0
         end if
 
-c write records
+! write records
 
 	write(iunit) (ilhv(ie),ie=1,neli)
 	write(iunit) (hlv(l),l=1,nlv)
@@ -987,11 +987,11 @@ c write records
 
 	end
 
-c************************************************************
+!************************************************************
 
 	subroutine ous_read_record(iu,it,nlvddi,ilhv,z,ze,ut,vt,ierr)
 
-c reads data record of OUS file
+! reads data record of OUS file
 
 	implicit none
 
@@ -1067,17 +1067,17 @@ c reads data record of OUS file
 	return
 	end
 
-c************************************************************
+!************************************************************
 
 	subroutine ous_write_record(iunit,it,nlvddi,ilhv,z,ze,ut,vt,ierr)
 
-c writes data record of OUS file
+! writes data record of OUS file
 
 	implicit none
 
         include 'ousinf.h'
 
-c arguments
+! arguments
 	integer iunit,it
 	integer nlvddi
 	integer ilhv(*)
@@ -1086,7 +1086,7 @@ c arguments
 	real ut(nlvddi,*)
 	real vt(nlvddi,*)
 	integer ierr
-c local
+! local
 	integer l,k,ie,i
 	integer nvers,nkn,nel,nlv
 
@@ -1119,18 +1119,18 @@ c local
 	return
 	end
 
-c************************************************************
+!************************************************************
 
         subroutine ous_peek_record(iu,it,ierr)
 
-c peeks into data record of OUS file
+! peeks into data record of OUS file
 
         implicit none
 
-c arguments
+! arguments
         integer iu,it
         integer ierr
-c local
+! local
         integer l,k,lmax
         integer nvers,nkn,nel,nlv,nvar
         integer iunit,ios
@@ -1165,13 +1165,13 @@ c local
 
         end
 
-c************************************************************
-c************************************************************
-c************************************************************
+!************************************************************
+!************************************************************
+!************************************************************
 
         subroutine ous_next_record(iunit,it,ierr)
 
-c skips data record - only reads header of record
+! skips data record - only reads header of record
 
         implicit none
 
@@ -1187,11 +1187,11 @@ c skips data record - only reads header of record
 
         end
 
-c************************************************************
+!************************************************************
 
         subroutine ous_back_record(iunit)
 
-c skips back one data record (contains five reads)
+! skips back one data record (contains five reads)
 
         implicit none
 
@@ -1205,7 +1205,7 @@ c skips back one data record (contains five reads)
 
         end
 
-c************************************************************
+!************************************************************
 
         subroutine ous_skip_header(iunit,ierr)
 
@@ -1224,7 +1224,7 @@ c************************************************************
 
         end
 
-c************************************************************
+!************************************************************
 
         subroutine ous_skip_record(iunit,it,ierr)
 
@@ -1236,20 +1236,20 @@ c************************************************************
 
         end
 
-c************************************************************
-c************************************************************
-c************************************************************
-c compatibility (old routine calls)
-c************************************************************
-c************************************************************
-c************************************************************
+!************************************************************
+!************************************************************
+!************************************************************
+! compatibility (old routine calls)
+!************************************************************
+!************************************************************
+!************************************************************
 
-	subroutine rfous	(iunit,nvers
-     +				,nkn,nel,nlv
-     +				,href,hzmin
-     +				,title
-     +				,ierr
-     +				)
+	subroutine rfous	(iunit,nvers &
+     &				,nkn,nel,nlv &
+     &				,href,hzmin &
+     &				,title &
+     &				,ierr &
+     &				)
 
 	integer iunit,nvers
 	integer nkn,nel,nlv
@@ -1264,14 +1264,14 @@ c************************************************************
 
 	end
 
-c************************************************************
+!************************************************************
 
-	subroutine wfous	(iunit,nvers
-     +				,nkn,nel,nlv
-     +				,href,hzmin
-     +				,title
-     +				,ierr
-     +				)
+	subroutine wfous	(iunit,nvers &
+     &				,nkn,nel,nlv &
+     &				,href,hzmin &
+     &				,title &
+     &				,ierr &
+     &				)
 
 	integer iunit,nvers
 	integer nkn,nel,nlv
@@ -1286,7 +1286,7 @@ c************************************************************
 
 	end
 
-c************************************************************
+!************************************************************
 
 	subroutine rsous(iunit,ilhv,hlv,hev,ierr)
 
@@ -1302,7 +1302,7 @@ c************************************************************
 
 	end
 
-c************************************************************
+!************************************************************
 
 	subroutine wsous(iunit,ilhv,hlv,hev,ierr)
 
@@ -1318,7 +1318,7 @@ c************************************************************
 
 	end
 
-c************************************************************
+!************************************************************
 
 	subroutine rdous(iunit,it,nlvddi,ilhv,z,ze,ut,vt,ierr)
 
@@ -1337,7 +1337,7 @@ c************************************************************
 
 	end
 
-c************************************************************
+!************************************************************
 
 	subroutine wrous(iunit,it,nlvddi,ilhv,z,ze,ut,vt,ierr)
 
@@ -1356,5 +1356,5 @@ c************************************************************
 
 	end
 
-c************************************************************
+!************************************************************
 

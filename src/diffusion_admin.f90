@@ -23,51 +23,51 @@
 !
 !--------------------------------------------------------------------------
 
-c routines for diffusion
-c
-c contents :
-c
-c subroutine diffstab(dt,rk,istot,v1v,v2v,gamma)        stability of diffusion
-c subroutine diffstab1(dt,rkv,istot,v1v,v2v,gamma)      checks diff.  stability
-c subroutine diffweight                                 computes diff. weights
-c subroutine difflimit(dt,rkv,istot,gammax)             limits diff. param.
-c subroutine diffadjust(mode,rkv)                       adjusts diff. coeff.
-c
-c revision log :
-c
-c 14.01.2005	ggu	new file for diffusion routines (this file)
-c 23.02.2005	ggu	new routines for smagorinski and green
-c 15.03.2005	ggu	austau() from newtra copied here
-c 08.11.2005	ggu	fixed wrong debug statement in austau()
-c 23.03.2006	ggu	changed time step to real
-c 27.01.2009	ggu	diffset() deleted
-c 12.02.2010	ggu	diffweight() has new method -> idtype=0,1,2
-c 17.02.2010	ggu	bug fix in diffweight()
-c 23.03.2010	ggu	changed v6.1.1
-c 08.04.2010	ggu	better error reporting in diffweight()
-c 16.02.2011	ggu	in diffweight() use double precision
-c 01.06.2011	ggu	bug fix in green() -> i instead ii
-c 05.12.2013	ggu	changed VERS_6_1_70
-c 19.12.2014	ggu	changed VERS_7_0_10
-c 23.12.2014	ggu	changed VERS_7_0_11
-c 19.01.2015	ggu	changed VERS_7_1_3
-c 10.07.2015	ggu	changed VERS_7_1_50
-c 17.07.2015	ggu	changed VERS_7_1_80
-c 20.07.2015	ggu	changed VERS_7_1_81
-c 18.09.2015	ggu	austau() not used anymore - eliminated
-c 23.09.2015	ggu	changed VERS_7_2_4
-c 01.04.2016	ggu	changed VERS_7_5_7
-c 09.10.2017	ggu	changed VERS_7_5_33
-c 05.12.2017	ggu	changed VERS_7_5_39
-c 03.04.2018	ggu	changed VERS_7_5_43
-c 16.02.2019	ggu	changed VERS_7_5_60
-c 09.04.2022	ggu	smagorinski prepared for mpi
-c
-c*****************************************************************
+! routines for diffusion
+!
+! contents :
+!
+! subroutine diffstab(dt,rk,istot,v1v,v2v,gamma)        stability of diffusion
+! subroutine diffstab1(dt,rkv,istot,v1v,v2v,gamma)      checks diff.  stability
+! subroutine diffweight                                 computes diff. weights
+! subroutine difflimit(dt,rkv,istot,gammax)             limits diff. param.
+! subroutine diffadjust(mode,rkv)                       adjusts diff. coeff.
+!
+! revision log :
+!
+! 14.01.2005	ggu	new file for diffusion routines (this file)
+! 23.02.2005	ggu	new routines for smagorinski and green
+! 15.03.2005	ggu	austau() from newtra copied here
+! 08.11.2005	ggu	fixed wrong debug statement in austau()
+! 23.03.2006	ggu	changed time step to real
+! 27.01.2009	ggu	diffset() deleted
+! 12.02.2010	ggu	diffweight() has new method -> idtype=0,1,2
+! 17.02.2010	ggu	bug fix in diffweight()
+! 23.03.2010	ggu	changed v6.1.1
+! 08.04.2010	ggu	better error reporting in diffweight()
+! 16.02.2011	ggu	in diffweight() use double precision
+! 01.06.2011	ggu	bug fix in green() -> i instead ii
+! 05.12.2013	ggu	changed VERS_6_1_70
+! 19.12.2014	ggu	changed VERS_7_0_10
+! 23.12.2014	ggu	changed VERS_7_0_11
+! 19.01.2015	ggu	changed VERS_7_1_3
+! 10.07.2015	ggu	changed VERS_7_1_50
+! 17.07.2015	ggu	changed VERS_7_1_80
+! 20.07.2015	ggu	changed VERS_7_1_81
+! 18.09.2015	ggu	austau() not used anymore - eliminated
+! 23.09.2015	ggu	changed VERS_7_2_4
+! 01.04.2016	ggu	changed VERS_7_5_7
+! 09.10.2017	ggu	changed VERS_7_5_33
+! 05.12.2017	ggu	changed VERS_7_5_39
+! 03.04.2018	ggu	changed VERS_7_5_43
+! 16.02.2019	ggu	changed VERS_7_5_60
+! 09.04.2022	ggu	smagorinski prepared for mpi
+!
+!*****************************************************************
 
         subroutine diffstab(dt,rk,istot,v1v,v2v,gamma)
 
-c checks stability of diffusion (old, not used)
+! checks stability of diffusion (old, not used)
 
 	use evgeom
 	use basin
@@ -120,11 +120,11 @@ c checks stability of diffusion (old, not used)
 
         end
 
-c*************************************************************
+!*************************************************************
 
         subroutine diffstab1(dt,rkv,istot,v1v,v2v,gamma)
 
-c checks stability of diffusion (with variable diffusion coef.)
+! checks stability of diffusion (with variable diffusion coef.)
 
 	use evgeom
 	use basin
@@ -173,13 +173,13 @@ c checks stability of diffusion (with variable diffusion coef.)
 
         end
 
-c*************************************************************
+!*************************************************************
 
         subroutine diffweight
 
-c computes weight for diffusion
-c
-c weights in main diagonal are positive => weights out of diag are negative
+! computes weight for diffusion
+!
+! weights in main diagonal are positive => weights out of diag are negative
 
 	use mod_diff_aux
 	use evgeom
@@ -201,9 +201,9 @@ c weights in main diagonal are positive => weights out of diag are negative
 
 	real getpar
 
-c-----------------------------------------------------------------
-c initialization
-c-----------------------------------------------------------------
+!-----------------------------------------------------------------
+! initialization
+!-----------------------------------------------------------------
 
 	idtype = 1	!0: original  1: adjust  2: new sym weights
 	idtype = nint(getpar('idtype'))	!delete after tests
@@ -216,9 +216,9 @@ c-----------------------------------------------------------------
 
         write(6,*) 'diffweight: computing weights'
 
-c-----------------------------------------------------------------
-c loop over elements
-c-----------------------------------------------------------------
+!-----------------------------------------------------------------
+! loop over elements
+!-----------------------------------------------------------------
 
         do ie=1,nel
 
@@ -227,9 +227,9 @@ c-----------------------------------------------------------------
             c(ii) = ev(6+ii,ie)
           end do
 
-c	  -----------------------------------------------------------------
-c 	  type 0
-c	  -----------------------------------------------------------------
+!	  -----------------------------------------------------------------
+! 	  type 0
+!	  -----------------------------------------------------------------
 
           do ii=1,3
             do iii=1,3
@@ -238,15 +238,15 @@ c	  -----------------------------------------------------------------
             end do
 	  end do
 
-c	  -----------------------------------------------------------------
-c 	  adjust matrix
-c	  -----------------------------------------------------------------
+!	  -----------------------------------------------------------------
+! 	  adjust matrix
+!	  -----------------------------------------------------------------
 
 	  if( idtype .eq. 1 ) then
 
-c	    -----------------------------------------------------------------
-c 	    type 1
-c	    -----------------------------------------------------------------
+!	    -----------------------------------------------------------------
+! 	    type 1
+!	    -----------------------------------------------------------------
 
             do ii=1,3
               do iii=1,3
@@ -265,9 +265,9 @@ c	    -----------------------------------------------------------------
 
 	  else if( idtype .eq. 2 ) then	!out of diag are negative
 
-c	    -----------------------------------------------------------------
-c 	    type 2
-c	    -----------------------------------------------------------------
+!	    -----------------------------------------------------------------
+! 	    type 2
+!	    -----------------------------------------------------------------
 
             do i=1,3
 	      ia = 1+mod(i,3)
@@ -295,9 +295,9 @@ c	    -----------------------------------------------------------------
 
 	  end if
 
-c	  -----------------------------------------------------------------
-c 	  error handling and copy to wdifhv
-c	  -----------------------------------------------------------------
+!	  -----------------------------------------------------------------
+! 	  error handling and copy to wdifhv
+!	  -----------------------------------------------------------------
 
 	  berror = .false.
 	  do ii=1,3
@@ -346,25 +346,25 @@ c	  -----------------------------------------------------------------
 
         end do
 
-c-----------------------------------------------------------------
-c end of loop over elements
-c-----------------------------------------------------------------
+!-----------------------------------------------------------------
+! end of loop over elements
+!-----------------------------------------------------------------
 
         write(6,*) 'diffweight: total weights changed = ', nchange
         write(6,*) 'diffweight: type of hor diffus    = ', idtype
         write(6,*) 'diffweight: maximum error         = ', wacu_max
 
-c-----------------------------------------------------------------
-c end of routine
-c-----------------------------------------------------------------
+!-----------------------------------------------------------------
+! end of routine
+!-----------------------------------------------------------------
 
         end
 
-c*************************************************************
+!*************************************************************
 
         subroutine difflimit(dt,rkv,istot,gammax)
 
-c limits diffusion parameter
+! limits diffusion parameter
 
 	use evgeom
 	use basin
@@ -411,11 +411,11 @@ c limits diffusion parameter
 
         end
 
-c*************************************************************
+!*************************************************************
 
         subroutine diffadjust(mode,rkv)
 
-c adjusts diffusion coefficient
+! adjusts diffusion coefficient
 
 	use mod_depth
 	use evgeom
@@ -475,16 +475,16 @@ c adjusts diffusion coefficient
 
         end
 
-c*************************************************************************** 
+!*************************************************************************** 
 
         subroutine set_diffusivity
 
-c sets the horizontal diffusion array
-c
-c idhtyp gives type of diffusion
-c	0	constant
-c	1	variable with area ( ah = alpha * dx**(4/3) )
-c	2	smagorinsky (variable with area and time)
+! sets the horizontal diffusion array
+!
+! idhtyp gives type of diffusion
+!	0	constant
+!	1	variable with area ( ah = alpha * dx**(4/3) )
+!	2	smagorinsky (variable with area and time)
 
 	use mod_diff_visc_fric
 	use evgeom
@@ -514,32 +514,32 @@ c	2	smagorinsky (variable with area and time)
         save icall
         data icall /0/
 
-c------------------------------------------------------------------
-c set params
-c------------------------------------------------------------------
+!------------------------------------------------------------------
+! set params
+!------------------------------------------------------------------
 
         if( icall .lt. 0 ) return
 
-c------------------------------------------------------------------
-c time dependent diffusion
-c	call this only during time iteration of simulation
-c------------------------------------------------------------------
+!------------------------------------------------------------------
+! time dependent diffusion
+!	call this only during time iteration of simulation
+!------------------------------------------------------------------
 
         if( icall .gt. 0 ) then         !time dependent diffusion
 	  call smagorinsky
 	  return
         end if
 
-c------------------------------------------------------------------
-c first call
-c------------------------------------------------------------------
+!------------------------------------------------------------------
+! first call
+!------------------------------------------------------------------
 
         idhtyp = nint(getpar('idhtyp'))
         dhlen = getpar('dhlen')
 
-c       ------------------------------------------------
-c       set up diffusion coefficients
-c       ------------------------------------------------
+!       ------------------------------------------------
+!       set up diffusion coefficients
+!       ------------------------------------------------
 
         dhpar = getpar('dhpar')
         chpar = getpar('chpar')
@@ -561,9 +561,9 @@ c       ------------------------------------------------
 
         parmax = max(dhpar,chpar,thpar,shpar,ahpar)
 
-c       ------------------------------------------------
-c       set up area dependent diffusion coefficient
-c       ------------------------------------------------
+!       ------------------------------------------------
+!       set up area dependent diffusion coefficient
+!       ------------------------------------------------
 
         alpha = 0.
         if( idhtyp .eq. 1 ) then
@@ -571,9 +571,9 @@ c       ------------------------------------------------
           alpha = 1. / ( dhlen**(4./3.) )
         end if
 
-c       ------------------------------------------------
-c       set up time constant diffusion coefficient
-c       ------------------------------------------------
+!       ------------------------------------------------
+!       set up time constant diffusion coefficient
+!       ------------------------------------------------
 
         ahmax = 0.
         do ie=1,nel
@@ -588,9 +588,9 @@ c       ------------------------------------------------
           end do
         end do
 
-c       ------------------------------------------------
-c       finished initializing
-c       ------------------------------------------------
+!       ------------------------------------------------
+!       finished initializing
+!       ------------------------------------------------
 
         if( ahmax * parmax .gt. 1000. ) then
           write(6,*) 'Horizontal diffusion coefficient too high'
@@ -611,18 +611,18 @@ c       ------------------------------------------------
         write(6,*) ' dhpar,chpar,thpar,shpar,ahpar : '
         write(6,*) dhpar,chpar,thpar,shpar,ahpar
 
-c       ------------------------------------------------------------------
-c       checks stability
-c       ------------------------------------------------------------------
+!       ------------------------------------------------------------------
+!       checks stability
+!       ------------------------------------------------------------------
 
 	call get_timestep(dt)
 
-c	still to do difhv,parmax
-c        call diffstab1(dt,cdifhv,istot,v1v,v2v,gamma)
+!	still to do difhv,parmax
+!        call diffstab1(dt,cdifhv,istot,v1v,v2v,gamma)
 
-c       ------------------------------------------------------------------
-c       write file
-c       ------------------------------------------------------------------
+!       ------------------------------------------------------------------
+!       write file
+!       ------------------------------------------------------------------
 
         do ie=1,nel
           ve1v(ie) = parmax * difhv(1,ie)
@@ -635,9 +635,9 @@ c       ------------------------------------------------------------------
 !        call e2n2d(ve1v,v1v,v2v)
 !        call wrnos2d(file,title,v1v)
 
-c------------------------------------------------------------------
-c end of routine
-c------------------------------------------------------------------
+!------------------------------------------------------------------
+! end of routine
+!------------------------------------------------------------------
 
         return
    99   continue
@@ -645,27 +645,27 @@ c------------------------------------------------------------------
         stop 'error stop diff_h_set: dhlen not allowed'
         end
 
-c*************************************************************************** 
-c
-c subroutines for computing Smagorinsky Horizontal Diffusion
-c               Coefficient AHG, AMG
-c
-c       Ahg=[(CD*Size/Pi)**2ABS(DD)]
-c       DD=SQRT[DT**2+DS**2]
-c       DT=Ux-Vy
-c       DS=Uy+Vx
-c
-c Ahg is horizontal diffusivity coefficient        
-c It is computed considering both the 
-c Size of the spatial discretization,
-c the horizontal tension DT and 
-c the shearing stress DS of the velocity field
-c CD is a parameter (Mellor CD=0.5)
-c 
-c To convert diffusivity coefficient in viscosity coefficient 
-c Amg, introduce a CVD=Amg/Ahg factor = 0.2
-c
-c*************************************************************************** 
+!*************************************************************************** 
+!
+! subroutines for computing Smagorinsky Horizontal Diffusion
+!               Coefficient AHG, AMG
+!
+!       Ahg=[(CD*Size/Pi)**2ABS(DD)]
+!       DD=SQRT[DT**2+DS**2]
+!       DT=Ux-Vy
+!       DS=Uy+Vx
+!
+! Ahg is horizontal diffusivity coefficient        
+! It is computed considering both the 
+! Size of the spatial discretization,
+! the horizontal tension DT and 
+! the shearing stress DS of the velocity field
+! CD is a parameter (Mellor CD=0.5)
+! 
+! To convert diffusivity coefficient in viscosity coefficient 
+! Amg, introduce a CVD=Amg/Ahg factor = 0.2
+!
+!*************************************************************************** 
 
         subroutine smagorinsky
 
@@ -685,14 +685,14 @@ c***************************************************************************
         
         integer k,l,ie,ii,lmax,ie_mpi
         
-c the FEM method gives for Ux(ie)=unv(ie)*b and for Uy(ie)=unv(ie)*c
+! the FEM method gives for Ux(ie)=unv(ie)*b and for Uy(ie)=unv(ie)*c
        
         do ie_mpi=1,nel
          ie = ip_sort_elem(ie_mpi)
 	 lmax = ilhv(ie)
          area = 12. * ev(10,ie)
          
-c compute the spatial derivates of horizontal velocity        
+! compute the spatial derivates of horizontal velocity        
          
          do l=1,lmax
 
@@ -722,13 +722,13 @@ c compute the spatial derivates of horizontal velocity
 	return
         end 
 
-c***********************************************************************
+!***********************************************************************
 
 	subroutine green(ie,l,ugreen,vgreen)
 
-c solves green identity for reynolds stresses
+! solves green identity for reynolds stresses
 
-c ieltv:  >0 element  0: boundary  -1: open boundary
+! ieltv:  >0 element  0: boundary  -1: open boundary
 
 	use mod_geom
 	use mod_hydro
@@ -759,20 +759,20 @@ c ieltv:  >0 element  0: boundary  -1: open boundary
 	  stop 'error stop green: not ready for mpi'
 	end if
 
-c------------------------------------------------------------
-c get transports
-c------------------------------------------------------------
+!------------------------------------------------------------
+! get transports
+!------------------------------------------------------------
 
 	u = utlov(l,ie)
 	v = vtlov(l,ie)
 
-c------------------------------------------------------------
-c compute geometric characteristics for element
-c------------------------------------------------------------
+!------------------------------------------------------------
+! compute geometric characteristics for element
+!------------------------------------------------------------
 
-c	---------------------------------------------
-c	center point
-c	---------------------------------------------
+!	---------------------------------------------
+!	center point
+!	---------------------------------------------
 
 	do ii=1,3
 	  k = nen3v(ii,ie)
@@ -782,9 +782,9 @@ c	---------------------------------------------
 
 	call baric(ie,xm,ym)
 
-c	---------------------------------------------
-c	length of sides
-c	---------------------------------------------
+!	---------------------------------------------
+!	length of sides
+!	---------------------------------------------
 
 	do ii=1,3
 	  i1 = mod(ii,3) + 1
@@ -792,22 +792,22 @@ c	---------------------------------------------
 	  dl(ii) = distance(x(i1),y(i1),x(i2),y(i2))
 	end do
 
-c------------------------------------------------------------
-c compute contribution
-c------------------------------------------------------------
+!------------------------------------------------------------
+! compute contribution
+!------------------------------------------------------------
 
 	do ii=1,3
 
-c	  ------------------------------------------------------------
-c	  find neibor element
-c	  ------------------------------------------------------------
+!	  ------------------------------------------------------------
+!	  find neibor element
+!	  ------------------------------------------------------------
 
 	  ienb = ieltv(ii,ie)
 	  if( ienb .gt. 0 .and. ilhv(ienb) .lt. l ) ienb = 0
 
-c	  ---------------------------------------------
-c	  find velocity in neibor element
-c	  ---------------------------------------------
+!	  ---------------------------------------------
+!	  find velocity in neibor element
+!	  ---------------------------------------------
 
 	  if( ienb .lt. 0 ) then	!open boundary -> no friction
 	    unb = u
@@ -823,50 +823,50 @@ c	  ---------------------------------------------
 	    vnb = vtlov(l,ienb)
 	  end if
 
-c	  ---------------------------------------------
-c	  find a distance for gradient
-c	  ---------------------------------------------
+!	  ---------------------------------------------
+!	  find a distance for gradient
+!	  ---------------------------------------------
 
 	  if( ienb .gt. 0 ) then
 
-c	    ------------------------------------------------
-c	    compute distance to center point of neibor element
-c	    ------------------------------------------------
+!	    ------------------------------------------------
+!	    compute distance to center point of neibor element
+!	    ------------------------------------------------
 
 	    call baric(ienb,xmb,ymb)
 	    dist = distance(xm,ym,xmb,ymb)
 
 	  else
 
-c	    ------------------------------------------------
-c	    compute virtual distance
-c	    ------------------------------------------------
+!	    ------------------------------------------------
+!	    compute virtual distance
+!	    ------------------------------------------------
 
 	    dist = 0.5 * distance(xm,ym,x(ii),y(ii))
 
 	  end if
 
-c	  ---------------------------------------------
-c	  compute gradient
-c	  ---------------------------------------------
+!	  ---------------------------------------------
+!	  compute gradient
+!	  ---------------------------------------------
 
 	  ugrad = (unb - u) / dist
 	  vgrad = (vnb - v) / dist
 
-c	  ---------------------------------------------
-c	  final contribution
-c	  ---------------------------------------------
+!	  ---------------------------------------------
+!	  final contribution
+!	  ---------------------------------------------
 
 	  ugreen = ugreen + ugrad * dl(ii)
 	  vgreen = vgreen + vgrad * dl(ii)
 
 	end do
 
-c------------------------------------------------------------
-c end of routine
-c------------------------------------------------------------
+!------------------------------------------------------------
+! end of routine
+!------------------------------------------------------------
 
 	end
 
-c***********************************************************************
+!***********************************************************************
 

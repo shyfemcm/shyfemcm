@@ -24,47 +24,47 @@
 !
 !--------------------------------------------------------------------------
 
-c general framework to work on files needing basin
-c
-c revision log :
-c
-c 06.04.1999	ggu	completely restructured
-c 04.06.1999	ggu	new statistics are computed
-c 28.11.2005	ggu	new call to makehkv
-c 31.05.2007	ggu	added area and volume frequency curve
-c 24.08.2007	ggu	added new routine write_grd_from_bas
-c 06.04.2009	ggu	read param.h
-c 12.06.2009	ggu	areatr in double precision - new algorithm
-c 01.03.2010	ggu	new routine basqual() to compute grid quality
-c 22.03.2010	ggu	write external element number in basqual()
-c 17.05.2011	ggu	changes in freqdep()
-c 12.07.2011	ggu	better treatment of freqdep()
-c 16.11.2011	ggu	basin.h introduced
-c 23.01.2012	ggu	new from basinf
-c 12.11.2013	ggu	changed VERS_6_1_69
-c 18.06.2014	ggu	changed VERS_6_1_77
-c 19.12.2014	ggu	changed VERS_7_0_10
-c 19.01.2015	ggu	changed VERS_7_1_3
-c 05.06.2015	ggu	changed VERS_7_1_12
-c 10.07.2015	ggu	changed VERS_7_1_50
-c 13.07.2015	ggu	changed VERS_7_1_51
-c 17.07.2015	ggu	changed VERS_7_1_80
-c 20.07.2015	ggu	changed VERS_7_1_81
-c 25.09.2015	ggu	prepared for nudging velocities
-c 29.09.2015	ggu	finished nudging velocities
-c 04.11.2015	ggu	bug in velocitiy nudging fixed
-c 15.04.2016	ggu	started cleaning module
-c 09.04.2017	ccf	new format for nduge file, use more stations for nudging
-c 09.05.2017	ggu	changed VERS_7_5_26
-c 05.12.2017	ggu	changed VERS_7_5_39
-c 03.04.2018	ggu	changed VERS_7_5_43
-c 31.08.2018	ggu	changed VERS_7_5_49
-c 23.11.2018	ggu	new routines to read and interpolate time series
-c 18.12.2018	ggu	changed VERS_7_5_52
-c 16.02.2019	ggu	changed VERS_7_5_60
-c 21.03.2022    ggu     upgraded to da_out
-c
-c****************************************************************
+! general framework to work on files needing basin
+!
+! revision log :
+!
+! 06.04.1999	ggu	completely restructured
+! 04.06.1999	ggu	new statistics are computed
+! 28.11.2005	ggu	new call to makehkv
+! 31.05.2007	ggu	added area and volume frequency curve
+! 24.08.2007	ggu	added new routine write_grd_from_bas
+! 06.04.2009	ggu	read param.h
+! 12.06.2009	ggu	areatr in double precision - new algorithm
+! 01.03.2010	ggu	new routine basqual() to compute grid quality
+! 22.03.2010	ggu	write external element number in basqual()
+! 17.05.2011	ggu	changes in freqdep()
+! 12.07.2011	ggu	better treatment of freqdep()
+! 16.11.2011	ggu	basin.h introduced
+! 23.01.2012	ggu	new from basinf
+! 12.11.2013	ggu	changed VERS_6_1_69
+! 18.06.2014	ggu	changed VERS_6_1_77
+! 19.12.2014	ggu	changed VERS_7_0_10
+! 19.01.2015	ggu	changed VERS_7_1_3
+! 05.06.2015	ggu	changed VERS_7_1_12
+! 10.07.2015	ggu	changed VERS_7_1_50
+! 13.07.2015	ggu	changed VERS_7_1_51
+! 17.07.2015	ggu	changed VERS_7_1_80
+! 20.07.2015	ggu	changed VERS_7_1_81
+! 25.09.2015	ggu	prepared for nudging velocities
+! 29.09.2015	ggu	finished nudging velocities
+! 04.11.2015	ggu	bug in velocitiy nudging fixed
+! 15.04.2016	ggu	started cleaning module
+! 09.04.2017	ccf	new format for nduge file, use more stations for nudging
+! 09.05.2017	ggu	changed VERS_7_5_26
+! 05.12.2017	ggu	changed VERS_7_5_39
+! 03.04.2018	ggu	changed VERS_7_5_43
+! 31.08.2018	ggu	changed VERS_7_5_49
+! 23.11.2018	ggu	new routines to read and interpolate time series
+! 18.12.2018	ggu	changed VERS_7_5_52
+! 16.02.2019	ggu	changed VERS_7_5_60
+! 21.03.2022    ggu     upgraded to da_out
+!
+!****************************************************************
 
 !==================================================================
         module mod_nudge
@@ -258,7 +258,7 @@ c****************************************************************
 	stop 'error stop nudge_init: no internal node'
 	end
 
-c****************************************************************
+!****************************************************************
 
 	subroutine set_zeta_nudging
 
@@ -337,9 +337,9 @@ c****************************************************************
 
 	end
 
-c*******************************************************************
-c*******************************************************************
-c*******************************************************************
+!*******************************************************************
+!*******************************************************************
+!*******************************************************************
 
 	subroutine nudge_setup_multi(ttau,sigma)
 
@@ -411,11 +411,11 @@ c*******************************************************************
 
 	end
 
-c*******************************************************************
+!*******************************************************************
 
 	subroutine distance(ttau,sigma)
 
-c sets up andg_dist and andg_weight
+! sets up andg_dist and andg_weight
 
 	use mod_nudge
 	use basin
@@ -460,11 +460,11 @@ c sets up andg_dist and andg_weight
 
 	end
 
-c*******************************************************************
+!*******************************************************************
 
 	subroutine nudge_influence
 
-c sets up ndg_nodes and ndg_area (influence of nodes)
+! sets up ndg_nodes and ndg_area (influence of nodes)
 
 	use mod_nudge
 	use basin
@@ -507,9 +507,9 @@ c sets up ndg_nodes and ndg_area (influence of nodes)
 
 	end
 
-c*******************************************************************
-c*******************************************************************
-c*******************************************************************
+!*******************************************************************
+!*******************************************************************
+!*******************************************************************
 
 	subroutine init_velocity_nudging
 
@@ -554,8 +554,8 @@ c*******************************************************************
 
 	taudefvel = getpar('tauvel')
 
-        call iff_init(dtime0,surffile,nvar,np,lmax,nintp
-     +                          ,nodes,vconst,idsurf)
+        call iff_init(dtime0,surffile,nvar,np,lmax,nintp &
+     &                          ,nodes,vconst,idsurf)
         call iff_set_description(idsurf,ibc,'surf vel')
         call iff_need_all_values(idsurf,.false.)
 
@@ -572,7 +572,7 @@ c*******************************************************************
 
 	end
 
-c*******************************************************************
+!*******************************************************************
 
 	subroutine set_velocity_nudging
 
@@ -659,7 +659,7 @@ c*******************************************************************
 
 	end 
 
-c*******************************************************************
+!*******************************************************************
 
         subroutine velocity_nudging_check_data(id,nvar)
  
@@ -701,8 +701,8 @@ c*******************************************************************
             call iff_set_var_description(id,2,'velocity y')
           end if
         else
-          if( string1 == 'velocity x' 
-     +			.and. string2 == 'velocity y' ) then
+          if( string1 == 'velocity x'  &
+     &			.and. string2 == 'velocity y' ) then
             ivtype = 1
           else
             write(6,*) 'description string for velocity not recognized:'
@@ -733,9 +733,9 @@ c*******************************************************************
 
 	end
 
-c*******************************************************************
-c*******************************************************************
-c*******************************************************************
+!*******************************************************************
+!*******************************************************************
+!*******************************************************************
 
 	subroutine init_nudging
 
@@ -746,7 +746,7 @@ c*******************************************************************
 
 	end 
 
-c*******************************************************************
+!*******************************************************************
 
 	subroutine set_nudging
 
@@ -757,4 +757,4 @@ c*******************************************************************
 
 	end 
 
-c*******************************************************************
+!*******************************************************************

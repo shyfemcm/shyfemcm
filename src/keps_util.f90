@@ -23,25 +23,25 @@
 !
 !--------------------------------------------------------------------------
 
-c routines for k-epsilon model
-c
-c revision log :
-c
-c 25.02.1999	ggu	finished writing routines
-c 23.03.2010	ggu	changed v6.1.1
-c 31.08.2018	ggu	changed VERS_7_5_49
-c 16.02.2019	ggu	changed VERS_7_5_60
-c
-c notes :
-c
-c u,v,rho are evaluated at the center of the layer
-c other variables (k,eps,rkm,rkt) at the top and bottom of the layers
-c
-c********************************************************************
+! routines for k-epsilon model
+!
+! revision log :
+!
+! 25.02.1999	ggu	finished writing routines
+! 23.03.2010	ggu	changed v6.1.1
+! 31.08.2018	ggu	changed VERS_7_5_49
+! 16.02.2019	ggu	changed VERS_7_5_60
+!
+! notes :
+!
+! u,v,rho are evaluated at the center of the layer
+! other variables (k,eps,rkm,rkt) at the top and bottom of the layers
+!
+!********************************************************************
 
 	subroutine tridagd(a,b,c,r,u,ud,gam,n)
 
-c solves tridiagonal system
+! solves tridiagonal system
 
 	implicit none
 
@@ -77,11 +77,11 @@ c solves tridiagonal system
 
 	end
 
-c************************************************************************
+!************************************************************************
 
 	subroutine tridag(a,b,c,r,u,gam,n)
 
-c solves tridiagonal system
+! solves tridiagonal system
 
 	implicit none
 
@@ -108,11 +108,11 @@ c solves tridiagonal system
 
 	end
 
-c*********************************************************************
+!*********************************************************************
 
 	subroutine makedz(lmax,dl,dzk,dzr)
 
-c makes level differences from dl (bottom depth of single levels)
+! makes level differences from dl (bottom depth of single levels)
 
 	implicit none
 
@@ -124,9 +124,9 @@ c makes level differences from dl (bottom depth of single levels)
 	integer l
 	real z0
 
-c z0 is height of surface -> if highly variable -> pass into routine
-c
-c dzk == dz        dzr == dZ  (Langland and Liou, MWR, May 1996, 905-918)
+! z0 is height of surface -> if highly variable -> pass into routine
+!
+! dzk == dz        dzr == dZ  (Langland and Liou, MWR, May 1996, 905-918)
 
 	z0 = 0.
 
@@ -148,11 +148,11 @@ c dzk == dz        dzr == dZ  (Langland and Liou, MWR, May 1996, 905-918)
 
 	end
 
-c*********************************************************************
+!*********************************************************************
 
 	subroutine ksmooth(lmax,k,eps,rkm,rkt,kold,epsold,rkmold,rktold)
 
-c smoothing of keps quantities
+! smoothing of keps quantities
 
 	implicit none
 
@@ -169,11 +169,11 @@ c smoothing of keps quantities
 
 	end
 
-c************************************************************************
+!************************************************************************
 
 	subroutine smooth(lmax,var,varold)
 
-c smoothing in time
+! smoothing in time
 
 	implicit none
 
@@ -194,11 +194,11 @@ c smoothing in time
 
 	end
 
-c********************************************************************
+!********************************************************************
 
 	subroutine hmixk(lmax,k,lmix)
 
-c finds depth of mixed layer
+! finds depth of mixed layer
 
 	implicit none
 
@@ -219,11 +219,11 @@ c finds depth of mixed layer
 
 	end
 
-c********************************************************************
+!********************************************************************
 
 	subroutine hmix(lmax,rho,rhoin,lmix)
 
-c finds depth of mixed layer
+! finds depth of mixed layer
 
 	implicit none
 
@@ -250,11 +250,11 @@ c finds depth of mixed layer
 
 	end
 
-c********************************************************************
+!********************************************************************
 
 	subroutine prvar(iunit,lmax,t,val,fact,const)
 
-c prints val to file
+! prints val to file
 
 	implicit none
 
@@ -271,5 +271,5 @@ c prints val to file
 
 	end
 
-c********************************************************************
+!********************************************************************
 

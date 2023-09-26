@@ -23,63 +23,63 @@
 !
 !--------------------------------------------------------------------------
 
-c utility routines for operations on vectors
-c
-c contents :
-c
-c subroutine mima(xx,n,xmin,xmax)			min/max of vector
-c subroutine mimar(xx,n,xmin,xmax,rnull)		min/max of vector
-c subroutine mimari(xx,n,xmin,xmax,imin,imax,rnull)	min/max and index
-c subroutine aver(xx,n,xaver,rnull)			aver of vector
-c
-c revision log :
-c
-c 26.08.1998	ggu	routines mimari transferred from newbcl0
-c 31.05.1999	ggu	new comodity routine mima2i
-c 23.03.2010	ggu	changed v6.1.1
-c 19.06.2016	ggu	new routine aver, some other routines deleted
-c 27.06.2016	ggu	changed VERS_7_5_16
-c 09.09.2016	ggu	changed VERS_7_5_17
-c 16.02.2019	ggu	changed VERS_7_5_60
-c
-c*******************************************
-c
+! utility routines for operations on vectors
+!
+! contents :
+!
+! subroutine mima(xx,n,xmin,xmax)			min/max of vector
+! subroutine mimar(xx,n,xmin,xmax,rnull)		min/max of vector
+! subroutine mimari(xx,n,xmin,xmax,imin,imax,rnull)	min/max and index
+! subroutine aver(xx,n,xaver,rnull)			aver of vector
+!
+! revision log :
+!
+! 26.08.1998	ggu	routines mimari transferred from newbcl0
+! 31.05.1999	ggu	new comodity routine mima2i
+! 23.03.2010	ggu	changed v6.1.1
+! 19.06.2016	ggu	new routine aver, some other routines deleted
+! 27.06.2016	ggu	changed VERS_7_5_16
+! 09.09.2016	ggu	changed VERS_7_5_17
+! 16.02.2019	ggu	changed VERS_7_5_60
+!
+!*******************************************
+!
 	subroutine mima(xx,n,xmin,xmax)
-c
-c computes min/max of vector
-c
-c xx		vector
-c n		dimension of vector
-c xmin,xmax	min/max value in vector
-c
+!
+! computes min/max of vector
+!
+! xx		vector
+! n		dimension of vector
+! xmin,xmax	min/max value in vector
+!
         implicit none
-c
+!
         integer n,i
         real xx(n)
         real xmin,xmax,x
-c
+!
 	xmax=xx(1)
 	xmin=xmax
-c
+!
 	do i=1,n
           x=xx(i)
           if(x.gt.xmax) xmax=x
           if(x.lt.xmin) xmin=x
 	end do
-c
+!
 	return
 	end
-c
-c*******************************************
+!
+!*******************************************
 
         subroutine mimar(xx,n,xmin,xmax,rnull)
 
-c computes min/max of vector (2d)
-c
-c xx            vector
-c n             dimension of vector
-c xmin,xmax     min/max value in vector
-c rnull         invalid value
+! computes min/max of vector (2d)
+!
+! xx            vector
+! n             dimension of vector
+! xmin,xmax     min/max value in vector
+! rnull         invalid value
 
         implicit none
 
@@ -111,7 +111,7 @@ c rnull         invalid value
 
         end
 
-c*******************************************
+!*******************************************
 
 	subroutine mima3d(n,nlvddi,il,val,vmin,vmax)
 
@@ -141,20 +141,20 @@ c*******************************************
 
 	end
 
-c*******************************************
-c
+!*******************************************
+!
         subroutine mimari(xx,n,xmin,xmax,imin,imax,rnull)
-c
-c computes min/max of vector
-c
-c xx            vector
-c n             dimension of vector
-c xmin,xmax     min/max value in vector
-c imin,imax     pointer to min/max value in vector
-c rnull         invalid value
-c
+!
+! computes min/max of vector
+!
+! xx            vector
+! n             dimension of vector
+! xmin,xmax     min/max value in vector
+! imin,imax     pointer to min/max value in vector
+! rnull         invalid value
+!
         implicit none
-c
+!
         integer n,i,nmin
         integer imin,imax
         real xx(n)
@@ -192,22 +192,22 @@ c
             end if
           end if
         end do
-c
+!
         return
         end
 
-c*******************************************
-c*******************************************
-c*******************************************
+!*******************************************
+!*******************************************
+!*******************************************
 
         subroutine aver(xx,n,xaver,rnull)
 
-c computes aver of vector
-c
-c xx            vector
-c n             dimension of vector
-c xmin,xmax     min/max value in vector
-c rnull         invalid value
+! computes aver of vector
+!
+! xx            vector
+! n             dimension of vector
+! xmin,xmax     min/max value in vector
+! rnull         invalid value
 
         implicit none
 
@@ -233,7 +233,7 @@ c rnull         invalid value
 
         end
 
-c*******************************************
-c*******************************************
-c*******************************************
+!*******************************************
+!*******************************************
+!*******************************************
 

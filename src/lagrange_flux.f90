@@ -24,39 +24,39 @@
 !
 !--------------------------------------------------------------------------
 
-c routines handling fluxes
-c
-c revision log :
-c
-c 05.02.2009	ggu	copied from other files
-c 28.04.2009	ggu	links re-structured
-c 23.03.2010	ggu	changed v6.1.1
-c 20.10.2011	ggu	new routines for fluxes implemented
-c 24.10.2011	ggu	3d routines implemented
-c 04.11.2011	ggu	part with bsigma not yet finished
-c 16.12.2011	ggu	bug fix - flux2d_aux was integer
-c 24.01.2012	ggu	changed VERS_6_1_41
-c 23.03.2012	ggu	bug fix - dst was not available in setup_vl_3d
-c 30.03.2012	ggu	changed VERS_6_1_51
-c 28.08.2012	ggu&ccf	bug fix - ok now for 3d surface tracking
-c 19.12.2014	ggu	changed VERS_7_0_10
-c 23.12.2014	ggu	changed VERS_7_0_11
-c 19.01.2015	ggu	changed VERS_7_1_3
-c 23.04.2015	ggu	changed VERS_7_1_8
-c 17.07.2015	ggu	changed VERS_7_1_53
-c 17.07.2015	ggu	changed VERS_7_1_80
-c 20.07.2015	ggu	changed VERS_7_1_81
-c 24.07.2015	ggu	changed VERS_7_1_82
-c 16.11.2015	ggu	changed VERS_7_3_14
-c 16.12.2015	ggu	changed VERS_7_3_16
-c 19.02.2016	ggu	changed VERS_7_5_2
-c 16.02.2019	ggu	changed VERS_7_5_60
-c
-c****************************************************************
+! routines handling fluxes
+!
+! revision log :
+!
+! 05.02.2009	ggu	copied from other files
+! 28.04.2009	ggu	links re-structured
+! 23.03.2010	ggu	changed v6.1.1
+! 20.10.2011	ggu	new routines for fluxes implemented
+! 24.10.2011	ggu	3d routines implemented
+! 04.11.2011	ggu	part with bsigma not yet finished
+! 16.12.2011	ggu	bug fix - flux2d_aux was integer
+! 24.01.2012	ggu	changed VERS_6_1_41
+! 23.03.2012	ggu	bug fix - dst was not available in setup_vl_3d
+! 30.03.2012	ggu	changed VERS_6_1_51
+! 28.08.2012	ggu&ccf	bug fix - ok now for 3d surface tracking
+! 19.12.2014	ggu	changed VERS_7_0_10
+! 23.12.2014	ggu	changed VERS_7_0_11
+! 19.01.2015	ggu	changed VERS_7_1_3
+! 23.04.2015	ggu	changed VERS_7_1_8
+! 17.07.2015	ggu	changed VERS_7_1_53
+! 17.07.2015	ggu	changed VERS_7_1_80
+! 20.07.2015	ggu	changed VERS_7_1_81
+! 24.07.2015	ggu	changed VERS_7_1_82
+! 16.11.2015	ggu	changed VERS_7_3_14
+! 16.12.2015	ggu	changed VERS_7_3_16
+! 19.02.2016	ggu	changed VERS_7_5_2
+! 16.02.2019	ggu	changed VERS_7_5_60
+!
+!****************************************************************
 
 	subroutine lagr_setup_timestep
 
-c initializes length of element sides and fluxes
+! initializes length of element sides and fluxes
 
 	implicit none
 
@@ -66,11 +66,11 @@ c initializes length of element sides and fluxes
 
 	end
 
-c****************************************************************
+!****************************************************************
 
 	subroutine rprs
 
-c initializes length of element sides
+! initializes length of element sides
 
 	use mod_lagrange
 	use basin
@@ -109,13 +109,13 @@ c initializes length of element sides
 
 	end
 
-c******************************************************************
-c******************************************************************
-c******************************************************************
+!******************************************************************
+!******************************************************************
+!******************************************************************
 
 	subroutine setup_fluxes_3d
 
-c sets up fluxes in 3d - has to be done every time step
+! sets up fluxes in 3d - has to be done every time step
 
 	use mod_lagrange
 	use mod_geom
@@ -138,9 +138,9 @@ c sets up fluxes in 3d - has to be done every time step
 	
 	integer flxtype
 
-c	--------------------------------------------
-c	initialization
-c	--------------------------------------------
+!	--------------------------------------------
+!	initialization
+!	--------------------------------------------
 
 	call getaz(azpar)
 	az = azpar
@@ -155,9 +155,9 @@ c	--------------------------------------------
           end do
         end do
 
-c	--------------------------------------------
-c	loop on nodes
-c	--------------------------------------------
+!	--------------------------------------------
+!	loop on nodes
+!	--------------------------------------------
 
         do k=1,nkn
           itype=flxtype(k)
@@ -169,23 +169,23 @@ c	--------------------------------------------
   	  call setup_flux3d(k,lkmax,n,tflux,ne,elems)
         end do
 
-c	--------------------------------------------
-c	compute velocities
-c	--------------------------------------------
+!	--------------------------------------------
+!	compute velocities
+!	--------------------------------------------
 
         call setup_vl_3d
 
-c	--------------------------------------------
-c	end of routine
-c	--------------------------------------------
+!	--------------------------------------------
+!	end of routine
+!	--------------------------------------------
 
         end
 
-c******************************************************************
+!******************************************************************
 
 	subroutine setup_fluxes_2d
 
-c sets up fluxes - has to be done every time step
+! sets up fluxes - has to be done every time step
 
 	use mod_lagrange
 	use mod_geom
@@ -221,9 +221,9 @@ c sets up fluxes - has to be done every time step
         do k=1,nkn
           itype=flxtype(k)
 
-c	  --------------------------------------------
-c	  new way to set-up rflux,tflux
-c	  --------------------------------------------
+!	  --------------------------------------------
+!	  new way to set-up rflux,tflux
+!	  --------------------------------------------
 
 	  n = ngr
 	  call get_elems_around(k,maxlnk,ne,elems)
@@ -232,32 +232,32 @@ c	  --------------------------------------------
   	  call setup_flux2d(k,n,tflux,flux2d,ne,elems)
         end do
 
-c	--------------------------------------------
-c	error check ... delete
-c	--------------------------------------------
+!	--------------------------------------------
+!	error check ... delete
+!	--------------------------------------------
 
-c	--------------------------------------------
-c	compute velocities
-c	--------------------------------------------
+!	--------------------------------------------
+!	compute velocities
+!	--------------------------------------------
 
         call setup_vl_2d
 
-c	--------------------------------------------
-c	end of routine
-c	--------------------------------------------
+!	--------------------------------------------
+!	end of routine
+!	--------------------------------------------
 
         end
 
-c******************************************************************
-c******************************************************************
-c******************************************************************
+!******************************************************************
+!******************************************************************
+!******************************************************************
 
   	subroutine setup_flux3d(k,lkmax,n,tflux,ne,elems)
 
-c computes 3d fluxes in element
-c
-c maybe not existing fluxes are set in flux3d
-c we do not use lkmax, but lmax
+! computes 3d fluxes in element
+!
+! maybe not existing fluxes are set in flux3d
+! we do not use lkmax, but lmax
 
 	use mod_lagrange
 	use mod_geom
@@ -291,11 +291,11 @@ c we do not use lkmax, but lmax
 
 	end
 
-c******************************************************************
+!******************************************************************
 
   	subroutine setup_flux2d(k,n,tflux,flux2d_loc,ne,elems)
 
-c computes fluxes in element
+! computes fluxes in element
 
 	use mod_lagrange
 	use mod_geom
@@ -326,23 +326,23 @@ c computes fluxes in element
 
 	end
 
-c*********************************************************************
+!*********************************************************************
 
         subroutine setup_vl_3d
 	
-c computes velocities in element
+! computes velocities in element
 
-c use first layer thickness which already contains water level
-c
-c dH = dh + dz		dh undisturbed depth  dz average water level
-c
-c dz = (z1+z2+z3)/3.
-c
-c dp = dh + (z1+z2)/2 = dH - dz + (z1+z2)/2 
-c		= dH + (3*z1+3*z2-2*z1-2*z2-2*z3)/6
-c		= dH + (z1+z2-2*z3)/6
-c
-c all this has to be revised for sigma layers
+! use first layer thickness which already contains water level
+!
+! dH = dh + dz		dh undisturbed depth  dz average water level
+!
+! dz = (z1+z2+z3)/3.
+!
+! dp = dh + (z1+z2)/2 = dH - dz + (z1+z2)/2 
+!		= dH + (3*z1+3*z2-2*z1-2*z2-2*z3)/6
+!		= dH + (z1+z2-2*z3)/6
+!
+! all this has to be revised for sigma layers
 
 	use mod_lagrange
 	use mod_layer_thickness
@@ -393,23 +393,23 @@ c all this has to be revised for sigma layers
 	
 	end
 
-c*********************************************************************
+!*********************************************************************
 
         subroutine setup_vl_2d
 	
-c computes velocities in element
+! computes velocities in element
 
-c use first layer thickness which already contains water level
-c
-c dH = dh + dz		dh undisturbed depth  dz average water level
-c
-c dz = (z1+z2+z3)/3.
-c
-c dp = dh + (z1+z2)/2 = dH - dz + (z1+z2)/2 
-c		= dH + (3*z1+3*z2-2*z1-2*z2-2*z3)/6
-c		= dH + (z1+z2-2*z3)/6
-c
-c all this has to be revised for sigma layers
+! use first layer thickness which already contains water level
+!
+! dH = dh + dz		dh undisturbed depth  dz average water level
+!
+! dz = (z1+z2+z3)/3.
+!
+! dp = dh + (z1+z2)/2 = dH - dz + (z1+z2)/2 
+!		= dH + (3*z1+3*z2-2*z1-2*z2-2*z3)/6
+!		= dH + (z1+z2-2*z3)/6
+!
+! all this has to be revised for sigma layers
 
 	use mod_lagrange
 	use mod_layer_thickness
@@ -445,5 +445,5 @@ c all this has to be revised for sigma layers
 	
 	end
 
-c**********************************************************************
+!**********************************************************************
 

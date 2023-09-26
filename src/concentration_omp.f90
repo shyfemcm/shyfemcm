@@ -25,100 +25,100 @@
 !
 !--------------------------------------------------------------------------
 
-c revision log :
-c
-c 09.01.1994	ggu	(from scratch)
-c 19.01.1994	ggu	$$flux - flux conserving property
-c 20.01.1994	ggu	$$iclin - iclin not used to compute volume
-c 20.01.1994	ggu	$$lumpc - evaluate conz. nodewise
-c 03.02.1994	ggu	$$itot0 - exception for itot=0 or 3
-c 04.02.1994	ggu	$$fact3 - factor 3 missing in transport
-c 04.02.1994	ggu	$$azpar - azpar used to compute transport
-c 04.02.1994	ggu	$$condry - comute conz also in dry areas
-c 07.02.1994	ggu	$$istot - istot for fractional time step
-c 01.06.1994	ggu	restructured for 3-d model
-c 18.07.1994	ggu	$$htop - use htop instead of htopo for mass cons.
-c 09.04.1996	ggu	$$rvadj adjust rv in certain areas
-c 20.05.2015	erp	transformed for OMP
-c 30.09.2015	ggu	routine cleaned, no reals in conz3d
-c 12.10.2015	ggu	changed VERS_7_3_3
-c 22.10.2015	ggu	changed VERS_7_3_7
-c 23.10.2015	ggu	changed VERS_7_3_9
-c 20.11.2015	ggu&erp	chunk size introduced, omp finalized
-c 18.12.2015	ggu	changed VERS_7_3_17
-c 19.02.2016	ggu	changed VERS_7_5_2
-c 20.10.2016	ccf	pass rtauv for differential nudging
-c 12.01.2017	ggu	changed VERS_7_5_21
-c 05.12.2017	ggu	changed VERS_7_5_39
-c 11.05.2018	ggu	compute only unique nodes (needed for zeta layers)
-c 06.07.2018	ggu	changed VERS_7_5_48
-c 11.10.2018	ggu	code adjusted for sediment deposition (negative loads)
-c 01.02.2019	ggu	bug fix for conz==0 with negative loading
-c 14.02.2019	ggu	bug fix for conz<0 with negative loading
-c 16.02.2019	ggu	changed VERS_7_5_60
-c 13.03.2019	ggu	changed VERS_7_5_61
-c 09.05.2023    lrp     introduce top layer index variable
-c
-c**************************************************************
+! revision log :
+!
+! 09.01.1994	ggu	(from scratch)
+! 19.01.1994	ggu	$$flux - flux conserving property
+! 20.01.1994	ggu	$$iclin - iclin not used to compute volume
+! 20.01.1994	ggu	$$lumpc - evaluate conz. nodewise
+! 03.02.1994	ggu	$$itot0 - exception for itot=0 or 3
+! 04.02.1994	ggu	$$fact3 - factor 3 missing in transport
+! 04.02.1994	ggu	$$azpar - azpar used to compute transport
+! 04.02.1994	ggu	$$condry - comute conz also in dry areas
+! 07.02.1994	ggu	$$istot - istot for fractional time step
+! 01.06.1994	ggu	restructured for 3-d model
+! 18.07.1994	ggu	$$htop - use htop instead of htopo for mass cons.
+! 09.04.1996	ggu	$$rvadj adjust rv in certain areas
+! 20.05.2015	erp	transformed for OMP
+! 30.09.2015	ggu	routine cleaned, no reals in conz3d
+! 12.10.2015	ggu	changed VERS_7_3_3
+! 22.10.2015	ggu	changed VERS_7_3_7
+! 23.10.2015	ggu	changed VERS_7_3_9
+! 20.11.2015	ggu&erp	chunk size introduced, omp finalized
+! 18.12.2015	ggu	changed VERS_7_3_17
+! 19.02.2016	ggu	changed VERS_7_5_2
+! 20.10.2016	ccf	pass rtauv for differential nudging
+! 12.01.2017	ggu	changed VERS_7_5_21
+! 05.12.2017	ggu	changed VERS_7_5_39
+! 11.05.2018	ggu	compute only unique nodes (needed for zeta layers)
+! 06.07.2018	ggu	changed VERS_7_5_48
+! 11.10.2018	ggu	code adjusted for sediment deposition (negative loads)
+! 01.02.2019	ggu	bug fix for conz==0 with negative loading
+! 14.02.2019	ggu	bug fix for conz<0 with negative loading
+! 16.02.2019	ggu	changed VERS_7_5_60
+! 13.03.2019	ggu	changed VERS_7_5_61
+! 09.05.2023    lrp     introduce top layer index variable
+!
+!**************************************************************
 
-        subroutine conz3d_omp(cn1,co1
-     +			,ddt
-     +                  ,rkpar,difhv,difv
-     +			,difmol,cbound
-     +		 	,itvd,itvdv,gradxv,gradyv
-     +			,cobs,robs,rtauv
-     +			,wsink,wsinkv
-     +			,rload,load
-     +			,azpar,adpar,aapar
-     +			,istot,isact,nlvddi
-     +                  ,nlev)
+        subroutine conz3d_omp(cn1,co1 &
+     &			,ddt &
+     &                  ,rkpar,difhv,difv &
+     &			,difmol,cbound &
+     &		 	,itvd,itvdv,gradxv,gradyv &
+     &			,cobs,robs,rtauv &
+     &			,wsink,wsinkv &
+     &			,rload,load &
+     &			,azpar,adpar,aapar &
+     &			,istot,isact,nlvddi &
+     &                  ,nlev)
      
-c computes concentration
-c
-c cn     new concentration
-c co     old concentration              !not used !FIXME
-c caux   aux vector
-c clow	 lower diagonal of vertical system
-c chig	 upper diagonal of vertical system
-c ddt    time step
-c rkpar  horizontal turbulent diffusivity
-c difhv  horizontal turbulent diffusivity (variable between elements)
-c difv   vertical turbulent diffusivity
-c difmol vertical molecular diffusivity
-c cbound boundary condition (mass flux) [kg/s] -> now concentration [kg/m**3]
-c itvd	 type of horizontal transport algorithm used
-c itvdv	 type of vertical transport algorithm used
-c gradxv,gradyv  gradient vectors for TVD algorithm
-c cobs	 observations for nudging
-c robs	 use observations for nuding (real)
-c rtauv	 variable relaxation coefficient (real)
-c wsink	 factor for settling velocity
-c wsinkv variable settling velocity [m/s]
-c rload	 factor for loading
-c load   load (source or sink) [kg/s]
-c azpar  time weighting parameter
-c adpar  time weighting parameter for vertical diffusion (ad)
-c aapar  time weighting parameter for vertical advection (aa)
-c istot	 total inter time steps
-c isact	 actual inter time step
-c nlvddi	 dimension in z direction
-c nlv	 actual needed levels
-c
-c solution of purely diffusional part :
-c
-c dC/dt = a*laplace(C)    with    c(x,0+)=delta(x)
-c
-c C(x,t) =  (4*pi*a*t)**(-n/2) * exp( -|x|**2/(4*a*t) )
-c
-c for n-dimensions and
-c
-c C(x,t) =  1/sqrt(4*pi*a*t) * exp( -x**2/(4*a*t) )
-c
-c for 1 dimension
-c
-c the solution is normalized, i.e.  int(C(x,t)dx) = 1 over the whole area
-c
-c DPGGU -> introduced double precision to stabilize solution
+! computes concentration
+!
+! cn     new concentration
+! co     old concentration              !not used !FIXME
+! caux   aux vector
+! clow	 lower diagonal of vertical system
+! chig	 upper diagonal of vertical system
+! ddt    time step
+! rkpar  horizontal turbulent diffusivity
+! difhv  horizontal turbulent diffusivity (variable between elements)
+! difv   vertical turbulent diffusivity
+! difmol vertical molecular diffusivity
+! cbound boundary condition (mass flux) [kg/s] -> now concentration [kg/m**3]
+! itvd	 type of horizontal transport algorithm used
+! itvdv	 type of vertical transport algorithm used
+! gradxv,gradyv  gradient vectors for TVD algorithm
+! cobs	 observations for nudging
+! robs	 use observations for nuding (real)
+! rtauv	 variable relaxation coefficient (real)
+! wsink	 factor for settling velocity
+! wsinkv variable settling velocity [m/s]
+! rload	 factor for loading
+! load   load (source or sink) [kg/s]
+! azpar  time weighting parameter
+! adpar  time weighting parameter for vertical diffusion (ad)
+! aapar  time weighting parameter for vertical advection (aa)
+! istot	 total inter time steps
+! isact	 actual inter time step
+! nlvddi	 dimension in z direction
+! nlv	 actual needed levels
+!
+! solution of purely diffusional part :
+!
+! dC/dt = a*laplace(C)    with    c(x,0+)=delta(x)
+!
+! C(x,t) =  (4*pi*a*t)**(-n/2) * exp( -|x|**2/(4*a*t) )
+!
+! for n-dimensions and
+!
+! C(x,t) =  1/sqrt(4*pi*a*t) * exp( -x**2/(4*a*t) )
+!
+! for 1 dimension
+!
+! the solution is normalized, i.e.  int(C(x,t)dx) = 1 over the whole area
+!
+! DPGGU -> introduced double precision to stabilize solution
 
 	use mod_bound_geom
 	use mod_geom
@@ -176,9 +176,9 @@ c DPGGU -> introduced double precision to stabilize solution
 
         if(nlv.ne.nlev) stop 'error stop conz3d_omp: nlv/=nlev'
 	
-c----------------------------------------------------------------
-c initialize variables and parameters
-c----------------------------------------------------------------
+!----------------------------------------------------------------
+! initialize variables and parameters
+!----------------------------------------------------------------
 
 !	call cpu_time(time1)
 !!$	dtime1 = omp_get_wtime()
@@ -252,17 +252,17 @@ c----------------------------------------------------------------
 		if(j .le. subset_el(i)) then
 	        ie = indipendent_subset(j,i)
 	        !print *,i,ie
-                call conz3d_element(ie,cdiag,clow,chigh,cn,cn1
-     +			,dt
-     +                  ,rkpar,difhv,difv
-     +			,difmol,cbound
-     +		 	,itvd,itvdv,gradxv,gradyv
-     +			,cobs,robs,rtauv
-     +			,wsink,wsinkv
-     +			,rload,load
-     +			,az,ad,aa,azt,adt,aat,an,ant
-     +			,rso,rsn,rsot,rsnt
-     +			,nlvddi,nlev)
+                call conz3d_element(ie,cdiag,clow,chigh,cn,cn1 &
+     &			,dt &
+     &                  ,rkpar,difhv,difv &
+     &			,difmol,cbound &
+     &		 	,itvd,itvdv,gradxv,gradyv &
+     &			,cobs,robs,rtauv &
+     &			,wsink,wsinkv &
+     &			,rload,load &
+     &			,az,ad,aa,azt,adt,aat,an,ant &
+     &			,rso,rsn,rsot,rsnt &
+     &			,nlvddi,nlev)
 		end if
 	end do ! end loop over el in subset
 !$OMP END TASK
@@ -294,9 +294,9 @@ c----------------------------------------------------------------
 !$OMP&           rload,ad,aa,dt,nlvddi,ntot)
 	 do k=knod,knod+nchunk-1
 	 if(k .le. ntot) then
-	   call conz3d_nodes(k,cn,cdiag(:,k),clow(:,k),chigh(:,k),
-     +                          cn1,cbound,load,rload,
-     +                          ad,aa,dt,nlvddi)
+	   call conz3d_nodes(k,cn,cdiag(:,k),clow(:,k),chigh(:,k), &
+     &                          cn1,cbound,load,rload, &
+     &                          ad,aa,dt,nlvddi)
          endif
          enddo
 !$OMP END TASK 	      
@@ -319,26 +319,26 @@ c----------------------------------------------------------------
 !!$	dtime2 = omp_get_wtime()
 !	write(6,*) time2-time1,dtime2-dtime1
 
-c----------------------------------------------------------------
-c end of routine
-c----------------------------------------------------------------
+!----------------------------------------------------------------
+! end of routine
+!----------------------------------------------------------------
 
 	end
 
-c*****************************************************************
+!*****************************************************************
 
-       subroutine conz3d_element(ie
-     +			,cdiag,clow,chigh,cn,cn1
-     +			,dt
-     +                  ,rkpar,difhv,difv
-     +			,difmol,cbound
-     +		 	,itvd,itvdv,gradxv,gradyv
-     +			,cobs,robs,rtauv
-     +			,wsink,wsinkv
-     +			,rload,load
-     +			,az,ad,aa,azt,adt,aat,an,ant
-     +			,rso,rsn,rsot,rsnt
-     +			,nlvddi,nlev)
+       subroutine conz3d_element(ie &
+     &			,cdiag,clow,chigh,cn,cn1 &
+     &			,dt &
+     &                  ,rkpar,difhv,difv &
+     &			,difmol,cbound &
+     &		 	,itvd,itvdv,gradxv,gradyv &
+     &			,cobs,robs,rtauv &
+     &			,wsink,wsinkv &
+     &			,rload,load &
+     &			,az,ad,aa,azt,adt,aat,an,ant &
+     &			,rso,rsn,rsot,rsnt &
+     &			,nlvddi,nlev)
      
         use mod_bound_geom
 	use mod_geom
@@ -496,8 +496,8 @@ c*****************************************************************
 ! 	----------------------------------------------------------------
 
 	wws = 0.	!sinking already in wl
-	call vertical_flux_ie(btvdv,ie,ilevel,jlevel,
-     +			      dt,wws,cl,wl,hold,vflux)
+	call vertical_flux_ie(btvdv,ie,ilevel,jlevel, &
+     &			      dt,wws,cl,wl,hold,vflux)
 
 ! ----------------------------------------------------------------
 !  loop over levels
@@ -564,10 +564,10 @@ c*****************************************************************
 	  hmntop =2.*rvptop*presentl(l-1)/(hnew(l-1,ii)+hnew(l,ii))
 	  hmnbot =2.*rvpbot*presentl(l+1)/(hnew(l,ii)+hnew(l+1,ii))
 
-	  fd(ii) = adt * ( 
-     +			(cl(l,ii)-cl(l+1,ii))*hmobot -
-     +			(cl(l-1,ii)-cl(l,ii))*hmotop
-     +			  )
+	  fd(ii) = adt * (  &
+     &			(cl(l,ii)-cl(l+1,ii))*hmobot - &
+     &			(cl(l-1,ii)-cl(l,ii))*hmotop &
+     &			  )
 
 	  clc(l,ii) = clc(l,ii) + ad * ( hmntop + hmnbot )
 	  clm(l,ii) = clm(l,ii) - ad * ( hmntop )
@@ -679,15 +679,15 @@ c*****************************************************************
 	do ii=1,3
 	  k=kn(ii)
           hmed = haver(l)                    !new ggu   !HACK
-	  cexpl = aj4 * ( hold(l,ii)*cl(l,ii)
-     +				+ dt *  ( 
-     +					    hold(l,ii)*fnudge(ii)
-     +					  + 3.*fl(ii) 
-     +					  - fw(ii)
-     +					  - rk3*hmed*wdiff(ii)
-     +					  - fd(ii)
-     +					)
-     +			               )
+	  cexpl = aj4 * ( hold(l,ii)*cl(l,ii) &
+     &				+ dt *  (  &
+     &					    hold(l,ii)*fnudge(ii) &
+     &					  + 3.*fl(ii)  &
+     &					  - fw(ii) &
+     &					  - rk3*hmed*wdiff(ii) &
+     &					  - fd(ii) &
+     &					) &
+     &			               )
 	  
 	  !clm(1,ii) = 0.		!ERIC
 	  !clp(ilevel,ii) = 0.
@@ -700,8 +700,8 @@ c*****************************************************************
 	  
 	  alow  = aj4 * dt * clm(l,ii)
 	  ahigh = aj4 * dt * clp(l,ii)
-	  adiag = aj4 * dt * clc(l,ii) 
-     +			+ aj4 * (1.+dt*finu(l,ii)) * hnew(l,ii)
+	  adiag = aj4 * dt * clc(l,ii)  &
+     &			+ aj4 * (1.+dt*finu(l,ii)) * hnew(l,ii)
 	  cn(l,k)    = cn(l,k)    + cexpl
 	  clow(l,k)  = clow(l,k)  + alow
 	  chigh(l,k) = chigh(l,k) + ahigh   
@@ -729,8 +729,8 @@ c*****************************************************************
 
 ! *****************************************************************
       
-       subroutine conz3d_nodes(k,cn,cdiag,clow,chigh,cn1,cbound,
-     +                         load,rload,ad,aa,dt,nlvddi)
+       subroutine conz3d_nodes(k,cn,cdiag,clow,chigh,cn1,cbound, &
+     &                         load,rload,ad,aa,dt,nlvddi)
 
       	use mod_bound_geom
 	use mod_geom
@@ -856,7 +856,7 @@ c*****************************************************************
 	stop 'error stop conz3d_nodes (omp): diag == 0'
       end subroutine conz3d_nodes
 
-c*****************************************************************
+!*****************************************************************
 
         subroutine tsdebug(robs,cobs,rtauv)
 
@@ -884,7 +884,7 @@ c*****************************************************************
 
         end
 
-c*****************************************************************
+!*****************************************************************
 
         subroutine tsdebugk(k,lmax,robs,cobs,rtau)
 
@@ -911,5 +911,5 @@ c*****************************************************************
 
         end
 
-c*****************************************************************
+!*****************************************************************
 

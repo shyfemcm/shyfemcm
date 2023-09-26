@@ -351,17 +351,17 @@
 	end module box_arrays
 !==================================================================
 
-c******************************************************************
-c******************************************************************
-c******************************************************************
-c general box routine (init/accum/aver/write)
-c******************************************************************
-c******************************************************************
-c******************************************************************
+!******************************************************************
+!******************************************************************
+!******************************************************************
+! general box routine (init/accum/aver/write)
+!******************************************************************
+!******************************************************************
+!******************************************************************
 
 	subroutine wrboxa
 
-c administers writing of flux data
+! administers writing of flux data
 
 	use mod_conz, only : cnv
 	use mod_ts
@@ -413,17 +413,17 @@ c administers writing of flux data
 	character*80, allocatable :: chflx(:)
 
 
-c-----------------------------------------------------------------
-c start of code
-c-----------------------------------------------------------------
+!-----------------------------------------------------------------
+! start of code
+!-----------------------------------------------------------------
 
         if( icall .eq. -1 ) return
 
 	b3d = nlv > 1
 
-c-----------------------------------------------------------------
-c initialization
-c-----------------------------------------------------------------
+!-----------------------------------------------------------------
+! initialization
+!-----------------------------------------------------------------
 
         if( icall .eq. 0 ) then
 
@@ -446,14 +446,14 @@ c-----------------------------------------------------------------
 		nscboxdim = nsect + nbc_ob
 		nfxboxdim = kfluxm + nbc_ob + nk_ob
 		call box_alloc(nkn,nel,nlvdi,nbc_ob,nbox,nscboxdim,nfxboxdim)
-		call box_arrays_alloc(nlv,nlv_global,nbc_ob,nbox
-     +					,nscboxdim,nfxboxdim)
+		call box_arrays_alloc(nlv,nlv_global,nbc_ob,nbox &
+     &					,nscboxdim,nfxboxdim)
 		allocate(wlaux(nlv,nkn))
 		allocate(wl0aux(0:nlv,nkn))
 
 		call box_init		!reads boxfile and sets up things
-		call box_make_stats(nbox,iboxes,nblayers !sets up nblayers
-     +					,barea,bvol2d,bdepth)
+		call box_make_stats(nbox,iboxes,nblayers !sets up nblayers &
+     &					,barea,bvol2d,bdepth)
 
                 if( nsect .gt. nscboxdim ) then
                   stop 'error stop wrboxa: dimension nscboxdim'
@@ -506,26 +506,26 @@ c-----------------------------------------------------------------
 		!call shympi_syncronize
 		!write(6,*) 'gggguuuu 3',my_id; flush(6)
 
-c               here we could also compute and write section in m**2
+!               here we could also compute and write section in m**2
 
                 date = nint(dgetpar('date'))
                 time = nint(dgetpar('time'))
 		idtbox = nint(da_out(1))
-		call box_write_stats(date,time,idtbox
-     +					,nbox,nsect,iboxes,isects
-     +					,kfluxm,kflux,kflux_ext
-     +					,nslayers,nblayers
-     +					,barea,bvol2d,bdepth
-     +					,bextra)
+		call box_write_stats(date,time,idtbox &
+     &					,nbox,nsect,iboxes,isects &
+     &					,kfluxm,kflux,kflux_ext &
+     &					,nslayers,nblayers &
+     &					,barea,bvol2d,bdepth &
+     &					,bextra)
 
 		allocate(taubot(nkn))
 
 		call write_matrix_boxes
         end if
 
-c-----------------------------------------------------------------
-c normal call
-c-----------------------------------------------------------------
+!-----------------------------------------------------------------
+! normal call
+!-----------------------------------------------------------------
 
 	if( is_first_output_d(da_out) ) then	!initial condition
 	  call boxes_compute_area(barea)
@@ -542,17 +542,17 @@ c-----------------------------------------------------------------
 	call getaz(azpar)
 	az = azpar
 
-c	-------------------------------------------------------
-c	accumulate fluxes (is done on local domains)
-c	-------------------------------------------------------
+!	-------------------------------------------------------
+!	accumulate fluxes (is done on local domains)
+!	-------------------------------------------------------
 
 	ivar = 0
 	call flxscs(kfluxm,kflux,iflux,az,fluxes,ivar,rhov)
 	call fluxes_accum_d(nlvdi,nsect,nslayers,dt,trm,masst,fluxes)
 
 	call box_ob_compute(nbc_ob,nlvdi,fluxes_ob)	!open boundary conditions
-	call fluxes_accum_d(nlvdi,nbc_ob,nslayers_ob,dt,trob
-     +				,masst_ob,fluxes_ob)
+	call fluxes_accum_d(nlvdi,nbc_ob,nslayers_ob,dt,trob &
+     &				,masst_ob,fluxes_ob)
 
 	if( ibarcl .gt. 0 ) then
 	  ivar = 11
@@ -569,9 +569,9 @@ c	-------------------------------------------------------
 	  call fluxes_accum_d(nlvdi,nsect,nslayers,dt,trc,conzt,fluxes)
 	end if
 
-c	-------------------------------------------------------
-c	accumulate box variables (is done on local domains)
-c	-------------------------------------------------------
+!	-------------------------------------------------------
+!	accumulate box variables (is done on local domains)
+!	-------------------------------------------------------
 
 	dtbox = dtbox + dt
 
@@ -615,17 +615,17 @@ c	-------------------------------------------------------
 
 	!call assert_values
 
-c	-------------------------------------------------------
-c	time for output?
-c	-------------------------------------------------------
+!	-------------------------------------------------------
+!	time for output?
+!	-------------------------------------------------------
 
         if( .not. next_output_d(da_out) ) return
 
 	nbflx = nint(da_out(4))
 
-c	-------------------------------------------------------
-c	time average results and collect domains
-c	-------------------------------------------------------
+!	-------------------------------------------------------
+!	time average results and collect domains
+!	-------------------------------------------------------
 
 	nvers = 0
 	call get_absolute_act_time(atime)
@@ -650,8 +650,8 @@ c	-------------------------------------------------------
 	call box_flx_collect(nlvdi,fluxes,fluxesg_m)
 	call box_flx_write(atime,nbflx,ivar,fluxesg_m)
 
-	call fluxes_aver_d(nlvdi,nbc_ob,nslayers_ob,trob
-     +					,masst_ob,fluxes_ob)
+	call fluxes_aver_d(nlvdi,nbc_ob,nslayers_ob,trob &
+     &					,masst_ob,fluxes_ob)
 	call box_flx_collect(nlvdi,fluxes_ob,fluxesg_ob)
 
 	if( ibarcl .gt. 0 ) then
@@ -693,45 +693,45 @@ c	-------------------------------------------------------
 	  aux2d = barea*(eta_act-eta_old)
 	  call print_2d(nbox,barea,bvol2d,eta_act,eta_old)
 	  call print_3d_flx(nsect,nbc_ob,dtbox,fluxesg_m,fluxesg_ob)
-	  call boxes_mass_balance_2d(dtbox,bvol2d
-     +					,fluxesg_m,fluxesg_ob,aux2d)
+	  call boxes_mass_balance_2d(dtbox,bvol2d &
+     &					,fluxesg_m,fluxesg_ob,aux2d)
 	end if
 	if( b3d .and. bmass3d ) then
 	  aux3dg = valv3dg(:,:,1) + valv3dg(:,:,2)	   !vertical velocity
-	  call boxes_mass_balance_3d(dtbox,bvol2d
-     +					,nblayers,nslayers
-     +					,fluxesg_m,fluxesg_ob,aux2d,aux3dg)
+	  call boxes_mass_balance_3d(dtbox,bvol2d &
+     &					,nblayers,nslayers &
+     &					,fluxesg_m,fluxesg_ob,aux2d,aux3dg)
 	end if
 
-c	-------------------------------------------------------
-c	write results
-c	-------------------------------------------------------
+!	-------------------------------------------------------
+!	write results
+!	-------------------------------------------------------
 
 	call get_act_timeline(aline)
 	if( shympi_is_master() ) then
 	  write(6,*) 'writing box results... ',trim(aline)
 	end if
 
-	call box_write_2d(dtime,aline,fluxesg_m,fluxesg_ob
-     +					,nv3d,val3dg
-     +					,nv2d,val2d
-     +					,eta_act)
+	call box_write_2d(dtime,aline,fluxesg_m,fluxesg_ob &
+     &					,nv3d,val3dg &
+     &					,nv2d,val2d &
+     &					,eta_act)
 	call box_write_meteo(dtime,aline,nvmet,valmet)
 
 	if( bbox3d .and. b3d ) then
-	  call box_write_3d(dtime,aline,nblayers,nslayers
-     +			,fluxesg_m,fluxesg_ob
-     +			,nv3d,val3d
-     +			,nv2d,val2d)
-	  call box_write_vertical(dtime,aline,nblayers
-     +			,nvv3d,valv3d)
+	  call box_write_3d(dtime,aline,nblayers,nslayers &
+     &			,fluxesg_m,fluxesg_ob &
+     &			,nv3d,val3d &
+     &			,nv2d,val2d)
+	  call box_write_vertical(dtime,aline,nblayers &
+     &			,nvv3d,valv3d)
 	end if
 
 	!stop 'forced stop after write'
 
-c	-------------------------------------------------------
-c	reset variables
-c	-------------------------------------------------------
+!	-------------------------------------------------------
+!	reset variables
+!	-------------------------------------------------------
 
 	call fluxes_init_d(nlvdi,nsect,nslayers,trm,masst)
 	call fluxes_init_d(nlvdi,nbc_ob,nslayers_ob,trob,masst_ob)
@@ -755,9 +755,9 @@ c	-------------------------------------------------------
 
 	eta_old = eta_act
 
-c-----------------------------------------------------------------
-c end of routine
-c-----------------------------------------------------------------
+!-----------------------------------------------------------------
+! end of routine
+!-----------------------------------------------------------------
 
 	return
    97	continue
@@ -768,17 +768,17 @@ c-----------------------------------------------------------------
 	stop 'error stop wrboxa: header'
 	end
 
-c******************************************************************
-c******************************************************************
-c******************************************************************
-c reading and setup routines
-c******************************************************************
-c******************************************************************
-c******************************************************************
+!******************************************************************
+!******************************************************************
+!******************************************************************
+! reading and setup routines
+!******************************************************************
+!******************************************************************
+!******************************************************************
 
 	subroutine box_init
 
-c reads file etc...
+! reads file etc...
 
 	use box
 	use box_arrays
@@ -819,7 +819,7 @@ c reads file etc...
 
 	end
 
-c******************************************************************
+!******************************************************************
 
 	subroutine box_check(nbx,nsct,kflxm)
 
@@ -875,7 +875,7 @@ c******************************************************************
 	stop 'error stop box_check: id'
 	end
 
-c******************************************************************
+!******************************************************************
 
 	subroutine box_read
 
@@ -1000,11 +1000,11 @@ c******************************************************************
 	stop 'error stop box_read: nel/=nelbox'
 	end
 
-c******************************************************************
+!******************************************************************
 
 	subroutine box_insert_section(id,n,itype,ib1,ib2,list,ierr)
 
-c inserts section in data structure
+! inserts section in data structure
 
 	use basin
 	use box
@@ -1038,13 +1038,13 @@ c inserts section in data structure
 
 	end
 
-c******************************************************************
+!******************************************************************
 
 	subroutine box_elab(iboxes,ikboxes)
 
-c sets up ikboxes - index of nodes to boxes
-c
-c is -1 if node belongs to more than one box
+! sets up ikboxes - index of nodes to boxes
+!
+! is -1 if node belongs to more than one box
 
 	use basin
 	!use box
@@ -1090,12 +1090,12 @@ c is -1 if node belongs to more than one box
 
 	end
 
-c******************************************************************
+!******************************************************************
 
-	subroutine box_make_stats(nbox,iboxes,nblayers
-     +					,barea,bvol2d,bdepth)
+	subroutine box_make_stats(nbox,iboxes,nblayers &
+     &					,barea,bvol2d,bdepth)
 
-c computes max layers for each box
+! computes max layers for each box
 
 	use mod_depth
 	use evgeom
@@ -1146,22 +1146,22 @@ c computes max layers for each box
 
 	end
 
-c******************************************************************
-c******************************************************************
-c******************************************************************
-c writing routines
-c******************************************************************
-c******************************************************************
-c******************************************************************
+!******************************************************************
+!******************************************************************
+!******************************************************************
+! writing routines
+!******************************************************************
+!******************************************************************
+!******************************************************************
 
-	subroutine box_write_stats(date,time,idtbox
-     +					,nbox,nsect,iboxes,isects
-     +					,kfluxm,kflux,kflux_ext
-     +					,nslayers,nblayers
-     +					,barea,bvol2d,bdepth
-     +					,bextra)
+	subroutine box_write_stats(date,time,idtbox &
+     &					,nbox,nsect,iboxes,isects &
+     &					,kfluxm,kflux,kflux_ext &
+     &					,nslayers,nblayers &
+     &					,barea,bvol2d,bdepth &
+     &					,bextra)
 
-c writes statistics to files boxes_stats.txt and boxes_geom.txt
+! writes statistics to files boxes_stats.txt and boxes_geom.txt
 
 	use basin
 	use mod_depth
@@ -1247,8 +1247,8 @@ c writes statistics to files boxes_stats.txt and boxes_geom.txt
 	s2 = '          area        volume       depth'
 	if( bextra ) write(iu,'(a)') trim(s1)//trim(s2)
 	do ib=1,nbox
-	  if( bw ) write(iu,1000) ib,nblayers(ib)
-     +				,barea(ib),bvol2d(ib),bdepth(ib)
+	  if( bw ) write(iu,1000) ib,nblayers(ib) &
+     &				,barea(ib),bvol2d(ib),bdepth(ib)
  1000	  format(2i8,2e14.6,f12.4)
 	end do
 
@@ -1398,7 +1398,7 @@ c writes statistics to files boxes_stats.txt and boxes_geom.txt
 
 	end
 
-c******************************************************************
+!******************************************************************
 
 	subroutine insert_sect_node(ndim,nbox,ib,kbox,k)
 
@@ -1422,7 +1422,7 @@ c******************************************************************
 
 	end
 
-c******************************************************************
+!******************************************************************
 
 	subroutine make_kexy(n,knodes,x,y,ns)
 
@@ -1470,11 +1470,11 @@ c******************************************************************
 
 	end
 
-c******************************************************************
+!******************************************************************
 
 	subroutine box_write_init(nbox,eta_act,bextra)
 
-c writes initial conditions boxes_init.txt for eta - still to be done : T/S
+! writes initial conditions boxes_init.txt for eta - still to be done : T/S
 
 	use shympi
 
@@ -1513,20 +1513,20 @@ c writes initial conditions boxes_init.txt for eta - still to be done : T/S
 
 	end
 
-c******************************************************************
+!******************************************************************
 
-	subroutine box_write_2d(dtime,aline,fluxesg,fluxesg_ob
-     +				,nv3d,val3dg
-     +				,nv2d,val2d
-     +				,eta_act)
+	subroutine box_write_2d(dtime,aline,fluxesg,fluxesg_ob &
+     &				,nv3d,val3dg &
+     &				,nv2d,val2d &
+     &				,eta_act)
 
-c writes 2d vertical average box values to file boxes_2d.txt
-c
-c for boxes variables are:
-c	1	temperature
-c	2	salinity
-c	3	water level
-c	4	current velocity
+! writes 2d vertical average box values to file boxes_2d.txt
+!
+! for boxes variables are:
+!	1	temperature
+!	2	salinity
+!	3	water level
+!	4	current velocity
 
 	use basin
 	use levels
@@ -1579,11 +1579,11 @@ c	4	current velocity
 	!     12345678901234567890123456789012345678901234567890
 	if( bextra ) write(iu,'(a)') '#'//trim(s1)//trim(s2)
 	do ib=1,nbox
-	  if( bw ) write(iu,1000) ib
-     +				,(val3dg(0,ib,iv),iv=1,nv3d-1)
-     +				,eta_act(ib)
-     +				,(val2d(ib,iv),iv=1,nv2d)
-     +				,val3dg(0,ib,nv3d)		!volume
+	  if( bw ) write(iu,1000) ib &
+     &				,(val3dg(0,ib,iv),iv=1,nv3d-1) &
+     &				,eta_act(ib) &
+     &				,(val2d(ib,iv),iv=1,nv2d) &
+     &				,val3dg(0,ib,nv3d)		!volume
  !1000	  format(i5,10f10.5)	!FIXME
  1000	  format(i5,6f10.5,e14.6)
 	end do
@@ -1640,14 +1640,14 @@ c	4	current velocity
 
 	end
 
-c******************************************************************
+!******************************************************************
 
-	subroutine box_write_3d(dtime,aline,nblayers,nslayers
-     +			,fluxesg,fluxesg_ob
-     +			,nv3d,val3d
-     +			,nv2d,val2d)
+	subroutine box_write_3d(dtime,aline,nblayers,nslayers &
+     &			,fluxesg,fluxesg_ob &
+     &			,nv3d,val3d &
+     &			,nv2d,val2d)
 
-c writes 3d box values to file
+! writes 3d box values to file
 
 	use basin
 	use levels
@@ -1751,12 +1751,12 @@ c writes 3d box values to file
 
 	end
 
-c******************************************************************
+!******************************************************************
 
-	subroutine box_write_vertical(dtime,aline,nblayers
-     +			,nvv3d,valv3d)
+	subroutine box_write_vertical(dtime,aline,nblayers &
+     &			,nvv3d,valv3d)
 
-c writes 3d interface box values to file (bottom interfaces)
+! writes 3d interface box values to file (bottom interfaces)
 
 	use basin
 	use levels
@@ -1802,8 +1802,8 @@ c writes 3d interface box values to file (bottom interfaces)
 	  s1 = '#   box layers'
 	  if( bextra ) write(iu,'(a)') trim(s1)
 	  if( bw ) write(iu,1100) ib,lmax
-	  s1 = '# layer flux_positive flux_negative'//
-     +			'     viscosity   diffusivity'
+	  s1 = '# layer flux_positive flux_negative'// &
+     &			'     viscosity   diffusivity'
 	  if( bextra ) write(iu,'(a)') trim(s1)
 	  do l=1,lmax
 	    if( bw ) write(iu,1000) l,(valv3d(l,ib,iv),iv=1,nvv3d)
@@ -1816,13 +1816,13 @@ c writes 3d interface box values to file (bottom interfaces)
 
 	end
 
-c******************************************************************
-c******************************************************************
-c******************************************************************
-c box average routines
-c******************************************************************
-c******************************************************************
-c******************************************************************
+!******************************************************************
+!******************************************************************
+!******************************************************************
+! box average routines
+!******************************************************************
+!******************************************************************
+!******************************************************************
 
 	subroutine boxes_compute_area(area)
 
@@ -1853,7 +1853,7 @@ c******************************************************************
 
 	end
 
-c******************************************************************
+!******************************************************************
 
 	subroutine boxes_compute_volume(vola)
 
@@ -1894,11 +1894,11 @@ c******************************************************************
 
 	end
 
-c******************************************************************
+!******************************************************************
 
 	subroutine box_aver_eta(zev,val)
 
-c computes average eta values for box
+! computes average eta values for box
 
 	use mod_geom_dynamic
 	use evgeom
@@ -1948,11 +1948,11 @@ c computes average eta values for box
 
 	end
 
-c******************************************************************
+!******************************************************************
 
 	subroutine box_3d_aver_vel(val)
 
-c computes average velocity values (speed) for box
+! computes average velocity values (speed) for box
 
 	use mod_layer_thickness
 	use mod_hydro
@@ -2008,11 +2008,11 @@ c computes average velocity values (speed) for box
 
 	end
 
-c******************************************************************
+!******************************************************************
 
 	subroutine box_3d_aver_vertical(scalar,val,iaver)
 
-c computes average scalar values defined on interface (verticals) for box
+! computes average scalar values defined on interface (verticals) for box
 
 	use mod_depth
 	use evgeom
@@ -2061,11 +2061,11 @@ c computes average scalar values defined on interface (verticals) for box
 
 	end
 
-c******************************************************************
+!******************************************************************
 
 	subroutine box_3d_aver_scalar(scalar,val,iaver)
 
-c computes average scalar values for box
+! computes average scalar values for box
 
 	use mod_layer_thickness
 	use evgeom
@@ -2117,11 +2117,11 @@ c computes average scalar values for box
 
 	end
 
-c******************************************************************
+!******************************************************************
 
 	subroutine box_2d_aver_scalar(scalar,val)
 
-c computes accumulation of 2d scalar values for box
+! computes accumulation of 2d scalar values for box
 
 	use evgeom
 	use basin
@@ -2160,11 +2160,11 @@ c computes accumulation of 2d scalar values for box
 
 	end
 
-c******************************************************************
+!******************************************************************
 
 	subroutine box_3d_aver_scalar_box(ibox,scalar,val)
 
-c computes average scalar values for box (only for box ibox - debug)
+! computes average scalar values for box (only for box ibox - debug)
 
 	use mod_layer_thickness
 	use evgeom
@@ -2213,13 +2213,13 @@ c computes average scalar values for box (only for box ibox - debug)
 
 	end
 
-c******************************************************************
-c******************************************************************
-c******************************************************************
-c time init/accum/aver routines for boxes
-c******************************************************************
-c******************************************************************
-c******************************************************************
+!******************************************************************
+!******************************************************************
+!******************************************************************
+! time init/accum/aver routines for boxes
+!******************************************************************
+!******************************************************************
+!******************************************************************
 
 	subroutine boxes_2d_init(n,nv,val)
 
@@ -2232,7 +2232,7 @@ c******************************************************************
 
 	end
 
-c******************************************************************
+!******************************************************************
 
 	subroutine boxes_2d_accum(n,dt,area,val,value)
 
@@ -2248,7 +2248,7 @@ c******************************************************************
 
 	end
 
-c******************************************************************
+!******************************************************************
 
 	subroutine boxes_2d_aver(n,nv,bdtarea,val)
 
@@ -2274,7 +2274,7 @@ c******************************************************************
 
 	end
 
-c******************************************************************
+!******************************************************************
 
 	subroutine boxes_3d_init(nlvddi,n,nv,val)
 
@@ -2287,7 +2287,7 @@ c******************************************************************
 
 	end
 
-c******************************************************************
+!******************************************************************
 
 	subroutine boxes_3d_accum(nlvddi,n,dt,bvol3d,val,value)
 
@@ -2303,7 +2303,7 @@ c******************************************************************
 
 	end
 
-c******************************************************************
+!******************************************************************
 
 	subroutine boxes_3d_sum(nlvddi,n,val,valg)
 
@@ -2332,7 +2332,7 @@ c******************************************************************
 
 	end
 
-c******************************************************************
+!******************************************************************
 
 	subroutine boxes_3d_aver(nlvddi,n,nv,vol,val,valg)
 
@@ -2371,17 +2371,17 @@ c******************************************************************
 
 	end
 
-c******************************************************************
-c******************************************************************
-c******************************************************************
-c open boundary handling routines
-c******************************************************************
-c******************************************************************
-c******************************************************************
+!******************************************************************
+!******************************************************************
+!******************************************************************
+! open boundary handling routines
+!******************************************************************
+!******************************************************************
+!******************************************************************
 
 	subroutine box_ob_init
 
-c sets up open boundary inputs
+! sets up open boundary inputs
 
 	use basin
 	use box
@@ -2461,13 +2461,13 @@ c sets up open boundary inputs
 	stop 'error stop box_ob_init: not unique box for node'
 	end
 
-c******************************************************************
+!******************************************************************
 
 	subroutine box_ob_compute(nbc_ob,nlvddi,fluxes_ob)
 
-c computes open boundary inputs
-c
-c these fluxes are barotropic, so we insert them in 0 (baro) and 1 (1 layer)
+! computes open boundary inputs
+!
+! these fluxes are barotropic, so we insert them in 0 (baro) and 1 (1 layer)
 
 	use shympi
 
@@ -2506,13 +2506,13 @@ c these fluxes are barotropic, so we insert them in 0 (baro) and 1 (1 layer)
 
 	end
 
-c******************************************************************
-c******************************************************************
-c******************************************************************
-c meteo routines
-c******************************************************************
-c******************************************************************
-c******************************************************************
+!******************************************************************
+!******************************************************************
+!******************************************************************
+! meteo routines
+!******************************************************************
+!******************************************************************
+!******************************************************************
 
 	subroutine boxes_meteo_accum(nbox,dt,nvmet,barea,valmet,ievap)
 
@@ -2584,7 +2584,7 @@ c******************************************************************
 
 	end
 
-c******************************************************************
+!******************************************************************
 
 	subroutine box_write_meteo(dtime,aline,nvmet,valmet)
 
@@ -2652,7 +2652,7 @@ c******************************************************************
  1002	format(i5,1x,20f8.3)
 	end
 
-c******************************************************************
+!******************************************************************
 
 	subroutine box_write_header(iu,ftype)
 
@@ -2668,18 +2668,18 @@ c******************************************************************
 
 	end
 
-c******************************************************************
-c******************************************************************
-c******************************************************************
-c mass balance routines
-c******************************************************************
-c******************************************************************
-c******************************************************************
+!******************************************************************
+!******************************************************************
+!******************************************************************
+! mass balance routines
+!******************************************************************
+!******************************************************************
+!******************************************************************
 
-	subroutine boxes_mass_balance_2d(dtbox,bvol2d
-     +					,fluxesg,fluxesg_ob,voldif)
+	subroutine boxes_mass_balance_2d(dtbox,bvol2d &
+     &					,fluxesg,fluxesg_ob,voldif)
 
-c computes mass balance
+! computes mass balance
 
 	use basin
 	use levels
@@ -2766,14 +2766,14 @@ c computes mass balance
 
 	end
 
-c******************************************************************
+!******************************************************************
 
-	subroutine boxes_mass_balance_3d(dtbox,bvol2d
-     +					,nblayers,nslayers
-     +					,fluxesg,fluxesg_ob
-     +					,voldif,wflux)
+	subroutine boxes_mass_balance_3d(dtbox,bvol2d &
+     &					,nblayers,nslayers &
+     &					,fluxesg,fluxesg_ob &
+     &					,voldif,wflux)
 
-c computes mass balance
+! computes mass balance
 
 	use basin
 	use levels
@@ -2822,9 +2822,9 @@ c computes mass balance
 	    if( ib2 > 0 ) vol(l,ib2) = vol(l,ib2) + flux
 	    if( bdebug .and. abs(flux) > 0. ) then
 	      if( nblayers(ib1) < l .or. nblayers(ib2) < l ) then
-		write(6,'(a,6i5,g14.4)') 'non existing flux: '
-     +				,is,ib1,ib2
-     +				,nblayers(ib1),nblayers(ib2),l,flux
+		write(6,'(a,6i5,g14.4)') 'non existing flux: ' &
+     &				,is,ib1,ib2 &
+     &				,nblayers(ib1),nblayers(ib2),l,flux
 	      end if
 	    end if
 	  end do
@@ -2852,8 +2852,8 @@ c computes mass balance
 	  lmax = nblayers(ib)
 	  do l=lmax+1,ltot
 	    if( bdebug .and. vol(l,ib) /= 0. ) then
-	      write(6,'(a,3i5,g14.4)') 'non existing box: '
-     +				,ib,lmax,l,vol(l,ib)
+	      write(6,'(a,3i5,g14.4)') 'non existing box: ' &
+     &				,ib,lmax,l,vol(l,ib)
 	    end if
 	  end do
 	  
@@ -2895,9 +2895,9 @@ c computes mass balance
 
 	end
 
-c******************************************************************
-c******************************************************************
-c******************************************************************
+!******************************************************************
+!******************************************************************
+!******************************************************************
 
         subroutine box_flx_file_open(nvar,da_out)
 
@@ -2921,16 +2921,16 @@ c******************************************************************
 	  chflx(i) = string
 	end do
 
-c-----------------------------------------------------------------
-c normal call
-c-----------------------------------------------------------------
+!-----------------------------------------------------------------
+! normal call
+!-----------------------------------------------------------------
 
-        call flux_file_open('.box.flx',da_out,nvar,nsect,kfluxm
-     +                          ,kflux_ext,nslayers,chflx)
+        call flux_file_open('.box.flx',da_out,nvar,nsect,kfluxm &
+     &                          ,kflux_ext,nslayers,chflx)
 
 	end
 
-c******************************************************************
+!******************************************************************
 
 	subroutine box_flx_collect(nlvddi,flux_local,flux_global)
 
@@ -2952,7 +2952,7 @@ c******************************************************************
 
 	end
 
-c******************************************************************
+!******************************************************************
 
 	subroutine box_flx_write(atime,nbflx,ivar,flux_global)
 
@@ -2972,12 +2972,12 @@ c******************************************************************
         nl = nlv_global
         ns = nsect
 
-        call flux_write(nbflx,atime,ivar,nl,ns
-     +                          ,nslayers,flux_global)
+        call flux_write(nbflx,atime,ivar,nl,ns &
+     &                          ,nslayers,flux_global)
 
 	end
 
-c******************************************************************
+!******************************************************************
 
 	subroutine box_debug_2d(text,iubase,n,val)
 
@@ -3005,7 +3005,7 @@ c******************************************************************
 
 	end
 
-c******************************************************************
+!******************************************************************
 
 	subroutine box_debug_3d(text)
 
@@ -3041,7 +3041,7 @@ c******************************************************************
 
 	end
 
-c******************************************************************
+!******************************************************************
 
 	subroutine assert_values
 
@@ -3120,7 +3120,7 @@ c******************************************************************
 	stop 'error stop assert_values'
 	end
 
-c******************************************************************
+!******************************************************************
 
 	subroutine write_matrix_boxes
 
@@ -3195,7 +3195,7 @@ c******************************************************************
  1000	format(i5,20i3)
 	end
 
-c******************************************************************
+!******************************************************************
 
 	subroutine flx_print(iu,text,nsect,nlvddi,fluxes)
 
@@ -3224,7 +3224,7 @@ c******************************************************************
  1000	format(2i5,3g16.8)
 	end
 
-c******************************************************************
+!******************************************************************
 
 	subroutine print_2d(nbox,barea,bvol2d,eta_act,eta_old)
 
@@ -3261,7 +3261,7 @@ c******************************************************************
  1000	format(i5,4g18.10)
 	end
 
-c******************************************************************
+!******************************************************************
 
 	subroutine print_3d_flx(nsect,nbc_ob,dtbox,fluxesg,fluxesg_ob)
 
@@ -3316,5 +3316,5 @@ c******************************************************************
  1000	format(2i5,3g20.10)
 	end
 
-c******************************************************************
+!******************************************************************
 
