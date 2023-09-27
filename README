@@ -21,7 +21,7 @@
 #
 #------------------------------------------------------------------------
 
-    This is the README file for the SHYFEM model
+    This is the README file for the SHYFEM Community Model
 
 #------------------------------------------------------------------------
 
@@ -37,26 +37,16 @@
     Fax    : +39-041-2407940
     E-Mail : georg.umgiesser@ismar.cnr.it
 
-#------------------------------------------------------------------------
-
-    Availability:
-
-    https://github.com/SHYFEM-model/
-
-    Comments and issues should be posted in the Issues section 
-    on the abovementioned GitHub repository
 
 #------------------------------------------------------------------------
 
-    Documentation:
+    Documentation: TO BE CHANGED
 
-    The manual can be found in femdoc/final/shyfem.pdf
-
-    Example applications can be found in examples
+    The manual can be found in docs/final/shyfem.pdf
 
 #------------------------------------------------------------------------
 
-    The software is also supported by various institutions:
+    The software is supported by SHYFEM Consortium: TO BE UPDATED
 
     CNR - ISMAR (Istituto di Scienze Marine)
     ---------
@@ -88,35 +78,25 @@
  
     Fondazione CMCC (Centro Mediterraneno per i cambiamenti climatici)
     ---------
-	Silvia Mocavero, MPI parallization
+	Italo Epicoco, MPI parallization
 	Giorgio Micaletto, MPI parallization
+	Ivan Federico
+	Giorgia Verri
 	
 #------------------------------------------------------------------------
 
 Directory structure
 ===================
 
-examples	example applications
-fem3d		FEM model and utility routines
-femadj		Routines for the adjustment of the grid after the
-		automatic mesh generation. The program to run is shyadj.
-femanim		Routines to generate animations from postscript files
-fembin		Binaries used by the model
-femcheck	Routines to set up and check the installation
-femdoc		Documentation, manual, etc.
-femdummy	Dummy directory
-femersem	Routines for BFM (ERSEM) ecological model
-femgotm		Routines for GOTM turbulence clousre model
-femlib		Library routines (populated during compilation)
-femplot		Plotting routines for post processing. The routine
-		to run is shyplot.
-femregres	Routines to do regression testing. Developers only.
-femutil		Various utility programs
-grid		Visualization routine for GRD files
-hcbs		Outdated files for plotting to monitor
-mesh		Automatic mesh generator
-post		Library for plotting to Postscript files.
-tmp		Temporary directory
+src: 		shyfem model files
+include: 	all the header files related to the model
+lib: 		common shyfem files used both for the model and tools 
+bin: 		binary files (both model and tools)
+tools: 		preprocessing tools, file format, partitioning
+external: 	external tools developed by third party (gotm)
+contrib: 	external models  
+test: 		test cases for unit test and validation
+docs: 		latex source files for model documentation 
 
 Compiling the model
 ===================
