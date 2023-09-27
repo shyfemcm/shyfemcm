@@ -14,8 +14,8 @@ newtmp
 mod
 private
 
-/lib
-/bin
+/lib/mod
+/lib/lib*.a
 /save
 bugs
 
