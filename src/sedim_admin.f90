@@ -466,8 +466,8 @@
           call get_first_dtime(dtime)
           nintp = 2
           nvar = nscls
-          call bnds_init_new(what,dtime,nintp,nvar,nkn,nlvdi
-     +                          ,sbound,idsedi)
+          call bnds_init_new(what,dtime,nintp,nvar,nkn,nlvdi &
+     &                          ,sbound,idsedi)
 
 !         --------------------------------------------------
 !	  Initialize output
@@ -509,9 +509,9 @@
 !       -------------------------------------------------------------------
 !       Compute sediment transport on nodes
 !       -------------------------------------------------------------------
-        call sed_loop(timedr,nscls,gs,hzoff,totbed,riph,ripl,scn,eps,
-     +                sedx,sedy,gdx,gdy,tao,gskm,percbd,bedn,salref,
-     +                temref,wsink,sload,sflx)
+        call sed_loop(timedr,nscls,gs,hzoff,totbed,riph,ripl,scn,eps, &
+     &                sedx,sedy,gdx,gdy,tao,gskm,percbd,bedn,salref, &
+     &                temref,wsink,sload,sflx)
 	taubot = tao
 
 !       -------------------------------------------------------------------
@@ -1331,7 +1331,7 @@
 
         subroutine init_file_fem(what,file_init,nvar,nkn,val)
 
-c initialization of conz from file
+! initialization of conz from file
 
         implicit none
 
@@ -1354,8 +1354,8 @@ c initialization of conz from file
 	nlv = 1
 	val0 = 0.	!not needed
 
-        call tracer_file_init(what,file_init,dtime
-     +                          ,nvar,nlvddi,nlv,nkn,val0,val)
+        call tracer_file_init(what,file_init,dtime &
+     &                          ,nvar,nlvddi,nlv,nkn,val0,val)
 
         end
 
@@ -1398,8 +1398,8 @@ c initialization of conz from file
         if( file .eq. ' ' ) return      !nothing to initialize
 
         write(6,*) 'Initializing sediment grainsize...'
-        call iff_init(dtime,file,nvar,np,lmax,nintp
-     +                          ,nodes,sconst,idsed)
+        call iff_init(dtime,file,nvar,np,lmax,nintp &
+     &                          ,nodes,sconst,idsed)
         call iff_set_description(idsed,ibc,whats)
 
         lmax = 1
@@ -1531,8 +1531,8 @@ c initialization of conz from file
 !	  -3- Viscosity from GOTM and beta from Villatoro et al 2010
 !         -4- Diffusivity from GOTM 
 
-        subroutine vmixcoef(dtype,l,dep,h,wsink,ustc,ustcw,ub,dcw,ht,
-     +			    per,dx,difv,visv,epss)
+        subroutine vmixcoef(dtype,l,dep,h,wsink,ustc,ustcw,ub,dcw,ht, &
+     &			    per,dx,difv,visv,epss)
 
         use levels
 
@@ -2056,8 +2056,8 @@ c initialization of conz from file
 !       -------------------------------------------------------------------
 
         do is = 1,nscls
-          CALL THRESH(VISK,gs(is),RHOS,RHOW,ws(is),usb(is),uss(is),
-     +ust(is),dxx(is))
+          CALL THRESH(VISK,gs(is),RHOS,RHOW,ws(is),usb(is),uss(is), &
+     &ust(is),dxx(is))
         end do
 
 	if ( wsetbio ) call wsinkbio(tem,wwsb)
@@ -4432,10 +4432,10 @@ c initialization of conz from file
 ! !$OMP& SHARED(scn,wsink,sload,eps,idsedi) DEFAULT(NONE)
 
 !$OMP TASK DEFAULT(FIRSTPRIVATE) SHARED(idsedi,scn,wsink,sload,eps)
-          call scn_compute_intern(what
-     +			,is,idsedi,sedkpar,difmol
-     +			,scn(:,:,is),wsink(:,:,is)
-     +			,sload(:,is),eps(:,:,is))
+          call scn_compute_intern(what &
+     &			,is,idsedi,sedkpar,difmol &
+     &			,scn(:,:,is),wsink(:,:,is) &
+     &			,sload(:,is),eps(:,:,is))
 !$OMP END TASK
 
         end do
@@ -4454,9 +4454,9 @@ c initialization of conz from file
 
 !******************************************************************
 
-        subroutine scn_compute_intern(what
-     +			,is,idsedi,sedkpar,difmol
-     +			,scn,wsink,sload,eps)
+        subroutine scn_compute_intern(what &
+     &			,is,idsedi,sedkpar,difmol &
+     &			,scn,wsink,sload,eps)
 
         use mod_diff_visc_fric
         use levels, only : nlvdi,nlv,ilhkv
@@ -4493,10 +4493,10 @@ c initialization of conz from file
         wsinks(:,:) = wsink(:,:)
 	where( scal < 0. ) scal = 0.			!GGUZ0
 
-        call scal_adv_fact(what,is,fact
-     +                      ,scal,idsedi
-     +                      ,sedkpar,fact,wsinks,fact,load
-     +                      ,difhv,epss,difmol)
+        call scal_adv_fact(what,is,fact &
+     &                      ,scal,idsedi &
+     &                      ,sedkpar,fact,wsinks,fact,load &
+     &                      ,difhv,epss,difmol)
 
         call sload3d(load,nkn,nlvdi,ilhkv,lload)
         scn(:,:) = scal(:,:)
@@ -4597,8 +4597,8 @@ c initialization of conz from file
 
 !******************************************************************
 
-	subroutine mud_sand_fract(nlbdim,nscls,nkn,nbcc,percbd,
-     +		   percc,percs)
+	subroutine mud_sand_fract(nlbdim,nscls,nkn,nbcc,percbd, &
+     &		   percc,percs)
 
 	implicit none
 

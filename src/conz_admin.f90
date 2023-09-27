@@ -24,79 +24,79 @@
 !
 !--------------------------------------------------------------------------
 
-c routines for generic concentration
-c
-c contents :
-c
-c subroutine conz3sh
-c						shell for conz (new version)
-c revision log :
-c
-c 28.04.2008	ggu	conz3sh into own file
-c 28.04.2008	ggu	new conzm3sh for multiple concentrations
-c 24.06.2008	ggu	changes in dacay for multiple concentrations
-c 09.10.2008	ggu	new call to confop
-c 19.01.2010	ggu	handle restart of conzentrations
-c 23.03.2010	ggu	changed v6.1.1
-c 25.02.2011	ggu	new routine decay_conz_variable(), add t90 time scale
-c 01.03.2011	ggu	changed VERS_6_1_20
-c 30.03.2012	ggu	changed VERS_6_1_51
-c 01.06.2012	ggu	changed VERS_6_1_53
-c 29.08.2012	ggu	changed VERS_6_1_56
-c 12.11.2013	ggu	changed VERS_6_1_69
-c 13.02.2014	ggu	routines for reading initial condition
-c 07.03.2014	ggu	changed VERS_6_1_72
-c 07.07.2014	ggu	changed VERS_6_1_79
-c 10.07.2014	ggu	only new file format allowed
-c 18.07.2014	ggu	changed VERS_7_0_1
-c 20.10.2014	ggu	pass ids to scal_adv routines
-c 30.10.2014	ggu	changed VERS_7_0_4
-c 26.11.2014	ggu	changed VERS_7_0_7
-c 19.12.2014	ggu	changed VERS_7_0_10
-c 23.12.2014	ggu	changed VERS_7_0_11
-c 19.01.2015	ggu	changed VERS_7_1_3
-c 10.02.2015	ggu	call to bnds_read_new() introduced
-c 26.02.2015	ggu	changed VERS_7_1_5
-c 01.04.2015	ggu	changed VERS_7_1_7
-c 13.07.2015	ggu	changed VERS_7_1_51
-c 17.07.2015	ggu	changed VERS_7_1_52
-c 17.07.2015	ggu	changed VERS_7_1_53
-c 17.07.2015	ggu	changed VERS_7_1_80
-c 20.07.2015	ggu	changed VERS_7_1_81
-c 24.07.2015	ggu	changed VERS_7_1_82
-c 30.07.2015	ggu	changed VERS_7_1_83
-c 18.09.2015	ggu	changed VERS_7_2_3
-c 23.09.2015	ggu	changed VERS_7_2_4
-c 22.10.2015	ggu	changed VERS_7_3_7
-c 09.11.2015	ggu	newly structured in init, compute and write
-c 19.02.2016	ggu	changed VERS_7_5_3
-c 06.06.2016	ggu	initialization from file changed
-c 10.06.2016	ggu	some more re-formatting
-c 08.09.2016	ggu	new decay function implemented (chapra), cleaned
-c 13.02.2017	mcg	idecay has new meaning!!! (incompatible)
-c 13.04.2017	ggu	contau deprecated... use taupar (array)
-c 02.09.2017	ggu	changed VERS_7_5_31
-c 09.10.2017	ggu	changed VERS_7_5_33
-c 05.12.2017	ggu	changed VERS_7_5_39
-c 22.02.2018	ggu	changed VERS_7_5_42
-c 03.04.2018	ggu	changed VERS_7_5_43
-c 16.10.2018	ggu	changed VERS_7_5_50
-c 16.02.2019	ggu	changed VERS_7_5_60
-c 13.03.2019	ggu	changed VERS_7_5_61
-c 20.03.2020	ggu	restart routines added
-c 22.06.2021	ggu	age computation introduced (bage)
-c 28.06.2021	ggu	bug fix for age and OMP
-c 15.02.2022	ggu	read iage/bage from STR file
-c 16.02.2022	ggu	compute age in days
-c 29.03.2022	ggu	eliminated error with profile=check
-c 02.04.2023    ggu     only master writes to iuinfo
-c 19.04.2023    ggu     init tracer file output only once, syncronize
-c
-c*********************************************************************
+! routines for generic concentration
+!
+! contents :
+!
+! subroutine conz3sh
+!						shell for conz (new version)
+! revision log :
+!
+! 28.04.2008	ggu	conz3sh into own file
+! 28.04.2008	ggu	new conzm3sh for multiple concentrations
+! 24.06.2008	ggu	changes in dacay for multiple concentrations
+! 09.10.2008	ggu	new call to confop
+! 19.01.2010	ggu	handle restart of conzentrations
+! 23.03.2010	ggu	changed v6.1.1
+! 25.02.2011	ggu	new routine decay_conz_variable(), add t90 time scale
+! 01.03.2011	ggu	changed VERS_6_1_20
+! 30.03.2012	ggu	changed VERS_6_1_51
+! 01.06.2012	ggu	changed VERS_6_1_53
+! 29.08.2012	ggu	changed VERS_6_1_56
+! 12.11.2013	ggu	changed VERS_6_1_69
+! 13.02.2014	ggu	routines for reading initial condition
+! 07.03.2014	ggu	changed VERS_6_1_72
+! 07.07.2014	ggu	changed VERS_6_1_79
+! 10.07.2014	ggu	only new file format allowed
+! 18.07.2014	ggu	changed VERS_7_0_1
+! 20.10.2014	ggu	pass ids to scal_adv routines
+! 30.10.2014	ggu	changed VERS_7_0_4
+! 26.11.2014	ggu	changed VERS_7_0_7
+! 19.12.2014	ggu	changed VERS_7_0_10
+! 23.12.2014	ggu	changed VERS_7_0_11
+! 19.01.2015	ggu	changed VERS_7_1_3
+! 10.02.2015	ggu	call to bnds_read_new() introduced
+! 26.02.2015	ggu	changed VERS_7_1_5
+! 01.04.2015	ggu	changed VERS_7_1_7
+! 13.07.2015	ggu	changed VERS_7_1_51
+! 17.07.2015	ggu	changed VERS_7_1_52
+! 17.07.2015	ggu	changed VERS_7_1_53
+! 17.07.2015	ggu	changed VERS_7_1_80
+! 20.07.2015	ggu	changed VERS_7_1_81
+! 24.07.2015	ggu	changed VERS_7_1_82
+! 30.07.2015	ggu	changed VERS_7_1_83
+! 18.09.2015	ggu	changed VERS_7_2_3
+! 23.09.2015	ggu	changed VERS_7_2_4
+! 22.10.2015	ggu	changed VERS_7_3_7
+! 09.11.2015	ggu	newly structured in init, compute and write
+! 19.02.2016	ggu	changed VERS_7_5_3
+! 06.06.2016	ggu	initialization from file changed
+! 10.06.2016	ggu	some more re-formatting
+! 08.09.2016	ggu	new decay function implemented (chapra), cleaned
+! 13.02.2017	mcg	idecay has new meaning!!! (incompatible)
+! 13.04.2017	ggu	contau deprecated... use taupar (array)
+! 02.09.2017	ggu	changed VERS_7_5_31
+! 09.10.2017	ggu	changed VERS_7_5_33
+! 05.12.2017	ggu	changed VERS_7_5_39
+! 22.02.2018	ggu	changed VERS_7_5_42
+! 03.04.2018	ggu	changed VERS_7_5_43
+! 16.10.2018	ggu	changed VERS_7_5_50
+! 16.02.2019	ggu	changed VERS_7_5_60
+! 13.03.2019	ggu	changed VERS_7_5_61
+! 20.03.2020	ggu	restart routines added
+! 22.06.2021	ggu	age computation introduced (bage)
+! 28.06.2021	ggu	bug fix for age and OMP
+! 15.02.2022	ggu	read iage/bage from STR file
+! 16.02.2022	ggu	compute age in days
+! 29.03.2022	ggu	eliminated error with profile=check
+! 02.04.2023    ggu     only master writes to iuinfo
+! 19.04.2023    ggu     init tracer file output only once, syncronize
+!
+!*********************************************************************
 
 	subroutine tracer_init
 
-c initializes tracer computation
+! initializes tracer computation
 
 	use mod_conz
 	!use mod_diff_visc_fric
@@ -118,9 +118,9 @@ c initializes tracer computation
 	integer nbnds
 	real getpar
 
-c-------------------------------------------------------------
-c initialization of module
-c-------------------------------------------------------------
+!-------------------------------------------------------------
+! initialization of module
+!-------------------------------------------------------------
 
 	if( iconz < 0 ) return
 
@@ -142,9 +142,9 @@ c-------------------------------------------------------------
 	  end if
         end if
 
-c-------------------------------------------------------------
-c initialization of parameters
-c-------------------------------------------------------------
+!-------------------------------------------------------------
+! initialization of parameters
+!-------------------------------------------------------------
 
 	cref=getpar('conref')
 	rkpar=getpar('chpar')
@@ -221,8 +221,8 @@ c-------------------------------------------------------------
 	call get_first_dtime(dtime0)
 	nintp = 2
 	cdefs = 0.				!default boundary condition
-        call bnds_init_new(what,dtime0,nintp,nvar,nkn,nlv
-     +				,cdefs,idconz)
+        call bnds_init_new(what,dtime0,nintp,nvar,nkn,nlv &
+     &				,cdefs,idconz)
 
 	iprogr = nint(getpar('iprogr'))
 	if( level .le. 0 ) iprogr = 0
@@ -231,7 +231,7 @@ c-------------------------------------------------------------
 
 	end
 
-c*********************************************************************
+!*********************************************************************
 
 	subroutine check_cnv
 
@@ -263,13 +263,13 @@ c*********************************************************************
 	
 	end
 
-c*********************************************************************
-c*********************************************************************
-c*********************************************************************
-c compute tracer
-c*********************************************************************
-c*********************************************************************
-c*********************************************************************
+!*********************************************************************
+!*********************************************************************
+!*********************************************************************
+! compute tracer
+!*********************************************************************
+!*********************************************************************
+!*********************************************************************
 
 	subroutine tracer_compute
 
@@ -291,7 +291,7 @@ c*********************************************************************
 
 	end
 
-c*********************************************************************
+!*********************************************************************
 
 	subroutine tracer_compute_single
 
@@ -310,18 +310,18 @@ c*********************************************************************
 	real dt
 	double precision dtime
 
-c-------------------------------------------------------------
-c initialization
-c-------------------------------------------------------------
+!-------------------------------------------------------------
+! initialization
+!-------------------------------------------------------------
 
 	if( iconz < 0 ) return
 
 	call is_time_first(bfirst)
 	if( bfirst ) stop 'tracer_compute_single: internal error'
 
-c-------------------------------------------------------------
-c normal call
-c-------------------------------------------------------------
+!-------------------------------------------------------------
+! normal call
+!-------------------------------------------------------------
 
 	wsink = 0.
 	call get_act_dtime(dtime)
@@ -329,14 +329,14 @@ c-------------------------------------------------------------
 
 	call bnds_read_new(what,idconz,dtime)
 
-        call scal_adv(what,0
-     +                          ,cnv,idconz
-     +                          ,rkpar,wsink
-     +                          ,difhv,difv,difmol)
+        call scal_adv(what,0 &
+     &                          ,cnv,idconz &
+     &                          ,rkpar,wsink &
+     &                          ,difhv,difv,difmol)
 
-c-------------------------------------------------------------
-c simulate decay
-c-------------------------------------------------------------
+!-------------------------------------------------------------
+! simulate decay
+!-------------------------------------------------------------
 
 	if( idecay == 1 ) then
           call decay_conz(dt,contau,cnv)
@@ -344,27 +344,27 @@ c-------------------------------------------------------------
           call decay_conz_chapra(dt,1.,cnv)
 	end if
 
-c-------------------------------------------------------------
-c simulate age
-c-------------------------------------------------------------
+!-------------------------------------------------------------
+! simulate age
+!-------------------------------------------------------------
 
 	if( bage ) call age_conz(dt,cnv)
 
-c-------------------------------------------------------------
-c info and accumulate
-c-------------------------------------------------------------
+!-------------------------------------------------------------
+! info and accumulate
+!-------------------------------------------------------------
 
 	if( binfo ) call massconc(+1,cnv,nlvdi,massv(1))
 
 	call tracer_accum_accum(dt)
 
-c-------------------------------------------------------------
-c end of routine
-c-------------------------------------------------------------
+!-------------------------------------------------------------
+! end of routine
+!-------------------------------------------------------------
 
 	end
 
-c*********************************************************************
+!*********************************************************************
 
 	subroutine tracer_compute_multi
 
@@ -383,18 +383,18 @@ c*********************************************************************
 	real dt
 	double precision dtime
 
-c-------------------------------------------------------------
-c initialization
-c-------------------------------------------------------------
+!-------------------------------------------------------------
+! initialization
+!-------------------------------------------------------------
 
 	if( iconz < 0 ) return
 
 	call is_time_first(bfirst)
 	if( bfirst ) stop 'tracer_compute_multi: internal error'
 
-c-------------------------------------------------------------
-c normal call
-c-------------------------------------------------------------
+!-------------------------------------------------------------
+! normal call
+!-------------------------------------------------------------
 
 	nvar = iconz
 	wsink = 0.
@@ -410,10 +410,10 @@ c-------------------------------------------------------------
 !$OMP& dt,nlvdi,idecay,blinfo,bage) 
 !OMP&  SHARED(conzv,tauv,massv) DEFAULT(NONE)
  
-          call scal_adv(what,i
-     +                          ,conzv(1,1,i),idconz
-     +                          ,rkpar,wsink
-     +                          ,difhv,difv,difmol)
+          call scal_adv(what,i &
+     &                          ,conzv(1,1,i),idconz &
+     &                          ,rkpar,wsink &
+     &                          ,difhv,difv,difmol)
 
 
 	  if(idecay == 1) then
@@ -432,19 +432,19 @@ c-------------------------------------------------------------
 
 !$OMP TASKWAIT
 
-c-------------------------------------------------------------
-c end of routine
-c-------------------------------------------------------------
+!-------------------------------------------------------------
+! end of routine
+!-------------------------------------------------------------
 
 	end
 
-c*********************************************************************
-c*********************************************************************
-c*********************************************************************
-c write and read routines
-c*********************************************************************
-c*********************************************************************
-c*********************************************************************
+!*********************************************************************
+!*********************************************************************
+!*********************************************************************
+! write and read routines
+!*********************************************************************
+!*********************************************************************
+!*********************************************************************
 
 	subroutine tracer_write_init
 
@@ -471,7 +471,7 @@ c*********************************************************************
 
 	end
 
-c*********************************************************************
+!*********************************************************************
 
 	subroutine tracer_write
 
@@ -493,9 +493,9 @@ c*********************************************************************
 
 	if( iconz < 0 ) return
 
-c-------------------------------------------------------------
-c write to file
-c-------------------------------------------------------------
+!-------------------------------------------------------------
+! write to file
+!-------------------------------------------------------------
 
 	call get_act_dtime(dtime)
 	nvar = iconz
@@ -508,17 +508,17 @@ c-------------------------------------------------------------
 	      call tracer_accum_aver
 	      allocate(caux2d(nlvdi,nkn))
 	      caux2d = conz_min(:,:,1)
-	      call shy_write_scalar_record(id,dtime,idc,nlvdi
-     +						,caux2d)
+	      call shy_write_scalar_record(id,dtime,idc,nlvdi &
+     &						,caux2d)
 	      caux2d = conz_aver(:,:,1)	!convert from double to real
 	      dtime = dtime + 1
-	      call shy_write_scalar_record(id,dtime,idc,nlvdi
-     +						,cnv)
+	      call shy_write_scalar_record(id,dtime,idc,nlvdi &
+     &						,cnv)
 !     +						,caux2d)
 	      caux2d = conz_max(:,:,1)
 	      dtime = dtime + 1
-	      call shy_write_scalar_record(id,dtime,idc,nlvdi
-     +						,caux2d)
+	      call shy_write_scalar_record(id,dtime,idc,nlvdi &
+     &						,caux2d)
 	      call tracer_accum_init
 	    else
 	      !write(6,*) 'writing scalar record ',idc
@@ -528,8 +528,8 @@ c-------------------------------------------------------------
 	    do i=1,nvar
 	      idc = 300 + i
 	      !write(6,*) 'writing scalar record ',idc
-	      call shy_write_scalar_record(id,dtime,idc,nlvdi
-     +						,conzv(1,1,i))
+	      call shy_write_scalar_record(id,dtime,idc,nlvdi &
+     &						,conzv(1,1,i))
 	    end do
           end if
 
@@ -537,9 +537,9 @@ c-------------------------------------------------------------
 
         end if
 
-c-------------------------------------------------------------
-c write to info file
-c-------------------------------------------------------------
+!-------------------------------------------------------------
+! write to info file
+!-------------------------------------------------------------
 
 	if( iconz == 1 ) then
 	  if( iprogr .gt. 0 ) then
@@ -565,17 +565,17 @@ c-------------------------------------------------------------
 	  !write(65,*) it,massv
 	end if
 
-c-------------------------------------------------------------
-c end of routine
-c-------------------------------------------------------------
+!-------------------------------------------------------------
+! end of routine
+!-------------------------------------------------------------
 
 	end
 
-c*********************************************************************
+!*********************************************************************
 
         subroutine conz_init_file(dtime,nvar,nlvddi,nlv,nkn,val0,val)
 
-c initialization of conz from file
+! initialization of conz from file
 
 	implicit none
 
@@ -587,22 +587,22 @@ c initialization of conz from file
         real val0(nvar)
         real val(nlvddi,nkn,nvar)
 
-        call tracer_file_init('conz init','conzin',dtime
-     +                          ,nvar,nlvddi,nlv,nkn,val0,val)
+        call tracer_file_init('conz init','conzin',dtime &
+     &                          ,nvar,nlvddi,nlv,nkn,val0,val)
 
 	end
 
-c*********************************************************************
-c*********************************************************************
-c*********************************************************************
-c decay routines
-c*********************************************************************
-c*********************************************************************
-c*********************************************************************
+!*********************************************************************
+!*********************************************************************
+!*********************************************************************
+! decay routines
+!*********************************************************************
+!*********************************************************************
+!*********************************************************************
 
         subroutine decay_conz(dt,tau,e)
 
-c simulates decay for concentration
+! simulates decay for concentration
 
 	use levels
 	use basin, only : nkn,nel,ngr,mbw
@@ -630,11 +630,11 @@ c simulates decay for concentration
 
         end
 
-c*********************************************************************
+!*********************************************************************
 
         subroutine decay_conz_chapra(dt,tau,e)
 
-c simulates decay for concentration (from Chapra, 506-510)
+! simulates decay for concentration (from Chapra, 506-510)
 
         use mod_layer_thickness
         use mod_ts
@@ -702,11 +702,11 @@ c simulates decay for concentration (from Chapra, 506-510)
 
         end
 
-c*********************************************************************
+!*********************************************************************
 
         subroutine decay_conz_variable(dt,tau,e)
 
-c simulates decay for concentration
+! simulates decay for concentration
 
 	use mod_layer_thickness
 	use mod_ts
@@ -746,8 +746,8 @@ c simulates decay for concentration
 	    hdep = hdep + h
 	    t = tempv(l,k)
 	    s = saltv(l,k)
-	    kappa = alpha * 1.040**(t-20.) * 1.012**s +
-     +			0.113 * solrad * exp(-z/rk)
+	    kappa = alpha * 1.040**(t-20.) * 1.012**s + &
+     &			0.113 * solrad * exp(-z/rk)
             aux = exp(-dtt*kappa)
             e(l,k) = aux * e(l,k)
           end do
@@ -755,20 +755,20 @@ c simulates decay for concentration
 
         end
 
-c*********************************************************************
-c*********************************************************************
-c*********************************************************************
-c age routines
-c*********************************************************************
-c*********************************************************************
-c*********************************************************************
+!*********************************************************************
+!*********************************************************************
+!*********************************************************************
+! age routines
+!*********************************************************************
+!*********************************************************************
+!*********************************************************************
 
         subroutine age_conz(dt,e)
 
-c simulates concentration as age
-c
-c this routine is called if bage == .true.
-c to be used all boundary conditions of concentration must be 0
+! simulates concentration as age
+!
+! this routine is called if bage == .true.
+! to be used all boundary conditions of concentration must be 0
 
 	use levels
 	use basin, only : nkn,nel,ngr,mbw
@@ -792,13 +792,13 @@ c to be used all boundary conditions of concentration must be 0
 
         end
 
-c*********************************************************************
-c*********************************************************************
-c*********************************************************************
-c tracer accumulation routines
-c*********************************************************************
-c*********************************************************************
-c*********************************************************************
+!*********************************************************************
+!*********************************************************************
+!*********************************************************************
+! tracer accumulation routines
+!*********************************************************************
+!*********************************************************************
+!*********************************************************************
 
 	subroutine tracer_accum_init
 
@@ -817,7 +817,7 @@ c*********************************************************************
 
 	end
 
-c*********************************************************************
+!*********************************************************************
 
 	subroutine tracer_accum_accum(dt)
 
@@ -845,7 +845,7 @@ c*********************************************************************
 
 	end
 
-c*********************************************************************
+!*********************************************************************
 
 	subroutine tracer_accum_aver
 
@@ -861,5 +861,5 @@ c*********************************************************************
 
 	end
 
-c*********************************************************************
+!*********************************************************************
 

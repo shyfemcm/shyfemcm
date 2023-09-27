@@ -23,63 +23,63 @@
 !
 !--------------------------------------------------------------------------
 
-c linear equation solvers
-c
-c contents :
-c
-c      SUBROUTINE LEQT1B (A,N,NLC,NUC,IA,B,M,IB,IJOB,XL,IER)
-c      SUBROUTINE LEQT2B (A,N,NLC,NUC,IA,B,M,IB,IJOB,U,IU,XL,IER)
-c      SUBROUTINE LEQ1PB (A,N,NC,IA,B,IB,M,IDGT,D1,D2,IER)
-c      SUBROUTINE LEQ2PB (A,N,NC,IA,B,IB,M,IDGT,D1,D2,WK,IER)
-c      SUBROUTINE LUDAPB (A,N,NC,IA,UL,IU,D1,D2,IER)
-c      SUBROUTINE LUELPB (UL,B,N,NC,IA,X)
-c      SUBROUTINE LUREPB (A,N,NC,IA,UL,IU,B,X,IDGT,RES,IER)
-c      SUBROUTINE DEQT1B (A,N,NLC,NUC,IA,B,M,IB,IJOB,XL,IER)
-c      SUBROUTINE DEQT2B (A,N,NLC,NUC,IA,B,M,IB,IJOB,U,IU,XL,IER)
-c      SUBROUTINE DEQ1PB (A,N,NC,IA,B,IB,M,IDGT,D1,D2,IER)
-c      SUBROUTINE DEQ2PB (A,N,NC,IA,B,IB,M,IDGT,D1,D2,WK,IER)
-c      SUBROUTINE DUDAPB (A,N,NC,IA,UL,IU,D1,D2,IER)
-c      SUBROUTINE DUELPB (UL,B,N,NC,IA,X)
-c      SUBROUTINE DUREPB (A,N,NC,IA,UL,IU,B,X,IDGT,RES,IER)
-c      SUBROUTINE UERTST (IER,NAME)
-c      SUBROUTINE UGETIO (IOPT,NIN,NOUT)
-c      SUBROUTINE GELB(R,A,M,N,MUD,MLD,EPS,IER)
-c      SUBROUTINE DGELB(R,A,M,N,MUD,MLD,EPS,IER)
-c      SUBROUTINE MCHB(R,A,M,N,MUD,IOP,EPS,IER)
-c      SUBROUTINE DMCHB(R,A,M,N,MUD,IOP,EPS,IER)
-c      subroutine loctst(i,j,n,m)
-c      function locmy(i,j,n,m)
-c      function locimm(i,j,n,m)
-c      function loccer(i,j,n,m)
-c      function locssp(i,j,n,m)
-c      function locsps(i,j,n,m)
-c
-c revision log :
-c
-c 03.04.1997	ggu	general - compiler warnings for gfortran
-c 24.05.1997	ggu	general - compiler warnings -> call to dp routines
-c 23.03.2010	ggu	changed v6.1.1
-c 30.03.2012	ggu	changed VERS_6_1_51
-c 01.06.2012	ggu	changed VERS_6_1_53
-c 18.12.2015	ggu	changed VERS_7_3_17
-c 16.02.2019	ggu	changed VERS_7_5_60
-c 13.03.2019	ggu	changed VERS_7_5_61
-c
-c********************************************************************
+! linear equation solvers
+!
+! contents :
+!
+!      SUBROUTINE LEQT1B (A,N,NLC,NUC,IA,B,M,IB,IJOB,XL,IER)
+!      SUBROUTINE LEQT2B (A,N,NLC,NUC,IA,B,M,IB,IJOB,U,IU,XL,IER)
+!      SUBROUTINE LEQ1PB (A,N,NC,IA,B,IB,M,IDGT,D1,D2,IER)
+!      SUBROUTINE LEQ2PB (A,N,NC,IA,B,IB,M,IDGT,D1,D2,WK,IER)
+!      SUBROUTINE LUDAPB (A,N,NC,IA,UL,IU,D1,D2,IER)
+!      SUBROUTINE LUELPB (UL,B,N,NC,IA,X)
+!      SUBROUTINE LUREPB (A,N,NC,IA,UL,IU,B,X,IDGT,RES,IER)
+!      SUBROUTINE DEQT1B (A,N,NLC,NUC,IA,B,M,IB,IJOB,XL,IER)
+!      SUBROUTINE DEQT2B (A,N,NLC,NUC,IA,B,M,IB,IJOB,U,IU,XL,IER)
+!      SUBROUTINE DEQ1PB (A,N,NC,IA,B,IB,M,IDGT,D1,D2,IER)
+!      SUBROUTINE DEQ2PB (A,N,NC,IA,B,IB,M,IDGT,D1,D2,WK,IER)
+!      SUBROUTINE DUDAPB (A,N,NC,IA,UL,IU,D1,D2,IER)
+!      SUBROUTINE DUELPB (UL,B,N,NC,IA,X)
+!      SUBROUTINE DUREPB (A,N,NC,IA,UL,IU,B,X,IDGT,RES,IER)
+!      SUBROUTINE UERTST (IER,NAME)
+!      SUBROUTINE UGETIO (IOPT,NIN,NOUT)
+!      SUBROUTINE GELB(R,A,M,N,MUD,MLD,EPS,IER)
+!      SUBROUTINE DGELB(R,A,M,N,MUD,MLD,EPS,IER)
+!      SUBROUTINE MCHB(R,A,M,N,MUD,IOP,EPS,IER)
+!      SUBROUTINE DMCHB(R,A,M,N,MUD,IOP,EPS,IER)
+!      subroutine loctst(i,j,n,m)
+!      function locmy(i,j,n,m)
+!      function locimm(i,j,n,m)
+!      function loccer(i,j,n,m)
+!      function locssp(i,j,n,m)
+!      function locsps(i,j,n,m)
+!
+! revision log :
+!
+! 03.04.1997	ggu	general - compiler warnings for gfortran
+! 24.05.1997	ggu	general - compiler warnings -> call to dp routines
+! 23.03.2010	ggu	changed v6.1.1
+! 30.03.2012	ggu	changed VERS_6_1_51
+! 01.06.2012	ggu	changed VERS_6_1_53
+! 18.12.2015	ggu	changed VERS_7_3_17
+! 16.02.2019	ggu	changed VERS_7_5_60
+! 13.03.2019	ggu	changed VERS_7_5_61
+!
+!********************************************************************
 
       SUBROUTINE LEQT1B (A,N,NLC,NUC,IA,B,M,IB,IJOB,XL,IER)
-C
+!
       DIMENSION          A(IA,*),XL(N,*),B(IB,*)
       DATA               ZERO/0./,ONE/1.0/
-C                                  FIRST EXECUTABLE STATEMENT
+!                                  FIRST EXECUTABLE STATEMENT
       IER = 0
       JBEG = NLC+1
       NLC1 = JBEG
       IF (IJOB .EQ. 2) GO TO 80
       RN = N
-C                                  RESTRUCTURE THE MATRIX
-C                                  FIND RECIPROCAL OF THE LARGEST
-C                                  ABSOLUTE VALUE IN ROW I
+!                                  RESTRUCTURE THE MATRIX
+!                                  FIND RECIPROCAL OF THE LARGEST
+!                                  ABSOLUTE VALUE IN ROW I
       I = 1
       NC = JBEG+NUC
       NN = NC
@@ -123,7 +123,7 @@ C                                  ABSOLUTE VALUE IN ROW I
    37    NN = NN-1
    40 CONTINUE
       L = NLC
-C                                  L-U DECOMPOSITION
+!                                  L-U DECOMPOSITION
       DO 75 K = 1,N
          P =  ABS(A(K,1))*XL(K,NLC1)
          I = K
@@ -138,10 +138,10 @@ C                                  L-U DECOMPOSITION
    45    CONTINUE
    50    XL(I,NLC1) = XL(K,NLC1)
          XL(K,NLC1) = I
-C                                  SINGULARITY FOUND
+!                                  SINGULARITY FOUND
          Q = RN+P
          IF (Q .EQ. RN) GO TO 135
-C                                  INTERCHANGE ROWS I AND K
+!                                  INTERCHANGE ROWS I AND K
          IF (K .EQ. I) GO TO 60
          DO 55 J = 1,NC
             P = A(K,J)
@@ -160,7 +160,7 @@ C                                  INTERCHANGE ROWS I AND K
    70    CONTINUE
    75 CONTINUE
       IF (IJOB .EQ. 1) GO TO 9005
-C                                  FORWARD SUBSTITUTION
+!                                  FORWARD SUBSTITUTION
    80 L = NLC
       DO 105 K = 1,N
          I = XL(K,NLC1)
@@ -181,7 +181,7 @@ C                                  FORWARD SUBSTITUTION
    95       CONTINUE
   100    CONTINUE
   105 CONTINUE
-C                                  BACKWARD SUBSTITUTION
+!                                  BACKWARD SUBSTITUTION
       JBEG = NUC+NLC
       DO 125 J = 1,M
          L = 1
@@ -204,15 +204,15 @@ C                                  BACKWARD SUBSTITUTION
       CALL UERTST(IER,'LEQT1B')
  9005 RETURN
       END
-C
-c********************************************************************
-C
+!
+!********************************************************************
+!
       SUBROUTINE LEQT2B (A,N,NLC,NUC,IA,B,M,IB,IJOB,U,IU,XL,IER)
-C
+!
       DIMENSION          A(IA,*),U(IU,*),XL(N,*),B(IB,*)
       DOUBLE PRECISION   SUM
       DATA               ZERO/0.0/,ITMAX/50/
-C                                  FIRST EXECUTABLE STATEMENT
+!                                  FIRST EXECUTABLE STATEMENT
       IER = 0
       NLCP1 = NLC+1
       NCC = NUC+NLCP1
@@ -221,30 +221,30 @@ C                                  FIRST EXECUTABLE STATEMENT
       NU2 = NCC+1
       NU3 = NCC+2
       IF (IJOB .EQ. 2) GO TO 15
-C                                  SAVE MATRIX A
+!                                  SAVE MATRIX A
       DO 10 I = 1,N
          DO 5 J = 1,NCC
             U(I,J) = A(I,J)
     5    CONTINUE
    10 CONTINUE
-C                                  FACTOR MATRIX A
+!                                  FACTOR MATRIX A
       CALL LEQT1B(U,N,NLC,NUC,IU,B,M,IB,1,XL,IER)
       IF (IER .NE. 0) GO TO 9000
       IF (IJOB .EQ. 1) GO TO 9005
-C                                  SAVE THE RIGHT HAND SIDES
+!                                  SAVE THE RIGHT HAND SIDES
    15 DO 60 J = 1,M
          DO 20 I = 1,N
             U(I,NU2) = B(I,J)
    20    CONTINUE
-C                                  OBTAIN A SOLUTION
+!                                  OBTAIN A SOLUTION
          CALL LEQT1B(U,N,NLC,NUC,IU,U(1,NU2),1,IU,2,XL,IER)
-C                                  COMPUTE THE NORM OF THE SOLUTION
+!                                  COMPUTE THE NORM OF THE SOLUTION
          XNORM = ZERO
          DO 25 I = 1,N
             XNORM = MAX(XNORM, ABS(U(I,NU2)))
    25    CONTINUE
          IF (XNORM .EQ. ZERO) GO TO 60
-C                                  COMPUTE THE RESIDUALS
+!                                  COMPUTE THE RESIDUALS
          DO 45 ITER = 1,ITMAX
             NC = NCC
             KK = 1
@@ -263,7 +263,7 @@ C                                  COMPUTE THE RESIDUALS
    35       CONTINUE
             CALL LEQT1B(U,N,NLC,NUC,IU,U(1,NU3),1,IU,2,XL,IER)
             DXNORM = ZERO
-C                                  UPDATE THE SOLUTION
+!                                  UPDATE THE SOLUTION
             DO 40 I = 1,N
                U(I,NU2) = U(I,NU2)+U(I,NU3)
                DXNORM = MAX(DXNORM, ABS(U(I,NU3)))
@@ -271,7 +271,7 @@ C                                  UPDATE THE SOLUTION
             IF (XNORM+DXNORM .EQ. XNORM) GO TO 50
    45    CONTINUE
          IER = 130
-C                                  STORE THE SOLUTION
+!                                  STORE THE SOLUTION
    50    DO 55 JK = 1,N
             B(JK,J) = U(JK,NU2)
    55    CONTINUE
@@ -282,20 +282,20 @@ C                                  STORE THE SOLUTION
       CALL UERTST(IER,'LEQT2B')
  9005 RETURN
       END
-C
-c********************************************************************
-C
+!
+!********************************************************************
+!
       SUBROUTINE LEQ1PB (A,N,NC,IA,B,IB,M,IDGT,D1,D2,IER)
-C
+!
       REAL               A(IA,*),B(IB,*),D1,D2
-C                                  FIRST EXECUTABLE STATEMENT
+!                                  FIRST EXECUTABLE STATEMENT
       IER = 0*IDGT
-C                                  DECOMPOSITION OF MATRIX A INTO
-C                                  L*L-TRANSPOSE
+!                                  DECOMPOSITION OF MATRIX A INTO
+!                                  L*L-TRANSPOSE
       CALL LUDAPB(A,N,NC,IA,A,IA,D1,D2,IER)
       IF (IER .NE. 0) GO TO 9000
       DO 5 I = 1,M
-C                                  SOLUTION OF AX = B
+!                                  SOLUTION OF AX = B
          CALL LUELPB(A,B(1,I),N,NC,IA,B(1,I))
     5 CONTINUE
       GO TO 9005
@@ -303,13 +303,13 @@ C                                  SOLUTION OF AX = B
       CALL UERTST (IER,'LEQ1PB')
  9005 RETURN
       END
-C
-c********************************************************************
-C
+!
+!********************************************************************
+!
       SUBROUTINE LEQ2PB (A,N,NC,IA,B,IB,M,IDGT,D1,D2,WK,IER)
-C
+!
       REAL               A(IA,*),B(IB,*),WK(N,*),D1,D2
-C                                  FIRST EXECUTABLE STATEMENT
+!                                  FIRST EXECUTABLE STATEMENT
       IER = 0
       K = NC+2
       K1 = K+1
@@ -329,54 +329,54 @@ C                                  FIRST EXECUTABLE STATEMENT
       CALL UERTST(IER,'LEQ2PB')
  9005 RETURN
       END
-C
-c********************************************************************
-C
+!
+!********************************************************************
+!
       SUBROUTINE LUDAPB (A,N,NC,IA,UL,IU,D1,D2,IER)
-C
-      REAL               ZERO,A(IA,*),UL(IU,*),D1,D2,ONE,SUM,
-     +                   RN,FOUR,SIXTN,SIXTH
-      DATA               ZERO/0.0/,FOUR/4.0/,SIXTN/16./,
-     +                   SIXTH/.0625/,ONE/1.0/
-C                                  FIRST EXECUTABLE STATEMENT
+!
+      REAL               ZERO,A(IA,*),UL(IU,*),D1,D2,ONE,SUM, &
+     &                   RN,FOUR,SIXTN,SIXTH
+      DATA               ZERO/0.0/,FOUR/4.0/,SIXTN/16./, &
+     &                   SIXTH/.0625/,ONE/1.0/
+!                                  FIRST EXECUTABLE STATEMENT
       IER = 0
       RN = ONE/(N*SIXTN)
       D1 = ONE
       D2 = ZERO
       NCP1 = NC+1
       IF (NC .EQ. 0) GO TO 15
-C                                  INITIALIZE ZERO ELEMENTS
+!                                  INITIALIZE ZERO ELEMENTS
       DO 10 I = 1,NC
          DO 5 J = I,NC
             K = NCP1-J
             UL(I,K) = ZERO
     5    CONTINUE
    10 CONTINUE
-C                                  I IS ROW INDEX OF ELEMENT BEING
-C                                  COMPUTED
+!                                  I IS ROW INDEX OF ELEMENT BEING
+!                                  COMPUTED
    15 DO 60 I = 1,N
          IMNCP1 = I-NCP1
          I1 = MAX0(1,1-IMNCP1)
-C                                  J IS COLUMN INDEX OF ELEMENT BEING
-C                                  COMPUTED
+!                                  J IS COLUMN INDEX OF ELEMENT BEING
+!                                  COMPUTED
          DO 60 J = I1,NCP1
-C                                  L IS ROW INDEX OF PREVIOUSLY COMPUTED
-C                                  VECTOR BEING USED TO COMPUTE INNER
-C                                  PRODUCT
+!                                  L IS ROW INDEX OF PREVIOUSLY COMPUTED
+!                                  VECTOR BEING USED TO COMPUTE INNER
+!                                  PRODUCT
             L = IMNCP1+J
             I2 = NCP1-J
             SUM = A(I,J)
             JM1 = J-1
             IF (JM1) 30,30,20
    20       DO 25 K = 1,JM1
-C                                  M IS COLUMN INDEX
+!                                  M IS COLUMN INDEX
                M = I2+K
                SUM = SUM-UL(I,K)*UL(L,M)
    25       CONTINUE
    30       IF (J .NE. NCP1) GO TO 55
             IF(A(I,J)+SUM*RN .LE. A(I,J))GO TO 65
             UL(I,J) = ONE/SQRT(SUM)
-C                                  UPDATE THE DETERMINANT
+!                                  UPDATE THE DETERMINANT
             D1 = D1*SUM
    35       IF (ABS(D1)-ONE) 45,45,40
    40       D1 = D1*SIXTH
@@ -394,15 +394,15 @@ C                                  UPDATE THE DETERMINANT
       CALL UERTST(IER,'LUDAPB')
  9005 RETURN
       END
-C
-c********************************************************************
-C
+!
+!********************************************************************
+!
       SUBROUTINE LUELPB (UL,B,N,NC,IA,X)
-C
+!
       REAL               UL(IA,*),B(*),X(*),ZERO,SUM
       DATA               ZERO/0.0/
-C                                  FIRST EXECUTABLE STATEMENT
-C                                  SOLUTION LY = B
+!                                  FIRST EXECUTABLE STATEMENT
+!                                  SOLUTION LY = B
       NC1 = NC+1
       IW = 0
       L = 0
@@ -422,7 +422,7 @@ C                                  SOLUTION LY = B
     9    IF (SUM .NE. ZERO) IW = 1
    10    X(I) = SUM*UL(I,NC1)
    15 CONTINUE
-C                                  SOLUTION UX = Y
+!                                  SOLUTION UX = Y
    20 X(N) = X(N)*UL(N,NC1)
       IF (N .LE. 1) GO TO 40
       N1 = N+1
@@ -441,17 +441,17 @@ C                                  SOLUTION UX = Y
    35 CONTINUE
    40 RETURN
       END
-C
-c********************************************************************
-C
+!
+!********************************************************************
+!
       SUBROUTINE LUREPB (A,N,NC,IA,UL,IU,B,X,IDGT,RES,IER)
-C
-      REAL               A(IA,*),B(*),UL(IU,*),RES(*),X(*),XNORM,
-     +                   ZERO,DXNORM
+!
+      REAL               A(IA,*),B(*),UL(IU,*),RES(*),X(*),XNORM, &
+     &                   ZERO,DXNORM
       DOUBLE PRECISION   SUM
       DATA               ITMAX/50/
       DATA               ZERO/0.0/
-C                                  FIRST EXECUTABLE STATEMENT
+!                                  FIRST EXECUTABLE STATEMENT
       IER = 0
       NC1 = NC+1
       XNORM = ZERO
@@ -461,7 +461,7 @@ C                                  FIRST EXECUTABLE STATEMENT
       IF (XNORM .NE. ZERO) GO TO 10
       IDGT = 50
       GO TO 9005
-C                                  ITERATION LOOP
+!                                  ITERATION LOOP
    10 DO 45 ITER = 1,ITMAX
          L = 0
          DO 30 I = 1,N
@@ -493,31 +493,31 @@ C                                  ITERATION LOOP
          IF (DXNORM .GT. ZERO) IDGT = -LOG10(DXNORM/XNORM)
    40    IF (XNORM + DXNORM .EQ. XNORM)GO TO 9005
    45 CONTINUE
-C                                  ITERATIVE IMPROVEMENT FAILED
+!                                  ITERATIVE IMPROVEMENT FAILED
       IER = 129
  9000 CONTINUE
       CALL UERTST(IER,'LUREPB')
  9005 RETURN
       END
-C
-c********************************************************************
-C
+!
+!********************************************************************
+!
       SUBROUTINE DEQT1B (A,N,NLC,NUC,IA,B,M,IB,IJOB,XL,IER)
-C
+!
 	implicit integer (i-n)
 	implicit double precision (a-h)
 	implicit double precision (o-z)
       DIMENSION          A(IA,*),XL(N,*),B(IB,*)
       DATA               ZERO/0./,ONE/1.0/
-C                                  FIRST EXECUTABLE STATEMENT
+!                                  FIRST EXECUTABLE STATEMENT
       IER = 0
       JBEG = NLC+1
       NLC1 = JBEG
       IF (IJOB .EQ. 2) GO TO 80
       RN = N
-C                                  RESTRUCTURE THE MATRIX
-C                                  FIND RECIPROCAL OF THE LARGEST
-C                                  DABSOLUTE VALUE IN ROW I
+!                                  RESTRUCTURE THE MATRIX
+!                                  FIND RECIPROCAL OF THE LARGEST
+!                                  DABSOLUTE VALUE IN ROW I
       I = 1
       NC = JBEG+NUC
       NN = NC
@@ -561,7 +561,7 @@ C                                  DABSOLUTE VALUE IN ROW I
    37    NN = NN-1
    40 CONTINUE
       L = NLC
-C                                  L-U DECOMPOSITION
+!                                  L-U DECOMPOSITION
       DO 75 K = 1,N
          P =  DABS(A(K,1))*XL(K,NLC1)
          I = K
@@ -576,10 +576,10 @@ C                                  L-U DECOMPOSITION
    45    CONTINUE
    50    XL(I,NLC1) = XL(K,NLC1)
          XL(K,NLC1) = I
-C                                  SINGULARITY FOUND
+!                                  SINGULARITY FOUND
          Q = RN+P
          IF (Q .EQ. RN) GO TO 135
-C                                  INTERCHANGE ROWS I AND K
+!                                  INTERCHANGE ROWS I AND K
          IF (K .EQ. I) GO TO 60
          DO 55 J = 1,NC
             P = A(K,J)
@@ -598,7 +598,7 @@ C                                  INTERCHANGE ROWS I AND K
    70    CONTINUE
    75 CONTINUE
       IF (IJOB .EQ. 1) GO TO 9005
-C                                  FORWARD SUBSTITUTION
+!                                  FORWARD SUBSTITUTION
    80 L = NLC
       DO 105 K = 1,N
          I = XL(K,NLC1)
@@ -619,7 +619,7 @@ C                                  FORWARD SUBSTITUTION
    95       CONTINUE
   100    CONTINUE
   105 CONTINUE
-C                                  BACKWARD SUBSTITUTION
+!                                  BACKWARD SUBSTITUTION
       JBEG = NUC+NLC
       DO 125 J = 1,M
          L = 1
@@ -642,18 +642,18 @@ C                                  BACKWARD SUBSTITUTION
       CALL UERTST(IER,'LEQT1B')
  9005 RETURN
       END
-C
-c********************************************************************
-C
+!
+!********************************************************************
+!
       SUBROUTINE DEQT2B (A,N,NLC,NUC,IA,B,M,IB,IJOB,U,IU,XL,IER)
-C
+!
 	implicit integer (i-n)
 	implicit double precision (a-h)
 	implicit double precision (o-z)
       DIMENSION          A(IA,*),U(IU,*),XL(N,*),B(IB,*)
       DOUBLE PRECISION   SUM
       DATA               ZERO/0.0/,ITMAX/50/
-C                                  FIRST EXECUTABLE STATEMENT
+!                                  FIRST EXECUTABLE STATEMENT
       IER = 0
       NLCP1 = NLC+1
       NCC = NUC+NLCP1
@@ -662,32 +662,32 @@ C                                  FIRST EXECUTABLE STATEMENT
       NU2 = NCC+1
       NU3 = NCC+2
       IF (IJOB .EQ. 2) GO TO 15
-C                                  SAVE MATRIX A
+!                                  SAVE MATRIX A
       DO 10 I = 1,N
          DO 5 J = 1,NCC
             U(I,J) = A(I,J)
     5    CONTINUE
    10 CONTINUE
-C                                  FACTOR MATRIX A
-cggu  CALL LEQT1B(U,N,NLC,NUC,IU,B,M,IB,1,XL,IER)
+!                                  FACTOR MATRIX A
+!ggu  CALL LEQT1B(U,N,NLC,NUC,IU,B,M,IB,1,XL,IER)
       CALL DEQT1B(U,N,NLC,NUC,IU,B,M,IB,1,XL,IER)
       IF (IER .NE. 0) GO TO 9000
       IF (IJOB .EQ. 1) GO TO 9005
-C                                  SAVE THE RIGHT HAND SIDES
+!                                  SAVE THE RIGHT HAND SIDES
    15 DO 60 J = 1,M
          DO 20 I = 1,N
             U(I,NU2) = B(I,J)
    20    CONTINUE
-C                                  OBTAIN A SOLUTION
-cggu     CALL LEQT1B(U,N,NLC,NUC,IU,U(1,NU2),1,IU,2,XL,IER)
+!                                  OBTAIN A SOLUTION
+!ggu     CALL LEQT1B(U,N,NLC,NUC,IU,U(1,NU2),1,IU,2,XL,IER)
          CALL DEQT1B(U,N,NLC,NUC,IU,U(1,NU2),1,IU,2,XL,IER)
-C                                  COMPUTE THE NORM OF THE SOLUTION
+!                                  COMPUTE THE NORM OF THE SOLUTION
          XNORM = ZERO
          DO 25 I = 1,N
             XNORM = DMAX1(XNORM, DABS(U(I,NU2)))
    25    CONTINUE
          IF (XNORM .EQ. ZERO) GO TO 60
-C                                  COMPUTE THE RESIDUALS
+!                                  COMPUTE THE RESIDUALS
          DO 45 ITER = 1,ITMAX
             NC = NCC
             KK = 1
@@ -704,10 +704,10 @@ C                                  COMPUTE THE RESIDUALS
                U(I,NU3) = SUM
                IF (I .GE. NMNUC) NC = NC-1
    35       CONTINUE
-cggu        CALL LEQT1B(U,N,NLC,NUC,IU,U(1,NU3),1,IU,2,XL,IER)
+!ggu        CALL LEQT1B(U,N,NLC,NUC,IU,U(1,NU3),1,IU,2,XL,IER)
             CALL DEQT1B(U,N,NLC,NUC,IU,U(1,NU3),1,IU,2,XL,IER)
             DXNORM = ZERO
-C                                  UPDATE THE SOLUTION
+!                                  UPDATE THE SOLUTION
             DO 40 I = 1,N
                U(I,NU2) = U(I,NU2)+U(I,NU3)
                DXNORM = DMAX1(DXNORM, DABS(U(I,NU3)))
@@ -715,7 +715,7 @@ C                                  UPDATE THE SOLUTION
             IF (XNORM+DXNORM .EQ. XNORM) GO TO 50
    45    CONTINUE
          IER = 130
-C                                  STORE THE SOLUTION
+!                                  STORE THE SOLUTION
    50    DO 55 JK = 1,N
             B(JK,J) = U(JK,NU2)
    55    CONTINUE
@@ -726,25 +726,25 @@ C                                  STORE THE SOLUTION
       CALL UERTST(IER,'LEQT2B')
  9005 RETURN
       END
-C
-c********************************************************************
-C
+!
+!********************************************************************
+!
       SUBROUTINE DEQ1PB (A,N,NC,IA,B,IB,M,IDGT,D1,D2,IER)
-C
+!
 	implicit integer (i-n)
 	implicit double precision (a-h)
 	implicit double precision (o-z)
       double precision               A(IA,*),B(IB,*),D1,D2
-C                                  FIRST EXECUTABLE STATEMENT
+!                                  FIRST EXECUTABLE STATEMENT
       IER = 0*IDGT
-C                                  DECOMPOSITION OF MATRIX A INTO
-C                                  L*L-TRANSPOSE
-cggu  CALL LUDAPB(A,N,NC,IA,A,IA,D1,D2,IER)
+!                                  DECOMPOSITION OF MATRIX A INTO
+!                                  L*L-TRANSPOSE
+!ggu  CALL LUDAPB(A,N,NC,IA,A,IA,D1,D2,IER)
       CALL DUDAPB(A,N,NC,IA,A,IA,D1,D2,IER)
       IF (IER .NE. 0) GO TO 9000
       DO 5 I = 1,M
-C                                  SOLUTION OF AX = B
-cggu     CALL LUELPB(A,B(1,I),N,NC,IA,B(1,I))
+!                                  SOLUTION OF AX = B
+!ggu     CALL LUELPB(A,B(1,I),N,NC,IA,B(1,I))
          CALL DUELPB(A,B(1,I),N,NC,IA,B(1,I))
     5 CONTINUE
       GO TO 9005
@@ -752,25 +752,25 @@ cggu     CALL LUELPB(A,B(1,I),N,NC,IA,B(1,I))
       CALL UERTST (IER,'LEQ1PB')
  9005 RETURN
       END
-C
-c********************************************************************
-C
+!
+!********************************************************************
+!
       SUBROUTINE DEQ2PB (A,N,NC,IA,B,IB,M,IDGT,D1,D2,WK,IER)
-C
+!
 	implicit integer (i-n)
 	implicit double precision (a-h)
 	implicit double precision (o-z)
       double precision          A(IA,*),B(IB,*),WK(N,*),D1,D2
-C                                  FIRST EXECUTABLE STATEMENT
+!                                  FIRST EXECUTABLE STATEMENT
       IER = 0
       K = NC+2
       K1 = K+1
-cggu  CALL LUDAPB(A,N,NC,IA,WK,N,D1,D2,IER)
+!ggu  CALL LUDAPB(A,N,NC,IA,WK,N,D1,D2,IER)
       CALL DUDAPB(A,N,NC,IA,WK,N,D1,D2,IER)
       IF (IER .NE. 0) GO TO 9000
          DO 10 I = 1,M
-cggu     CALL LUELPB(WK,B(1,I),N,NC,N,WK(1,K))
-cggu     CALL LUREPB(A,N,NC,IA,WK,N,B(1,I),WK(1,K),IDGT,WK(1,K1),IER)
+!ggu     CALL LUELPB(WK,B(1,I),N,NC,N,WK(1,K))
+!ggu     CALL LUREPB(A,N,NC,IA,WK,N,B(1,I),WK(1,K),IDGT,WK(1,K1),IER)
          CALL DUELPB(WK,B(1,I),N,NC,N,WK(1,K))
          CALL DUREPB(A,N,NC,IA,WK,N,B(1,I),WK(1,K),IDGT,WK(1,K1),IER)
             DO 5 J = 1,N
@@ -784,57 +784,57 @@ cggu     CALL LUREPB(A,N,NC,IA,WK,N,B(1,I),WK(1,K),IDGT,WK(1,K1),IER)
       CALL UERTST(IER,'LEQ2PB')
  9005 RETURN
       END
-C
-c********************************************************************
-C
+!
+!********************************************************************
+!
       SUBROUTINE DUDAPB (A,N,NC,IA,UL,IU,D1,D2,IER)
-C
+!
 	implicit integer (i-n)
 	implicit double precision (a-h)
 	implicit double precision (o-z)
-      double precision    ZERO,A(IA,*),UL(IU,*),D1,D2,ONE,SUM,
-     +                   RN,FOUR,SIXTN,SIXTH
-      DATA               ZERO/0.0/,FOUR/4.0/,SIXTN/16./,
-     +                   SIXTH/.0625/,ONE/1.0/
-C                                  FIRST EXECUTABLE STATEMENT
+      double precision    ZERO,A(IA,*),UL(IU,*),D1,D2,ONE,SUM, &
+     &                   RN,FOUR,SIXTN,SIXTH
+      DATA               ZERO/0.0/,FOUR/4.0/,SIXTN/16./, &
+     &                   SIXTH/.0625/,ONE/1.0/
+!                                  FIRST EXECUTABLE STATEMENT
       IER = 0
       RN = ONE/(N*SIXTN)
       D1 = ONE
       D2 = ZERO
       NCP1 = NC+1
       IF (NC .EQ. 0) GO TO 15
-C                                  INITIALIZE ZERO ELEMENTS
+!                                  INITIALIZE ZERO ELEMENTS
       DO 10 I = 1,NC
          DO 5 J = I,NC
             K = NCP1-J
             UL(I,K) = ZERO
     5    CONTINUE
    10 CONTINUE
-C                                  I IS ROW INDEX OF ELEMENT BEING
-C                                  COMPUTED
+!                                  I IS ROW INDEX OF ELEMENT BEING
+!                                  COMPUTED
    15 DO 60 I = 1,N
          IMNCP1 = I-NCP1
          I1 = MAX0(1,1-IMNCP1)
-C                                  J IS COLUMN INDEX OF ELEMENT BEING
-C                                  COMPUTED
+!                                  J IS COLUMN INDEX OF ELEMENT BEING
+!                                  COMPUTED
          DO 60 J = I1,NCP1
-C                                  L IS ROW INDEX OF PREVIOUSLY COMPUTED
-C                                  VECTOR BEING USED TO COMPUTE INNER
-C                                  PRODUCT
+!                                  L IS ROW INDEX OF PREVIOUSLY COMPUTED
+!                                  VECTOR BEING USED TO COMPUTE INNER
+!                                  PRODUCT
             L = IMNCP1+J
             I2 = NCP1-J
             SUM = A(I,J)
             JM1 = J-1
             IF (JM1) 30,30,20
    20       DO 25 K = 1,JM1
-C                                  M IS COLUMN INDEX
+!                                  M IS COLUMN INDEX
                M = I2+K
                SUM = SUM-UL(I,K)*UL(L,M)
    25       CONTINUE
    30       IF (J .NE. NCP1) GO TO 55
             IF(A(I,J)+SUM*RN .LE. A(I,J))GO TO 65
             UL(I,J) = ONE/DSQRT(SUM)
-C                                  UPDATE THE DETERMINANT
+!                                  UPDATE THE DETERMINANT
             D1 = D1*SUM
    35       IF (DABS(D1)-ONE) 45,45,40
    40       D1 = D1*SIXTH
@@ -852,18 +852,18 @@ C                                  UPDATE THE DETERMINANT
       CALL UERTST(IER,'LUDAPB')
  9005 RETURN
       END
-C
-c********************************************************************
-C
+!
+!********************************************************************
+!
       SUBROUTINE DUELPB (UL,B,N,NC,IA,X)
-C
+!
 	implicit integer (i-n)
 	implicit double precision (a-h)
 	implicit double precision (o-z)
       double precision               UL(IA,*),B(*),X(*),ZERO,SUM
       DATA               ZERO/0.0/
-C                                  FIRST EXECUTABLE STATEMENT
-C                                  SOLUTION LY = B
+!                                  FIRST EXECUTABLE STATEMENT
+!                                  SOLUTION LY = B
       NC1 = NC+1
       IW = 0
       L = 0
@@ -883,7 +883,7 @@ C                                  SOLUTION LY = B
     9    IF (SUM .NE. ZERO) IW = 1
    10    X(I) = SUM*UL(I,NC1)
    15 CONTINUE
-C                                  SOLUTION UX = Y
+!                                  SOLUTION UX = Y
    20 X(N) = X(N)*UL(N,NC1)
       IF (N .LE. 1) GO TO 40
       N1 = N+1
@@ -902,20 +902,20 @@ C                                  SOLUTION UX = Y
    35 CONTINUE
    40 RETURN
       END
-C
-c********************************************************************
-C
+!
+!********************************************************************
+!
       SUBROUTINE DUREPB (A,N,NC,IA,UL,IU,B,X,IDGT,RES,IER)
-C
+!
 	implicit integer (i-n)
 	implicit double precision (a-h)
 	implicit double precision (o-z)
-      double precision      A(IA,*),B(*),UL(IU,*),RES(*),X(*),XNORM,
-     +                   ZERO,DXNORM
+      double precision      A(IA,*),B(*),UL(IU,*),RES(*),X(*),XNORM, &
+     &                   ZERO,DXNORM
       DOUBLE PRECISION   SUM
       DATA               ITMAX/50/
       DATA               ZERO/0.0/
-C                                  FIRST EXECUTABLE STATEMENT
+!                                  FIRST EXECUTABLE STATEMENT
       IER = 0
       NC1 = NC+1
       XNORM = ZERO
@@ -925,7 +925,7 @@ C                                  FIRST EXECUTABLE STATEMENT
       IF (XNORM .NE. ZERO) GO TO 10
       IDGT = 50
       GO TO 9005
-C                                  ITERATION LOOP
+!                                  ITERATION LOOP
    10 DO 45 ITER = 1,ITMAX
          L = 0
          DO 30 I = 1,N
@@ -945,7 +945,7 @@ C                                  ITERATION LOOP
    20       CONTINUE
    25       RES(I) = SUM
    30    CONTINUE
-cggu     CALL LUELPB(UL,RES,N,NC,IU,RES)
+!ggu     CALL LUELPB(UL,RES,N,NC,IU,RES)
          CALL DUELPB(UL,RES,N,NC,IU,RES)
          DXNORM = ZERO
          XNORM = ZERO
@@ -958,54 +958,54 @@ cggu     CALL LUELPB(UL,RES,N,NC,IU,RES)
          IF (DXNORM .GT. ZERO) IDGT = -DLOG10(DXNORM/XNORM)
    40    IF (XNORM + DXNORM .EQ. XNORM)GO TO 9005
    45 CONTINUE
-C                                  ITERATIVE IMPROVEMENT FAILED
+!                                  ITERATIVE IMPROVEMENT FAILED
       IER = 129
  9000 CONTINUE
       CALL UERTST(IER,'LUREPB')
  9005 RETURN
       END
-C
-c********************************************************************
-C
+!
+!********************************************************************
+!
       SUBROUTINE UERTST (IER,NAME)
-C                                  SPECIFICATIONS FOR ARGUMENTS
+!                                  SPECIFICATIONS FOR ARGUMENTS
       INTEGER            IER
 	character*6	name
-C                                  SPECIFICATIONS FOR LOCAL VARIABLES
+!                                  SPECIFICATIONS FOR LOCAL VARIABLES
 	character*6	namset,nameq
 	character*1	ieq
 	data	namset,nameq,ieq /'UERSET','      ','='/
-C                                  FIRST EXECUTABLE STATEMENT
+!                                  FIRST EXECUTABLE STATEMENT
       DATA               LEVEL/4/,IEQDF/0/
       IF (IER.GT.999) GO TO 25
       IF (IER.LT.-32) GO TO 55
       IF (IER.LE.128) GO TO 5
       IF (LEVEL.LT.1) GO TO 30
-C                                  PRINT TERMINAL MESSAGE
+!                                  PRINT TERMINAL MESSAGE
       CALL UGETIO(1,NIN,IOUNIT)
       IF (IEQDF.EQ.1) WRITE(IOUNIT,35) IER,NAMEQ,IEQ,NAME
       IF (IEQDF.EQ.0) WRITE(IOUNIT,35) IER,NAME
       GO TO 30
     5 IF (IER.LE.64) GO TO 10
       IF (LEVEL.LT.2) GO TO 30
-C                                  PRINT WARNING WITH FIX MESSAGE
+!                                  PRINT WARNING WITH FIX MESSAGE
       CALL UGETIO(1,NIN,IOUNIT)
       IF (IEQDF.EQ.1) WRITE(IOUNIT,40) IER,NAMEQ,IEQ,NAME
       IF (IEQDF.EQ.0) WRITE(IOUNIT,40) IER,NAME
       GO TO 30
    10 IF (IER.LE.32) GO TO 15
-C                                  PRINT WARNING MESSAGE
+!                                  PRINT WARNING MESSAGE
       IF (LEVEL.LT.3) GO TO 30
       CALL UGETIO(1,NIN,IOUNIT)
       IF (IEQDF.EQ.1) WRITE(IOUNIT,45) IER,NAMEQ,IEQ,NAME
       IF (IEQDF.EQ.0) WRITE(IOUNIT,45) IER,NAME
       GO TO 30
    15 CONTINUE
-C                                  CHECK FOR UERSET CALL
+!                                  CHECK FOR UERSET CALL
 	if( name .ne. namset )  goto 25
-c      DO 20 I=1,3
-c         IF (NAME(I).NE.NAMSET(I)) GO TO 25
-c   20 CONTINUE
+!      DO 20 I=1,3
+!         IF (NAME(I).NE.NAMSET(I)) GO TO 25
+!   20 CONTINUE
       LEVOLD = LEVEL
       LEVEL = IER
       IER = LEVOLD
@@ -1014,39 +1014,39 @@ c   20 CONTINUE
       GO TO 30
    25 CONTINUE
       IF (LEVEL.LT.4) GO TO 30
-C                                  PRINT NON-DEFINED MESSAGE
+!                                  PRINT NON-DEFINED MESSAGE
       CALL UGETIO(1,NIN,IOUNIT)
       IF (IEQDF.EQ.1) WRITE(IOUNIT,50) IER,NAMEQ,IEQ,NAME
       IF (IEQDF.EQ.0) WRITE(IOUNIT,50) IER,NAME
    30 IEQDF = 0
       RETURN
-   35 FORMAT(19H *** TERMINAL ERROR,10X,7H(IER = ,I3,
-     +       20H) FROM IMSL ROUTINE ,a6,A1,a6)
-   40 FORMAT(36H *** WARNING WITH FIX ERROR  (IER = ,I3,
-     +       20H) FROM IMSL ROUTINE ,a6,A1,a6)
-   45 FORMAT(18H *** WARNING ERROR,11X,7H(IER = ,I3,
-     +       20H) FROM IMSL ROUTINE ,a6,A1,a6)
-   50 FORMAT(20H *** UNDEFINED ERROR,9X,7H(IER = ,I5,
-     +       20H) FROM IMSL ROUTINE ,a6,A1,a6)
-C                                  SAVE P FOR P = R CASE
-C                                    P IS THE PAGE NAME
-C                                    R IS THE ROUTINE NAME
+   35 FORMAT(19H *** TERMINAL ERROR,10X,7H(IER = ,I3, &
+     &       20H) FROM IMSL ROUTINE ,a6,A1,a6)
+   40 FORMAT(36H *** WARNING WITH FIX ERROR  (IER = ,I3, &
+     &       20H) FROM IMSL ROUTINE ,a6,A1,a6)
+   45 FORMAT(18H *** WARNING ERROR,11X,7H(IER = ,I3, &
+     &       20H) FROM IMSL ROUTINE ,a6,A1,a6)
+   50 FORMAT(20H *** UNDEFINED ERROR,9X,7H(IER = ,I5, &
+     &       20H) FROM IMSL ROUTINE ,a6,A1,a6)
+!                                  SAVE P FOR P = R CASE
+!                                    P IS THE PAGE NAME
+!                                    R IS THE ROUTINE NAME
    55 IEQDF = 1
 	nameq = name
-c      DO 60 I=1,3
-c   60 NAMEQ(I) = NAME(I)
+!      DO 60 I=1,3
+!   60 NAMEQ(I) = NAME(I)
    65 RETURN
       END
-C
-c********************************************************************
-C
+!
+!********************************************************************
+!
       SUBROUTINE UGETIO (IOPT,NIN,NOUT)
-C                                  SPECIFICATIONS FOR ARGUMENTS
+!                                  SPECIFICATIONS FOR ARGUMENTS
       INTEGER            IOPT,NIN,NOUT
-C                                  SPECIFICATIONS FOR LOCAL VARIABLES
+!                                  SPECIFICATIONS FOR LOCAL VARIABLES
       INTEGER            NIND,NOUTD
       DATA               NIND/5/,NOUTD/6/
-C                                  FIRST EXECUTABLE STATEMENT
+!                                  FIRST EXECUTABLE STATEMENT
       IF (IOPT.EQ.3) GO TO 10
       IF (IOPT.EQ.2) GO TO 5
       IF (IOPT.NE.1) GO TO 9005
@@ -1058,11 +1058,11 @@ C                                  FIRST EXECUTABLE STATEMENT
    10 NOUTD = NOUT
  9005 RETURN
       END
-C
-c********************************************************************
-C
+!
+!********************************************************************
+!
 	SUBROUTINE GELB(R,A,M,N,MUD,MLD,EPS,IER)
-C
+!
 	DIMENSION R(*),A(*)
 	J=0
 	JJ=0
@@ -1196,11 +1196,11 @@ C
    47	IER=-1
 	RETURN
 	END
-C
-c********************************************************************
-C
+!
+!********************************************************************
+!
 	SUBROUTINE DGELB(R,A,M,N,MUD,MLD,EPS,IER)
-C
+!
 	DIMENSION R(*),A(*)
 	DOUBLE PRECISION R,A,PIV,TB,TOL
 	J=0
@@ -1335,11 +1335,11 @@ C
    47	IER=-1
 	RETURN
 	END
-c
-c******************************************************************
-c
+!
+!******************************************************************
+!
 	SUBROUTINE MCHB(R,A,M,N,MUD,IOP,EPS,IER)
-c
+!
         DIMENSION R(*),A(*)
 	DOUBLE PRECISION TOL,SUM,PIV
 	PIV=0.
@@ -1452,11 +1452,11 @@ c
    43	IER=-1
    44	RETURN
 	END
-c
-c******************************************************************
-c
+!
+!******************************************************************
+!
 	SUBROUTINE DMCHB(R,A,M,N,MUD,IOP,EPS,IER)
-c
+!
         DIMENSION R(*),A(*)
 	DOUBLE PRECISION TOL,SUM,PIV,R,A
 	PIV=0.
@@ -1569,52 +1569,52 @@ c
    43	IER=-1
    44	RETURN
 	END
-c
-c*************************************************************************
-c
+!
+!*************************************************************************
+!
         subroutine loctst(i,j,n,m)
-c
-c control indices
-c
-c (i,j)   position of element in square matrix (row,column)
-c n       dimension of square matrix
-c m       band width of square matrix
-c
+!
+! control indices
+!
+! (i,j)   position of element in square matrix (row,column)
+! n       dimension of square matrix
+! m       band width of square matrix
+!
         implicit none
-c
+!
         integer i,j,n,m
-c
+!
         if(i.lt.1.or.i.gt.n.or.j.lt.1.or.j.gt.n) then
           write(6,*) '(i,j) out of matrix'
           write(6,*) 'i,j,n : ',i,j,n
           stop 'error stop : loctst'
         end if
-c
+!
         if(iabs(i-j).gt.m) then
           write(6,*) '(i,j) out of band'
           write(6,*) 'i,j,|i-j|,m : ',i,j,iabs(i-j),m
           stop 'error stop : loctst'
         end if
-c
+!
         return
         end
-c
-c*************************************************************************
-c
+!
+!*************************************************************************
+!
         function locmy(i,j,n,m)
-c
-c access my routines
-c
-c (i,j)   position of element in square matrix (row,column)
-c n       dimension of square matrix
-c m       band width of square matrix
-c locmy   position of element in band matrix
-c
+!
+! access my routines
+!
+! (i,j)   position of element in square matrix (row,column)
+! n       dimension of square matrix
+! m       band width of square matrix
+! locmy   position of element in band matrix
+!
         implicit none
-c
+!
 	integer locmy
         integer i,j,n,m
-c
+!
         if(i.eq.j) then
           locmy=i
         else if(i.gt.j) then
@@ -1622,72 +1622,72 @@ c
         else!if(i.lt.j) then
           locmy=n+n*m+i*(m-1)+j-m-1
         end if
-c
+!
         return
         end
-c
-c*************************************************************************
-c
+!
+!*************************************************************************
+!
         function locimm(i,j,n,m)
-c
-c access imsl routines
-c
-c formula if mlo!=mup : loc = n*(mlo+j-i)+i
-c
-c (i,j)   position of element in square matrix (row,column)
-c n       dimension of square matrix
-c m       band width of square matrix
-c locimm  position of element in band matrix
-c
+!
+! access imsl routines
+!
+! formula if mlo!=mup : loc = n*(mlo+j-i)+i
+!
+! (i,j)   position of element in square matrix (row,column)
+! n       dimension of square matrix
+! m       band width of square matrix
+! locimm  position of element in band matrix
+!
         implicit none
-c
+!
 	integer locimm
         integer i,j,n,m
-c
+!
         locimm = n*(m+j-i)+i
-c
+!
         return
         end
-c
-c*************************************************************************
-c
+!
+!*************************************************************************
+!
         function loccer(i,j,n,m)
-c
-c access kernlib routines
-c
-c formula if mlo!=mup : loc = n*(j-max(i-mlo,1))+i
-c
-c (i,j)   position of element in square matrix (row,column)
-c n       dimension of square matrix
-c m       band width of square matrix
-c loccer  position of element in band matrix
-c
+!
+! access kernlib routines
+!
+! formula if mlo!=mup : loc = n*(j-max(i-mlo,1))+i
+!
+! (i,j)   position of element in square matrix (row,column)
+! n       dimension of square matrix
+! m       band width of square matrix
+! loccer  position of element in band matrix
+!
         implicit none
-c
+!
 	integer loccer
         integer i,j,n,m
-c
+!
         loccer = n*(j-max(i-m,1))+i
-c
+!
         return
         end
-c
-c*************************************************************************
-c
+!
+!*************************************************************************
+!
         function locssp(i,j,n,m)
-c
-c access ssp routines
-c
-c (i,j)   position of element in square matrix (row,column)
-c n       dimension of square matrix
-c m       band width of square matrix
-c locssp  position of element in band matrix
-c
+!
+! access ssp routines
+!
+! (i,j)   position of element in square matrix (row,column)
+! n       dimension of square matrix
+! m       band width of square matrix
+! locssp  position of element in band matrix
+!
         implicit none
-c
+!
 	integer locssp
         integer i,j,n,m
-c
+!
 	if(i-j.gt.m.or.j-i.gt.m) then
 	  locssp = 0
 	else if(n.le.m) then	!this is for a full matrix
@@ -1695,47 +1695,47 @@ c
         else if(i.lt.m) then
           locssp = 2*m*i - m + j - m*(m+1)/2 + (m-i)*(m-i+1)/2
         else if(i.gt.n-m+1) then
-          locssp = 2*m*i - m + j - m*(m+1)/2
-     +                - (i-(n-m+1))*(i-(n-m))/2
+          locssp = 2*m*i - m + j - m*(m+1)/2 &
+     &                - (i-(n-m+1))*(i-(n-m))/2
         else
           locssp = 2*m*i - m + j - m*(m+1)/2
         end if
-c
+!
         return
         end
-c
-c*************************************************************************
-c
+!
+!*************************************************************************
+!
         function locsps(i,j,n,m)
-c
-c access ssp routines (symmetric compressed storage mode)
-c
-c only main and upper diagonals - if an element in the lower
-c ...diagonals is referenced, 0 is returned
-c
-c (i,j)   position of element in square matrix (row,column)
-c n       dimension of square matrix
-c m       band width of square matrix
-c locsps  position of element in band matrix
-c
-c original formula : locsps = (1+m)*(i-1)+abs(j-i)+1
-c
+!
+! access ssp routines (symmetric compressed storage mode)
+!
+! only main and upper diagonals - if an element in the lower
+! ...diagonals is referenced, 0 is returned
+!
+! (i,j)   position of element in square matrix (row,column)
+! n       dimension of square matrix
+! m       band width of square matrix
+! locsps  position of element in band matrix
+!
+! original formula : locsps = (1+m)*(i-1)+abs(j-i)+1
+!
         implicit none
-c
+!
 	integer locsps
         integer i,j,n,m
-c
+!
 	if(i.gt.j.or.j-i.gt.m) then
 	  locsps = 0
         else if(i.gt.n-m+1) then
-          locsps = m*(i-1)+j
-     +                - (i-(n-m+1))*(i-(n-m))/2
+          locsps = m*(i-1)+j &
+     &                - (i-(n-m+1))*(i-(n-m))/2
         else
           locsps = m*(i-1)+j
         end if
-c
+!
         return
         end
 
-c*************************************************************************
+!*************************************************************************
 

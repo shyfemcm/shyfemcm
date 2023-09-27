@@ -660,9 +660,9 @@
 
 	logical bopen
 
-c-----------------------------------------------------
-c open file
-c-----------------------------------------------------
+!-----------------------------------------------------
+! open file
+!-----------------------------------------------------
 
 	bopen = shympi_is_master()	!opens file only if master
 
@@ -674,9 +674,9 @@ c-----------------------------------------------------
 	  stop 'error stop shy_open_output_file: opening file'
 	end if
 
-c-----------------------------------------------------
-c initialize data structure
-c-----------------------------------------------------
+!-----------------------------------------------------
+! initialize data structure
+!-----------------------------------------------------
 
 	call shy_set_params(id,nkn_global,nel_global,npr,nlg,nvar)
         call shy_set_ftype(id,ftype)
@@ -689,9 +689,9 @@ c-----------------------------------------------------
 	  write(6,*) 'initialized shy file ',trim(file)
 	end if
 
-c-----------------------------------------------------
-c end of routine
-c-----------------------------------------------------
+!-----------------------------------------------------
+! end of routine
+!-----------------------------------------------------
 
 	end
 
@@ -708,17 +708,17 @@ c-----------------------------------------------------
 	integer ierr
 	character*80 file
 
-c-----------------------------------------------------
-c write header of file
-c-----------------------------------------------------
+!-----------------------------------------------------
+! write header of file
+!-----------------------------------------------------
 
 	if( id <= 0 ) return
 
 	call shy_write_header(id,ierr)
 
-c-----------------------------------------------------
-c error check
-c-----------------------------------------------------
+!-----------------------------------------------------
+! error check
+!-----------------------------------------------------
 
 	if( ierr /= 0 ) then
 	  write(6,*) 'error writing header of file ',ierr
@@ -728,9 +728,9 @@ c-----------------------------------------------------
 	  stop 'error stop shy_make_header: writing header'
 	end if
 
-c-----------------------------------------------------
-c end of routine
-c-----------------------------------------------------
+!-----------------------------------------------------
+! end of routine
+!-----------------------------------------------------
 
 	end
 
@@ -899,9 +899,9 @@ c-----------------------------------------------------
 !****************************************************************
 !****************************************************************
 
-	subroutine shy_write_output_record(id,dtime,ivar
-     +					,belem,n,m,lmax
-     +					,nlvdi,c)
+	subroutine shy_write_output_record(id,dtime,ivar &
+     &					,belem,n,m,lmax &
+     &					,nlvdi,c)
 
 	use shyfile
 	use shympi
@@ -971,8 +971,8 @@ c-----------------------------------------------------
 	  stop 'error stop shy_write_output_record: nlvdi>lmax>1'
 	end if
 
-	if(bdebug) write(6,*) 'shy_write_output_record: '
-     +				,my_id,nn,ng,belem
+	if(bdebug) write(6,*) 'shy_write_output_record: ' &
+     &				,my_id,nn,ng,belem
 
 	nl = lmax
 	if( m > 1 ) then
@@ -1117,8 +1117,8 @@ c-----------------------------------------------------
 ! a 3d MPI run has one domain with only one layer (nlvdi==1) and a 3d output
 ! therefore it is important to use shy_write_scalar_record2d() for 2d output
 
-	call shy_write_output_record(id,dtime,ivar
-     +				,belem,nkn,1,nlg,nlvddi,c)
+	call shy_write_output_record(id,dtime,ivar &
+     &				,belem,nkn,1,nlg,nlvddi,c)
 
 	end
 

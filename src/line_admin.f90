@@ -546,8 +546,8 @@
 
 ! loop until no more line or line found
 
-	do while( nextline(inode,ndim,nnode,ifirst,ilast) .and. 
-     +				.not. bfound )
+	do while( nextline(inode,ndim,nnode,ifirst,ilast) .and.  &
+     &				.not. bfound )
 	  nlines = nlines + 1
 	  if( nline .eq. nlines ) bfound = .true.
 	end do
@@ -713,8 +713,8 @@
 	do il=1,nli
 	  is = ind(il)
 	  n = ind(il+1) - is
-	  call lines_set_line(id,il,il,it,n,d
-     +				,nodes,xv(is:),yv(is:))
+	  call lines_set_line(id,il,il,it,n,d &
+     &				,nodes,xv(is:),yv(is:))
 	end do
 
 	deallocate(xv,yv,nodes,ind)

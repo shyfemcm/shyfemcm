@@ -26,95 +26,95 @@
 !
 !--------------------------------------------------------------------------
 
-c explicit term routines
-c
-c contents :
-c
-c subroutine set_explicit
-c subroutine viscous_stability(ahpar,ahstab)	computes stability for viscosity
-c subroutine set_diff_horizontal
-c subroutine set_advective
-c subroutine set_semi_lagrange
-c subroutine set_barocl
-c subroutine set_barocl_new
-c subroutine set_barocl_new1
-c
-c revision log :
-c
-c 01.05.2007	ggu	new file -> all explicit terms here
-c 28.09.2007	ggu	semi-lagrangian part introduced
-c 16.04.2008	ggu	bugfix in set_barocl (real do indices!!)
-c 14.07.2008	ggu&ccf	ahpar is real in set_diff_horizontal_new
-c 03.11.2008	ggu&dbf	nudging implemented (call to bclnudge)
-c 09.11.2008	ggu	set_barocl_new (cleaned version of set_barocl)
-c 19.11.2008	ggu	new set_diff_horizontal_new1(), viscous_stability()
-c 19.02.2010	ggu	in viscous_stability() for dt=1
-c 26.02.2010	ggu	new call to momentum_viscous_stability()
-c 26.02.2010	ggu	set_advective() cleaned up
-c 26.02.2010	ggu	new momentum_advective_stability()
-c 08.03.2010	ggu	run only down to avail layers (bug fix)
-c 23.03.2010	ggu	changed v6.1.1
-c 14.04.2010	ggu	changed v6.1.4
-c 16.12.2010	ggu	barocl preconditioned for sigma layers, but not finshed
-c 27.01.2011	ggu	changed VERS_6_1_17
-c 20.05.2011	ggu	compute statistics of stability, no stab in dry elemes
-c 31.05.2011	ggu	changed VERS_6_1_23
-c 14.07.2011	ggu	changed VERS_6_1_27
-c 25.08.2011	dbf&ggu	baroclinic gradient for sigma level integrated
-c 01.09.2011	ggu	changed VERS_6_1_32
-c 18.10.2011	ggu	changed VERS_6_1_33
-c 25.10.2011	dbf&ggu	bug fix in set_barocl_new_interface (psigma)
-c 04.11.2011	ggu	adapted for hybrid coordinates
-c 10.05.2013	dbf&ggu	new routines for vertical advection (bvertadv)
-c 10.05.2013	dbf&ggu	new routines for non-hydro
-c 25.05.2013	ggu	new version for vertical advection (bvertadv)
-c 13.06.2013	ggu	changed VERS_6_1_65
-c 12.09.2013	ggu	changed VERS_6_1_67
-c 13.09.2013	dbf&ggu	new sigma layer adjustment integrated
-c 25.10.2013	ggu	changed VERS_6_1_68
-c 05.12.2013	ggu	changed VERS_6_1_70
-c 28.01.2014	ggu	changed VERS_6_1_71
-c 10.04.2014	ggu	use rlin and rdistv to determin advective contribution
-c 05.05.2014	ggu	changed VERS_6_1_74
-c 18.06.2014	ggu	changed VERS_6_1_77
-c 07.07.2014	ggu	changed VERS_6_1_79
-c 05.11.2014	ggu	changed VERS_7_0_5
-c 23.12.2014	ggu	changed VERS_7_0_11
-c 19.01.2015	ggu	changed VERS_7_1_3
-c 17.04.2015	ggu	only one routine set_diff_horizontal()
-c 10.07.2015	ggu	changed VERS_7_1_50
-c 13.07.2015	ggu	changed VERS_7_1_51
-c 17.07.2015	ggu	changed VERS_7_1_80
-c 20.07.2015	ggu	changed VERS_7_1_81
-c 24.07.2015	ggu	changed VERS_7_1_82
-c 18.09.2015	ggu	use momentx/yv to store advective terms, not aux arrays
-c 23.09.2015	ggu	changed VERS_7_2_4
-c 25.09.2015	ggu	new call to set_nudging()
-c 12.10.2015	ggu	changed VERS_7_3_3
-c 14.06.2016	dbf	diff. vertical momentum advection schemes implemented
-c 03.04.2018	ggu	changed VERS_7_5_43
-c 16.02.2019	ggu	changed VERS_7_5_60
-c 13.03.2019	ggu	changed VERS_7_5_61
-c 26.05.2020	ggu	use rdistv now on elements and ruseterm
-c 30.03.2022	ggu	compiler bug with PGI (PGI_ggguuu) - no solution
-c 04.04.2022	ggu	exchange momentx/yv arrays
-c 08.04.2022	ggu	ie_mpi introduced computing advective terms
-c 09.04.2022	ggu	ie_mpi also in baroclinic section, some debug code
-c 15.10.2022	ggu	some new debug code, bpresxv,bpresyv local
-c 21.10.2022	ggu	allocate big array saux that was on stack
-c 18.03.2023	ggu	adjusted horizontal diffusion for mpi
-c 27.03.2023	ggu	tripple point routines in new file submpi_tripple.f
-c 29.03.2023	ggu	handle tripple points, new horizontal diffusion routine
-c 29.03.2023	ggu	exchange rindex between domains
-c 09.05.2023    lrp     introduce top layer index variable
-c 24.05.2023    ggu     momentum_viscous_stability(): must run over nel_unique
-c 05.06.2023    lrp     introduce z-star
-c
-c notes :
-c
-c sign of explicit term is computed for left hand side
-c
-c******************************************************************
+! explicit term routines
+!
+! contents :
+!
+! subroutine set_explicit
+! subroutine viscous_stability(ahpar,ahstab)	computes stability for viscosity
+! subroutine set_diff_horizontal
+! subroutine set_advective
+! subroutine set_semi_lagrange
+! subroutine set_barocl
+! subroutine set_barocl_new
+! subroutine set_barocl_new1
+!
+! revision log :
+!
+! 01.05.2007	ggu	new file -> all explicit terms here
+! 28.09.2007	ggu	semi-lagrangian part introduced
+! 16.04.2008	ggu	bugfix in set_barocl (real do indices!!)
+! 14.07.2008	ggu&ccf	ahpar is real in set_diff_horizontal_new
+! 03.11.2008	ggu&dbf	nudging implemented (call to bclnudge)
+! 09.11.2008	ggu	set_barocl_new (cleaned version of set_barocl)
+! 19.11.2008	ggu	new set_diff_horizontal_new1(), viscous_stability()
+! 19.02.2010	ggu	in viscous_stability() for dt=1
+! 26.02.2010	ggu	new call to momentum_viscous_stability()
+! 26.02.2010	ggu	set_advective() cleaned up
+! 26.02.2010	ggu	new momentum_advective_stability()
+! 08.03.2010	ggu	run only down to avail layers (bug fix)
+! 23.03.2010	ggu	changed v6.1.1
+! 14.04.2010	ggu	changed v6.1.4
+! 16.12.2010	ggu	barocl preconditioned for sigma layers, but not finshed
+! 27.01.2011	ggu	changed VERS_6_1_17
+! 20.05.2011	ggu	compute statistics of stability, no stab in dry elemes
+! 31.05.2011	ggu	changed VERS_6_1_23
+! 14.07.2011	ggu	changed VERS_6_1_27
+! 25.08.2011	dbf&ggu	baroclinic gradient for sigma level integrated
+! 01.09.2011	ggu	changed VERS_6_1_32
+! 18.10.2011	ggu	changed VERS_6_1_33
+! 25.10.2011	dbf&ggu	bug fix in set_barocl_new_interface (psigma)
+! 04.11.2011	ggu	adapted for hybrid coordinates
+! 10.05.2013	dbf&ggu	new routines for vertical advection (bvertadv)
+! 10.05.2013	dbf&ggu	new routines for non-hydro
+! 25.05.2013	ggu	new version for vertical advection (bvertadv)
+! 13.06.2013	ggu	changed VERS_6_1_65
+! 12.09.2013	ggu	changed VERS_6_1_67
+! 13.09.2013	dbf&ggu	new sigma layer adjustment integrated
+! 25.10.2013	ggu	changed VERS_6_1_68
+! 05.12.2013	ggu	changed VERS_6_1_70
+! 28.01.2014	ggu	changed VERS_6_1_71
+! 10.04.2014	ggu	use rlin and rdistv to determin advective contribution
+! 05.05.2014	ggu	changed VERS_6_1_74
+! 18.06.2014	ggu	changed VERS_6_1_77
+! 07.07.2014	ggu	changed VERS_6_1_79
+! 05.11.2014	ggu	changed VERS_7_0_5
+! 23.12.2014	ggu	changed VERS_7_0_11
+! 19.01.2015	ggu	changed VERS_7_1_3
+! 17.04.2015	ggu	only one routine set_diff_horizontal()
+! 10.07.2015	ggu	changed VERS_7_1_50
+! 13.07.2015	ggu	changed VERS_7_1_51
+! 17.07.2015	ggu	changed VERS_7_1_80
+! 20.07.2015	ggu	changed VERS_7_1_81
+! 24.07.2015	ggu	changed VERS_7_1_82
+! 18.09.2015	ggu	use momentx/yv to store advective terms, not aux arrays
+! 23.09.2015	ggu	changed VERS_7_2_4
+! 25.09.2015	ggu	new call to set_nudging()
+! 12.10.2015	ggu	changed VERS_7_3_3
+! 14.06.2016	dbf	diff. vertical momentum advection schemes implemented
+! 03.04.2018	ggu	changed VERS_7_5_43
+! 16.02.2019	ggu	changed VERS_7_5_60
+! 13.03.2019	ggu	changed VERS_7_5_61
+! 26.05.2020	ggu	use rdistv now on elements and ruseterm
+! 30.03.2022	ggu	compiler bug with PGI (PGI_ggguuu) - no solution
+! 04.04.2022	ggu	exchange momentx/yv arrays
+! 08.04.2022	ggu	ie_mpi introduced computing advective terms
+! 09.04.2022	ggu	ie_mpi also in baroclinic section, some debug code
+! 15.10.2022	ggu	some new debug code, bpresxv,bpresyv local
+! 21.10.2022	ggu	allocate big array saux that was on stack
+! 18.03.2023	ggu	adjusted horizontal diffusion for mpi
+! 27.03.2023	ggu	tripple point routines in new file submpi_tripple.f
+! 29.03.2023	ggu	handle tripple points, new horizontal diffusion routine
+! 29.03.2023	ggu	exchange rindex between domains
+! 09.05.2023    lrp     introduce top layer index variable
+! 24.05.2023    ggu     momentum_viscous_stability(): must run over nel_unique
+! 05.06.2023    lrp     introduce z-star
+!
+! notes :
+!
+! sign of explicit term is computed for left hand side
+!
+!******************************************************************
 
 	subroutine set_explicit
 
@@ -132,9 +132,9 @@ c******************************************************************
         real getpar
 	logical bnohyd
 
-c-------------------------------------------
-c parameters
-c-------------------------------------------
+!-------------------------------------------
+! parameters
+!-------------------------------------------
 
         ilin = nint(getpar('ilin'))
         rlin = getpar('rlin')
@@ -143,28 +143,28 @@ c-------------------------------------------
         bbarcl = ibarcl .gt. 0 .and. ibarcl .ne. 3
 	call nonhydro_get_flag(bnohyd)
 	
-c-------------------------------------------
-c initialization
-c-------------------------------------------
+!-------------------------------------------
+! initialization
+!-------------------------------------------
 
 	fxv = 0.
 	fyv = 0.
 
-c-------------------------------------------
-c fix or nudge boundary velocities
-c-------------------------------------------
+!-------------------------------------------
+! fix or nudge boundary velocities
+!-------------------------------------------
 
 	call bclfix
 
-c-------------------------------------------
-c horizontal diffusion
-c-------------------------------------------
+!-------------------------------------------
+! horizontal diffusion
+!-------------------------------------------
 
 	call set_diff_horizontal
 
-c-------------------------------------------
-c advective (non-linear) terms
-c-------------------------------------------
+!-------------------------------------------
+! advective (non-linear) terms
+!-------------------------------------------
 
         if( ilin .eq. 0 ) then
           if( itlin .eq. 0 ) then
@@ -177,39 +177,39 @@ c-------------------------------------------
 	  end if
 	end if
 
-c-------------------------------------------
-c baroclinic contribution
-c-------------------------------------------
+!-------------------------------------------
+! baroclinic contribution
+!-------------------------------------------
 
         !if( bbarcl ) call set_barocl
         !if( bbarcl ) call set_barocl_new
 	if( bbarcl ) call set_barocl_new_interface
 
-c-------------------------------------------
-c non-hydrostatic contribution (experimental)
-c-------------------------------------------
+!-------------------------------------------
+! non-hydrostatic contribution (experimental)
+!-------------------------------------------
 
 	if( bnohyd ) call nonhydro_set_explicit
 
-c-------------------------------------------
-c nudging of water levels and velocities
-c-------------------------------------------
+!-------------------------------------------
+! nudging of water levels and velocities
+!-------------------------------------------
 
 	call set_nudging
 
-c-------------------------------------------
-c end of routine
-c-------------------------------------------
+!-------------------------------------------
+! end of routine
+!-------------------------------------------
 
 	end
 
-c******************************************************************
+!******************************************************************
 
         subroutine momentum_viscous_stability_old(ahpar,rindex,dstab)
 
-c computes stability for viscosity
-c
-c stability is computed for dt == 1
+! computes stability for viscosity
+!
+! stability is computed for dt == 1
 
         use mod_geom
         use mod_internal
@@ -274,13 +274,13 @@ c stability is computed for dt == 1
 
         end
 
-c******************************************************************
+!******************************************************************
 
 	subroutine momentum_viscous_stability(ahpar,rindex,dstab)
 
-c computes stability for viscosity
-c
-c stability is computed for dt == 1
+! computes stability for viscosity
+!
+! stability is computed for dt == 1
 
 	use mod_geom
 	use mod_internal
@@ -382,7 +382,7 @@ c stability is computed for dt == 1
 
 	end
 
-c******************************************************************
+!******************************************************************
 
 	subroutine set_diff_horizontal
 
@@ -488,7 +488,7 @@ c******************************************************************
 
 	end
 
-c******************************************************************
+!******************************************************************
 
 	subroutine set_diff_horizontal_old
 
@@ -583,11 +583,11 @@ c******************************************************************
 
 	end
 
-c******************************************************************
+!******************************************************************
 
         subroutine set_momentum_flux
 
-c sets arrays momentx/yv
+! sets arrays momentx/yv
 
 	use mod_layer_thickness
 	use mod_hydro_print
@@ -612,9 +612,9 @@ c sets arrays momentx/yv
 
 	real, allocatable :: saux(:,:)
 
-c---------------------------------------------------------------
-c initialization
-c---------------------------------------------------------------
+!---------------------------------------------------------------
+! initialization
+!---------------------------------------------------------------
 
 	allocate(saux(nlvdi,nkn))
 
@@ -622,9 +622,9 @@ c---------------------------------------------------------------
 	momentxv = 0.
 	momentyv = 0.
 
-c---------------------------------------------------------------
-c accumulate momentum that flows into nodes (weighted by flux)
-c---------------------------------------------------------------
+!---------------------------------------------------------------
+! accumulate momentum that flows into nodes (weighted by flux)
+!---------------------------------------------------------------
 
 	do ie_mpi=1,nel
 	  ie = ip_sort_elem(ie_mpi)
@@ -648,9 +648,9 @@ c---------------------------------------------------------------
           end do
 	end do
 
-c---------------------------------------------------------------
-c compute average momentum for every node
-c---------------------------------------------------------------
+!---------------------------------------------------------------
+! compute average momentum for every node
+!---------------------------------------------------------------
 
 	do k=1,nkn
 	  lmax = ilhkv(k)
@@ -667,20 +667,20 @@ c---------------------------------------------------------------
 	  end do
 	end do
 
-c---------------------------------------------------------------
-c exchange arrays
-c---------------------------------------------------------------
+!---------------------------------------------------------------
+! exchange arrays
+!---------------------------------------------------------------
 
 	call shympi_exchange_3d_node(momentxv)
 	call shympi_exchange_3d_node(momentyv)
 
-c---------------------------------------------------------------
-c end of routine
-c---------------------------------------------------------------
+!---------------------------------------------------------------
+! end of routine
+!---------------------------------------------------------------
 
 	end
 
-c******************************************************************
+!******************************************************************
 
         subroutine set_advective(rlin)
 
@@ -717,21 +717,21 @@ c******************************************************************
 
 	!write(6,*) 'set_advective called...'
 
-c---------------------------------------------------------------
-c initialization
-c---------------------------------------------------------------
+!---------------------------------------------------------------
+! initialization
+!---------------------------------------------------------------
 
         ihwadv = nint(getpar('ihwadv'))
 
-c---------------------------------------------------------------
-c accumulate momentum that flows into nodes (weighted by flux)
-c---------------------------------------------------------------
+!---------------------------------------------------------------
+! accumulate momentum that flows into nodes (weighted by flux)
+!---------------------------------------------------------------
 
         call set_momentum_flux	!sets aux arrays momentx/yv
 
-c---------------------------------------------------------------
-c compute advective contribution
-c---------------------------------------------------------------
+!---------------------------------------------------------------
+! compute advective contribution
+!---------------------------------------------------------------
 
 	uc = 0.
 	vc = 0.
@@ -748,9 +748,9 @@ c---------------------------------------------------------------
 
 	  do l=lmin,lmax
 
-c	    ---------------------------------------------------------------
-c	    horizontal advection
-c	    ---------------------------------------------------------------
+!	    ---------------------------------------------------------------
+!	    horizontal advection
+!	    ---------------------------------------------------------------
 
 	    area = 12. * ev(10,ie)
             h = hdeov(l,ie)
@@ -786,9 +786,9 @@ c	    ---------------------------------------------------------------
 	    zxadv = 0.
 	    zyadv = 0. 
 	   
-c	    ---------------------------------------------------------------
-c	    vertical advection
-c	    ---------------------------------------------------------------
+!	    ---------------------------------------------------------------
+!	    vertical advection
+!	    ---------------------------------------------------------------
 
 	    if( ihwadv > 0 ) then	!compute vertical momentum advection
 	      wbot = wbot / 3.
@@ -842,9 +842,9 @@ c	    ---------------------------------------------------------------
 	      wtop = wbot
 	    end if
 
-c	    ---------------------------------------------------------------
-c	    total contribution
-c	    ---------------------------------------------------------------
+!	    ---------------------------------------------------------------
+!	    total contribution
+!	    ---------------------------------------------------------------
 
 	    f = rlin * ruseterm
 	    fxv(l,ie) = fxv(l,ie) + f * (xadv + zxadv)
@@ -852,19 +852,19 @@ c	    ---------------------------------------------------------------
 	  end do
 	end do
 
-c---------------------------------------------------------------
-c end of routine
-c---------------------------------------------------------------
+!---------------------------------------------------------------
+! end of routine
+!---------------------------------------------------------------
 
         end
 
-c******************************************************************
+!******************************************************************
 
 	subroutine momentum_advective_stability(rlin,rindex,astab)
 
-c computes courant number of advective terms in momentum equation
-c
-c stability is computed for dt == 1
+! computes courant number of advective terms in momentum equation
+!
+! stability is computed for dt == 1
 
 	use mod_internal
 	use mod_geom_dynamic
@@ -927,11 +927,11 @@ c stability is computed for dt == 1
 
 	end
 
-c******************************************************************
+!******************************************************************
 
 	subroutine compute_stability_stats(what,cc)
 
-c computes histogram of stability of elements
+! computes histogram of stability of elements
 
 	implicit none
 
@@ -970,7 +970,7 @@ c computes histogram of stability of elements
  1000	format(a20,11i6)
 	end
 
-c******************************************************************
+!******************************************************************
 
 	subroutine set_semi_lagrange
 
@@ -999,7 +999,7 @@ c******************************************************************
 
 	end
 
-c******************************************************************
+!******************************************************************
 
         subroutine set_barocl
 
@@ -1080,13 +1080,13 @@ c******************************************************************
 
         end
 
-c**********************************************************************
+!**********************************************************************
 
         subroutine set_barocl_new
 
-c computes baroclinic contribution centered on layers
-c
-c cannot use this for sigma levels
+! computes baroclinic contribution centered on layers
+!
+! cannot use this for sigma levels
 
 	use mod_internal
 	use mod_layer_thickness
@@ -1149,11 +1149,11 @@ c cannot use this for sigma levels
         
         end
 
-c**********************************************************************
+!**********************************************************************
 
         subroutine set_barocl_old
 
-c do not use this routine !
+! do not use this routine !
 
 	use mod_internal
 	use mod_layer_thickness
@@ -1223,13 +1223,13 @@ c do not use this routine !
         
         end
 
-c**********************************************************************
+!**********************************************************************
 
         subroutine set_barocl_new_interface
 
-c computes baroclinic contribution centered on interfaces
-c
-c this routine works with Z and sigma layers
+! computes baroclinic contribution centered on interfaces
+!
+! this routine works with Z and sigma layers
 
 	use mod_internal
 	use mod_layer_thickness
@@ -1245,7 +1245,7 @@ c this routine works with Z and sigma layers
          
 	include 'pkonst.h'
 
-c---------- DEB SIG
+!---------- DEB SIG
 	real hkk
 	!real hkko(0:nlvdi,nkn)	!depth of interface at node
 	!real hkkom(0:nlvdi,nkn)	!average depth of layer at node
@@ -1262,7 +1262,7 @@ c---------- DEB SIG
 	integer lkmax,ld,lu
 	integer laux,ll,ls,nn,nb !DEB
 	integer llup(3),lldown(3)
-c---------- DEB SIG
+!---------- DEB SIG
 
 	logical bdebug,bdebugggu
 	logical bsigma,bzadapt,badapt,bmoveinterface,bsigadjust
@@ -1556,7 +1556,7 @@ c---------- DEB SIG
 	stop 'error stop set_barocl_new_interface: internal error'
         end
 
-c**********************************************************************
-c**********************************************************************
-c**********************************************************************
+!**********************************************************************
+!**********************************************************************
+!**********************************************************************
 

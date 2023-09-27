@@ -24,36 +24,36 @@
 !
 !--------------------------------------------------------------------------
 
-c deal with vertical velocities
-c
-c revision log :
-c
-c 01.04.2015	ggu	changed VERS_7_1_7
-c 23.04.2015	ggu	internal coodinates finished
-c 06.05.2015	ccf	included settling velocity for lagrangian
-c 08.05.2015	ggu&ccf	bug fix in track_xi_next_element
-c 14.05.2015	ccf	bug fix in track_xi
-c 21.05.2015	ggu	changed VERS_7_1_11
-c 05.06.2015	ggu	changed VERS_7_1_12
-c 17.07.2015	ggu	changed VERS_7_1_80
-c 20.07.2015	ggu	changed VERS_7_1_81
-c 16.11.2015	ggu	changed VERS_7_3_14
-c 15.02.2016	ggu	handle particles on vertical wall gracefully
-c 19.02.2016	ggu	changed VERS_7_5_3
-c 22.02.2016	ggu	changed VERS_7_5_4
-c 09.05.2017	ggu	changed VERS_7_5_26
-c 26.05.2017	ccf	handle particles on open boundary
-c 25.10.2018	ggu	changed VERS_7_5_51
-c 16.02.2019	ggu	changed VERS_7_5_60
-c 22.05.2023	ggu	get_layer_thickness() was missing an argument
-c 05.06.2023    lrp     introduce z-star
+! deal with vertical velocities
+!
+! revision log :
+!
+! 01.04.2015	ggu	changed VERS_7_1_7
+! 23.04.2015	ggu	internal coodinates finished
+! 06.05.2015	ccf	included settling velocity for lagrangian
+! 08.05.2015	ggu&ccf	bug fix in track_xi_next_element
+! 14.05.2015	ccf	bug fix in track_xi
+! 21.05.2015	ggu	changed VERS_7_1_11
+! 05.06.2015	ggu	changed VERS_7_1_12
+! 17.07.2015	ggu	changed VERS_7_1_80
+! 20.07.2015	ggu	changed VERS_7_1_81
+! 16.11.2015	ggu	changed VERS_7_3_14
+! 15.02.2016	ggu	handle particles on vertical wall gracefully
+! 19.02.2016	ggu	changed VERS_7_5_3
+! 22.02.2016	ggu	changed VERS_7_5_4
+! 09.05.2017	ggu	changed VERS_7_5_26
+! 26.05.2017	ccf	handle particles on open boundary
+! 25.10.2018	ggu	changed VERS_7_5_51
+! 16.02.2019	ggu	changed VERS_7_5_60
+! 22.05.2023	ggu	get_layer_thickness() was missing an argument
+! 05.06.2023    lrp     introduce z-star
 
-c
-c******************************************************
+!
+!******************************************************
 
 	subroutine getzvel(ie,z0,l0,is_in,is_out,a_in,a_out,w)
 
-c returns vertical velocity to be used in lagrangian model
+! returns vertical velocity to be used in lagrangian model
 
 	implicit none
 
@@ -97,11 +97,11 @@ c returns vertical velocity to be used in lagrangian model
 
 	end
 
-c******************************************************
+!******************************************************
 
 	subroutine getzvel_point(ie,l0,is,a,w)
 
-c returns vertical velocity at point given by ie,l0,is,a
+! returns vertical velocity at point given by ie,l0,is,a
 
 	use mod_hydro_vel
 	use basin
@@ -152,11 +152,11 @@ c returns vertical velocity at point given by ie,l0,is,a
 
 	end
 
-c******************************************************
+!******************************************************
 
 	subroutine lagr_layer_thickness(ie,lmax,hl,htot,htotz)
 
-c computes layer thickness for element ie
+! computes layer thickness for element ie
 
 	use mod_depth
 	use mod_hydro
@@ -188,8 +188,8 @@ c computes layer thickness for element ie
 	end do
 	z = z / 6.
 
-	call get_layer_thickness(lmax,1,nsigma,nadapt,
-     +				 hsigma,hadapt,z,h,hlv,hl)
+	call get_layer_thickness(lmax,1,nsigma,nadapt, &
+     &				 hsigma,hadapt,z,h,hlv,hl)
 	htot = h
 	htotz = h + z
 
@@ -199,7 +199,7 @@ c computes layer thickness for element ie
 	stop 'error stop lagr_layer_thickness: incompatible layers'
 	end
 
-c*******************************************************************
+!*******************************************************************
 
         subroutine vertpos(zn0,deltat,layd,w,zn1,ztime,addl)
 
@@ -213,10 +213,10 @@ c*******************************************************************
         integer addl		!relative movement to next layer [-1,0,+1]
         real layd		!layer thickness
 
-c return are zn1,ztime,addl
+! return are zn1,ztime,addl
 
-c lstd		max vertical distance to be traveled
-c cpstd		computed distance to be traveled
+! lstd		max vertical distance to be traveled
+! cpstd		computed distance to be traveled
 
 	real cpdst,lstd
 
@@ -245,7 +245,7 @@ c cpstd		computed distance to be traveled
 
         end
 
-c************************************************************
+!************************************************************
 
 	subroutine getalfa(side,d,near,far,re)
 
@@ -269,14 +269,14 @@ c************************************************************
 	
 	end 
 
-c************************************************************
-c************************************************************
-c************************************************************
-c
-c z = 0		top of layer
-c z = 1		bottom of layer
-c
-c************************************************************
+!************************************************************
+!************************************************************
+!************************************************************
+!
+! z = 0		top of layer
+! z = 1		bottom of layer
+!
+!************************************************************
 
 	subroutine track_xi(id,iel,lb,sv,xi,z,time)
 
@@ -575,11 +575,11 @@ c************************************************************
 	stop 'error stop track_xi: internal error (1)'
 	end
 
-c************************************************************
+!************************************************************
 
 	subroutine track_xi_next_element(ie,xi)
 
-c copies internal coordinates to new element - avoid falling on vertex
+! copies internal coordinates to new element - avoid falling on vertex
 
 	use mod_lagrange
 	use mod_geom
@@ -711,11 +711,11 @@ c copies internal coordinates to new element - avoid falling on vertex
 	stop 'error stop track_xi_next_element: erroneous ieltv'
 	end
 
-c************************************************************
+!************************************************************
 
 	function track_xi_on_material_boundary(ie,xi)
 
-c checks if particle is on material boundary
+! checks if particle is on material boundary
 
 	use mod_geom
 
@@ -737,7 +737,7 @@ c checks if particle is on material boundary
 
 	end
 
-c************************************************************
+!************************************************************
 
 	function track_xi_has_layer(iel,lb)
 
@@ -752,13 +752,13 @@ c************************************************************
 
 	end
 
-c************************************************************
+!************************************************************
 
 	subroutine track_xi_adjust_layer(id,ieorig,iel,lb,z)
 
-c adjusts layer when passing from one element to the next
-c
-c is only temporary - must also adjust w
+! adjusts layer when passing from one element to the next
+!
+! is only temporary - must also adjust w
 
 	use levels
 
@@ -789,9 +789,9 @@ c is only temporary - must also adjust w
 
 	end
 
-c************************************************************
-c************************************************************
-c************************************************************
+!************************************************************
+!************************************************************
+!************************************************************
 
 	subroutine track_new_vert_pos(id,ie1,ie2,lb1,lb2,z1,z2)
 
@@ -892,13 +892,13 @@ c************************************************************
 	stop 'error stop track_new_vert_pos: internal error'
 	end
 
-c************************************************************
-c************************************************************
-c************************************************************
+!************************************************************
+!************************************************************
+!************************************************************
 
 	subroutine track_xi_get_flux(iel,lb,iflux,alpha,vel)
 
-c gets flux and vel information for element and layer
+! gets flux and vel information for element and layer
 
 	use mod_lagrange
 	use mod_geom
@@ -963,8 +963,8 @@ c gets flux and vel information for element and layer
 	  end if
 	end do
 
-c fact is introduced to compense for flux if fp /= fm
-c always scale to outgoing flux fm
+! fact is introduced to compense for flux if fp /= fm
+! always scale to outgoing flux fm
 
 	if( in == 1 .and. io > 0 ) then
 	  iflux = -nn			!into this node
@@ -1017,7 +1017,7 @@ c always scale to outgoing flux fm
 
 	end
 
-c************************************************************
+!************************************************************
 
 	subroutine track_xi_get_vertical(id,iel,lb,lmax,hd,w)
 
@@ -1062,7 +1062,7 @@ c************************************************************
 	stop 'error stop track_xi_get_vertical: no such layer'
 	end
 
-c************************************************************
+!************************************************************
 
 	subroutine track_xi_check(text,id,xi)
 
@@ -1096,11 +1096,11 @@ c************************************************************
 
 	end
 
-c************************************************************
+!************************************************************
 
 	subroutine track_xi_info_element(ie)
 
-c prints information on element
+! prints information on element
 
 	use mod_geom
 	use mod_hydro_vel
@@ -1138,5 +1138,5 @@ c prints information on element
 
 	end
 
-c************************************************************
+!************************************************************
 

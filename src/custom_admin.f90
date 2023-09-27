@@ -25,130 +25,130 @@
 !
 !--------------------------------------------------------------------------
 
-c custom routines
-c
-c contents :
-c
-c subroutine custom( it )	custom routines
-c
-c subroutine totvol( it )	computes total volume in basin
-c subroutine georg( it )	test some nodes and elements
-c subroutine temp( it )		q-flux test
-c subroutine bocche		adjust depth at inlets
-c
-c revision log :
-c
-c 22.01.1998	ggu	custom routine called at end of time step
-c 20.03.1998	ggu	custom routine in own file to avoid compiler warnings
-c 08.05.1998	ggu	new custom routine to check for mass balance
-c 25.06.1998	ggu	test for q-flux (zerlina)
-c 21.08.1998	ggu	xv eliminated
-c 03.09.1998	ggu	subroutine bocche to adjust depth at Venice inlets
-c 03.10.1998	ggu	subroutine salt to check salt
-c 19.04.1999	ggu	subroutine impli to change weighting factor
-c 27.05.1999	ggu	use icust to call custom routines
-c 05.12.2001	ggu	fixed compiler error with -Wall -pedantic
-c 10.08.2003	ggu	use accessor routines for chezy values in anpa()
-c 14.08.2003	ggu	new routines test_hakata (icust=26) and node3d
-c 14.08.2003	ggu	only 3D in concmass1
-c 02.09.2003	ggu	new routine lago (76)
-c 04.09.2003	ggu	some fixes in routine anpa
-c 05.10.2004	ggu	new routine aldo to set conz in area
-c 22.02.2005	ggu	subroutines deleted: salt
-c 14.03.2005	ggu	subroutine traccia
-c 30.06.2005	ggu	traccia changed, new routines jamal, sedimt
-c 01.12.2005	ggu	more changes in traccia
-c 23.03.2006	ggu	changed time step to real
-c 18.10.2006	ggu	jamal has been updated and comented
-c 22.02.2007	ggu	traccie routines updated
-c 23.05.2007	ggu	new routines oscillation, kreis, debora
-c 03.08.2007	ggu	in jamal reset introduced...
-c 12.03.2008	ggu	jamal restructured -> computes projected res time
-c 17.03.2008	ggu	new routines zinit, cprint
-c 26.06.2008	ggu	routien for testing diffusion
-c 09.10.2008	ggu	new call to confop
-c 11.10.2008	ggu	pass zfranco into subroutine
-c 12.11.2008	ggu	new routine joel
-c 19.11.2008	ggu	new routine viscos
-c 06.12.2008	ggu	new routine vdiffus()
-c 28.01.2009	aac	new routine andreac()
-c 24.03.2009	ggu	new zinit, tvd_test
-c 23.05.2009	ggu	bug fix in jamal - reset also outer area
-c 16.10.2009	ggu	some changes and documentation for traccia
-c 18.11.2009	ggu	residence time computation in jamal with correction
-c 12.02.2010	ggu	new routines for horizontal diffusion tests (diffus2d)
-c 01.03.2010	ggu	new routines jamal_fra() to reset conz
-c 23.03.2010	ggu	changed v6.1.1
-c 15.12.2010	ggu	traccia routines moved to subtrace.f
-c 26.01.2011	ggu	set rtauv for black sea (black_sea_nudge)
-c 17.02.2011	ggu	changed VERS_6_1_18
-c 18.02.2011	ggu	changed VERS_6_1_19
-c 01.03.2011	ggu	changed VERS_6_1_20
-c 14.04.2011	ggu	changed VERS_6_1_22
-c 17.05.2011	ggu	new routines skadar_debug() and wet_dry()
-c 31.05.2011	ggu	changed VERS_6_1_23
-c 31.05.2011	ggu	changed VERS_6_1_24
-c 07.06.2011	ggu	changed VERS_6_1_25
-c 12.07.2011	ggu	new routines init_ts()
-c 26.08.2011	ggu	changed VERS_6_1_30
-c 01.09.2011	ggu	changed VERS_6_1_32
-c 18.10.2011	ggu	changed VERS_6_1_33
-c 09.12.2011	ggu	changed VERS_6_1_38
-c 09.03.2012	ggu	no call to jamal anymore
-c 16.03.2012	ggu	changed VERS_6_1_48
-c 30.03.2012	ggu	changed VERS_6_1_51
-c 13.04.2012	ggu	changed VERS_6_1_52
-c 01.06.2012	ggu	changed VERS_6_1_53
-c 21.06.2012	ggu	changed VERS_6_1_54
-c 26.06.2012	ggu	changed VERS_6_1_55
-c 29.08.2012	ggu	changed VERS_6_1_56
-c 19.11.2012	ggu	changed VERS_6_1_61
-c 25.01.2013	ggu	changed VERS_6_1_62
-c 13.06.2013	ggu	changed VERS_6_1_65
-c 12.09.2013	ggu	changed VERS_6_1_67
-c 07.03.2014	ggu	changed VERS_6_1_72
-c 25.03.2014	ggu	new routine conz_decay_curonian()
-c 05.05.2014	ggu	changed VERS_6_1_74
-c 18.06.2014	ggu	changed VERS_6_1_77
-c 18.07.2014	ggu	changed VERS_7_0_1
-c 19.12.2014	ggu	changed VERS_7_0_10
-c 23.12.2014	ggu	changed VERS_7_0_11
-c 19.01.2015	ggu	changed VERS_7_1_3
-c 05.06.2015	ggu	changed VERS_7_1_12
-c 10.07.2015	ggu	changed VERS_7_1_50
-c 17.07.2015	ggu	changed VERS_7_1_52
-c 17.07.2015	ggu	changed VERS_7_1_80
-c 20.07.2015	ggu	changed VERS_7_1_81
-c 24.07.2015	ggu	changed VERS_7_1_82
-c 18.09.2015	ggu	changed VERS_7_2_3
-c 23.09.2015	ggu	changed VERS_7_2_4
-c 05.11.2015	ggu	changed VERS_7_3_12
-c 09.11.2015	ggu	changed VERS_7_3_13
-c 18.12.2015	ggu	changed VERS_7_3_17
-c 25.05.2016	ggu	changed VERS_7_5_10
-c 17.06.2016	ggu	changed VERS_7_5_15
-c 21.10.2016	ccf	set ttauv and stauv for med-mar-bla
-c 12.01.2017	ggu	changed VERS_7_5_21
-c 05.12.2017	ggu	changed VERS_7_5_39
-c 07.12.2017	ggu	changed VERS_7_5_40
-c 24.01.2018	ggu	changed VERS_7_5_41
-c 03.04.2018	ggu	changed VERS_7_5_43
-c 19.04.2018	ggu	changed VERS_7_5_45
-c 14.02.2019	ggu	changed VERS_7_5_56
-c 16.02.2019	ggu	changed VERS_7_5_60
-c 13.03.2019	ggu	changed VERS_7_5_61
-c 16.04.2019	ggu	small changes in close_inlets1() (bfill)
-c 21.05.2019	ggu	changed VERS_7_5_62
-c 10.09.2019	ggu	more parameters written in cyano_diana()
-c 30.01.2020	ggu	new kreis routines for vorticity checks
-c 20.03.2022	ggu	upgraded to da_out
-c 04.05.2022	mbj	new routine to compute the ibe effect
-c
-c******************************************************************
+! custom routines
+!
+! contents :
+!
+! subroutine custom( it )	custom routines
+!
+! subroutine totvol( it )	computes total volume in basin
+! subroutine georg( it )	test some nodes and elements
+! subroutine temp( it )		q-flux test
+! subroutine bocche		adjust depth at inlets
+!
+! revision log :
+!
+! 22.01.1998	ggu	custom routine called at end of time step
+! 20.03.1998	ggu	custom routine in own file to avoid compiler warnings
+! 08.05.1998	ggu	new custom routine to check for mass balance
+! 25.06.1998	ggu	test for q-flux (zerlina)
+! 21.08.1998	ggu	xv eliminated
+! 03.09.1998	ggu	subroutine bocche to adjust depth at Venice inlets
+! 03.10.1998	ggu	subroutine salt to check salt
+! 19.04.1999	ggu	subroutine impli to change weighting factor
+! 27.05.1999	ggu	use icust to call custom routines
+! 05.12.2001	ggu	fixed compiler error with -Wall -pedantic
+! 10.08.2003	ggu	use accessor routines for chezy values in anpa()
+! 14.08.2003	ggu	new routines test_hakata (icust=26) and node3d
+! 14.08.2003	ggu	only 3D in concmass1
+! 02.09.2003	ggu	new routine lago (76)
+! 04.09.2003	ggu	some fixes in routine anpa
+! 05.10.2004	ggu	new routine aldo to set conz in area
+! 22.02.2005	ggu	subroutines deleted: salt
+! 14.03.2005	ggu	subroutine traccia
+! 30.06.2005	ggu	traccia changed, new routines jamal, sedimt
+! 01.12.2005	ggu	more changes in traccia
+! 23.03.2006	ggu	changed time step to real
+! 18.10.2006	ggu	jamal has been updated and comented
+! 22.02.2007	ggu	traccie routines updated
+! 23.05.2007	ggu	new routines oscillation, kreis, debora
+! 03.08.2007	ggu	in jamal reset introduced...
+! 12.03.2008	ggu	jamal restructured -> computes projected res time
+! 17.03.2008	ggu	new routines zinit, cprint
+! 26.06.2008	ggu	routien for testing diffusion
+! 09.10.2008	ggu	new call to confop
+! 11.10.2008	ggu	pass zfranco into subroutine
+! 12.11.2008	ggu	new routine joel
+! 19.11.2008	ggu	new routine viscos
+! 06.12.2008	ggu	new routine vdiffus()
+! 28.01.2009	aac	new routine andreac()
+! 24.03.2009	ggu	new zinit, tvd_test
+! 23.05.2009	ggu	bug fix in jamal - reset also outer area
+! 16.10.2009	ggu	some changes and documentation for traccia
+! 18.11.2009	ggu	residence time computation in jamal with correction
+! 12.02.2010	ggu	new routines for horizontal diffusion tests (diffus2d)
+! 01.03.2010	ggu	new routines jamal_fra() to reset conz
+! 23.03.2010	ggu	changed v6.1.1
+! 15.12.2010	ggu	traccia routines moved to subtrace.f
+! 26.01.2011	ggu	set rtauv for black sea (black_sea_nudge)
+! 17.02.2011	ggu	changed VERS_6_1_18
+! 18.02.2011	ggu	changed VERS_6_1_19
+! 01.03.2011	ggu	changed VERS_6_1_20
+! 14.04.2011	ggu	changed VERS_6_1_22
+! 17.05.2011	ggu	new routines skadar_debug() and wet_dry()
+! 31.05.2011	ggu	changed VERS_6_1_23
+! 31.05.2011	ggu	changed VERS_6_1_24
+! 07.06.2011	ggu	changed VERS_6_1_25
+! 12.07.2011	ggu	new routines init_ts()
+! 26.08.2011	ggu	changed VERS_6_1_30
+! 01.09.2011	ggu	changed VERS_6_1_32
+! 18.10.2011	ggu	changed VERS_6_1_33
+! 09.12.2011	ggu	changed VERS_6_1_38
+! 09.03.2012	ggu	no call to jamal anymore
+! 16.03.2012	ggu	changed VERS_6_1_48
+! 30.03.2012	ggu	changed VERS_6_1_51
+! 13.04.2012	ggu	changed VERS_6_1_52
+! 01.06.2012	ggu	changed VERS_6_1_53
+! 21.06.2012	ggu	changed VERS_6_1_54
+! 26.06.2012	ggu	changed VERS_6_1_55
+! 29.08.2012	ggu	changed VERS_6_1_56
+! 19.11.2012	ggu	changed VERS_6_1_61
+! 25.01.2013	ggu	changed VERS_6_1_62
+! 13.06.2013	ggu	changed VERS_6_1_65
+! 12.09.2013	ggu	changed VERS_6_1_67
+! 07.03.2014	ggu	changed VERS_6_1_72
+! 25.03.2014	ggu	new routine conz_decay_curonian()
+! 05.05.2014	ggu	changed VERS_6_1_74
+! 18.06.2014	ggu	changed VERS_6_1_77
+! 18.07.2014	ggu	changed VERS_7_0_1
+! 19.12.2014	ggu	changed VERS_7_0_10
+! 23.12.2014	ggu	changed VERS_7_0_11
+! 19.01.2015	ggu	changed VERS_7_1_3
+! 05.06.2015	ggu	changed VERS_7_1_12
+! 10.07.2015	ggu	changed VERS_7_1_50
+! 17.07.2015	ggu	changed VERS_7_1_52
+! 17.07.2015	ggu	changed VERS_7_1_80
+! 20.07.2015	ggu	changed VERS_7_1_81
+! 24.07.2015	ggu	changed VERS_7_1_82
+! 18.09.2015	ggu	changed VERS_7_2_3
+! 23.09.2015	ggu	changed VERS_7_2_4
+! 05.11.2015	ggu	changed VERS_7_3_12
+! 09.11.2015	ggu	changed VERS_7_3_13
+! 18.12.2015	ggu	changed VERS_7_3_17
+! 25.05.2016	ggu	changed VERS_7_5_10
+! 17.06.2016	ggu	changed VERS_7_5_15
+! 21.10.2016	ccf	set ttauv and stauv for med-mar-bla
+! 12.01.2017	ggu	changed VERS_7_5_21
+! 05.12.2017	ggu	changed VERS_7_5_39
+! 07.12.2017	ggu	changed VERS_7_5_40
+! 24.01.2018	ggu	changed VERS_7_5_41
+! 03.04.2018	ggu	changed VERS_7_5_43
+! 19.04.2018	ggu	changed VERS_7_5_45
+! 14.02.2019	ggu	changed VERS_7_5_56
+! 16.02.2019	ggu	changed VERS_7_5_60
+! 13.03.2019	ggu	changed VERS_7_5_61
+! 16.04.2019	ggu	small changes in close_inlets1() (bfill)
+! 21.05.2019	ggu	changed VERS_7_5_62
+! 10.09.2019	ggu	more parameters written in cyano_diana()
+! 30.01.2020	ggu	new kreis routines for vorticity checks
+! 20.03.2022	ggu	upgraded to da_out
+! 04.05.2022	mbj	new routine to compute the ibe effect
+!
+!******************************************************************
 
 	subroutine custom( dtime )
 
-c custom routines
+! custom routines
 
 	implicit none
 
@@ -222,17 +222,17 @@ c custom routines
 	if( icall .eq. 905 ) call lock_exchange
 	if( icall .eq. 906 ) call ibe_factor
 
-c	call totvol(it)
-c	call georg(it)
-c	call temp(it)
+!	call totvol(it)
+!	call georg(it)
+!	call temp(it)
 
 	end
 
-c*****************************************************************
+!*****************************************************************
 
 	subroutine totvol( it )
 
-c computes total volume in basin
+! computes total volume in basin
 
 	use mod_geom_dynamic
 	use basin, only : nkn,nel,ngr,mbw
@@ -270,16 +270,16 @@ c computes total volume in basin
 
 	vol = voldry + volwet
 
-	write(99,'(i10,i5,4e16.8)') 'totvol: '
-     +			,it,iwet,area,volwet,voldry,vol
+	write(99,'(i10,i5,4e16.8)') 'totvol: ' &
+     &			,it,iwet,area,volwet,voldry,vol
 
 	end
 
-c*****************************************************************
+!*****************************************************************
 
 	subroutine georg( it )
 
-c test some nodes and elements
+! test some nodes and elements
 
 	use mod_geom_dynamic
 	use mod_hydro
@@ -296,7 +296,7 @@ c test some nodes and elements
 
 	integer icall,k1,k2,ie1,ie2,ie3
 	save icall,k1,k2,ie1,ie2,ie3
-c	data icall,k1,k2,ie1,ie2,ie3 /0,556,555,777,788,788/
+!	data icall,k1,k2,ie1,ie2,ie3 /0,556,555,777,788,788/
 	data icall,k1,k2,ie1,ie2,ie3 /0,337,368,513,514,511/
 
 	if( icall .eq. 0 ) then
@@ -318,11 +318,11 @@ c	data icall,k1,k2,ie1,ie2,ie3 /0,556,555,777,788,788/
 
 	end
 
-c*****************************************************************
+!*****************************************************************
 
 	subroutine temp( it )
 
-c q-flux test
+! q-flux test
 
 	use mod_ts
 
@@ -348,11 +348,11 @@ c q-flux test
 
 	end
 
-c*****************************************************************
+!*****************************************************************
 
 	subroutine bocche
 
-c adjust depth at inlets -> must be called from cst routines
+! adjust depth at inlets -> must be called from cst routines
 
 	use mod_depth
 	use basin
@@ -397,11 +397,11 @@ c adjust depth at inlets -> must be called from cst routines
 
 	end
 
-c*****************************************************************
+!*****************************************************************
 
 	subroutine impli(it)
 
-c changes implicity
+! changes implicity
 
 	implicit none
 
@@ -445,11 +445,11 @@ c changes implicity
 
 	end
 
-c*****************************************************************
+!*****************************************************************
 
 	subroutine anpa(it)
 
-c changes chezy
+! changes chezy
 
 	implicit none
 
@@ -512,11 +512,11 @@ c changes chezy
 
 	end
 
-c*****************************************************************
+!*****************************************************************
 
 	subroutine channel(it)
 
-c channel output
+! channel output
 
 	use mod_ts
 	use mod_hydro_vel
@@ -566,23 +566,23 @@ c channel output
 	  open(87,file='glen.dat',status='unknown',form='formatted')
 	end if
 	
-c	write(86,*) it,ndim
-c	write(88,*) it,ndim
-c	do i=1,ndim
-c	  k = nodes(i)
-c	  nlev = ilhkv(k)
-c
-c	  write(86,*) i,k,nlev
-c	  do l=1,nlev
-c	    write(86,*) l,ulnv(l,k),vlnv(l,k)
-c	  end do
-c
-c	  write(88,*) i,k,nlev
-c	  do l=1,nlev-1
-c	    write(88,*) l,visv(l,k),difv(l,k),tken(l,k),eps(l,k),rls(l,k)
-c	  end do
-c
-c	end do
+!	write(86,*) it,ndim
+!	write(88,*) it,ndim
+!	do i=1,ndim
+!	  k = nodes(i)
+!	  nlev = ilhkv(k)
+!
+!	  write(86,*) i,k,nlev
+!	  do l=1,nlev
+!	    write(86,*) l,ulnv(l,k),vlnv(l,k)
+!	  end do
+!
+!	  write(88,*) i,k,nlev
+!	  do l=1,nlev-1
+!	    write(88,*) l,visv(l,k),difv(l,k),tken(l,k),eps(l,k),rls(l,k)
+!	  end do
+!
+!	end do
 
 	k = nodes(2)
 	nlev = ilhkv(k)
@@ -613,11 +613,11 @@ c	end do
 
 	end
 
-c*****************************************************************
+!*****************************************************************
 
 	subroutine sedcust(it)
 
-c channel output
+! channel output
 
 	use mod_hydro_baro
 
@@ -649,7 +649,7 @@ c channel output
 
 	if( icall .eq. 0 ) then
 	  iisp = ieint(iesp)
-c	  write(78,*) 'element: ',iisp,iesp
+!	  write(78,*) 'element: ',iisp,iesp
 	  do i=1,ndim
 	    iispv(i) = ieint(iespv(i))
 	  end do
@@ -673,11 +673,11 @@ c	  write(78,*) 'element: ',iisp,iesp
 
 	end
 
-c*****************************************************************
+!*****************************************************************
 
 	subroutine velchan(it)
 
-c channel velocity output
+! channel velocity output
 
 	use mod_ts
 	use mod_hydro_print
@@ -786,11 +786,11 @@ c channel velocity output
 
 	end
 
-c*****************************************************************
+!*****************************************************************
 
 	subroutine concmass(it)
 
-c set up zeta and conc for mass conservation test
+! set up zeta and conc for mass conservation test
 
 	use mod_conz
 	use mod_hydro
@@ -863,11 +863,11 @@ c set up zeta and conc for mass conservation test
 
 	end
 
-c*****************************************************************
+!*****************************************************************
 
 	subroutine concmass1(it)
 
-c mass conservation test
+! mass conservation test
 
 	use mod_conz
 	use mod_geom_dynamic
@@ -892,12 +892,12 @@ c mass conservation test
 	call massconc(1,cnv,nlvdi,res)		!3D
 
 	write(6,*) 'total dissolved mass: ',it,res,iweg
-c	call debug_node(4179)
-c	call debug_dry
+!	call debug_node(4179)
+!	call debug_dry
 
 	end
 
-c*****************************************************************
+!*****************************************************************
 
 	subroutine hakata(it)
 
@@ -916,13 +916,13 @@ c*****************************************************************
         end if
 
         call hakanode(iunit,it,1608)    !901
-c        call hakanode(iunit,it,777)     !178
+!        call hakanode(iunit,it,777)     !178
         call hakanode(iunit,it,585)     !1032 C-10
         call hakanode(iunit,it,383)     !231
 
 	end
 
-c*****************************************************************
+!*****************************************************************
 
 	subroutine hakanode(iunit,it,k)
 
@@ -961,8 +961,8 @@ c*****************************************************************
  1000   format(i8,2x,a)
 	end
 
-c*****************************************************************
-c*****************************************************************
+!*****************************************************************
+!*****************************************************************
 
 	subroutine animhead(iunit,lmax,ivert,xmin,xmax,ymin,ymax)
 
@@ -981,7 +981,7 @@ c*****************************************************************
 
 	end
 
-c*****************************************************************
+!*****************************************************************
 
 	subroutine animdata(iunit,it,n,val)
 
@@ -998,16 +998,16 @@ c*****************************************************************
 
 	end
 
-c*****************************************************************
+!*****************************************************************
 
 	subroutine close_inlets
 
 	implicit none
 
 	include 'femtime.h'
-c local
+! local
         integer ie,ii,k
-c	integer ibc,nbc
+!	integer ibc,nbc
 	integer ibc,nbc
 	integer ibctot
 	real dz,dzcmh
@@ -1049,7 +1049,7 @@ c	integer ibc,nbc
 	
 	end
 
-c*****************************************************************
+!*****************************************************************
 
 	subroutine close_inlets1
 
@@ -1060,9 +1060,9 @@ c*****************************************************************
 
 	include 'param.h'
 	include 'femtime.h'
-c local
+! local
         integer ie,ii,k
-c	integer ibc,nbc
+!	integer ibc,nbc
 	integer ibc
 	integer ibctot
 	real dz,dzmmh
@@ -1108,10 +1108,10 @@ c	integer ibc,nbc
 	  iclose_old = 0
 	end if
 
-c dsl  pts  btz  cfg  pbo  vgr  tso  fus  pov  ser  tre  gbo  vdg  lsl
-c 2750 2449 19   919  533  1385 936  2174 2032 3140 3342 4086 4343 3971
+! dsl  pts  btz  cfg  pbo  vgr  tso  fus  pov  ser  tre  gbo  vdg  lsl
+! 2750 2449 19   919  533  1385 936  2174 2032 3140 3342 4086 4343 3971
 
-c 1336 1717
+! 1336 1717
 
 	k = 1336		!2750 extern
 	dsv = znv(k)
@@ -1126,7 +1126,7 @@ c 1336 1717
 	zsalv   = 0.01*getpar('zsalv')
         zextra  = zsalv - 1.
 
-c iclose=1      => lagoon is completely closed
+! iclose=1      => lagoon is completely closed
 
 	call is_closed(0,nbcc,icl)      !nbcc is total number of OBC
 	iclose = 0
@@ -1135,8 +1135,8 @@ c iclose=1      => lagoon is completely closed
           call get_prev(ndim,it,zfranco,n,vals)
           call get_wind_rain(it,windv,rainv,wmax,rmax,dzmmh)
 
-          call class12new(it,n,vals,zsalv,zextra,zrise,wmax,rmax,psv
-     +                  ,zmax,zdate,ih,iclass,class)
+          call class12new(it,n,vals,zsalv,zextra,zrise,wmax,rmax,psv &
+     &                  ,zmax,zdate,ih,iclass,class)
 
           call set_zdate(0,zdate)
 
@@ -1148,12 +1148,12 @@ c iclose=1      => lagoon is completely closed
 	  zlevel = 0
 	  if( ih .gt. 0 ) zlevel = zrise+vals(ih)       !level at time ih
 	  zbound = zvbnds(1)                            !level outside
-          write(i66,2300) it,iclass,class,icl,ih
-     +          ,icm(zmax),icm(zlevel),icm(psv),icm(dsv)
-     +		,icm(zbound),icm(zdate),(itybnd(ibc),ibc=1,nbc)
+          write(i66,2300) it,iclass,class,icl,ih &
+     &          ,icm(zmax),icm(zlevel),icm(psv),icm(dsv) &
+     &		,icm(zbound),icm(zdate),(itybnd(ibc),ibc=1,nbc)
 
-c ittot         number of time steps inlets are completely closed
-c itotal        number of total closures
+! ittot         number of time steps inlets are completely closed
+! itotal        number of total closures
 
           if( iclose .eq. 1 ) then
             ittot = ittot + 1
@@ -1162,8 +1162,8 @@ c itotal        number of total closures
 
 	iclose_old = iclose
 
-	write(iunit,*) it,dzmmh,zdate
-     +			,(itybnd(ibc),ibc=1,nbc),itotal,ittot
+	write(iunit,*) it,dzmmh,zdate &
+     &			,(itybnd(ibc),ibc=1,nbc),itotal,ittot
 	
  2200       format(20i4)
  2100     format(i10,i2,a5,i2,i3,4f6.2)
@@ -1174,7 +1174,7 @@ c itotal        number of total closures
 
 	end
 
-c*****************************************************************
+!*****************************************************************
 
 	subroutine test_hakata(it)
 
@@ -1210,14 +1210,14 @@ c*****************************************************************
 	  call node3d(iunit,it,k)
 	end do
 
-c        call hakanode(iunit,it,1608)    !901
-c        call hakanode(iunit,it,777)     !178
-c        call hakanode(iunit,it,585)     !1032 C-10
-c        call hakanode(iunit,it,383)     !231
+!        call hakanode(iunit,it,1608)    !901
+!        call hakanode(iunit,it,777)     !178
+!        call hakanode(iunit,it,585)     !1032 C-10
+!        call hakanode(iunit,it,383)     !231
 
 	end
 
-c*****************************************************************
+!*****************************************************************
 
 	subroutine node3d(iunit,it,k)
 
@@ -1260,7 +1260,7 @@ c*****************************************************************
  1000   format(a,2i10)
 	end
 
-c*****************************************************************
+!*****************************************************************
 
 	subroutine lago(it)
 
@@ -1307,7 +1307,7 @@ c*****************************************************************
 
 	end
 
-c*****************************************************************
+!*****************************************************************
 
 	subroutine aldo(it)
 
@@ -1340,8 +1340,8 @@ c*****************************************************************
          do k=1,nkn
           xp = xgv(k)
           yp = ygv(k)
-          if( .not. is_left(xp,yp,x0,y0,x1,y1) .and.
-     +                  is_left(xp,yp,x2,y2,x3,y3) ) then
+          if( .not. is_left(xp,yp,x0,y0,x1,y1) .and. &
+     &                  is_left(xp,yp,x2,y2,x3,y3) ) then
             lmax = ilhkv(k)
             do l=1,lmax
               cnv(l,k) = 100.
@@ -1352,7 +1352,7 @@ c*****************************************************************
 
         end
 
-c*****************************************************************
+!*****************************************************************
 
         function is_left(xp,yp,x0,y0,x1,y1)
 
@@ -1377,15 +1377,15 @@ c*****************************************************************
 
         end
 
-c*****************************************************************
-c*****************************************************************
-c*****************************************************************
-c*****************************************************************
-c*****************************************************************
+!*****************************************************************
+!*****************************************************************
+!*****************************************************************
+!*****************************************************************
+!*****************************************************************
 
         subroutine jamal
 
-c computes residence time online - one value for whole lagoon
+! computes residence time online - one value for whole lagoon
 
 	use mod_conz, only : cnv
 	use levels
@@ -1429,27 +1429,27 @@ c computes residence time online - one value for whole lagoon
         save icall
         data icall / 0 /
 
-c------------------------------------------------------------
-c parameters
-c------------------------------------------------------------
-c
-c bnoret	true if no return flow is used (conzentrations outside
-c		are explicitly set to 0)
-c bstir		simulates completely stirred tank
-c		(replaces at every time step conz with average conz)
-c percmin	percentage to reach -> after this stop computation
-c		use 0 if no premature end is desired
-c iaout		area code of elements out of lagoon (used for init and retflow)
-c		use -1 to if no outside areas exist
-c c0		initial concentration of tracer
-c itmin		time from when to compute residence time
-c idtreset	time step to reset concentration to c0
-c		use 0 if no reset is wanted
-c
-c secsmonth	how many seconds in a month
-c--------------------------
-c default settings
-c--------------------------
+!------------------------------------------------------------
+! parameters
+!------------------------------------------------------------
+!
+! bnoret	true if no return flow is used (conzentrations outside
+!		are explicitly set to 0)
+! bstir		simulates completely stirred tank
+!		(replaces at every time step conz with average conz)
+! percmin	percentage to reach -> after this stop computation
+!		use 0 if no premature end is desired
+! iaout		area code of elements out of lagoon (used for init and retflow)
+!		use -1 to if no outside areas exist
+! c0		initial concentration of tracer
+! itmin		time from when to compute residence time
+! idtreset	time step to reset concentration to c0
+!		use 0 if no reset is wanted
+!
+! secsmonth	how many seconds in a month
+!--------------------------
+! default settings
+!--------------------------
         bnoret = .false.
 	bstir = .false.
 	percmin = 0.
@@ -1457,48 +1457,48 @@ c--------------------------
 	c0 = 1.
 	itmin = 0
 	idtreset = 0
-c--------------------------
-c set how many seconds are in a month
-c--------------------------
+!--------------------------
+! set how many seconds are in a month
+!--------------------------
 	secsmonth = nint(30.5 * 86400)		! 366 days per year
 	!secsmonth = secsmonth - 7200		! 365 days per year
-c--------------------------
-c nador
-c--------------------------
-c	bnoret = .true.
-c	percmin = 1.
-c	iaout = 0
-c--------------------------
-c alimini
-c--------------------------
-c	idtreset = 1 * secsmonth
-c--------------------------
-c mar menor
-c--------------------------
-c 	just use default settings
-c--------------------------
-c taranto
-c--------------------------
-c	itmin = -1
-c	itmin = 0
-c	idtreset = 3 * secsmonth
-c--------------------------
-c curonian lagoon
-c--------------------------
+!--------------------------
+! nador
+!--------------------------
+!	bnoret = .true.
+!	percmin = 1.
+!	iaout = 0
+!--------------------------
+! alimini
+!--------------------------
+!	idtreset = 1 * secsmonth
+!--------------------------
+! mar menor
+!--------------------------
+! 	just use default settings
+!--------------------------
+! taranto
+!--------------------------
+!	itmin = -1
+!	itmin = 0
+!	idtreset = 3 * secsmonth
+!--------------------------
+! curonian lagoon
+!--------------------------
 	secsmonth = secsmonth - 7200		! 365 days per year
 	c0 = 0.
 	idtreset = 3 * secsmonth
 	idtreset = 86400
 
-c------------------------------------------------------------
-c do not change anything after this point
-c------------------------------------------------------------
+!------------------------------------------------------------
+! do not change anything after this point
+!------------------------------------------------------------
 
 	if( itmin .eq. -1 ) itmin = itanf
 
-c------------------------------------------------------------
-c can we run the routine?
-c------------------------------------------------------------
+!------------------------------------------------------------
+! can we run the routine?
+!------------------------------------------------------------
 
 	iconz = nint(getpar('iconz'))
 	if( iconz <= 0 ) then
@@ -1506,15 +1506,15 @@ c------------------------------------------------------------
 	  stop 'error stop jamal: iconz must be 1'
 	end if
 
-c------------------------------------------------------------
-c is it time to run the routine?
-c------------------------------------------------------------
+!------------------------------------------------------------
+! is it time to run the routine?
+!------------------------------------------------------------
 
         if( it .le. itmin ) return
 
-c------------------------------------------------------------
-c initialization -> decide on reset
-c------------------------------------------------------------
+!------------------------------------------------------------
+! initialization -> decide on reset
+!------------------------------------------------------------
 
 	breset = .false.		!normally do not reset
 
@@ -1529,9 +1529,9 @@ c------------------------------------------------------------
 	  if( it-it0 .ge. idtreset ) breset = .true.
 	end if
 
-c------------------------------------------------------------
-c flag nodes that are inside lagoon (v1v(k)=1)
-c------------------------------------------------------------
+!------------------------------------------------------------
+! flag nodes that are inside lagoon (v1v(k)=1)
+!------------------------------------------------------------
 
         do k=1,nkn
           v1v(k) = 0.
@@ -1547,9 +1547,9 @@ c------------------------------------------------------------
           end if
         end do
 
-c------------------------------------------------------------
-c reset concentrations
-c------------------------------------------------------------
+!------------------------------------------------------------
+! reset concentrations
+!------------------------------------------------------------
 
         if( breset ) then		!reset concentrations to c0
           write(6,*) 'resetting concentrations in jamal at time ',it
@@ -1563,9 +1563,9 @@ c------------------------------------------------------------
           end do
 	end if
 
-c------------------------------------------------------------
-c total mass (only for nodes inside lagoon)
-c------------------------------------------------------------
+!------------------------------------------------------------
+! total mass (only for nodes inside lagoon)
+!------------------------------------------------------------
 
         mass = 0.
         volume = 0.
@@ -1581,9 +1581,9 @@ c------------------------------------------------------------
           end if
         end do
 
-c------------------------------------------------------------
-c stirred tank?
-c------------------------------------------------------------
+!------------------------------------------------------------
+! stirred tank?
+!------------------------------------------------------------
 
 	if( bstir ) then
 	  conz = mass / volume
@@ -1614,9 +1614,9 @@ c------------------------------------------------------------
 	!write(67,*) it,mass,massaux,volume,volaux
 	!write(67,*) it,mass,massaux
 
-c------------------------------------------------------------
-c reset variables to compute residence time
-c------------------------------------------------------------
+!------------------------------------------------------------
+! reset variables to compute residence time
+!------------------------------------------------------------
 
         if( breset ) then
 	  mass0 = mass 
@@ -1629,9 +1629,9 @@ c------------------------------------------------------------
 	  rsumsq = 0.
 	end if
 
-c------------------------------------------------------------
-c write to file
-c------------------------------------------------------------
+!------------------------------------------------------------
+! write to file
+!------------------------------------------------------------
 
 	call get_timestep(dt)
 
@@ -1657,27 +1657,27 @@ c------------------------------------------------------------
 	resmed = rsum / ndata
 	resstd = sqrt( rsumsq/ndata - resmed*resmed )
 
-c it		time in seconds
-c perc		percentage of mass still in domain
-c restime	residence time computed by integrating
-c restimec	residence time computed by integrating with correction
-c restime1	residence time computed by fitting regression curve
-c resmed	average of residence times computed
-c resstd	standard deviation of residence time
+! it		time in seconds
+! perc		percentage of mass still in domain
+! restime	residence time computed by integrating
+! restimec	residence time computed by integrating with correction
+! restime1	residence time computed by fitting regression curve
+! resmed	average of residence times computed
+! resstd	standard deviation of residence time
 
         write(iu,1000) it,perc,restime,restimec,restime1,resmed,resstd
 
-c------------------------------------------------------------
-c finish computation if mass is below threshold
-c------------------------------------------------------------
+!------------------------------------------------------------
+! finish computation if mass is below threshold
+!------------------------------------------------------------
 
         if( mass0 .ne. 0. .and. perc .lt. percmin ) then
                 stop 'finished computing'
         end if
 
-c------------------------------------------------------------
-c no return flow -> set outside areas to 0
-c------------------------------------------------------------
+!------------------------------------------------------------
+! no return flow -> set outside areas to 0
+!------------------------------------------------------------
 
         if( bnoret ) then
           do k=1,nkn
@@ -1690,25 +1690,25 @@ c------------------------------------------------------------
           end do
         end if
 
-c------------------------------------------------------------
-c remember initialization
-c------------------------------------------------------------
+!------------------------------------------------------------
+! remember initialization
+!------------------------------------------------------------
 
         icall = icall + 1
 
-c------------------------------------------------------------
-c end of routine
-c------------------------------------------------------------
+!------------------------------------------------------------
+! end of routine
+!------------------------------------------------------------
 
 	return
  1000	format(i10,6f10.2)
         end
 
-c*****************************************************************
+!*****************************************************************
 
         subroutine jamal_fra
 
-c reset conz for fdp
+! reset conz for fdp
 
 	use mod_conz
 	use levels
@@ -1751,15 +1751,15 @@ c reset conz for fdp
 	idtreset = 0
 	idtreset = nint( 1 * 30.5 * 86400 )		!one month is 30.5 days
 
-c------------------------------------------------------------
-c is it time to run the routine?
-c------------------------------------------------------------
+!------------------------------------------------------------
+! is it time to run the routine?
+!------------------------------------------------------------
 
         if( it .le. itmin ) return
 
-c------------------------------------------------------------
-c initialization -> decide on reset
-c------------------------------------------------------------
+!------------------------------------------------------------
+! initialization -> decide on reset
+!------------------------------------------------------------
 
 	breset = .false.		!normally do not reset
 
@@ -1774,9 +1774,9 @@ c------------------------------------------------------------
 	  if( it-it0 .ge. idtreset ) breset = .true.
 	end if
 
-c------------------------------------------------------------
-c reset concentrations
-c------------------------------------------------------------
+!------------------------------------------------------------
+! reset concentrations
+!------------------------------------------------------------
 
         if( breset ) then		!reset concentrations to c0
           write(6,*) 'resetting concentrations in jamal at time ',it
@@ -1790,13 +1790,13 @@ c------------------------------------------------------------
 	  it0 = it
 	end if
 
-c------------------------------------------------------------
-c end of routine
-c------------------------------------------------------------
+!------------------------------------------------------------
+! end of routine
+!------------------------------------------------------------
 
 	end
 
-c*****************************************************************
+!*****************************************************************
 
         subroutine sedimt
 
@@ -1826,9 +1826,9 @@ c*****************************************************************
 
 	if( icall < 0 ) return
 
-c------------------------------------------------------------
-c parameters
-c------------------------------------------------------------
+!------------------------------------------------------------
+! parameters
+!------------------------------------------------------------
 
 	wsink = 0.
 	wsink = 1.e-4
@@ -1836,9 +1836,9 @@ c------------------------------------------------------------
 	wsink = 5.e-5
 	rhos = 2500.
 
-c------------------------------------------------------------
-c initialization
-c------------------------------------------------------------
+!------------------------------------------------------------
+! initialization
+!------------------------------------------------------------
 
         if( icall .eq. 0 ) then
 
@@ -1861,15 +1861,15 @@ c------------------------------------------------------------
 
         end if
 
-c------------------------------------------------------------
-c is it time ?
-c------------------------------------------------------------
+!------------------------------------------------------------
+! is it time ?
+!------------------------------------------------------------
 
         if( .not. is_in_output_d(da_out) ) return
 
-c------------------------------------------------------------
-c sinking
-c------------------------------------------------------------
+!------------------------------------------------------------
+! sinking
+!------------------------------------------------------------
 
 	call get_act_dtime(dtime)
 	call get_timestep(dt)
@@ -1895,9 +1895,9 @@ c------------------------------------------------------------
           end do
 	end if
 
-c------------------------------------------------------------
-c compute total mass
-c------------------------------------------------------------
+!------------------------------------------------------------
+! compute total mass
+!------------------------------------------------------------
 
         mass = 0.
         masss = 0.
@@ -1911,16 +1911,16 @@ c------------------------------------------------------------
 	    masss = masss + conzs(k)
         end do
 
-c------------------------------------------------------------
-c write total mass
-c------------------------------------------------------------
+!------------------------------------------------------------
+! write total mass
+!------------------------------------------------------------
 
         write(6,*) 'sedimt: ',dtime,mass,masss,mass+masss
         write(iunit,*) 'sedimt: ',dtime,mass,masss,mass+masss
 
-c------------------------------------------------------------
-c write file
-c------------------------------------------------------------
+!------------------------------------------------------------
+! write file
+!------------------------------------------------------------
 
         if( .not. next_output_d(da_out) ) return
 
@@ -1929,16 +1929,16 @@ c------------------------------------------------------------
         call shy_write_scalar_record2d(id,dtime,23,conza)	![kg/m**2]
         call shy_write_scalar_record2d(id,dtime,24,conzh)	![m]
 
-c------------------------------------------------------------
-c end of routine
-c------------------------------------------------------------
+!------------------------------------------------------------
+! end of routine
+!------------------------------------------------------------
 
 	return
    99	continue
 	stop 'error stop sedimt: error opening file'
         end
 
-c*****************************************************************
+!*****************************************************************
 
 	subroutine oscillation
 
@@ -1965,7 +1965,7 @@ c*****************************************************************
 
 	end
 
-c*****************************************************************
+!*****************************************************************
 
 	subroutine kreis_vel(mode)
 
@@ -1982,7 +1982,7 @@ c*****************************************************************
 
 	end 
 
-c*****************************************************************
+!*****************************************************************
 
 	subroutine kreis
 
@@ -2010,7 +2010,7 @@ c*****************************************************************
 
 	end
 
-c*****************************************************************
+!*****************************************************************
 
 	subroutine init_kreis(mode)
 
@@ -2130,7 +2130,7 @@ c*****************************************************************
 
 	end
 
-c*****************************************************************
+!*****************************************************************
 
         subroutine bclevvar
 
@@ -2150,16 +2150,16 @@ c*****************************************************************
         integer edim
         parameter(edim = 20) !20!number of element near the open boundary
         integer elese(edim)!elements near the boundary
-c  !      data elese / 290,321,326,335,308,2112,324,336,334,325,
-c !    +     2118,2113,328,295,2119,2116,333,2121,2120,2114
-c!     +      /                                                !grid chao0_primapubb.grd
-        data elese / 3002,3001,2902,2901,2802,2801,2702,2701,
-     +  2602,2601,3004,3003,2904,2903,2804,2803,2704,2703,2604,2603
-     +      /    !grid chao0_ordinato.grd
-c     !   data elese /382,381,380,379,378,377,376,375,374,373,372,371,
-c     !+  369,368,367,366,365,364,363,362,361,360,359,358,357,356,
-c     !+  355,354,353
-c     !+         /!grid bati_gradino.grd
+!  !      data elese / 290,321,326,335,308,2112,324,336,334,325,
+! !    +     2118,2113,328,295,2119,2116,333,2121,2120,2114
+!!     +      /                                                !grid chao0_primapubb.grd
+        data elese / 3002,3001,2902,2901,2802,2801,2702,2701, &
+     &  2602,2601,3004,3003,2904,2903,2804,2803,2704,2703,2604,2603 &
+     &      /    !grid chao0_ordinato.grd
+!     !   data elese /382,381,380,379,378,377,376,375,374,373,372,371,
+!     !+  369,368,367,366,365,364,363,362,361,360,359,358,357,356,
+!     !+  355,354,353
+!     !+         /!grid bati_gradino.grd
         integer eleint(edim)
         integer ie,l,i
         logical berror          !true on return if error
@@ -2217,7 +2217,7 @@ c     !+         /!grid bati_gradino.grd
         enddo
 
         end
-c*****************************************************************
+!*****************************************************************
         subroutine bclevvar_ini !dbf
 
 	use mod_internal
@@ -2235,16 +2235,16 @@ c*****************************************************************
         integer edim
         parameter(edim = 20) !number of element near the open boundary
         integer elese(edim)!elements near the boundary
-c!        data elese / 290,321,326,335,308,2112,324,336,334,325,
-c!     +     2118,2113,328,295,2119,2116,333,2121,2120,2114
-c!     +      /                                                !grid chao0_primapubb.grd
-          data elese / 3002,3001,2902,2901,2802,2801,2702,2701,
-     +  2602,2601,3004,3003,2904,2903,2804,2803,2704,2703,2604,2603 
-     +  /    !grid chao0_ordinato.grd
-c    !   data elese /382,381,380,379,378,377,376,375,374,373,372,371,
-c    ! +  369,368,367,366,365,364,363,362,361,360,359,358,357,356,
-c    ! +  355,354,353
-c    ! +     /!grid bati_gradino.grd
+!!        data elese / 290,321,326,335,308,2112,324,336,334,325,
+!!     +     2118,2113,328,295,2119,2116,333,2121,2120,2114
+!!     +      /                                                !grid chao0_primapubb.grd
+          data elese / 3002,3001,2902,2901,2802,2801,2702,2701, &
+     &  2602,2601,3004,3003,2904,2903,2804,2803,2704,2703,2604,2603  &
+     &  /    !grid chao0_ordinato.grd
+!    !   data elese /382,381,380,379,378,377,376,375,374,373,372,371,
+!    ! +  369,368,367,366,365,364,363,362,361,360,359,358,357,356,
+!    ! +  355,354,353
+!    ! +     /!grid bati_gradino.grd
 
         integer eleint(edim)
         integer ie,l,i,ii
@@ -2310,10 +2310,10 @@ c    ! +     /!grid bati_gradino.grd
         end
 
 
-c****************************************************************************
+!****************************************************************************
 
 
-c*****************************************************************
+!*****************************************************************
 
 	subroutine debora(it)
 
@@ -2337,7 +2337,7 @@ c*****************************************************************
 
 	end
 
-c*****************************************************************
+!*****************************************************************
 
         subroutine tsinitdebora(it)
 
@@ -2378,7 +2378,7 @@ c*****************************************************************
 
         end
 
-c*****************************************************************
+!*****************************************************************
 
 	subroutine zinit
 
@@ -2437,7 +2437,7 @@ c*****************************************************************
 
 	end
 
-c****************************************************************
+!****************************************************************
 
 	subroutine cprint(it)
 
@@ -2488,23 +2488,23 @@ c****************************************************************
 
 	end
 
-c****************************************************************
-c****************************************************************
-c****************************************************************
-c****************************************************************
-c****************************************************************
+!****************************************************************
+!****************************************************************
+!****************************************************************
+!****************************************************************
+!****************************************************************
 
 	subroutine diffus2d
 
-c test for 2D horizontal diffusion algorithm
+! test for 2D horizontal diffusion algorithm
 
-c dC/dt = a*laplace(C)    with    c(x,0+)=delta(x)
-c
-c C(x,t) =  (4*pi*a*t)**(-n/2) * exp( -|x|**2/(4*a*t) )		(n=n)
-c
-c C(x,t) =  1/sqrt(4*pi*a*t) * exp( -x**2/(4*a*t) )		(n=1)
-c
-c C(x,t) =  1/(4*pi*a*t) * exp( -|x|**2/(4*a*t) )		(n=2)
+! dC/dt = a*laplace(C)    with    c(x,0+)=delta(x)
+!
+! C(x,t) =  (4*pi*a*t)**(-n/2) * exp( -|x|**2/(4*a*t) )		(n=n)
+!
+! C(x,t) =  1/sqrt(4*pi*a*t) * exp( -x**2/(4*a*t) )		(n=1)
+!
+! C(x,t) =  1/(4*pi*a*t) * exp( -|x|**2/(4*a*t) )		(n=2)
 
 	use mod_conz
 	use levels, only : nlvdi,nlv
@@ -2538,9 +2538,9 @@ c C(x,t) =  1/(4*pi*a*t) * exp( -|x|**2/(4*a*t) )		(n=2)
 	save icall
 	data icall / 0 /
 
-c----------------------------------------------------------
-c initialization
-c----------------------------------------------------------
+!----------------------------------------------------------
+! initialization
+!----------------------------------------------------------
 
 	idtfrq = 500
 	it0 = 1000		!initialize with this time
@@ -2568,9 +2568,9 @@ c----------------------------------------------------------
 	icall = icall + 1
 	itt = it + it0 - idt
 
-c----------------------------------------------------------
-c compute average over section
-c----------------------------------------------------------
+!----------------------------------------------------------
+! compute average over section
+!----------------------------------------------------------
 
 	if( mod(itt,idtfrq) .ne. 0 ) return
 
@@ -2609,13 +2609,13 @@ c----------------------------------------------------------
         call make_filename(itt,file,'p60','.txt')
 	call write_file(file,n,xv,yv)
 
-c----------------------------------------------------------
-c end of routine
-c----------------------------------------------------------
+!----------------------------------------------------------
+! end of routine
+!----------------------------------------------------------
 
 	end
 
-c****************************************************************
+!****************************************************************
 
 	subroutine write_file(file,ndim,xv,yv)
 
@@ -2638,11 +2638,11 @@ c****************************************************************
 
 	end
 
-c****************************************************************
+!****************************************************************
 
 	subroutine make_anal(it,ndim,xv,yv,c0,rk,dx)
 
-c C(x,t) =  1/(4*pi*a*t) * exp( -|x|**2/(4*a*t) )		(n=2)
+! C(x,t) =  1/(4*pi*a*t) * exp( -|x|**2/(4*a*t) )		(n=2)
 
 	implicit none
 
@@ -2692,11 +2692,11 @@ c C(x,t) =  1/(4*pi*a*t) * exp( -|x|**2/(4*a*t) )		(n=2)
 
 	end
 
-c****************************************************************
+!****************************************************************
 
 	subroutine cv_init(it,k0,rk,c0,ct0,cv)
 
-c initializes cnv with analytic solution (2D)
+! initializes cnv with analytic solution (2D)
 
 	use levels, only : nlvdi,nlv
 	use basin
@@ -2737,11 +2737,11 @@ c initializes cnv with analytic solution (2D)
 
 	end
 
-c****************************************************************
+!****************************************************************
 
 	subroutine extract_irreg(cv,ndim,n,xv,yv,k0,dx,phi)
 
-c extracts conz from array
+! extracts conz from array
 
 	use levels, only : nlvdi,nlv
 	use basin
@@ -2773,9 +2773,9 @@ c extracts conz from array
 	y0 = ygv(kin0)
 	write(6,*) 'center... ',k0,kin0,x0,y0
 
-c------------------------------------------------------------
-c prepare parameters
-c------------------------------------------------------------
+!------------------------------------------------------------
+! prepare parameters
+!------------------------------------------------------------
 
 	xv(1) = 0.
 	yv(1) = cv(1,kin0)
@@ -2784,9 +2784,9 @@ c------------------------------------------------------------
 	rad = pi/180.
 	phi0 = phi * rad
 
-c------------------------------------------------------------
-c go backward
-c------------------------------------------------------------
+!------------------------------------------------------------
+! go backward
+!------------------------------------------------------------
 
 	ie = 0
 	do i=2,ndim
@@ -2804,9 +2804,9 @@ c------------------------------------------------------------
 	n = i-1
 	write(6,*) 'backward... ',n
 	
-c------------------------------------------------------------
-c invert arrays
-c------------------------------------------------------------
+!------------------------------------------------------------
+! invert arrays
+!------------------------------------------------------------
 
 	do i=1,n/2
 	  ip = n+1-i
@@ -2814,9 +2814,9 @@ c------------------------------------------------------------
 	  call swap_ggu(yv(i),yv(ip))
 	end do
 
-c------------------------------------------------------------
-c go foreward
-c------------------------------------------------------------
+!------------------------------------------------------------
+! go foreward
+!------------------------------------------------------------
 
 	ie = 0
 	do i=n+1,ndim
@@ -2835,13 +2835,13 @@ c------------------------------------------------------------
 	
 	write(6,*) 'finished to extract... n = ',n
 
-c------------------------------------------------------------
-c end of routine
-c------------------------------------------------------------
+!------------------------------------------------------------
+! end of routine
+!------------------------------------------------------------
 
 	end
 
-c****************************************************************
+!****************************************************************
 
 	subroutine swap_ggu(a,b)
 
@@ -2857,7 +2857,7 @@ c****************************************************************
 
 	end
 
-c****************************************************************
+!****************************************************************
 
 	subroutine intp_on_node(ie,x,y,cv,zp)
 
@@ -2889,11 +2889,11 @@ c****************************************************************
 
 	end
 
-c****************************************************************
+!****************************************************************
 
 	subroutine extract_conz(cv,ndim,xv,yv,k0,kmin,kmax,kstep)
 
-c extracts conz from array
+! extracts conz from array
 
 	use levels, only : nlvdi,nlv
 	use basin
@@ -2937,15 +2937,15 @@ c extracts conz from array
 
 	end
 
-c****************************************************************
-c****************************************************************
-c****************************************************************
-c****************************************************************
-c****************************************************************
+!****************************************************************
+!****************************************************************
+!****************************************************************
+!****************************************************************
+!****************************************************************
 
 	subroutine diffus
 
-c test for horizontal diffusion algorithm
+! test for horizontal diffusion algorithm
 
 	use mod_conz
 
@@ -2963,9 +2963,9 @@ c test for horizontal diffusion algorithm
 	save icall
 	data icall / 0 /
 
-c----------------------------------------------------------
-c initialization
-c----------------------------------------------------------
+!----------------------------------------------------------
+! initialization
+!----------------------------------------------------------
 
 	c0 = 100.
 
@@ -2977,9 +2977,9 @@ c----------------------------------------------------------
 
 	icall = icall + 1
 
-c----------------------------------------------------------
-c compute average over section
-c----------------------------------------------------------
+!----------------------------------------------------------
+! compute average over section
+!----------------------------------------------------------
 
 	do i=1,25
 	  k1 = i*9
@@ -2994,17 +2994,17 @@ c----------------------------------------------------------
 
 	write(88,*) it,caux
 
-c----------------------------------------------------------
-c end of routine
-c----------------------------------------------------------
+!----------------------------------------------------------
+! end of routine
+!----------------------------------------------------------
 
 	end
 
-c****************************************************************
+!****************************************************************
 
 	subroutine viscos
 
-c viscosity algorithm
+! viscosity algorithm
 
 	use mod_hydro_print
 	use levels, only : nlvdi,nlv
@@ -3030,25 +3030,25 @@ c viscosity algorithm
 
 	end
 
-c****************************************************************
+!****************************************************************
 
 	subroutine vdiffus(mode)
 
-c diffusion algorithm
-c
-c solution of purely diffusional part :
-c
-c dC/dt = a*laplace(C)    with    c(x,0+)=delta(x)
-c
-c C(x,t) =  (4*pi*a*t)**(-n/2) * exp( -|x|**2/(4*a*t) )
-c
-c for n-dimensions and
-c
-c C(x,t) =  1/sqrt(4*pi*a*t) * exp( -x**2/(4*a*t) )
-c
-c for 1 dimension
-c
-c the solution is normalized, i.e.  int(C(x,t)dx) = 1 over the whole area
+! diffusion algorithm
+!
+! solution of purely diffusional part :
+!
+! dC/dt = a*laplace(C)    with    c(x,0+)=delta(x)
+!
+! C(x,t) =  (4*pi*a*t)**(-n/2) * exp( -|x|**2/(4*a*t) )
+!
+! for n-dimensions and
+!
+! C(x,t) =  1/sqrt(4*pi*a*t) * exp( -x**2/(4*a*t) )
+!
+! for 1 dimension
+!
+! the solution is normalized, i.e.  int(C(x,t)dx) = 1 over the whole area
 
 	use mod_conz
 	use levels
@@ -3074,7 +3074,7 @@ c the solution is normalized, i.e.  int(C(x,t)dx) = 1 over the whole area
 	save icall
 	data icall / 0 /
 
-c C(x,t) =  1/sqrt(4*pi*a*t) * exp( -x**2/(4*a*t) )
+! C(x,t) =  1/sqrt(4*pi*a*t) * exp( -x**2/(4*a*t) )
 
 	lc = (nlv+1)/2
 	c0 = 100.
@@ -3118,7 +3118,7 @@ c C(x,t) =  1/sqrt(4*pi*a*t) * exp( -x**2/(4*a*t) )
 
 	end
 
-c****************************************************************
+!****************************************************************
 
         subroutine uv_bottom
 
@@ -3156,11 +3156,11 @@ c****************************************************************
 
         end
 
-c********************************************************************
+!********************************************************************
 
 	subroutine joel
 
-c writes node list for Malta Coastal Model
+! writes node list for Malta Coastal Model
 
 	use mod_depth
 	use levels
@@ -3189,16 +3189,16 @@ c writes node list for Malta Coastal Model
 	save icall
 	data icall / 0 /
 
-c----------------------------------------------------------
-c do only at first call
-c----------------------------------------------------------
+!----------------------------------------------------------
+! do only at first call
+!----------------------------------------------------------
 
 	if( icall .ne. 0 ) return
 	icall = 1
 
-c----------------------------------------------------------
-c initialize geographic projection
-c----------------------------------------------------------
+!----------------------------------------------------------
+! initialize geographic projection
+!----------------------------------------------------------
 
 	bproj = .false.
 
@@ -3219,9 +3219,9 @@ c----------------------------------------------------------
 	  xfact = yfact * cos(phi0*rad)
 	end if
 
-c----------------------------------------------------------
-c get deepest depth on node
-c----------------------------------------------------------
+!----------------------------------------------------------
+! get deepest depth on node
+!----------------------------------------------------------
 
         do k = 1,nkn
 	  v1v(k) = -999.
@@ -3234,9 +3234,9 @@ c----------------------------------------------------------
 	  end do
 	end do
 
-c----------------------------------------------------------
-c write out values for total domain
-c----------------------------------------------------------
+!----------------------------------------------------------
+! write out values for total domain
+!----------------------------------------------------------
 
 	open(1,file='joel_total.dat')
 
@@ -3252,9 +3252,9 @@ c----------------------------------------------------------
 
 	close(1)
 
-c----------------------------------------------------------
-c write out values for open boundary
-c----------------------------------------------------------
+!----------------------------------------------------------
+! write out values for open boundary
+!----------------------------------------------------------
 
 	nbc = nbnds()
 
@@ -3278,9 +3278,9 @@ c----------------------------------------------------------
 	close(1)
 	end if
 
-c----------------------------------------------------------
-c write out values z-levels
-c----------------------------------------------------------
+!----------------------------------------------------------
+! write out values z-levels
+!----------------------------------------------------------
 
 	open(1,file='joel_zlevels.dat')
 
@@ -3292,24 +3292,24 @@ c----------------------------------------------------------
 
 	close(1)
 
-c----------------------------------------------------------
-c write boundary nodes
-c----------------------------------------------------------
+!----------------------------------------------------------
+! write boundary nodes
+!----------------------------------------------------------
 
         call print_bound_nodes(nkn,v1v)
 
-c----------------------------------------------------------
-c end of routine
-c----------------------------------------------------------
+!----------------------------------------------------------
+! end of routine
+!----------------------------------------------------------
 
  1000	format(2i10,i5,3f16.8)
 	end
 
-c********************************************************************
+!********************************************************************
 
         subroutine andreac
 
-c introduce le condizioni iniziali per la concentrazione
+! introduce le condizioni iniziali per la concentrazione
 
 	use mod_conz
 	use basin, only : nkn,nel,ngr,mbw
@@ -3334,11 +3334,11 @@ c introduce le condizioni iniziali per la concentrazione
 
 	end
 
-c********************************************************************
+!********************************************************************
 
         subroutine tvd_test(it)
 
-c introduce le condizioni iniziali per la concentrazione
+! introduce le condizioni iniziali per la concentrazione
 
 	use mod_conz
 	use basin
@@ -3447,7 +3447,7 @@ c introduce le condizioni iniziali per la concentrazione
 
         end
 
-c********************************************************************
+!********************************************************************
 
         subroutine make_filename(it,file,pre,ext)
 
@@ -3467,7 +3467,7 @@ c********************************************************************
 
         end
 
-c**********************************************************************
+!**********************************************************************
 
 	subroutine black_sea_nudge
 
@@ -3733,7 +3733,7 @@ c**********************************************************************
 
         end
 
-c**********************************************************************
+!**********************************************************************
 
         subroutine ggu_ginevra
 
@@ -3783,13 +3783,13 @@ c**********************************************************************
 
 	end
 
-c**********************************************************************
-c**********************************************************************
-c**********************************************************************
+!**********************************************************************
+!**********************************************************************
+!**********************************************************************
 
         subroutine skadar_debug
 
-c debugging skadar application
+! debugging skadar application
 
 	implicit none
 
@@ -3812,7 +3812,7 @@ c debugging skadar application
 
 	end
 
-c**********************************************************************
+!**********************************************************************
 
         subroutine skadar
 
@@ -3823,7 +3823,7 @@ c**********************************************************************
 
 	end
 
-c**********************************************************************
+!**********************************************************************
 
         subroutine write_meteo
 
@@ -3860,7 +3860,7 @@ c**********************************************************************
 
 	end
 
-c**********************************************************************
+!**********************************************************************
 
         subroutine limit_temp
 
@@ -3889,11 +3889,11 @@ c**********************************************************************
 
 	end
 
-c**********************************************************************
+!**********************************************************************
 
 	subroutine wet_dry
 
-c time of inundation for theseus
+! time of inundation for theseus
 
 	use mod_geom_dynamic
 	use mod_depth
@@ -3938,9 +3938,9 @@ c time of inundation for theseus
 	idtwrite = 86400*30.5
 	smed = 5.
 
-c-----------------------------------------
-c first call
-c-----------------------------------------
+!-----------------------------------------
+! first call
+!-----------------------------------------
 
 	if( icall .eq. 0 ) then
 	  allocate(idry(nel))
@@ -3968,9 +3968,9 @@ c-----------------------------------------
 	  isum = 0
 	end if
 
-c-----------------------------------------
-c accumulate
-c-----------------------------------------
+!-----------------------------------------
+! accumulate
+!-----------------------------------------
 
 	icall = icall + 1
 
@@ -3985,9 +3985,9 @@ c-----------------------------------------
 	  salt_aver_k(k) = salt_aver_k(k) + saltv(1,k)
 	end do
 
-c-----------------------------------------
-c write to file
-c-----------------------------------------
+!-----------------------------------------
+! write to file
+!-----------------------------------------
 
 	if( mod(it,idtwrite) .eq. 0 ) then
 	  if( iu124 == 0 ) iu124 = ifemop('.124','form','new')
@@ -4023,9 +4023,9 @@ c-----------------------------------------
 	  write(iu123,*) (idry(ie),ie=1,nel)
 	end if
 
-c-----------------------------------------
-c modify depth
-c-----------------------------------------
+!-----------------------------------------
+! modify depth
+!-----------------------------------------
 
 	sedim = sedim_save
 
@@ -4060,9 +4060,9 @@ c-----------------------------------------
 
 	end if
 
-c-----------------------------------------
-c read or write hev
-c-----------------------------------------
+!-----------------------------------------
+! read or write hev
+!-----------------------------------------
 
 	if( binit ) then	! initialize hev
 	  write(6,*) 'hev initialized'
@@ -4081,13 +4081,13 @@ c-----------------------------------------
 	  write(6,*) 'sedim used: ',sedim_save,binit
 	end if
 
-c-----------------------------------------
-c end of routine
-c-----------------------------------------
+!-----------------------------------------
+! end of routine
+!-----------------------------------------
 
 	end
 
-c**********************************************************************
+!**********************************************************************
 
         subroutine init_ts
 
@@ -4102,12 +4102,12 @@ c**********************************************************************
 	include 'femtime.h'
 
 
-c	integer ndim
-c	parameter (ndim=10)	!must be at least the number of layers used
-c	real tobs(ndim)
-c	real sobs(ndim)
-c	data tobs /20.,20.,15.,13.,12.,10.,8.,6.,6.,6./
-c	data sobs /35.,35.,35.,36.,36.,36.,37.,37.,37.,37./
+!	integer ndim
+!	parameter (ndim=10)	!must be at least the number of layers used
+!	real tobs(ndim)
+!	real sobs(ndim)
+!	data tobs /20.,20.,15.,13.,12.,10.,8.,6.,6.,6./
+!	data sobs /35.,35.,35.,36.,36.,36.,37.,37.,37.,37./
 
 	integer ndim
         parameter (ndim=22)     !must be at least the number of layers used
@@ -4151,7 +4151,7 @@ c	data sobs /35.,35.,35.,36.,36.,36.,37.,37.,37.,37./
 	stop 'error stop init_ts: ndim must be at least lmax'
 	end
 
-c**********************************************************************
+!**********************************************************************
 
 	subroutine fluid_mud
 
@@ -4193,7 +4193,7 @@ c**********************************************************************
 
 	end
 
-c**********************************************************************
+!**********************************************************************
 
 	subroutine test_par
 
@@ -4215,7 +4215,7 @@ c**********************************************************************
 
 	end
 
-c**********************************************************************
+!**********************************************************************
 
 	subroutine conz_decay_curonian
 
@@ -4236,8 +4236,8 @@ c**********************************************************************
 	real qx,qy,d,d0
 	logical is_north
 
-c sim 5:	+10 -10 0.5
-c sim 6:	+8 -8 0.4
+! sim 5:	+10 -10 0.5
+! sim 6:	+8 -8 0.4
 
 	tau1 = +8.0		!growth rate - efolding time in days
 	tau2 = -8.0		!decay rate - efolding time in days
@@ -4272,7 +4272,7 @@ c sim 6:	+8 -8 0.4
 
 	end
 
-c**********************************************************************
+!**********************************************************************
 
 	function is_north(x,y,x1,y1,x2,y2)
 
@@ -4287,11 +4287,11 @@ c**********************************************************************
 
 	end
 
-c**********************************************************************
+!**********************************************************************
 
         subroutine set_yaron
 
-c momentum input for yaron
+! momentum input for yaron
 
         use mod_internal
         use mod_layer_thickness
@@ -4334,11 +4334,11 @@ c momentum input for yaron
 
         end
 
-c*******************************************************************
+!*******************************************************************
 
         subroutine lock_exchange
 
-c lock exchange experiment to test non-hydrostatic dynamics
+! lock exchange experiment to test non-hydrostatic dynamics
 
 	use mod_hydro
 	use mod_ts
@@ -4373,14 +4373,14 @@ c lock exchange experiment to test non-hydrostatic dynamics
 
 	end
 
-c*******************************************************************
+!*******************************************************************
 
 	subroutine mpi_test_basin(mode)
 
-c mode == 1	initialize for wind
-c mode == 2	initialize for zeta (oscillation)
-c mode == 3	initialize only output
-c mode == 4	initialize only output for mmba
+! mode == 1	initialize for wind
+! mode == 2	initialize for zeta (oscillation)
+! mode == 3	initialize only output
+! mode == 4	initialize only output for mmba
 
 	use mod_meteo
 	use basin
@@ -4412,8 +4412,8 @@ c mode == 4	initialize only output for mmba
 	integer, parameter :: ndim = 5
 	integer, save :: nodes(ndim) = (/5,59,113,167,221/)
 	integer, parameter :: nmdim = 9
-	integer, save :: nmodes(nmdim) = (/132539,131111,132453
-     +		,202,201,204,203,129327,130459/)
+	integer, save :: nmodes(nmdim) = (/132539,131111,132453 &
+     &		,202,201,204,203,129327,130459/)
 
 	integer ipint
 
@@ -4549,7 +4549,7 @@ c mode == 4	initialize only output for mmba
 
 	end
 
-c*******************************************************************
+!*******************************************************************
 
 	subroutine register_nodes(n,nodes)
 
@@ -4580,7 +4580,7 @@ c*******************************************************************
 
 	end
 
-c*******************************************************************
+!*******************************************************************
 
 	subroutine cyano_diana
 
@@ -4654,7 +4654,7 @@ c*******************************************************************
 
 	end
 
-c*******************************************************************
+!*******************************************************************
 
 	subroutine get_new_cyano_time(file,dtout,dtwin,astart,aend,ierr)
 
@@ -4712,7 +4712,7 @@ c*******************************************************************
 
 	end
 
-c*******************************************************************
+!*******************************************************************
 
         subroutine age
 
@@ -4785,7 +4785,7 @@ c*******************************************************************
 
         end
 
-c*******************************************************************
+!*******************************************************************
 
         subroutine ibe_factor
 

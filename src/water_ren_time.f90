@@ -25,95 +25,95 @@
 !
 !--------------------------------------------------------------------------
 
-c routines dealing with water renewal time
-c
-c contents :
-c
-c revision log :
-c
-c 24.10.2011	ggu	new file copied from subcus.f (jamal)
-c 04.11.2011	ggu	changed VERS_6_1_35
-c 28.02.2012	ggu&dbf	completely restructured
-c 09.03.2012	ggu	changed VERS_6_1_47
-c 16.03.2012	ggu	use idtwrt=-1 for no renewal computation
-c 19.03.2012	ggu	changed VERS_6_1_49
-c 13.04.2012	ggu	changed VERS_6_1_52
-c 01.06.2012	ggu	changed VERS_6_1_53
-c 12.09.2012	ggu	changed VERS_6_1_57
-c 10.05.2014	ccf	parameters from the str file
-c 18.07.2014	ggu	changed VERS_7_0_1
-c 26.11.2014	ggu	changed VERS_7_0_7
-c 23.12.2014	ggu	changed VERS_7_0_11
-c 19.01.2015	ggu	changed VERS_7_1_3
-c 23.01.2015	ggu	changed VERS_7_1_4
-c 31.03.2015	ggu	compute res time for different areas
-c 01.04.2015	ggu	changed VERS_7_1_7
-c 30.04.2015	ggu	changed VERS_7_1_9
-c 20.05.2015	ggu	rinside computed only once, bug fix for conz==0
-c 05.06.2015	ggu	new routine to limit concentration between 0 and c0
-c 10.07.2015	ggu	changed VERS_7_1_50
-c 13.07.2015	ggu	changed VERS_7_1_51
-c 17.07.2015	ggu	changed VERS_7_1_80
-c 20.07.2015	ggu	changed VERS_7_1_81
-c 09.11.2015	ggu	changed VERS_7_3_13
-c 01.02.2016	ggu	implemented custom reset
-c 19.02.2016	ggu	changed VERS_7_5_2
-c 15.04.2016	ggu	new input file for custom reset
-c 31.10.2016	ggu	new output format for wrt files
-c 12.01.2017	ggu	changed VERS_7_5_21
-c 05.12.2017	ggu	changed VERS_7_5_39
-c 03.04.2018	ggu	changed VERS_7_5_43
-c 16.04.2018	ggu	restructured, new computation of WRT (see WRTOLD)
-c 18.04.2018	ggu	restructured, some bugs fixed
-c 26.04.2018	ggu	changed VERS_7_5_46
-c 11.05.2018	ggu	changed VERS_7_5_47
-c 05.10.2018	ggu	before calling dep3dele() set nlev
-c 16.10.2018	ggu	changed VERS_7_5_50
-c 07.02.2019	ggu	for custom reset allow iso date
-c 14.02.2019	ggu	changed VERS_7_5_56
-c 16.02.2019	ggu	changed VERS_7_5_60
-c 12.03.2019	ggu	bug fix if no custom data is given (only idtwrt)
-c 29.04.2019	ggu	fix computation for too low concentrations (climit)
-c 21.05.2019	ggu	changed VERS_7_5_62
-c 22.09.2020    ggu     correct warnings for PGI compiler
-c
-c******************************************************************
-c Parameters to be set in section $wrt of the parameter input file
-c
-c bnoret	true if no return flow is used (concentrations outside
-c		are explicitly set to 0)
-c bstir		simulates completely stirred tank
-c		(replaces at every time step conz with average conz)
-c blog          use logarithmic regression to compute renewal time
-c badj          adjust renewal time for tail of distribution
-c
-c percmin	percentage to reach -> after this stop computation
-c		use 0 if no premature end is desired
-c iaout		area code of elements out of lagoon (used for init and retflow)
-c		use -1 to if no outside areas exist
-c c0		initial concentration of tracer
-c
-c itmin		time from when to compute renewal time (-1 for start of sim)
-c itmax		time up to when to compute renewal time (-1 for end of sim)
-c idtwrt	time step to reset concentration to c0
-c		use 0 if no reset is desired
-c		use -1 if no renewal time computation is desired
-c
-c ctop          maximum to be used for frequency curve
-c ccut          cut renewal time at this level (for res time computation)
-c------------------------------------------------------------
-c
-c computation through logarithm:
-c
-c c = c0*exp(-at)  with a = 1/tau and tau is the residence time
-c log(c/c0) = -at  and  log(c0/c) = at
-c define y=log(c0/c)=-log(c/c0) then y = at
-c minimum squares: f(a) = sum_i (y(i)-at(i))**2
-c df/da = 0 => sum_i (y(i)-at(i))t(i) = 0 => 
-c a = sum_i(t(i)y(i))/sum_i(t(i)t(i)) 
-c and finally: tau = sum_i(t(i)t(i))/sum_i(t(i)y(i))
-c
-c------------------------------------------------------------
+! routines dealing with water renewal time
+!
+! contents :
+!
+! revision log :
+!
+! 24.10.2011	ggu	new file copied from subcus.f (jamal)
+! 04.11.2011	ggu	changed VERS_6_1_35
+! 28.02.2012	ggu&dbf	completely restructured
+! 09.03.2012	ggu	changed VERS_6_1_47
+! 16.03.2012	ggu	use idtwrt=-1 for no renewal computation
+! 19.03.2012	ggu	changed VERS_6_1_49
+! 13.04.2012	ggu	changed VERS_6_1_52
+! 01.06.2012	ggu	changed VERS_6_1_53
+! 12.09.2012	ggu	changed VERS_6_1_57
+! 10.05.2014	ccf	parameters from the str file
+! 18.07.2014	ggu	changed VERS_7_0_1
+! 26.11.2014	ggu	changed VERS_7_0_7
+! 23.12.2014	ggu	changed VERS_7_0_11
+! 19.01.2015	ggu	changed VERS_7_1_3
+! 23.01.2015	ggu	changed VERS_7_1_4
+! 31.03.2015	ggu	compute res time for different areas
+! 01.04.2015	ggu	changed VERS_7_1_7
+! 30.04.2015	ggu	changed VERS_7_1_9
+! 20.05.2015	ggu	rinside computed only once, bug fix for conz==0
+! 05.06.2015	ggu	new routine to limit concentration between 0 and c0
+! 10.07.2015	ggu	changed VERS_7_1_50
+! 13.07.2015	ggu	changed VERS_7_1_51
+! 17.07.2015	ggu	changed VERS_7_1_80
+! 20.07.2015	ggu	changed VERS_7_1_81
+! 09.11.2015	ggu	changed VERS_7_3_13
+! 01.02.2016	ggu	implemented custom reset
+! 19.02.2016	ggu	changed VERS_7_5_2
+! 15.04.2016	ggu	new input file for custom reset
+! 31.10.2016	ggu	new output format for wrt files
+! 12.01.2017	ggu	changed VERS_7_5_21
+! 05.12.2017	ggu	changed VERS_7_5_39
+! 03.04.2018	ggu	changed VERS_7_5_43
+! 16.04.2018	ggu	restructured, new computation of WRT (see WRTOLD)
+! 18.04.2018	ggu	restructured, some bugs fixed
+! 26.04.2018	ggu	changed VERS_7_5_46
+! 11.05.2018	ggu	changed VERS_7_5_47
+! 05.10.2018	ggu	before calling dep3dele() set nlev
+! 16.10.2018	ggu	changed VERS_7_5_50
+! 07.02.2019	ggu	for custom reset allow iso date
+! 14.02.2019	ggu	changed VERS_7_5_56
+! 16.02.2019	ggu	changed VERS_7_5_60
+! 12.03.2019	ggu	bug fix if no custom data is given (only idtwrt)
+! 29.04.2019	ggu	fix computation for too low concentrations (climit)
+! 21.05.2019	ggu	changed VERS_7_5_62
+! 22.09.2020    ggu     correct warnings for PGI compiler
+!
+!******************************************************************
+! Parameters to be set in section $wrt of the parameter input file
+!
+! bnoret	true if no return flow is used (concentrations outside
+!		are explicitly set to 0)
+! bstir		simulates completely stirred tank
+!		(replaces at every time step conz with average conz)
+! blog          use logarithmic regression to compute renewal time
+! badj          adjust renewal time for tail of distribution
+!
+! percmin	percentage to reach -> after this stop computation
+!		use 0 if no premature end is desired
+! iaout		area code of elements out of lagoon (used for init and retflow)
+!		use -1 to if no outside areas exist
+! c0		initial concentration of tracer
+!
+! itmin		time from when to compute renewal time (-1 for start of sim)
+! itmax		time up to when to compute renewal time (-1 for end of sim)
+! idtwrt	time step to reset concentration to c0
+!		use 0 if no reset is desired
+!		use -1 if no renewal time computation is desired
+!
+! ctop          maximum to be used for frequency curve
+! ccut          cut renewal time at this level (for res time computation)
+!------------------------------------------------------------
+!
+! computation through logarithm:
+!
+! c = c0*exp(-at)  with a = 1/tau and tau is the residence time
+! log(c/c0) = -at  and  log(c0/c) = at
+! define y=log(c0/c)=-log(c/c0) then y = at
+! minimum squares: f(a) = sum_i (y(i)-at(i))**2
+! df/da = 0 => sum_i (y(i)-at(i))t(i) = 0 => 
+! a = sum_i(t(i)y(i))/sum_i(t(i)t(i)) 
+! and finally: tau = sum_i(t(i)t(i))/sum_i(t(i)y(i))
+!
+!------------------------------------------------------------
 
 !==================================================================
         module mod_renewal_time
@@ -218,9 +218,9 @@ c------------------------------------------------------------
 
 	bmaster = shympi_is_master()
 
-c------------------------------------------------------------
-c initialization
-c------------------------------------------------------------
+!------------------------------------------------------------
+! initialization
+!------------------------------------------------------------
 
         if( icall .eq. 0 ) then
 
@@ -302,9 +302,9 @@ c------------------------------------------------------------
 
         icall = icall + 1
 	
-c------------------------------------------------------------
-c is it time to run the routine?
-c------------------------------------------------------------
+!------------------------------------------------------------
+! is it time to run the routine?
+!------------------------------------------------------------
 
 	call get_act_dtime(dtime)
 	call get_absolute_act_time(atime)
@@ -314,14 +314,14 @@ c------------------------------------------------------------
 
 	call get_act_timeline(aline)
 
-c------------------------------------------------------------
-c decide on what to do
-c------------------------------------------------------------
+!------------------------------------------------------------
+! decide on what to do
+!------------------------------------------------------------
 
-c binit		is initial call
-c breset	resets concentration
-c bcompute	computes residence times and writes to file
-c belab		elaborates (accumulates) concentrations
+! binit		is initial call
+! breset	resets concentration
+! bcompute	computes residence times and writes to file
+! belab		elaborates (accumulates) concentrations
 
 	binit = .false.		!only true for first call
 	if( nrepl .lt. 0 ) then
@@ -347,9 +347,9 @@ c belab		elaborates (accumulates) concentrations
 	  write(6,*) dtime,ius
 	end if
 
-c------------------------------------------------------------
-c elaborate results
-c------------------------------------------------------------
+!------------------------------------------------------------
+! elaborate results
+!------------------------------------------------------------
 
 	conz = 0.
 	if( belab ) then
@@ -359,8 +359,8 @@ c------------------------------------------------------------
 	  call wrt_massvolconz(cnv,iaout,vol,mass,volume)
 	  call wrt_mass_area(iaout,narea,cnv,massa,vola,conza)
 	  call wrt_write_area(iua,aline,iaout,narea,massa,massa0)
-	  call wrt_acum_area(-iuw,aline,time,tacu
-     +				,narea,massa,massa0,wrta)
+	  call wrt_acum_area(-iuw,aline,time,tacu &
+     &				,narea,massa,massa0,wrta)
 	  conz = mass / volume
 
 	  if( bstir ) call wrt_bstir(conz,cnv,rinside)	!stirred tank
@@ -369,38 +369,38 @@ c------------------------------------------------------------
 	  call acu_acum(blog,time,c0,cnv,vol,rinside,tacu,cvacu,volacu)
 	  tacu = tacu + time * time
 
-	  call wrt_restime_summary(ius,dtime,dtime0
-     +					,mass,mass0,rcorrect)
+	  call wrt_restime_summary(ius,dtime,dtime0 &
+     &					,mass,mass0,rcorrect)
 	end if
 
 	if( bdebug ) then
 	  write(6,*) 'WRT debug (conz): ',conz
 	end if
 
-c------------------------------------------------------------
-c reset concentrations
-c------------------------------------------------------------
+!------------------------------------------------------------
+! reset concentrations
+!------------------------------------------------------------
 
         if( breset ) then		!reset concentrations to c0
 
 	  if( bmaster ) then
-       	    write(6,*) 'resetting concentrations for renewal time '
-     +				,aline
+       	    write(6,*) 'resetting concentrations for renewal time ' &
+     &				,aline
 	  end if
 
-c------------------------------------------------------------
-c reset variables to compute renewal time (and write to file)
-c------------------------------------------------------------
+!------------------------------------------------------------
+! reset variables to compute renewal time (and write to file)
+!------------------------------------------------------------
 
 	  if( bcompute ) then	!compute new renewal time
 	    rcorrect = 0.	!do not used global correction
-	    call acu_comp(da_out
-     +				,blog,badj,dtime,c0,ccut,rcorrect
-     +				,tacu,cvacu
-     +				,cnv,cvres3)
+	    call acu_comp(da_out &
+     &				,blog,badj,dtime,c0,ccut,rcorrect &
+     &				,tacu,cvacu &
+     &				,cnv,cvres3)
 	    call acu_freq(iuf,aline,ctop,rinside,cvres3,volacu)
-	    call wrt_acum_area(iuw,aline,time,tacu
-     +					,narea,massa,massa0,wrta)
+	    call wrt_acum_area(iuw,aline,time,tacu &
+     &					,narea,massa,massa0,wrta)
 	    nrepl = nrepl + 1
 
 	    if( bmaster ) then
@@ -419,8 +419,8 @@ c------------------------------------------------------------
 	    call wrt_mass_area(iaout,narea,cnv,massa0,vola0,conza0)
 	    call wrt_write_area(iua,aline,iaout,narea,massa0,massa0)
 
-	    call wrt_restime_summary(-ius,dtime,dtime0
-     +					,mass0,mass0,rcorrect)
+	    call wrt_restime_summary(-ius,dtime,dtime0 &
+     &					,mass0,mass0,rcorrect)
 	    mass = mass0
 	  end if
 
@@ -431,9 +431,9 @@ c------------------------------------------------------------
 
 	end if
 
-c------------------------------------------------------------
-c finish computation if mass is below threshold
-c------------------------------------------------------------
+!------------------------------------------------------------
+! finish computation if mass is below threshold
+!------------------------------------------------------------
 
         if( mass0 .ne. 0. ) then
 	  perc = mass / mass0
@@ -444,21 +444,21 @@ c------------------------------------------------------------
 	  end if
         end if
 
-c------------------------------------------------------------
-c end of routine
-c------------------------------------------------------------
+!------------------------------------------------------------
+! end of routine
+!------------------------------------------------------------
 
         end
 
-c*****************************************************************
-c*****************************************************************
-c*****************************************************************
+!*****************************************************************
+!*****************************************************************
+!*****************************************************************
 
 	subroutine wrt_flag_inside(rinside,iaout)
 
-c flags inside nodes (nodes with area code different from iaout)
-c
-c on return rinside(k) = 1 for nodes inside domain
+! flags inside nodes (nodes with area code different from iaout)
+!
+! on return rinside(k) = 1 for nodes inside domain
 
 	use basin
 
@@ -483,11 +483,11 @@ c on return rinside(k) = 1 for nodes inside domain
 
 	end
 
-c*****************************************************************
+!*****************************************************************
 
 	subroutine wrt_breset(c0,cnv,rinside)
 
-c resets concentration for start of new computation
+! resets concentration for start of new computation
 
 	use levels
 	use basin, only : nkn,nel,ngr,mbw
@@ -512,11 +512,11 @@ c resets concentration for start of new computation
 
 	end
 
-c*****************************************************************
+!*****************************************************************
 
 	subroutine wrt_bstir(c0,cnv,rinside)
 
-c simulates stirred tank
+! simulates stirred tank
 
 	use levels
 	use basin, only : nkn,nel,ngr,mbw
@@ -540,11 +540,11 @@ c simulates stirred tank
 	
 	end
 
-c******************************************************
+!******************************************************
 
 	subroutine wrt_limit_conz(c0,cnv)
 
-c limits concentration between 0 and c0
+! limits concentration between 0 and c0
 
 	use levels
 	use basin, only : nkn,nel,ngr,mbw
@@ -566,11 +566,11 @@ c limits concentration between 0 and c0
 
 	end
 
-c****************************************************
+!****************************************************
 
 	subroutine wrt_bnoret(cnv,rinside)
 
-c sets concentration to zero outside of domain
+! sets concentration to zero outside of domain
 
 	use levels
 	use basin, only : nkn,nel,ngr,mbw
@@ -593,13 +593,13 @@ c sets concentration to zero outside of domain
 
 	end
 
-c******************************************************
-c******************************************************
-c******************************************************
+!******************************************************
+!******************************************************
+!******************************************************
 
 	subroutine wrt_write_area(iua,aline,iaout,narea,massa,massa0)
 
-c computes masses for different areas
+! computes masses for different areas
 
 	use shympi
 
@@ -636,11 +636,11 @@ c computes masses for different areas
 
 	if( shympi_is_master() ) then
 	  if( all( massa == massa0 ) ) then
-	    write(iua,'(a)') '# concentration [%] in areas'//
-     +			' identified by area code'
+	    write(iua,'(a)') '# concentration [%] in areas'// &
+     &			' identified by area code'
 	    write(iua,'(a)') '# not used area codes have conz=0'
-	    write(iua,2000) '#               time  total'
-     +				,(iarea(i),i=0,na)
+	    write(iua,2000) '#               time  total' &
+     &				,(iarea(i),i=0,na)
 	  end if
 	  write(iua,1000) aline,perc(-1:na)
 	end if
@@ -650,12 +650,12 @@ c computes masses for different areas
  2000	format(a,20i7)
 	end
 
-c******************************************************
+!******************************************************
 
-	subroutine wrt_acum_area(iuw,aline,time,tacu
-     +					,narea,massa,massa0,wrta)
+	subroutine wrt_acum_area(iuw,aline,time,tacu &
+     &					,narea,massa,massa0,wrta)
 
-c computes masses for different areas - in -1 is total mass
+! computes masses for different areas - in -1 is total mass
 
 	use shympi
 
@@ -699,10 +699,10 @@ c computes masses for different areas - in -1 is total mass
 	if( shympi_is_master() ) then
 	  if( bheader ) then
 	    bheader = .false.
-	    write(iuw,'(a)') '# water renewal time (WRT) '//
-     +					'in days for each area'
-	    write(iuw,'(a,20i8)') '#               time   total'
-     +				,(i,i=0,narea)
+	    write(iuw,'(a)') '# water renewal time (WRT) '// &
+     &					'in days for each area'
+	    write(iuw,'(a,20i8)') '#               time   total' &
+     &				,(i,i=0,narea)
 	  end if
 	  !write(179,*) aline,wrta
 	  !call flush(179)
@@ -715,11 +715,11 @@ c computes masses for different areas - in -1 is total mass
 
 	end
 
-c******************************************************
+!******************************************************
 
 	subroutine wrt_mass_area(iaout,narea,cnv,massa,vola,conza)
 
-c computes masses for different areas - in -1 is total mass
+! computes masses for different areas - in -1 is total mass
 
 	use evgeom
 	use levels
@@ -789,11 +789,11 @@ c computes masses for different areas - in -1 is total mass
 	stop 'error stop wrt_mass_area: internal error (1)'
 	end
 
-c******************************************************
+!******************************************************
 
 	subroutine wrt_massvolconz(cnv,iaout,vol,mass,volume)
 
-c computes mass and volume on internal nodes
+! computes mass and volume on internal nodes
 
 	use levels
 	use basin
@@ -867,14 +867,14 @@ c computes mass and volume on internal nodes
 	stop 'error stop wrt_massvolconz: internal error (1)'
 	end
 
-c***************************************************************
-c***************************************************************
-c***************************************************************
+!***************************************************************
+!***************************************************************
+!***************************************************************
 
-	subroutine acu_acum(blog,time,c0,cnv,vol,rinside
-     +					,tacu,cvacu,volacu)
+	subroutine acu_acum(blog,time,c0,cnv,vol,rinside &
+     &					,tacu,cvacu,volacu)
 
-c accumulate renewal time
+! accumulate renewal time
 
 	use levels
 	use basin, only : nkn,nel,ngr,mbw
@@ -939,13 +939,13 @@ c accumulate renewal time
 
 	end
 
-c***************************************************************
+!***************************************************************
 
-	subroutine acu_comp(da_out,blog,badj,dtime,c0,ccut,rcorrect
-     +				,tacu,cvacu
-     +				,cnv,cvres3)
+	subroutine acu_comp(da_out,blog,badj,dtime,c0,ccut,rcorrect &
+     &				,tacu,cvacu &
+     &				,cnv,cvres3)
 
-c compute renewal time and write to file
+! compute renewal time and write to file
 
 	use levels
 	use basin, only : nkn,nel,ngr,mbw
@@ -969,18 +969,18 @@ c compute renewal time and write to file
 
 	double precision dgetpar
 
-c---------------------------------------------------------------
-c set parameters
-c---------------------------------------------------------------
+!---------------------------------------------------------------
+! set parameters
+!---------------------------------------------------------------
 
 	secs_in_day = 86400.
 
 	rconv = 1. / secs_in_day
 	cc0 = c0
 
-c---------------------------------------------------------------
-c compute renewal times -> put in cvres3
-c---------------------------------------------------------------
+!---------------------------------------------------------------
+! compute renewal times -> put in cvres3
+!---------------------------------------------------------------
 
         do k=1,nkn
           lmax = ilhkv(k)
@@ -1009,9 +1009,9 @@ c---------------------------------------------------------------
           end do
         end do
 
-c---------------------------------------------------------------
-c write to file
-c---------------------------------------------------------------
+!---------------------------------------------------------------
+! write to file
+!---------------------------------------------------------------
 
 	ivar = 99
 	id = nint(da_out(4))
@@ -1019,27 +1019,27 @@ c---------------------------------------------------------------
 	call shy_write_scalar_record(id,dtime,ivar,nlvdi,cvres3)
 	call shy_sync(id)
 
-c---------------------------------------------------------------
-c end of routine
-c---------------------------------------------------------------
+!---------------------------------------------------------------
+! end of routine
+!---------------------------------------------------------------
 
 	end
 
-c**********************************************************************
-c**********************************************************************
-c**********************************************************************
+!**********************************************************************
+!**********************************************************************
+!**********************************************************************
 
-	subroutine wrt_restime_summary(ius,dtime,dtime0
-     +					,mass,mass0,rcorrect)
+	subroutine wrt_restime_summary(ius,dtime,dtime0 &
+     &					,mass,mass0,rcorrect)
 
-c write summuary of WRT computation to file
+! write summuary of WRT computation to file
 
-c perc		percentage of mass still in domain
-c restime	renewal time computed by integrating
-c restimec	renewal time computed by integrating with correction
-c restimel	renewal time computed by fitting regression curve
-c resmed	average of renewal times computed
-c resstd	standard deviation of renewal time
+! perc		percentage of mass still in domain
+! restime	renewal time computed by integrating
+! restimec	renewal time computed by integrating with correction
+! restimel	renewal time computed by fitting regression curve
+! resmed	average of renewal times computed
+! resstd	standard deviation of renewal time
 
      	implicit none
 	
@@ -1117,15 +1117,15 @@ c resstd	standard deviation of renewal time
 	call get_timeline(dtime,aline)
 	if( breset ) then
           write(iu,'(a)') '# estimation of WRT in days for whole basin'
-          write(iu,'(a)') '#               time'
-     +				//'      conz  integral corrected'
-     +				//'  lin-regr   average       std'
+          write(iu,'(a)') '#               time' &
+     &				//'      conz  integral corrected' &
+     &				//'  lin-regr   average       std'
 	end if
 
 !	write(6,1000) aline,perc,restime,restimec
 !     +					,restimel,resmed,resstd
-        write(iu,1000) aline,perc,restime,restimec
-     +					,restimel,resmed,resstd
+        write(iu,1000) aline,perc,restime,restimec &
+     &					,restimel,resmed,resstd
 
 !	it = nint(dtime)
 !        write(177,2000) it,perc,restime,restimec
@@ -1135,13 +1135,13 @@ c resstd	standard deviation of renewal time
  2000	format(i10,6f10.2)
 	end
 
-c**********************************************************************
-c**********************************************************************
-c**********************************************************************
+!**********************************************************************
+!**********************************************************************
+!**********************************************************************
 
 	subroutine acu_freq(iu,aline,ctop,rinside,cvres3,volacu)
 
-c write histogram
+! write histogram
 
 	use levels
 	use basin, only : nkn,nel,ngr,mbw
@@ -1170,9 +1170,9 @@ c write histogram
 	bdebug = .true.
 	bdebug = .false.
 
-c---------------------------------------------------------------
-c compute maximum
-c---------------------------------------------------------------
+!---------------------------------------------------------------
+! compute maximum
+!---------------------------------------------------------------
 
 	ntot = nkn_unique
 
@@ -1189,9 +1189,9 @@ c---------------------------------------------------------------
 	if( ctop .gt. 0. .and. amax .gt. ctop ) amax = ctop
 	if( ctop .lt. 0. ) amax = -ctop
 
-c---------------------------------------------------------------
-c compute average
-c---------------------------------------------------------------
+!---------------------------------------------------------------
+! compute average
+!---------------------------------------------------------------
 
 	tot = 0.
 	vtot = 0.
@@ -1208,9 +1208,9 @@ c---------------------------------------------------------------
 	tot = shympi_sum(tot)
 	vtot = shympi_sum(vtot)
 
-c---------------------------------------------------------------
-c compute frequency curve
-c---------------------------------------------------------------
+!---------------------------------------------------------------
+! compute frequency curve
+!---------------------------------------------------------------
 
 	icount = 0
 	dcount = 0.
@@ -1236,18 +1236,18 @@ c---------------------------------------------------------------
 	ic = sum(icount)
 	dc = sum(dcount)
 
-c---------------------------------------------------------------
-c write to file (if master)
-c---------------------------------------------------------------
+!---------------------------------------------------------------
+! write to file (if master)
+!---------------------------------------------------------------
 
 	if( .not. shympi_is_master() ) return
 
 	write(iu,*) 'cmax: ',aline,cmax,amax
 	write(iu,2000) 'aver_by_tot: ',aline,tot,vtot,tot/vtot
 
-c---------------------------------------------------------------
-c compute and write frequency curve to file
-c---------------------------------------------------------------
+!---------------------------------------------------------------
+! compute and write frequency curve to file
+!---------------------------------------------------------------
 
 	dw = 1.
 	tot = 0.
@@ -1288,9 +1288,9 @@ c---------------------------------------------------------------
 	end do
 	write(iu,2000) 'aver_by_vol: ',aline,tot,vtot,tot/vtot
 
-c---------------------------------------------------------------
-c write out all data to file (for debug and median)
-c---------------------------------------------------------------
+!---------------------------------------------------------------
+! write out all data to file (for debug and median)
+!---------------------------------------------------------------
 
 	!write(76,*) nkn,aline
         !do k=1,nkn
@@ -1298,18 +1298,18 @@ c---------------------------------------------------------------
 	!  write(76,*) conz
 	!end do
 
-c---------------------------------------------------------------
-c end of routine
-c---------------------------------------------------------------
+!---------------------------------------------------------------
+! end of routine
+!---------------------------------------------------------------
 
  2000	format(a,a20,2e14.6,f14.4)
 	end
 
-c**********************************************************************
-c**********************************************************************
-c**********************************************************************
-c**********************************************************************
-c**********************************************************************
+!**********************************************************************
+!**********************************************************************
+!**********************************************************************
+!**********************************************************************
+!**********************************************************************
 
 	subroutine init_custom_reset(atime)
 
@@ -1326,5 +1326,5 @@ c**********************************************************************
 
 	end
 
-c**********************************************************************
+!**********************************************************************
 

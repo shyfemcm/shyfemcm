@@ -25,74 +25,74 @@
 !
 !--------------------------------------------------------------------------
 
-c routines handling flooding and drying
-c
-c contents :
-c
-c subroutine setweg(iweich,iw,hzmin)	sets array iwegv
-c subroutine setuvd			sets velocities in dry areas
-c subroutine setzev			sets array zenv from znv
-c subroutine setznv			sets array znv from zenv
-c subroutine zuniq(zv,av)		makes z values unique
-c
-c revision log :
-c
-c 01.07.1992	ggu	$$lump  - lumping of matrix
-c 05.08.1992	ggu	$$ibtyp3 - implementation of ibtyp=3
-c 01.09.1992	ggu	$$eps  - introduction of eps (setuvd)
-c 12.01.1994	ggu	$$hzon  - use new variable hzon (setweg)
-c 12.01.1994	ggu	$$eps0  - use eps only in last control (setuvd)
-c 12.01.1994	ggu	$$99  - do not jump to 99 in loop (setuvd)
-c 05.02.1994	ggu	$$azpar - use az to compute velocities (setuvd)
-c 04.03.1994	ggu	$$azuvdry - one az too much in formula (setuvd)
-c 27.10.1997	ggu	$$isum - better identification of error 99 (setuvd)
-c 27.10.1997	ggu	$$dpisum - use double prec. for key values (setuvd)
-c 27.03.1998	ggu	eliminated /bnd/, /irv/
-c 27.04.1998	ggu	$$NKNEL - do not call nknel in tstlnk
-c 08.05.1998	ggu	new routine pntfla -> absolute element index
-c 20.05.1998	ggu	hard coded unit 88 substituted (use ifileo)
-c 14.07.1998	ggu	$$ibtyp4 - boundary type 4 integrated
-c 21.08.1998	ggu	file sublnk splitted into lnk/dry
-c 21.08.1998	ggu	routine setczg removed
-c 21.08.1998	ggu	xv eliminated
-c 21.11.2001	ggu	extra bdebug in setweg
-c 21.11.2001	ggu	more debug information in setuvd
-c 13.08.2003	ggu	new routine setznv
-c 03.09.2004	ggu	setznv: do not stop if znv is not unique (restart)
-c 22.09.2004	ggu	debug in setweg()
-c 23.03.2006	ggu	changed time step to real
-c 23.03.2010	ggu	changed v6.1.1
-c 20.05.2011	ggu	different algorithm for element removal (wet&dry)
-c 20.05.2011	ggu	new routines set_dry() and set_element_dry(ie)
-c 31.05.2011	ggu	changed VERS_6_1_23
-c 07.06.2011	ggu	slight changes in wetting and drying
-c 14.07.2011	ggu	changed VERS_6_1_27
-c 27.01.2012	dbf&ggu	changes for sigma coordinates (bsigma)
-c 30.03.2012	ggu	changed VERS_6_1_51
-c 12.09.2013	ggu	changed VERS_6_1_67
-c 12.12.2014	ggu	changed VERS_7_0_9
-c 19.12.2014	ggu	changed VERS_7_0_10
-c 23.12.2014	ggu	changed VERS_7_0_11
-c 19.01.2015	ggu	changed VERS_7_1_3
-c 05.05.2015	ggu	changed VERS_7_1_10
-c 17.07.2015	ggu	changed VERS_7_1_80
-c 20.07.2015	ggu	changed VERS_7_1_81
-c 23.09.2015	ggu	changed VERS_7_2_4
-c 28.04.2016	ggu	changed VERS_7_5_9
-c 05.12.2017	ggu	changed VERS_7_5_39
-c 19.04.2018	ggu	changed VERS_7_5_45
-c 16.02.2019	ggu	changed VERS_7_5_60
-c 13.03.2019	ggu	changed VERS_7_5_61
-c 21.05.2019	ggu	changed VERS_7_5_62
-c 06.11.2019	ggu	eliminated femtime
-c 23.05.2023	ggu	in setznv() loop over ie_mpi
-c 07.06.2023	ggu	new routine compute_dry_elements()
-c
-c*****************************************************************
+! routines handling flooding and drying
+!
+! contents :
+!
+! subroutine setweg(iweich,iw,hzmin)	sets array iwegv
+! subroutine setuvd			sets velocities in dry areas
+! subroutine setzev			sets array zenv from znv
+! subroutine setznv			sets array znv from zenv
+! subroutine zuniq(zv,av)		makes z values unique
+!
+! revision log :
+!
+! 01.07.1992	ggu	$$lump  - lumping of matrix
+! 05.08.1992	ggu	$$ibtyp3 - implementation of ibtyp=3
+! 01.09.1992	ggu	$$eps  - introduction of eps (setuvd)
+! 12.01.1994	ggu	$$hzon  - use new variable hzon (setweg)
+! 12.01.1994	ggu	$$eps0  - use eps only in last control (setuvd)
+! 12.01.1994	ggu	$$99  - do not jump to 99 in loop (setuvd)
+! 05.02.1994	ggu	$$azpar - use az to compute velocities (setuvd)
+! 04.03.1994	ggu	$$azuvdry - one az too much in formula (setuvd)
+! 27.10.1997	ggu	$$isum - better identification of error 99 (setuvd)
+! 27.10.1997	ggu	$$dpisum - use double prec. for key values (setuvd)
+! 27.03.1998	ggu	eliminated /bnd/, /irv/
+! 27.04.1998	ggu	$$NKNEL - do not call nknel in tstlnk
+! 08.05.1998	ggu	new routine pntfla -> absolute element index
+! 20.05.1998	ggu	hard coded unit 88 substituted (use ifileo)
+! 14.07.1998	ggu	$$ibtyp4 - boundary type 4 integrated
+! 21.08.1998	ggu	file sublnk splitted into lnk/dry
+! 21.08.1998	ggu	routine setczg removed
+! 21.08.1998	ggu	xv eliminated
+! 21.11.2001	ggu	extra bdebug in setweg
+! 21.11.2001	ggu	more debug information in setuvd
+! 13.08.2003	ggu	new routine setznv
+! 03.09.2004	ggu	setznv: do not stop if znv is not unique (restart)
+! 22.09.2004	ggu	debug in setweg()
+! 23.03.2006	ggu	changed time step to real
+! 23.03.2010	ggu	changed v6.1.1
+! 20.05.2011	ggu	different algorithm for element removal (wet&dry)
+! 20.05.2011	ggu	new routines set_dry() and set_element_dry(ie)
+! 31.05.2011	ggu	changed VERS_6_1_23
+! 07.06.2011	ggu	slight changes in wetting and drying
+! 14.07.2011	ggu	changed VERS_6_1_27
+! 27.01.2012	dbf&ggu	changes for sigma coordinates (bsigma)
+! 30.03.2012	ggu	changed VERS_6_1_51
+! 12.09.2013	ggu	changed VERS_6_1_67
+! 12.12.2014	ggu	changed VERS_7_0_9
+! 19.12.2014	ggu	changed VERS_7_0_10
+! 23.12.2014	ggu	changed VERS_7_0_11
+! 19.01.2015	ggu	changed VERS_7_1_3
+! 05.05.2015	ggu	changed VERS_7_1_10
+! 17.07.2015	ggu	changed VERS_7_1_80
+! 20.07.2015	ggu	changed VERS_7_1_81
+! 23.09.2015	ggu	changed VERS_7_2_4
+! 28.04.2016	ggu	changed VERS_7_5_9
+! 05.12.2017	ggu	changed VERS_7_5_39
+! 19.04.2018	ggu	changed VERS_7_5_45
+! 16.02.2019	ggu	changed VERS_7_5_60
+! 13.03.2019	ggu	changed VERS_7_5_61
+! 21.05.2019	ggu	changed VERS_7_5_62
+! 06.11.2019	ggu	eliminated femtime
+! 23.05.2023	ggu	in setznv() loop over ie_mpi
+! 07.06.2023	ggu	new routine compute_dry_elements()
+!
+!*****************************************************************
 
 	subroutine set_dry
 
-c sets dry elements
+! sets dry elements
 
 	implicit none
 
@@ -103,11 +103,11 @@ c sets dry elements
 
 	end
 
-c*****************************************************************
+!*****************************************************************
 
 	subroutine set_element_dry(ie)
 
-c sets dry elements
+! sets dry elements
 
 	use mod_geom_dynamic
 
@@ -122,39 +122,39 @@ c sets dry elements
 	
 	end
 
-c*****************************************************************
-c
+!*****************************************************************
+!
         subroutine setweg(iweich,iw)
-c
-c sets array iwegv
-c
-c iweich 	flag
-c	-1: initialize  
-c	 0: first call  
-c	 1: only take away (hzmin)
-c	 2: only take away (hzoff)    
-c	 3: only add
-c iw		if on return iw != 0 iwegv has changed
-c
-c 1 is used to check, if iteration has to be repeated
-c 2 is just to switch off an element in time, so no iteration
-c	has to be repeated
-c generally it is true that : 0 <= hzmin <= zmin <= hzoff <= hzon
-c
-c				in			out
-c			   element was inside	   element was outside
-c	+---------------------------------------------------------------+
-c  h4	|		|	-		|	include		|
-c	+- hzon  -------------------------------------------------------+
-c  h3	|		|	-		|	-		|
-c	+- hzoff -------------------------------------------------------+
-c  h2	|		|	exclude		|	-		|
-c	+- hzmin -------------------------------------------------------+
-c  h1	|		|    exclude, repeat	|	error		|
-c	+- zero  -------------------------------------------------------+
-c
-c iwegv   0:all nodes wet   >0:number of nodes dry -> out of system
-c
+!
+! sets array iwegv
+!
+! iweich 	flag
+!	-1: initialize  
+!	 0: first call  
+!	 1: only take away (hzmin)
+!	 2: only take away (hzoff)    
+!	 3: only add
+! iw		if on return iw != 0 iwegv has changed
+!
+! 1 is used to check, if iteration has to be repeated
+! 2 is just to switch off an element in time, so no iteration
+!	has to be repeated
+! generally it is true that : 0 <= hzmin <= zmin <= hzoff <= hzon
+!
+!				in			out
+!			   element was inside	   element was outside
+!	+---------------------------------------------------------------+
+!  h4	|		|	-		|	include		|
+!	+- hzon  -------------------------------------------------------+
+!  h3	|		|	-		|	-		|
+!	+- hzoff -------------------------------------------------------+
+!  h2	|		|	exclude		|	-		|
+!	+- hzmin -------------------------------------------------------+
+!  h1	|		|    exclude, repeat	|	error		|
+!	+- zero  -------------------------------------------------------+
+!
+! iwegv   0:all nodes wet   >0:number of nodes dry -> out of system
+!
 	use mod_geom_dynamic
 	use mod_hydro
 	use evgeom
@@ -162,9 +162,9 @@ c
 
         implicit none
 
-c arguments
+! arguments
         integer iweich,iw
-c local
+! local
         integer ie,ii,iwh,iweg,k,iu
         integer iespec,iwait,iwet
 	integer nlv,nsigma
@@ -172,10 +172,10 @@ c local
         real hzg,hzmin,hzoff,hzon,volmin,aomega,zmin
 	real hzlim,hztot
 	character*10 text
-c functions
+! functions
         real getpar
-c	integer ieint,iround,ipint
-c aux
+!	integer ieint,iround,ipint
+! aux
 	logical debug,bnodry
         logical bdebug,bbdebug
         logical bnewalg,binclude
@@ -293,7 +293,7 @@ c aux
 	    hztot = hztot / 3.
 	    !binclude = hztot .ge. hzon
 	    binclude = hztot .ge. hzon .and. -iwetv(ie) .gt. iwait
-c %%%%%%%%% this is wrong -> test also for iweg > 0	!FIXME
+! %%%%%%%%% this is wrong -> test also for iweg > 0	!FIXME
 	    if( bnewalg .and. binclude ) then		!new algorithm
 	      iweg = 0
               if(bdebug) then
@@ -344,17 +344,17 @@ c %%%%%%%%% this is wrong -> test also for iweg > 0	!FIXME
 	stop 'error stop setweg'
         end
 
-c****************************************************************
-c
+!****************************************************************
+!
         subroutine setuvd
-c
-c sets velocities in dry areas
-c
-c ie    element
-c dt    time step
-c hzmin smallest z allowed
-c b,c   form functions
-c
+!
+! sets velocities in dry areas
+!
+! ie    element
+! dt    time step
+! hzmin smallest z allowed
+! b,c   form functions
+!
 	use mod_geom_dynamic
 	use mod_hydro_baro
 	use mod_hydro
@@ -362,11 +362,11 @@ c
 	use basin
 
         implicit none
-c
-c local
+!
+! local
         integer ie,ii,i1,i2,isum,itot
         integer i3,i4,i5,i6,i7,i8
-c        real zm,zmed,d1,d2,det
+!        real zm,zmed,d1,d2,det
         double precision zm,zmed,d1,d2,det	!$$dpisum
         real adt,axdt,dt,hzmin
 	real az,azt,azpar
@@ -375,26 +375,26 @@ c        real zm,zmed,d1,d2,det
         integer nnn,itmin
 	double precision dtime
 	character*20 aline
-c save
+! save
         real eps
         save eps
         data eps /1.e-5/
-c functions
+! functions
         real getpar
         integer ieext
         logical iseout
         iseout(ie) = iwegv(ie).gt.0
-c
+!
         nnn=-802 	!<0 if not needed
-c	itmin=1550100	!0 if not needed
+!	itmin=1550100	!0 if not needed
 	itmin=0		!0 if not needed
-c
+!
 	call get_timestep(dt)
         hzmin=getpar('hzmin')
 	call getaz(azpar)
 	az = azpar
 	azt=1.-az
-c
+!
         i7=0            !mean value is too low for node
           i8=0          !
             i3=0
@@ -404,14 +404,14 @@ c
 
         do ie=1,nel
         if( iseout(ie) ) then
-c
+!
         uo=uov(ie)	!use barotropic velocities
         vo=vov(ie)
 	axdt=3.*dt    !$$lump $$azpar
         adt=1./axdt   !$$lump
-c
-c z average, set b,c
-c
+!
+! z average, set b,c
+!
         zm=0.
         do ii=1,3
 	  zn(ii) = zenv(ii,ie)
@@ -420,12 +420,12 @@ c
           c(ii)=ev(6+ii,ie)
         end do
         zmed=zm/3.
-c
-c compute final z value for the nodes
-c
+!
+! compute final z value for the nodes
+!
         itot=0
         isum=0
-c        zm=0.
+!        zm=0.
         do ii=1,3
           if(zmed+hm3v(ii,ie).lt.hzmin) then  !$$eps0
             z(ii)=hzmin-hm3v(ii,ie)
@@ -437,7 +437,7 @@ c        zm=0.
           end if
           zm=zm-z(ii)
         end do
-c
+!
         if(itot.eq.0) then
           !ok
         else if(itot.eq.1) then
@@ -447,12 +447,12 @@ c
             i8=i8+1
             z(i1)=hzmin-hm3v(i1,ie)
             z(i2)=3.*zmed-z(i1)-z(isum)
-c            if(z(i2)+hm3v(i2,ie).lt.hzmin-eps) goto 99 !$$99
+!            if(z(i2)+hm3v(i2,ie).lt.hzmin-eps) goto 99 !$$99
           else if(z(i2)+zm*0.5+hm3v(i2,ie).lt.hzmin) then !$$eps0
             i3=i3+1
             z(i2)=hzmin-hm3v(i2,ie)
             z(i1)=3.*zmed-z(i2)-z(isum)
-c            if(z(i1)+hm3v(i1,ie).lt.hzmin-eps) goto 99  !$$99
+!            if(z(i1)+hm3v(i1,ie).lt.hzmin-eps) goto 99  !$$99
           else
             i4=i4+1
             z(i1)=z(i1)+0.5*zm
@@ -462,13 +462,13 @@ c            if(z(i1)+hm3v(i1,ie).lt.hzmin-eps) goto 99  !$$99
           i5=i5+1
           i1=6-isum
           z(i1)=z(i1)+zm
-c          if(z(i1)+hm3v(i1,ie).lt.hzmin-eps) goto 99  !$$99
+!          if(z(i1)+hm3v(i1,ie).lt.hzmin-eps) goto 99  !$$99
         else
           goto 99
         end if
-c
-c control, leave in any case
-c
+!
+! control, leave in any case
+!
         isum=-1
         zm=0.
         do ii=1,3
@@ -477,28 +477,28 @@ c
         end do
         isum=-2		!$$isum
         if(abs(zm-3.*zmed).gt.eps) goto 99
-c
-c now compute velocities
-c						!$$azpar
-        d1 = (z(1)-zn(1))*adt
-     +          - azt*( b(1)*uo + c(1)*vo )
-        d2 = (z(2)-zn(2))*adt
-     +          - azt*( b(2)*uo + c(2)*vo )
+!
+! now compute velocities
+!						!$$azpar
+        d1 = (z(1)-zn(1))*adt &
+     &          - azt*( b(1)*uo + c(1)*vo )
+        d2 = (z(2)-zn(2))*adt &
+     &          - azt*( b(2)*uo + c(2)*vo )
         det=1./(b(1)*c(2)-b(2)*c(1))
-c
+!
         u = det * ( c(2)*d1 - c(1)*d2 )
         v = det * (-b(2)*d1 + b(1)*d2 )
-c
-c with this velocity is there some node drying out ?
-c
+!
+! with this velocity is there some node drying out ?
+!
 	isum=-1
         itot=0
         do ii=1,3				!$$azpar
-          zz = axdt * ( b(ii)*(azt*uo+az*u) + c(ii)*(azt*vo+az*v) ) 
-     +			+ zn(ii)
+          zz = axdt * ( b(ii)*(azt*uo+az*u) + c(ii)*(azt*vo+az*v) )  &
+     &			+ zn(ii)
           if(zz+hm3v(ii,ie).lt.hzmin-eps) itot=itot+1 !$$eps
         end do
-c
+!
         if(itot.gt.0) then    !node is drying, set next z to above values
 	  isum=-2
           i6=i6+1
@@ -507,45 +507,45 @@ c
 	    write(6,*) 'for explicit runs you may use az=1 and am=0'
 	    stop 'error stop setuvd: az=0'
 	  end if
-c						!$$azpar
-          d1 = (z(1)-zn(1))*adt
-     +          - azt*( b(1)*uo + c(1)*vo )
-          d2 = (z(2)-zn(2))*adt
-     +          - azt*( b(2)*uo + c(2)*vo )
+!						!$$azpar
+          d1 = (z(1)-zn(1))*adt &
+     &          - azt*( b(1)*uo + c(1)*vo )
+          d2 = (z(2)-zn(2))*adt &
+     &          - azt*( b(2)*uo + c(2)*vo )
           det=1./( az * (b(1)*c(2)-b(2)*c(1)) )	!$$azuvdry
-c
-c the formula should be   det=1./( az*az * (b(1)*c(2)-b(2)*c(1)) )
-c and in the next two lines   u = det * az * (...)   and   v = ...
-c but we devide by az both equations
-c
+!
+! the formula should be   det=1./( az*az * (b(1)*c(2)-b(2)*c(1)) )
+! and in the next two lines   u = det * az * (...)   and   v = ...
+! but we devide by az both equations
+!
           u = det * ( c(2)*d1 - c(1)*d2 )
           v = det * (-b(2)*d1 + b(1)*d2 )
         end if
-c
-c now set u/v/z
-c
+!
+! now set u/v/z
+!
         itot=0
         zm=0.          !only for control
         do ii=1,3				!$$azpar
-          zz = axdt * ( b(ii)*(azt*uo+az*u) + c(ii)*(azt*vo+az*v) ) 
-     +			+ zn(ii)
+          zz = axdt * ( b(ii)*(azt*uo+az*u) + c(ii)*(azt*vo+az*v) )  &
+     &			+ zn(ii)
           if(zz+hm3v(ii,ie).lt.hzmin-eps) itot=itot+1 !$$eps
           zenv(ii,ie)=zz
           zm=zm+zz
         end do
         isum=-3		!$$isum
         if(abs(zm-3.*zmed).gt.eps) goto 99
-c
+!
         if(itot.gt.0) goto 97
 
         unv(ie)=u	!put back to new barotropic velocities
         vnv(ie)=v
-c
+!
         end if
         end do
 
-c        write(88,*) i7,i8,i3,i4,i5,i6
-c
+!        write(88,*) i7,i8,i3,i4,i5,i6
+!
         return
 
    99   continue  !use isum to decide which branch has been taken
@@ -587,12 +587,12 @@ c
         write(6,*) '---------------------'
         stop 'error stop setuvd : u/v computation'
         end
-c
-c****************************************************************
+!
+!****************************************************************
 
         subroutine setzev
 
-c sets array zenv from znv
+! sets array zenv from znv
 
 	use mod_geom_dynamic
 	use mod_hydro
@@ -600,7 +600,7 @@ c sets array zenv from znv
 
         implicit none
 
-c local
+! local
         integer ie,ii
 
         do ie=1,nel
@@ -613,11 +613,11 @@ c local
 
         end
 
-c****************************************************************
+!****************************************************************
 
         subroutine setznv
 
-c sets array znv from zenv
+! sets array znv from zenv
 
 	use mod_geom_dynamic
 	use mod_hydro
@@ -629,15 +629,15 @@ c sets array znv from zenv
 
 	include 'mkonst.h'
 
-c local
+! local
         integer ie,ii,k,ie_mpi
         integer ntot
 	real z,area
 	real v1v(nkn),v2v(nkn)
 
-c-------------------------------------------------------------
-c initialize znv and counters
-c-------------------------------------------------------------
+!-------------------------------------------------------------
+! initialize znv and counters
+!-------------------------------------------------------------
 
         ntot = 0
 
@@ -645,9 +645,9 @@ c-------------------------------------------------------------
 	v1v = 0.
 	v2v = 0.
 
-c-------------------------------------------------------------
-c set znv and accumulate
-c-------------------------------------------------------------
+!-------------------------------------------------------------
+! set znv and accumulate
+!-------------------------------------------------------------
 
         do ie_mpi=1,nel
 	  ie = ip_sort_elem(ie_mpi)
@@ -673,9 +673,9 @@ c-------------------------------------------------------------
           end if
 	end do
 
-c-------------------------------------------------------------
-c compute znv for dry areas
-c-------------------------------------------------------------
+!-------------------------------------------------------------
+! compute znv for dry areas
+!-------------------------------------------------------------
 
         !call shympi_comment('shympi_elem: exchange v1v, v2v')
         call shympi_exchange_and_sum_2d_nodes(v1v)
@@ -691,59 +691,59 @@ c-------------------------------------------------------------
 	call shympi_exchange_2d_node(znv)
 	!call shympi_barrier
 
-c-------------------------------------------------------------
-c write debug status
-c-------------------------------------------------------------
+!-------------------------------------------------------------
+! write debug status
+!-------------------------------------------------------------
 
         if( ntot .gt. 0 ) then
           write(6,*) ntot, ' nodes with different z value'
         end if
 
-c-------------------------------------------------------------
-c end of routine
-c-------------------------------------------------------------
+!-------------------------------------------------------------
+! end of routine
+!-------------------------------------------------------------
 
 	return
    99	continue
 	write(6,*) 'ie,ii,k,z,znv(k) ',ie,ii,k,z,znv(k)
 	stop 'error stop setznv: nodal value not unique'
         end
-c
-c****************************************************************
-c
+!
+!****************************************************************
+!
         subroutine zuniq(zv,av)
-c
-c makes z values in dynamic system unique
-c
-c works only for lumped mass matrix
-c
-c zv    aux vector for z value
-c av    aux vector for weighting factors (areas)
-c
+!
+! makes z values in dynamic system unique
+!
+! works only for lumped mass matrix
+!
+! zv    aux vector for z value
+! av    aux vector for weighting factors (areas)
+!
 	use mod_geom_dynamic
 	use mod_hydro
 	use evgeom
 	use basin
 
         implicit none
-c
-c arguments
+!
+! arguments
         real zv(1),av(1)
-c local
+! local
         integer ie,i,k
         real aomega
-c functions
+! functions
         logical isein
         isein(ie) = iwegv(ie).eq.0
 
-c initialize aux vectors
+! initialize aux vectors
 
         do k=1,nkn
           zv(k)=0.
           av(k)=0.
         end do
 
-c accumulate contributions
+! accumulate contributions
 
         do ie=1,nel
           if(isein(ie)) then
@@ -756,7 +756,7 @@ c accumulate contributions
           end if
         end do
 
-c scaling of z values with weighting functions
+! scaling of z values with weighting functions
 
         do k=1,nkn
           if(av(k).gt.0.) then
@@ -764,7 +764,7 @@ c scaling of z values with weighting functions
           end if
         end do
 
-c write back to original vector zenv
+! write back to original vector zenv
 
         do ie=1,nel
           if(isein(ie)) then
@@ -776,8 +776,8 @@ c write back to original vector zenv
 
         return
         end
-c
-c*****************************************************************
+!
+!*****************************************************************
 
         subroutine compute_dry_elements(iloop)
 

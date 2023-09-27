@@ -25,176 +25,176 @@
 !
 !--------------------------------------------------------------------------
 
-c dd: newbcl.f,v 1.37 2010-03-08 17:46:45 georg Exp $
-c
-c baroclinic routines
-c
-c contents :
-c
-c subroutine barocl(mode)		amministrates the baroclinic time step
-c subroutine rhoset_shell(iterwant)	sets rho iterating to real solution
-c subroutine rhoset(resid)		computes rhov
-c subroutine convectivecorr             convective adjustment
-c subroutine getts(l,k,t,s)             accessor routine to get T/S
-c
-c revision log :
-c
-c 09.01.1994	ggu	(from scratch)
-c 30.08.1995	ggu	$$AUST - austausch coefficient introduced
-c 11.10.1995	ggu	$$BCLBND - boundary condition for barocliic runs
-c 19.08.1998	ggu	call to barcfi changed
-c 20.08.1998	ggu	can initialize S/T from file
-c 24.08.1998	ggu	levdbg used for debug
-c 26.08.1998	ggu	init, bnd and file routines substituted with con..
-c 30.01.2001	ggu	eliminated compile directives
-c 05.12.2001	ggu	horizontal diffusion variable, limit diffusion coef.
-c 05.12.2001	ggu	compute istot, more debug info
-c 11.10.2002	ggu	diffset introduced, shpar = thpar
-c 10.08.2003	ggu	qfluxr eliminated (now in subn11.f)
-c 10.08.2003	ggu	rhov and bpresv are initialized here
-c 04.03.2004	ggu	in init for T/S pass number of vars (inicfil)
-c 15.03.2004	ggu	general clean-up, bclint() deleted, new scal3sh
-c 17.01.2005	ggu	new difhv implemented
-c 15.03.2005	ggu	new diagnostic routines implemented (diagnostic)
-c 15.03.2005	ggu	new 3d boundary conditions implemented
-c 05.04.2005	ggu	some changes in routine diagnostic
-c 07.11.2005	ggu	sinking velocity wsink introduced in call to scal3sh
-c 08.06.2007	ggu&dbf	restructured for new baroclinic version
-c 04.10.2007	ggu	bug fix -> call qflux3d with dt real
-c 17.03.2008	ggu	new open boundary routines introduced
-c 08.04.2008	ggu	treatment of boundaries slightly changed
-c 22.04.2008	ggu	advection parallelized, no saux1v...
-c 23.04.2008	ggu	call to bnds_set_def() changed
-c 12.06.2008	ggu	s/tdifhv deleted
-c 09.10.2008	ggu	new call to confop
-c 12.11.2008	ggu	new initialization, check_layers, initial nos file
-c 13.01.2009	ggu&dbf	changes in reading file in ts_next_record()
-c 13.10.2009	ggu	in rhoset bug computing pres
-c 13.11.2009	ggu	only initialize T/S if no restart, new rhoset_shell
-c 19.01.2010	ggu	different call to has_restart() 
-c 23.03.2010	ggu	changed v6.1.1
-c 16.12.2010	ggu	sigma layers introduced (maybe not finished)
-c 26.01.2011	ggu	read in obs for t/s (tobsv,sobsv)
-c 28.01.2011	ggu	parameters changed in call to ts_nudge()
-c 17.02.2011	ggu	changed VERS_6_1_18
-c 04.03.2011	ggu	better error message for rhoset_shell
-c 23.03.2011	ggu	changed VERS_6_1_21
-c 31.03.2011	ggu	only write temp/salt if computed
-c 14.04.2011	ggu	changed VERS_6_1_22
-c 31.05.2011	ggu	changed VERS_6_1_23
-c 15.07.2011	ggu	changed VERS_6_1_28
-c 04.11.2011	ggu	adapted for hybrid coordinates
-c 07.11.2011	ggu	hybrid changed to resemble code in newexpl.f
-c 11.11.2011	ggu	restructured ts_next_record() and diagnostic()
-c 22.11.2011	ggu	bug fix in ts_file_open() -> bhashl
-c 02.12.2011	ggu	adapt ts_file_open() for barotropic version (ihashl)
-c 09.12.2011	ggu	changed VERS_6_1_38
-c 27.01.2012	dbf&ggu	changes for hybrid in ts_file_open,ts_next_record
-c 10.02.2012	ggu	bug in call to ts_next_record (called with nlvddi)
-c 23.02.2012	ccf	do noy check depth structure
-c 09.03.2012	dbf	bug fix in ts_next_record: ilhkv was real
-c 16.03.2012	ggu	changed VERS_6_1_48
-c 21.03.2012	ggu	changed VERS_6_1_50
-c 30.03.2012	ggu	changed VERS_6_1_51
-c 21.06.2012	ggu	changed VERS_6_1_54
-c 08.10.2012	ggu	changed VERS_6_1_58
-c 31.10.2012	ggu	open and next_record transfered to subtsuvfile.f
-c 05.11.2012	ggu	changed VERS_6_1_60
-c 05.09.2013	ggu	limit salinity to [0,...]
-c 12.09.2013	ggu	changed VERS_6_1_67
-c 25.10.2013	ggu	changed VERS_6_1_68
-c 25.03.2014	ggu	new offline
-c 27.06.2014	ggu	changed VERS_6_1_78
-c 07.07.2014	ggu	changed VERS_6_1_79
-c 10.07.2014	ggu	only new file format allowed
-c 18.07.2014	ggu	changed VERS_7_0_1
-c 20.10.2014	ggu	pass ids to scal_adv()
-c 05.11.2014	ggu	changed VERS_7_0_5
-c 26.11.2014	ggu	changed VERS_7_0_7
-c 19.12.2014	ggu	changed VERS_7_0_10
-c 23.12.2014	ggu	changed VERS_7_0_11
-c 19.01.2015	ggu	changed VERS_7_1_3
-c 10.02.2015	ggu	call to bnds_read_new() introduced
-c 26.02.2015	ggu	changed VERS_7_1_5
-c 21.05.2015	ggu	changed VERS_7_1_11
-c 13.07.2015	ggu	changed VERS_7_1_51
-c 17.07.2015	ggu	changed VERS_7_1_80
-c 20.07.2015	ggu	changed VERS_7_1_81
-c 24.07.2015	ggu	changed VERS_7_1_82
-c 30.07.2015	ggu	changed VERS_7_1_83
-c 18.09.2015	ggu	changed VERS_7_2_3
-c 23.09.2015	ggu	changed VERS_7_2_4
-c 29.09.2015	ggu	changed VERS_7_2_5
-c 15.10.2015	ggu	added new calls for shy file format
-c 22.10.2015	ggu	changed VERS_7_3_7
-c 23.10.2015	ggu	changed VERS_7_3_9
-c 26.10.2015	ggu	bug fix for parallel code (what was not set)
-c 05.11.2015	ggu	changed VERS_7_3_12
-c 09.11.2015	ggu	changed VERS_7_3_13
-c 28.04.2016	ggu	changed VERS_7_5_9
-c 07.06.2016	ggu	changed VERS_7_5_12
-c 10.06.2016	ggu	not used routines deleted
-c 14.06.2016	ggu	open and write of file in own subroutine
-c 27.06.2016	ggu	bug fix: irho was not saved
-c 11.10.2016	ggu	changed VERS_7_5_20
-c 12.01.2017	ggu	changed VERS_7_5_21
-c 04.11.2017	ggu	changed VERS_7_5_34
-c 03.04.2018	ggu	changed VERS_7_5_43
-c 19.04.2018	ggu	changed VERS_7_5_45
-c 05.10.2018	ggu	new diagnostic routine ts_dia()
-c 16.10.2018	ggu	changed VERS_7_5_50
-c 18.12.2018	ggu	changed VERS_7_5_52
-c 14.02.2019	ggu	changed VERS_7_5_56
-c 16.02.2019	ggu	changed VERS_7_5_60
-c 13.03.2019	ggu	changed VERS_7_5_61
-c 21.05.2019	ggu	changed VERS_7_5_62
-c 14.02.2020	ggu	nudging enhanced with reading of tau values
-c 05.03.2020	ggu	finished new nudging routines
-c 27.03.2020	ggu	cleaned new nudging routines
-c 17.09.2020    ggu     renamed sigma to sigma_stp
-c 24.03.2021    ggu     more diagnostic output in ts_dia()
-c 31.05.2021    ggu     changes in ts_dia(), debug section
-c 09.04.2022    ggu     new iterwant in rhoset_shell for mpi
-c 15.10.2022	ggu	bug fix: rhov was recomputed after restart
-c 15.10.2022	ggu	bpresv deleted
-c 02.04.2023	ggu	min/max of T/S computed correctly for mpi
-c 09.05.2023    lrp     introduce top layer index variable
-c
-c notes :
-c
-c initialization of T/S values
-c
-c if restart 
-c	T/S not initialized (are initialized with restart values)
-c else if bdiag
-c	initialized with ts_diag values
-c else
-c	initialized with ts_init values
-c end if
-c
-c if bobs 
-c	read ts_obs values (for nudging)
-c end if
-c
-c normal call
-c
-c if bdiag
-c	read ts_diag values into ts
-c else if bobs
-c	read ts_obs values
-c end if
-c
-c important: bobs does not imply initialization of ts with ts_obs values
-c		only if ts_init is given ts is initialized
-c
-c*****************************************************************
+! dd: newbcl.f,v 1.37 2010-03-08 17:46:45 georg Exp $
+!
+! baroclinic routines
+!
+! contents :
+!
+! subroutine barocl(mode)		amministrates the baroclinic time step
+! subroutine rhoset_shell(iterwant)	sets rho iterating to real solution
+! subroutine rhoset(resid)		computes rhov
+! subroutine convectivecorr             convective adjustment
+! subroutine getts(l,k,t,s)             accessor routine to get T/S
+!
+! revision log :
+!
+! 09.01.1994	ggu	(from scratch)
+! 30.08.1995	ggu	$$AUST - austausch coefficient introduced
+! 11.10.1995	ggu	$$BCLBND - boundary condition for barocliic runs
+! 19.08.1998	ggu	call to barcfi changed
+! 20.08.1998	ggu	can initialize S/T from file
+! 24.08.1998	ggu	levdbg used for debug
+! 26.08.1998	ggu	init, bnd and file routines substituted with con..
+! 30.01.2001	ggu	eliminated compile directives
+! 05.12.2001	ggu	horizontal diffusion variable, limit diffusion coef.
+! 05.12.2001	ggu	compute istot, more debug info
+! 11.10.2002	ggu	diffset introduced, shpar = thpar
+! 10.08.2003	ggu	qfluxr eliminated (now in subn11.f)
+! 10.08.2003	ggu	rhov and bpresv are initialized here
+! 04.03.2004	ggu	in init for T/S pass number of vars (inicfil)
+! 15.03.2004	ggu	general clean-up, bclint() deleted, new scal3sh
+! 17.01.2005	ggu	new difhv implemented
+! 15.03.2005	ggu	new diagnostic routines implemented (diagnostic)
+! 15.03.2005	ggu	new 3d boundary conditions implemented
+! 05.04.2005	ggu	some changes in routine diagnostic
+! 07.11.2005	ggu	sinking velocity wsink introduced in call to scal3sh
+! 08.06.2007	ggu&dbf	restructured for new baroclinic version
+! 04.10.2007	ggu	bug fix -> call qflux3d with dt real
+! 17.03.2008	ggu	new open boundary routines introduced
+! 08.04.2008	ggu	treatment of boundaries slightly changed
+! 22.04.2008	ggu	advection parallelized, no saux1v...
+! 23.04.2008	ggu	call to bnds_set_def() changed
+! 12.06.2008	ggu	s/tdifhv deleted
+! 09.10.2008	ggu	new call to confop
+! 12.11.2008	ggu	new initialization, check_layers, initial nos file
+! 13.01.2009	ggu&dbf	changes in reading file in ts_next_record()
+! 13.10.2009	ggu	in rhoset bug computing pres
+! 13.11.2009	ggu	only initialize T/S if no restart, new rhoset_shell
+! 19.01.2010	ggu	different call to has_restart() 
+! 23.03.2010	ggu	changed v6.1.1
+! 16.12.2010	ggu	sigma layers introduced (maybe not finished)
+! 26.01.2011	ggu	read in obs for t/s (tobsv,sobsv)
+! 28.01.2011	ggu	parameters changed in call to ts_nudge()
+! 17.02.2011	ggu	changed VERS_6_1_18
+! 04.03.2011	ggu	better error message for rhoset_shell
+! 23.03.2011	ggu	changed VERS_6_1_21
+! 31.03.2011	ggu	only write temp/salt if computed
+! 14.04.2011	ggu	changed VERS_6_1_22
+! 31.05.2011	ggu	changed VERS_6_1_23
+! 15.07.2011	ggu	changed VERS_6_1_28
+! 04.11.2011	ggu	adapted for hybrid coordinates
+! 07.11.2011	ggu	hybrid changed to resemble code in newexpl.f
+! 11.11.2011	ggu	restructured ts_next_record() and diagnostic()
+! 22.11.2011	ggu	bug fix in ts_file_open() -> bhashl
+! 02.12.2011	ggu	adapt ts_file_open() for barotropic version (ihashl)
+! 09.12.2011	ggu	changed VERS_6_1_38
+! 27.01.2012	dbf&ggu	changes for hybrid in ts_file_open,ts_next_record
+! 10.02.2012	ggu	bug in call to ts_next_record (called with nlvddi)
+! 23.02.2012	ccf	do noy check depth structure
+! 09.03.2012	dbf	bug fix in ts_next_record: ilhkv was real
+! 16.03.2012	ggu	changed VERS_6_1_48
+! 21.03.2012	ggu	changed VERS_6_1_50
+! 30.03.2012	ggu	changed VERS_6_1_51
+! 21.06.2012	ggu	changed VERS_6_1_54
+! 08.10.2012	ggu	changed VERS_6_1_58
+! 31.10.2012	ggu	open and next_record transfered to subtsuvfile.f
+! 05.11.2012	ggu	changed VERS_6_1_60
+! 05.09.2013	ggu	limit salinity to [0,...]
+! 12.09.2013	ggu	changed VERS_6_1_67
+! 25.10.2013	ggu	changed VERS_6_1_68
+! 25.03.2014	ggu	new offline
+! 27.06.2014	ggu	changed VERS_6_1_78
+! 07.07.2014	ggu	changed VERS_6_1_79
+! 10.07.2014	ggu	only new file format allowed
+! 18.07.2014	ggu	changed VERS_7_0_1
+! 20.10.2014	ggu	pass ids to scal_adv()
+! 05.11.2014	ggu	changed VERS_7_0_5
+! 26.11.2014	ggu	changed VERS_7_0_7
+! 19.12.2014	ggu	changed VERS_7_0_10
+! 23.12.2014	ggu	changed VERS_7_0_11
+! 19.01.2015	ggu	changed VERS_7_1_3
+! 10.02.2015	ggu	call to bnds_read_new() introduced
+! 26.02.2015	ggu	changed VERS_7_1_5
+! 21.05.2015	ggu	changed VERS_7_1_11
+! 13.07.2015	ggu	changed VERS_7_1_51
+! 17.07.2015	ggu	changed VERS_7_1_80
+! 20.07.2015	ggu	changed VERS_7_1_81
+! 24.07.2015	ggu	changed VERS_7_1_82
+! 30.07.2015	ggu	changed VERS_7_1_83
+! 18.09.2015	ggu	changed VERS_7_2_3
+! 23.09.2015	ggu	changed VERS_7_2_4
+! 29.09.2015	ggu	changed VERS_7_2_5
+! 15.10.2015	ggu	added new calls for shy file format
+! 22.10.2015	ggu	changed VERS_7_3_7
+! 23.10.2015	ggu	changed VERS_7_3_9
+! 26.10.2015	ggu	bug fix for parallel code (what was not set)
+! 05.11.2015	ggu	changed VERS_7_3_12
+! 09.11.2015	ggu	changed VERS_7_3_13
+! 28.04.2016	ggu	changed VERS_7_5_9
+! 07.06.2016	ggu	changed VERS_7_5_12
+! 10.06.2016	ggu	not used routines deleted
+! 14.06.2016	ggu	open and write of file in own subroutine
+! 27.06.2016	ggu	bug fix: irho was not saved
+! 11.10.2016	ggu	changed VERS_7_5_20
+! 12.01.2017	ggu	changed VERS_7_5_21
+! 04.11.2017	ggu	changed VERS_7_5_34
+! 03.04.2018	ggu	changed VERS_7_5_43
+! 19.04.2018	ggu	changed VERS_7_5_45
+! 05.10.2018	ggu	new diagnostic routine ts_dia()
+! 16.10.2018	ggu	changed VERS_7_5_50
+! 18.12.2018	ggu	changed VERS_7_5_52
+! 14.02.2019	ggu	changed VERS_7_5_56
+! 16.02.2019	ggu	changed VERS_7_5_60
+! 13.03.2019	ggu	changed VERS_7_5_61
+! 21.05.2019	ggu	changed VERS_7_5_62
+! 14.02.2020	ggu	nudging enhanced with reading of tau values
+! 05.03.2020	ggu	finished new nudging routines
+! 27.03.2020	ggu	cleaned new nudging routines
+! 17.09.2020    ggu     renamed sigma to sigma_stp
+! 24.03.2021    ggu     more diagnostic output in ts_dia()
+! 31.05.2021    ggu     changes in ts_dia(), debug section
+! 09.04.2022    ggu     new iterwant in rhoset_shell for mpi
+! 15.10.2022	ggu	bug fix: rhov was recomputed after restart
+! 15.10.2022	ggu	bpresv deleted
+! 02.04.2023	ggu	min/max of T/S computed correctly for mpi
+! 09.05.2023    lrp     introduce top layer index variable
+!
+! notes :
+!
+! initialization of T/S values
+!
+! if restart 
+!	T/S not initialized (are initialized with restart values)
+! else if bdiag
+!	initialized with ts_diag values
+! else
+!	initialized with ts_init values
+! end if
+!
+! if bobs 
+!	read ts_obs values (for nudging)
+! end if
+!
+! normal call
+!
+! if bdiag
+!	read ts_diag values into ts
+! else if bobs
+!	read ts_obs values
+! end if
+!
+! important: bobs does not imply initialization of ts with ts_obs values
+!		only if ts_init is given ts is initialized
+!
+!*****************************************************************
 
 	subroutine barocl(mode)
 
-c amministrates the baroclinic time step
-c
-c mode : =0 initialize  >0 normal call
-c
+! amministrates the baroclinic time step
+!
+! mode : =0 initialize  >0 normal call
+!
 	use mod_layer_thickness
 	use mod_ts
 	use mod_diff_visc_fric
@@ -205,14 +205,14 @@ c
 	use shympi
 
 	implicit none
-c
-c arguments
+!
+! arguments
 	integer mode
-c common
+! common
 	include 'pkonst.h'
 	include 'mkonst.h'
 
-c local
+! local
 	logical debug
 	logical bgdebug
         logical binfo
@@ -248,8 +248,8 @@ c local
 	character*80 file
 	character*20 aline
 	character*4 what
-c functions
-c	real sigma
+! functions
+!	real sigma
 	real getpar
 	double precision scalcont,dq
 	integer iround
@@ -262,7 +262,7 @@ c	real sigma
 	
 	double precision theatold,theatnew
 	double precision theatconv1,theatconv2,theatqfl1,theatqfl2
-c save
+! save
 	logical, save :: badvect,bobs,bbarcl,bdiag
         integer, save :: iuinfo = 0
 	integer, save :: ibarcl
@@ -272,9 +272,9 @@ c save
 	integer, save, allocatable :: idtemp(:),idsalt(:)
 	integer, save :: icall = 0
 
-c----------------------------------------------------------
-c parameter setup and check
-c----------------------------------------------------------
+!----------------------------------------------------------
+! parameter setup and check
+!----------------------------------------------------------
 
 	if(icall.eq.-1) return
 
@@ -288,9 +288,9 @@ c----------------------------------------------------------
         bgdebug = .false.
 	binitial_nos = .true.
 
-c----------------------------------------------------------
-c initialization
-c----------------------------------------------------------
+!----------------------------------------------------------
+! initialization
+!----------------------------------------------------------
 
 	if(icall.eq.0) then	!first time
 
@@ -318,9 +318,9 @@ c----------------------------------------------------------
                 isalt=iround(getpar('isalt'))
                 irho=iround(getpar('irho'))
 
-c		--------------------------------------------
-c		initialize saltv,tempv
-c		--------------------------------------------
+!		--------------------------------------------
+!		initialize saltv,tempv
+!		--------------------------------------------
 
 		call get_first_dtime(dtime0)
 
@@ -338,22 +338,22 @@ c		--------------------------------------------
 		end if
 
 		if( bobs ) then
-	  	  call ts_nudge(dtime0,nlvdi,nlv,nkn,tobsv,sobsv
-     +						,ttauv,stauv)
+	  	  call ts_nudge(dtime0,nlvdi,nlv,nkn,tobsv,sobsv &
+     &						,ttauv,stauv)
 		end if
 
-c		--------------------------------------------
-c		initialize observations and relaxation times
-c		--------------------------------------------
+!		--------------------------------------------
+!		initialize observations and relaxation times
+!		--------------------------------------------
 
 		tobsv = 0.
 		sobsv = 0.
 		ttauv = 0.
 		stauv = 0.
 
-c		--------------------------------------------
-c		initialize open boundary conditions
-c		--------------------------------------------
+!		--------------------------------------------
+!		initialize open boundary conditions
+!		--------------------------------------------
 
 		nbc = nbnds()
 		allocate(idtemp(nbc))
@@ -365,18 +365,18 @@ c		--------------------------------------------
                 nvar = 1
                 cdef(1) = 0.
 		what = 'temp'
-		call bnds_init_new(what,dtime0,nintp,nvar,nkn,nlv
-     +					,cdef,idtemp)
+		call bnds_init_new(what,dtime0,nintp,nvar,nkn,nlv &
+     &					,cdef,idtemp)
 		what = 'salt'
-		call bnds_init_new(what,dtime0,nintp,nvar,nkn,nlv
-     +					,cdef,idsalt)
+		call bnds_init_new(what,dtime0,nintp,nvar,nkn,nlv &
+     &					,cdef,idsalt)
 
-c		--------------------------------------------
-c		initialize rhov
-c		--------------------------------------------
+!		--------------------------------------------
+!		initialize rhov
+!		--------------------------------------------
 
-c		rhov depends on pressure and viceversa
-c		-> we iterate to the real solution
+!		rhov depends on pressure and viceversa
+!		-> we iterate to the real solution
 
 		if( .not. rst_use_restart(3) ) then   !no restart of rho values
 		  rhov = 0.		!rhov is rho^prime => 0
@@ -385,9 +385,9 @@ c		-> we iterate to the real solution
 		  !call ts_dia('init after rhoset_shell')
 		end if
 
-c		--------------------------------------------
-c		initialize output files
-c		--------------------------------------------
+!		--------------------------------------------
+!		initialize output files
+!		--------------------------------------------
 
 		call bcl_open_output(da_out,itemp,isalt,irho)
 		call bcl_write_output(dtime0,da_out,itemp,isalt,irho)
@@ -403,9 +403,9 @@ c		--------------------------------------------
 
 	if(mode.eq.0) return
 
-c----------------------------------------------------------
-c normal call
-c----------------------------------------------------------
+!----------------------------------------------------------
+! normal call
+!----------------------------------------------------------
 
 	!call ts_dia('begin normal call')
 
@@ -425,9 +425,9 @@ c----------------------------------------------------------
 	  call ts_nudge(dtime,nlvdi,nlv,nkn,tobsv,sobsv,ttauv,stauv)
 	end if
 
-c----------------------------------------------------------
-c salt and temperature transport and diffusion
-c----------------------------------------------------------
+!----------------------------------------------------------
+! salt and temperature transport and diffusion
+!----------------------------------------------------------
 
 	if( badvect ) then
 
@@ -452,11 +452,11 @@ c----------------------------------------------------------
 
           if( itemp .gt. 0 ) then
 		what = 'temp'
-                call scal_adv_nudge(what,0
-     +                          ,tempv,idtemp
-     +                          ,thpar,wsink
-     +                          ,difhv,difv,difmol
-     +				,tobsv,robs,ttauv)
+                call scal_adv_nudge(what,0 &
+     &                          ,tempv,idtemp &
+     &                          ,thpar,wsink &
+     &                          ,difhv,difv,difmol &
+     &				,tobsv,robs,ttauv)
 	  end if
 
 !$OMP END TASK
@@ -471,11 +471,11 @@ c----------------------------------------------------------
 
           if( isalt .gt. 0 ) then
 		what = 'salt'
-                call scal_adv_nudge(what,0
-     +                          ,saltv,idsalt
-     +                          ,shpar,wsink
-     +                          ,difhv,difv,difmol
-     +				,sobsv,robs,stauv)
+                call scal_adv_nudge(what,0 &
+     &                          ,saltv,idsalt &
+     &                          ,shpar,wsink &
+     &                          ,difhv,difv,difmol &
+     &				,sobsv,robs,stauv)
           end if
 
 !$OMP END TASK
@@ -510,15 +510,15 @@ c----------------------------------------------------------
 	  end if
 	end if
 
-c----------------------------------------------------------
-c heat flux through surface	!ccf --> moved to meteo_force
-c----------------------------------------------------------
+!----------------------------------------------------------
+! heat flux through surface	!ccf --> moved to meteo_force
+!----------------------------------------------------------
 
 	call compute_heat_flux
 
-c----------------------------------------------------------
-c compute rhov
-c----------------------------------------------------------
+!----------------------------------------------------------
+! compute rhov
+!----------------------------------------------------------
 
 	call ts_dia('normal before rhoset_shell')
 	allocate(rho_aux1(nlvdi,nkn),rho_aux2(nlvdi,nkn))
@@ -529,23 +529,23 @@ c----------------------------------------------------------
 	call rhoset_shell(1)
 	!call ts_dia('normal after rhoset_shell')
 
-c----------------------------------------------------------
-c compute min/max
-c----------------------------------------------------------
+!----------------------------------------------------------
+! compute min/max
+!----------------------------------------------------------
 
 	call stmima(saltv,nkn,nlvdi,ilhkv,smin,smax)
 	call stmima(tempv,nkn,nlvdi,ilhkv,tmin,tmax)
 	call stmima(rhov,nkn,nlvdi,ilhkv,rmin,rmax)
 
-c----------------------------------------------------------
-c write results to file
-c----------------------------------------------------------
+!----------------------------------------------------------
+! write results to file
+!----------------------------------------------------------
 
 	call bcl_write_output(dtime,da_out,itemp,isalt,irho)
 
-c----------------------------------------------------------
-c debug
-c----------------------------------------------------------
+!----------------------------------------------------------
+! debug
+!----------------------------------------------------------
 
 	ks = 30280
 	ks = 29988
@@ -557,19 +557,19 @@ c----------------------------------------------------------
 	  call check_nodes_around_node(ks)
 	end if
 
-c----------------------------------------------------------
-c end of routine
-c----------------------------------------------------------
+!----------------------------------------------------------
+! end of routine
+!----------------------------------------------------------
 
 	end
 
-c********************************************************
-c********************************************************
-c********************************************************
+!********************************************************
+!********************************************************
+!********************************************************
 
 	subroutine rhoset_shell(iterwant)
 
-c sets rho iterating to real solution
+! sets rho iterating to real solution
 
 	use mod_ts
 	use shympi
@@ -618,20 +618,20 @@ c sets rho iterating to real solution
 
 	end
 
-c********************************************************
+!********************************************************
 
 	subroutine rhoset(resid)
 
-c computes rhov
-c
-c 1 bar = 100 kPascal ==> factor 1.e-5
-c pres = rho0*g*(zeta-z) + presbc
-c with presbc = int_{z}^{zeta}(g*rho_prime)dz
-c and rho_prime = rho - rho_0 = sigma - sigma_0
-c
-c in rhov()   is rho_prime (=sigma_prime)
-c
-c presbc and rhov() are given at node and layer center
+! computes rhov
+!
+! 1 bar = 100 kPascal ==> factor 1.e-5
+! pres = rho0*g*(zeta-z) + presbc
+! with presbc = int_{z}^{zeta}(g*rho_prime)dz
+! and rho_prime = rho - rho_0 = sigma - sigma_0
+!
+! in rhov()   is rho_prime (=sigma_prime)
+!
+! presbc and rhov() are given at node and layer center
 
 	use mod_layer_thickness
 	use mod_ts
@@ -641,10 +641,10 @@ c presbc and rhov() are given at node and layer center
 	implicit none
 
 	real resid
-c common
+! common
 	include 'pkonst.h'
 
-c local
+! local
 	logical bdebug,debug,bsigma
 	integer k,l,lmax,lmin
 	integer nresid,nsigma
@@ -653,7 +653,7 @@ c local
 	real rhop,presbt,presbc,dpresc
 	real salt
 	double precision dresid
-c functions
+! functions
 	real sigma_stp
 
 	rho0 = rowass
@@ -711,20 +711,20 @@ c functions
 	return
 	end
 
-c********************************************************
+!********************************************************
 
 	subroutine rhoset1
 
-c computes rhov
-c
-c 1 bar = 100 kPascal ==> factor 1.e-5
-c pres = rho0*g*(zeta-z) + presbc
-c with presbc = int_{z}^{zeta}(g*rho_prime)dz
-c and rho_prime = rho - rho_0 = sigma - sigma_0
-c
-c in rhov()   is rho_prime (=sigma_prime)
-c
-c presbc and rhov() are given at node and layer center
+! computes rhov
+!
+! 1 bar = 100 kPascal ==> factor 1.e-5
+! pres = rho0*g*(zeta-z) + presbc
+! with presbc = int_{z}^{zeta}(g*rho_prime)dz
+! and rho_prime = rho - rho_0 = sigma - sigma_0
+!
+! in rhov()   is rho_prime (=sigma_prime)
+!
+! presbc and rhov() are given at node and layer center
 
 	use mod_layer_thickness
 	use mod_ts
@@ -733,10 +733,10 @@ c presbc and rhov() are given at node and layer center
 
 	implicit none
 
-c common
+! common
 	include 'pkonst.h'
 
-c local
+! local
 	logical bdebug,debug,bsigma
 	integer k,l,lmax
 	integer nresid,nsigma
@@ -748,7 +748,7 @@ c local
 	real resid
 	real eps
 	double precision dresid
-c functions
+! functions
 	real sigma_stp
 
 	iter_max = 10
@@ -818,11 +818,11 @@ c functions
 	stop 'error stop rhoset1: too many iterations'
 	end
 
-c*******************************************************************	
+!*******************************************************************	
 
 	subroutine tsrho_check
 
-c checks values of t/s/rho
+! checks values of t/s/rho
 
 	use mod_ts
 	use levels
@@ -850,9 +850,9 @@ c checks values of t/s/rho
 
 	end
 
-c*******************************************************************	
-c*******************************************************************	
-c*******************************************************************	
+!*******************************************************************	
+!*******************************************************************	
+!*******************************************************************	
 
 	subroutine ts_diag(dtime,nlvddi,nlv,nkn,tempv,saltv)
 
@@ -886,10 +886,10 @@ c*******************************************************************
 
 	end
 
-c*******************************************************************	
+!*******************************************************************	
 
-	subroutine ts_nudge(dtime,nlvddi,nlv,nkn,tobsv,sobsv
-     +					,ttauv,stauv)
+	subroutine ts_nudge(dtime,nlvddi,nlv,nkn,tobsv,sobsv &
+     &					,ttauv,stauv)
 
 	implicit none
 
@@ -977,7 +977,7 @@ c*******************************************************************
 
 	end
 
-c*******************************************************************	
+!*******************************************************************	
 
 	subroutine ts_nudge_get_tau(string,file,tau,dtime,nkn,nlv,id)
 
@@ -1010,7 +1010,7 @@ c*******************************************************************
 	stop 'error stop ts_nudge_get_tau: error getting tau'
 	end
 
-c*******************************************************************	
+!*******************************************************************	
 
 	subroutine ts_open(string,file,dtime,nkn,nlv,id)
 
@@ -1042,11 +1042,11 @@ c*******************************************************************
 	stop 'error stop ts_open: error opening file'
 	end
 
-c*******************************************************************	
+!*******************************************************************	
 
 	subroutine ts_init(dtime,nlvddi,nlv,nkn,tempv,saltv)
 
-c initialization of T/S from file
+! initialization of T/S from file
 
 	use shympi
 
@@ -1067,8 +1067,8 @@ c initialization of T/S from file
 	call getfnm('saltin',saltf)
 
 	if( tempf .ne. ' ' ) then
-          write(6,'(a)') 'initializing temperature from file '
-     +                        //trim(tempf)
+          write(6,'(a)') 'initializing temperature from file ' &
+     &                        //trim(tempf)
 	  string = 'temp init'
 	  call ts_open(string,tempf,dtime,nkn,nlv,id)
           call ts_next_record(dtime,id,nlvddi,nkn,nlv,tempv)
@@ -1078,8 +1078,8 @@ c initialization of T/S from file
 	end if
 
 	if( saltf .ne. ' ' ) then
-          write(6,'(a)') 'initializing salinity from file '
-     +                        //trim(saltf)
+          write(6,'(a)') 'initializing salinity from file ' &
+     &                        //trim(saltf)
 	  string = 'salt init'
 	  call ts_open(string,saltf,dtime,nkn,nlv,id)
           call ts_next_record(dtime,id,nlvddi,nkn,nlv,saltv)
@@ -1090,13 +1090,13 @@ c initialization of T/S from file
 
 	end
 
-c*******************************************************************	
-c*******************************************************************	
-c*******************************************************************	
+!*******************************************************************	
+!*******************************************************************	
+!*******************************************************************	
 
 	subroutine bcl_open_output(da_out,itemp,isalt,irho)
 
-c opens output of T/S
+! opens output of T/S
 
 	use levels
 
@@ -1124,11 +1124,11 @@ c opens output of T/S
 
 	end
 
-c*******************************************************************	
+!*******************************************************************	
 
 	subroutine bcl_write_output(dtime,da_out,itemp,isalt,irho)
 
-c writes output of T/S
+! writes output of T/S
 
 	use levels
 	use mod_ts
@@ -1158,13 +1158,13 @@ c writes output of T/S
 
 	end
 
-c*******************************************************************	
-c*******************************************************************	
-c*******************************************************************	
+!*******************************************************************	
+!*******************************************************************	
+!*******************************************************************	
 
 	subroutine getts(l,k,t,s)
 
-c accessor routine to get T/S
+! accessor routine to get T/S
 
 	use mod_ts
 
@@ -1178,9 +1178,9 @@ c accessor routine to get T/S
 
         end
 
-c******************************************************************
-c*******************************************************************	
-c*******************************************************************	
+!******************************************************************
+!*******************************************************************	
+!*******************************************************************	
 
 	subroutine ts_dia(string)
 
@@ -1229,8 +1229,8 @@ c*******************************************************************
 	  write(166,*) 'saltv (min/max): ',smin,smax
 	  write(166,*) 'tempv (min/max): ',tmin,tmax
 	  write(166,*) 'list of nodes with strange values:'
-	  write(166,*) '      layer     kintern     kextern' //
-     +				'            t                s'
+	  write(166,*) '      layer     kintern     kextern' // &
+     &				'            t                s'
 	  do k=1,nkn
 	    lmax = ilhkv(k)
 	    ke = ipext(k)
@@ -1251,5 +1251,5 @@ c*******************************************************************
 
 	end
 
-c*******************************************************************	
+!*******************************************************************	
 

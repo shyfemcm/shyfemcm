@@ -24,87 +24,87 @@
 !
 !--------------------------------------------------------------------------
 
-c subroutines for computing volumes
-c
-c contents :
-c
-c        subroutine invola
-c        subroutine rdvola
-c        subroutine ckvola
-c        subroutine prvola
-c        subroutine tsvola
-c
-c        subroutine wrvola(dtime)			write of vol data
-c
-c        subroutine volareas(kvol,ivol,n,az,vol)	vol in areas
-c        function volarea(kvol,ivol,n,az)		vol in area
-c
-c	 function voltotal(bz)				vol in total basin
-c	 function areatotal()				area in total basin
-c
-c        subroutine volini			initializes vol routines
-c        subroutine volin(kvol,ivol,n)		sets up info structure
-c
-c	 subroutine volinf(nv,n,kvol,idim,ivolm,ivol)	sets up element info
-c	 subroutine wrvolinf(n,ielem,volav,areav,hav)	computes average values
-c
-c	 subroutine linecl(n,kvol,nnodes,kline,xline,yline)	close line
-c
-c	 subroutine wrtelem(iunit,n,ielems,ietype)
-c	 subroutine wrtline(iunit,n,inodes,il,iltype)
-c
-c revision log :
-c
-c 30.04.1998	ggu	newly written routines (subpor deleted)
-c 07.05.1998	ggu	check nrdveci on return for error
-c 08.05.1998	ggu	restructured with new comodity routines
-c 13.09.1999	ggu	type of node computed in own routine voltype
-c 20.01.2000	ggu	common block /dimdim/ eliminated
-c 31.07.2003	ggu	some comments and little restructuring
-c 10.08.2003	ggu	do not call setweg, setnod, setkan
-c 02.09.2003	ggu	bug fix $$BUGVOLT in wrvola -> summation on tot vol
-c 17.09.2003	ggu	new routine volstats -> statistics to file .vvv
-c 26.11.2004	ggu	routine volstats commented (use only if needed)
-c 22.02.2005	ggu	iflag substituted by v3v
-c 23.03.2010	ggu	changed v6.1.1
-c 07.03.2014	ggu	changed VERS_6_1_72
-c 18.06.2014	ggu	changed VERS_6_1_77
-c 26.11.2014	ggu	changed VERS_7_0_7
-c 19.12.2014	ggu	changed VERS_7_0_10
-c 23.12.2014	ggu	changed VERS_7_0_11
-c 19.01.2015	ggu	changed VERS_7_1_3
-c 05.05.2015	ggu	changed VERS_7_1_10
-c 17.07.2015	ggu	changed VERS_7_1_80
-c 20.07.2015	ggu	changed VERS_7_1_81
-c 30.07.2015	ggu	changed VERS_7_1_83
-c 23.09.2015	ggu	changed VERS_7_2_4
-c 03.04.2018	ggu	changed VERS_7_5_43
-c 16.02.2019	ggu	changed VERS_7_5_60
-c 16.02.2020    ggu     femtime eliminated
-c 20.03.2022    ggu     upgraded to da_out
-c
-c notes :
-c
-c These routines can also be used internally to compute the vol
-c over various sections. The following calling sequence must be respected:
-c
-c call n2int(n,kvol,berror)		converts external to internal nodes
-c nvols = klineck(n,kvol)		checks array kvol and computes nvols
-c call volin(kvol,ivol,n)		initializes ivol
-c
-c call volareas(kvol,ivol,n,az,vol)	computes vols and returns in vol()
-c
-c Initialization can be done anytime.
-c
-c wrvola
-c       volareas
-c       voltotal
-c volini
-c       volin
-c               volinf
-c       volstats        (commented)
-c
-c******************************************************************
+! subroutines for computing volumes
+!
+! contents :
+!
+!        subroutine invola
+!        subroutine rdvola
+!        subroutine ckvola
+!        subroutine prvola
+!        subroutine tsvola
+!
+!        subroutine wrvola(dtime)			write of vol data
+!
+!        subroutine volareas(kvol,ivol,n,az,vol)	vol in areas
+!        function volarea(kvol,ivol,n,az)		vol in area
+!
+!	 function voltotal(bz)				vol in total basin
+!	 function areatotal()				area in total basin
+!
+!        subroutine volini			initializes vol routines
+!        subroutine volin(kvol,ivol,n)		sets up info structure
+!
+!	 subroutine volinf(nv,n,kvol,idim,ivolm,ivol)	sets up element info
+!	 subroutine wrvolinf(n,ielem,volav,areav,hav)	computes average values
+!
+!	 subroutine linecl(n,kvol,nnodes,kline,xline,yline)	close line
+!
+!	 subroutine wrtelem(iunit,n,ielems,ietype)
+!	 subroutine wrtline(iunit,n,inodes,il,iltype)
+!
+! revision log :
+!
+! 30.04.1998	ggu	newly written routines (subpor deleted)
+! 07.05.1998	ggu	check nrdveci on return for error
+! 08.05.1998	ggu	restructured with new comodity routines
+! 13.09.1999	ggu	type of node computed in own routine voltype
+! 20.01.2000	ggu	common block /dimdim/ eliminated
+! 31.07.2003	ggu	some comments and little restructuring
+! 10.08.2003	ggu	do not call setweg, setnod, setkan
+! 02.09.2003	ggu	bug fix $$BUGVOLT in wrvola -> summation on tot vol
+! 17.09.2003	ggu	new routine volstats -> statistics to file .vvv
+! 26.11.2004	ggu	routine volstats commented (use only if needed)
+! 22.02.2005	ggu	iflag substituted by v3v
+! 23.03.2010	ggu	changed v6.1.1
+! 07.03.2014	ggu	changed VERS_6_1_72
+! 18.06.2014	ggu	changed VERS_6_1_77
+! 26.11.2014	ggu	changed VERS_7_0_7
+! 19.12.2014	ggu	changed VERS_7_0_10
+! 23.12.2014	ggu	changed VERS_7_0_11
+! 19.01.2015	ggu	changed VERS_7_1_3
+! 05.05.2015	ggu	changed VERS_7_1_10
+! 17.07.2015	ggu	changed VERS_7_1_80
+! 20.07.2015	ggu	changed VERS_7_1_81
+! 30.07.2015	ggu	changed VERS_7_1_83
+! 23.09.2015	ggu	changed VERS_7_2_4
+! 03.04.2018	ggu	changed VERS_7_5_43
+! 16.02.2019	ggu	changed VERS_7_5_60
+! 16.02.2020    ggu     femtime eliminated
+! 20.03.2022    ggu     upgraded to da_out
+!
+! notes :
+!
+! These routines can also be used internally to compute the vol
+! over various sections. The following calling sequence must be respected:
+!
+! call n2int(n,kvol,berror)		converts external to internal nodes
+! nvols = klineck(n,kvol)		checks array kvol and computes nvols
+! call volin(kvol,ivol,n)		initializes ivol
+!
+! call volareas(kvol,ivol,n,az,vol)	computes vols and returns in vol()
+!
+! Initialization can be done anytime.
+!
+! wrvola
+!       volareas
+!       voltotal
+! volini
+!       volin
+!               volinf
+!       volstats        (commented)
+!
+!******************************************************************
 
         subroutine mod_vol(mode)
  
@@ -132,7 +132,7 @@ c******************************************************************
         else if( mode .eq. M_TEST ) then
            call tsvola
         else if( mode .eq. M_BEFOR ) then
-c          nothing
+!          nothing
         else
            write(6,*) 'unknown mode : ', mode
            stop 'error stop mod_vol'
@@ -140,14 +140,14 @@ c          nothing
  
         end
 
-c******************************************************************
+!******************************************************************
 
         subroutine invola
 
-c nvols		total number of areas
-c kvold		dimension of kvol
-c kvolm		total number of nodes defining areas
-c kvol()	node numbers defining areas
+! nvols		total number of areas
+! kvold		dimension of kvol
+! kvolm		total number of nodes defining areas
+! kvol()	node numbers defining areas
 
         implicit none
 
@@ -162,7 +162,7 @@ c kvol()	node numbers defining areas
 
         end
 
-c******************************************************************
+!******************************************************************
 
         subroutine rdvola
 
@@ -184,8 +184,8 @@ c******************************************************************
 
         if( kvolm .lt. 0 ) then
           if( kvolm .eq. -1 ) then
-            write(6,*) 'dimension error nvodin in section $VOL : '
-     +                          ,nfxdi
+            write(6,*) 'dimension error nvodin in section $VOL : ' &
+     &                          ,nfxdi
           else
             write(6,*) 'read error in section $VOL'
           end if
@@ -194,7 +194,7 @@ c******************************************************************
 
         end
 
-c******************************************************************
+!******************************************************************
 
         subroutine ckvola
 
@@ -214,13 +214,13 @@ c******************************************************************
 		stop 'error stop: ckvola'
 	end if
 
-c the real set up is done in volini
-c however, at this stage we do not have all the arrays set up,
-c so we have to post-pone it until later
+! the real set up is done in volini
+! however, at this stage we do not have all the arrays set up,
+! so we have to post-pone it until later
 
         end
 
-c******************************************************************
+!******************************************************************
 
 	subroutine prvola
 
@@ -240,15 +240,15 @@ c******************************************************************
 	logical nextline
 	real voltotal,areatotal
 
-c----------------------------------------------------------
+!----------------------------------------------------------
 
 	if( nvols .le. 0 ) return
 
-c----------------------------------------------------------
+!----------------------------------------------------------
 
 	bwrite = .true.
 
-c----------------------------------------------------------
+!----------------------------------------------------------
 
 	write(6,*)
 	write(6,*) 'vol section :'
@@ -257,7 +257,7 @@ c----------------------------------------------------------
 	write(6,*) 'kvold,ivolm ',kvold,ivolm
 	write(6,*)
 
-c----------------------------------------------------------
+!----------------------------------------------------------
 
 	ns = 0
 	nnode = 0
@@ -274,7 +274,7 @@ c----------------------------------------------------------
 
 	if( bwrite ) close(69)
 
-c----------------------------------------------------------
+!----------------------------------------------------------
 
 	ns = 0
 	nnode = 0
@@ -299,11 +299,11 @@ c----------------------------------------------------------
 
 	if( bwrite ) close(69)
 
-c----------------------------------------------------------
+!----------------------------------------------------------
 
 	end
 
-c******************************************************************
+!******************************************************************
 
 	subroutine tsvola
 
@@ -325,11 +325,11 @@ c******************************************************************
 
 	end
 
-c******************************************************************
+!******************************************************************
 
 	subroutine wrvola(dtime)
 
-c write of vol data
+! write of vol data
 
 	implicit none
 
@@ -366,11 +366,11 @@ c write of vol data
         save icall,nbvol,nvers,idfile
         data icall,nbvol,nvers,idfile /0,0,1,538/
 
-c start of code
+! start of code
 
         if( icall .eq. -1 ) return
 
-c initialization
+! initialization
 
         if( icall .eq. 0 ) then
 
@@ -409,14 +409,14 @@ c initialization
 	write(6,*) 'module not yet converted... do not use'
 	stop 'error stop wrvola: cannot use'
 
-c normal call
+! normal call
 
         icall = icall + 1
 	it = nint(dtime)
 
         if( .not. is_over_output_d(da_out) ) return
 
-c	accumulate results
+!	accumulate results
 
         nr = nr + 1
 
@@ -430,7 +430,7 @@ c	accumulate results
 
         if( .not. next_output_d(da_out) ) return
 
-c	write results
+!	write results
 
         rr=1./nr
 
@@ -440,9 +440,9 @@ c	write results
 	voltot = volt(0) * rr
 
         write(nbvol) it,nvols+1,voltot,(vol(i),i=1,nvols)
-c	write(6,*) 'section written: ',nvols,nr,it
+!	write(6,*) 'section written: ',nvols,nr,it
 
-c	reset variables
+!	reset variables
 
         nr = 0
         do i=0,nvols
@@ -451,11 +451,11 @@ c	reset variables
 
 	end
 
-c******************************************************************
+!******************************************************************
 
 	subroutine volareas(n,ielem,vol)
 
-c computes vol in all areas and returns them in vol
+! computes vol in all areas and returns them in vol
 
 	implicit none
 
@@ -479,11 +479,11 @@ c computes vol in all areas and returns them in vol
 
 	end
 
-c******************************************************************
+!******************************************************************
 
 	function volarea(n,ielem)
 
-c computes vol in one area
+! computes vol in one area
 
 	implicit none
 
@@ -507,11 +507,11 @@ c computes vol in one area
 
 	end
 	  
-c******************************************************************
+!******************************************************************
 
 	function voltotal(bz)
 
-c computes vol in total basin
+! computes vol in total basin
 
 	use basin, only : nkn,nel,ngr,mbw
 
@@ -542,11 +542,11 @@ c computes vol in total basin
 
 	end
 	  
-c******************************************************************
+!******************************************************************
 
 	function areatotal()
 
-c computes area in total basin
+! computes area in total basin
 
 	use basin, only : nkn,nel,ngr,mbw
 
@@ -570,11 +570,11 @@ c computes area in total basin
 
 	end
 	  
-c******************************************************************
+!******************************************************************
 
 	subroutine volstats(n,ielem)
 
-c writes statistics of volumes to file
+! writes statistics of volumes to file
 
 	implicit none
 
@@ -623,11 +623,11 @@ c writes statistics of volumes to file
 
 	end
 
-c******************************************************************
+!******************************************************************
 
 	subroutine volini
 
-c initializes vol routines finally
+! initializes vol routines finally
 
 	use mod_geom
 
@@ -642,7 +642,7 @@ c initializes vol routines finally
 
 	integer klineck
 
-c more checks for compatibility
+! more checks for compatibility
 
 	nvols = klineck(kvolm,kvol)
 
@@ -651,13 +651,13 @@ c more checks for compatibility
 	  stop 'error stop : volini'
 	end if
 
-c be sure all these arrays are initialized (lenkv,ilinkv must exists)
+! be sure all these arrays are initialized (lenkv,ilinkv must exists)
 
-c	call setweg(-1,idummy)
-c	call setnod
-c	call setkan(kantv)
+!	call setweg(-1,idummy)
+!	call setnod
+!	call setkan(kantv)
 
-c now set info structure for sections
+! now set info structure for sections
 
 	write(6,*)
 	write(6,*) 'setting up section vol... ',kvolm
@@ -668,11 +668,11 @@ c now set info structure for sections
 
 	end
 
-c******************************************************************
+!******************************************************************
 
 	subroutine volin(n,kvol,idim,ivolm,ivol)
 
-c sets up element info structure ivol(1) from kvol(1) for all areas
+! sets up element info structure ivol(1) from kvol(1) for all areas
 
 	implicit none
 
@@ -692,17 +692,17 @@ c sets up element info structure ivol(1) from kvol(1) for all areas
 	do while( nextline(kvol,n,nnode,ifirst,ilast) )
 	  nv = nv + 1
 	  ntotal = ilast - ifirst + 1
-c	  write(6,*) n,nnode,ifirst,ilast,ntotal
+!	  write(6,*) n,nnode,ifirst,ilast,ntotal
 	  call volinf(nv,ntotal,kvol(ifirst),idim,ivolm,ivol)
 	end do
 
 	end
 
-c******************************************************************
+!******************************************************************
 
 	subroutine volinf(nv,n,kvol,idim,ivolm,ivol)
 
-c sets up element info structure ivol(1) from kvol(1) for one area
+! sets up element info structure ivol(1) from kvol(1) for one area
 
 	use basin, only : nkn,nel,ngr,mbw
 
@@ -733,7 +733,7 @@ c sets up element info structure ivol(1) from kvol(1) for one area
 
 	if( bdebug ) write(6,*) '0 (volinf) closing line ',nv
 
-c see if we can close it
+! see if we can close it
 
 	call linecl(n,kvol,nnodes,kline,xline,yline)
 	bclosed = nnodes .ge. 0
@@ -753,7 +753,7 @@ c see if we can close it
 	  end if
 	end if
 
-c collect elements in volume
+! collect elements in volume
 
 	ntot = 0
 
@@ -779,8 +779,8 @@ c collect elements in volume
 	if( ivolm .gt. idim ) goto 99
 	ivol(ivolm) = 0
 
-c	write(6,*) ivolm
-c	write(6,*) (ivol(ie),ie=1,ivolm)
+!	write(6,*) ivolm
+!	write(6,*) (ivol(ie),ie=1,ivolm)
 
 	return
    99	continue
@@ -789,11 +789,11 @@ c	write(6,*) (ivol(ie),ie=1,ivolm)
 	stop 'error stop volinf: dimension ivol'
 	end
 
-c******************************************************************
+!******************************************************************
 
 	subroutine wrvolinf(n,ielem,volav,areav,hav)
 
-c computes average values...
+! computes average values...
 
 	implicit none
 
@@ -821,11 +821,11 @@ c computes average values...
 
 	end
 
-c******************************************************************
+!******************************************************************
 
 	subroutine linecl(n,kvol,nnodes,kline,xline,yline)
 
-c close line -> nodes will be unique (first & last are different)
+! close line -> nodes will be unique (first & last are different)
 
 	use mod_geom
 	use basin
@@ -844,7 +844,7 @@ c close line -> nodes will be unique (first & last are different)
 	integer i,k
 	integer kfirst,kstart,knext
 
-c copy original line
+! copy original line
 
 	do i=1,n
 	  k = kvol(i)
@@ -857,15 +857,15 @@ c copy original line
 
 	if( kvol(1) .eq. kvol(n) ) return
 
-c not closed -> try to close it
+! not closed -> try to close it
 
 	nnodes = nnodes + 1
 	kfirst = kline(1)
 	kstart = kline(n)
 	knext = kantv(1,kstart)
 
-	do while( knext .ne. kfirst .and. knext .ne. kstart 
-     +			.and. knext .gt. 0 )
+	do while( knext .ne. kfirst .and. knext .ne. kstart  &
+     &			.and. knext .gt. 0 )
 
 	  nnodes = nnodes + 1
 
@@ -887,7 +887,7 @@ c not closed -> try to close it
 
 	end
 
-c******************************************************************
+!******************************************************************
 
 	subroutine wrtelem(iunit,n,ielems,ietype)
 
@@ -920,8 +920,8 @@ c******************************************************************
 	    v3v(kn(ii)) = 1.
 	  end do
 
-	  write(iunit,2000) 2,ipev(ie),ietype,nvert
-     +				,(ipv(kn(ii)),ii=1,nvert),hmed
+	  write(iunit,2000) 2,ipev(ie),ietype,nvert &
+     &				,(ipv(kn(ii)),ii=1,nvert),hmed
 
 	end do
 
@@ -937,7 +937,7 @@ c******************************************************************
  2000	format(i1,6i10,e12.4)
 	end
 
-c******************************************************************
+!******************************************************************
 
 	subroutine wrtline(iunit,n,inodes,il,iltype)
 
@@ -973,5 +973,5 @@ c******************************************************************
  2001	format((10i7))
 	end
 
-c******************************************************************
+!******************************************************************
 

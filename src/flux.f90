@@ -25,153 +25,153 @@
 !
 !--------------------------------------------------------------------------
 
-c subroutines for computing discharge / flux
-c
-c contents :
-c
-c subroutine inflxa
-c subroutine rdflxa
-c subroutine ckflxa
-c subroutine prflxa
-c subroutine tsflxa
-c
-c subroutine wrflxa				write of flux data
-c
-c subroutine flxscs(n,kflux,iflux,az,fluxes)	flux through sections
-c subroutine flxsec(n,kflux,iflux,az,fluxes)	flux through section
-c
-c subroutine flxini				initializes flux routines
-c subroutine flx_init(kfluxm,kflux,nsect,iflux)	sets up array iflux
-c subroutine flxinf(m,kflux,iflux)		sets up one info structure
-c function igtnsc(k1,k2)			gets number of internal section
-c
-c revision log :
-c
-c 30.04.1998	ggu	newly written routines (subpor deleted)
-c 07.05.1998	ggu	check nrdveci on return for error
-c 08.05.1998	ggu	restructured with new comodity routines
-c 13.09.1999	ggu	type of node computed in own routine flxtype
-c 19.11.1999	ggu	iskadj into sublin
-c 20.01.2000	ggu	old routines substituted, new routine extrsect
-c 20.01.2000	ggu	common block /dimdim/ eliminated
-c 20.01.2000	ggu	common block /dimdim/ eliminated
-c 01.09.2002	ggu	ggu99 -> bug in flx routines (how to reproduce?)
-c 26.05.2003	ggu	in flxnov substituted a,b with b,c
-c 26.05.2003	ggu	new routine make_fluxes (for lagrangian)
-c 10.08.2003	ggu	do not call setweg, setnod, setkan
-c 23.03.2006	ggu	changed time step to real
-c 28.09.2007	ggu	use testbndo to determine boundary node in flxtype
-c 28.04.2009	ggu	links re-structured
-c 23.03.2010	ggu	changed v6.1.1
-c 23.02.2011	ggu	new routine call write_node_fluxes() for special output
-c 01.03.2011	ggu	changed VERS_6_1_20
-c 01.06.2011	ggu	documentation to flxscs() changed
-c 14.07.2011	ggu	changed VERS_6_1_27
-c 21.09.2011	ggu	some lower-level subroutines copied to subflx.f
-c 07.10.2011	ggu	adjusted for 3d flux routines
-c 18.10.2011	ggu	changed VERS_6_1_33
-c 19.10.2011	ggu	added T/S variables, created fluxes_*() routines
-c 19.10.2011	ggu	added conz variables, created fluxes_template()
-c 09.12.2011	ggu	changed VERS_6_1_38
-c 01.06.2012	ggu	changed VERS_6_1_53
-c 10.05.2013	ggu	introduced subflxa.h, common routines to subflxu.f
-c 25.10.2013	ggu	changed VERS_6_1_68
-c 07.03.2014	ggu	changed VERS_6_1_72
-c 26.11.2014	ggu	changed VERS_7_0_7
-c 19.12.2014	ggu	changed VERS_7_0_10
-c 19.01.2015	ggu	changed VERS_7_1_3
-c 20.05.2015	ggu	modules introduced
-c 10.07.2015	ggu	changed VERS_7_1_50
-c 17.07.2015	ggu	changed VERS_7_1_80
-c 20.07.2015	ggu	changed VERS_7_1_81
-c 09.11.2015	ggu	changed VERS_7_3_13
-c 12.04.2016	ggu	fluxes_template adjourned
-c 15.04.2016	ggu	fluxes_template debugged and finished
-c 09.09.2016	ggu	changed VERS_7_5_17
-c 31.03.2017	ggu	changed VERS_7_5_24
-c 22.09.2017	ccf	added total sediment concentration
-c 26.10.2017	ggu	reads itable, chflx and section description
-c 04.11.2017	ggu	changed VERS_7_5_34
-c 14.11.2017	ggu	changed VERS_7_5_36
-c 17.11.2017	ggu	sediment output adapted to new framework
-c 17.11.2017	ggu	changed VERS_7_5_38
-c 27.03.2018	ggu	new code for generic flux handling (fluxes_generic())
-c 03.04.2018	ggu	changed VERS_7_5_43
-c 06.07.2018	ggu	changed VERS_7_5_48
-c 16.02.2019	ggu	changed VERS_7_5_60
-c 06.03.2020	ggu	new flux0d, get_barotropic_flux()
-c 27.05.2022	ggu	changed to be used with mpi, fluxes now double
-c 30.05.2022	ggu	more changes for mpi
-c 18.05.2023	ggu	in flx_write() call flx_collect_3d()
-c 22.05.2023	ggu	need fluxes_r for write
-c
-c notes :
-c
-c These routines can also be used internally to compute the flux
-c over various sections. The following calling sequence must be respected:
-c
-c call flx_init(kfluxm,kflux,nsect,iflux)		initializes iflux
-c
-c call flxscs(kfluxm,kflux,iflux,az,fluxes) computes fluxes 
-c
-c Initialization can be done anytime.
-c
-c nsect		total number of sections
-c kfluxm	total number of nodes defining sections
-c kflux()	node numbers defining sections
-c
-c calling sequence :
-c
-c rdflxa
-c	flx_read_section
-c ckflxa
-c	convert_nodes
-c prflxa
-c tsflxa
-c
-c flxini
-c
-c wrflxa	administration
-c	init:
-c		flx_alloc_arrays
-c		flux_initialize
-c			flx_init
-c				klineck
-c				flxinf
-c					igtnsc
-c			get_nlayers
-c			correct_nlayers
-c			correct_iflux
-c		fluxes_init_d
-c		flx_file_open
-c			flux_file_open
-c				flx_write_header
-c				flx_write_header2
-c	loop:
-c		flxscs
-c			flxsec
-c				flx3d
-c		fluxes_accum_d
-c		fluxes_aver_d
-c		flx_write
-c			flux_write
-c				flx_write_record
-c		fluxes_init_d
-c
-c
-c there are 3 fluxes given for every section: fluxes(3,ns)
-c
-c	fluxes(1,is)		total flux
-c	fluxes(2,is)		positive flux
-c	fluxes(3,is)		negative flux
-c
-c in three 3D the definition is: fluxes(0:nlv,3,ns)
-c
-c in fluxes(0,:,:) the verticall integrated flux is stored
-c
-c******************************************************************
-c******************************************************************
-c******************************************************************
+! subroutines for computing discharge / flux
+!
+! contents :
+!
+! subroutine inflxa
+! subroutine rdflxa
+! subroutine ckflxa
+! subroutine prflxa
+! subroutine tsflxa
+!
+! subroutine wrflxa				write of flux data
+!
+! subroutine flxscs(n,kflux,iflux,az,fluxes)	flux through sections
+! subroutine flxsec(n,kflux,iflux,az,fluxes)	flux through section
+!
+! subroutine flxini				initializes flux routines
+! subroutine flx_init(kfluxm,kflux,nsect,iflux)	sets up array iflux
+! subroutine flxinf(m,kflux,iflux)		sets up one info structure
+! function igtnsc(k1,k2)			gets number of internal section
+!
+! revision log :
+!
+! 30.04.1998	ggu	newly written routines (subpor deleted)
+! 07.05.1998	ggu	check nrdveci on return for error
+! 08.05.1998	ggu	restructured with new comodity routines
+! 13.09.1999	ggu	type of node computed in own routine flxtype
+! 19.11.1999	ggu	iskadj into sublin
+! 20.01.2000	ggu	old routines substituted, new routine extrsect
+! 20.01.2000	ggu	common block /dimdim/ eliminated
+! 20.01.2000	ggu	common block /dimdim/ eliminated
+! 01.09.2002	ggu	ggu99 -> bug in flx routines (how to reproduce?)
+! 26.05.2003	ggu	in flxnov substituted a,b with b,c
+! 26.05.2003	ggu	new routine make_fluxes (for lagrangian)
+! 10.08.2003	ggu	do not call setweg, setnod, setkan
+! 23.03.2006	ggu	changed time step to real
+! 28.09.2007	ggu	use testbndo to determine boundary node in flxtype
+! 28.04.2009	ggu	links re-structured
+! 23.03.2010	ggu	changed v6.1.1
+! 23.02.2011	ggu	new routine call write_node_fluxes() for special output
+! 01.03.2011	ggu	changed VERS_6_1_20
+! 01.06.2011	ggu	documentation to flxscs() changed
+! 14.07.2011	ggu	changed VERS_6_1_27
+! 21.09.2011	ggu	some lower-level subroutines copied to subflx.f
+! 07.10.2011	ggu	adjusted for 3d flux routines
+! 18.10.2011	ggu	changed VERS_6_1_33
+! 19.10.2011	ggu	added T/S variables, created fluxes_*() routines
+! 19.10.2011	ggu	added conz variables, created fluxes_template()
+! 09.12.2011	ggu	changed VERS_6_1_38
+! 01.06.2012	ggu	changed VERS_6_1_53
+! 10.05.2013	ggu	introduced subflxa.h, common routines to subflxu.f
+! 25.10.2013	ggu	changed VERS_6_1_68
+! 07.03.2014	ggu	changed VERS_6_1_72
+! 26.11.2014	ggu	changed VERS_7_0_7
+! 19.12.2014	ggu	changed VERS_7_0_10
+! 19.01.2015	ggu	changed VERS_7_1_3
+! 20.05.2015	ggu	modules introduced
+! 10.07.2015	ggu	changed VERS_7_1_50
+! 17.07.2015	ggu	changed VERS_7_1_80
+! 20.07.2015	ggu	changed VERS_7_1_81
+! 09.11.2015	ggu	changed VERS_7_3_13
+! 12.04.2016	ggu	fluxes_template adjourned
+! 15.04.2016	ggu	fluxes_template debugged and finished
+! 09.09.2016	ggu	changed VERS_7_5_17
+! 31.03.2017	ggu	changed VERS_7_5_24
+! 22.09.2017	ccf	added total sediment concentration
+! 26.10.2017	ggu	reads itable, chflx and section description
+! 04.11.2017	ggu	changed VERS_7_5_34
+! 14.11.2017	ggu	changed VERS_7_5_36
+! 17.11.2017	ggu	sediment output adapted to new framework
+! 17.11.2017	ggu	changed VERS_7_5_38
+! 27.03.2018	ggu	new code for generic flux handling (fluxes_generic())
+! 03.04.2018	ggu	changed VERS_7_5_43
+! 06.07.2018	ggu	changed VERS_7_5_48
+! 16.02.2019	ggu	changed VERS_7_5_60
+! 06.03.2020	ggu	new flux0d, get_barotropic_flux()
+! 27.05.2022	ggu	changed to be used with mpi, fluxes now double
+! 30.05.2022	ggu	more changes for mpi
+! 18.05.2023	ggu	in flx_write() call flx_collect_3d()
+! 22.05.2023	ggu	need fluxes_r for write
+!
+! notes :
+!
+! These routines can also be used internally to compute the flux
+! over various sections. The following calling sequence must be respected:
+!
+! call flx_init(kfluxm,kflux,nsect,iflux)		initializes iflux
+!
+! call flxscs(kfluxm,kflux,iflux,az,fluxes) computes fluxes 
+!
+! Initialization can be done anytime.
+!
+! nsect		total number of sections
+! kfluxm	total number of nodes defining sections
+! kflux()	node numbers defining sections
+!
+! calling sequence :
+!
+! rdflxa
+!	flx_read_section
+! ckflxa
+!	convert_nodes
+! prflxa
+! tsflxa
+!
+! flxini
+!
+! wrflxa	administration
+!	init:
+!		flx_alloc_arrays
+!		flux_initialize
+!			flx_init
+!				klineck
+!				flxinf
+!					igtnsc
+!			get_nlayers
+!			correct_nlayers
+!			correct_iflux
+!		fluxes_init_d
+!		flx_file_open
+!			flux_file_open
+!				flx_write_header
+!				flx_write_header2
+!	loop:
+!		flxscs
+!			flxsec
+!				flx3d
+!		fluxes_accum_d
+!		fluxes_aver_d
+!		flx_write
+!			flux_write
+!				flx_write_record
+!		fluxes_init_d
+!
+!
+! there are 3 fluxes given for every section: fluxes(3,ns)
+!
+!	fluxes(1,is)		total flux
+!	fluxes(2,is)		positive flux
+!	fluxes(3,is)		negative flux
+!
+! in three 3D the definition is: fluxes(0:nlv,3,ns)
+!
+! in fluxes(0,:,:) the verticall integrated flux is stored
+!
+!******************************************************************
+!******************************************************************
+!******************************************************************
 
 !==================================================================
         module flux
@@ -246,7 +246,7 @@ c******************************************************************
 
         end subroutine flx_read_section
 
-c******************************************************************
+!******************************************************************
 
         subroutine flx_alloc_arrays(nl,ns)
 
@@ -304,9 +304,9 @@ c******************************************************************
 
 	end
 
-c******************************************************************
-c******************************************************************
-c******************************************************************
+!******************************************************************
+!******************************************************************
+!******************************************************************
 
         subroutine mod_flx(mode)
  
@@ -339,7 +339,7 @@ c******************************************************************
  
         end
 
-c******************************************************************
+!******************************************************************
 
         subroutine rdflxa
 
@@ -360,11 +360,11 @@ c******************************************************************
 
         end
 
-c******************************************************************
+!******************************************************************
 
         subroutine ckflxa
 
-c converts external to internal nodes
+! converts external to internal nodes
 
 	use flux
 
@@ -378,7 +378,7 @@ c converts external to internal nodes
 
         end
 
-c******************************************************************
+!******************************************************************
 
 	subroutine prflxa
 
@@ -413,7 +413,7 @@ c******************************************************************
 
 	end
 
-c******************************************************************
+!******************************************************************
 
 	subroutine tsflxa
 
@@ -432,9 +432,9 @@ c******************************************************************
 
 	end
 
-c******************************************************************
-c******************************************************************
-c******************************************************************
+!******************************************************************
+!******************************************************************
+!******************************************************************
 
 	subroutine get_barotropic_flux(is,flux0)
 
@@ -453,13 +453,13 @@ c******************************************************************
 
 	end
 
-c******************************************************************
-c******************************************************************
-c******************************************************************
+!******************************************************************
+!******************************************************************
+!******************************************************************
 
 	subroutine wrflxa
 
-c administers writing of flux data
+! administers writing of flux data
 
 	use mod_conz, only : cnv
 	use mod_ts
@@ -486,15 +486,15 @@ c administers writing of flux data
 	integer, save :: nvar
 	integer, save :: icall = 0
 
-c-----------------------------------------------------------------
-c start of code
-c-----------------------------------------------------------------
+!-----------------------------------------------------------------
+! start of code
+!-----------------------------------------------------------------
 
         if( icall .eq. -1 ) return
 
-c-----------------------------------------------------------------
-c initialization
-c-----------------------------------------------------------------
+!-----------------------------------------------------------------
+! initialization
+!-----------------------------------------------------------------
 
         if( icall .eq. 0 ) then
 
@@ -544,13 +544,13 @@ c-----------------------------------------------------------------
 
 		call flx_file_open(nvar)
 
-c               here we could also compute and write section in m**2
+!               here we could also compute and write section in m**2
 
         end if
 
-c-----------------------------------------------------------------
-c normal call
-c-----------------------------------------------------------------
+!-----------------------------------------------------------------
+! normal call
+!-----------------------------------------------------------------
 
         if( .not. is_over_output_d(da_out) ) return
 
@@ -558,9 +558,9 @@ c-----------------------------------------------------------------
 	call getaz(azpar)
 	az = azpar
 
-c	-------------------------------------------------------
-c	accumulate results
-c	-------------------------------------------------------
+!	-------------------------------------------------------
+!	accumulate results
+!	-------------------------------------------------------
 
 	ivar = 0
 	call flxscs(kfluxm,kflux,iflux,az,fluxes,ivar,rhov)
@@ -590,18 +590,18 @@ c	-------------------------------------------------------
 	end if
 
 
-c	-------------------------------------------------------
-c	time for output?
-c	-------------------------------------------------------
+!	-------------------------------------------------------
+!	time for output?
+!	-------------------------------------------------------
 
         if( .not. next_output_d(da_out) ) return
 
         nbflx = nint(da_out(4))
         call get_absolute_act_time(atime)
 
-c	-------------------------------------------------------
-c	average and write results
-c	-------------------------------------------------------
+!	-------------------------------------------------------
+!	average and write results
+!	-------------------------------------------------------
 
 	ierr = 0
 
@@ -637,9 +637,9 @@ c	-------------------------------------------------------
 
 	if( iv /= nvar ) goto 91
 
-c	-------------------------------------------------------
-c	reset variables
-c	-------------------------------------------------------
+!	-------------------------------------------------------
+!	reset variables
+!	-------------------------------------------------------
 
 	call fluxes_init_d(nlvdi,nsect,nlayers,trm,masst)
 
@@ -658,9 +658,9 @@ c	-------------------------------------------------------
 	  call fluxes_init_d(nlvdi,nsect,nlayers,trsc,ssctt)
 	end if
 
-c-----------------------------------------------------------------
-c end of routine
-c-----------------------------------------------------------------
+!-----------------------------------------------------------------
+! end of routine
+!-----------------------------------------------------------------
 
 	return
    91   continue
@@ -757,8 +757,8 @@ c-----------------------------------------------------------------
 		call get_nlayers(kfluxm,kflux,nsect,nlayers,nlmax)
 
 		do i=1,nscal
-		  call fluxes_init_d(nlvdi,nsect,nlayers,trs(i)
-     +				,scalt(0,1,1,i))
+		  call fluxes_init_d(nlvdi,nsect,nlayers,trs(i) &
+     &				,scalt(0,1,1,i))
 		end do
 
                 nbflx = ifemop(ext,'unform','new')
@@ -769,8 +769,8 @@ c-----------------------------------------------------------------
 	        nvers = 0
 		nvar = nscal
 		idtflx = nint(da_out(1))
-                call flx_write_header(nbflx,0,nsect,kfluxm,idtflx
-     +                                  ,nlmax,nvar,ierr)
+                call flx_write_header(nbflx,0,nsect,kfluxm,idtflx &
+     &                                  ,nlmax,nvar,ierr)
                 if( ierr /= 0 ) goto 98
 
                 title = descrp
@@ -781,9 +781,9 @@ c-----------------------------------------------------------------
                   kext(i) = ipext(kflux(i))
                 end do
 
-                call flx_write_header2(nbflx,0,nsect,kfluxm
-     +                          ,kext,nlayers
-     +                          ,atime0,title,femver,chflx,ierr)
+                call flx_write_header2(nbflx,0,nsect,kfluxm &
+     &                          ,kext,nlayers &
+     &                          ,atime0,title,femver,chflx,ierr)
                 if( ierr /= 0 ) goto 98
 
         end if
@@ -804,8 +804,8 @@ c-----------------------------------------------------------------
 	do i=1,nscal
 	  ivar = ivbase + i
 	  call flxscs(kfluxm,kflux,iflux,az,fluxes,ivar,scal(1,1,i))
-	  call fluxes_accum_d(nlvdi,nsect,nlayers,dt,trs(i)
-     +			,scalt(0,1,1,i),fluxes)
+	  call fluxes_accum_d(nlvdi,nsect,nlayers,dt,trs(i) &
+     &			,scalt(0,1,1,i),fluxes)
 	end do
 
 !	-------------------------------------------------------
@@ -822,11 +822,11 @@ c-----------------------------------------------------------------
 
 	do i=1,nscal
 	  ivar = ivbase + i
-	  call fluxes_aver_d(nlvdi,nsect,nlayers,trs(i)
-     +			,scalt(0,1,1,i),fluxes)
+	  call fluxes_aver_d(nlvdi,nsect,nlayers,trs(i) &
+     &			,scalt(0,1,1,i),fluxes)
 	  fluxes_r = fluxes
-          call flx_write_record(nbflx,nvers,atime,nlvdi,nsect,ivar
-     +                          ,nlayers,fluxes_r,ierr)
+          call flx_write_record(nbflx,nvers,atime,nlvdi,nsect,ivar &
+     &                          ,nlayers,fluxes_r,ierr)
           if( ierr /= 0 ) goto 97
 	end do
 
@@ -835,8 +835,8 @@ c-----------------------------------------------------------------
 !	-------------------------------------------------------
 
 	do i=1,nscal
-	  call fluxes_init_d(nlvdi,nsect,nlayers,trs(i)
-     +			,scalt(0,1,1,i))
+	  call fluxes_init_d(nlvdi,nsect,nlayers,trs(i) &
+     &			,scalt(0,1,1,i))
 	end do
 
 !-----------------------------------------------------------------
@@ -872,8 +872,8 @@ c-----------------------------------------------------------------
 
 	integer nvar
 
-	call flux_file_open('.flx',da_out,nvar,nsect,kfluxm
-     +                          ,kflux_ext,nlayers,chflx)
+	call flux_file_open('.flx',da_out,nvar,nsect,kfluxm &
+     &                          ,kflux_ext,nlayers,chflx)
 
 	end
 
@@ -900,8 +900,8 @@ c-----------------------------------------------------------------
 	n = 3*ns
 
 	call flx_collect_3d(nl,n,flux_local,flux_global)
-        call flux_write(nbflx,atime,ivar,ng,ns
-     +                          ,nlayers,flux_global)
+        call flux_write(nbflx,atime,ivar,ng,ns &
+     &                          ,nlayers,flux_global)
 
 	end
 

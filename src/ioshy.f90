@@ -424,8 +424,8 @@
 	if( iunit == 0 ) return
 
 	if( bopen ) then
-	  open(iunit,file=file,status=stat,form='unformatted'
-     +				,iostat=ios)
+	  open(iunit,file=file,status=stat,form='unformatted' &
+     &				,iostat=ios)
 	  if( ios /= 0 ) return
 	end if
 
@@ -572,30 +572,30 @@
 	!if( pentry(id1)%date /= pentry(id2)%date ) goto 99 
 	!if( pentry(id1)%time /= pentry(id2)%time ) goto 99 
 
-	if( shy_error_i('nen3v',3*ne
-     +		,pentry(id1)%nen3v,pentry(id2)%nen3v) ) return
-	if( shy_error_i('ipev',ne
-     +		,pentry(id1)%ipev,pentry(id2)%ipev) ) return
-	if( shy_error_i('ipv',nk
-     +		,pentry(id1)%ipv,pentry(id2)%ipv) ) return
+	if( shy_error_i('nen3v',3*ne &
+     &		,pentry(id1)%nen3v,pentry(id2)%nen3v) ) return
+	if( shy_error_i('ipev',ne &
+     &		,pentry(id1)%ipev,pentry(id2)%ipev) ) return
+	if( shy_error_i('ipv',nk &
+     &		,pentry(id1)%ipv,pentry(id2)%ipv) ) return
 !	if( shy_error_i('iarv',ne
 !     +		,pentry(id1)%iarv,pentry(id2)%iarv) ) return
 !	if( shy_error_i('iarnv',nk
 !     +		,pentry(id1)%iarnv,pentry(id2)%iarnv) ) return
-	if( shy_error_i('ilhv',ne
-     +		,pentry(id1)%ilhv,pentry(id2)%ilhv) ) return
-	if( shy_error_i('ilhkv',nk
-     +		,pentry(id1)%ilhkv,pentry(id2)%ilhkv) ) return
+	if( shy_error_i('ilhv',ne &
+     &		,pentry(id1)%ilhv,pentry(id2)%ilhv) ) return
+	if( shy_error_i('ilhkv',nk &
+     &		,pentry(id1)%ilhkv,pentry(id2)%ilhkv) ) return
 
-	if( shy_error_r('xgv',eps1,nk
-     +		,pentry(id1)%xgv,pentry(id2)%xgv) ) return
-	if( shy_error_r('ygv',eps1,nk
-     +		,pentry(id1)%ygv,pentry(id2)%ygv) ) return
-	if( shy_error_r('hm3v',epsm1,3*ne
-     +		,pentry(id1)%hm3v,pentry(id2)%hm3v) ) return
+	if( shy_error_r('xgv',eps1,nk &
+     &		,pentry(id1)%xgv,pentry(id2)%xgv) ) return
+	if( shy_error_r('ygv',eps1,nk &
+     &		,pentry(id1)%ygv,pentry(id2)%ygv) ) return
+	if( shy_error_r('hm3v',epsm1,3*ne &
+     &		,pentry(id1)%hm3v,pentry(id2)%hm3v) ) return
 
-	if( shy_error_r('hlv',eps0,nl
-     +		,pentry(id1)%hlv,pentry(id2)%hlv) ) return
+	if( shy_error_r('hlv',eps0,nl &
+     &		,pentry(id1)%hlv,pentry(id2)%hlv) ) return
 
 	shy_are_compatible = .true.
 
@@ -1322,8 +1322,8 @@
 
 !**************************************************************
 
-	subroutine shy_read_record(id,dtime,belem
-     +				,ivar,n,m,lmax,nlvddi,c,ierr)
+	subroutine shy_read_record(id,dtime,belem &
+     &				,ivar,n,m,lmax,nlvddi,c,ierr)
 
 	integer id,ierr
 	double precision dtime
@@ -1372,9 +1372,9 @@
 	else
 	  write(6,*) lmax,m
 	  stop 'error stop shy_read_record: m and lmax > 1'
-	  read(iunit,iostat=ierr) (( c(l,i)
-     +			,l=1,il(1+(i-1)/m) )
-     +			,i=1,n*m )
+	  read(iunit,iostat=ierr) (( c(l,i) &
+     &			,l=1,il(1+(i-1)/m) ) &
+     &			,i=1,n*m )
 	end if
 	deallocate(il)
 
@@ -1532,8 +1532,8 @@
 
 !**************************************************************
 
-	subroutine shy_write_record(id,dtime,ivar
-     +				,belem,n,m,lmax,nlvddi,c,ierr)
+	subroutine shy_write_record(id,dtime,ivar &
+     &				,belem,n,m,lmax,nlvddi,c,ierr)
 
 	integer id,ierr
 	double precision dtime
@@ -1591,9 +1591,9 @@
 	else
 	  write(6,*) lmax,m
 	  stop 'error stop shy_write_record: m and lmax > 1'
-	  write(iunit,iostat=ierr) (( c(l,i)
-     +			,l=1,il(1+(i-1)/m) )
-     +			,i=1,n*m )
+	  write(iunit,iostat=ierr) (( c(l,i) &
+     &			,l=1,il(1+(i-1)/m) ) &
+     &			,i=1,n*m )
 	end if
 
 	pentry(id)%nvar_act = pentry(id)%nvar_act + 1

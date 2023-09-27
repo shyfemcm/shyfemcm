@@ -24,79 +24,79 @@
 !
 !--------------------------------------------------------------------------
 
-c interactive assignment of files with apn
-c
-c contents :
-c
-c subroutine assnam(mode)                       assigns run/bas interactivly
-c function iapini(mode,nknddi,nelddi,matdim)    init routine for ap routines
-c subroutine pardef                             reads nls and fnm
-c
-c revision log :
-c
-c 22.03.1995	ggu	$$EXINEL - call to exinel changed to ieint
-c 21.05.1997	ggu	$$NOBAS - in iapini bug if basin is not opened
-c 21.01.1998	ggu	$$APNPAR - only look for apn file in local directory
-c 01.05.1998	ggu	$$IMEM - close file only for imem > 0
-c 01.05.1998	ggu	interactive questions beautified
-c 20.06.1998	ggu	general clean up
-c 07.08.1998	ggu	handles negative mode -> do not change names
-c 12.02.1999	ggu	useless data structures deleted in iapini
-c 12.02.1999	ggu	in assnam do not ask for apn file
-c 12.02.1999	ggu	honor auto mode
-c 12.02.1999	ggu	read runnam from memfil only if not in apn file
-c 05.12.2001	ggu	fixed compiler error with -Wall -pedantic
-c 20.06.2003	ggu	in iapini statement shiftet for compiler error Origin
-c 23.03.2010	ggu	changed v6.1.1
-c 15.07.2011	ggu	adjusted, ideffi substituted
-c 19.03.2012	ggu	if no basin is given return with "error"
-c 27.02.2013	ggu	pass what parameter into nlsa
-c 03.05.2013	ggu	changed VERS_6_1_63
-c 05.09.2013	ggu	read_apn_file() needs integer now
-c 12.09.2013	ggu	changed VERS_6_1_67
-c 18.06.2014	ggu	changed VERS_6_1_77
-c 12.12.2014	ggu	changed VERS_7_0_9
-c 23.12.2014	ggu	changed VERS_7_0_11
-c 14.01.2015	ggu	reorganized and cleaned
-c 23.01.2015	ggu	changed VERS_7_1_4
-c 10.02.2015	ggu	debugged, bcompat gives compatibility with old versions
-c 26.02.2015	ggu	changed VERS_7_1_5
-c 29.04.2015	ggu	generic changes - now works as anticipated
-c 05.06.2015	ggu	changed VERS_7_1_12
-c 10.07.2015	ggu	changed VERS_7_1_50
-c 17.07.2015	ggu	changed VERS_7_1_53
-c 20.07.2015	ggu	changed VERS_7_1_81
-c 28.04.2016	ggu	changed VERS_7_5_9
-c 11.07.2017	ggu	changed VERS_7_5_30
-c 14.11.2017	ggu	changed VERS_7_5_36
-c 16.02.2019	ggu	changed VERS_7_5_60
-c
-c notes :
-c
-c	call iapini
-c		->   call pardef
-c			->   call nlsina
-c			->   call fnminh
-c	  		->   call read_apn_file(-1)
-c				->   call nlsa
-c		->   call assnam
-c		->   call read_bas_file(nknddi,nelddi)
-c		->   call sp131k(matdim)
-c
-c .memory is only changed with bask == .true.
-c .memory is read with bmem == .true., but not changed
-c
-c****************************************************************
+! interactive assignment of files with apn
+!
+! contents :
+!
+! subroutine assnam(mode)                       assigns run/bas interactivly
+! function iapini(mode,nknddi,nelddi,matdim)    init routine for ap routines
+! subroutine pardef                             reads nls and fnm
+!
+! revision log :
+!
+! 22.03.1995	ggu	$$EXINEL - call to exinel changed to ieint
+! 21.05.1997	ggu	$$NOBAS - in iapini bug if basin is not opened
+! 21.01.1998	ggu	$$APNPAR - only look for apn file in local directory
+! 01.05.1998	ggu	$$IMEM - close file only for imem > 0
+! 01.05.1998	ggu	interactive questions beautified
+! 20.06.1998	ggu	general clean up
+! 07.08.1998	ggu	handles negative mode -> do not change names
+! 12.02.1999	ggu	useless data structures deleted in iapini
+! 12.02.1999	ggu	in assnam do not ask for apn file
+! 12.02.1999	ggu	honor auto mode
+! 12.02.1999	ggu	read runnam from memfil only if not in apn file
+! 05.12.2001	ggu	fixed compiler error with -Wall -pedantic
+! 20.06.2003	ggu	in iapini statement shiftet for compiler error Origin
+! 23.03.2010	ggu	changed v6.1.1
+! 15.07.2011	ggu	adjusted, ideffi substituted
+! 19.03.2012	ggu	if no basin is given return with "error"
+! 27.02.2013	ggu	pass what parameter into nlsa
+! 03.05.2013	ggu	changed VERS_6_1_63
+! 05.09.2013	ggu	read_apn_file() needs integer now
+! 12.09.2013	ggu	changed VERS_6_1_67
+! 18.06.2014	ggu	changed VERS_6_1_77
+! 12.12.2014	ggu	changed VERS_7_0_9
+! 23.12.2014	ggu	changed VERS_7_0_11
+! 14.01.2015	ggu	reorganized and cleaned
+! 23.01.2015	ggu	changed VERS_7_1_4
+! 10.02.2015	ggu	debugged, bcompat gives compatibility with old versions
+! 26.02.2015	ggu	changed VERS_7_1_5
+! 29.04.2015	ggu	generic changes - now works as anticipated
+! 05.06.2015	ggu	changed VERS_7_1_12
+! 10.07.2015	ggu	changed VERS_7_1_50
+! 17.07.2015	ggu	changed VERS_7_1_53
+! 20.07.2015	ggu	changed VERS_7_1_81
+! 28.04.2016	ggu	changed VERS_7_5_9
+! 11.07.2017	ggu	changed VERS_7_5_30
+! 14.11.2017	ggu	changed VERS_7_5_36
+! 16.02.2019	ggu	changed VERS_7_5_60
+!
+! notes :
+!
+!	call iapini
+!		->   call pardef
+!			->   call nlsina
+!			->   call fnminh
+!	  		->   call read_apn_file(-1)
+!				->   call nlsa
+!		->   call assnam
+!		->   call read_bas_file(nknddi,nelddi)
+!		->   call sp131k(matdim)
+!
+! .memory is only changed with bask == .true.
+! .memory is read with bmem == .true., but not changed
+!
+!****************************************************************
 
 	subroutine assnam(mode)
 
-c assigns name for run and basin (also interactivly)
-c
-c mode          1:assign basin 2:assign run 4:assign parameter file
-c
-c mode < 0	do not ask for names
-c
-c combinations are possible, all together : 7
+! assigns name for run and basin (also interactivly)
+!
+! mode          1:assign basin 2:assign run 4:assign parameter file
+!
+! mode < 0	do not ask for names
+!
+! combinations are possible, all together : 7
 
 	implicit none
 
@@ -106,19 +106,19 @@ c combinations are possible, all together : 7
 	character*80 runnam,basnam
 	character*80 runmem,basmem
 
-c---------------------------------------------------------------------
-c read memory file
-c---------------------------------------------------------------------
+!---------------------------------------------------------------------
+! read memory file
+!---------------------------------------------------------------------
 
 	bask = mode .gt. 0
 	bchange = .false.
 
 	call read_memory(runmem,basmem)
 
-c---------------------------------------------------------------------
-c if we already have the names through the title section -> use these
-c	else use the names just read from memory file
-c---------------------------------------------------------------------
+!---------------------------------------------------------------------
+! if we already have the names through the title section -> use these
+!	else use the names just read from memory file
+!---------------------------------------------------------------------
 
 	call getfnm('runnam',runnam)
 	call getfnm('basnam',basnam)
@@ -129,18 +129,18 @@ c---------------------------------------------------------------------
 	if( runnam .eq. ' ' ) runnam = runmem
 	if( basnam .eq. ' ' ) basnam = basmem
 
-c---------------------------------------------------------------------
-c if necessary ask for new values
-c---------------------------------------------------------------------
+!---------------------------------------------------------------------
+! if necessary ask for new values
+!---------------------------------------------------------------------
 
 	if( bask ) then
 	  stop 'error stop: bask==.true. not supported any more'
 	  !call ask_memory(mode,runnam,basnam,bchange)
 	end if
 
-c---------------------------------------------------------------------
-c see if we have what we need
-c---------------------------------------------------------------------
+!---------------------------------------------------------------------
+! see if we have what we need
+!---------------------------------------------------------------------
 
 	if( btest(abs(mode),0) ) then
 	  if( basnam == ' ' ) then
@@ -158,26 +158,26 @@ c---------------------------------------------------------------------
 	  write(6,*) 'Name of simulation : ',trim(runnam)
 	end if
 
-c---------------------------------------------------------------------
-c writes new information and new values
-c---------------------------------------------------------------------
+!---------------------------------------------------------------------
+! writes new information and new values
+!---------------------------------------------------------------------
 
 	call putfnm('runnam',runnam)
 	call putfnm('basnam',basnam)
 
 	if(bchange) call write_memory(runnam,basnam)
 
-c---------------------------------------------------------------------
-c end of routine
-c---------------------------------------------------------------------
+!---------------------------------------------------------------------
+! end of routine
+!---------------------------------------------------------------------
 
 	end
 
-c*************************************************************
+!*************************************************************
 
 	subroutine ap_set_names(basin,simul)
 
-c sets basin and simulation
+! sets basin and simulation
 
 	character*(*) basin,simul
 
@@ -191,11 +191,11 @@ c sets basin and simulation
 
 	end
 
-c*************************************************************
+!*************************************************************
 
 	subroutine ap_get_names(basin,simul)
 
-c sets basin and simulation
+! sets basin and simulation
 
 	character*(*) basin,simul
 
@@ -209,23 +209,23 @@ c sets basin and simulation
 
 	end
 
-c*************************************************************
-c*************************************************************
-c*************************************************************
+!*************************************************************
+!*************************************************************
+!*************************************************************
 
 	subroutine ap_init_basin
 
-c shell for just reading basin
+! shell for just reading basin
 
 	call ap_init(.false.,1,0,0)
 
 	end
 
-c*************************************************************
+!*************************************************************
 
 	subroutine ap_init(bask,mode,nknddi,nelddi)
 
-c initializes post processing
+! initializes post processing
 
 	implicit none
 
@@ -240,23 +240,23 @@ c initializes post processing
 
 	end
 
-c*************************************************************
+!*************************************************************
 
 	function iapini(mode,nknddi,nelddi,matdim)
 
-c init routine for ap routines
-c
-c calls pardef
-c calls assnam
-c reads basin
-c
-c iapini        1:success 0:error
-c mode          for assnam 1:assign basin 2:assign run 3:both
-c nknddi        dimension for nkn for reading bas file
-c nelddi        dimension for nel for reading bas file
-c matdim        (probably useless...)
-c
-c mode negative: do not ask for new basin and simulation
+! init routine for ap routines
+!
+! calls pardef
+! calls assnam
+! reads basin
+!
+! iapini        1:success 0:error
+! mode          for assnam 1:assign basin 2:assign run 3:both
+! nknddi        dimension for nkn for reading bas file
+! nelddi        dimension for nel for reading bas file
+! matdim        (probably useless...)
+!
+! mode negative: do not ask for new basin and simulation
 
 	implicit none
 
@@ -284,71 +284,71 @@ c mode negative: do not ask for new basin and simulation
 
 	end
 
-c*************************************************************
+!*************************************************************
 
 	subroutine iap_init(mode,nknddi,nelddi,matdim)
 
-c init routine for ap routines
-c
-c calls pardef
-c calls assnam
-c reads basin
-c
-c iapini        1:success 0:error
-c mode          for assnam 1:assign basin 2:assign run 3:both
-c nknddi        dimension for nkn for reading bas file
-c nelddi        dimension for nel for reading bas file
-c matdim        (probably useless...)
-c
-c mode negative: do not ask for new basin and simulation
+! init routine for ap routines
+!
+! calls pardef
+! calls assnam
+! reads basin
+!
+! iapini        1:success 0:error
+! mode          for assnam 1:assign basin 2:assign run 3:both
+! nknddi        dimension for nkn for reading bas file
+! nelddi        dimension for nel for reading bas file
+! matdim        (probably useless...)
+!
+! mode negative: do not ask for new basin and simulation
 
 	implicit none
 
 	integer mode,nknddi,nelddi,matdim
 
-c---------------------------------------------------------------------
-c assign new parameter file
-c---------------------------------------------------------------------
+!---------------------------------------------------------------------
+! assign new parameter file
+!---------------------------------------------------------------------
 
 	call pardef
 
-c---------------------------------------------------------------------
-c get names of basin and simulation
-c---------------------------------------------------------------------
+!---------------------------------------------------------------------
+! get names of basin and simulation
+!---------------------------------------------------------------------
 
 	call assnam(mode)
 
-c---------------------------------------------------------------------
-c if no bas file has to be opened we are done
-c---------------------------------------------------------------------
+!---------------------------------------------------------------------
+! if no bas file has to be opened we are done
+!---------------------------------------------------------------------
 
 	if( .not. btest(abs(mode),0) ) return
 
-c---------------------------------------------------------------------
-c open bas file
-c---------------------------------------------------------------------
+!---------------------------------------------------------------------
+! open bas file
+!---------------------------------------------------------------------
 
 	call read_bas_file(nknddi,nelddi)
 
-c---------------------------------------------------------------------
-c set up boundary nodes
-c---------------------------------------------------------------------
+!---------------------------------------------------------------------
+! set up boundary nodes
+!---------------------------------------------------------------------
 
 	!if(matdim.gt.0) call sp131k(matdim)
 
-c---------------------------------------------------------------------
-c end of routine
-c---------------------------------------------------------------------
+!---------------------------------------------------------------------
+! end of routine
+!---------------------------------------------------------------------
 
 	end
 
-c**************************************************************
-c**************************************************************
-c**************************************************************
+!**************************************************************
+!**************************************************************
+!**************************************************************
 
 	subroutine pardef
 
-c reads default parameters nls and fnm
+! reads default parameters nls and fnm
 
 	implicit none
 
@@ -372,7 +372,7 @@ c reads default parameters nls and fnm
 
 	end
 
-c**************************************************************
+!**************************************************************
 
 	subroutine read_apn_file(ivar)
 
@@ -391,9 +391,9 @@ c**************************************************************
 
 	end
 
-c**************************************************************
-c**************************************************************
-c**************************************************************
+!**************************************************************
+!**************************************************************
+!**************************************************************
 
 	subroutine read_memory(simul,basin)
 
@@ -424,7 +424,7 @@ c**************************************************************
 
 	end
 
-c**************************************************************
+!**************************************************************
 
 	subroutine write_memory(simul,basin)
 
@@ -452,11 +452,11 @@ c**************************************************************
 
 	end
 
-c**************************************************************
+!**************************************************************
 
 	subroutine read_bas_file(nknddi,nelddi)
 
-c opens and reads basin file
+! opens and reads basin file
 
 	use basin
 
@@ -493,5 +493,5 @@ c opens and reads basin file
 
 	end
 
-c**************************************************************
+!**************************************************************
 

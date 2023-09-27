@@ -27,177 +27,177 @@
 !
 !--------------------------------------------------------------------------
 
-c boundary condition routines
-c
-c contents :
-c
-c subroutine sp111(mode)		set up boundary/initial cond.
-c
-c subroutine z_tilt			tilting of boundary surface (fixed)
-c subroutine c_tilt			tilting of boundary surface (Coriolis)
-c
-c subroutine init_tilt(ibc)       	finds tilting node in node list
-c subroutine init_flux(ibc)		initializes flux boundary
-c
-c subroutine set_mass_flux		sets up (water) mass flux array mfluxv
-c subroutine adjust_mass_flux		adjusts mass flux for dry nodes
-c subroutine make_scal_flux(what,r3v,scal,sflux,sconz,ssurf)	sets scal flux
-c subroutine flux_debug(what,mfluxv,sflux,sconz)
-c subroutine check_scal_flux(what,scal,sconz)			checks scal flux
-c 
-c subroutine init_scal_bc(r3v)		initializes array for scalar BC
-c subroutine mult_scal_bc(r3v,value)	multiplies array for scalar BC by value
-c 
-c subroutine dist_3d(nlvddi,r3v,kn,nbdim,values)
-c subroutine dist_horizontal(nlvddi,r3v,n,value)
-c subroutine aver_horizontal(nlvddi,r3v,n,value)
-c
-c subroutine print_scal_bc(r3v)		prints non-flag entries of scalar BC
-c subroutine get_bflux(k,flux)		returns boundary flux of node k
-c 
-c subroutine level_flux(dtime,levflx,kn,rw) compute discharge from water level
-c subroutine z_smooth(z)		smooths z values
-c subroutine flow_out_piece_new(z,rout)
-c
-c function get_discharge(ibc)		returns discharge through boundary ibc
-c
-c revision log :
-c
-c 05.08.1992	ggu	$$ibtyp3 - implementation of ibtyp=3
-c 31.08.1992	ggu	$$rqv1   - rqv initialized in sp159b, not here
-c 05.09.1992	ggu	$$close1 - rqv initialized here
-c 27.10.1993	ggu	$$roger  - ibtyp=70 (nwe-shelf)
-c 05.11.1993	ggu	$$roger  - call to roger has been commented
-c 11.01.1994	ggu	$$restart - restart is reading all variables
-c 20.01.1994	ggu	$$zeov - initialize zeov
-c 20.01.1994	ggu	$$conz - impl. of conz with bnd(12,.)
-c 31.01.1994	ggu	$$conzbc - impl. of bc for conz with rcv
-c 24.03.1994	ggu	$$surel - impl. of distributed source/sink
-c 02.04.1996	ggu	$$exxqq - interpolation for more files ok
-c 25.06.1997	ggu	complete restructured -> new subroutines
-c 18.09.1997	ggu	$$FLUX3 - special treatment of type 3 boundary
-c 23.09.1997	ggu	concentration boundary as file implemented
-c 03.12.1997	ggu	$$TS - temp/salt implemented
-c 20.05.1998	ggu	rain from file implemented
-c 22.05.1998	ggu	local variable t introduced
-c 22.05.1998	ggu	corrected bug for rain (surel called twice)
-c 28.05.1998	ggu	new ruv, rvv (momentum input) (incomplete)
-c 20.06.1998	ggu	more on momentum input (mvalue)
-c 29.06.1998	ggu	!$$momin1 - bug fix for momentum input
-c 13.07.1998	ggu	!initialize ruv, rvv by node
-c 14.07.1998	ggu	finally momentum input finished -> new exxqq
-c 20.08.1998	ggu	iextpo finally eliminated
-c 20.08.1998	ggu	2d dependent routines copied to subini.f
-c 21.08.1998	ggu	xv eliminated
-c 24.08.1998	ggu	BC for concentration is bnd(20,..)
-c 24.08.1998	ggu	BC for maximum input level is bnd(12,..) -> levmax
-c 05.11.1998	ggu	slightly restructured restart
-c 18.02.1999	ggu	allow for boundary type 0
-c 20.04.1999	ggu	converted to stress instead of wind (tauxnv...)
-c 01.12.1999	ggu	handle negative boundary type
-c 07.05.2001	ggu	introduced variable zfact
-c 24.10.2001	ggu	ignore boundary with type 0
-c 10.08.2003	ggu	better commented, new routines meteo_init, meteo_force
-c 14.08.2003	ggu	initialization of z and uv made explicit
-c 10.03.2004	ggu	RQVDT - value in rqv is now discharge [m**3/s]
-c 03.09.2004	ggu	restart taken out to ht
-c 11.10.2004	ggu	new ibtyp=31, multiply with zfact also for sin (ZFACT)
-c 11.03.2005	ggu	new boundary routines b3dvalue, c3dvalue (3D bounds)
-c 17.02.2006	ggu	new routine get_bflux()
-c 23.03.2006	ggu	changed time step to real
-c 18.09.2007	ggu	new set_mass_flux, bug fix in dist_3d
-c 25.09.2007	ggu	routines deleted: [mbc]value, testbc
-c 02.10.2007	ggu	bug fix in make_scal_flux: surface flux only in layer 1
-c 08.10.2007	ggu	deleted commented lines
-c 17.03.2008	ggu	name of some variables changed, new scalar values
-c 07.04.2008	ggu	deleted c2dvalue, set_scal_bc
-c 07.04.2008	ggu	differential input introduced (-5555)
-c 09.04.2008	ggu	only level boundary array, re-arranged
-c 10.04.2008	ggu&ccf	new call to init_z0b()
-c 17.04.2008	ggu	lmin introduced in set_mass_flux (negative levmax)
-c 17.04.2008	ggu	evaporation introduced, rain adjusted
-c 18.04.2008	ggu	rain simplified, bugfix
-c 22.04.2008	ggu	in make_scal_flux do not alter mfluxv (parallel code)
-c 03.06.2008	ggu	levmin introduced
-c 24.03.2009	ggu	bug fix for rain; rain0d; new rain2distributed()
-c 27.03.2009	ggu	new routine adjust_mass_flux() for dry nodes
-c 31.03.2009	ggu	in make_scal_flux() bug fix for negative fluxes
-c 02.04.2009	ggu	use get_bnd_(i)par() for special routines
-c 03.04.2009	ggu	set intpol depending on ibtyp if intpol==0
-c 20.04.2009	ggu	new routine z_tilt (tilting around a fixed value)
-c 27.04.2009	ggu	can use ktilt with ztilt
-c 19.01.2010	ggu	in make_scal_flux() return also sconz at bound
-c 26.02.2010	ggu	bug fix in make_scal_flux() - sconz was out of l-loop
-c 01.03.2010	dbf	tramp introduced
-c 10.03.2010	ggu	new routine check_scal_flux()
-c 22.03.2010	ggu	in make_scal_flux() forgotten to initialize sconz
-c 14.04.2010	ggu	account for negative levmin/max
-c 16.02.2011	ggu	copied meteo routines to submet.f
-c 23.02.2011	ggu	new parameters tramp and levflx implemented
-c 01.03.2011	ggu	implement smoothing for levflx
-c 14.04.2011	ggu	changed VERS_6_1_22
-c 14.05.2011	ggu	new routine get_discharge()
-c 31.05.2011	ggu	changed VERS_6_1_23
-c 07.06.2011	ggu	changed VERS_6_1_25
-c 30.03.2012	ggu	changed VERS_6_1_51
-c 13.06.2013	ggu	changed VERS_6_1_65
-c 29.11.2013	ggu	prepared for ibtyp == 0
-c 05.12.2013	ggu	changed VERS_6_1_70
-c 05.05.2014	ggu	changed VERS_6_1_74
-c 27.06.2014	ggu	changed VERS_6_1_78
-c 07.07.2014	ggu	changed VERS_6_1_79
-c 10.07.2014	ggu	only new file format allowed
-c 18.07.2014	ggu	changed VERS_7_0_1
-c 30.10.2014	ggu	in c_tilt() compute distance also for lat/lon
-c 31.10.2014	ccf	new call to init_z0 instead than init_z0b
-c 05.11.2014	ggu	changed VERS_7_0_5
-c 07.11.2014	ggu	bug fix for distance computation in z_tilt, c_tilt
-c 05.12.2014	ggu	changed VERS_7_0_8
-c 19.12.2014	ggu	changed VERS_7_0_10
-c 23.12.2014	ggu	changed VERS_7_0_11
-c 19.01.2015	ggu	changed VERS_7_1_3
-c 10.02.2015	ggu	new call to iff_read_and_interpolate()
-c 26.02.2015	ggu	changed VERS_7_1_5
-c 10.07.2015	ggu	changed VERS_7_1_50
-c 17.07.2015	ggu	changed VERS_7_1_80
-c 20.07.2015	ggu	changed VERS_7_1_81
-c 30.07.2015	ggu	changed VERS_7_1_83
-c 05.11.2015	ggu	changed VERS_7_3_12
-c 16.12.2015	ggu	changed VERS_7_3_16
-c 18.12.2015	ggu	changed VERS_7_3_17
-c 12.01.2017	ggu	changed VERS_7_5_21
-c 05.12.2017	ggu	changed VERS_7_5_39
-c 03.04.2018	ggu	changed VERS_7_5_43
-c 04.04.2018	ggu	initialization for zeta revised for mpi
-c 19.04.2018	ggu	changed VERS_7_5_45
-c 01.06.2018	mbj	added tramp for sea level boundary condition
-c 06.07.2018	ggu	changed VERS_7_5_48
-c 11.10.2018	ggu	zconst setting adjourned
-c 18.12.2018	ggu	changed VERS_7_5_52
-c 16.02.2019	ggu	changed VERS_7_5_60
-c 06.03.2019	mbj	added tramp = -2, (average, Bajo et al., 2019)
-c 13.03.2019	ggu	changed VERS_7_5_61
-c 04.07.2019	ggu	setweg & setznv introduced before make_new_depth
-c 05.06.2020	ggu	bug fix: set_area was not called (MPI_SET_AREA)
-c 30.03.2021	ggu	in set_mass_flux() use new time step data
-c 31.03.2021	ggu	some debug code (iudbg)
-c 11.04.2022	ggu	mpi handling of zconst
-c 02.05.2022	ggu	exchange mfluxv, rqdsv, rqv (maybe not needed)
-c 03.05.2022	ggu	do not exchange rqv, lots of debug code
-c 11.10.2022	ggu	make_new_depth substituted with initialize_layer_depth
-c 16.12.2022	ggu	no tilting for mpi -> error
-c 01.02.2023	ggu	rflux introduced for double BC
-c 01.04.2023	ggu	handle new boundary type 5
-c 09.05.2023    lrp     introduce top layer index variable
-c
-c***************************************************************
+! boundary condition routines
+!
+! contents :
+!
+! subroutine sp111(mode)		set up boundary/initial cond.
+!
+! subroutine z_tilt			tilting of boundary surface (fixed)
+! subroutine c_tilt			tilting of boundary surface (Coriolis)
+!
+! subroutine init_tilt(ibc)       	finds tilting node in node list
+! subroutine init_flux(ibc)		initializes flux boundary
+!
+! subroutine set_mass_flux		sets up (water) mass flux array mfluxv
+! subroutine adjust_mass_flux		adjusts mass flux for dry nodes
+! subroutine make_scal_flux(what,r3v,scal,sflux,sconz,ssurf)	sets scal flux
+! subroutine flux_debug(what,mfluxv,sflux,sconz)
+! subroutine check_scal_flux(what,scal,sconz)			checks scal flux
+! 
+! subroutine init_scal_bc(r3v)		initializes array for scalar BC
+! subroutine mult_scal_bc(r3v,value)	multiplies array for scalar BC by value
+! 
+! subroutine dist_3d(nlvddi,r3v,kn,nbdim,values)
+! subroutine dist_horizontal(nlvddi,r3v,n,value)
+! subroutine aver_horizontal(nlvddi,r3v,n,value)
+!
+! subroutine print_scal_bc(r3v)		prints non-flag entries of scalar BC
+! subroutine get_bflux(k,flux)		returns boundary flux of node k
+! 
+! subroutine level_flux(dtime,levflx,kn,rw) compute discharge from water level
+! subroutine z_smooth(z)		smooths z values
+! subroutine flow_out_piece_new(z,rout)
+!
+! function get_discharge(ibc)		returns discharge through boundary ibc
+!
+! revision log :
+!
+! 05.08.1992	ggu	$$ibtyp3 - implementation of ibtyp=3
+! 31.08.1992	ggu	$$rqv1   - rqv initialized in sp159b, not here
+! 05.09.1992	ggu	$$close1 - rqv initialized here
+! 27.10.1993	ggu	$$roger  - ibtyp=70 (nwe-shelf)
+! 05.11.1993	ggu	$$roger  - call to roger has been commented
+! 11.01.1994	ggu	$$restart - restart is reading all variables
+! 20.01.1994	ggu	$$zeov - initialize zeov
+! 20.01.1994	ggu	$$conz - impl. of conz with bnd(12,.)
+! 31.01.1994	ggu	$$conzbc - impl. of bc for conz with rcv
+! 24.03.1994	ggu	$$surel - impl. of distributed source/sink
+! 02.04.1996	ggu	$$exxqq - interpolation for more files ok
+! 25.06.1997	ggu	complete restructured -> new subroutines
+! 18.09.1997	ggu	$$FLUX3 - special treatment of type 3 boundary
+! 23.09.1997	ggu	concentration boundary as file implemented
+! 03.12.1997	ggu	$$TS - temp/salt implemented
+! 20.05.1998	ggu	rain from file implemented
+! 22.05.1998	ggu	local variable t introduced
+! 22.05.1998	ggu	corrected bug for rain (surel called twice)
+! 28.05.1998	ggu	new ruv, rvv (momentum input) (incomplete)
+! 20.06.1998	ggu	more on momentum input (mvalue)
+! 29.06.1998	ggu	!$$momin1 - bug fix for momentum input
+! 13.07.1998	ggu	!initialize ruv, rvv by node
+! 14.07.1998	ggu	finally momentum input finished -> new exxqq
+! 20.08.1998	ggu	iextpo finally eliminated
+! 20.08.1998	ggu	2d dependent routines copied to subini.f
+! 21.08.1998	ggu	xv eliminated
+! 24.08.1998	ggu	BC for concentration is bnd(20,..)
+! 24.08.1998	ggu	BC for maximum input level is bnd(12,..) -> levmax
+! 05.11.1998	ggu	slightly restructured restart
+! 18.02.1999	ggu	allow for boundary type 0
+! 20.04.1999	ggu	converted to stress instead of wind (tauxnv...)
+! 01.12.1999	ggu	handle negative boundary type
+! 07.05.2001	ggu	introduced variable zfact
+! 24.10.2001	ggu	ignore boundary with type 0
+! 10.08.2003	ggu	better commented, new routines meteo_init, meteo_force
+! 14.08.2003	ggu	initialization of z and uv made explicit
+! 10.03.2004	ggu	RQVDT - value in rqv is now discharge [m**3/s]
+! 03.09.2004	ggu	restart taken out to ht
+! 11.10.2004	ggu	new ibtyp=31, multiply with zfact also for sin (ZFACT)
+! 11.03.2005	ggu	new boundary routines b3dvalue, c3dvalue (3D bounds)
+! 17.02.2006	ggu	new routine get_bflux()
+! 23.03.2006	ggu	changed time step to real
+! 18.09.2007	ggu	new set_mass_flux, bug fix in dist_3d
+! 25.09.2007	ggu	routines deleted: [mbc]value, testbc
+! 02.10.2007	ggu	bug fix in make_scal_flux: surface flux only in layer 1
+! 08.10.2007	ggu	deleted commented lines
+! 17.03.2008	ggu	name of some variables changed, new scalar values
+! 07.04.2008	ggu	deleted c2dvalue, set_scal_bc
+! 07.04.2008	ggu	differential input introduced (-5555)
+! 09.04.2008	ggu	only level boundary array, re-arranged
+! 10.04.2008	ggu&ccf	new call to init_z0b()
+! 17.04.2008	ggu	lmin introduced in set_mass_flux (negative levmax)
+! 17.04.2008	ggu	evaporation introduced, rain adjusted
+! 18.04.2008	ggu	rain simplified, bugfix
+! 22.04.2008	ggu	in make_scal_flux do not alter mfluxv (parallel code)
+! 03.06.2008	ggu	levmin introduced
+! 24.03.2009	ggu	bug fix for rain; rain0d; new rain2distributed()
+! 27.03.2009	ggu	new routine adjust_mass_flux() for dry nodes
+! 31.03.2009	ggu	in make_scal_flux() bug fix for negative fluxes
+! 02.04.2009	ggu	use get_bnd_(i)par() for special routines
+! 03.04.2009	ggu	set intpol depending on ibtyp if intpol==0
+! 20.04.2009	ggu	new routine z_tilt (tilting around a fixed value)
+! 27.04.2009	ggu	can use ktilt with ztilt
+! 19.01.2010	ggu	in make_scal_flux() return also sconz at bound
+! 26.02.2010	ggu	bug fix in make_scal_flux() - sconz was out of l-loop
+! 01.03.2010	dbf	tramp introduced
+! 10.03.2010	ggu	new routine check_scal_flux()
+! 22.03.2010	ggu	in make_scal_flux() forgotten to initialize sconz
+! 14.04.2010	ggu	account for negative levmin/max
+! 16.02.2011	ggu	copied meteo routines to submet.f
+! 23.02.2011	ggu	new parameters tramp and levflx implemented
+! 01.03.2011	ggu	implement smoothing for levflx
+! 14.04.2011	ggu	changed VERS_6_1_22
+! 14.05.2011	ggu	new routine get_discharge()
+! 31.05.2011	ggu	changed VERS_6_1_23
+! 07.06.2011	ggu	changed VERS_6_1_25
+! 30.03.2012	ggu	changed VERS_6_1_51
+! 13.06.2013	ggu	changed VERS_6_1_65
+! 29.11.2013	ggu	prepared for ibtyp == 0
+! 05.12.2013	ggu	changed VERS_6_1_70
+! 05.05.2014	ggu	changed VERS_6_1_74
+! 27.06.2014	ggu	changed VERS_6_1_78
+! 07.07.2014	ggu	changed VERS_6_1_79
+! 10.07.2014	ggu	only new file format allowed
+! 18.07.2014	ggu	changed VERS_7_0_1
+! 30.10.2014	ggu	in c_tilt() compute distance also for lat/lon
+! 31.10.2014	ccf	new call to init_z0 instead than init_z0b
+! 05.11.2014	ggu	changed VERS_7_0_5
+! 07.11.2014	ggu	bug fix for distance computation in z_tilt, c_tilt
+! 05.12.2014	ggu	changed VERS_7_0_8
+! 19.12.2014	ggu	changed VERS_7_0_10
+! 23.12.2014	ggu	changed VERS_7_0_11
+! 19.01.2015	ggu	changed VERS_7_1_3
+! 10.02.2015	ggu	new call to iff_read_and_interpolate()
+! 26.02.2015	ggu	changed VERS_7_1_5
+! 10.07.2015	ggu	changed VERS_7_1_50
+! 17.07.2015	ggu	changed VERS_7_1_80
+! 20.07.2015	ggu	changed VERS_7_1_81
+! 30.07.2015	ggu	changed VERS_7_1_83
+! 05.11.2015	ggu	changed VERS_7_3_12
+! 16.12.2015	ggu	changed VERS_7_3_16
+! 18.12.2015	ggu	changed VERS_7_3_17
+! 12.01.2017	ggu	changed VERS_7_5_21
+! 05.12.2017	ggu	changed VERS_7_5_39
+! 03.04.2018	ggu	changed VERS_7_5_43
+! 04.04.2018	ggu	initialization for zeta revised for mpi
+! 19.04.2018	ggu	changed VERS_7_5_45
+! 01.06.2018	mbj	added tramp for sea level boundary condition
+! 06.07.2018	ggu	changed VERS_7_5_48
+! 11.10.2018	ggu	zconst setting adjourned
+! 18.12.2018	ggu	changed VERS_7_5_52
+! 16.02.2019	ggu	changed VERS_7_5_60
+! 06.03.2019	mbj	added tramp = -2, (average, Bajo et al., 2019)
+! 13.03.2019	ggu	changed VERS_7_5_61
+! 04.07.2019	ggu	setweg & setznv introduced before make_new_depth
+! 05.06.2020	ggu	bug fix: set_area was not called (MPI_SET_AREA)
+! 30.03.2021	ggu	in set_mass_flux() use new time step data
+! 31.03.2021	ggu	some debug code (iudbg)
+! 11.04.2022	ggu	mpi handling of zconst
+! 02.05.2022	ggu	exchange mfluxv, rqdsv, rqv (maybe not needed)
+! 03.05.2022	ggu	do not exchange rqv, lots of debug code
+! 11.10.2022	ggu	make_new_depth substituted with initialize_layer_depth
+! 16.12.2022	ggu	no tilting for mpi -> error
+! 01.02.2023	ggu	rflux introduced for double BC
+! 01.04.2023	ggu	handle new boundary type 5
+! 09.05.2023    lrp     introduce top layer index variable
+!
+!***************************************************************
 
 	subroutine sp111(mode)
 
-c set up boundary and initial conditions
-c
-c mode		1 : first call, initialize b.c.
-c		2 : read in b.c.
+! set up boundary and initial conditions
+!
+! mode		1 : first call, initialize b.c.
+!		2 : read in b.c.
 
 	use mod_bound_geom
 	use mod_bnd_aux
@@ -236,7 +236,7 @@ c		2 : read in b.c.
 	real dt
 	real conz,temp,salt
 	real conzdf,tempdf,saltdf
-c	real dz
+!	real dz
 	real rmu,rmv
 	real getpar,rwint
 	real conz3,temp3,salt3
@@ -260,15 +260,15 @@ c	real dz
 	write(6,*) 'mode = ',mode
 	stop 'error stop: internal error sp111: mode'
 
-c---------------------------------------------------------------
-c first call %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-c---------------------------------------------------------------
+!---------------------------------------------------------------
+! first call %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+!---------------------------------------------------------------
 
     1	continue
 
-c	-----------------------------------------------------
-c       initialize boundary ids
-c	-----------------------------------------------------
+!	-----------------------------------------------------
+!       initialize boundary ids
+!	-----------------------------------------------------
 
 	nbc = nbnds()
 	allocate(ids(nbc))
@@ -276,15 +276,15 @@ c	-----------------------------------------------------
 	ids = 0
 	dzbav = zflag
 	
-c	-----------------------------------------------------
-c       initialize meteo
-c	-----------------------------------------------------
+!	-----------------------------------------------------
+!       initialize meteo
+!	-----------------------------------------------------
 
 	call meteo_init
 
-c	-----------------------------------------------------
-c       initialize tilted and flux boundaries
-c	-----------------------------------------------------
+!	-----------------------------------------------------
+!       initialize tilted and flux boundaries
+!	-----------------------------------------------------
 
 	nbc = nbnds()
 
@@ -302,13 +302,13 @@ c	-----------------------------------------------------
 	  end if
 	end do
 
-c	-----------------------------------------------------
-c       initialization of aux array
-c	-----------------------------------------------------
+!	-----------------------------------------------------
+!       initialization of aux array
+!	-----------------------------------------------------
 
-c	-----------------------------------------------------
-c       initialization of fem_intp
-c	-----------------------------------------------------
+!	-----------------------------------------------------
+!       initialization of fem_intp
+!	-----------------------------------------------------
 
 	call get_first_dtime(dtime0)
 
@@ -329,10 +329,10 @@ c	-----------------------------------------------------
 	    intpol = 2
 	    if( ibtyp .eq. 1 ) intpol = 4
 	  end if
-	  write(6,'(a,3i5)') 'opening boundary file: (ibc,ibtyp,intpol) '
-     +				,ibc,ibtyp,intpol
-          call iff_init(dtime0,zfile,nvar,nk,0,intpol
-     +                          ,nodes,vconst,id)
+	  write(6,'(a,3i5)') 'opening boundary file: (ibc,ibtyp,intpol) ' &
+     &				,ibc,ibtyp,intpol
+          call iff_init(dtime0,zfile,nvar,nk,0,intpol &
+     &                          ,nodes,vconst,id)
 	  if( ibtyp .eq. 0 ) then
 	    write(auxname,'(a8,1x,i3)') 'not used',ibtyp
 	  else if( ibtyp .lt. 0 ) then
@@ -346,15 +346,15 @@ c	-----------------------------------------------------
 	  end if
 	  call iff_set_description(id,ibc,auxname)
 	  ids(ibc) = id
-	  write(6,'(a,2i5,4a)') ' boundary file opened: '
-     +			,ibc,id,' ',auxname,' ',trim(zfile)
+	  write(6,'(a,2i5,4a)') ' boundary file opened: ' &
+     &			,ibc,id,' ',auxname,' ',trim(zfile)
 	end do
 
 	!call iff_print_info(ids(1))
 
-c	-----------------------------------------------------
-c       determine constant for z initialization
-c	-----------------------------------------------------
+!	-----------------------------------------------------
+!       determine constant for z initialization
+!	-----------------------------------------------------
 
 	zconst=getpar('zconst')	!constant initial z value
 	dtime = dtime0
@@ -401,10 +401,10 @@ c	-----------------------------------------------------
 
 	call putpar('zconst',zconst)
 
-c	-----------------------------------------------------
-c       initialize variables or restart
-c	...the variables that have to be set are zenv, utlnv, vtlnv
-c	-----------------------------------------------------
+!	-----------------------------------------------------
+!       initialize variables or restart
+!	...the variables that have to be set are zenv, utlnv, vtlnv
+!	-----------------------------------------------------
 
 	call init_z(zconst)	!initializes znv and zenv
 	call setweg(0,iw)	!sets minimum depth
@@ -421,32 +421,32 @@ c	-----------------------------------------------------
 	call copy_uvz		!copies to old time level
 	call copy_depth		!copies layer thickness
 
-c	-----------------------------------------------------
-c       finish
-c	-----------------------------------------------------
+!	-----------------------------------------------------
+!       finish
+!	-----------------------------------------------------
 
-c next only for radiation condition
-c
-c        write(78,*) 46728645,1
-c        write(78,*) 50,0
-c        write(78,*) 0,50,-0.01,0.01
-c        write(79,*) 46728645,1
-c        write(79,*) 50,0
-c        write(79,*) 0,50,-0.01,0.01
+! next only for radiation condition
+!
+!        write(78,*) 46728645,1
+!        write(78,*) 50,0
+!        write(78,*) 0,50,-0.01,0.01
+!        write(79,*) 46728645,1
+!        write(79,*) 50,0
+!        write(79,*) 0,50,-0.01,0.01
 
 	return
 
-c---------------------------------------------------------------
-c normal call for boundary conditions %%%%%%%%%%%%%%%%%%%%%%%%%%
-c---------------------------------------------------------------
+!---------------------------------------------------------------
+! normal call for boundary conditions %%%%%%%%%%%%%%%%%%%%%%%%%%
+!---------------------------------------------------------------
 
     2	continue
 
 	call get_act_dtime(dtime)
 
-c	-----------------------------------------------------
-c	initialize node vectors with boundary conditions
-c	-----------------------------------------------------
+!	-----------------------------------------------------
+!	initialize node vectors with boundary conditions
+!	-----------------------------------------------------
 
 	do k=1,nkn
           rwv2(k)=0.
@@ -460,9 +460,9 @@ c	-----------------------------------------------------
 
 	rflux = 0.	!flux values for every boundary node
 
-c	-----------------------------------------------------
-c	loop over boundaries
-c	-----------------------------------------------------
+!	-----------------------------------------------------
+!	loop over boundaries
+!	-----------------------------------------------------
 
         !call bndo_radiat(it,rzv)
 	nbc = nbnds()
@@ -563,14 +563,14 @@ c	-----------------------------------------------------
                if( i .eq. 1 ) write(iunrad,*) dtime,nk,ktilt,rw
                write(iunrad,*) rzv(kn)
              else if(ibtyp.eq.32) then		!for malta 
-c	       nothing
+!	       nothing
              else if(ibtyp.eq.0) then		!switched off
-c	       nothing
+!	       nothing
              else if(ibtyp.lt.0) then		!closed
-c	       nothing
+!	       nothing
 	     else
-c               kranf,krend not available...
-c	       call zspeci(ibtyp,kranf,krend,rw)	!for radiation...
+!               kranf,krend not available...
+!	       call zspeci(ibtyp,kranf,krend,rw)	!for radiation...
 	       write(6,*) 'boundary = ',ibc,'   type = ',ibtyp
 	       stop 'error stop sp111: Unknown boundary type'
 	     end if
@@ -580,34 +580,34 @@ c	       call zspeci(ibtyp,kranf,krend,rw)	!for radiation...
 
 	end do
 
-c	-----------------------------------------------------
-c	tilting
-c	-----------------------------------------------------
+!	-----------------------------------------------------
+!	tilting
+!	-----------------------------------------------------
 
 	call z_tilt
 	call c_tilt
 
-c	-----------------------------------------------------
-c	meteo forcing					!$$surel
-c	-----------------------------------------------------
+!	-----------------------------------------------------
+!	meteo forcing					!$$surel
+!	-----------------------------------------------------
 
 	call meteo_force
 
-c	-----------------------------------------------------
-c	set mass flux -> fills mfluxv and integrates to rqv
-c	-----------------------------------------------------
+!	-----------------------------------------------------
+!	set mass flux -> fills mfluxv and integrates to rqv
+!	-----------------------------------------------------
 
 	call set_mass_flux
 
-c	-----------------------------------------------------
-c	testing
-c	-----------------------------------------------------
+!	-----------------------------------------------------
+!	testing
+!	-----------------------------------------------------
 
-c	call tsbnds
+!	call tsbnds
 
-c -----------------------------------------------------------
-c end of routine
-c -----------------------------------------------------------
+! -----------------------------------------------------------
+! end of routine
+! -----------------------------------------------------------
 
 
 	return
@@ -618,7 +618,7 @@ c -----------------------------------------------------------
 	stop 'error stop : sp111'
 	end
 
-c**************************************************************
+!**************************************************************
 
 	subroutine z_ramp(kn,alpha,bav,rw)
 
@@ -651,14 +651,14 @@ c**************************************************************
           rw = rw + dzb(kn)
 	else if ( nint(alpha) == -2 ) then
 	  ! subtract the initial bias between the averages from z-file records
-	  if( nint(bav) == flag ) 
-     +      stop 'error stop z_ramp: error in average boundary value.'
+	  if( nint(bav) == flag )  &
+     &      stop 'error stop z_ramp: error in average boundary value.'
 	  rw = rw + bav
         end if
 
 	end
 
-c**************************************************************
+!**************************************************************
 
 	subroutine z_ramp_avinit(nbc,ib,nkb,rwv2,bav)
 
@@ -690,18 +690,18 @@ c**************************************************************
 	end subroutine z_ramp_avinit
 
 
-c**************************************************************
+!**************************************************************
 
 	subroutine z_tilt
 
-c artificial tilting of boundary surface - uses ktilt and ztilt
-c
-c the first boundary node is set to -ztilt, and the last to +ztilt
-c the total water level difference is therefore 2*ztilt
-c if ktilt is not given then the other nodes are linearily interpolated
-c	between these two values
-c if ktilt is given then this node will be set to z=0 and the other
-c	nodes are linearly interpolated between start-ktilt and ktilt-end
+! artificial tilting of boundary surface - uses ktilt and ztilt
+!
+! the first boundary node is set to -ztilt, and the last to +ztilt
+! the total water level difference is therefore 2*ztilt
+! if ktilt is not given then the other nodes are linearily interpolated
+!	between these two values
+! if ktilt is given then this node will be set to z=0 and the other
+!	nodes are linearly interpolated between start-ktilt and ktilt-end
 
 	use mod_bound_geom
 	use mod_bound_dynamic
@@ -731,25 +731,25 @@ c	nodes are linearly interpolated between start-ktilt and ktilt-end
 	    do k=kranf+1,krend
 		kn2=irv(k)
 		kn1=irv(k-1)
-		call compute_distance(xgv(kn1),ygv(kn1)
-     +				,xgv(kn2),ygv(kn2),dx,dy)
+		call compute_distance(xgv(kn1),ygv(kn1) &
+     &				,xgv(kn2),ygv(kn2),dx,dy)
 	        rltot = rltot + sqrt(dx*dx+dy*dy)
 		if( k .eq. ktilt ) rltot1 = rltot	!BUG 3.12.2013
 	    end do
 	    rltot2 = rltot - rltot1
 
-c in rltot the whole length of boundary is stored
-c in rltot1 and rltot2 are first and second part of length of boundary
-c rltot1 from start to ktilt, and rltot2 from ktilt to end
-c if no ktilt is given rltot1/rltot2 are not used
+! in rltot the whole length of boundary is stored
+! in rltot1 and rltot2 are first and second part of length of boundary
+! rltot1 from start to ktilt, and rltot2 from ktilt to end
+! if no ktilt is given rltot1/rltot2 are not used
 
 	    rl = 0.
             rzv(irv(kranf)) = rzv(irv(kranf)) - ztilt
 	    do k=kranf+1,krend
 		kn2=irv(k)
 		kn1=irv(k-1)
-		call compute_distance(xgv(kn1),ygv(kn1)
-     +				,xgv(kn2),ygv(kn2),dx,dy)
+		call compute_distance(xgv(kn1),ygv(kn1) &
+     &				,xgv(kn2),ygv(kn2),dx,dy)
 	        rl = rl + sqrt(dx*dx+dy*dy)
 		if( ktilt .le. 0 ) then			!no fixed node
 	          z = - ztilt + (rl/rltot) * 2. * ztilt
@@ -767,15 +767,15 @@ c if no ktilt is given rltot1/rltot2 are not used
 
 	end
 
-c**************************************************************
+!**************************************************************
 
 	subroutine c_tilt
 
-c tilting of boundary surface due to Coriolis acceleration - needs ktilt
-c
-c this routine is only used if ztilt == 0
-c if ztilt is given then z_tilt() is used to tilt water level
-c if ktilt is not given nothing is tilted
+! tilting of boundary surface due to Coriolis acceleration - needs ktilt
+!
+! this routine is only used if ztilt == 0
+! if ztilt is given then z_tilt() is used to tilt water level
+! if ktilt is not given nothing is tilted
 
 	use mod_bound_geom
 	use mod_bound_dynamic
@@ -815,8 +815,8 @@ c if ktilt is not given nothing is tilted
 	   do k=ktilt+1,krend,1
 		kn2=irv(k)
 		kn1=irv(k-1)
-		call compute_distance(xgv(kn1),ygv(kn1)
-     +				,xgv(kn2),ygv(kn2),dx,dy)
+		call compute_distance(xgv(kn1),ygv(kn1) &
+     &				,xgv(kn2),ygv(kn2),dx,dy)
 		call get_meteo_forcing(kn1,wx,wy,taux1,tauy1,p1)
 		call get_meteo_forcing(kn2,wx,wy,taux2,tauy2,p2)
 		taux = 0.5*(taux1+taux2)
@@ -833,8 +833,8 @@ c if ktilt is not given nothing is tilted
 	   do k=ktilt-1,kranf,-1
 		kn2=irv(k+1)
 		kn1=irv(k)
-		call compute_distance(xgv(kn1),ygv(kn1)
-     +				,xgv(kn2),ygv(kn2),dx,dy)
+		call compute_distance(xgv(kn1),ygv(kn1) &
+     &				,xgv(kn2),ygv(kn2),dx,dy)
 		call get_meteo_forcing(kn1,wx,wy,taux1,tauy1,p1)
 		call get_meteo_forcing(kn2,wx,wy,taux2,tauy2,p2)
 		taux = 0.5*(taux1+taux2)
@@ -852,13 +852,13 @@ c if ktilt is not given nothing is tilted
 
 	end
 
-c**************************************************************
+!**************************************************************
 
 	subroutine init_tilt(ibc)
 
 	use shympi
 
-c finds tilting node in boundary node list
+! finds tilting node in boundary node list
 
 	implicit none
 
@@ -907,11 +907,11 @@ c finds tilting node in boundary node list
 
 	end
 
-c******************************************************************
+!******************************************************************
 
 	subroutine init_flux(ibc)
 
-c initializes flux boundary
+! initializes flux boundary
 
 	use mod_bound_geom
 	use basin
@@ -998,9 +998,9 @@ c initializes flux boundary
 
 	end
 
-c*******************************************************************
-c*******************************************************************
-c*******************************************************************
+!*******************************************************************
+!*******************************************************************
+!*******************************************************************
 
 	subroutine adjust_bound(id,ibc,dtime,nk,rw)
 
@@ -1032,11 +1032,11 @@ c*******************************************************************
 
 	end
 
-c*******************************************************************
+!*******************************************************************
 
 	subroutine set_mass_flux
 
-c sets up (water) mass flux array mfluxv (3d) and rqv (vertically integrated)
+! sets up (water) mass flux array mfluxv (3d) and rqv (vertically integrated)
 
 	use mod_bound_dynamic
 	use mod_bound_geom
@@ -1058,9 +1058,9 @@ c sets up (water) mass flux array mfluxv (3d) and rqv (vertically integrated)
 	integer nkbnds,kbnds,nbnds,kbndind
 	real volnode		!function to compute volume of node
 
-c------------------------------------------------------------------
-c initialize arrays and parameter
-c------------------------------------------------------------------
+!------------------------------------------------------------------
+! initialize arrays and parameter
+!------------------------------------------------------------------
 
 	mode = -1		!old time step
 	mode = +1		!old time step
@@ -1074,9 +1074,9 @@ c------------------------------------------------------------------
 
 	mfluxv = 0.
 
-c------------------------------------------------------------------
-c loop over boundaries for point sources -> use volumes as weight
-c------------------------------------------------------------------
+!------------------------------------------------------------------
+! loop over boundaries for point sources -> use volumes as weight
+!------------------------------------------------------------------
 
 	nbc = nbnds()
 
@@ -1128,9 +1128,9 @@ c------------------------------------------------------------------
 
 	end do
 
-c------------------------------------------------------------------
-c add distributed sources
-c------------------------------------------------------------------
+!------------------------------------------------------------------
+! add distributed sources
+!------------------------------------------------------------------
 
 	do k=1,nkn
 	  lmin = jlhkv(k)
@@ -1142,9 +1142,9 @@ c------------------------------------------------------------------
 	call shympi_exchange_3d_node(mfluxv)
 	call shympi_exchange_2d_node(rqdsv)
 
-c------------------------------------------------------------------
-c compute total flux for check and integrate flux into rqv
-c------------------------------------------------------------------
+!------------------------------------------------------------------
+! compute total flux for check and integrate flux into rqv
+!------------------------------------------------------------------
 
 	fluxtot = 0.
 	do k=1,nkn
@@ -1164,9 +1164,9 @@ c------------------------------------------------------------------
 	
 	if( debug ) write(iu,*) '  total flux: ',fluxtot
 
-c------------------------------------------------------------------
-c end of routine
-c------------------------------------------------------------------
+!------------------------------------------------------------------
+! end of routine
+!------------------------------------------------------------------
 
 	return
    98	continue
@@ -1183,11 +1183,11 @@ c------------------------------------------------------------------
 	stop 'error stop set_mass_flux: voltot = 0'
 	end
 
-c**********************************************************************
+!**********************************************************************
 
 	subroutine adjust_mass_flux
 
-c adjusts mass flux for dry nodes
+! adjusts mass flux for dry nodes
 
 	use mod_geom_dynamic
 	use mod_bound_dynamic
@@ -1213,11 +1213,11 @@ c adjusts mass flux for dry nodes
 
 	end
 
-c**********************************************************************
+!**********************************************************************
 
 	subroutine make_scal_flux(what,iter,r3v,scal,sflux,sconz,ssurf)
 
-c computes scalar flux from fluxes and concentrations
+! computes scalar flux from fluxes and concentrations
 
 	use mod_bound_dynamic
 	use levels
@@ -1305,7 +1305,7 @@ c computes scalar flux from fluxes and concentrations
 	stop 'error stop make_scal_flux: boundary condition mismatch'
 	end
 
-c**********************************************************************
+!**********************************************************************
 
 	subroutine flux_debug(what,mfluxv,sflux,sconz)
 
@@ -1348,11 +1348,11 @@ c**********************************************************************
 
 	end
 
-c**********************************************************************
+!**********************************************************************
 
 	subroutine check_scal_flux(what,scal,sconz)
 
-c checks scalar flux
+! checks scalar flux
 
 	use mod_bound_dynamic
 	use levels
@@ -1392,13 +1392,13 @@ c checks scalar flux
  1000	format(2i10,4f10.4)
 	end
 
-c**********************************************************************
-c**********************************************************************
-c**********************************************************************
+!**********************************************************************
+!**********************************************************************
+!**********************************************************************
 
 	subroutine init_scal_bc(r3v)
 
-c initializes array for scalar boundary condition
+! initializes array for scalar boundary condition
 
 	use levels, only : nlvdi,nlv
 	use basin, only : nkn,nel,ngr,mbw
@@ -1419,11 +1419,11 @@ c initializes array for scalar boundary condition
 
 	end
 
-c*******************************************************************
+!*******************************************************************
 
 	subroutine mult_scal_bc(r3v,value)
 
-c multiplies array for scalar boundary condition with value
+! multiplies array for scalar boundary condition with value
 
 	use levels, only : nlvdi,nlv
 	use basin, only : nkn,nel,ngr,mbw
@@ -1446,7 +1446,7 @@ c multiplies array for scalar boundary condition with value
 	end
 
 
-c*******************************************************************
+!*******************************************************************
 
 	subroutine dist_3d(nlvddi,r3v,kn,nbdim,values)
 
@@ -1481,7 +1481,7 @@ c*******************************************************************
 	  
 	end
 
-c**********************************************************************
+!**********************************************************************
 
 	subroutine dist_horizontal(nlvddi,r3v,n,value)
 
@@ -1500,7 +1500,7 @@ c**********************************************************************
 	  
 	end
 
-c**********************************************************************
+!**********************************************************************
 
         subroutine aver_horizontal(nlvddi,r3v,n,value)
 
@@ -1521,11 +1521,11 @@ c**********************************************************************
 
 	end
 
-c**********************************************************************
+!**********************************************************************
 
 	subroutine print_scal_bc(r3v)
 
-c prints non-flag entries of array for scalar boundary condition
+! prints non-flag entries of array for scalar boundary condition
 
 	use levels, only : nlvdi,nlv
 	use basin, only : nkn,nel,ngr,mbw
@@ -1550,11 +1550,11 @@ c prints non-flag entries of array for scalar boundary condition
 
 	end
 
-c**********************************************************************
+!**********************************************************************
 
 	subroutine get_bflux(k,flux)
 
-c returns boundary flux of node k
+! returns boundary flux of node k
 
 	use mod_bound_dynamic
 
@@ -1567,11 +1567,11 @@ c returns boundary flux of node k
 
 	end
 
-c**********************************************************************
+!**********************************************************************
 
 	subroutine level_flux(dtime,levflx,kn,rw)
 
-c compute discharge from water level
+! compute discharge from water level
 
 	use mod_hydro
 
@@ -1584,8 +1584,8 @@ c compute discharge from water level
 
 	real z,a,b,c,z0
 
-c use fit 1 for compatibility to old simulations
-c use fit 3 for best results without using piecewise fit
+! use fit 1 for compatibility to old simulations
+! use fit 3 for best results without using piecewise fit
 
 	if( levflx .eq. 0 ) then
 	  !nothing changed -> return same rw
@@ -1596,28 +1596,28 @@ c use fit 3 for best results without using piecewise fit
 	  !a = 1648		!no outliers
 	  !c = -2684		!no outliers
 
-c-------------- old fit ----------------------------	1
+!-------------- old fit ----------------------------	1
 	  z0 = 5.		!reference level
 	  a = 1808
 	  c = -2875
 	  rw = a*log(z0+z) + c
-c---------------------------------------------------
+!---------------------------------------------------
 
-c-------------- fit based on mass balance -------------  2
+!-------------- fit based on mass balance -------------  2
 	  !a = 211.521555200211
 	  !b = 0.855968510497031     
 	  !rw = a * z**b
-c---------------------------------------------------
+!---------------------------------------------------
 
-c-------------- new fit based on mass balance ----------  3
+!-------------- new fit based on mass balance ----------  3
 	  !a = 223.529239458563		!new calibration
 	  !b = 0.862816507081288
 	  !rw = a * z**b
-c---------------------------------------------------
+!---------------------------------------------------
 
-c-------------- best fit based on mass balance -----------  4
+!-------------- best fit based on mass balance -----------  4
           !call flow_out_piece_new(z,rw)	!this is best (if it works)
-c---------------------------------------------------
+!---------------------------------------------------
 
 	  rw = -rw
 	  write(134,*) dtime,z,rw
@@ -1628,11 +1628,11 @@ c---------------------------------------------------
 
 	end
 
-c**********************************************************************
+!**********************************************************************
 
 	subroutine z_smooth(z)
 
-c smooths z values
+! smooths z values
 
 	implicit none
 
@@ -1663,7 +1663,7 @@ c smooths z values
 
 	end
 
-c**********************************************************************
+!**********************************************************************
 
         subroutine flow_out_piece_new(z,rout)
 
@@ -1692,12 +1692,12 @@ c**********************************************************************
 
         end
 
-c**********************************************************************
+!**********************************************************************
  
 	function get_discharge(ibc)
 
-c returns discharge through boundary ibc for points sources
-c for z-boundaries 0 is returned
+! returns discharge through boundary ibc for points sources
+! for z-boundaries 0 is returned
 
 	use mod_bound_dynamic
 	use mod_bound_geom
@@ -1730,5 +1730,5 @@ c for z-boundaries 0 is returned
 
 	end
 
-c**********************************************************************
+!**********************************************************************
 

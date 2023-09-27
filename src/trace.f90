@@ -24,63 +24,63 @@
 !
 !--------------------------------------------------------------------------
 
-c trace routines
-c
-c revision log :
-c
-c 14.03.2005	ggu	subroutine traccia
-c 30.06.2005	ggu	traccia changed, new routines jamal, sedimt
-c 01.12.2005	ggu	more changes in traccia
-c 16.10.2009	ggu	some changes and documentation for traccia
-c 01.12.2010	ggu	routines adjusted for Marco (Romanian coast -> uv)
-c 15.12.2010	ggu	routines copied from subcus.f
-c 19.12.2014	ggu	changed VERS_7_0_10
-c 23.12.2014	ggu	changed VERS_7_0_11
-c 19.01.2015	ggu	changed VERS_7_1_3
-c 17.07.2015	ggu	changed VERS_7_1_80
-c 20.07.2015	ggu	changed VERS_7_1_81
-c 14.11.2017	ggu	changed VERS_7_5_36
-c 14.02.2019	ggu	changed VERS_7_5_56
-c 16.02.2019	ggu	changed VERS_7_5_60
-c 16.02.2020	ggu	femtime eliminated
-c
-c notes :
-c
-c still to be done:
-c
-c	call from main, not from subcus
-c	general parameters -> traccia.dat, etc...
-c	configure from STR
-c
-c******************************************************************
-c
-c check following routines:
-c
-c	get_next_traccia  write_traccia  interpolate_traccia
-c
-c check following logical variables:
-c
-c usedts	time is in YYMMDD etc.. and must be converted to it
-c			-> change in get_next_traccia, write_traccia
-c bnearpoint	if true find closest point and use this value
-c bintmiss	if true use last good value
-c		use (xinit,yinit) if no good value has been found yet
-c		in this case also (xinit,yinit) have to be set
-c bnodry	treat dry areas as not found elements
-c
-c if one of bnearpoint or bintmiss is .true. a value will be always found
-c if both are .false. points outside of the domain return -999.
-c
-c fantina:	bnearpoint = .true.   bintmiss = .true.  usedts=.true.
-c rachel:	bnearpoint = .false.  bintmiss = .true.  usedts=.false.
-c marco:	bnearpoint = .false.  bintmiss = .true.  usedts=.false.
-c
-c for carote di fantina, use usedts=.false.
-c
-c if there are traccie completely out of domain,
-c	use bnearpoint = .false.  bintmiss = .true.
-c
-c*****************************************************************
+! trace routines
+!
+! revision log :
+!
+! 14.03.2005	ggu	subroutine traccia
+! 30.06.2005	ggu	traccia changed, new routines jamal, sedimt
+! 01.12.2005	ggu	more changes in traccia
+! 16.10.2009	ggu	some changes and documentation for traccia
+! 01.12.2010	ggu	routines adjusted for Marco (Romanian coast -> uv)
+! 15.12.2010	ggu	routines copied from subcus.f
+! 19.12.2014	ggu	changed VERS_7_0_10
+! 23.12.2014	ggu	changed VERS_7_0_11
+! 19.01.2015	ggu	changed VERS_7_1_3
+! 17.07.2015	ggu	changed VERS_7_1_80
+! 20.07.2015	ggu	changed VERS_7_1_81
+! 14.11.2017	ggu	changed VERS_7_5_36
+! 14.02.2019	ggu	changed VERS_7_5_56
+! 16.02.2019	ggu	changed VERS_7_5_60
+! 16.02.2020	ggu	femtime eliminated
+!
+! notes :
+!
+! still to be done:
+!
+!	call from main, not from subcus
+!	general parameters -> traccia.dat, etc...
+!	configure from STR
+!
+!******************************************************************
+!
+! check following routines:
+!
+!	get_next_traccia  write_traccia  interpolate_traccia
+!
+! check following logical variables:
+!
+! usedts	time is in YYMMDD etc.. and must be converted to it
+!			-> change in get_next_traccia, write_traccia
+! bnearpoint	if true find closest point and use this value
+! bintmiss	if true use last good value
+!		use (xinit,yinit) if no good value has been found yet
+!		in this case also (xinit,yinit) have to be set
+! bnodry	treat dry areas as not found elements
+!
+! if one of bnearpoint or bintmiss is .true. a value will be always found
+! if both are .false. points outside of the domain return -999.
+!
+! fantina:	bnearpoint = .true.   bintmiss = .true.  usedts=.true.
+! rachel:	bnearpoint = .false.  bintmiss = .true.  usedts=.false.
+! marco:	bnearpoint = .false.  bintmiss = .true.  usedts=.false.
+!
+! for carote di fantina, use usedts=.false.
+!
+! if there are traccie completely out of domain,
+!	use bnearpoint = .false.  bintmiss = .true.
+!
+!*****************************************************************
 
 	subroutine traccia
 
@@ -111,9 +111,9 @@ c*****************************************************************
 
 	if( icall .eq. -1 ) return
 
-c-------------------------------------------------------------------
-c initialize
-c-------------------------------------------------------------------
+!-------------------------------------------------------------------
+! initialize
+!-------------------------------------------------------------------
 
 	if( icall .eq. 0 ) then
 	  iuin = ifileo(55,'traccia.dat','form','old')
@@ -133,9 +133,9 @@ c-------------------------------------------------------------------
 	  icall = 1
 	end if
 
-c-------------------------------------------------------------------
-c prepare time
-c-------------------------------------------------------------------
+!-------------------------------------------------------------------
+! prepare time
+!-------------------------------------------------------------------
 
 	call get_act_dtime(dtime)
 	call get_ddt(ddt)
@@ -146,17 +146,17 @@ c-------------------------------------------------------------------
 	if( itp .lt. itold ) goto 89
 	ierr = 0
 
-c-------------------------------------------------------------------
-c loop on traccie read
-c-------------------------------------------------------------------
+!-------------------------------------------------------------------
+! loop on traccie read
+!-------------------------------------------------------------------
 
 	do while( ierr .eq. 0 .and. itold .le. itp .and. itp .le. itnew )
 
 	  call interpolate_traccia(iep,itp,itold,itnew,xp,yp,zp,uv)
 
 	  write(6,*) 'traccia: ',itold,itnew,itp,xp,yp,zp,iep
-	  write(99,*) 'traccia: ',itold,itnew,itp,xp,yp,zp,iep
-     +					,iwegv(abs(iep)),np
+	  write(99,*) 'traccia: ',itold,itnew,itp,xp,yp,zp,iep &
+     &					,iwegv(abs(iep)),np
 	  call write_traccia(iuout,itp,np,xdp,ydp,zp,line,uv)
 	  
 	  call get_next_traccia(iuin,itp,np,xdp,ydp,line,uv,ierr)
@@ -168,9 +168,9 @@ c-------------------------------------------------------------------
 	if( ierr .gt. 0 ) goto 97
 	if( ierr .lt. 0 ) icall = -1
 
-c-------------------------------------------------------------------
-c end of routine
-c-------------------------------------------------------------------
+!-------------------------------------------------------------------
+! end of routine
+!-------------------------------------------------------------------
 
 	return
    99	continue
@@ -185,7 +185,7 @@ c-------------------------------------------------------------------
 	stop 'error stop traccia: simulation start too late'
         end
 
-c*****************************************************************
+!*****************************************************************
 
 	subroutine interpolate_traccia(iep,itp,itold,itnew,xp,yp,zp,uv)
 
@@ -220,17 +220,17 @@ c*****************************************************************
 	save icall
 	data icall /0/
 
-c bnearpoint	if true find closest point and use this value
-c bintmiss	if true use last good value
-c		use (xinit,yinit) if no good value has been found yet
-c		in this case also (xinit,yinit) have to be set
-c bnodry	treat dry areas as not found elements
-c
-c if one of bnearpoint or bintmiss is .true. a value will be always found
-c if both are .false. points outside of the domain return -999.
-c
-c fantina:	bnearpoint = .true.   bintmiss = .true.
-c rachel:	bnearpoint = .false.  bintmiss = .true.
+! bnearpoint	if true find closest point and use this value
+! bintmiss	if true use last good value
+!		use (xinit,yinit) if no good value has been found yet
+!		in this case also (xinit,yinit) have to be set
+! bnodry	treat dry areas as not found elements
+!
+! if one of bnearpoint or bintmiss is .true. a value will be always found
+! if both are .false. points outside of the domain return -999.
+!
+! fantina:	bnearpoint = .true.   bintmiss = .true.
+! rachel:	bnearpoint = .false.  bintmiss = .true.
 
 	bintmiss = .true.
 	bnearpoint = .false.
@@ -283,11 +283,11 @@ c rachel:	bnearpoint = .false.  bintmiss = .true.
 	stop 'error stop interpolate_traccia: no element found'
 	end
 
-c*****************************************************************
+!*****************************************************************
 
 	subroutine intp_z(iep,xp,yp,itp,itold,itnew,zp)
 
-c interpolates water level
+! interpolates water level
 
 	use mod_hydro
 
@@ -309,11 +309,11 @@ c interpolates water level
 
 	end
 
-c*****************************************************************
+!*****************************************************************
 
 	subroutine intp_uv(iep,xp,yp,itp,itold,itnew,uv)
 
-c interpolates current velocity
+! interpolates current velocity
 
 	use mod_hydro_baro
 	use mod_hydro_vel
@@ -363,12 +363,12 @@ c interpolates current velocity
 
 	end
 
-c*****************************************************************
+!*****************************************************************
 
 	subroutine get_next_traccia(iuin,itp,np,xdp,ydp,line,uv,ierr)
 
-c 2004 07 18 10 0 41 621 37002.0159999998 39108.9670000002
-c 23964600  37778.7 39962.7      60 SA14 2005-10-05::08:50:00
+! 2004 07 18 10 0 41 621 37002.0159999998 39108.9670000002
+! 23964600  37778.7 39962.7      60 SA14 2005-10-05::08:50:00
 
 	implicit none
 
@@ -403,11 +403,11 @@ c 23964600  37778.7 39962.7      60 SA14 2005-10-05::08:50:00
 	if( ierr .ne. 0 ) return
 	if( .not. usedts ) return
 
-c	------------------------------------------
-c	the next part is only executed if we have to convert
-c	the time (given as year month...) to fem_time
-c	if we alread read fem_time nothing more is to do
-c	------------------------------------------
+!	------------------------------------------
+!	the next part is only executed if we have to convert
+!	the time (given as year month...) to fem_time
+!	if we alread read fem_time nothing more is to do
+!	------------------------------------------
 
 	if( icall .eq. 0 ) then
 	  date = 10000*year + 101
@@ -422,11 +422,11 @@ c	------------------------------------------
 
 	end
 
-c*****************************************************************
+!*****************************************************************
 
 	subroutine write_traccia(iuout,itp,np,xdp,ydp,zp,line,uv)
 
-c writes raw traccia
+! writes raw traccia
 
 	implicit none
 
@@ -459,7 +459,7 @@ c writes raw traccia
  2001	format(i10,2f14.6,i10,4f14.6)
 	end
 
-c*****************************************************************
+!*****************************************************************
 
 	function get_nearest_point(xp,yp)
 
@@ -494,7 +494,7 @@ c*****************************************************************
 	
 	end
 
-c*****************************************************************
+!*****************************************************************
 
 	subroutine get_string_length(line,ilen)
 
@@ -515,11 +515,11 @@ c*****************************************************************
 
 	end
 	
-c*****************************************************************
+!*****************************************************************
 
 	subroutine write_traccia0(iuout,itp,np,xdp,ydp,zp,tz)
 
-c old routine -> do not use anymore
+! old routine -> do not use anymore
 
 	implicit none
 
@@ -552,7 +552,7 @@ c old routine -> do not use anymore
 	  time = ihour*10000+min*100+sec
 	  write(iuout,'(i8,i8,f14.3,2x,f14.3,2x,f10.3)') time,np,x,y,z
 	else if( itype .eq. 2 ) then
-c	  (rachel) 2319029.6 5032260.39 38835 27 may 2004
+!	  (rachel) 2319029.6 5032260.39 38835 27 may 2004
 	  x = xdp + x0
 	  y = ydp + y0
 	  z = zp - 0.23
@@ -566,5 +566,5 @@ c	  (rachel) 2319029.6 5032260.39 38835 27 may 2004
 
 	end
 
-c*****************************************************************
+!*****************************************************************
 

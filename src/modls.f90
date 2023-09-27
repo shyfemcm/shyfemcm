@@ -33,66 +33,66 @@
 ! 16.02.2019	ggu	changed VERS_7_5_60
 ! 21.05.2019	ggu	changed VERS_7_5_62
 
-c***************************************************************
-c
-c look in subcst for initialization
-c
-c cstinit	M_INIT		start of hp/ht
-c cstcheck	M_CHECK		after read of STR file
-c cstsetup	M_SETUP		after setup of basic arrays (ev,...)
-c
-c look in subnsh for read, write and others
-c
-c prilog	M_PRINT		after everything has been setup (before loop)
-c pritst	M_TEST		only for debug
-c
-c dobefor	M_BEFOR		beginning of each time loop
-c doafter	M_AFTER		end of each time loop
-c
-c nlsh2d	M_READ		read in STR file
-c
-c***************************************************************
-c
-c modules still to transform:
-c
-c wrouta
-c resid
-c rmsvel
-c adjust_chezy (bottom friction)
-c prwnds
-c prarea (checy)
-c prclos
-c proxy, prlgr
-c prbnds
-c pripar
-c biocos
-c locous, locspc
-c
-c***************************************************************
+!***************************************************************
+!
+! look in subcst for initialization
+!
+! cstinit	M_INIT		start of hp/ht
+! cstcheck	M_CHECK		after read of STR file
+! cstsetup	M_SETUP		after setup of basic arrays (ev,...)
+!
+! look in subnsh for read, write and others
+!
+! prilog	M_PRINT		after everything has been setup (before loop)
+! pritst	M_TEST		only for debug
+!
+! dobefor	M_BEFOR		beginning of each time loop
+! doafter	M_AFTER		end of each time loop
+!
+! nlsh2d	M_READ		read in STR file
+!
+!***************************************************************
+!
+! modules still to transform:
+!
+! wrouta
+! resid
+! rmsvel
+! adjust_chezy (bottom friction)
+! prwnds
+! prarea (checy)
+! prclos
+! proxy, prlgr
+! prbnds
+! pripar
+! biocos
+! locous, locspc
+!
+!***************************************************************
 
 	subroutine modules(mode)
 
-c handles module framework
+! handles module framework
 
 	implicit none
 
 	integer mode		!mode of call
 
-c------------------------------------------------------------
-c modules
-c------------------------------------------------------------
+!------------------------------------------------------------
+! modules
+!------------------------------------------------------------
 
 	call mod_ext(mode)		!extra nodes
-c	call mod_ets(mode)		!extra time series nodes
-c	call mod_box(mode)		!boxes
+!	call mod_ets(mode)		!extra time series nodes
+!	call mod_box(mode)		!boxes
 	call mod_flx(mode)		!fluxes through sections
-c	call mod_vol(mode)		!volumes in areas
+!	call mod_vol(mode)		!volumes in areas
 
-c------------------------------------------------------------
-c end of routine
-c------------------------------------------------------------
+!------------------------------------------------------------
+! end of routine
+!------------------------------------------------------------
 
 	end
 
-c***************************************************************
+!***************************************************************
 

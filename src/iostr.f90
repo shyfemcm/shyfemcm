@@ -25,150 +25,150 @@
 !
 !--------------------------------------------------------------------------
 
-c utility routines for shyfem main routine
-c
-c contents :
-c
-c subroutine prilog                     prints parameters for main
-c subroutine priout(mode)               writes output files
-c subroutine pritst(id)                 test output of constants and variables
-c subroutine init_3d			sets up 3D vertical arrays
-c subroutine nlsh2d(iunit)		read STR  parameter file for FE model
-c subroutine rdtitl			reads title section
-c
-c subroutine impini		initializes parameters for semi-implicit time
-c function bimpli(it)		checks if semi-implicit time-step is active
-c function getimp		gets weight for semi-implicit time-step
-c subroutine setimp(it,aweigh)	sets parameters for semi-implicit time-step
-c
-c revision log :
-c
-c 20.01.1994	ggu	$$conz - impl. of concentration in bnd(12,.)
-c 07.04.1995	ggu	$$baroc - impl. of baroclinic salt/temp (21/22)
-c 01.06.1997	ggu	complete revision
-c 23.09.1997	ggu	boundn deleted -> no access to data structure
-c 18.03.1998	ggu	use variable section instead name
-c 20.03.1998	ggu	minor changes to priout
-c 29.04.1998	ggu	new module for semi-implicit time-step
-c 07.05.1998	ggu	check for error on return of nrdvecr
-c 19.06.1998	ggu	version number is character
-c 22.01.1999	ggu	oxygen section added
-c 26.01.1999	ggu	new comp3d added
-c 11.08.1999	ggu	new compatibility array hlhv initialized
-c 19.11.1999	ggu	new routines for section vol
-c 20.01.2000	ggu	common block /dimdim/ eliminated
-c 04.02.2000	ggu	no priout, dobefor/after, pritime, endtime
-c 15.05.2000	ggu	hm3v substituted
-c 26.05.2000	ggu	copright statement adjourned
-c 21.11.2001	ggu	routines to handle advective index (aix)
-c 27.11.2001	ggu	routine to handle info file (getinfo)
-c 11.10.2002	ggu	aix routines deleted
-c 07.02.2003	ggu	routine added: changeimp, getaz; deleted getaza
-c 10.08.2003	ggu	call adjust_chezy instead sp135r
-c 14.08.2003	ggu	femver transfered to subver, not called in nlsh2d
-c 20.08.2003	ggu	tsmed substituted by ts_shell
-c 01.09.2003	ggu	call wrousa
-c 03.09.2004	ggu	call admrst, comp3d renamed to init_3d (not used)
-c 03.09.2004	ggu	nlv, hlv initialized in nlsh2d (FIXME)
-c 28.09.2004	ggu	read lagrangian section
-c 01.12.2004	ggu	new routine set_timestep for variable time step
-c 17.01.2005	ggu	get_stab_index to newcon.f, error stop in set_timestep
-c 14.03.2005	ggu	syncronize idt with end of simulation (set_timestep)
-c 07.11.2005	ggu	handle new section sedtr for sediments
-c 23.03.2006	ggu	changed time step to real
-c 23.05.2007	ggu	recall variable time step pars at every time step
-c 02.10.2007	ggu	bug fix in set_timestep for very small rindex
-c 10.04.2008	ccf	output in netcdf format
-c 28.04.2008	ggu	in set_timestep new call to advect_stability()
-c 03.09.2008	ggu	in nlsh2d different error message
-c 20.11.2008	ggu	init_3d deleted, nlv initialized to 0
-c 18.11.2009	ggu	new format in pritime (write also time step)
-c 22.02.2010	ggu	new call to hydro_stability to compute time step
-c 22.02.2010	ccf	new routine for tidal pot. (tideforc), locaus deleted
-c 26.02.2010	ggu	in set_timestep compute and write ri with old dt
-c 22.03.2010	ggu	some comments for better readability
-c 09.04.2010	ggu	changed v6.1.3
-c 29.04.2010	ggu	new routine set_output_frequency() ... not finished
-c 03.05.2010	ggu	changed VERS_6_1_8
-c 04.05.2010	ggu	shell to compute energy
-c 22.07.2010	ggu	changed VERS_6_1_9
-c 28.09.2010	ggu	changed VERS_6_1_11
-c 15.12.2010	ggu	changed VERS_6_1_14
-c 22.02.2011	ggu	in pritime() new write to terminal
-c 01.03.2011	ggu	changed VERS_6_1_20
-c 14.04.2011	ggu	changed VERS_6_1_22
-c 20.05.2011	ggu	changes in set_timestep(), element removal, idtmin
-c 31.05.2011	ggu	changes for BFM
-c 01.06.2011	ggu	idtmin introduced
-c 12.07.2011	ggu	new routine next_output(), revised set_output_frequency
-c 14.07.2011	ggu	new routines for original time step
-c 13.09.2011	ggu	better error check, rdtitl() more robust
-c 18.10.2011	ggu	changed VERS_6_1_33
-c 23.01.2012	ggu	new section "proj"
-c 24.01.2012	ggu	new routine setup_parallel()
-c 10.02.2012	ggu	new routines to initialize and access time common block
-c 21.03.2012	ggu	changed VERS_6_1_50
-c 30.03.2012	ggu	changed VERS_6_1_51
-c 01.06.2012	ggu	changed VERS_6_1_53
-c 21.06.2012	ggu	changed VERS_6_1_54
-c 26.06.2012	ggu	changed VERS_6_1_55
-c 29.08.2012	ggu	changed VERS_6_1_56
-c 03.05.2013	ggu	changed VERS_6_1_63
-c 10.05.2013	ggu	changed VERS_6_1_64
-c 05.12.2013	ggu	changed VERS_6_1_70
-c 28.01.2014	ggu	changed VERS_6_1_71
-c 05.03.2014	ggu	code prepared to repeat time step (irepeat) - not ready
-c 05.03.2014	ggu	new routines get_last/first_time()
-c 10.04.2014	ccf	new section "wrt" for water renewal time
-c 05.05.2014	ggu	changed VERS_6_1_74
-c 07.07.2014	ggu	changed VERS_6_1_79
-c 18.07.2014	ggu	changed VERS_7_0_1
-c 21.10.2014	ggu	changed VERS_7_0_3
-c 29.10.2014	ggu	do_() routines transfered from newpri.f
-c 10.11.2014	ggu	shyfem time management routines to new file subtime.f
-c 26.11.2014	ggu	changed VERS_7_0_7
-c 01.12.2014	ccf	handle new section waves for wave module
-c 19.12.2014	ggu	changed VERS_7_0_10
-c 23.12.2014	ggu	changed VERS_7_0_11
-c 19.01.2015	ggu	changed VERS_7_1_3
-c 26.02.2015	ggu	changed VERS_7_1_5
-c 01.04.2015	ggu	changed VERS_7_1_7
-c 05.05.2015	ggu	changed VERS_7_1_10
-c 21.05.2015	ggu	changed VERS_7_1_11
-c 10.07.2015	ggu	changed VERS_7_1_50
-c 13.07.2015	ggu	changed VERS_7_1_51
-c 17.07.2015	ggu	changed VERS_7_1_80
-c 20.07.2015	ggu	changed VERS_7_1_81
-c 24.09.2015	ggu	call initialization for irv before reading STR file
-c 10.10.2015	ggu	changed VERS_7_3_2
-c 05.11.2015	ggu	changed VERS_7_3_12
-c 26.05.2016	ggu	new check for sections: count_sections()
-c 16.06.2016	wmk	added check for section nonhyd 
-c 31.03.2017	ggu	changed VERS_7_5_24
-c 04.11.2017	ggu	changed VERS_7_5_34
-c 14.11.2017	ggu	changed VERS_7_5_36
-c 05.12.2017	ggu	changed VERS_7_5_39
-c 07.12.2017	ggu	changed VERS_7_5_40
-c 22.02.2018	ggu	changed VERS_7_5_42
-c 03.04.2018	ggu	changed VERS_7_5_43
-c 19.04.2018	ggu	changed VERS_7_5_45
-c 26.04.2018	ggu	changed VERS_7_5_46
-c 11.05.2018	ggu	semi.h deleted and substituted with module
-c 06.07.2018	ggu	changed VERS_7_5_48
-c 15.11.2018	ccf	call to tide_vuf in do_befor
-c 18.12.2018	ggu	changed VERS_7_5_52
-c 16.02.2019	ggu	changed VERS_7_5_60
-c 13.03.2019	ggu	changed VERS_7_5_61
-c 21.05.2019	ggu	changed VERS_7_5_62
-c 06.11.2019	ggu	femtime eliminated
-c 16.02.2020	ggu	femtime finally eliminated
-c 18.03.2020	ggu	admrst() substituted with rst_write_restart()
-c
-c************************************************************
+! utility routines for shyfem main routine
+!
+! contents :
+!
+! subroutine prilog                     prints parameters for main
+! subroutine priout(mode)               writes output files
+! subroutine pritst(id)                 test output of constants and variables
+! subroutine init_3d			sets up 3D vertical arrays
+! subroutine nlsh2d(iunit)		read STR  parameter file for FE model
+! subroutine rdtitl			reads title section
+!
+! subroutine impini		initializes parameters for semi-implicit time
+! function bimpli(it)		checks if semi-implicit time-step is active
+! function getimp		gets weight for semi-implicit time-step
+! subroutine setimp(it,aweigh)	sets parameters for semi-implicit time-step
+!
+! revision log :
+!
+! 20.01.1994	ggu	$$conz - impl. of concentration in bnd(12,.)
+! 07.04.1995	ggu	$$baroc - impl. of baroclinic salt/temp (21/22)
+! 01.06.1997	ggu	complete revision
+! 23.09.1997	ggu	boundn deleted -> no access to data structure
+! 18.03.1998	ggu	use variable section instead name
+! 20.03.1998	ggu	minor changes to priout
+! 29.04.1998	ggu	new module for semi-implicit time-step
+! 07.05.1998	ggu	check for error on return of nrdvecr
+! 19.06.1998	ggu	version number is character
+! 22.01.1999	ggu	oxygen section added
+! 26.01.1999	ggu	new comp3d added
+! 11.08.1999	ggu	new compatibility array hlhv initialized
+! 19.11.1999	ggu	new routines for section vol
+! 20.01.2000	ggu	common block /dimdim/ eliminated
+! 04.02.2000	ggu	no priout, dobefor/after, pritime, endtime
+! 15.05.2000	ggu	hm3v substituted
+! 26.05.2000	ggu	copright statement adjourned
+! 21.11.2001	ggu	routines to handle advective index (aix)
+! 27.11.2001	ggu	routine to handle info file (getinfo)
+! 11.10.2002	ggu	aix routines deleted
+! 07.02.2003	ggu	routine added: changeimp, getaz; deleted getaza
+! 10.08.2003	ggu	call adjust_chezy instead sp135r
+! 14.08.2003	ggu	femver transfered to subver, not called in nlsh2d
+! 20.08.2003	ggu	tsmed substituted by ts_shell
+! 01.09.2003	ggu	call wrousa
+! 03.09.2004	ggu	call admrst, comp3d renamed to init_3d (not used)
+! 03.09.2004	ggu	nlv, hlv initialized in nlsh2d (FIXME)
+! 28.09.2004	ggu	read lagrangian section
+! 01.12.2004	ggu	new routine set_timestep for variable time step
+! 17.01.2005	ggu	get_stab_index to newcon.f, error stop in set_timestep
+! 14.03.2005	ggu	syncronize idt with end of simulation (set_timestep)
+! 07.11.2005	ggu	handle new section sedtr for sediments
+! 23.03.2006	ggu	changed time step to real
+! 23.05.2007	ggu	recall variable time step pars at every time step
+! 02.10.2007	ggu	bug fix in set_timestep for very small rindex
+! 10.04.2008	ccf	output in netcdf format
+! 28.04.2008	ggu	in set_timestep new call to advect_stability()
+! 03.09.2008	ggu	in nlsh2d different error message
+! 20.11.2008	ggu	init_3d deleted, nlv initialized to 0
+! 18.11.2009	ggu	new format in pritime (write also time step)
+! 22.02.2010	ggu	new call to hydro_stability to compute time step
+! 22.02.2010	ccf	new routine for tidal pot. (tideforc), locaus deleted
+! 26.02.2010	ggu	in set_timestep compute and write ri with old dt
+! 22.03.2010	ggu	some comments for better readability
+! 09.04.2010	ggu	changed v6.1.3
+! 29.04.2010	ggu	new routine set_output_frequency() ... not finished
+! 03.05.2010	ggu	changed VERS_6_1_8
+! 04.05.2010	ggu	shell to compute energy
+! 22.07.2010	ggu	changed VERS_6_1_9
+! 28.09.2010	ggu	changed VERS_6_1_11
+! 15.12.2010	ggu	changed VERS_6_1_14
+! 22.02.2011	ggu	in pritime() new write to terminal
+! 01.03.2011	ggu	changed VERS_6_1_20
+! 14.04.2011	ggu	changed VERS_6_1_22
+! 20.05.2011	ggu	changes in set_timestep(), element removal, idtmin
+! 31.05.2011	ggu	changes for BFM
+! 01.06.2011	ggu	idtmin introduced
+! 12.07.2011	ggu	new routine next_output(), revised set_output_frequency
+! 14.07.2011	ggu	new routines for original time step
+! 13.09.2011	ggu	better error check, rdtitl() more robust
+! 18.10.2011	ggu	changed VERS_6_1_33
+! 23.01.2012	ggu	new section "proj"
+! 24.01.2012	ggu	new routine setup_parallel()
+! 10.02.2012	ggu	new routines to initialize and access time common block
+! 21.03.2012	ggu	changed VERS_6_1_50
+! 30.03.2012	ggu	changed VERS_6_1_51
+! 01.06.2012	ggu	changed VERS_6_1_53
+! 21.06.2012	ggu	changed VERS_6_1_54
+! 26.06.2012	ggu	changed VERS_6_1_55
+! 29.08.2012	ggu	changed VERS_6_1_56
+! 03.05.2013	ggu	changed VERS_6_1_63
+! 10.05.2013	ggu	changed VERS_6_1_64
+! 05.12.2013	ggu	changed VERS_6_1_70
+! 28.01.2014	ggu	changed VERS_6_1_71
+! 05.03.2014	ggu	code prepared to repeat time step (irepeat) - not ready
+! 05.03.2014	ggu	new routines get_last/first_time()
+! 10.04.2014	ccf	new section "wrt" for water renewal time
+! 05.05.2014	ggu	changed VERS_6_1_74
+! 07.07.2014	ggu	changed VERS_6_1_79
+! 18.07.2014	ggu	changed VERS_7_0_1
+! 21.10.2014	ggu	changed VERS_7_0_3
+! 29.10.2014	ggu	do_() routines transfered from newpri.f
+! 10.11.2014	ggu	shyfem time management routines to new file subtime.f
+! 26.11.2014	ggu	changed VERS_7_0_7
+! 01.12.2014	ccf	handle new section waves for wave module
+! 19.12.2014	ggu	changed VERS_7_0_10
+! 23.12.2014	ggu	changed VERS_7_0_11
+! 19.01.2015	ggu	changed VERS_7_1_3
+! 26.02.2015	ggu	changed VERS_7_1_5
+! 01.04.2015	ggu	changed VERS_7_1_7
+! 05.05.2015	ggu	changed VERS_7_1_10
+! 21.05.2015	ggu	changed VERS_7_1_11
+! 10.07.2015	ggu	changed VERS_7_1_50
+! 13.07.2015	ggu	changed VERS_7_1_51
+! 17.07.2015	ggu	changed VERS_7_1_80
+! 20.07.2015	ggu	changed VERS_7_1_81
+! 24.09.2015	ggu	call initialization for irv before reading STR file
+! 10.10.2015	ggu	changed VERS_7_3_2
+! 05.11.2015	ggu	changed VERS_7_3_12
+! 26.05.2016	ggu	new check for sections: count_sections()
+! 16.06.2016	wmk	added check for section nonhyd 
+! 31.03.2017	ggu	changed VERS_7_5_24
+! 04.11.2017	ggu	changed VERS_7_5_34
+! 14.11.2017	ggu	changed VERS_7_5_36
+! 05.12.2017	ggu	changed VERS_7_5_39
+! 07.12.2017	ggu	changed VERS_7_5_40
+! 22.02.2018	ggu	changed VERS_7_5_42
+! 03.04.2018	ggu	changed VERS_7_5_43
+! 19.04.2018	ggu	changed VERS_7_5_45
+! 26.04.2018	ggu	changed VERS_7_5_46
+! 11.05.2018	ggu	semi.h deleted and substituted with module
+! 06.07.2018	ggu	changed VERS_7_5_48
+! 15.11.2018	ccf	call to tide_vuf in do_befor
+! 18.12.2018	ggu	changed VERS_7_5_52
+! 16.02.2019	ggu	changed VERS_7_5_60
+! 13.03.2019	ggu	changed VERS_7_5_61
+! 21.05.2019	ggu	changed VERS_7_5_62
+! 06.11.2019	ggu	femtime eliminated
+! 16.02.2020	ggu	femtime finally eliminated
+! 18.03.2020	ggu	admrst() substituted with rst_write_restart()
+!
+!************************************************************
 
 	subroutine prilog
 
-c writes output to terminal or log file
+! writes output to terminal or log file
 
 	use shympi
 
@@ -247,9 +247,9 @@ c writes output to terminal or log file
 
 	call prclos		!prints closing sections
 
-c	call proxy		!prints oxygen section
+!	call proxy		!prints oxygen section
 
-c	call prlgr		!prints float coordinates
+!	call prlgr		!prints float coordinates
 
 	call modules(M_PRINT)
 
@@ -261,13 +261,13 @@ c	call prlgr		!prints float coordinates
  1030   format(1x,78('='))
 	end
 
-c********************************************************************
+!********************************************************************
 
 	subroutine pritst(id)
 
-c test output of all constants and variables
-c
-c id    identifier
+! test output of all constants and variables
+!
+! id    identifier
 
 	use basin
 
@@ -306,9 +306,9 @@ c id    identifier
 
 	call tsclos
 
-c	call tsoxy	!oxygen
+!	call tsoxy	!oxygen
 
-c	write(6,*) '/close/'	!deleted on 28.05.97
+!	write(6,*) '/close/'	!deleted on 28.05.97
 
 	call modules(M_TEST)
 	
@@ -322,13 +322,13 @@ c	write(6,*) '/close/'	!deleted on 28.05.97
     1   format(1x,a,i6,a)
 	end
 
-c********************************************************************
-c********************************************************************
-c********************************************************************
+!********************************************************************
+!********************************************************************
+!********************************************************************
 
 	subroutine do_init
 
-c to do before time loop
+! to do before time loop
 
 	implicit none
 
@@ -339,11 +339,11 @@ c to do before time loop
 
 	end
 
-c********************************************************************
+!********************************************************************
 
 	subroutine do_befor
 
-c to do in time loop before time step
+! to do in time loop before time step
 
 	implicit none
 
@@ -357,11 +357,11 @@ c to do in time loop before time step
 
 	end
 
-c********************************************************************
+!********************************************************************
 
 	subroutine do_after
 
-c to do in time loop after time step
+! to do in time loop after time step
 
 	implicit none
 
@@ -373,9 +373,9 @@ c to do in time loop after time step
 
 	call get_act_dtime(dtime)
 
-c	call wrouta
+!	call wrouta
 	call wrousa
-c	call wrexta
+!	call wrexta
 	!call wrflxa
 	call wrvola(dtime)
 	call wrboxa
@@ -385,24 +385,24 @@ c	call wrexta
 
         call rst_write_restart
 
-c        call tsmed
+!        call tsmed
 	call ts_shell
 
-c	call wrnetcdf		!output in netcdf format - not supported
+!	call wrnetcdf		!output in netcdf format - not supported
 
 	call custom(dtime)
 
 	end
 
-c*******************************************************************
-c*******************************************************************
-c*******************************************************************
+!*******************************************************************
+!*******************************************************************
+!*******************************************************************
 
 	subroutine nlsh2d(iunit)
 
-c read STR  parameter file for FE model
-c
-c iunit		unit number of file
+! read STR  parameter file for FE model
+!
+! iunit		unit number of file
 
 	use levels
 	use nls
@@ -413,13 +413,13 @@ c iunit		unit number of file
 
 	include 'modules.h'
 
-c---------------------------------------------------------------
-c---------------------------------------------------------------
+!---------------------------------------------------------------
+!---------------------------------------------------------------
 
 	character*6 section,extra,last
 	logical bdebug
 	integer nsc,num,iline
-c	integer nrdsec,nrdveci,nrdvecr
+!	integer nrdsec,nrdveci,nrdvecr
 	integer nrdsec,nrdvecr
 	character*80 vers,aline
 
@@ -439,7 +439,7 @@ c	integer nrdsec,nrdveci,nrdvecr
 	call nrdini(iunit)
 	call mod_irv_initialize
 
-c read loop over sections %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+! read loop over sections %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
 	do while( nrdsec(section,num,extra) .ne. 0 )
 
@@ -518,7 +518,7 @@ c read loop over sections %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
 	if( bdebug ) write(6,*) 'finished reading STR file'
 
-c end of read %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+! end of read %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
 	return
    63	continue
@@ -549,7 +549,7 @@ c end of read %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 	stop 'error stop nlsh2d: no such section'
 	end
 
-c************************************************************************
+!************************************************************************
 
 	subroutine section_deleted(section,compat)
 
@@ -568,7 +568,7 @@ c************************************************************************
 	stop 'error stop section_deleted: section has been removed'
 	end
 
-c************************************************************************
+!************************************************************************
 
         subroutine read_hlv
 
@@ -597,11 +597,11 @@ c************************************************************************
 
         end subroutine read_hlv
 
-c************************************************************************
+!************************************************************************
 
 	subroutine rdtitl
 
-c reads title section
+! reads title section
 
 	implicit none
 
@@ -638,26 +638,26 @@ c reads title section
 	stop 'error stop rdtitl: cannot read title section'
 	end
 
-c**********************************************************************
-c**********************************************************************
-c**********************************************************************
-c
-c routines for handling semi-implicit time-step
-c
-c the only routines that should be necessary to be called are
-c setimp(it,weight) and getazam(az,am)
-c
-c setimp sets the implicit parameter until time it to weight
-c getazam returns az,am with the actual weight
-c
-c usage: call setimp in a program that would like to change the
-c	 weight for a limited time (closing sections etc...)
-c	 call getazam when az,am are needed
-c	 (getaz if only az is needed)
-c
-c**********************************************************************
-c**********************************************************************
-c**********************************************************************
+!**********************************************************************
+!**********************************************************************
+!**********************************************************************
+!
+! routines for handling semi-implicit time-step
+!
+! the only routines that should be necessary to be called are
+! setimp(it,weight) and getazam(az,am)
+!
+! setimp sets the implicit parameter until time it to weight
+! getazam returns az,am with the actual weight
+!
+! usage: call setimp in a program that would like to change the
+!	 weight for a limited time (closing sections etc...)
+!	 call getazam when az,am are needed
+!	 (getaz if only az is needed)
+!
+!**********************************************************************
+!**********************************************************************
+!**********************************************************************
 
 !======================================================================
 	module semi_implicit
@@ -671,11 +671,11 @@ c**********************************************************************
 	end module semi_implicit
 !======================================================================
 
-c**********************************************************************
+!**********************************************************************
 
 	subroutine getaz(azpar)
 
-c returns actual az
+! returns actual az
 
 	use semi_implicit
 
@@ -696,11 +696,11 @@ c returns actual az
 
 	end
 
-c**********************************************************************
+!**********************************************************************
 
 	subroutine getazam(azpar,ampar)
 
-c returns actual az,am
+! returns actual az,am
 
 	use semi_implicit
 
@@ -721,11 +721,11 @@ c returns actual az,am
 
 	end
 
-c**********************************************************************
+!**********************************************************************
 
 	subroutine changeimp(dtime,azpar,ampar)
 
-c changes parameters for semi-implicit time-step if necessary
+! changes parameters for semi-implicit time-step if necessary
 
 	use semi_implicit
 
@@ -741,11 +741,11 @@ c changes parameters for semi-implicit time-step if necessary
 
 	end
 
-c**********************************************************************
+!**********************************************************************
 
 	subroutine setimp(dtime,aweigh)
 
-c sets parameters for semi-implicit time-step
+! sets parameters for semi-implicit time-step
 
 	use semi_implicit
 
@@ -761,11 +761,11 @@ c sets parameters for semi-implicit time-step
 
 	end
 
-c**********************************************************************
+!**********************************************************************
 
 	function getimp()
 
-c gets weight for semi-implicit time-step
+! gets weight for semi-implicit time-step
 
 	use semi_implicit
 
@@ -777,13 +777,13 @@ c gets weight for semi-implicit time-step
 
 	end
 
-c**********************************************************************
-c**********************************************************************
-c**********************************************************************
+!**********************************************************************
+!**********************************************************************
+!**********************************************************************
 
         subroutine getinfo(iunit)
 
-c gets unit of info file
+! gets unit of info file
 
         implicit none
 
@@ -805,9 +805,9 @@ c gets unit of info file
 
         end
 
-c**********************************************************************
-c**********************************************************************
-c**********************************************************************
+!**********************************************************************
+!**********************************************************************
+!**********************************************************************
 
 	subroutine setup_omp_parallel
 
@@ -848,13 +848,13 @@ c**********************************************************************
 
 	end
 
-c********************************************************************
-c********************************************************************
-c********************************************************************
+!********************************************************************
+!********************************************************************
+!********************************************************************
 
         subroutine total_energy
 
-c writes info on total energy to info file
+! writes info on total energy to info file
 
 	use shympi
 
@@ -886,16 +886,16 @@ c writes info on total energy to info file
 
 	if(shympi_is_master()) then
 	  call get_act_timeline(aline)
-	  write(iuinfo,1000) ' energy: ',aline
-     +				,kenergy,penergy,tenergy,ksurf
+	  write(iuinfo,1000) ' energy: ',aline &
+     &				,kenergy,penergy,tenergy,ksurf
  1000	  format(a,a20,4e12.4)
 	end if
 
 	end
 
-c********************************************************************
-c********************************************************************
-c********************************************************************
+!********************************************************************
+!********************************************************************
+!********************************************************************
 
 	subroutine count_sections(section)
 
@@ -960,4 +960,4 @@ c********************************************************************
 
 	end
 
-c********************************************************************
+!********************************************************************

@@ -24,44 +24,44 @@
 !
 !--------------------------------------------------------------------------
 
-c extra file administration routines
-c
-c revision log :
-c
-c 08.05.1998	ggu	changed read of node numbers through nrdveci
-c 20.01.2000	ggu	common block /dimdim/ eliminated
-c 01.02.2000	ggu	module framework introduced
-c 23.03.2010	ggu	changed v6.1.1
-c 07.03.2014	ggu	changed VERS_6_1_72
-c 18.06.2014	ggu	changed VERS_6_1_77
-c 27.06.2014	ggu	changed VERS_6_1_78
-c 26.11.2014	ggu	changed VERS_7_0_7
-c 19.12.2014	ggu	changed VERS_7_0_10
-c 19.01.2015	ggu	changed VERS_7_1_3
-c 05.05.2015	ggu	changed VERS_7_1_10
-c 20.05.2015	ggu	modules introduced
-c 17.07.2015	ggu	changed VERS_7_1_80
-c 20.07.2015	ggu	changed VERS_7_1_81
-c 23.09.2015	ggu	changed VERS_7_2_4
-c 18.12.2015	ggu	changed VERS_7_3_17
-c 20.10.2017	ggu	new framework - read also table with strings
-c 04.11.2017	ggu	changed VERS_7_5_34
-c 14.11.2017	ggu	changed VERS_7_5_36
-c 22.11.2017	ccf	write also waves and sediment concentration
-c 05.12.2017	ggu	changed VERS_7_5_39
-c 24.01.2018	ggu	changed VERS_7_5_41
-c 03.04.2018	ggu	changed VERS_7_5_43
-c 11.04.2018	ggu	for mpi use global vertical levels
-c 19.04.2018	ggu	changed VERS_7_5_45
-c 11.05.2018	ggu	changed VERS_7_5_47
-c 06.07.2018	ggu	changed VERS_7_5_48
-c 16.02.2019	ggu	changed VERS_7_5_60
-c 02.04.2022	ggu	close ext file explicitly
-c 18.09.2023	ggu	also write rho to ext file
-c
-c******************************************************************
-c******************************************************************
-c******************************************************************
+! extra file administration routines
+!
+! revision log :
+!
+! 08.05.1998	ggu	changed read of node numbers through nrdveci
+! 20.01.2000	ggu	common block /dimdim/ eliminated
+! 01.02.2000	ggu	module framework introduced
+! 23.03.2010	ggu	changed v6.1.1
+! 07.03.2014	ggu	changed VERS_6_1_72
+! 18.06.2014	ggu	changed VERS_6_1_77
+! 27.06.2014	ggu	changed VERS_6_1_78
+! 26.11.2014	ggu	changed VERS_7_0_7
+! 19.12.2014	ggu	changed VERS_7_0_10
+! 19.01.2015	ggu	changed VERS_7_1_3
+! 05.05.2015	ggu	changed VERS_7_1_10
+! 20.05.2015	ggu	modules introduced
+! 17.07.2015	ggu	changed VERS_7_1_80
+! 20.07.2015	ggu	changed VERS_7_1_81
+! 23.09.2015	ggu	changed VERS_7_2_4
+! 18.12.2015	ggu	changed VERS_7_3_17
+! 20.10.2017	ggu	new framework - read also table with strings
+! 04.11.2017	ggu	changed VERS_7_5_34
+! 14.11.2017	ggu	changed VERS_7_5_36
+! 22.11.2017	ccf	write also waves and sediment concentration
+! 05.12.2017	ggu	changed VERS_7_5_39
+! 24.01.2018	ggu	changed VERS_7_5_41
+! 03.04.2018	ggu	changed VERS_7_5_43
+! 11.04.2018	ggu	for mpi use global vertical levels
+! 19.04.2018	ggu	changed VERS_7_5_45
+! 11.05.2018	ggu	changed VERS_7_5_47
+! 06.07.2018	ggu	changed VERS_7_5_48
+! 16.02.2019	ggu	changed VERS_7_5_60
+! 02.04.2022	ggu	close ext file explicitly
+! 18.09.2023	ggu	also write rho to ext file
+!
+!******************************************************************
+!******************************************************************
+!******************************************************************
 
 !==================================================================
         module extra
@@ -108,9 +108,9 @@ c******************************************************************
 
 	end subroutine extra_read_section
 
-c******************************************************************
-c******************************************************************
-c******************************************************************
+!******************************************************************
+!******************************************************************
+!******************************************************************
 
 	subroutine mod_ext(mode)
 
@@ -135,7 +135,7 @@ c******************************************************************
 	else if( mode .eq. M_TEST ) then
 	   call tsexta
 	else if( mode .eq. M_BEFOR ) then
-c	   nothing
+!	   nothing
 	else
 	   write(6,*) 'unknown mode : ', mode
 	   stop 'error stop mod_ext'
@@ -143,7 +143,7 @@ c	   nothing
 
 	end
 
-c******************************************************************
+!******************************************************************
 
 	subroutine inexta
 
@@ -151,7 +151,7 @@ c******************************************************************
 
 	end
 
-c******************************************************************
+!******************************************************************
 
 	subroutine rdexta
 
@@ -173,7 +173,7 @@ c******************************************************************
 
 	end
 
-c******************************************************************
+!******************************************************************
 
 	subroutine ckexta
 
@@ -206,7 +206,7 @@ c******************************************************************
 
 	end
 
-c******************************************************************
+!******************************************************************
 
 	subroutine prexta
 
@@ -228,7 +228,7 @@ c******************************************************************
 
 	end
 
-c******************************************************************
+!******************************************************************
 
 	subroutine tsexta
 
@@ -246,13 +246,13 @@ c******************************************************************
 
 	end
 
-c******************************************************************
-c******************************************************************
-c******************************************************************
+!******************************************************************
+!******************************************************************
+!******************************************************************
 
 	subroutine wrexta
 
-c writes and administers ext file
+! writes and administers ext file
 
 	use mod_hydro
 	use mod_hydro_print
@@ -297,9 +297,9 @@ c writes and administers ext file
 
 	if( icall .eq. -1 ) return
 
-c--------------------------------------------------------------
-c initialization
-c--------------------------------------------------------------
+!--------------------------------------------------------------
+! initialization
+!--------------------------------------------------------------
 
 	if( icall .eq. 0 ) then
           call init_output_d('itmext','idtext',da_out)
@@ -347,20 +347,20 @@ c--------------------------------------------------------------
 	  call get_shyfem_version_and_commit(femver)
 	  call get_absolute_ref_time(atime0)
 	  if( shympi_is_master() ) then
-            call ext_write_header2(nbext,0,knausm,nlv_global
-     +                          ,atime0
-     +                          ,href,hzmin,nzadapt,title,femver
-     +                          ,kext,hdep,il,x,y,strings,hlv_global
-     +                          ,ierr)
+            call ext_write_header2(nbext,0,knausm,nlv_global &
+     &                          ,atime0 &
+     &                          ,href,hzmin,nzadapt,title,femver &
+     &                          ,kext,hdep,il,x,y,strings,hlv_global &
+     &                          ,ierr)
             if( ierr /= 0 ) goto 96
 	  end if
         end if
 
 	icall = icall + 1
 
-c--------------------------------------------------------------
-c write file ext
-c--------------------------------------------------------------
+!--------------------------------------------------------------
+! write file ext
+!--------------------------------------------------------------
 
         if( .not. next_output_d(da_out) ) return
 
@@ -372,9 +372,9 @@ c--------------------------------------------------------------
 	!nlv2d = 1	!to be tested
 	vals = 0.
 
-c	-------------------------------------------------------
-c	barotropic velocities and water level
-c	-------------------------------------------------------
+!	-------------------------------------------------------
+!	barotropic velocities and water level
+!	-------------------------------------------------------
 
 	iv = 1
 	ivar = 1
@@ -386,14 +386,14 @@ c	-------------------------------------------------------
 	  call shympi_collect_node_value(k,znv,vals(1,j,3))
 	end do
 	if( shympi_is_master() ) then
-          call ext_write_record(nbext,0,atime,knausm,nlv2d
-     +                                  ,ivar,m,il,vals,ierr)
+          call ext_write_record(nbext,0,atime,knausm,nlv2d &
+     &                                  ,ivar,m,il,vals,ierr)
         if( ierr /= 0 ) goto 97
 	end if
 
-c	-------------------------------------------------------
-c	velocities
-c	-------------------------------------------------------
+!	-------------------------------------------------------
+!	velocities
+!	-------------------------------------------------------
 
 	iv = iv + 1
 	ivar = 2
@@ -404,14 +404,14 @@ c	-------------------------------------------------------
 	  call shympi_collect_node_value(k,vprv,vals(:,j,2))
 	end do
 	if( shympi_is_master() ) then
-          call ext_write_record(nbext,0,atime,knausm,nlv3d
-     +                                  ,ivar,m,il,vals,ierr)
+          call ext_write_record(nbext,0,atime,knausm,nlv3d &
+     &                                  ,ivar,m,il,vals,ierr)
           if( ierr /= 0 ) goto 97
 	end if
 
-c	-------------------------------------------------------
-c	temperature
-c	-------------------------------------------------------
+!	-------------------------------------------------------
+!	temperature
+!	-------------------------------------------------------
 
 	m = 1
 
@@ -423,15 +423,15 @@ c	-------------------------------------------------------
 	    call shympi_collect_node_value(k,tempv,vals(:,j,1))
 	  end do
 	  if( shympi_is_master() ) then
-            call ext_write_record(nbext,0,atime,knausm,nlv3d
-     +                                  ,ivar,m,il,vals,ierr)
+            call ext_write_record(nbext,0,atime,knausm,nlv3d &
+     &                                  ,ivar,m,il,vals,ierr)
             if( ierr /= 0 ) goto 97
 	  end if
 	end if
 
-c	-------------------------------------------------------
-c	salinity
-c	-------------------------------------------------------
+!	-------------------------------------------------------
+!	salinity
+!	-------------------------------------------------------
 
 	if( bsalt ) then
 	  iv = iv + 1
@@ -441,15 +441,15 @@ c	-------------------------------------------------------
 	    call shympi_collect_node_value(k,saltv,vals(:,j,1))
 	  end do
 	  if( shympi_is_master() ) then
-            call ext_write_record(nbext,0,atime,knausm,nlv3d
-     +                                  ,ivar,m,il,vals,ierr)
+            call ext_write_record(nbext,0,atime,knausm,nlv3d &
+     &                                  ,ivar,m,il,vals,ierr)
             if( ierr /= 0 ) goto 97
 	  end if
 	end if
 
-c       -------------------------------------------------------
-c       density
-c       -------------------------------------------------------
+!       -------------------------------------------------------
+!       density
+!       -------------------------------------------------------
 
         if( brho ) then
           iv = iv + 1
@@ -459,15 +459,15 @@ c       -------------------------------------------------------
             call shympi_collect_node_value(k,rhov,vals(:,j,1))
           end do
           if( shympi_is_master() ) then
-            call ext_write_record(nbext,0,atime,knausm,nlv3d
-     +                                  ,ivar,m,il,vals,ierr)
+            call ext_write_record(nbext,0,atime,knausm,nlv3d &
+     &                                  ,ivar,m,il,vals,ierr)
             if( ierr /= 0 ) goto 97
           end if
         end if
 
-c	-------------------------------------------------------
-c	concentration
-c	-------------------------------------------------------
+!	-------------------------------------------------------
+!	concentration
+!	-------------------------------------------------------
 
 	if( bconz ) then
 	  iv = iv + 1
@@ -477,15 +477,15 @@ c	-------------------------------------------------------
 	    call shympi_collect_node_value(k,cnv,vals(:,j,1))
 	  end do
 	  if( shympi_is_master() ) then
-            call ext_write_record(nbext,0,atime,knausm,nlv3d
-     +                                  ,ivar,m,il,vals,ierr)
+            call ext_write_record(nbext,0,atime,knausm,nlv3d &
+     &                                  ,ivar,m,il,vals,ierr)
             if( ierr /= 0 ) goto 97
 	  end if
 	end if
 
-c	-------------------------------------------------------
-c	total suspended sediment concentration
-c	-------------------------------------------------------
+!	-------------------------------------------------------
+!	total suspended sediment concentration
+!	-------------------------------------------------------
 
 	if( bsedi ) then
 	  iv = iv + 1
@@ -495,15 +495,15 @@ c	-------------------------------------------------------
 	    call shympi_collect_node_value(k,tcn,vals(:,j,1))
 	  end do
 	  if( shympi_is_master() ) then
-            call ext_write_record(nbext,0,atime,knausm,nlv3d
-     +                                  ,ivar,m,il,vals,ierr)
+            call ext_write_record(nbext,0,atime,knausm,nlv3d &
+     &                                  ,ivar,m,il,vals,ierr)
             if( ierr /= 0 ) goto 97
 	  end if
 	end if
 
-c       -------------------------------------------------------
-c       waves
-c       -------------------------------------------------------
+!       -------------------------------------------------------
+!       waves
+!       -------------------------------------------------------
 
         if( bwave ) then
           iv = iv + 1
@@ -516,21 +516,21 @@ c       -------------------------------------------------------
 	    call shympi_collect_node_value(k,waved,vals(1,j,3))
           end do
 	  if( shympi_is_master() ) then
-            call ext_write_record(nbext,0,atime,knausm,nlv2d
-     +                                  ,ivar,m,il,vals,ierr)
+            call ext_write_record(nbext,0,atime,knausm,nlv2d &
+     &                                  ,ivar,m,il,vals,ierr)
             if( ierr /= 0 ) goto 97
 	  end if
         end if
 
-c--------------------------------------------------------------
-c error check
-c--------------------------------------------------------------
+!--------------------------------------------------------------
+! error check
+!--------------------------------------------------------------
 
 	if( iv /= nvar ) goto 91
 
-c--------------------------------------------------------------
-c finalize
-c--------------------------------------------------------------
+!--------------------------------------------------------------
+! finalize
+!--------------------------------------------------------------
 
         call is_time_last(blast)
         if( blast ) then
@@ -538,9 +538,9 @@ c--------------------------------------------------------------
 	  call shympi_barrier
 	end if
 
-c--------------------------------------------------------------
-c end of routine
-c--------------------------------------------------------------
+!--------------------------------------------------------------
+! end of routine
+!--------------------------------------------------------------
 
 	return
    91   continue
@@ -565,7 +565,7 @@ c--------------------------------------------------------------
 	stop 'error stop wrexta: writing ext record'
 	end
 
-c*********************************************************
+!*********************************************************
 
 	subroutine collect_header(n,kext,hdep,x,y,il,strings,kind)
 
@@ -622,5 +622,5 @@ c*********************************************************
 
 	end
 
-c*********************************************************
+!*********************************************************
 

@@ -1,24 +1,24 @@
 
-C**************************************************************************
-C
-C     This is part of the netCDF package.
-C     Copyright 2006 University Corporation for Atmospheric Research/Unidata.
-C     See COPYRIGHT file for conditions of use.
-C
-C     This is an example which reads some surface pressure and
-C     temperatures. The data file read by this program is produced
-C     comapnion program sfc_pres_temp_wr.f. It is intended to illustrate
-C     the use of the netCDF fortran 77 API.
-C
-C     This program is part of the netCDF tutorial:
-C     http://www.unidata.ucar.edu/software/netcdf/docs/netcdf-tutorial
-C
-C     Full documentation of the netCDF Fortran 77 API can be found at:
-C     http://www.unidata.ucar.edu/software/netcdf/docs/netcdf-f77
-C
-C     $Id: sfc_pres_temp_rd.f,v 1.8 2007/01/24 19:45:09 russ Exp $
-C
-C**************************************************************************
+! **************************************************************************
+! 
+!      This is part of the netCDF package.
+!      Copyright 2006 University Corporation for Atmospheric Research/Unidata.
+!      See COPYRIGHT file for conditions of use.
+! 
+!      This is an example which reads some surface pressure and
+!      temperatures. The data file read by this program is produced
+!      comapnion program sfc_pres_temp_wr.f. It is intended to illustrate
+!      the use of the netCDF fortran 77 API.
+! 
+!      This program is part of the netCDF tutorial:
+!      http://www.unidata.ucar.edu/software/netcdf/docs/netcdf-tutorial
+! 
+!      Full documentation of the netCDF Fortran 77 API can be found at:
+!      http://www.unidata.ucar.edu/software/netcdf/docs/netcdf-f77
+! 
+!      $Id: sfc_pres_temp_rd.f,v 1.8 2007/01/24 19:45:09 russ Exp $
+! 
+! **************************************************************************
 
 !===================================================================
 	module mod_ncinfo

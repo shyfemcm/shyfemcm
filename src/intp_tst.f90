@@ -24,34 +24,34 @@
 !
 !--------------------------------------------------------------------------
 
-c closure routines
-c
-c revision log :
-c
-c 02.09.2004	ggu	new classification routine
-c 04.09.2004	ggu	franco added (zfranco)
-c 11.10.2008	ggu	franco passed in
-c 23.03.2010	ggu	changed v6.1.1
-c 30.03.2012	ggu	changed VERS_6_1_51
-c 16.11.2012	ggu	if franco == 99 -> use PS as forecast (init_ps)
-c 23.12.2014	ggu	changed VERS_7_0_11
-c 19.01.2015	ggu	changed VERS_7_1_3
-c 05.05.2015	ggu	changed VERS_7_1_10
-c 17.07.2015	ggu	changed VERS_7_1_80
-c 20.07.2015	ggu	changed VERS_7_1_81
-c 23.11.2018	ggu	new routines to read and interpolate time series
-c 18.12.2018	ggu	changed VERS_7_5_52
-c 16.02.2019	ggu	changed VERS_7_5_60
-c 16.02.2019	ggu	transferred and started close_inlets2()
-c 10.11.2021    ggu     avoid warning for stack size
-c
-c**********************************************************************
+! closure routines
+!
+! revision log :
+!
+! 02.09.2004	ggu	new classification routine
+! 04.09.2004	ggu	franco added (zfranco)
+! 11.10.2008	ggu	franco passed in
+! 23.03.2010	ggu	changed v6.1.1
+! 30.03.2012	ggu	changed VERS_6_1_51
+! 16.11.2012	ggu	if franco == 99 -> use PS as forecast (init_ps)
+! 23.12.2014	ggu	changed VERS_7_0_11
+! 19.01.2015	ggu	changed VERS_7_1_3
+! 05.05.2015	ggu	changed VERS_7_1_10
+! 17.07.2015	ggu	changed VERS_7_1_80
+! 20.07.2015	ggu	changed VERS_7_1_81
+! 23.11.2018	ggu	new routines to read and interpolate time series
+! 18.12.2018	ggu	changed VERS_7_5_52
+! 16.02.2019	ggu	changed VERS_7_5_60
+! 16.02.2019	ggu	transferred and started close_inlets2()
+! 10.11.2021    ggu     avoid warning for stack size
+!
+!**********************************************************************
 
-c	program intp
-c	call intp_test
-c	end
+!	program intp
+!	call intp_test
+!	end
 
-c**********************************************************************
+!**********************************************************************
 
 	subroutine intp_test
 
@@ -130,8 +130,8 @@ c**********************************************************************
 	  call get_prev(ndim,it,zfranco,n,vals)
 	  call get_wind_rain(it,windv,rainv,wmax,rmax,dz)
 
-          call class12new(it,n,vals,zsalv,zextra,zrise,wmax,rmax,psv
-     +                  ,zmax,zdate,ih,iclass,class)
+          call class12new(it,n,vals,zsalv,zextra,zrise,wmax,rmax,psv &
+     &                  ,zmax,zdate,ih,iclass,class)
 
 	  if( iclose .eq. 1 ) then	!already closed
 	    dz = dz*iddt/(1000.*3600.)	!convert to [m/timestep]
@@ -142,8 +142,8 @@ c**********************************************************************
 
           zlevel = 0
           if( ih .gt. 0 ) zlevel = zrise+vals(ih)
-	  write(66,2300) it,iclass,class,iclose,ih
-     +		,icm(zmax),icm(zlevel),icm(psv),icm(dsv),icm(zlagoon)
+	  write(66,2300) it,iclass,class,iclose,ih &
+     &		,icm(zmax),icm(zlevel),icm(psv),icm(dsv),icm(zlagoon)
 	  if( iclass .gt. 0 ) then
 	    !write(66,2200) (nint(100.*vals(j)),j=1,20)
 	  end if
@@ -157,8 +157,8 @@ c**********************************************************************
 	  else if( iclose .eq. 1 .and. dsv .lt. zlagoon ) then
 !     +				.and. psv .lt. zdate ) then
 	    !write(66,2500) 'opening inlets: ',class,it,zlagoon,zdate,it-itcl
-	    write(6,2500) 'opening inlets: '
-     +				,class,it,zlagoon,zdate,it-itcl
+	    write(6,2500) 'opening inlets: ' &
+     &				,class,it,zlagoon,zdate,it-itcl
 	    iclose = 0
 	    zlagoon = 0.
 	    itotal = itotal + 1
@@ -177,11 +177,11 @@ c**********************************************************************
  2500	format(a,a4,i10,2f9.2,i10)
 	end
 
-c********************************************************
+!********************************************************
 
 	subroutine get_prev(nvdim,it,zfranco,if,vals)
 
-c gets previsioni
+! gets previsioni
 
 	implicit none
 
@@ -261,11 +261,11 @@ c gets previsioni
 
 	end
 
-c********************************************************
+!********************************************************
 
 	subroutine init_ps(ndim,nfore,n,itime,ifill,pp,paux)
 
-c initializes previsioni
+! initializes previsioni
 
 	implicit none
 
@@ -319,11 +319,11 @@ c initializes previsioni
 
 	end
 
-c********************************************************
+!********************************************************
 
 	subroutine init_prev(ndim,nfore,n,itime,ifill,pp,paux)
 
-c initializes previsioni
+! initializes previsioni
 
 	implicit none
 
@@ -345,13 +345,13 @@ c initializes previsioni
         iunit = ifileo(iunit,file,'form','old')
 	if( iunit .le. 0 ) stop 'error stop init_prev'
 
-c it	fem time (secs)
-c i1	day
-c i2	month
-c i3	year
-c i4	julian day
-c i5	hour
-c if	fill
+! it	fem time (secs)
+! i1	day
+! i2	month
+! i3	year
+! i4	julian day
+! i5	hour
+! if	fill
 
 	n = 0
     1	continue
@@ -376,10 +376,10 @@ c if	fill
 
 	end
 
-c********************************************************
+!********************************************************
 
-	subroutine class12(n,vals,zsalv,zextra,zrise,wmax,rmax,psv
-     +			,zmax,zdate,ih,iclass,class)
+	subroutine class12(n,vals,zsalv,zextra,zrise,wmax,rmax,psv &
+     &			,zmax,zdate,ih,iclass,class)
 
 	implicit none
 
@@ -452,10 +452,10 @@ c********************************************************
 
 	end
 
-c********************************************************
+!********************************************************
 
-	subroutine class12new(it,n,vals,zsalv,zextra,zrise,wmax,rmax,psv
-     +			,zmax,zdate,ih,iclass,class)
+	subroutine class12new(it,n,vals,zsalv,zextra,zrise,wmax,rmax,psv &
+     &			,zmax,zdate,ih,iclass,class)
 
 	implicit none
 
@@ -595,11 +595,11 @@ c********************************************************
 
 	end
 
-c********************************************************
+!********************************************************
 
 	subroutine get_max(it,ih,wmax,rmax)
 
-c gets max of wind and rain for ih hours ahead
+! gets max of wind and rain for ih hours ahead
 
 	implicit none
 
@@ -635,7 +635,7 @@ c gets max of wind and rain for ih hours ahead
 
 	itmax = it + 3600*ih
 
-c wind
+! wind
 
 	do while( iwind .le. nwind .and. itwind(iwind) .lt. it )
 	  iwind = iwind + 1
@@ -648,7 +648,7 @@ c wind
 	  i = i + 1
 	end do
 
-c rain
+! rain
 
 	do while( irain .le. nrain .and. itrain(irain) .lt. it )
 	  irain = irain + 1
@@ -664,7 +664,7 @@ c rain
 
 	end
 
-c********************************************************
+!********************************************************
 
         subroutine leakage(wind,dz)
 
@@ -687,11 +687,11 @@ c********************************************************
 
         end
 
-c********************************************************
+!********************************************************
 
 	subroutine raise_zeta(dz)
 
-c raises water level of lagoon
+! raises water level of lagoon
 
 	use mod_hydro
 	use basin, only : nkn,nel,ngr,mbw
@@ -714,13 +714,13 @@ c raises water level of lagoon
 
 	end
 
-c********************************************************
+!********************************************************
 
 	subroutine get_wind_rain(it,w,r,wmax,rmax,dz)
 
-c wind in [m/s]
-c rain in [mm/h]
-c leakage dz in [mm/h]
+! wind in [m/s]
+! rain in [mm/h]
+! leakage dz in [mm/h]
 
 	implicit none
 
@@ -765,7 +765,7 @@ c leakage dz in [mm/h]
 
 	end
 
-c********************************************************
+!********************************************************
 
 	subroutine close_inlets2
 
@@ -883,8 +883,8 @@ c********************************************************
           call get_prev(ndim,it,zfranco,n,vals)
           call get_wind_rain(it,windv,rainv,wmax,rmax,dzmmh)
 
-          call class12new(it,n,vals,zsalv,zextra,zrise,wmax,rmax,psv
-     +                  ,zmax,zdate,ih,iclass,class)
+          call class12new(it,n,vals,zsalv,zextra,zrise,wmax,rmax,psv &
+     &                  ,zmax,zdate,ih,iclass,class)
 
           call set_zdate(0,zdate)	!set zdate for all inlets
 
@@ -904,9 +904,9 @@ c********************************************************
 	  zlevel = 0
 	  if( ih .gt. 0 ) zlevel = zrise+vals(ih)       !level at time ih
 	  zbound = zvbnds(1)                            !level outside
-          write(i66,2300) it,iclass,class,icl,ih
-     +          ,icm(zmax),icm(zlevel),icm(psv),icm(dsv)
-     +		,icm(zbound),icm(zdate),(itybnd(ibc),ibc=1,nbc)
+          write(i66,2300) it,iclass,class,icl,ih &
+     &          ,icm(zmax),icm(zlevel),icm(psv),icm(dsv) &
+     &		,icm(zbound),icm(zdate),(itybnd(ibc),ibc=1,nbc)
 
 !------------------------------------------------------------------
 ! statistics of closures
@@ -922,8 +922,8 @@ c********************************************************
 
 	iclose_old = iclose
 
-	write(iunit,*) it,dzmmh,zdate
-     +			,(itybnd(ibc),ibc=1,nbc),itotal,ittot
+	write(iunit,*) it,dzmmh,zdate &
+     &			,(itybnd(ibc),ibc=1,nbc),itotal,ittot
 	
 !------------------------------------------------------------------
 ! end of routine
@@ -938,5 +938,5 @@ c********************************************************
 
 	end
 
-c********************************************************
+!********************************************************
 

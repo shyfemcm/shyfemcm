@@ -23,24 +23,24 @@
 !
 !--------------------------------------------------------------------------
 
-c utilities for tracking (should be revised)
-c
-c revision log :
-c
-c 05.02.2009	ggu	copied from other files (lagrange.f)
-c 23.03.2010	ggu	changed v6.1.1
-c 30.03.2012	ggu	changed VERS_6_1_51
-c 19.01.2015	ggu	changed VERS_7_1_3
-c 05.05.2015	ggu	changed VERS_7_1_10
-c 17.07.2015	ggu	changed VERS_7_1_80
-c 20.07.2015	ggu	changed VERS_7_1_81
-c 16.02.2019	ggu	changed VERS_7_5_60
-c
-c**********************************************************************
+! utilities for tracking (should be revised)
+!
+! revision log :
+!
+! 05.02.2009	ggu	copied from other files (lagrange.f)
+! 23.03.2010	ggu	changed v6.1.1
+! 30.03.2012	ggu	changed VERS_6_1_51
+! 19.01.2015	ggu	changed VERS_7_1_3
+! 05.05.2015	ggu	changed VERS_7_1_10
+! 17.07.2015	ggu	changed VERS_7_1_80
+! 20.07.2015	ggu	changed VERS_7_1_81
+! 16.02.2019	ggu	changed VERS_7_5_60
+!
+!**********************************************************************
 
 	subroutine retta(ext,cy,cx,b,el)
 	
-c dati gli estremi calcolo i coefficienti a, b della retta passante
+! dati gli estremi calcolo i coefficienti a, b della retta passante
 	
 	use basin
 
@@ -89,22 +89,22 @@ c dati gli estremi calcolo i coefficienti a, b della retta passante
 
 	end
 
-c**********************************************************************
+!**********************************************************************
 
        subroutine dirz(pfin,ratio,ext,cy,cx,b,ny,nx,el,pb,ipb)
 	
-c per il calcolo della retta traiettoria percorsa del body:
-c ho bisogno del punto di arrivo, pfin e un punto di partenza pini
-c                         | questo punto lo calcolo considerando: 
-c         /\ pfin         | differenza deltax tra le coord. x degli estremi
-c        /  \             | della retta y=ax+b, applico il rapporto
-c       /    \            | (ratio) dei segmenti a tale delta X e  
-c      /      \           | trovo la frazione di x da aggiungere  
-c     /  ratio \          | all''estremo opposto a cui si riferisce il 
-c    <------------------> | ratio. Quindi trovo le nuove coordinate del punto
-c	        pini      | pini. Da pini e pfin trovo il fascio di
-c_________________________| rette in particolare an il coefficiente
-c                           angolare an
+! per il calcolo della retta traiettoria percorsa del body:
+! ho bisogno del punto di arrivo, pfin e un punto di partenza pini
+!                         | questo punto lo calcolo considerando: 
+!         /\ pfin         | differenza deltax tra le coord. x degli estremi
+!        /  \             | della retta y=ax+b, applico il rapporto
+!       /    \            | (ratio) dei segmenti a tale delta X e  
+!      /      \           | trovo la frazione di x da aggiungere  
+!     /  ratio \          | all''estremo opposto a cui si riferisce il 
+!    <------------------> | ratio. Quindi trovo le nuove coordinate del punto
+!	        pini      | pini. Da pini e pfin trovo il fascio di
+!_________________________| rette in particolare an il coefficiente
+!                           angolare an
 	use basin
 
 	implicit none
@@ -128,13 +128,13 @@ c                           angolare an
         real dfrq,aax,aay,axx,ayy
         real xn,yn,rr,a
 	
-c coordinate pfin
+! coordinate pfin
 
 	pi=nen3v(pfin,el)
 	xi=xgv(pi)
 	yi=ygv(pi)
 
-c definizione coordinate estremi del segmento
+! definizione coordinate estremi del segmento
 	
 	p1=nen3v(ext(1),el)
 	p2=nen3v(ext(2),el)
@@ -144,7 +144,7 @@ c definizione coordinate estremi del segmento
 	y1=ygv(p1)
 	y2=ygv(p2)
 
-c calcola distanza tra 2 punti p1,p2
+! calcola distanza tra 2 punti p1,p2
 
 	ax=x2-x1
 	ay=y2-y1
@@ -153,7 +153,7 @@ c calcola distanza tra 2 punti p1,p2
 
 	dist=sqrt(axx+ayy)
 
-c trasformazione frazione percentuale di 2 in distanza da punto 1
+! trasformazione frazione percentuale di 2 in distanza da punto 1
 
 	rr = 0.
 	do i=1,2
@@ -163,8 +163,8 @@ c trasformazione frazione percentuale di 2 in distanza da punto 1
 	 endif
 	enddo 
         
-c calcolo coordinate punto nella retta distante dfrq da p1 e
-c compreso tra p1 e p2
+! calcolo coordinate punto nella retta distante dfrq da p1 e
+! compreso tra p1 e p2
 
 	xn = 0.
 	yn = 0.
@@ -202,7 +202,7 @@ c compreso tra p1 e p2
               
 222	continue
 
-c calcolo coefficiente angolare del fascio di rette
+! calcolo coefficiente angolare del fascio di rette
 
  	ny=xn-xi
         nx=yn-yi
@@ -213,14 +213,14 @@ c calcolo coefficiente angolare del fascio di rette
 	
         end
 
-c**********************************************************************
+!**********************************************************************
 
 	subroutine traj(ny,nx,x,y,tb)
 
 	implicit none
 
-c in questa subroutine viene definita la retta y=an+tb passante per il 
-c punto x, y e di coefficiente angolare an
+! in questa subroutine viene definita la retta y=an+tb passante per il 
+! punto x, y e di coefficiente angolare an
 
         real ny,nx,x,y,tb
         real anx,any
@@ -231,12 +231,12 @@ c punto x, y e di coefficiente angolare an
 	
 	end
 
-c**********************************************************************
+!**********************************************************************
 
 	subroutine interc(ny,nx,b,cy,cx,ib,x,y)
 	
-c calcolo delle coordinate x e y di intercetta tra la retta y=ax+b
-c e la retta y=iax+ib
+! calcolo delle coordinate x e y di intercetta tra la retta y=ax+b
+! e la retta y=iax+ib
 
         implicit none
 
@@ -270,11 +270,11 @@ c e la retta y=iax+ib
 	
 	end
 
-c**********************************************************************
+!**********************************************************************
 	
 	subroutine distp(x,y,ext,d,near,far,el)
 
-c calcolo della distanza (dist) del punto x,y dall'estremo piu distante
+! calcolo della distanza (dist) del punto x,y dall'estremo piu distante
 
 	use basin
 
@@ -293,7 +293,7 @@ c calcolo della distanza (dist) del punto x,y dall'estremo piu distante
         real dxx1,dxx2
         real dist
 	
-c definizione coordinate estremi del segmento
+! definizione coordinate estremi del segmento
 
         p1=nen3v(ext(1),el)
         p2=nen3v(ext(2),el)
@@ -303,7 +303,7 @@ c definizione coordinate estremi del segmento
         y1=ygv(p1)
         y2=ygv(p2)
 
-c calcola distanza punto x1,y1 e punto x2,y2
+! calcola distanza punto x1,y1 e punto x2,y2
 
         ax=x2-x1
         ay=y2-y1
@@ -312,7 +312,7 @@ c calcola distanza punto x1,y1 e punto x2,y2
 
         dist=sqrt(axx+ayy)
 
-c calcola distanza punto x,y e punto x1,y1
+! calcola distanza punto x,y e punto x1,y1
 
         ax=x-x1
         ay=y-y1
@@ -320,7 +320,7 @@ c calcola distanza punto x,y e punto x1,y1
         ayy=ay**2
         dxx1=sqrt(axx+ayy)
 	
-c calcola distanza punto x,y e punto x2,y2
+! calcola distanza punto x,y e punto x2,y2
 
 	ax=x-x2
         ay=y-y2
@@ -328,7 +328,7 @@ c calcola distanza punto x,y e punto x2,y2
         ayy=ay**2
         dxx2=sqrt(axx+ayy)
 
-c individuo estremo piu lontano (far) e piu vicino (near)
+! individuo estremo piu lontano (far) e piu vicino (near)
 
 	if(dxx2.ge.dxx1)then
 	 far=ext(2)
@@ -340,26 +340,26 @@ c individuo estremo piu lontano (far) e piu vicino (near)
 	 d=dxx1/dist
 	endif 
         if((dxx1.gt.dist).or.(dxx2.gt.dist))then
-c        PRINT*,'STOP BODY IN X ',x,' Y ',y,' NON CONTENUTO IN EL ',el
+!        PRINT*,'STOP BODY IN X ',x,' Y ',y,' NON CONTENUTO IN EL ',el
          el=-el
          return
         endif
         end
 
-c**********************************************************************
+!**********************************************************************
 
 	subroutine pnt_inside(d,dd,ny,nx,x1,y1,x2,y2,xn,yn)
 
-c calcolo coordinate di un punto sulla retta nyY=nxX+b distante da x1,y1
-c di un valore d e compreso tra x1,y1 e x2,y2
+! calcolo coordinate di un punto sulla retta nyY=nxX+b distante da x1,y1
+! di un valore d e compreso tra x1,y1 e x2,y2
 
 	implicit none
 	
         real d,a,x1,y1,x2,y2,dd
         real xn,yn,ny,nx
 	
-c calcolo coordinate punto nella retta distante d da x1 e
-c compreso tra x1, y1 e x2, y2
+! calcolo coordinate punto nella retta distante d da x1 e
+! compreso tra x1, y1 e x2, y2
 
         if(ny.eq.0)then
 	 xn=x2
@@ -391,5 +391,5 @@ c compreso tra x1, y1 e x2, y2
 444     continue	
 	end
 
-c**********************************************************************
+!**********************************************************************
 

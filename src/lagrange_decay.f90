@@ -25,30 +25,30 @@
 !
 !--------------------------------------------------------------------------
 
-c decay of particles
-c
-c revision log :
-c
-c 05.02.2009	ggu	copied from other files
-c 23.03.2010	ggu	changed v6.1.1
-c 16.02.2012	mcg&fdp	new way to kill particles...
-c 08.10.2012	ggu	changed VERS_6_1_58
-c 25.10.2012	ggu	changed VERS_6_1_59
-c 28.03.2014	ggu	new version of decay (for all particles)
-c 05.05.2014	ggu	changed VERS_6_1_74
-c 12.12.2014	ggu	changed VERS_7_0_9
-c 19.12.2014	ggu	changed VERS_7_0_10
-c 21.05.2015	ggu	changed VERS_7_1_11
-c 16.11.2015	ggu	changed VERS_7_3_14
-c 25.10.2018	ggu	changed VERS_7_5_51
-c 16.02.2019	ggu	changed VERS_7_5_60
-c 13.03.2019	ggu	changed VERS_7_5_61
-c
-c**********************************************************************
+! decay of particles
+!
+! revision log :
+!
+! 05.02.2009	ggu	copied from other files
+! 23.03.2010	ggu	changed v6.1.1
+! 16.02.2012	mcg&fdp	new way to kill particles...
+! 08.10.2012	ggu	changed VERS_6_1_58
+! 25.10.2012	ggu	changed VERS_6_1_59
+! 28.03.2014	ggu	new version of decay (for all particles)
+! 05.05.2014	ggu	changed VERS_6_1_74
+! 12.12.2014	ggu	changed VERS_7_0_9
+! 19.12.2014	ggu	changed VERS_7_0_10
+! 21.05.2015	ggu	changed VERS_7_1_11
+! 16.11.2015	ggu	changed VERS_7_3_14
+! 25.10.2018	ggu	changed VERS_7_5_51
+! 16.02.2019	ggu	changed VERS_7_5_60
+! 13.03.2019	ggu	changed VERS_7_5_61
+!
+!**********************************************************************
 
         subroutine lagr_func(n)
 
-c handles decay of particles
+! handles decay of particles
 
         implicit none
         
@@ -75,11 +75,11 @@ c handles decay of particles
 
         end
 
-c**********************************************************************
+!**********************************************************************
 
         subroutine lagrange_decay(ldecay)
 
-c applies decay to all particles
+! applies decay to all particles
 
 	use mod_lagrange
 
@@ -109,18 +109,18 @@ c applies decay to all particles
 
         end
 
-c**********************************************************************
+!**********************************************************************
 
         subroutine lagr_decay(n)
 
-c in funzione di un decadimento esponenziale con
-c tempo di dimezzamento TDC particella n-esima
-c di eta' pari a Dt sara' soggetta dopo un
-c intervallo di tempo TIME ad una % di sopravvivenza
-c RDC pari a 1-(1/(e^(TIME/Dt))).
-c Con Random Walk determino numero casuale tra 0-1,
-c se tale numero cade nell'intervallo di mortalita'
-c allora la particella sparisce dal calcolo
+! in funzione di un decadimento esponenziale con
+! tempo di dimezzamento TDC particella n-esima
+! di eta' pari a Dt sara' soggetta dopo un
+! intervallo di tempo TIME ad una % di sopravvivenza
+! RDC pari a 1-(1/(e^(TIME/Dt))).
+! Con Random Walk determino numero casuale tra 0-1,
+! se tale numero cade nell'intervallo di mortalita'
+! allora la particella sparisce dal calcolo
 
 	use mod_lagrange
 
@@ -152,7 +152,7 @@ c allora la particella sparisce dal calcolo
 
         end
 
-c*********************************************************************
+!*********************************************************************
 
         subroutine lagr_conc(i)
 
@@ -185,11 +185,11 @@ c*********************************************************************
 
         end 
                 
-c**********************************************************************
+!**********************************************************************
 
 	subroutine lagr_surv(i)
 
-c particles older than tdead are eliminated
+! particles older than tdead are eliminated
 
 	use mod_lagrange
 
@@ -238,11 +238,11 @@ c particles older than tdead are eliminated
 
 	if( psurv .le. 0 ) then	!particle is dead
 	  icount = icount+1 
-c	  write(77,*) it,i,icount,deltat
+!	  write(77,*) it,i,icount,deltat
 	  lgr_ar(i)%actual%ie = -lgr_ar(i)%actual%ie
 	endif
 
 	end 
 
-c**********************************************************************
+!**********************************************************************
 

@@ -23,35 +23,35 @@
 !
 !--------------------------------------------------------------------------
 
-c simulates continuous release over open boundaries
-c
-c revision log :
-c
-c 12.12.2007	ggu	written from scratch
-c 12.06.2008	ggu	initialize also z
-c 28.08.2009	ggu	new call to find_elems_to_segment (before line_elems)
-c 23.03.2010	ggu	changed v6.1.1
-c 16.12.2011	ggu	new routine lagr_continuous_release_ppv()
-c 23.01.2012	ggu	new routine for release in point, connectivity
-c 25.01.2012	ggu	changed VERS_6_1_42
-c 29.08.2012	ggu	changed VERS_6_1_56
-c 23.10.2012	ggu	do not call connectivity here anymore
-c 28.03.2014	ggu	new routine lagr_continuous_release_pps_ppv()
-c 05.05.2014	ggu	changed VERS_6_1_74
-c 07.07.2014	ggu	changed VERS_6_1_79
-c 19.01.2015	ggu	changed VERS_7_1_3
-c 01.04.2015	ggu	changed VERS_7_1_7
-c 23.04.2015	ggu	changed VERS_7_1_8
-c 21.05.2015	ggu	changed VERS_7_1_11
-c 17.07.2015	ggu	changed VERS_7_1_80
-c 20.07.2015	ggu	changed VERS_7_1_81
-c 16.11.2015	ggu	changed VERS_7_3_14
-c 20.11.2015	ggu	changed VERS_7_3_15
-c 03.04.2018	ggu	changed VERS_7_5_43
-c 25.10.2018	ggu	changed VERS_7_5_51
-c 16.02.2019	ggu	changed VERS_7_5_60
-c
-c*******************************************************************
+! simulates continuous release over open boundaries
+!
+! revision log :
+!
+! 12.12.2007	ggu	written from scratch
+! 12.06.2008	ggu	initialize also z
+! 28.08.2009	ggu	new call to find_elems_to_segment (before line_elems)
+! 23.03.2010	ggu	changed v6.1.1
+! 16.12.2011	ggu	new routine lagr_continuous_release_ppv()
+! 23.01.2012	ggu	new routine for release in point, connectivity
+! 25.01.2012	ggu	changed VERS_6_1_42
+! 29.08.2012	ggu	changed VERS_6_1_56
+! 23.10.2012	ggu	do not call connectivity here anymore
+! 28.03.2014	ggu	new routine lagr_continuous_release_pps_ppv()
+! 05.05.2014	ggu	changed VERS_6_1_74
+! 07.07.2014	ggu	changed VERS_6_1_79
+! 19.01.2015	ggu	changed VERS_7_1_3
+! 01.04.2015	ggu	changed VERS_7_1_7
+! 23.04.2015	ggu	changed VERS_7_1_8
+! 21.05.2015	ggu	changed VERS_7_1_11
+! 17.07.2015	ggu	changed VERS_7_1_80
+! 20.07.2015	ggu	changed VERS_7_1_81
+! 16.11.2015	ggu	changed VERS_7_3_14
+! 20.11.2015	ggu	changed VERS_7_3_15
+! 03.04.2018	ggu	changed VERS_7_5_43
+! 25.10.2018	ggu	changed VERS_7_5_51
+! 16.02.2019	ggu	changed VERS_7_5_60
+!
+!*******************************************************************
 
 	subroutine lagr_continuous_release_shell
 
@@ -63,11 +63,11 @@ c*******************************************************************
 
 	end
 
-c*******************************************************************
+!*******************************************************************
 
 	subroutine lagr_continuous_release_ppv
 
-c continuous release - number of particles depends on volume flux
+! continuous release - number of particles depends on volume flux
 
 	use mod_lagrange
 
@@ -128,11 +128,11 @@ c continuous release - number of particles depends on volume flux
 
 	end
 
-c*******************************************************************
+!*******************************************************************
 
 	subroutine lagr_continuous_release_pps
 
-c continuous release - number of particles is independent of boundary length
+! continuous release - number of particles is independent of boundary length
 
 	use mod_lagrange
 
@@ -191,13 +191,13 @@ c continuous release - number of particles is independent of boundary length
 
 	end
 
-c*******************************************************************
+!*******************************************************************
 
 	subroutine lagr_continuous_release_pps_ppv
 
-c continuous release - works both for pps and ppv
-c
-c replaces the routines above
+! continuous release - works both for pps and ppv
+!
+! replaces the routines above
 
 	use mod_lagrange
 
@@ -284,7 +284,7 @@ c replaces the routines above
 
 	end
 
-c*******************************************************************
+!*******************************************************************
 
 	subroutine create_parts(ity,np,k1,k2)
 
@@ -332,7 +332,7 @@ c*******************************************************************
 
 	end
 
-c*******************************************************************
+!*******************************************************************
 
 	function get_bflux_ppv(k1,k2)
 
@@ -363,13 +363,13 @@ c*******************************************************************
 	
 	end
 
-c*******************************************************************
-c*******************************************************************
-c*******************************************************************
+!*******************************************************************
+!*******************************************************************
+!*******************************************************************
 
 	subroutine release_on_node(ity,ppts,k,n)
 
-c release on node
+! release on node
 
 	use basin
 
@@ -392,13 +392,13 @@ c release on node
 
 	end
 
-c*******************************************************************
+!*******************************************************************
 
 	subroutine find_elem_to_node(k,iee,x,y)
 
 	use basin
 
-c be sure particle is in an element
+! be sure particle is in an element
 
 	implicit none
 
@@ -456,11 +456,11 @@ c be sure particle is in an element
 	
 	end
 
-c*******************************************************************
+!*******************************************************************
 
 	subroutine release_on_point(ity,ppts,ie,x,y,n)
 
-c release from one point - works for 2D
+! release from one point - works for 2D
 
 	implicit none
 
@@ -484,7 +484,7 @@ c release from one point - works for 2D
 
 	end
 
-c*******************************************************************
-c*******************************************************************
-c*******************************************************************
+!*******************************************************************
+!*******************************************************************
+!*******************************************************************
 

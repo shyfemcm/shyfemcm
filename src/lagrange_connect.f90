@@ -47,7 +47,7 @@
 ! 30.04.2020    mcg     adapted to new applications
 ! 24.05.2021    ggu     bug fixes in lagr_connect_read_params()
 
-c*******************************************************************
+!*******************************************************************
 
 	module connectivity
 
@@ -85,7 +85,7 @@ c*******************************************************************
 
 	end module connectivity
 
-c*******************************************************************
+!*******************************************************************
 
 	subroutine lagr_connect_read_params
 
@@ -156,7 +156,7 @@ c*******************************************************************
 
 	end
 
-c*******************************************************************
+!*******************************************************************
 
 	subroutine lagr_connect_continuous_points(brelease)
 
@@ -181,7 +181,7 @@ c*******************************************************************
 
 	if( icall .lt. 0 ) return
 
-c initialize the first time
+! initialize the first time
 
 	if( icall .eq. 0 ) then			
 	  bconnect = .false.
@@ -200,14 +200,14 @@ c initialize the first time
 
 	icall = icall + 1
 
-c set parameters
+! set parameters
 
 	np = np_station
 	call get_timestep(dt)
 	pps = lagr_connect_pps		!release of particles per second
 	ppts = dt * pps				!particles per time step
 
-c release particles TODO 3d release
+! release particles TODO 3d release
 
 	if( brelease ) then			!release?
 	  do ip=1,np
@@ -218,7 +218,7 @@ c release particles TODO 3d release
 	  end do
 	end if
 
-c write with freqency itout or at the end of sim 
+! write with freqency itout or at the end of sim 
 
 	itout = lagr_connect_itout	!matric write frequency
 	if( (mod(it,itout).eq.0).or.(it.eq.itend)) then
@@ -234,9 +234,9 @@ c write with freqency itout or at the end of sim
 	stop 'error stop lagr_connect_continuous_points: np_station'
 	end
 
-c*******************************************************************
-c*******************************************************************
-c*******************************************************************
+!*******************************************************************
+!*******************************************************************
+!*******************************************************************
 
 	subroutine lagr_connect_init(np,xp,yp,iep)
 
@@ -290,18 +290,18 @@ c*******************************************************************
 
 	end
 
-c*******************************************************************
+!*******************************************************************
 
 	subroutine lagr_connect_reset(np)
 
-c i_connect_total(ie)	!total number of particles went across each element
-c t_connect_total(ie)	!cumulate time spent in each element passing by
-c i_connect(ip,jp)	!particles exchanged from ip to jp with redundancy 
-c if_connect(ip,jp)	!particles exchanged from ip to jp without
-c t_connect(ip,jp)	!time spent by particles from ip in jp with redundancy
-c tf_connect(ip,jp)	!time spent by particles from ip in jp without redundancy
-c agef_connect(ip,jp)	!age of particles from ip in jp station without redundancy
-c i_connect_released(ip)!total number of particles released at ip
+! i_connect_total(ie)	!total number of particles went across each element
+! t_connect_total(ie)	!cumulate time spent in each element passing by
+! i_connect(ip,jp)	!particles exchanged from ip to jp with redundancy 
+! if_connect(ip,jp)	!particles exchanged from ip to jp without
+! t_connect(ip,jp)	!time spent by particles from ip in jp with redundancy
+! tf_connect(ip,jp)	!time spent by particles from ip in jp without redundancy
+! agef_connect(ip,jp)	!age of particles from ip in jp station without redundancy
+! i_connect_released(ip)!total number of particles released at ip
 
 	use basin
 	use connectivity
@@ -330,29 +330,29 @@ c i_connect_released(ip)!total number of particles released at ip
 
 	end
 
-c*******************************************************************
+!*******************************************************************
 
 	subroutine lagr_connect_mark_elems(ip,xp,yp,iep,r)
 
-c marks elements contained in circle (x,y) with radius r
-c mgh : it doesn't work in spherical coordinates
-c 
-c from : https://en.wikipedia.org/wiki/Great-circle_distance
-c phi1,lambda1 = lat e lon in rad point 1 
-c phi2,lambda2 = lat e lon in rad point 2 
-c delta_rho =central angle between them 
-c delta_lam, delta_phi =  absolute difference 
-c radious of sphera (Earth =6371 km ) 
-c distance = d = r*delta_rho
+! marks elements contained in circle (x,y) with radius r
+! mgh : it doesn't work in spherical coordinates
+! 
+! from : https://en.wikipedia.org/wiki/Great-circle_distance
+! phi1,lambda1 = lat e lon in rad point 1 
+! phi2,lambda2 = lat e lon in rad point 2 
+! delta_rho =central angle between them 
+! delta_lam, delta_phi =  absolute difference 
+! radious of sphera (Earth =6371 km ) 
+! distance = d = r*delta_rho
 
-c FDP: https://rosettacode.org/wiki/Haversine_formula#Fortran
-c used for harvesine formula: for small distances
-c delta_rho = 2arcsin [ sqrt (sin**2 (delta_phy/2)  + 
-c				cos phi1 * cos phi2 ) * 
-c				sin**2(delta_lam/2) ]				 
-c
+! FDP: https://rosettacode.org/wiki/Haversine_formula#Fortran
+! used for harvesine formula: for small distances
+! delta_rho = 2arcsin [ sqrt (sin**2 (delta_phy/2)  + 
+!				cos phi1 * cos phi2 ) * 
+!				sin**2(delta_lam/2) ]				 
+!
 
-c iep = elemento in cui si trova la stazione !FDP
+! iep = elemento in cui si trova la stazione !FDP
 
 
 	use basin
@@ -396,7 +396,7 @@ c iep = elemento in cui si trova la stazione !FDP
 	
 !	if(isphe.eq.1)then
 	 !rsphe =to_radian(rkm,rsphe)
-c	 raux2= 2 asin (sqrt (cos(xp)*cos(XX) ) !x di un punto
+!	 raux2= 2 asin (sqrt (cos(xp)*cos(XX) ) !x di un punto
 	 raux2 = r*r
 	 r2 =  raux2
 !!	endif 
@@ -464,9 +464,9 @@ c	 raux2= 2 asin (sqrt (cos(xp)*cos(XX) ) !x di un punto
 	stop 'error stop lagr_connect_mark_elems: non unique station'
 	end
 
-c*******************************************************************
-c*******************************************************************
-c*******************************************************************
+!*******************************************************************
+!*******************************************************************
+!*******************************************************************
 
 	subroutine lagr_connect_released(ip,n)
 
@@ -480,7 +480,7 @@ c*******************************************************************
 
 	end
 
-c*******************************************************************
+!*******************************************************************
 
 	subroutine lagr_connect_count(ibdy,ie_to,ie_from,time)
 
@@ -539,10 +539,10 @@ c*******************************************************************
 	ip_orig = i_connect_elems(ie_orig)
 
 	if( ip_orig .le. 0 ) then
-	  write(6,*) 'particle not coming from source: '
-     +				,ibdy,ie_orig,ip_orig
-	  write(6,*) 'particle not coming from source: '
-     +				,ibdy,ieext(ie_orig),ip_orig
+	  write(6,*) 'particle not coming from source: ' &
+     &				,ibdy,ie_orig,ip_orig
+	  write(6,*) 'particle not coming from source: ' &
+     &				,ibdy,ieext(ie_orig),ip_orig
 	  stop 'error stop lagr_connect_count: no source'
 	end if
 
@@ -572,8 +572,8 @@ c*******************************************************************
 	  end if
 	  if( ip_from > 0 ) then  !can only leave if ever entered
 	    if( btest(lgr_ar(ibdy)%bitmap_in,ip_from) ) then
-	      lgr_ar(ibdy)%bitmap_out 
-     +			= ibset(lgr_ar(ibdy)%bitmap_out,ip_from)
+	      lgr_ar(ibdy)%bitmap_out  &
+     &			= ibset(lgr_ar(ibdy)%bitmap_out,ip_from)
 	    end if
 	  end if
 	end if
@@ -601,13 +601,13 @@ c*******************************************************************
 	if( bfirstenter ) then
 	  tarrive = it - tinit 	!first arrival age
 !	  write(8,*) ibdy,tinit,it,tarrive,ip_orig,ip_to
-	  agef_connect(ip_orig,ip_to) = agef_connect(ip_orig,ip_to)
-     +					+ tarrive
+	  agef_connect(ip_orig,ip_to) = agef_connect(ip_orig,ip_to) &
+     &					+ tarrive
 	end if
 
 	end
 
-c*******************************************************************
+!*******************************************************************
 
 	subroutine lagr_connect_write(np)
 
@@ -635,28 +635,28 @@ c*******************************************************************
 
 	if( np .le. 0 ) return
 
-cmi file.127 probability definition (angel or classic)
-c	write(127,*) np
-c	do ip=1,np
-c	  write(127,*) ip,i_connect_released(ip),a_connect_area(ip)
-c	end do
-c	write(127,*) 'total matrix time',it
+!mi file.127 probability definition (angel or classic)
+!	write(127,*) np
+!	do ip=1,np
+!	  write(127,*) ip,i_connect_released(ip),a_connect_area(ip)
+!	end do
+!	write(127,*) 'total matrix time',it
 
-cmi file.129 Cowen probability 
-c	write(129,*) np
-c	do ip=1,np
-c	  write(129,*) ip,i_connect_released(ip),a_connect_area(ip)
-c	end do
-c	write(129,*) 'total matrix time',it
+!mi file.129 Cowen probability 
+!	write(129,*) np
+!	do ip=1,np
+!	  write(129,*) ip,i_connect_released(ip),a_connect_area(ip)
+!	end do
+!	write(129,*) 'total matrix time',it
 
-cmi file.136 Exposure 
-c	write(136,*) np
-c	do ip=1,np
-c	  write(136,*) ip,i_connect_released(ip),a_connect_area(ip)
-c	end do
-c	write(136,*) 'total matrix time',it
+!mi file.136 Exposure 
+!	write(136,*) np
+!	do ip=1,np
+!	  write(136,*) ip,i_connect_released(ip),a_connect_area(ip)
+!	end do
+!	write(136,*) 'total matrix time',it
 
-cmi file.137 cumulate number of part. and time 
+!mi file.137 cumulate number of part. and time 
 	write(137,*) np
 	do ip=1,np
 	  write(137,*) ip,i_connect_released(ip),a_connect_area(ip)
@@ -699,7 +699,7 @@ cmi file.137 cumulate number of part. and time
 	!call wreos(iunit,it,ivar+2,nlvdim,ilhv,c,ierr)
 !	close(iunit)
 
-cmi file.128 total released particles and time 
+!mi file.128 total released particles and time 
 	write(128,*) nel
 	do ie=1,nel
 	  write(128,*) ie,i_connect_total(ie),t_connect_total(ie)
@@ -707,7 +707,7 @@ cmi file.128 total released particles and time
 
 	end
 
-c*******************************************************************
+!*******************************************************************
 
 	subroutine lagr_connect_write_entry(it,np,ip,jp)
 
@@ -738,8 +738,8 @@ c*******************************************************************
 	expos =0 
 	expos_f =0 
 
-c ip is from (source)
-c jp is to (destination)
+! ip is from (source)
+! jp is to (destination)
 
 	area_i = a_connect_area(ip)	!area of station i  [m^2] source
 	itot = i_connect_released(ip)	!total number of particles released by i
@@ -752,7 +752,7 @@ c jp is to (destination)
 	tcf = tf_connect(ip,jp)		!total time spent by partic orig. in i in the area of j [s]
 	agef = agef_connect(ip,jp) !age of first arrival of particles without redundance
 
-c average arrival time TO DO 
+! average arrival time TO DO 
 
 
 !sum su j: particelle di i=fix ricevute da qualche j    
@@ -764,13 +764,13 @@ c average arrival time TO DO
 	daux = daux + i_connect(ip,j) * a_connect_area(j) 	!angel per area 
 	dauxf = dauxf + if_connect(ip,j) * a_connect_area(j)
 
-cmgh	daux = daux + i_connect(ip,j) 				!michol solo particles
-cmgh	dauxf = dauxf + if_connect(ip,j)
+!mgh	daux = daux + i_connect(ip,j) 				!michol solo particles
+!mgh	dauxf = dauxf + if_connect(ip,j)
 	dtaux = dtaux + t_connect(ip,j)
 	dtauxf = dtauxf + tf_connect(ip,j)
 	enddo
-c	write(99,*) 'daux dauxf',ip,jp,daux,dauxf
-c	write(99,*) '-----------'
+!	write(99,*) 'daux dauxf',ip,jp,daux,dauxf
+!	write(99,*) '-----------'
 	
 ! sum su i = particelle di tutte i ricevute da una j=fix
 	naux=0
@@ -785,10 +785,10 @@ c	write(99,*) '-----------'
 	ntauxf = ntauxf + tf_connect(i,jp) ! [s]
 	enddo
 
-c	write(99,*) 'naux nauxf',ip,jp,naux,nauxf
-c	write(99,*) '-----------'
+!	write(99,*) 'naux nauxf',ip,jp,naux,nauxf
+!	write(99,*) '-----------'
 	
-c Cowen probability: it is not reasonable  
+! Cowen probability: it is not reasonable  
 
 	if(daux.eq.0)then
 	!write(6,*) 'warning daux 0'
@@ -799,7 +799,7 @@ c Cowen probability: it is not reasonable
 	cowpabf = (if_connect(ip,jp)*area_j) /dauxf	!without redund
 	endif
 
-C Angel or classical
+! Angel or classical
 
 	if(itot.eq.0)then
 	write(6,*) 'warning itot 0'
@@ -815,43 +815,43 @@ C Angel or classical
 	pabf = real(if_connect(ip,jp))/ real(itot)	!without redund
 	endif
 
-c tcfave = tempo medio trascorso in j da tutte le particelle i arrivate una volta in j e contato
-c solo quella volta.  
+! tcfave = tempo medio trascorso in j da tutte le particelle i arrivate una volta in j e contato
+! solo quella volta.  
 	if( icf .gt. 0 ) agefave = (agef / icf ) ! eta media di arrivo
 	if( icf .gt. 0 ) tcfave = (tcf / icf  ) !tempo medio speso in j 
 	if( ic .gt. 0 ) tcave = (tc / ic) !tempo medio speso in j ridond 
-c Exposure 
+! Exposure 
 
-c	expos = naux /(ntaux/86400.) 
-c	expos_f = nauxf /(ntauxf/86400.) 
+!	expos = naux /(ntaux/86400.) 
+!	expos_f = nauxf /(ntauxf/86400.) 
 	expos = naux /(ntaux/3600.) 
 	expos_f = nauxf /(ntauxf/3600.) 
 
 
-C FINAL OUTPUT 
+! FINAL OUTPUT 
 
-c	write(127,1000) ip,jp,ic,tc,icf,tcfave,pab,pabf
-c 1000	format(2i3,i8,e15.7,i8,e15.7,2e15.4)
+!	write(127,1000) ip,jp,ic,tc,icf,tcfave,pab,pabf
+! 1000	format(2i3,i8,e15.7,i8,e15.7,2e15.4)
 
 	write(127,1000) itw,ip,jp,ic,tc,icf,tcf,agef,paab,paabf
  1000	format(i10,2i3,i8,e15.7,i8,e15.7,3e15.4)
 
-c	write(129,1001) ip,jp,ic,tc,icf,tcf,cowpab,cowpabf
-c	write(129,1001) itw,ip,jp,ic,tcave,icf,tcfave,agefave,cowpab,cowpabf
+!	write(129,1001) ip,jp,ic,tc,icf,tcf,cowpab,cowpabf
+!	write(129,1001) itw,ip,jp,ic,tcave,icf,tcfave,agefave,cowpab,cowpabf
 	write(129,1001) itw,ip,jp,ic,tcave,icf,tcfave,agefave,pab,pabf
-c 1001	format(2i3,i8,e15.7,i8,e15.7,3e15.4)
-c 1001	format(2i3,i8,e15.7,i8,e15.7,2f9.4)
+! 1001	format(2i3,i8,e15.7,i8,e15.7,3e15.4)
+! 1001	format(2i3,i8,e15.7,i8,e15.7,2f9.4)
  1001	format(i10,2i3,i8,e15.7,i8,e15.7,3e15.4)
 
-c	write(136,1002) ip,jp,expos,expos_f
-c 1002	format(2i3,2e15.6)
+!	write(136,1002) ip,jp,expos,expos_f
+! 1002	format(2i3,2e15.6)
 
-c	write(137,1003) ip,jp,naux,ntaux,nauxf,ntauxf
-c 1003	format(2i3,4e15.6)
+!	write(137,1003) ip,jp,naux,ntaux,nauxf,ntauxf
+! 1003	format(2i3,4e15.6)
 	end
-c*******************************************************************
-c*******************************************************************
-c*******************************************************************
+!*******************************************************************
+!*******************************************************************
+!*******************************************************************
 
 	subroutine lagr_connect_find_elems(np,xp,yp,iep)
 
@@ -877,7 +877,7 @@ c*******************************************************************
 	    write(6,*) ' elements founded  '
 	end
 
-c*******************************************************************
+!*******************************************************************
 
         subroutine lagr_connect_get_coords(ndim,np,xp,yp)
 
@@ -928,7 +928,7 @@ c*******************************************************************
 	stop 'error stop lagr_connect_get_coords: no such file'
         end
 
-c******************************************************************
+!******************************************************************
 
 	subroutine lagr_connect_get_station(ie,ip_station,r_station)
 
@@ -951,7 +951,7 @@ c******************************************************************
 
 	end
 
-c******************************************************************
+!******************************************************************
 
 	subroutine lagr_connect_bitmap_init(ip)
 
@@ -966,7 +966,7 @@ c******************************************************************
 
 	end
 
-c******************************************************************
+!******************************************************************
 
 	subroutine lagr_connect_bitmap_copy(ifrom,ito)
 
@@ -981,7 +981,7 @@ c******************************************************************
 
 	end
 
-c******************************************************************
+!******************************************************************
 
  
 	!contains
@@ -996,7 +996,7 @@ c******************************************************************
 	  to_radian=rad
       end
  
-c******************************************************************
+!******************************************************************
       function haversine(deglat1,deglon1,deglat2,deglon2)
           ! great circle distance -- adapted from Matlab 
           real,intent(in) :: deglat1,deglon1,deglat2,deglon2
@@ -1012,4 +1012,4 @@ c******************************************************************
           dist = radius*c
 	  haversine=dist
       end
-c******************************************************************
+!******************************************************************

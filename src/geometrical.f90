@@ -24,69 +24,69 @@
 !
 !--------------------------------------------------------------------------
 
-c geometrical routines
-c
-c contents :
-c
-c function areat(x1,y1,x2,y2,x3,y3)
-c function areapoly(n,x,y)
-c
-c subroutine centert(x1,y1,x2,y2,x3,y3,xc,yc)
-c subroutine centerpoly(n,x,y,xc,yc)
-c
-c function left(x1,y1,x2,y2,x3,y3)
-c function lefton(x1,y1,x2,y2,x3,y3)
-c function collinear(x1,y1,x2,y2,x3,y3)
-c
-c function between(x1,y1,x2,y2,x3,y3)
-c function betweens(x1,y1,x2,y2,x3,y3)
-c function angle(x1,y1,x2,y2,x3,y3)
-c
-c subroutine dist_point_to_line(px,py,ax,ay,bx,by,qx,qy,d)
-c
-c function segsegint(x1,y1,x2,y2,x3,y3,x4,y4,xi,yi)
-c function parallelint(x1,y1,x2,y2,x3,y3,x4,y4,xi,yi)
-c
-c function isconvex(n,x,y)
-c function inconvex(n,x,y,x0,y0)
-c function polyinpoly(n1,x1,y1,n2,x2,y2)
-c
-c function inpoly(n,x,y,x0,y0)		!shell for inpoly0 or inpoly1
-c function inpoly1(n,x,y,x0,y0)		!fast algorithm
-c function inpoly0(n,x,y,x0,y0)		!using winding number
-c function winding(n,x,y,x0,y0)
-c
-c subroutine c2p(u,v,s,d)		converts cartesian to polar coordinates
-c
-c revision log :
-c
-c 18.03.1999	ggu	written from scratch (based on Joseph O-Rourke, 1998)
-c 28.03.1999	ggu	bug fix : area2 -> areat (area was 2x)
-c 28.03.1999	ggu	new routine polyinpoly
-c 29.03.1999	ggu	segsegint is working with double precision internally
-c 19.11.1999	ggu	new routines inpoly and winding
-c 06.02.2001	ggu	new routine angle
-c 22.03.2010	ggu	new routine inpoly() has been implemented
-c 05.07.2010	ggu	new routine dist_point_to_line(), bug fix in inpoly1()
-c 22.07.2010	ggu	changed VERS_6_1_9
-c 14.07.2011	ggu	changed VERS_6_1_27
-c 21.02.2014	ggu	new routine centert and centerpoly
-c 07.03.2014	ggu	changed VERS_6_1_72
-c 14.09.2015	ggu	changed VERS_7_2_2
-c 07.10.2017	ggu	new routine c2p_ocean()
-c 31.08.2018	ggu	changed VERS_7_5_49
-c 25.10.2018	ggu	changed VERS_7_5_51
-c 18.12.2018	ggu	changed VERS_7_5_52
-c 14.02.2019	ggu	changed VERS_7_5_56
-c 16.02.2019	ggu	changed VERS_7_5_60
-c
-c**************************************************************
-c**************************************************************
-c**************************************************************
+! geometrical routines
+!
+! contents :
+!
+! function areat(x1,y1,x2,y2,x3,y3)
+! function areapoly(n,x,y)
+!
+! subroutine centert(x1,y1,x2,y2,x3,y3,xc,yc)
+! subroutine centerpoly(n,x,y,xc,yc)
+!
+! function left(x1,y1,x2,y2,x3,y3)
+! function lefton(x1,y1,x2,y2,x3,y3)
+! function collinear(x1,y1,x2,y2,x3,y3)
+!
+! function between(x1,y1,x2,y2,x3,y3)
+! function betweens(x1,y1,x2,y2,x3,y3)
+! function angle(x1,y1,x2,y2,x3,y3)
+!
+! subroutine dist_point_to_line(px,py,ax,ay,bx,by,qx,qy,d)
+!
+! function segsegint(x1,y1,x2,y2,x3,y3,x4,y4,xi,yi)
+! function parallelint(x1,y1,x2,y2,x3,y3,x4,y4,xi,yi)
+!
+! function isconvex(n,x,y)
+! function inconvex(n,x,y,x0,y0)
+! function polyinpoly(n1,x1,y1,n2,x2,y2)
+!
+! function inpoly(n,x,y,x0,y0)		!shell for inpoly0 or inpoly1
+! function inpoly1(n,x,y,x0,y0)		!fast algorithm
+! function inpoly0(n,x,y,x0,y0)		!using winding number
+! function winding(n,x,y,x0,y0)
+!
+! subroutine c2p(u,v,s,d)		converts cartesian to polar coordinates
+!
+! revision log :
+!
+! 18.03.1999	ggu	written from scratch (based on Joseph O-Rourke, 1998)
+! 28.03.1999	ggu	bug fix : area2 -> areat (area was 2x)
+! 28.03.1999	ggu	new routine polyinpoly
+! 29.03.1999	ggu	segsegint is working with double precision internally
+! 19.11.1999	ggu	new routines inpoly and winding
+! 06.02.2001	ggu	new routine angle
+! 22.03.2010	ggu	new routine inpoly() has been implemented
+! 05.07.2010	ggu	new routine dist_point_to_line(), bug fix in inpoly1()
+! 22.07.2010	ggu	changed VERS_6_1_9
+! 14.07.2011	ggu	changed VERS_6_1_27
+! 21.02.2014	ggu	new routine centert and centerpoly
+! 07.03.2014	ggu	changed VERS_6_1_72
+! 14.09.2015	ggu	changed VERS_7_2_2
+! 07.10.2017	ggu	new routine c2p_ocean()
+! 31.08.2018	ggu	changed VERS_7_5_49
+! 25.10.2018	ggu	changed VERS_7_5_51
+! 18.12.2018	ggu	changed VERS_7_5_52
+! 14.02.2019	ggu	changed VERS_7_5_56
+! 16.02.2019	ggu	changed VERS_7_5_60
+!
+!**************************************************************
+!**************************************************************
+!**************************************************************
 
 	function areat(x1,y1,x2,y2,x3,y3)
 
-c computes area of triangle
+! computes area of triangle
 
 	implicit none
 
@@ -97,11 +97,11 @@ c computes area of triangle
 
 	end
 
-c**************************************************************
+!**************************************************************
 
 	function areapoly(n,x,y)
 
-c computes area of polygon - first point must be different from last point
+! computes area of polygon - first point must be different from last point
 
 	implicit none
 
@@ -137,13 +137,13 @@ c computes area of polygon - first point must be different from last point
 
 	end
 
-c**************************************************************
-c**************************************************************
-c**************************************************************
+!**************************************************************
+!**************************************************************
+!**************************************************************
 
 	subroutine centert(x1,y1,x2,y2,x3,y3,xc,yc)
 
-c computes center of triangle
+! computes center of triangle
 
 	implicit none
 
@@ -155,11 +155,11 @@ c computes center of triangle
 
 	end
 
-c**************************************************************
+!**************************************************************
 
 	subroutine centerpoly(n,x,y,xc,yc)
 
-c computes center of polygon (center of gravity)
+! computes center of polygon (center of gravity)
 
 	implicit none
 
@@ -208,13 +208,13 @@ c computes center of polygon (center of gravity)
 
 	end
 
-c**************************************************************
-c**************************************************************
-c**************************************************************
+!**************************************************************
+!**************************************************************
+!**************************************************************
 
 	function left(x1,y1,x2,y2,x3,y3)
 
-c left turn ?
+! left turn ?
 
 	implicit none
 
@@ -227,11 +227,11 @@ c left turn ?
 
 	end
 
-c**************************************************************
+!**************************************************************
 
 	function lefton(x1,y1,x2,y2,x3,y3)
 
-c left turn or straight ?
+! left turn or straight ?
 
 	implicit none
 
@@ -244,11 +244,11 @@ c left turn or straight ?
 
 	end
 
-c**************************************************************
+!**************************************************************
 
 	function collinear(x1,y1,x2,y2,x3,y3)
 
-c left turn ?
+! left turn ?
 
 	implicit none
 
@@ -261,13 +261,13 @@ c left turn ?
 
 	end
 
-c**************************************************************
-c**************************************************************
-c**************************************************************
+!**************************************************************
+!**************************************************************
+!**************************************************************
 
 	function between(x1,y1,x2,y2,x3,y3)
 
-c is 3 between 1 and 2 ?
+! is 3 between 1 and 2 ?
 
 	implicit none
 
@@ -291,11 +291,11 @@ c is 3 between 1 and 2 ?
 
 	end
 
-c**************************************************************
+!**************************************************************
 
 	function betweens(x1,y1,x2,y2,x3,y3)
 
-c is 3 between 1 and 2 ? (we already know that points are collinear)
+! is 3 between 1 and 2 ? (we already know that points are collinear)
 
 	implicit none
 
@@ -316,15 +316,15 @@ c is 3 between 1 and 2 ? (we already know that points are collinear)
 
 	end
 
-c**************************************************************
+!**************************************************************
 
 	function angle(x1,y1,x2,y2,x3,y3)
 
-c angle between 1-2-3 in degrees 
-c
-c a < 180 => right turn
-c a = 180 => straight
-c a > 180 => left turn
+! angle between 1-2-3 in degrees 
+!
+! a < 180 => right turn
+! a = 180 => straight
+! a > 180 => left turn
 
 	implicit none
 
@@ -353,14 +353,14 @@ c a > 180 => left turn
 
 	end
 
-c**************************************************************
-c**************************************************************
-c**************************************************************
+!**************************************************************
+!**************************************************************
+!**************************************************************
 
         subroutine dist_point_to_line(px,py,ax,ay,bx,by,qx,qy,d)
 
-c computes distance from point P to line given by A - B
-c returns point Q on line closest to P and its distance d
+! computes distance from point P to line given by A - B
+! returns point Q on line closest to P and its distance d
 
         implicit none
 
@@ -387,21 +387,21 @@ c returns point Q on line closest to P and its distance d
 
         end
 
-c**************************************************************
-c**************************************************************
-c**************************************************************
+!**************************************************************
+!**************************************************************
+!**************************************************************
 
 	function segsegint(x1r,y1r,x2r,y2r,x3r,y3r,x4r,y4r,xi,yi)
 
-c intersects two lines ( 1-2 and 3-4 ) and returns intersection in (xi,yi)
-c
-c return code :
-c			0	no intersection
-c			1	proper intersection
-c			2	segments collinearly overlap
-c			3	endpoint of one segment is on other
-c
-c test for .ne. 0 to find out on any intersection
+! intersects two lines ( 1-2 and 3-4 ) and returns intersection in (xi,yi)
+!
+! return code :
+!			0	no intersection
+!			1	proper intersection
+!			2	segments collinearly overlap
+!			3	endpoint of one segment is on other
+!
+! test for .ne. 0 to find out on any intersection
 
 	implicit none
 
@@ -417,7 +417,7 @@ c test for .ne. 0 to find out on any intersection
 	logical bdebug
 	bdebug = .false.
 
-c convert to double precision
+! convert to double precision
 
 	x1 = x1r
 	x2 = x2r
@@ -428,18 +428,18 @@ c convert to double precision
 	y3 = y3r
 	y4 = y4r
 
-c compute denominator
+! compute denominator
 
 	denom = (x1-x2)*(y4-y3) + (x4-x3)*(y2-y1)
 
-c if denominator segments are parallel -> handle seperately
+! if denominator segments are parallel -> handle seperately
 
 	if( denom .eq. 0. ) then
 	  segsegint = parallelint(x1r,y1r,x2r,y2r,x3r,y3r,x4r,y4r,xi,yi)
 	  return
 	end if
 
-c compute intersection
+! compute intersection
 
 	nums = x1*(y4-y3) + x3*(y1-y4) + x4*(y3-y1)
 	s = nums / denom
@@ -453,7 +453,7 @@ c compute intersection
 	if( numt .eq. 0.0 .or. numt .eq. denom ) segsegint = 3
 	if( t .eq. 0.0 .or. t .eq. 1.0 ) segsegint = 3
 
-c see if segments intersect
+! see if segments intersect
 
 	bsi = 0.0 .lt. s .and. s .lt. 1.0
 	bti = 0.0 .lt. t .and. t .lt. 1.0
@@ -471,7 +471,7 @@ c see if segments intersect
 	  end if
 	end if
 
-c compute point of intersection
+! compute point of intersection
 
 	xi = x1 + s * ( x2 - x1 )
 	yi = y1 + s * ( y2 - y1 )
@@ -488,15 +488,15 @@ c compute point of intersection
 
 	end
 
-c**************************************************************
+!**************************************************************
 
 	function parallelint(x1,y1,x2,y2,x3,y3,x4,y4,xi,yi)
 
-c intersects two parallel lines ( 1-2 and 3-4 ) and returns intersection
-c
-c return code :
-c			0	no intersection
-c			2	segments collinearly overlap
+! intersects two parallel lines ( 1-2 and 3-4 ) and returns intersection
+!
+! return code :
+!			0	no intersection
+!			2	segments collinearly overlap
 
 	implicit none
 
@@ -529,13 +529,13 @@ c			2	segments collinearly overlap
 
 	end
 
-c**************************************************************
-c**************************************************************
-c**************************************************************
+!**************************************************************
+!**************************************************************
+!**************************************************************
 
 	function isconvex(n,x,y)
 
-c is polygon convex ?
+! is polygon convex ?
 
 	implicit none
 
@@ -563,7 +563,7 @@ c is polygon convex ?
 	  yn = y(i)
 
 	  if( .not. lefton(xl,yl,xm,ym,xn,yn) ) then
-c	    write(6,*) 'isconvex: ',i-1,xm,ym
+!	    write(6,*) 'isconvex: ',i-1,xm,ym
 	    return
 	  end if
 	end do
@@ -572,11 +572,11 @@ c	    write(6,*) 'isconvex: ',i-1,xm,ym
 
 	end
 
-c**************************************************************
+!**************************************************************
 
 	function inconvex(n,x,y,x0,y0)
 
-c checks if point (x0,y0) is in convex polygon (border is inside)
+! checks if point (x0,y0) is in convex polygon (border is inside)
 
 	implicit none
 
@@ -607,11 +607,11 @@ c checks if point (x0,y0) is in convex polygon (border is inside)
 
 	end
 
-c**************************************************************
+!**************************************************************
 
 	function polyinpoly(n1,x1,y1,n2,x2,y2)
 
-c polygon 1 in convex polygon 2 ? (border is inside)
+! polygon 1 in convex polygon 2 ? (border is inside)
 
 	implicit none
 
@@ -633,13 +633,13 @@ c polygon 1 in convex polygon 2 ? (border is inside)
 
 	end
 
-c**************************************************************
-c**************************************************************
-c**************************************************************
+!**************************************************************
+!**************************************************************
+!**************************************************************
 
 	function inpoly(n,x,y,x0,y0)
 
-c shell for in-polygon check
+! shell for in-polygon check
 
 	implicit none
 
@@ -661,15 +661,15 @@ c shell for in-polygon check
 
 	end
 
-c**************************************************************
+!**************************************************************
 
 	function inpoly1(n,x,y,x0,y0)
 
-c checks if point (x0,y0) is in general polygon (border ?)
-c
-c fast algorithm from Dan Sunday
-c
-c http://softsurfer.com/Archive/algorithm_0103/algorithm_0103.htm
+! checks if point (x0,y0) is in general polygon (border ?)
+!
+! fast algorithm from Dan Sunday
+!
+! http://softsurfer.com/Archive/algorithm_0103/algorithm_0103.htm
 
 	implicit none
 
@@ -711,13 +711,13 @@ c http://softsurfer.com/Archive/algorithm_0103/algorithm_0103.htm
 
 	end
 
-c**************************************************************
+!**************************************************************
 
 	function inpoly0(n,x,y,x0,y0)
 
-c checks if point (x0,y0) is in general polygon (border is inside)
-c
-c use classical winding number
+! checks if point (x0,y0) is in general polygon (border is inside)
+!
+! use classical winding number
 
 	implicit none
 
@@ -738,26 +738,26 @@ c use classical winding number
 
 	if(bdebug) write(6,*) 'debug is set in inpoly...'
 
-c-------------------------------------------------------
-c initialize inpoly
-c-------------------------------------------------------
+!-------------------------------------------------------
+! initialize inpoly
+!-------------------------------------------------------
 
 	inpoly0 = .false.
 
 	if( n .le. 0 ) return
 
-c-------------------------------------------------------
-c maybe polygon is convex ?
-c-------------------------------------------------------
+!-------------------------------------------------------
+! maybe polygon is convex ?
+!-------------------------------------------------------
 
 	if( isconvex(n,x,y) ) then
 	  inpoly0 = inconvex(n,x,y,x0,y0)
 	  return
 	end if
 
-c-------------------------------------------------------
-c no it is not -> get min/max and make first decisions
-c-------------------------------------------------------
+!-------------------------------------------------------
+! no it is not -> get min/max and make first decisions
+!-------------------------------------------------------
 
 	xmin = x(1)
 	xmax = x(1)
@@ -779,29 +779,29 @@ c-------------------------------------------------------
 	if( x0 .lt. xmin .or. x0 .gt. xmax ) return
 	if( y0 .lt. ymin .or. y0 .gt. ymax ) return
 
-c-------------------------------------------------------
-c not yet decided -> proceed with heavy algorithm
-c-------------------------------------------------------
+!-------------------------------------------------------
+! not yet decided -> proceed with heavy algorithm
+!-------------------------------------------------------
 
 	if( winding(n,x,y,x0,y0) .eq. 0 ) return
 
-c-------------------------------------------------------
-c ok, it is inside
-c-------------------------------------------------------
+!-------------------------------------------------------
+! ok, it is inside
+!-------------------------------------------------------
 
 	inpoly0 = .true.
 
-c-------------------------------------------------------
-c end of routine
-c-------------------------------------------------------
+!-------------------------------------------------------
+! end of routine
+!-------------------------------------------------------
 
 	end
 
-c**************************************************************
+!**************************************************************
 
 	function winding(n,x,y,x0,y0)
 
-c compute winding number for x0/y0 (integer)
+! compute winding number for x0/y0 (integer)
 
 	implicit none
 
@@ -861,14 +861,14 @@ c compute winding number for x0/y0 (integer)
 
 	end
 
-c**************************************************************
-c**************************************************************
-c**************************************************************
+!**************************************************************
+!**************************************************************
+!**************************************************************
 
 	subroutine c2p_ocean(u,v,s,d)
 
-c converts cartesian to polar coordinates
-c oceanographic convention: 0 -> current to north
+! converts cartesian to polar coordinates
+! oceanographic convention: 0 -> current to north
 
 	real u,v,s,d
 
@@ -879,14 +879,14 @@ c oceanographic convention: 0 -> current to north
 
 	end
 
-c**************************************************************
+!**************************************************************
 
 	subroutine c2p(u,v,s,d)
 
-c converts cartesian to polar coordinates
-c
-c meteorological convention: 0 -> wind from north
-c if oceanographic convention is needed: d=d+180; if(d>360) d=d-360
+! converts cartesian to polar coordinates
+!
+! meteorological convention: 0 -> wind from north
+! if oceanographic convention is needed: d=d+180; if(d>360) d=d-360
 
 	implicit none
 
@@ -895,21 +895,21 @@ c if oceanographic convention is needed: d=d+180; if(d>360) d=d-360
 
 	real rad,a
 
-c----------------------------------------------------------------
-c Pi
-c----------------------------------------------------------------
+!----------------------------------------------------------------
+! Pi
+!----------------------------------------------------------------
 
 	rad = 45. / atan (1.)
 
-c----------------------------------------------------------------
-c compute speed
-c----------------------------------------------------------------
+!----------------------------------------------------------------
+! compute speed
+!----------------------------------------------------------------
 
 	s = sqrt( u**2 + v**2 )
 
-c----------------------------------------------------------------
-c compute mathematical angle
-c----------------------------------------------------------------
+!----------------------------------------------------------------
+! compute mathematical angle
+!----------------------------------------------------------------
 
 	if( u .eq. 0. ) then
 	  if( v .gt. 0. ) then
@@ -923,22 +923,22 @@ c----------------------------------------------------------------
 
 	if( u .lt. 0. ) a = a + 180.
 
-c----------------------------------------------------------------
-c convert to wind directions
-c----------------------------------------------------------------
+!----------------------------------------------------------------
+! convert to wind directions
+!----------------------------------------------------------------
 
 	d = 270 - a
 
 	if( d .gt. 360. ) d = d - 360.
 	if( d .lt. 0.   ) d = d + 360.
 
-c----------------------------------------------------------------
-c end of routine
-c----------------------------------------------------------------
+!----------------------------------------------------------------
+! end of routine
+!----------------------------------------------------------------
 
 	end
 
-c**************************************************************
-c**************************************************************
-c**************************************************************
+!**************************************************************
+!**************************************************************
+!**************************************************************
 

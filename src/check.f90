@@ -23,100 +23,100 @@
 !
 !--------------------------------------------------------------------------
 
-c routines for various checks
-c
-c contents :
-c
-c subroutine test3d(iunit,nn)           test output for new variables
-c subroutine check_all			checks arrays for sanity (shell)
-c subroutine check_fem			checks arrays for sanity
-c subroutine check_values		checks important variables
-c subroutine tsmass(ts,z,nlvdi,tstot)   computes mass of T/S or any conc. ts
-c subroutine debug_dry			writes debug information on dry areas
-c subroutine debug_node(k)		writes debug information on node k
-c subroutine mimafem(string)		writes some min/max values to stdout
-c subroutine mass_conserve		checks mass conservation
-c
-c subroutine check_node(k)		debug info on node k
-c subroutine check_elem(ie)		debug info on element ie
-c subroutine check_nodes_in_elem(ie)	debug info on nodes in element ie
-c subroutine check_elems_around_node(k) debug info on elements around node k
-c subroutine check_nodes_around_node(k) debug info on nodes around node k
-c
-c revision log :
-c
-c 24.08.1998	ggu	levdbg used for debug
-c 26.08.1998	ggu	subroutine tsmass transferred from newbcl0
-c 26.08.1998	ggu	subroutine convol, tstvol transferred from newcon1
-c 22.10.1999	ggu	igrv, ngrv eliminated (subst by ilinkv, lenkv)
-c 07.03.2000	ggu	arrays for vertical turbulent diffusion coefficient
-c 05.12.2001	ggu	always execute tstvol, more debug info
-c 11.10.2002	ggu	call to setaix deleted
-c 09.01.2003	ggu	some variables saved in contst
-c 27.03.2003	ggu	new routine value_check
-c 31.07.2003	ggu	eliminate compiler warnings
-c 31.07.2003	ggu	eliminate useless variables
-c 10.08.2003	ggu	new routine check_fem
-c 03.09.2003	ggu	routines check and sanity_check deleted
-c 03.09.2003	ggu	renamed value_check to check_values, new check_all
-c 13.03.2004	ggu	write total volume to inf file
-c 15.03.2005	ggu	call to check_austausch() eliminated
-c 23.03.2006	ggu	changed time step to real
-c 23.08.2007	ggu	test for boundary nodes using routines in testbndo.h
-c 27.09.2007	ggu	deleted tstvol,tstvol1,contst, new mass_conserve
-c 24.06.2008	ggu	bpresv deleted
-c 06.12.2008	ggu	read vreps from STR file
-c 21.01.2009	ggu	new var vrerr to stop if mass error is too high
-c 23.03.2009	ggu	more debug for vrerr, new routine check_node()
-c 02.04.2009	ggu	new routine check_elem()
-c 06.04.2009	ggu	new check_elems_around_node, check_nodes_in_elem
-c 26.02.2010	ggu	in test3d() write also meteo data
-c 23.03.2010	ggu	changed v6.1.1
-c 08.04.2010	ggu	more info in checks (depth and area)
-c 20.12.2010	ggu	changed VERS_6_1_16
-c 17.02.2011	ggu	changed VERS_6_1_18
-c 17.05.2011	ggu	new routine check_set_unit() to set output unit
-c 31.05.2011	ggu	changed VERS_6_1_23
-c 12.07.2011	ggu	loop only over actual nodes/elements, not dimensions
-c 15.07.2011	ggu	new routines for CRC computation
-c 19.08.2011	ggu	changed VERS_6_1_29
-c 25.10.2011	ggu	hlhv eliminated
-c 04.11.2011	ggu	changed VERS_6_1_35
-c 30.03.2012	ggu	changed VERS_6_1_51
-c 05.12.2013	ggu	changed VERS_6_1_70
-c 15.05.2014	ggu	write mass error only for levdbg >= 3
-c 19.12.2014	ggu	changed VERS_7_0_10
-c 23.12.2014	ggu	changed VERS_7_0_11
-c 19.01.2015	ggu	changed VERS_7_1_3
-c 10.07.2015	ggu	changed VERS_7_1_50
-c 13.07.2015	ggu	changed VERS_7_1_51
-c 17.07.2015	ggu	changed VERS_7_1_53
-c 17.07.2015	ggu	changed VERS_7_1_80
-c 20.07.2015	ggu	changed VERS_7_1_81
-c 24.07.2015	ggu	changed VERS_7_1_82
-c 17.09.2015	ggu	in mass_conserve aux variables are local
-c 29.09.2015	ggu	changed VERS_7_2_5
-c 16.12.2015	ggu	changed VERS_7_3_16
-c 28.04.2016	ggu	changed VERS_7_5_9
-c 14.06.2016	ggu	changed VERS_7_5_14
-c 17.06.2016	ggu	changed VERS_7_5_15
-c 05.12.2017	ggu	changed VERS_7_5_39
-c 03.04.2018	ggu	changed VERS_7_5_43
-c 19.04.2018	ggu	changed VERS_7_5_45
-c 14.02.2019	ggu	changed VERS_7_5_56
-c 16.02.2019	ggu	changed VERS_7_5_60
-c 29.08.2020	ggu	added new routine check_nodes_around_node()
-c 27.03.2021	ggu	some femtime.h eliminated (not all), cleanup
-c 31.05.2021	ggu	write time line in node/elem debug
-c 02.04.2023	ggu	only master writes to iuinfo
-c
-c*************************************************************
+! routines for various checks
+!
+! contents :
+!
+! subroutine test3d(iunit,nn)           test output for new variables
+! subroutine check_all			checks arrays for sanity (shell)
+! subroutine check_fem			checks arrays for sanity
+! subroutine check_values		checks important variables
+! subroutine tsmass(ts,z,nlvdi,tstot)   computes mass of T/S or any conc. ts
+! subroutine debug_dry			writes debug information on dry areas
+! subroutine debug_node(k)		writes debug information on node k
+! subroutine mimafem(string)		writes some min/max values to stdout
+! subroutine mass_conserve		checks mass conservation
+!
+! subroutine check_node(k)		debug info on node k
+! subroutine check_elem(ie)		debug info on element ie
+! subroutine check_nodes_in_elem(ie)	debug info on nodes in element ie
+! subroutine check_elems_around_node(k) debug info on elements around node k
+! subroutine check_nodes_around_node(k) debug info on nodes around node k
+!
+! revision log :
+!
+! 24.08.1998	ggu	levdbg used for debug
+! 26.08.1998	ggu	subroutine tsmass transferred from newbcl0
+! 26.08.1998	ggu	subroutine convol, tstvol transferred from newcon1
+! 22.10.1999	ggu	igrv, ngrv eliminated (subst by ilinkv, lenkv)
+! 07.03.2000	ggu	arrays for vertical turbulent diffusion coefficient
+! 05.12.2001	ggu	always execute tstvol, more debug info
+! 11.10.2002	ggu	call to setaix deleted
+! 09.01.2003	ggu	some variables saved in contst
+! 27.03.2003	ggu	new routine value_check
+! 31.07.2003	ggu	eliminate compiler warnings
+! 31.07.2003	ggu	eliminate useless variables
+! 10.08.2003	ggu	new routine check_fem
+! 03.09.2003	ggu	routines check and sanity_check deleted
+! 03.09.2003	ggu	renamed value_check to check_values, new check_all
+! 13.03.2004	ggu	write total volume to inf file
+! 15.03.2005	ggu	call to check_austausch() eliminated
+! 23.03.2006	ggu	changed time step to real
+! 23.08.2007	ggu	test for boundary nodes using routines in testbndo.h
+! 27.09.2007	ggu	deleted tstvol,tstvol1,contst, new mass_conserve
+! 24.06.2008	ggu	bpresv deleted
+! 06.12.2008	ggu	read vreps from STR file
+! 21.01.2009	ggu	new var vrerr to stop if mass error is too high
+! 23.03.2009	ggu	more debug for vrerr, new routine check_node()
+! 02.04.2009	ggu	new routine check_elem()
+! 06.04.2009	ggu	new check_elems_around_node, check_nodes_in_elem
+! 26.02.2010	ggu	in test3d() write also meteo data
+! 23.03.2010	ggu	changed v6.1.1
+! 08.04.2010	ggu	more info in checks (depth and area)
+! 20.12.2010	ggu	changed VERS_6_1_16
+! 17.02.2011	ggu	changed VERS_6_1_18
+! 17.05.2011	ggu	new routine check_set_unit() to set output unit
+! 31.05.2011	ggu	changed VERS_6_1_23
+! 12.07.2011	ggu	loop only over actual nodes/elements, not dimensions
+! 15.07.2011	ggu	new routines for CRC computation
+! 19.08.2011	ggu	changed VERS_6_1_29
+! 25.10.2011	ggu	hlhv eliminated
+! 04.11.2011	ggu	changed VERS_6_1_35
+! 30.03.2012	ggu	changed VERS_6_1_51
+! 05.12.2013	ggu	changed VERS_6_1_70
+! 15.05.2014	ggu	write mass error only for levdbg >= 3
+! 19.12.2014	ggu	changed VERS_7_0_10
+! 23.12.2014	ggu	changed VERS_7_0_11
+! 19.01.2015	ggu	changed VERS_7_1_3
+! 10.07.2015	ggu	changed VERS_7_1_50
+! 13.07.2015	ggu	changed VERS_7_1_51
+! 17.07.2015	ggu	changed VERS_7_1_53
+! 17.07.2015	ggu	changed VERS_7_1_80
+! 20.07.2015	ggu	changed VERS_7_1_81
+! 24.07.2015	ggu	changed VERS_7_1_82
+! 17.09.2015	ggu	in mass_conserve aux variables are local
+! 29.09.2015	ggu	changed VERS_7_2_5
+! 16.12.2015	ggu	changed VERS_7_3_16
+! 28.04.2016	ggu	changed VERS_7_5_9
+! 14.06.2016	ggu	changed VERS_7_5_14
+! 17.06.2016	ggu	changed VERS_7_5_15
+! 05.12.2017	ggu	changed VERS_7_5_39
+! 03.04.2018	ggu	changed VERS_7_5_43
+! 19.04.2018	ggu	changed VERS_7_5_45
+! 14.02.2019	ggu	changed VERS_7_5_56
+! 16.02.2019	ggu	changed VERS_7_5_60
+! 29.08.2020	ggu	added new routine check_nodes_around_node()
+! 27.03.2021	ggu	some femtime.h eliminated (not all), cleanup
+! 31.05.2021	ggu	write time line in node/elem debug
+! 02.04.2023	ggu	only master writes to iuinfo
+!
+!*************************************************************
 
 	subroutine test3d(iunit,nn)
 
-c test output for new variables
-c
-c nn	number of first array elements to be printed
+! test output for new variables
+!
+! nn	number of first array elements to be printed
 
 	use mod_meteo
 	use mod_internal
@@ -235,11 +235,11 @@ c nn	number of first array elements to be printed
 
 	end
 
-c******************************************************************
+!******************************************************************
 
 	subroutine check_all
 
-c checks arrays for sanity
+! checks arrays for sanity
 
 	implicit none
 
@@ -255,46 +255,46 @@ c checks arrays for sanity
 
 	end
 
-c******************************************************************
+!******************************************************************
 
 	subroutine check_fem
 
-c checks arrays for sanity
+! checks arrays for sanity
 
 	implicit none
 
-c-------------------------------------------------------
-c check geom arrays
-c-------------------------------------------------------
+!-------------------------------------------------------
+! check geom arrays
+!-------------------------------------------------------
 
 	call check_ev
 	call check_geom
 
-c-------------------------------------------------------
-c check vertical structure
-c-------------------------------------------------------
+!-------------------------------------------------------
+! check vertical structure
+!-------------------------------------------------------
 
 	call check_vertical
 
-c-------------------------------------------------------
-c check various arrays
-c-------------------------------------------------------
+!-------------------------------------------------------
+! check various arrays
+!-------------------------------------------------------
 
 	call check_eddy
 	call check_coriolis
 	call check_chezy
 
-c-------------------------------------------------------
-c end of routine
-c-------------------------------------------------------
+!-------------------------------------------------------
+! end of routine
+!-------------------------------------------------------
 
 	end
 
-c******************************************************************
+!******************************************************************
 
 	subroutine check_values
 
-c checks important variables
+! checks important variables
 
 	use mod_layer_thickness
 	use mod_ts
@@ -346,17 +346,17 @@ c checks important variables
 
 	end
 
-c**********************************************************************
+!**********************************************************************
 
         subroutine tsmass(ts,mode,nlvdi,tstot)
 
-c computes mass of T/S or any concentration ts
+! computes mass of T/S or any concentration ts
 
         implicit none
 
         integer nlvdi          !dimension of levels
         real ts(nlvdi,1)       !concentration on nodes
-c        real z(3,1)             !water level
+!        real z(3,1)             !water level
 	integer mode
         real tstot              !total computed mass of ts
 
@@ -371,11 +371,11 @@ c        real z(3,1)             !water level
 
         end
 
-c************************************************************
+!************************************************************
 
 	subroutine debug_dry
 
-c writes debug information on dry areas
+! writes debug information on dry areas
 
 	use mod_geom_dynamic
 	use basin, only : nkn,nel,ngr,mbw
@@ -398,11 +398,11 @@ c writes debug information on dry areas
 
 	end
 
-c*************************************************************
+!*************************************************************
 
 	subroutine debug_node(k)
 
-c writes debug information on final volume around node k (internal)
+! writes debug information on final volume around node k (internal)
 
 	use mod_geom_dynamic
 	use mod_depth
@@ -418,7 +418,7 @@ c writes debug information on final volume around node k (internal)
 
 	integer k
 
-c common
+! common
 	include 'femtime.h'
 	include 'mkonst.h'
 
@@ -471,7 +471,7 @@ c common
 	  end do
 	end if
 
-c compute inflow into column and volume of column
+! compute inflow into column and volume of column
 
 	call get_timestep(dt)
 	call getaz(azpar)
@@ -514,11 +514,11 @@ c compute inflow into column and volume of column
 
 	end
 
-c*************************************************************
+!*************************************************************
 
         subroutine mimafem(string)
 
-c writes some min/max values to stdout
+! writes some min/max values to stdout
 
 	use mod_layer_thickness
 	use mod_ts
@@ -546,9 +546,9 @@ c writes some min/max values to stdout
 	double precision dtime
 	character*20 aline
 
-c-----------------------------------------------------
-c initial check and write
-c-----------------------------------------------------
+!-----------------------------------------------------
+! initial check and write
+!-----------------------------------------------------
 
         !return  !FIXME
 
@@ -558,9 +558,9 @@ c-----------------------------------------------------
         write(6,*) '------------------ ',trim(string)
         write(6,*) '   time: ',dtime,'  ',aline
 
-c-----------------------------------------------------
-c check water levels and barotropic velocities
-c-----------------------------------------------------
+!-----------------------------------------------------
+! check water levels and barotropic velocities
+!-----------------------------------------------------
 
         high = 1.e+30
 
@@ -585,9 +585,9 @@ c-----------------------------------------------------
 
         write(6,*) zmin,zmax,umin,umax,vmin,vmax
 
-c-----------------------------------------------------
-c check of layer thickness
-c-----------------------------------------------------
+!-----------------------------------------------------
+! check of layer thickness
+!-----------------------------------------------------
 
         hknmax = -high
         hkomax = -high
@@ -609,9 +609,9 @@ c-----------------------------------------------------
 
         write(6,*) hknmax,hkomax,henmax,heomax
 
-c-----------------------------------------------------
-c check of transports
-c-----------------------------------------------------
+!-----------------------------------------------------
+! check of transports
+!-----------------------------------------------------
 
         utomax = -high
         utnmax = -high
@@ -628,19 +628,19 @@ c-----------------------------------------------------
 
         write(6,*) utomax,utnmax,vtomax,vtnmax
 
-c-----------------------------------------------------
-c end of routine
-c-----------------------------------------------------
+!-----------------------------------------------------
+! end of routine
+!-----------------------------------------------------
 
         write(6,*) '------------------'
 
         end
 
-c*************************************************************
+!*************************************************************
 
 	subroutine vol_mass(mode)
 
-c computes and writes total water volume
+! computes and writes total water volume
 
 	use shympi
 
@@ -673,11 +673,11 @@ c computes and writes total water volume
 
         end
 
-c*************************************************************
+!*************************************************************
 
 	subroutine mass_conserve
 
-c checks mass conservation of single boxes (finite volumes)
+! checks mass conservation of single boxes (finite volumes)
 
 	use mod_bound_geom
 	use mod_bound_dynamic
@@ -714,9 +714,9 @@ c checks mass conservation of single boxes (finite volumes)
 
 	integer, save :: iuinfo = 0
 
-c----------------------------------------------------------------
-c initialize
-c----------------------------------------------------------------
+!----------------------------------------------------------------
+! initialize
+!----------------------------------------------------------------
 
 	if( iuinfo == 0 ) then
 	  iuinfo = -1
@@ -742,9 +742,9 @@ c----------------------------------------------------------------
 	vf = 0.
 	va = 0.
 
-c----------------------------------------------------------------
-c compute horizontal divergence
-c----------------------------------------------------------------
+!----------------------------------------------------------------
+! compute horizontal divergence
+!----------------------------------------------------------------
 
         do ie=1,nel
           areafv = 4. * ev(10,ie)               !area of triangle / 3
@@ -764,9 +764,9 @@ c----------------------------------------------------------------
           end do
         end do
 
-c----------------------------------------------------------------
-c include vertical divergence
-c----------------------------------------------------------------
+!----------------------------------------------------------------
+! include vertical divergence
+!----------------------------------------------------------------
 
 	ks = 1000
 	ks = 5071
@@ -806,9 +806,9 @@ c----------------------------------------------------------------
 	  if( k .eq. ks ) write(77,*) 'vvv: ',vvv,vvm
 	end do
 
-c----------------------------------------------------------------
-c check mass balance in boxes
-c----------------------------------------------------------------
+!----------------------------------------------------------------
+! check mass balance in boxes
+!----------------------------------------------------------------
 
 	kss = 5226
 	kss = 0
@@ -858,9 +858,9 @@ c----------------------------------------------------------------
 	vlmax = vmax		!absolute error for each box
 	vrlmax = vrmax		!relative error for each box
 
-c----------------------------------------------------------------
-c barotropic
-c----------------------------------------------------------------
+!----------------------------------------------------------------
+! barotropic
+!----------------------------------------------------------------
 
 	do k=1,nkn
 	    vf(1,k) = 0.
@@ -919,14 +919,14 @@ c----------------------------------------------------------------
 	vbmax = vmax		!absolute error for water column
 	vrbmax = vrmax		!relative error for water column
 
-c----------------------------------------------------------------
-c write diagnostic output
-c----------------------------------------------------------------
+!----------------------------------------------------------------
+! write diagnostic output
+!----------------------------------------------------------------
 
-c	vbmax 		!absolute error for water column
-c	vrbmax 		!relative error for water column
-c	vlmax 		!absolute error for each box
-c	vrlmax 		!relative error for each box
+!	vbmax 		!absolute error for water column
+!	vrbmax 		!relative error for water column
+!	vlmax 		!absolute error for each box
+!	vrlmax 		!relative error for each box
 
 	if( vrlmax .gt. vrwarn ) then
 	  if( levdbg .ge. 3 ) then
@@ -950,17 +950,17 @@ c	vrlmax 		!relative error for each box
 
 	deallocate(vf,va)
 
-c----------------------------------------------------------------
-c end of routine
-c----------------------------------------------------------------
+!----------------------------------------------------------------
+! end of routine
+!----------------------------------------------------------------
 
 	end
 
-c*************************************************************
-c*************************************************************
-c************ CRC computation ********************************
-c*************************************************************
-c*************************************************************
+!*************************************************************
+!*************************************************************
+!************ CRC computation ********************************
+!*************************************************************
+!*************************************************************
 
 	subroutine check_crc
 
@@ -1032,7 +1032,7 @@ c*************************************************************
 
 	end
 
-c*************************************************************
+!*************************************************************
 
 	subroutine check_crc_2d(iu,text,nlvdi,n,levels,array)
 
@@ -1054,7 +1054,7 @@ c*************************************************************
 
 	end
 
-c*************************************************************
+!*************************************************************
 
 	subroutine check_crc_1d(iu,text,n,array)
 
@@ -1072,11 +1072,11 @@ c*************************************************************
 
 	end
 
-c*************************************************************
-c*************************************************************
-c*************************************************************
-c*************************************************************
-c*************************************************************
+!*************************************************************
+!*************************************************************
+!*************************************************************
+!*************************************************************
+!*************************************************************
 
 	module check_unit
 
@@ -1084,7 +1084,7 @@ c*************************************************************
 
 	end module check_unit
 
-c*************************************************************
+!*************************************************************
 
 	subroutine check_set_unit(iu)
 
@@ -1098,7 +1098,7 @@ c*************************************************************
 
 	end
 
-c*************************************************************
+!*************************************************************
 
 	subroutine check_get_unit(iu)
 
@@ -1112,15 +1112,15 @@ c*************************************************************
 
 	end
 
-c*************************************************************
-c*************************************************************
-c*************************************************************
-c*************************************************************
-c*************************************************************
+!*************************************************************
+!*************************************************************
+!*************************************************************
+!*************************************************************
+!*************************************************************
 
 	subroutine check_node(k)
 
-c writes debug information on node k
+! writes debug information on node k
 
 	use mod_geom_dynamic
 	use mod_depth
@@ -1179,11 +1179,11 @@ c writes debug information on node k
 
 	end
 
-c*************************************************************
+!*************************************************************
 
 	subroutine check_elem(ie)
 
-c writes debug information on element ie
+! writes debug information on element ie
 
 	use mod_geom_dynamic
 	use mod_depth
@@ -1238,11 +1238,11 @@ c writes debug information on element ie
 
 	end
 
-c*************************************************************
+!*************************************************************
 
 	subroutine check_nodes_in_elem(ie)
 
-c writes debug information on nodes in element ie
+! writes debug information on nodes in element ie
 
 	use basin
 
@@ -1266,11 +1266,11 @@ c writes debug information on nodes in element ie
 
 	end
 
-c*************************************************************
+!*************************************************************
 
 	subroutine check_elems_around_node(k)
 
-c writes debug information on elements around node k
+! writes debug information on elements around node k
 
 	use basin
 
@@ -1300,11 +1300,11 @@ c writes debug information on elements around node k
 
 	end
 
-c*************************************************************
+!*************************************************************
 
 	subroutine check_nodes_around_node(k)
 
-c writes debug information on nodes around node k
+! writes debug information on nodes around node k
 
 	use basin
 
@@ -1332,5 +1332,5 @@ c writes debug information on nodes around node k
 
 	end
 
-c*************************************************************
+!*************************************************************
 

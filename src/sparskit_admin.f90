@@ -25,34 +25,34 @@
 !
 !--------------------------------------------------------------------------
 
-c Sparskit solver routines
-c
-c revision log :
-c
-c 05.06.2009	ggu	some routines cleaned
-c 22.03.2010	ggu	change of some parameters
-c 29.03.2012	ggu	introduce zero and one as double (bug, was int before)
-c 05.06.2015	ggu	changed VERS_7_1_12
-c 10.07.2015	ggu	changed VERS_7_1_50
-c 17.07.2015	ggu	changed VERS_7_1_80
-c 20.07.2015	ggu	changed VERS_7_1_81
-c 12.10.2015	ggu	changed VERS_7_3_3
-c 26.10.2015	ggu	changed VERS_7_3_10
-c 15.12.2015	ggu&dbf	adapted to new 3d framework
-c 18.12.2015	ggu	changed VERS_7_3_17
-c 13.01.2016	ggu&ivn	bug in allocation of rvec and raux (n instead nndim)
-c 22.01.2016	ggu	changed VERS_7_5_1
-c 04.04.2016	ggu	make some big arrays allocatable and not on stack
-c 15.04.2016	ggu	changed VERS_7_5_8
-c 30.09.2016	ggu	changed VERS_7_5_18
-c 22.04.2018	ggu	eliminated redundant use and variables
-c 24.04.2018	ggu	pass matrix into routines
-c 11.05.2018	ggu	changed VERS_7_5_47
-c 18.01.2019	ggu	changed VERS_7_5_55
-c 16.02.2019	ggu	changed VERS_7_5_60
-c 13.03.2019	ggu	changed VERS_7_5_61
-c
-c*************************************************************************
+! Sparskit solver routines
+!
+! revision log :
+!
+! 05.06.2009	ggu	some routines cleaned
+! 22.03.2010	ggu	change of some parameters
+! 29.03.2012	ggu	introduce zero and one as double (bug, was int before)
+! 05.06.2015	ggu	changed VERS_7_1_12
+! 10.07.2015	ggu	changed VERS_7_1_50
+! 17.07.2015	ggu	changed VERS_7_1_80
+! 20.07.2015	ggu	changed VERS_7_1_81
+! 12.10.2015	ggu	changed VERS_7_3_3
+! 26.10.2015	ggu	changed VERS_7_3_10
+! 15.12.2015	ggu&dbf	adapted to new 3d framework
+! 18.12.2015	ggu	changed VERS_7_3_17
+! 13.01.2016	ggu&ivn	bug in allocation of rvec and raux (n instead nndim)
+! 22.01.2016	ggu	changed VERS_7_5_1
+! 04.04.2016	ggu	make some big arrays allocatable and not on stack
+! 15.04.2016	ggu	changed VERS_7_5_8
+! 30.09.2016	ggu	changed VERS_7_5_18
+! 22.04.2018	ggu	eliminated redundant use and variables
+! 24.04.2018	ggu	pass matrix into routines
+! 11.05.2018	ggu	changed VERS_7_5_47
+! 18.01.2019	ggu	changed VERS_7_5_55
+! 16.02.2019	ggu	changed VERS_7_5_60
+! 13.03.2019	ggu	changed VERS_7_5_61
+!
+!*************************************************************************
 
 	subroutine spk_initialize_system(matrix)
 
@@ -89,7 +89,7 @@ c*************************************************************************
 
 	end
 
-c*************************************************************************
+!*************************************************************************
 
 	subroutine spk_init_system(matrix)
 
@@ -110,7 +110,7 @@ c*************************************************************************
 
       end
 
-c*************************************************************************
+!*************************************************************************
 
       subroutine spk_solve_system(matrix,buse3d,nndim,n,z)
 
@@ -200,16 +200,16 @@ c*************************************************************************
 
 	if( buse3d ) then
 	  nnzero = mm%n3zero
-          call coocsr(ngl,nnzero,mm%c3coo,mm%i3coo,mm%j3coo
-     +					,csr,jcsr,icsr)
+          call coocsr(ngl,nnzero,mm%c3coo,mm%i3coo,mm%j3coo &
+     &					,csr,jcsr,icsr)
           !write(6,*)'3D nnzero',nnzero,ngl
 	  !call coo_show(ngl,nnzero,i3coo,j3coo,c3coo)
 	  !call csr_show(ngl,nnzero,icsr,jcsr,csr)
 	  !call coo_print(ngl,nnzero,i3coo,j3coo,c3coo,rvec3d)
 	else
 	  nnzero = mm%n2zero
-          call coocsr(ngl,nnzero,mm%c2coo,mm%i2coo,mm%j2coo
-     +					,csr,jcsr,icsr)
+          call coocsr(ngl,nnzero,mm%c2coo,mm%i2coo,mm%j2coo &
+     &					,csr,jcsr,icsr)
           !write(6,*)'2D nnzero',nnzero,ngl
 	  !call coo_show(ngl,nnzero,i2coo,j2coo,c2coo)
 	  !call csr_show(ngl,nnzero,icsr,jcsr,csr)
@@ -247,17 +247,17 @@ c*************************************************************************
       if (itpre .eq. 1) then
         call ilu0(ngl, csr, jcsr, icsr, alu, jlu, ju, iw, ierr)
       else if (itpre .eq. 2) then
-        call ilut(ngl,csr,jcsr,icsr,lfil,droptol,alu,
-     +            jlu,ju,iwk,wilut,jw,ierr)
+        call ilut(ngl,csr,jcsr,icsr,lfil,droptol,alu, &
+     &            jlu,ju,iwk,wilut,jw,ierr)
       else if (itpre .eq. 3) then
-        call ilutp(ngl,csr,jcsr,icsr,lfil,droptol,permtol,mbloc,alu,
-     +             jlu,ju,iwk,wilut,jw,iperm,ierr)
+        call ilutp(ngl,csr,jcsr,icsr,lfil,droptol,permtol,mbloc,alu, &
+     &             jlu,ju,iwk,wilut,jw,iperm,ierr)
       else if (itpre .eq. 4) then
-        call ilud(ngl,csr,jcsr,icsr,zero,droptol,alu,
-     +            jlu,ju,iwk,wilut,jw,ierr)
+        call ilud(ngl,csr,jcsr,icsr,zero,droptol,alu, &
+     &            jlu,ju,iwk,wilut,jw,ierr)
       else if (itpre .eq. 5) then
-        call iludp(ngl,csr,jcsr,icsr,one,droptol,permtol,mbloc,alu,
-     +             jlu,ju,iwk,wilut,jw,iperm,ierr)
+        call iludp(ngl,csr,jcsr,icsr,one,droptol,permtol,mbloc,alu, &
+     &             jlu,ju,iwk,wilut,jw,iperm,ierr)
       end if
 !--------------------------------------------------
 
@@ -294,29 +294,29 @@ c*************************************************************************
 !       write(6,*) 'rhsmin/max: ',smin,smax
 
        if (itsol .eq. 1) then
-         call runrc(ngl,rvec,raux,ipar,fpar,wksp,guess,csr,jcsr,icsr,
-     +     alu,jlu,ju,dbcg)
+         call runrc(ngl,rvec,raux,ipar,fpar,wksp,guess,csr,jcsr,icsr, &
+     &     alu,jlu,ju,dbcg)
        else if (itsol .eq. 2) then
-         call runrc(ngl,rvec,raux,ipar,fpar,wksp,guess,csr,jcsr,icsr,
-     +     alu,jlu,ju,bcg)
+         call runrc(ngl,rvec,raux,ipar,fpar,wksp,guess,csr,jcsr,icsr, &
+     &     alu,jlu,ju,bcg)
        else if (itsol .eq. 3) then
-         call runrc(ngl,rvec,raux,ipar,fpar,wksp,guess,csr,jcsr,icsr,
-     +     alu,jlu,ju,bcgstab)
+         call runrc(ngl,rvec,raux,ipar,fpar,wksp,guess,csr,jcsr,icsr, &
+     &     alu,jlu,ju,bcgstab)
        else if (itsol .eq. 4) then
-         call runrc(ngl,rvec,raux,ipar,fpar,wksp,guess,csr,jcsr,icsr,
-     +     alu,jlu,ju,fom)
+         call runrc(ngl,rvec,raux,ipar,fpar,wksp,guess,csr,jcsr,icsr, &
+     &     alu,jlu,ju,fom)
        else if (itsol .eq. 5) then
-         call runrc(ngl,rvec,raux,ipar,fpar,wksp,guess,csr,jcsr,icsr,
-     +     alu,jlu,ju,tfqmr)
+         call runrc(ngl,rvec,raux,ipar,fpar,wksp,guess,csr,jcsr,icsr, &
+     &     alu,jlu,ju,tfqmr)
        else if (itsol .eq. 6) then
-         call runrc(ngl,rvec,raux,ipar,fpar,wksp,guess,csr,jcsr,icsr,
-     +     alu,jlu,ju,gmres)
+         call runrc(ngl,rvec,raux,ipar,fpar,wksp,guess,csr,jcsr,icsr, &
+     &     alu,jlu,ju,gmres)
        else if (itsol .eq. 7) then
-         call runrc(ngl,rvec,raux,ipar,fpar,wksp,guess,csr,jcsr,icsr,
-     +     alu,jlu,ju,fgmres)
+         call runrc(ngl,rvec,raux,ipar,fpar,wksp,guess,csr,jcsr,icsr, &
+     &     alu,jlu,ju,fgmres)
        else if (itsol .eq. 8) then
-         call runrc(ngl,rvec,raux,ipar,fpar,wksp,guess,csr,jcsr,icsr,
-     +     alu,jlu,ju,dqgmres)
+         call runrc(ngl,rvec,raux,ipar,fpar,wksp,guess,csr,jcsr,icsr, &
+     &     alu,jlu,ju,dqgmres)
        end if
        
 	if( ipar(1) < 0 ) then
@@ -343,5 +343,5 @@ c*************************************************************************
 	stop 'error stop spk_solve_system: dimension iwork'
 	end
 
-c*************************************************************************
+!*************************************************************************
 

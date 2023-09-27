@@ -26,258 +26,258 @@
 !
 !--------------------------------------------------------------------------
 
-c routines for concentration
-c
-c contents :
-c
-c-------------------------------------------------------------
-c
-c subroutine scal_adv(what,ivar
-c     +                          ,scal,ids
-c     +                          ,rkpar,wsink
-c     +                          ,difhv,difv,difmol)
-c		shell for scalar (for parallel version)
+! routines for concentration
+!
+! contents :
+!
+!-------------------------------------------------------------
+!
+! subroutine scal_adv(what,ivar
+!     +                          ,scal,ids
+!     +                          ,rkpar,wsink
+!     +                          ,difhv,difv,difmol)
+!		shell for scalar (for parallel version)
 
-c subroutine scal_adv_nudge(what,ivar
-c     +				,scal,ids
-c     +				,rkpar,wsink
-c     +                          ,difhv,difv,difmol
-c     +				,sobs,robs,rtauv)
-c		shell for scalar with nudging (for parallel version)
-c
-c subroutine scal_adv_fact(what,ivar,fact
-c     +                          ,scal,ids
-c     +                          ,rkpar,wsink,wsinkv,rload,load
-c     +                          ,difhv,difv,difmol)
-c		shell for scalar (for parallel version)
-c		special version for cohesive sediments with factor
-c
-c-------------------------------------------------------------
-c
-c subroutine scal3sh(what,cnv,nlvddi,rcv,cobs,robs,rtauv,rkpar
-c					,wsink,wsinkv,rload,load
-c     +                                 ,difhv,difv,difmol)
-c		shell for scalar T/D
-c
-c subroutine conz3d(cn1,co1
-c     +                  ,ddt
-c     +                  ,rkpar,difhv,difv
-c     +                  ,difmol,cbound
-c     +                  ,itvd,gradxv,gradyv
-c     +                  ,cobs,robs,rtauv
-c     +                  ,wsink,wsinkv
-c     +                  ,rload,load
-c     +                  ,azpar,adpar,aapar
-c     +                  ,istot,isact
-c     +                  ,nlvddi,nlv)
-c
-c subroutine conzstab(cn1,co1
-c     +                  ,ddt
-c     +                  ,robs,rtauv,wsink,wsinkv
-c     +                  ,rkpar,difhv,difv
-c     +                  ,difmol,azpar
-c     +                  ,adpar,aapar
-c     +                  ,sindex
-c     +                  ,istot,isact
-c     +                  ,nlvddi,nlv)
-c
-c-------------------------------------------------------------
-c
-c subroutine massconc(mode,cn,nlvddi,mass)
-c		computes total mass of conc
-c
-c subroutine check_scal_bounds(cnv,cmin,cmax,eps,bstop)
-c		checks if scalar is out of bounds
-c
-c subroutine assert_min_max_property(cnv,cov,sbconz,rmin,rmax,eps)
-c		checks min/max property
-c
-c subroutine stb_histo(it,nlvddi,nkn,ilhkv,cwrite)
-c		writes histogram info about stability index
-c
-c-------------------------------------------------------------
-c
-c notes:
-c
-c	dispersion:
-c	  scal_adv(...,cnv,ids,...)
-c
-c	scal_adv(...,ids,...)
-c	  bnds_trans_new(...,ids,r3v,...)	(transfers BC to matrix)
-c         call scal3sh(...,cnv,r3v,...)
-c	
-c	scal3sh(...,cnv,r3v,...)
-c         call make_scal_flux(...,cnv,r3v,sbconz,...)
-c	  do
-c           call conz3d(...,cnv,sbconz,...)
-c           call assert_min_max_property(...,cnv,sbconz,...)
-c           call bndo_setbc(what,nlvddi,cnv,rcv,uprv,vprv)
-c	  end do
-c
-c-------------------------------------------------------------
-c
-c revision log :
-c
-c 09.01.1994	ggu	(from scratch)
-c 19.01.1994	ggu	$$flux - flux conserving property
-c 20.01.1994	ggu	$$iclin - iclin not used to compute volume
-c 20.01.1994	ggu	$$lumpc - evaluate conz. nodewise
-c 03.02.1994	ggu	$$itot0 - exception for itot=0 or 3
-c 04.02.1994	ggu	$$fact3 - factor 3 missing in transport
-c 04.02.1994	ggu	$$azpar - azpar used to compute transport
-c 04.02.1994	ggu	$$condry - comute conz also in dry areas
-c 07.02.1994	ggu	$$istot - istot for fractional time step
-c 01.06.1994	ggu	restructured for 3-d model
-c 18.07.1994	ggu	$$htop - use htop instead of htopo for mass cons.
-c 09.04.1996	ggu	$$rvadj adjust rv in certain areas
-c 14.08.1998	ggu	rkpar/rvpar -> chpar/cvpar
-c 14.08.1998	ggu	use ilhkv to scan vertical levels on node
-c 14.08.1998	ggu	$$LEV0 - bug fix : vertical level 0 used
-c 19.08.1998	ggu	call to conzfi changed
-c 26.08.1998	ggu	cleaned up conzsh
-c 26.08.1998	ggu	conz uses zeov,zenv for water level
-c 28.10.1999	ggu	names changed
-c 07.03.2000	ggu	constant vertical eddy coefficient subst. with difv
-c 20.06.2000	ggu	pass difmol to conz3d and use it
-c 05.12.2001	ggu	variable horizontal diffusion, limit on dif.coef.
-c 11.10.2002	ggu	file cleaned, t/shdif are set equal
-c 11.10.2002	ggu	con3sh removed, conzstab better commented
-c 14.10.2002	ggu	rstot re-introduced as rstol
-c 09.09.2003	ggu	call to scal3sh changed -> new arg nlvddi
-c 10.03.2004	ggu	call conwrite() to write stability param to nos file
-c 13.03.2004	ggu	new boundary conditions through flux (cbound)
-c 15.10.2004	ggu	boundary conditions back to old
-c 02.12.2004	ggu	return also sindex in conzstab
-c 17.01.2005	ggu	new routines with difhv
-c 17.01.2005	ggu	get_stability and get_stab_index in this file
-c 03.03.2005	ggu	new 3d boundary arrays implemented
-c 16.08.2005	ggu	TVD algorithm implemented (gradxv,gradyv,grad_tvd,btvd)
-c 04.11.2005	ggu	TVD changes from andrea integrated
-c 07.11.2005	ggu	parameter itvd introduced for TVD
-c 07.11.2005	ggu	sinking velocity wsink introduced in call to scal3sh
-c 11.11.2005	ggu	bug fix in grad_tvd (ggx/ggy in layer loop now)
-c 11.11.2005	ggu	new routine grad_2d()
-c 16.02.2006	ggu	set w to zero at surface and bottom (WZERO)
-c 23.03.2006	ggu	changed time step to real
-c 08.08.2007	ggu	new parameter istot_max
-c 23.08.2007	ggu	test for boundary nodes using routines in testbndo.h
-c 18.09.2007	ggu	new subroutine check_scal
-c 01.10.2007	ggu	Hack for ssurface -> set to 0 or -999 (temp)
-c 17.03.2008	ggu	new open boundary routines introduced
-c 08.04.2008	ggu	treatment of boundaries changed
-c 22.04.2008	ggu	parallelization: scal_adv, scal_bnd
-c 22.04.2008	ggu	local saux, sbflux, no explh, cl{c|m|p}e
-c 22.04.2008	ggu	new routine scal_adv_fact for cohesive sediments
-c 23.04.2008	ggu	call to bnds_set_def() changed
-c 28.04.2008	ggu	rstol deleted
-c 28.04.2008	ggu	new routines for stability, s/getistot deleted
-c 28.04.2008	ggu	conz3sh into own file
-c 24.06.2008	ggu	rstol re-introduced
-c 08.11.2008	ggu	BUGFIX in conz3d (vertical velocity)
-c 11.11.2008	ggu	conzstab cleaned
-c 19.11.2008	ggu	changes in advect_stability() - incomplete
-c 06.12.2008	ggu	in conzstab changed wprv, new routine write_elem_info()
-c 27.01.2009	aac	bugs in TVD scheme fixed
-c 24.03.2009	ggu	more bugs in TVD scheme fixed
-c 31.03.2009	ggu	TVD algorithm tested and cleaned
-c 20.04.2009	ggu	test for parallel execution (parallel_test)
-c 13.10.2009	ggu	write_elem_info() substituted with check_elem()
-c 12.11.2009	ggu	make_scal_flux() into internal time loop for stability
-c 12.11.2009	ggu	in conz_stab loop over all k that are not z-boundaries
-c 16.02.2010	ggu	use wdiff also in stab, use point sources in stab
-c 16.02.2010	ggu	min/max property, sbconz is passed to conz3d
-c 19.02.2010	ggu	restructured, stab routines into newstab.f
-c 10.03.2010	ggu	in assert_min_max_property() check all nodes (also BC)
-c 11.03.2010	ggu	in assert_min_max_property() do not check ibtyp=1
-c 12.03.2010	ggu	in assert_min_max_property() limit error messages
-c 22.03.2010	ggu	bug fix for evaporation (distr. sources) BUG_2010_01
-c 15.12.2010	ggu	new routine vertical_flux_ie() for vertical tvd
-c 26.01.2011	ggu	nudging implemented (scal_adv_nudge, cobs, robs)
-c 16.02.2011	ggu	pass robs to info_stability()
-c 23.03.2011	ggu	new parameter itvdv
-c 25.03.2011	ggu	error check for aapar and itvdv
-c 14.04.2011	ggu	changed VERS_6_1_22
-c 31.05.2011	ggu	changed VERS_6_1_23
-c 01.06.2011	ggu	wsink for stability integrated
-c 12.07.2011	ggu	run over nlv, not nlvddi, vertical_flux() for lmax>1
-c 15.07.2011	ggu	call vertical_flux() anyway (BUG)
-c 30.03.2012	ggu	changed VERS_6_1_51
-c 21.06.2012	ggu&ccf	variable vertical sinking velocity integrated
-c 26.06.2012	ggu	changed VERS_6_1_55
-c 25.10.2012	ggu	changed VERS_6_1_59
-c 13.06.2013	ggu	changed VERS_6_1_65
-c 12.09.2013	ggu	changed VERS_6_1_67
-c 03.12.2013	ggu&dbf	bug fix for horizontal diffusion
-c 15.05.2014	ggu	write min/max error only for levdbg >= 3
-c 18.06.2014	ggu	changed VERS_6_1_77
-c 27.06.2014	ggu	changed VERS_6_1_78
-c 07.07.2014	ggu	changed VERS_6_1_79
-c 10.07.2014	ggu	only new file format allowed
-c 18.07.2014	ggu	changed VERS_7_0_1
-c 13.10.2014	ggu	changed VERS_7_0_2
-c 20.10.2014	ggu	accept ids from calling routines
-c 22.10.2014	ccf	load in call to scal3sh
-c 05.11.2014	ggu	changed VERS_7_0_5
-c 12.12.2014	ggu	changed VERS_7_0_9
-c 19.12.2014	ggu	changed VERS_7_0_10
-c 23.12.2014	ggu	changed VERS_7_0_11
-c 19.01.2015	ggu	changed VERS_7_1_3
-c 26.02.2015	ggu	changed VERS_7_1_5
-c 20.05.2015	ggu	accumulate over nodes (for parallel version)
-c 05.06.2015	ggu	changed VERS_7_1_12
-c 10.07.2015	ggu	changed VERS_7_1_50
-c 13.07.2015	ggu	changed VERS_7_1_51
-c 17.07.2015	ggu	changed VERS_7_1_52
-c 17.07.2015	ggu	changed VERS_7_1_80
-c 20.07.2015	ggu	changed VERS_7_1_81
-c 24.07.2015	ggu	changed VERS_7_1_82
-c 30.07.2015	ggu	changed VERS_7_1_83
-c 23.09.2015	ggu	changed VERS_7_2_4
-c 30.09.2015	ggu	routine cleaned, no reals in conz3d
-c 23.10.2015	ggu	changed VERS_7_3_9
-c 26.10.2015	ggu	critical omp sections introduced (eliminated data race)
-c 26.10.2015	ggu	mass check only for levdbg > 2
-c 09.11.2015	ggu	changed VERS_7_3_13
-c 20.11.2015	ggu	changed VERS_7_3_15
-c 16.12.2015	ggu	changed VERS_7_3_16
-c 18.12.2015	ggu	changed VERS_7_3_17
-c 01.04.2016	ggu	most big arrays moved from stack to allocatable
-c 20.10.2016	ccf	pass rtauv for differential nudging
-c 12.01.2017	ggu	changed VERS_7_5_21
-c 05.12.2017	ggu	changed VERS_7_5_39
-c 03.02.2018	ggu	sindex did not use rstol for stability
-c 22.02.2018	ggu	changed VERS_7_5_42
-c 03.04.2018	ggu	changed VERS_7_5_43
-c 03.04.2018	ggu	changed VERS_7_5_44
-c 19.04.2018	ggu	changed VERS_7_5_45
-c 23.04.2018	ggu	exchange mpi inside loop for istot>1
-c 11.05.2018	ggu	compute only unique nodes (needed for zeta layers)
-c 30.05.2018	ggu	better debug output in conzstab (idtstb,itmstb)
-c 01.06.2018	ggu	stability of scalar revised - aa > 0 possible again
-c 01.06.2018	ggu	implicit nudging (relaxation) (ANT)
-c 06.07.2018	ggu	changed VERS_7_5_48
-c 11.10.2018	ggu	caux substituted with load,cobs,rtauv (bug inout)
-c 14.02.2019	ggu	check for negative scalar
-c 16.02.2019	ggu	changed VERS_7_5_60
-c 13.03.2019	ggu	changed VERS_7_5_61
-c 21.05.2019	ggu	changed VERS_7_5_62
-c 31.05.2021	ggu	possibly write stability index to inf file
-c 15.02.2022	ggu	new routine limit_scalar() implemented
-c 19.02.2022	ggu	write nodes where limit is exceeded
-c 06.04.2022	ggu	adapted to regular assembling over elems (ie_mpi)
-c 07.04.2022	ggu	debug code (kdebug)
-c 03.05.2022	ggu	exchanging twice around bndo_setbc() -> improve
-c 09.05.2023    lrp     introduce top layer index variable
-c 31.05.2023    ggu     in conzstab, use ie_mpi, run over nkn_unique (bug fix)
-c
-c*********************************************************************
+! subroutine scal_adv_nudge(what,ivar
+!     +				,scal,ids
+!     +				,rkpar,wsink
+!     +                          ,difhv,difv,difmol
+!     +				,sobs,robs,rtauv)
+!		shell for scalar with nudging (for parallel version)
+!
+! subroutine scal_adv_fact(what,ivar,fact
+!     +                          ,scal,ids
+!     +                          ,rkpar,wsink,wsinkv,rload,load
+!     +                          ,difhv,difv,difmol)
+!		shell for scalar (for parallel version)
+!		special version for cohesive sediments with factor
+!
+!-------------------------------------------------------------
+!
+! subroutine scal3sh(what,cnv,nlvddi,rcv,cobs,robs,rtauv,rkpar
+!					,wsink,wsinkv,rload,load
+!     +                                 ,difhv,difv,difmol)
+!		shell for scalar T/D
+!
+! subroutine conz3d(cn1,co1
+!     +                  ,ddt
+!     +                  ,rkpar,difhv,difv
+!     +                  ,difmol,cbound
+!     +                  ,itvd,gradxv,gradyv
+!     +                  ,cobs,robs,rtauv
+!     +                  ,wsink,wsinkv
+!     +                  ,rload,load
+!     +                  ,azpar,adpar,aapar
+!     +                  ,istot,isact
+!     +                  ,nlvddi,nlv)
+!
+! subroutine conzstab(cn1,co1
+!     +                  ,ddt
+!     +                  ,robs,rtauv,wsink,wsinkv
+!     +                  ,rkpar,difhv,difv
+!     +                  ,difmol,azpar
+!     +                  ,adpar,aapar
+!     +                  ,sindex
+!     +                  ,istot,isact
+!     +                  ,nlvddi,nlv)
+!
+!-------------------------------------------------------------
+!
+! subroutine massconc(mode,cn,nlvddi,mass)
+!		computes total mass of conc
+!
+! subroutine check_scal_bounds(cnv,cmin,cmax,eps,bstop)
+!		checks if scalar is out of bounds
+!
+! subroutine assert_min_max_property(cnv,cov,sbconz,rmin,rmax,eps)
+!		checks min/max property
+!
+! subroutine stb_histo(it,nlvddi,nkn,ilhkv,cwrite)
+!		writes histogram info about stability index
+!
+!-------------------------------------------------------------
+!
+! notes:
+!
+!	dispersion:
+!	  scal_adv(...,cnv,ids,...)
+!
+!	scal_adv(...,ids,...)
+!	  bnds_trans_new(...,ids,r3v,...)	(transfers BC to matrix)
+!         call scal3sh(...,cnv,r3v,...)
+!	
+!	scal3sh(...,cnv,r3v,...)
+!         call make_scal_flux(...,cnv,r3v,sbconz,...)
+!	  do
+!           call conz3d(...,cnv,sbconz,...)
+!           call assert_min_max_property(...,cnv,sbconz,...)
+!           call bndo_setbc(what,nlvddi,cnv,rcv,uprv,vprv)
+!	  end do
+!
+!-------------------------------------------------------------
+!
+! revision log :
+!
+! 09.01.1994	ggu	(from scratch)
+! 19.01.1994	ggu	$$flux - flux conserving property
+! 20.01.1994	ggu	$$iclin - iclin not used to compute volume
+! 20.01.1994	ggu	$$lumpc - evaluate conz. nodewise
+! 03.02.1994	ggu	$$itot0 - exception for itot=0 or 3
+! 04.02.1994	ggu	$$fact3 - factor 3 missing in transport
+! 04.02.1994	ggu	$$azpar - azpar used to compute transport
+! 04.02.1994	ggu	$$condry - comute conz also in dry areas
+! 07.02.1994	ggu	$$istot - istot for fractional time step
+! 01.06.1994	ggu	restructured for 3-d model
+! 18.07.1994	ggu	$$htop - use htop instead of htopo for mass cons.
+! 09.04.1996	ggu	$$rvadj adjust rv in certain areas
+! 14.08.1998	ggu	rkpar/rvpar -> chpar/cvpar
+! 14.08.1998	ggu	use ilhkv to scan vertical levels on node
+! 14.08.1998	ggu	$$LEV0 - bug fix : vertical level 0 used
+! 19.08.1998	ggu	call to conzfi changed
+! 26.08.1998	ggu	cleaned up conzsh
+! 26.08.1998	ggu	conz uses zeov,zenv for water level
+! 28.10.1999	ggu	names changed
+! 07.03.2000	ggu	constant vertical eddy coefficient subst. with difv
+! 20.06.2000	ggu	pass difmol to conz3d and use it
+! 05.12.2001	ggu	variable horizontal diffusion, limit on dif.coef.
+! 11.10.2002	ggu	file cleaned, t/shdif are set equal
+! 11.10.2002	ggu	con3sh removed, conzstab better commented
+! 14.10.2002	ggu	rstot re-introduced as rstol
+! 09.09.2003	ggu	call to scal3sh changed -> new arg nlvddi
+! 10.03.2004	ggu	call conwrite() to write stability param to nos file
+! 13.03.2004	ggu	new boundary conditions through flux (cbound)
+! 15.10.2004	ggu	boundary conditions back to old
+! 02.12.2004	ggu	return also sindex in conzstab
+! 17.01.2005	ggu	new routines with difhv
+! 17.01.2005	ggu	get_stability and get_stab_index in this file
+! 03.03.2005	ggu	new 3d boundary arrays implemented
+! 16.08.2005	ggu	TVD algorithm implemented (gradxv,gradyv,grad_tvd,btvd)
+! 04.11.2005	ggu	TVD changes from andrea integrated
+! 07.11.2005	ggu	parameter itvd introduced for TVD
+! 07.11.2005	ggu	sinking velocity wsink introduced in call to scal3sh
+! 11.11.2005	ggu	bug fix in grad_tvd (ggx/ggy in layer loop now)
+! 11.11.2005	ggu	new routine grad_2d()
+! 16.02.2006	ggu	set w to zero at surface and bottom (WZERO)
+! 23.03.2006	ggu	changed time step to real
+! 08.08.2007	ggu	new parameter istot_max
+! 23.08.2007	ggu	test for boundary nodes using routines in testbndo.h
+! 18.09.2007	ggu	new subroutine check_scal
+! 01.10.2007	ggu	Hack for ssurface -> set to 0 or -999 (temp)
+! 17.03.2008	ggu	new open boundary routines introduced
+! 08.04.2008	ggu	treatment of boundaries changed
+! 22.04.2008	ggu	parallelization: scal_adv, scal_bnd
+! 22.04.2008	ggu	local saux, sbflux, no explh, cl{c|m|p}e
+! 22.04.2008	ggu	new routine scal_adv_fact for cohesive sediments
+! 23.04.2008	ggu	call to bnds_set_def() changed
+! 28.04.2008	ggu	rstol deleted
+! 28.04.2008	ggu	new routines for stability, s/getistot deleted
+! 28.04.2008	ggu	conz3sh into own file
+! 24.06.2008	ggu	rstol re-introduced
+! 08.11.2008	ggu	BUGFIX in conz3d (vertical velocity)
+! 11.11.2008	ggu	conzstab cleaned
+! 19.11.2008	ggu	changes in advect_stability() - incomplete
+! 06.12.2008	ggu	in conzstab changed wprv, new routine write_elem_info()
+! 27.01.2009	aac	bugs in TVD scheme fixed
+! 24.03.2009	ggu	more bugs in TVD scheme fixed
+! 31.03.2009	ggu	TVD algorithm tested and cleaned
+! 20.04.2009	ggu	test for parallel execution (parallel_test)
+! 13.10.2009	ggu	write_elem_info() substituted with check_elem()
+! 12.11.2009	ggu	make_scal_flux() into internal time loop for stability
+! 12.11.2009	ggu	in conz_stab loop over all k that are not z-boundaries
+! 16.02.2010	ggu	use wdiff also in stab, use point sources in stab
+! 16.02.2010	ggu	min/max property, sbconz is passed to conz3d
+! 19.02.2010	ggu	restructured, stab routines into newstab.f
+! 10.03.2010	ggu	in assert_min_max_property() check all nodes (also BC)
+! 11.03.2010	ggu	in assert_min_max_property() do not check ibtyp=1
+! 12.03.2010	ggu	in assert_min_max_property() limit error messages
+! 22.03.2010	ggu	bug fix for evaporation (distr. sources) BUG_2010_01
+! 15.12.2010	ggu	new routine vertical_flux_ie() for vertical tvd
+! 26.01.2011	ggu	nudging implemented (scal_adv_nudge, cobs, robs)
+! 16.02.2011	ggu	pass robs to info_stability()
+! 23.03.2011	ggu	new parameter itvdv
+! 25.03.2011	ggu	error check for aapar and itvdv
+! 14.04.2011	ggu	changed VERS_6_1_22
+! 31.05.2011	ggu	changed VERS_6_1_23
+! 01.06.2011	ggu	wsink for stability integrated
+! 12.07.2011	ggu	run over nlv, not nlvddi, vertical_flux() for lmax>1
+! 15.07.2011	ggu	call vertical_flux() anyway (BUG)
+! 30.03.2012	ggu	changed VERS_6_1_51
+! 21.06.2012	ggu&ccf	variable vertical sinking velocity integrated
+! 26.06.2012	ggu	changed VERS_6_1_55
+! 25.10.2012	ggu	changed VERS_6_1_59
+! 13.06.2013	ggu	changed VERS_6_1_65
+! 12.09.2013	ggu	changed VERS_6_1_67
+! 03.12.2013	ggu&dbf	bug fix for horizontal diffusion
+! 15.05.2014	ggu	write min/max error only for levdbg >= 3
+! 18.06.2014	ggu	changed VERS_6_1_77
+! 27.06.2014	ggu	changed VERS_6_1_78
+! 07.07.2014	ggu	changed VERS_6_1_79
+! 10.07.2014	ggu	only new file format allowed
+! 18.07.2014	ggu	changed VERS_7_0_1
+! 13.10.2014	ggu	changed VERS_7_0_2
+! 20.10.2014	ggu	accept ids from calling routines
+! 22.10.2014	ccf	load in call to scal3sh
+! 05.11.2014	ggu	changed VERS_7_0_5
+! 12.12.2014	ggu	changed VERS_7_0_9
+! 19.12.2014	ggu	changed VERS_7_0_10
+! 23.12.2014	ggu	changed VERS_7_0_11
+! 19.01.2015	ggu	changed VERS_7_1_3
+! 26.02.2015	ggu	changed VERS_7_1_5
+! 20.05.2015	ggu	accumulate over nodes (for parallel version)
+! 05.06.2015	ggu	changed VERS_7_1_12
+! 10.07.2015	ggu	changed VERS_7_1_50
+! 13.07.2015	ggu	changed VERS_7_1_51
+! 17.07.2015	ggu	changed VERS_7_1_52
+! 17.07.2015	ggu	changed VERS_7_1_80
+! 20.07.2015	ggu	changed VERS_7_1_81
+! 24.07.2015	ggu	changed VERS_7_1_82
+! 30.07.2015	ggu	changed VERS_7_1_83
+! 23.09.2015	ggu	changed VERS_7_2_4
+! 30.09.2015	ggu	routine cleaned, no reals in conz3d
+! 23.10.2015	ggu	changed VERS_7_3_9
+! 26.10.2015	ggu	critical omp sections introduced (eliminated data race)
+! 26.10.2015	ggu	mass check only for levdbg > 2
+! 09.11.2015	ggu	changed VERS_7_3_13
+! 20.11.2015	ggu	changed VERS_7_3_15
+! 16.12.2015	ggu	changed VERS_7_3_16
+! 18.12.2015	ggu	changed VERS_7_3_17
+! 01.04.2016	ggu	most big arrays moved from stack to allocatable
+! 20.10.2016	ccf	pass rtauv for differential nudging
+! 12.01.2017	ggu	changed VERS_7_5_21
+! 05.12.2017	ggu	changed VERS_7_5_39
+! 03.02.2018	ggu	sindex did not use rstol for stability
+! 22.02.2018	ggu	changed VERS_7_5_42
+! 03.04.2018	ggu	changed VERS_7_5_43
+! 03.04.2018	ggu	changed VERS_7_5_44
+! 19.04.2018	ggu	changed VERS_7_5_45
+! 23.04.2018	ggu	exchange mpi inside loop for istot>1
+! 11.05.2018	ggu	compute only unique nodes (needed for zeta layers)
+! 30.05.2018	ggu	better debug output in conzstab (idtstb,itmstb)
+! 01.06.2018	ggu	stability of scalar revised - aa > 0 possible again
+! 01.06.2018	ggu	implicit nudging (relaxation) (ANT)
+! 06.07.2018	ggu	changed VERS_7_5_48
+! 11.10.2018	ggu	caux substituted with load,cobs,rtauv (bug inout)
+! 14.02.2019	ggu	check for negative scalar
+! 16.02.2019	ggu	changed VERS_7_5_60
+! 13.03.2019	ggu	changed VERS_7_5_61
+! 21.05.2019	ggu	changed VERS_7_5_62
+! 31.05.2021	ggu	possibly write stability index to inf file
+! 15.02.2022	ggu	new routine limit_scalar() implemented
+! 19.02.2022	ggu	write nodes where limit is exceeded
+! 06.04.2022	ggu	adapted to regular assembling over elems (ie_mpi)
+! 07.04.2022	ggu	debug code (kdebug)
+! 03.05.2022	ggu	exchanging twice around bndo_setbc() -> improve
+! 09.05.2023    lrp     introduce top layer index variable
+! 31.05.2023    ggu     in conzstab, use ie_mpi, run over nkn_unique (bug fix)
+!
+!*********************************************************************
 
-	subroutine scal_adv(what,ivar
-     +				,scal,ids
-     +				,rkpar,wsink
-     +                          ,difhv,difv,difmol)
+	subroutine scal_adv(what,ivar &
+     &				,scal,ids &
+     &				,rkpar,wsink &
+     &                          ,difhv,difv,difmol)
 
-c shell for scalar (for parallel version)
+! shell for scalar (for parallel version)
 
 	use levels, only : nlvdi,nlv
 	use basin, only : nkn,nel,ngr,mbw
@@ -319,9 +319,9 @@ c shell for scalar (for parallel version)
 	rtauv = 0.
 	wsinkv = 1.
 
-c--------------------------------------------------------------
-c make identifier for variable
-c--------------------------------------------------------------
+!--------------------------------------------------------------
+! make identifier for variable
+!--------------------------------------------------------------
 
 !$OMP CRITICAL
 	whatvar = what
@@ -332,42 +332,42 @@ c--------------------------------------------------------------
         iwhat = ichanm(whatvar)
 !$OMP END CRITICAL
 
-c--------------------------------------------------------------
-c transfer boundary conditions of var ivar to 3d matrix r3v
-c--------------------------------------------------------------
+!--------------------------------------------------------------
+! transfer boundary conditions of var ivar to 3d matrix r3v
+!--------------------------------------------------------------
 
 	call get_act_dtime(dtime)
 
-	call bnds_trans_new(whatvar(1:iwhat)
-     +			,ids,dtime,ivar,nkn,nlv,nlvdi,r3v)
+	call bnds_trans_new(whatvar(1:iwhat) &
+     &			,ids,dtime,ivar,nkn,nlv,nlvdi,r3v)
 
-c--------------------------------------------------------------
-c do advection and diffusion
-c--------------------------------------------------------------
+!--------------------------------------------------------------
+! do advection and diffusion
+!--------------------------------------------------------------
 
-        call scal3sh(whatvar(1:iwhat)
-     +				,scal,nlvdi
-     +                          ,r3v,cobs,robs,rtauv
-     +				,rkpar,wsink,wsinkv,rload,load
-     +                          ,difhv,difv,difmol)
+        call scal3sh(whatvar(1:iwhat) &
+     &				,scal,nlvdi &
+     &                          ,r3v,cobs,robs,rtauv &
+     &				,rkpar,wsink,wsinkv,rload,load &
+     &                          ,difhv,difv,difmol)
 
 	deallocate(r3v,load,cobs,rtauv,wsinkv)
 
-c--------------------------------------------------------------
-c end of routine
-c--------------------------------------------------------------
+!--------------------------------------------------------------
+! end of routine
+!--------------------------------------------------------------
 
 	end
 
-c*********************************************************************
+!*********************************************************************
 
-	subroutine scal_adv_nudge(what,ivar
-     +				,scal,ids
-     +				,rkpar,wsink
-     +                          ,difhv,difv,difmol
-     +				,sobs,robs,rtauv)
+	subroutine scal_adv_nudge(what,ivar &
+     &				,scal,ids &
+     &				,rkpar,wsink &
+     &                          ,difhv,difv,difmol &
+     &				,sobs,robs,rtauv)
 
-c shell for scalar with nudging (for parallel version)
+! shell for scalar with nudging (for parallel version)
 
 	use levels
 	use basin, only : nkn,nel,ngr,mbw
@@ -406,9 +406,9 @@ c shell for scalar with nudging (for parallel version)
 	wsinkv = 1.
 	load = 0.
 
-c--------------------------------------------------------------
-c make identifier for variable
-c--------------------------------------------------------------
+!--------------------------------------------------------------
+! make identifier for variable
+!--------------------------------------------------------------
 
 	whatvar = what
 	if( ivar .ne. 0 ) then
@@ -417,44 +417,44 @@ c--------------------------------------------------------------
 	end if
         iwhat = ichanm(whatvar)
 
-c--------------------------------------------------------------
-c transfer boundary conditions of var ivar to 3d matrix r3v
-c--------------------------------------------------------------
+!--------------------------------------------------------------
+! transfer boundary conditions of var ivar to 3d matrix r3v
+!--------------------------------------------------------------
 
 	call get_act_dtime(dtime)
 
-	call bnds_trans_new(whatvar(1:iwhat)
-     +			,ids,dtime,ivar,nkn,nlv,nlvdi,r3v)
+	call bnds_trans_new(whatvar(1:iwhat) &
+     &			,ids,dtime,ivar,nkn,nlv,nlvdi,r3v)
 
-c--------------------------------------------------------------
-c do advection and diffusion
-c--------------------------------------------------------------
+!--------------------------------------------------------------
+! do advection and diffusion
+!--------------------------------------------------------------
 
-        call scal3sh(whatvar(1:iwhat)
-     +				,scal,nlvdi
-     +                          ,r3v,sobs,robs,rtauv
-     +				,rkpar,wsink,wsinkv,rload,load
-     +                          ,difhv,difv,difmol)
+        call scal3sh(whatvar(1:iwhat) &
+     &				,scal,nlvdi &
+     &                          ,r3v,sobs,robs,rtauv &
+     &				,rkpar,wsink,wsinkv,rload,load &
+     &                          ,difhv,difv,difmol)
 
 	deallocate(r3v,load)
 	deallocate(wsinkv)
 
-c--------------------------------------------------------------
-c end of routine
-c--------------------------------------------------------------
+!--------------------------------------------------------------
+! end of routine
+!--------------------------------------------------------------
 
 	end
 
-c*********************************************************************
+!*********************************************************************
 
-	subroutine scal_adv_fact(what,ivar,fact
-     +				,scal,ids
-     +				,rkpar,wsink,wsinkv,rload,load
-     +                          ,difhv,difv,difmol)
+	subroutine scal_adv_fact(what,ivar,fact &
+     &				,scal,ids &
+     &				,rkpar,wsink,wsinkv,rload,load &
+     &                          ,difhv,difv,difmol)
 
-c shell for scalar (for parallel version)
-c
-c special version with factor for BC, variable sinking velocity and loads
+! shell for scalar (for parallel version)
+!
+! special version with factor for BC, variable sinking velocity and loads
 
 	use levels, only : nlvdi,nlv
 	use basin, only : nkn,nel,ngr,mbw
@@ -493,9 +493,9 @@ c special version with factor for BC, variable sinking velocity and loads
 	cobs = 0.
 	rtauv = 0.
 
-c--------------------------------------------------------------
-c make identifier for variable
-c--------------------------------------------------------------
+!--------------------------------------------------------------
+! make identifier for variable
+!--------------------------------------------------------------
 
 	whatvar = what
 	if( ivar .ne. 0 ) then
@@ -504,46 +504,46 @@ c--------------------------------------------------------------
 	end if
         iwhat = ichanm(whatvar)
 
-c--------------------------------------------------------------
-c transfer boundary conditions of var ivar to 3d matrix r3v
-c--------------------------------------------------------------
+!--------------------------------------------------------------
+! transfer boundary conditions of var ivar to 3d matrix r3v
+!--------------------------------------------------------------
 
 	call get_act_dtime(dtime)
 
-	call bnds_trans_new(whatvar(1:iwhat)
-     +			,ids,dtime,ivar,nkn,nlv,nlvdi,r3v)
+	call bnds_trans_new(whatvar(1:iwhat) &
+     &			,ids,dtime,ivar,nkn,nlv,nlvdi,r3v)
 
-c--------------------------------------------------------------
-c multiply boundary condition with factor
-c--------------------------------------------------------------
+!--------------------------------------------------------------
+! multiply boundary condition with factor
+!--------------------------------------------------------------
 
 	if( fact .ne. 1. ) then
 	  call mult_scal_bc(r3v,fact)
 	end if
 
-c--------------------------------------------------------------
-c do advection and diffusion
-c--------------------------------------------------------------
+!--------------------------------------------------------------
+! do advection and diffusion
+!--------------------------------------------------------------
 
-        call scal3sh(whatvar(1:iwhat)
-     +				,scal,nlvdi
-     +                          ,r3v,cobs,robs,rtauv
-     +				,rkpar,wsink,wsinkv,rload,load
-     +                          ,difhv,difv,difmol)
+        call scal3sh(whatvar(1:iwhat) &
+     &				,scal,nlvdi &
+     &                          ,r3v,cobs,robs,rtauv &
+     &				,rkpar,wsink,wsinkv,rload,load &
+     &                          ,difhv,difv,difmol)
 
 	deallocate(r3v,cobs,rtauv)
 
-c--------------------------------------------------------------
-c end of routine
-c--------------------------------------------------------------
+!--------------------------------------------------------------
+! end of routine
+!--------------------------------------------------------------
 
 	end
 
-c*********************************************************************
+!*********************************************************************
 
 	subroutine scal_bnd(what,t,bnd3)
 
-c sets boundary conditions for scalar - not used anymore - to be deleted
+! sets boundary conditions for scalar - not used anymore - to be deleted
 
 	implicit none
 
@@ -555,17 +555,17 @@ c sets boundary conditions for scalar - not used anymore - to be deleted
 
 	end
 
-c*********************************************************************
-c*********************************************************************
-c*********************************************************************
-c*********************************************************************
-c*********************************************************************
+!*********************************************************************
+!*********************************************************************
+!*********************************************************************
+!*********************************************************************
+!*********************************************************************
 
-	subroutine scal3sh(what,cnv,nlvddi,rcv,cobs,robs,rtauv,rkpar
-     +					,wsink,wsinkv,rload,load
-     +					,difhv,difv,difmol)
+	subroutine scal3sh(what,cnv,nlvddi,rcv,cobs,robs,rtauv,rkpar &
+     &					,wsink,wsinkv,rload,load &
+     &					,difhv,difv,difmol)
 
-c shell for scalar T/D
+! shell for scalar T/D
 
 	use mod_hydro_print
 	use levels, only : nlvdi,nlv
@@ -575,7 +575,7 @@ c shell for scalar T/D
 
 	implicit none
 
-c arguments
+! arguments
         character*(*) what
         real cnv(nlvddi,nkn)
 	integer nlvddi		!vertical dimension
@@ -591,15 +591,15 @@ c arguments
         real difhv(nlvddi,nel)
 	real difv(0:nlvddi,nkn)
         real difmol
-c parameters
+! parameters
 	integer istot_max
 	!parameter ( istot_max = 100 )
 	!parameter ( istot_max = 200 )
 	!parameter ( istot_max = 300 )
 	parameter ( istot_max = 1000 )
-c common
+! common
 	include 'mkonst.h'
-c local
+! local
         real, allocatable :: saux(:,:)		!aux array
         real, allocatable :: sbflux(:,:)	!flux boundary conditions
         real, allocatable :: sbconz(:,:)	!conz boundary conditions
@@ -623,20 +623,20 @@ c local
 	real wsinkl				!local sinking
 	double precision dtime
 	character*20 aline
-c function
+! function
 	real getpar
 	integer ipint
 
-c-------------------------------------------------------------
-c start of routine
-c-------------------------------------------------------------
+!-------------------------------------------------------------
+! start of routine
+!-------------------------------------------------------------
 
 	iunit = 888 + my_id
 	iunit = 0
 
-c-------------------------------------------------------------
-c initialization
-c-------------------------------------------------------------
+!-------------------------------------------------------------
+! initialization
+!-------------------------------------------------------------
 
 	call getaz(azpar)
 	adpar=getpar('adpar')
@@ -670,17 +670,17 @@ c-------------------------------------------------------------
 	eps = 1.e-4
 	eps = 1.e-2
 
-c-------------------------------------------------------------
-c check stability criterion -> set istot
-c-------------------------------------------------------------
+!-------------------------------------------------------------
+! check stability criterion -> set istot
+!-------------------------------------------------------------
 
 	call get_timestep(dt)
 	call get_act_dtime(dtime)
 	call get_act_timeline(aline)
 
 	saux = 0.
-	call scalar_stability(dt,robs,rtauv,wsinkl,wsinkv,rkpar,
-     +					sindex,istot,saux)
+	call scalar_stability(dt,robs,rtauv,wsinkl,wsinkv,rkpar, &
+     &					sindex,istot,saux)
 
 !$OMP CRITICAL
 	if(shympi_is_master()) then
@@ -689,35 +689,35 @@ c-------------------------------------------------------------
 !$OMP END CRITICAL
 
         if( istot .gt. istot_max ) then
-	    call scalar_info_stability(dt,robs,rtauv,wsinkl,wsinkv
-     +				,rkpar,sindex,istot,saux)
+	    call scalar_info_stability(dt,robs,rtauv,wsinkl,wsinkv &
+     &				,rkpar,sindex,istot,saux)
             write(6,*) 'istot  = ',istot,'   sindex = ',sindex
             stop 'error stop scal3sh: istot index too high'
         end if
 
-c-------------------------------------------------------------
-c set up TVD scheme
-c-------------------------------------------------------------
+!-------------------------------------------------------------
+! set up TVD scheme
+!-------------------------------------------------------------
 
 	!call tvd_init(itvd)	!is called in shyfem
 
-c-------------------------------------------------------------
-c set up flux boundary conditions (temporary) -> put in sbflux
-c-------------------------------------------------------------
+!-------------------------------------------------------------
+! set up flux boundary conditions (temporary) -> put in sbflux
+!-------------------------------------------------------------
 
 	ssurface = 0.	!FIXME - HACK
 	if( what .eq. 'temp' ) ssurface = -999.
 
-c make_scal_flux has been moved inside time loop of isact (see below)
-c to increase stability when treating outflow flux boundary
-c this is needed only for discharge < 0 in order to use always the
-c ambient tracer concentration
+! make_scal_flux has been moved inside time loop of isact (see below)
+! to increase stability when treating outflow flux boundary
+! this is needed only for discharge < 0 in order to use always the
+! ambient tracer concentration
 
 	!write(iunit,*) 'istot = ',istot,dtime
 
-c-------------------------------------------------------------
-c transport and diffusion
-c-------------------------------------------------------------
+!-------------------------------------------------------------
+! transport and diffusion
+!-------------------------------------------------------------
 
 	call massconc(-1,cnv,nlvddi,massold)
 
@@ -731,28 +731,28 @@ c-------------------------------------------------------------
 	  if( what /= 'temp' ) then
 	    where( cnv < 1.e-15 ) cnv = 0.
 	    if( any(cnv < 0.) ) then
-	      write(6,*) 'negative scalar: ',what,isact
-     +		,count(cnv<0.),minval(cnv)
+	      write(6,*) 'negative scalar: ',what,isact &
+     &		,count(cnv<0.),minval(cnv)
 	    end if
 	  end if
 
 	  if( btvd1 ) call tvd_grad_3d(cnv,gradxv,gradyv,saux,nlvddi)
 
           call conz3d_omp(
-          !call conz3d_orig(
-     +           cnv
-     +          ,saux
-     +          ,dt
-     +          ,rkpar,difhv,difv,difmol
-     +          ,sbconz
-     +		,itvd,itvdv,gradxv,gradyv
-     +		,cobs,robs,rtauv
-     +		,wsinkl,wsinkv
-     +		,rload,load
-     +		,azpar,adpar,aapar
-     +          ,istot,isact
-     +          ,nlvddi,nlv
-     +               )
+          !call conz3d_orig( &
+     &           cnv &
+     &          ,saux &
+     &          ,dt &
+     &          ,rkpar,difhv,difv,difmol &
+     &          ,sbconz &
+     &		,itvd,itvdv,gradxv,gradyv &
+     &		,cobs,robs,rtauv &
+     &		,wsinkl,wsinkv &
+     &		,rload,load &
+     &		,azpar,adpar,aapar &
+     &          ,istot,isact &
+     &          ,nlvddi,nlv &
+     &               )
 
 	  call assert_min_max_property(cnv,saux,sbconz,gradxv,gradyv,eps)
 
@@ -772,17 +772,17 @@ c-------------------------------------------------------------
         !call shympi_exchange_3d_node(cnv)
         !call shympi_barrier
 
-c-------------------------------------------------------------
-c check total mass
-c-------------------------------------------------------------
+!-------------------------------------------------------------
+! check total mass
+!-------------------------------------------------------------
 
 	if( levdbg > 2 ) then
 	  call massconc(+1,cnv,nlvddi,mass)
 	  massdiff = mass - massold
 !$OMP CRITICAL
           if(shympi_is_master())then
-	    write(iuinfo,1000) 'scal3sh_'//trim(what)//': ',aline
-     +                          ,mass,massold,massdiff
+	    write(iuinfo,1000) 'scal3sh_'//trim(what)//': ',aline &
+     &                          ,mass,massold,massdiff
 	  end if
 !$OMP END CRITICAL
 	end if
@@ -793,75 +793,75 @@ c-------------------------------------------------------------
 
 	if( iunit > 0 ) flush(iunit)
 
-c-------------------------------------------------------------
-c end of routine
-c-------------------------------------------------------------
+!-------------------------------------------------------------
+! end of routine
+!-------------------------------------------------------------
 
         return
  !1000   format(a,a,a,2i10,3d13.5)
  1000   format(a,a,3d13.5)
 	end
 
-c**************************************************************
+!**************************************************************
 
-        subroutine conz3d_orig(cn1,co1
-     +			,ddt
-     +                  ,rkpar,difhv,difv
-     +			,difmol,cbound
-     +		 	,itvd,itvdv,gradxv,gradyv
-     +			,cobs,robs,rtauv
-     +			,wsink,wsinkv
-     +			,rload,load
-     +			,azpar,adpar,aapar
-     +			,istot,isact
-     +			,nlvddi,nlev)
-c
-c computes concentration
-c
-c cn     new concentration
-c co     old concentration              !not used !FIXME
-c caux   aux vector
-c clow	 lower diagonal of vertical system
-c chig	 upper diagonal of vertical system
-c ddt    time step
-c rkpar  horizontal turbulent diffusivity
-c difhv  horizontal turbulent diffusivity (variable between elements)
-c difv   vertical turbulent diffusivity
-c difmol vertical molecular diffusivity
-c cbound boundary condition (mass flux) [kg/s] -> now concentration [kg/m**3]
-c itvd	 type of horizontal transport algorithm used
-c itvdv	 type of vertical transport algorithm used
-c gradxv,gradyv  gradient vectors for TVD algorithm
-c cobs	 observations for nudging
-c robs	 use observations for nuding (real)
-c rtauv	 relaxation time for nuding (real)
-c wsink	 factor for settling velocity
-c wsinkv variable settling velocity [m/s]
-c rload	 factor for loading
-c load   load (source or sink) [kg/s]
-c azpar  time weighting parameter
-c adpar  time weighting parameter for vertical diffusion (ad)
-c aapar  time weighting parameter for vertical advection (aa)
-c istot	 total inter time steps
-c isact	 actual inter time step
-c nlvddi	 dimension in z direction
-c nlv	 actual needed levels
-c
-c solution of purely diffusional part :
-c
-c dC/dt = a*laplace(C)    with    c(x,0+)=delta(x)
-c
-c C(x,t) =  (4*pi*a*t)**(-n/2) * exp( -|x|**2/(4*a*t) )
-c
-c for n-dimensions and
-c
-c C(x,t) =  1/sqrt(4*pi*a*t) * exp( -x**2/(4*a*t) )
-c
-c for 1 dimension
-c
-c the solution is normalized, i.e.  int(C(x,t)dx) = 1 over the whole area
-c
-c DPGGU -> introduced double precision to stabilize solution
+        subroutine conz3d_orig(cn1,co1 &
+     &			,ddt &
+     &                  ,rkpar,difhv,difv &
+     &			,difmol,cbound &
+     &		 	,itvd,itvdv,gradxv,gradyv &
+     &			,cobs,robs,rtauv &
+     &			,wsink,wsinkv &
+     &			,rload,load &
+     &			,azpar,adpar,aapar &
+     &			,istot,isact &
+     &			,nlvddi,nlev)
+!
+! computes concentration
+!
+! cn     new concentration
+! co     old concentration              !not used !FIXME
+! caux   aux vector
+! clow	 lower diagonal of vertical system
+! chig	 upper diagonal of vertical system
+! ddt    time step
+! rkpar  horizontal turbulent diffusivity
+! difhv  horizontal turbulent diffusivity (variable between elements)
+! difv   vertical turbulent diffusivity
+! difmol vertical molecular diffusivity
+! cbound boundary condition (mass flux) [kg/s] -> now concentration [kg/m**3]
+! itvd	 type of horizontal transport algorithm used
+! itvdv	 type of vertical transport algorithm used
+! gradxv,gradyv  gradient vectors for TVD algorithm
+! cobs	 observations for nudging
+! robs	 use observations for nuding (real)
+! rtauv	 relaxation time for nuding (real)
+! wsink	 factor for settling velocity
+! wsinkv variable settling velocity [m/s]
+! rload	 factor for loading
+! load   load (source or sink) [kg/s]
+! azpar  time weighting parameter
+! adpar  time weighting parameter for vertical diffusion (ad)
+! aapar  time weighting parameter for vertical advection (aa)
+! istot	 total inter time steps
+! isact	 actual inter time step
+! nlvddi	 dimension in z direction
+! nlv	 actual needed levels
+!
+! solution of purely diffusional part :
+!
+! dC/dt = a*laplace(C)    with    c(x,0+)=delta(x)
+!
+! C(x,t) =  (4*pi*a*t)**(-n/2) * exp( -|x|**2/(4*a*t) )
+!
+! for n-dimensions and
+!
+! C(x,t) =  1/sqrt(4*pi*a*t) * exp( -x**2/(4*a*t) )
+!
+! for 1 dimension
+!
+! the solution is normalized, i.e.  int(C(x,t)dx) = 1 over the whole area
+!
+! DPGGU -> introduced double precision to stabilize solution
 
 	use mod_bound_geom
 	use mod_geom
@@ -878,8 +878,8 @@ c DPGGU -> introduced double precision to stabilize solution
 	use shympi
 
 	implicit none
-c
-c arguments
+!
+! arguments
 	integer nlvddi,nlev
         real cn1(nlvddi,nkn),co1(nlvddi,nkn)		!DPGGU
         real difv(0:nlvddi,nkn)
@@ -900,7 +900,7 @@ c arguments
         real ddt,rkpar
         real azpar,adpar,aapar			!$$azpar
 	integer istot,isact
-c local
+! local
 	logical bdebug,bdebug1,btvdv,bdebggu
 	integer k,ie,ii,l,iii,ll,ibase,ntot,ie_mpi
 	integer lstart
@@ -939,7 +939,7 @@ c local
 	double precision fl(3),fnudge(3)
 	double precision flux_tot,flux_tot1,flux_top,flux_bot
         double precision wdiff(3),waux
-c local (new)
+! local (new)
 	double precision clc(nlvddi,3), clm(nlvddi,3), clp(nlvddi,3)
 	double precision cle(nlvddi,3)
 
@@ -967,7 +967,7 @@ c local (new)
 	double precision cauxd(nlvddi)
 	double precision cauxh(nlvddi)
 	double precision cauxl(nlvddi)
-c tvd
+! tvd
 	logical btvd
 	integer ic,kc,id,kdebug,ippp
 	integer ies
@@ -975,16 +975,16 @@ c tvd
 	double precision fls(3)
         double precision wws
 
-c functions
+! functions
 	integer ipint,ieint
 	integer ipext,ieext
 	integer ithis
 
         if(nlv.ne.nlev) stop 'error stop conz3d_orig: nlv/=nlev'
 
-c----------------------------------------------------------------
-c initialize variables and parameters
-c----------------------------------------------------------------
+!----------------------------------------------------------------
+! initialize variables and parameters
+!----------------------------------------------------------------
 
 	kdebug = ipint(3371)
 	kdebug = -1
@@ -1025,9 +1025,9 @@ c----------------------------------------------------------------
 	  stop 'error stop conz3d: vertical tvd scheme'
 	end if
 
-c	----------------------------------------------------------------
-c	global arrays for accumulation of implicit terms
-c	----------------------------------------------------------------
+!	----------------------------------------------------------------
+!	global arrays for accumulation of implicit terms
+!	----------------------------------------------------------------
 
 	do k=1,nkn
           do l=1,nlv
@@ -1046,12 +1046,12 @@ c	----------------------------------------------------------------
 	  write(iunit,*) co(1,kdebug)
 	end if
 	
-c	----------------------------------------------------------------
-c	aux elements inside element
-c	----------------------------------------------------------------
+!	----------------------------------------------------------------
+!	aux elements inside element
+!	----------------------------------------------------------------
 
-c	these are aux arrays (bigger than needed) to avoid checking for
-c	what layer we are in -> we never get out of bounds
+!	these are aux arrays (bigger than needed) to avoid checking for
+!	what layer we are in -> we never get out of bounds
 
         do l=0,nlv+1
 	  hdv(l) = 0.		!layer thickness
@@ -1066,9 +1066,9 @@ c	what layer we are in -> we never get out of bounds
 	  end do
 	end do
 
-c	these are the local arrays for accumulation of implicit terms
-c	(maybe we do not need them, but just to be sure...)
-c	after accumulation we copy them onto the global arrays
+!	these are the local arrays for accumulation of implicit terms
+!	(maybe we do not need them, but just to be sure...)
+!	after accumulation we copy them onto the global arrays
 
         do l=1,nlv
 	  do ii=1,3
@@ -1079,13 +1079,13 @@ c	after accumulation we copy them onto the global arrays
 	  end do
 	end do
 
-c	----------------------------------------------------------------
-c	define vertical velocities
-c	----------------------------------------------------------------
+!	----------------------------------------------------------------
+!	define vertical velocities
+!	----------------------------------------------------------------
 
-c----------------------------------------------------------------
-c loop over elements
-c----------------------------------------------------------------
+!----------------------------------------------------------------
+! loop over elements
+!----------------------------------------------------------------
 
         do ie_mpi=1,nel
 
@@ -1104,9 +1104,9 @@ c----------------------------------------------------------------
         ilevel=ilhv(ie)
         jlevel=jlhv(ie)
 
-c	----------------------------------------------------------------
-c	set up vectors for use in assembling contributions
-c	----------------------------------------------------------------
+!	----------------------------------------------------------------
+!	set up vectors for use in assembling contributions
+!	----------------------------------------------------------------
 
         do l=jlevel,ilevel
 	  hdv(l) = hdeov(l,ie)		!use old time step -> FIXME
@@ -1132,32 +1132,32 @@ c	----------------------------------------------------------------
 	  present(l) = 0.
 	end do
 
-c	----------------------------------------------------------------
-c	set vertical velocities in surface and bottom layer
-c	----------------------------------------------------------------
+!	----------------------------------------------------------------
+!	set vertical velocities in surface and bottom layer
+!	----------------------------------------------------------------
 
-c	we do not set wl(0,ii) because otherwise we loose concentration
-c	through surface
-c
-c	we set wl(ilevel,ii) to 0 because we are on the bottom
-c	and there should be no contribution from this element
-c	to the vertical velocity
+!	we do not set wl(0,ii) because otherwise we loose concentration
+!	through surface
+!
+!	we set wl(ilevel,ii) to 0 because we are on the bottom
+!	and there should be no contribution from this element
+!	to the vertical velocity
 
 	do ii=1,3
 	  wl(ilevel,ii) = 0.
 	end do
 
-c	----------------------------------------------------------------
-c	compute vertical fluxes (w/o vertical TVD scheme)
-c	----------------------------------------------------------------
+!	----------------------------------------------------------------
+!	compute vertical fluxes (w/o vertical TVD scheme)
+!	----------------------------------------------------------------
 
 	wws = 0.	!sinking velocity alread in wl
-	call vertical_flux_ie(btvdv,ie,ilevel,jlevel,
-     +			      dt,wws,cl,wl,hold,vflux)
+	call vertical_flux_ie(btvdv,ie,ilevel,jlevel, &
+     &			      dt,wws,cl,wl,hold,vflux)
 
-c----------------------------------------------------------------
-c loop over levels
-c----------------------------------------------------------------
+!----------------------------------------------------------------
+! loop over levels
+!----------------------------------------------------------------
 
         do l=jlevel,ilevel
 
@@ -1180,9 +1180,9 @@ c----------------------------------------------------------------
 	  cbm=cbm+b(ii)*cl(l,ii)
 	  ccm=ccm+c(ii)*cl(l,ii)
 
-c	  ----------------------------------------------------------------
-c	  initialization to be sure we are in a clean state
-c	  ----------------------------------------------------------------
+!	  ----------------------------------------------------------------
+!	  initialization to be sure we are in a clean state
+!	  ----------------------------------------------------------------
 
 	  fw(ii) = 0.
 	  cle(l,ii) = 0.
@@ -1190,9 +1190,9 @@ c	  ----------------------------------------------------------------
 	  clm(l,ii) = 0.
 	  clp(l,ii) = 0.
 
-c	  ----------------------------------------------------------------
-c	  contributions from horizontal diffusion
-c	  ----------------------------------------------------------------
+!	  ----------------------------------------------------------------
+!	  contributions from horizontal diffusion
+!	  ----------------------------------------------------------------
 
           waux = 0.
           do iii=1,3
@@ -1200,16 +1200,16 @@ c	  ----------------------------------------------------------------
           end do
           wdiff(ii) = waux
 
-c	  ----------------------------------------------------------------
-c	  contributions from vertical diffusion
-c	  ----------------------------------------------------------------
+!	  ----------------------------------------------------------------
+!	  contributions from vertical diffusion
+!	  ----------------------------------------------------------------
 
-c	  in fd(ii) is explicit contribution
-c	  the sign is for the term on the left side, therefore
-c	  fd(ii) must be subtracted from the right side
-c
-c	  maybe we should use real layer thickness, or even the
-c	  time dependent layer thickness
+!	  in fd(ii) is explicit contribution
+!	  the sign is for the term on the left side, therefore
+!	  fd(ii) must be subtracted from the right side
+!
+!	  maybe we should use real layer thickness, or even the
+!	  time dependent layer thickness
 
 	  rvptop = difv(l-1,k) + difmol
 	  rvpbot = difv(l,k) + difmol
@@ -1220,26 +1220,26 @@ c	  time dependent layer thickness
 	  hmntop =2.*rvptop*present(l-1)/(hnew(l-1,ii)+hnew(l,ii))
 	  hmnbot =2.*rvpbot*present(l+1)/(hnew(l,ii)+hnew(l+1,ii))
 
-	  fd(ii) = adt * ( 
-     +			(cl(l,ii)-cl(l+1,ii))*hmobot -
-     +			(cl(l-1,ii)-cl(l,ii))*hmotop
-     +			  )
+	  fd(ii) = adt * (  &
+     &			(cl(l,ii)-cl(l+1,ii))*hmobot - &
+     &			(cl(l-1,ii)-cl(l,ii))*hmotop &
+     &			  )
 
 	  clc(l,ii) = clc(l,ii) + ad * ( hmntop + hmnbot )
 	  clm(l,ii) = clm(l,ii) - ad * ( hmntop )
 	  clp(l,ii) = clp(l,ii) - ad * ( hmnbot )
 
-c	  ----------------------------------------------------------------
-c	  contributions from vertical advection
-c	  ----------------------------------------------------------------
+!	  ----------------------------------------------------------------
+!	  contributions from vertical advection
+!	  ----------------------------------------------------------------
 
-c	  in fw(ii) is explicit contribution
-c	  the sign is for the term on the left side, therefore
-c	  fw(ii) must be subtracted from the right side
-c	  fw is positive if flux out of node
-c
-c	  if we are in last layer, w(l,ii) is zero
-c	  if we are in first layer, w(l-1,ii) is zero (see above)
+!	  in fw(ii) is explicit contribution
+!	  the sign is for the term on the left side, therefore
+!	  fw(ii) must be subtracted from the right side
+!	  fw is positive if flux out of node
+!
+!	  if we are in last layer, w(l,ii) is zero
+!	  if we are in first layer, w(l-1,ii) is zero (see above)
 
 	  w = wl(l-1,ii)		!top of layer
 	  if( l .eq. jlevel ) w = 0.	!surface -> no transport (WZERO)
@@ -1271,16 +1271,16 @@ c	  if we are in first layer, w(l-1,ii) is zero (see above)
 	  fw(ii) = flux_tot
 	end do
 
-c	----------------------------------------------------------------
-c	contributions from horizontal advection (only explicit)
-c	----------------------------------------------------------------
-c
-c	f(ii) > 0 ==> flux into node ii
-c	itot=1 -> flux out of one node
-c		compute flux with concentration of this node
-c	itot=2 -> flux into one node
-c		for flux use conz. of the other two nodes and
-c		minus the sum of these nodes for the flux of this node
+!	----------------------------------------------------------------
+!	contributions from horizontal advection (only explicit)
+!	----------------------------------------------------------------
+!
+!	f(ii) > 0 ==> flux into node ii
+!	itot=1 -> flux out of one node
+!		compute flux with concentration of this node
+!	itot=2 -> flux into one node
+!		for flux use conz. of the other two nodes and
+!		minus the sum of these nodes for the flux of this node
 
 	if(itot.eq.1) then	!$$flux
 	  fl(1)=f(1)*cl(l,isum)
@@ -1300,9 +1300,9 @@ c		minus the sum of these nodes for the flux of this node
 	  fl(3)=0.
 	end if
 
-c	----------------------------------------------------------------
-c	horizontal TVD scheme start
-c	----------------------------------------------------------------
+!	----------------------------------------------------------------
+!	horizontal TVD scheme start
+!	----------------------------------------------------------------
 
         if( btvd ) then
 	  iext = 0
@@ -1316,34 +1316,34 @@ c	----------------------------------------------------------------
 	  end if
 	end if
 
-c	----------------------------------------------------------------
-c	horizontal TVD scheme finish
-c	----------------------------------------------------------------
+!	----------------------------------------------------------------
+!	horizontal TVD scheme finish
+!	----------------------------------------------------------------
 
-c	----------------------------------------------------------------
-c	contributions from nudging
-c	----------------------------------------------------------------
+!	----------------------------------------------------------------
+!	contributions from nudging
+!	----------------------------------------------------------------
 
 	do ii=1,3
 	  fnudge(ii) = robs * rtau(l,ii) * ( cob(l,ii) - ant * cl(l,ii) )
 	  finu(l,ii) = an * robs * rtau(l,ii)	!implicit contribution
 	end do
 
-c	----------------------------------------------------------------
-c	sum explicit contributions
-c	----------------------------------------------------------------
+!	----------------------------------------------------------------
+!	sum explicit contributions
+!	----------------------------------------------------------------
 
 	do ii=1,3
           hmed = haver(l)                    !new ggu   !HACK
-	  cexpl = aj4 * ( hold(l,ii)*cl(l,ii)
-     +				+ dt *  ( 
-     +					    hold(l,ii)*fnudge(ii)
-     +					  + 3.*fl(ii) 
-     +					  - fw(ii)
-     +					  - rk3*hmed*wdiff(ii)
-     +					  - fd(ii)
-     +					)
-     +		         )
+	  cexpl = aj4 * ( hold(l,ii)*cl(l,ii) &
+     &				+ dt *  (  &
+     &					    hold(l,ii)*fnudge(ii) &
+     &					  + 3.*fl(ii)  &
+     &					  - fw(ii) &
+     &					  - rk3*hmed*wdiff(ii) &
+     &					  - fd(ii) &
+     &					) &
+     &		         )
 	  cle(l,ii) = cle(l,ii) + cexpl
 	  k = nen3v(ii,ie)
 	  if( k == kdebug ) then
@@ -1360,20 +1360,20 @@ c	----------------------------------------------------------------
 
 	end do		! loop over l
 
-c----------------------------------------------------------------
-c end of loop over l
-c----------------------------------------------------------------
+!----------------------------------------------------------------
+! end of loop over l
+!----------------------------------------------------------------
 
-c----------------------------------------------------------------
-c set up implicit contributions
-c----------------------------------------------------------------
+!----------------------------------------------------------------
+! set up implicit contributions
+!----------------------------------------------------------------
 
-c cdiag is diagonal of tri-diagonal system
-c chigh is high (right) part of tri-diagonal system
-c clow is low (left) part of tri-diagonal system
-c
-c clp -> bottom
-c clm -> top
+! cdiag is diagonal of tri-diagonal system
+! chigh is high (right) part of tri-diagonal system
+! clow is low (left) part of tri-diagonal system
+!
+! clp -> bottom
+! clm -> top
 
 	do ii=1,3
 	  clm(1,ii) = 0.
@@ -1396,8 +1396,8 @@ c clm -> top
 	    ccle(l,ii,ie) =            cle(l,ii)
 	    cclm(l,ii,ie) = aj4 * dt * clm(l,ii)
 	    cclp(l,ii,ie) = aj4 * dt * clp(l,ii)
-	    cclc(l,ii,ie) = aj4 * ( dt * clc(l,ii) 
-     +				+ (1.+dt*finu(l,ii)) * hnew(l,ii) )
+	    cclc(l,ii,ie) = aj4 * ( dt * clc(l,ii)  &
+     &				+ (1.+dt*finu(l,ii)) * hnew(l,ii) )
 	  end do
           do l=ilevel+1,nlv
 	    ccle(l,ii,ie) = 0.
@@ -1409,18 +1409,18 @@ c clm -> top
 
 	end do		! loop over ie
 
-c----------------------------------------------------------------
-c end of loop over elements
-c----------------------------------------------------------------
+!----------------------------------------------------------------
+! end of loop over elements
+!----------------------------------------------------------------
 
-c in cdiag, chigh, clow is matrix (implicit part)
-c if explicit calculation, chigh=clow=0 and in cdiag is volume of node [m**3]
-c in cnv is mass of node [kg]
-c for explicit treatment, cnv/cdiag gives new concentration [kg/m**3]
+! in cdiag, chigh, clow is matrix (implicit part)
+! if explicit calculation, chigh=clow=0 and in cdiag is volume of node [m**3]
+! in cnv is mass of node [kg]
+! for explicit treatment, cnv/cdiag gives new concentration [kg/m**3]
 
-c----------------------------------------------------------------
-c accumulate contributions on each node
-c----------------------------------------------------------------
+!----------------------------------------------------------------
+! accumulate contributions on each node
+!----------------------------------------------------------------
 
 ! here we could make just one loop over nkn
 ! this would include this loop, the boundary conditions
@@ -1469,14 +1469,14 @@ c----------------------------------------------------------------
           call shympi_exchange_and_sum_3d_nodes(chigh)
 	end if
 
-c----------------------------------------------------------------
-c integrate boundary conditions
-c----------------------------------------------------------------
+!----------------------------------------------------------------
+! integrate boundary conditions
+!----------------------------------------------------------------
 
        ntot = nkn
        if( shympi_partition_on_nodes() ) ntot = nkn_unique
 
-c in case of negative flux (qflux<0) must check if node is OBC (BUG_2010_01)
+! in case of negative flux (qflux<0) must check if node is OBC (BUG_2010_01)
 
 	do k=1,ntot
 	  ilevel = ilhkv(k)
@@ -1503,9 +1503,9 @@ c in case of negative flux (qflux<0) must check if node is OBC (BUG_2010_01)
 	  end do
 	end do
 
-c----------------------------------------------------------------
-c compute concentration for each node (solve system)
-c----------------------------------------------------------------
+!----------------------------------------------------------------
+! compute concentration for each node (solve system)
+!----------------------------------------------------------------
 
 	if( ( aa .eq. 0. .and. ad .eq. 0. ) .or. ( nlv .eq. 1 ) ) then
 
@@ -1555,62 +1555,62 @@ c----------------------------------------------------------------
 	  write(iunit,*) cn(1,kdebug)
 	end if
 	
-c----------------------------------------------------------------
-c end of routine
-c----------------------------------------------------------------
+!----------------------------------------------------------------
+! end of routine
+!----------------------------------------------------------------
 
 	end
 
-c*****************************************************************
+!*****************************************************************
 
-        subroutine conzstab(
-     +			ddt
-     +			,robs,rtauv,wsink,wsinkv
-     +                  ,rkpar,difhv,difv
-     +			,difmol,azpar
-     +			,adpar,aapar
-     +                  ,sindex
-     +			,istot,isact
-     +			,nlvddi,nlev)
+        subroutine conzstab( &
+     &			ddt &
+     &			,robs,rtauv,wsink,wsinkv &
+     &                  ,rkpar,difhv,difv &
+     &			,difmol,azpar &
+     &			,adpar,aapar &
+     &                  ,sindex &
+     &			,istot,isact &
+     &			,nlvddi,nlev)
 
-c checks stability
-c
-c cn     new concentration
-c co     old concentration
-c caux   aux vector
-c clow	 lower diagonal of vertical system
-c chig	 upper diagonal of vertical system
-c ddt    time step
-c robs	 factor for nudging
-c rtauv	 variable relaxation coefficient
-c rkpar  horizontal turbulent diffusivity
-c difhv  horizontal turbulent diffusivity (variable between elements)
-c difv   vertical turbulent diffusivity
-c difmol vertical molecular diffusivity
-c azpar  time weighting parameter
-c adpar  time weighting parameter for vertical diffusion (ad)
-c aapar  time weighting parameter for vertical advection (aa)
-c sindex stability index
-c istot	 total inter time steps
-c isact	 actual inter time step
-c nlvddi	 dimension in z direction
-c nlv	 actual needed levels
-c
-c solution of purely diffusional part :
-c
-c dC/dt = a*laplace(C)    with    c(x,0+)=delta(x)
-c
-c C(x,t) =  (4*pi*a*t)**(-n/2) * exp( -|x|**2/(4*a*t) )
-c
-c for n-dimensions and
-c
-c C(x,t) =  1/sqrt(4*pi*a*t) * exp( -x**2/(4*a*t) )
-c
-c for 1 dimension
-c
-c the solution is normalized, i.e.  int(C(x,t)dx) = 1 over the whole area
-c
-c DPGGU -> introduced double precision to stabilize solution
+! checks stability
+!
+! cn     new concentration
+! co     old concentration
+! caux   aux vector
+! clow	 lower diagonal of vertical system
+! chig	 upper diagonal of vertical system
+! ddt    time step
+! robs	 factor for nudging
+! rtauv	 variable relaxation coefficient
+! rkpar  horizontal turbulent diffusivity
+! difhv  horizontal turbulent diffusivity (variable between elements)
+! difv   vertical turbulent diffusivity
+! difmol vertical molecular diffusivity
+! azpar  time weighting parameter
+! adpar  time weighting parameter for vertical diffusion (ad)
+! aapar  time weighting parameter for vertical advection (aa)
+! sindex stability index
+! istot	 total inter time steps
+! isact	 actual inter time step
+! nlvddi	 dimension in z direction
+! nlv	 actual needed levels
+!
+! solution of purely diffusional part :
+!
+! dC/dt = a*laplace(C)    with    c(x,0+)=delta(x)
+!
+! C(x,t) =  (4*pi*a*t)**(-n/2) * exp( -|x|**2/(4*a*t) )
+!
+! for n-dimensions and
+!
+! C(x,t) =  1/sqrt(4*pi*a*t) * exp( -x**2/(4*a*t) )
+!
+! for 1 dimension
+!
+! the solution is normalized, i.e.  int(C(x,t)dx) = 1 over the whole area
+!
+! DPGGU -> introduced double precision to stabilize solution
 
 	use mod_bound_geom
 	use mod_depth
@@ -1627,8 +1627,8 @@ c DPGGU -> introduced double precision to stabilize solution
 	use shympi
 
 	implicit none
-c
-c arguments
+!
+! arguments
 	integer nlvddi,nlev
         !real cn1(nlvddi,nkn),co1(nlvddi,nkn)		!DPGGU
         real difv(0:nlvddi,nkn)
@@ -1639,9 +1639,9 @@ c arguments
         real rtauv(nlvddi,nkn)
 	real wsinkv(0:nlvddi,nkn)
 	integer istot,isact
-c common
+! common
 	include 'mkonst.h'
-c local
+! local
 	logical bdebug,bdebug1
 	integer k,ie,ii,l,iii,id,ie_mpi
 	integer lstart
@@ -1669,9 +1669,9 @@ c local
 	double precision stabind,stabadv,stabdiff,stabvert,stabpoint
 	double precision voltot
 
-c------------------------------------------------------------
-c big arrays
-c------------------------------------------------------------
+!------------------------------------------------------------
+! big arrays
+!------------------------------------------------------------
 	double precision, allocatable :: cn(:,:)
 	double precision, allocatable :: co(:,:)
 	double precision, allocatable :: cdiag(:,:)
@@ -1680,18 +1680,18 @@ c------------------------------------------------------------
         real, allocatable :: cwrite(:,:)
         real, allocatable :: c2write(:)
         real, allocatable :: saux(:,:)
-c------------------------------------------------------------
-c end of big arrays
-c------------------------------------------------------------
+!------------------------------------------------------------
+! end of big arrays
+!------------------------------------------------------------
 
 	double precision cexpl
 	double precision cadv,cviadv,cvoadv,chdiff,cvdiff
 	double precision ciadv,coadv,chadv
 	double precision fwin(3),fwout(3),fd(3)
 	double precision fl(3)
-c local (new)
+! local (new)
 	double precision wl(0:nlvddi+1,3)
-c
+!
 	double precision hdv(0:nlvddi+1)
 	double precision haver(0:nlvddi+1)
 	double precision hnew(0:nlvddi+1,3)
@@ -1705,25 +1705,25 @@ c
 	integer, save :: iuinfo = 0
 	double precision, save :: da_out(4) = 0
 
-c functions
+! functions
 	logical is_zeta_bound,openmp_in_parallel,openmp_is_master
 	logical has_output_d,next_output_d
 	real getpar
 
         if(nlv.ne.nlev) stop 'error stop conzstab: nlv/=nlev'
 
-c-----------------------------------------------------------------
-c allocation
-c-----------------------------------------------------------------
+!-----------------------------------------------------------------
+! allocation
+!-----------------------------------------------------------------
 
 	allocate(cn(nlvddi,nkn),co(nlvddi,nkn),cdiag(nlvddi,nkn))
 	allocate(clow(nlvddi,nkn),chigh(nlvddi,nkn))
 	allocate(cwrite(nlvddi,nkn),saux(nlvddi,nkn))
 	allocate(c2write(nkn))
 
-c-----------------------------------------------------------------
-c global initialization
-c-----------------------------------------------------------------
+!-----------------------------------------------------------------
+! global initialization
+!-----------------------------------------------------------------
 
 	if( icall == 0 ) then
 	 if( openmp_is_master() ) then
@@ -1739,9 +1739,9 @@ c-----------------------------------------------------------------
 	 call getinfo(iuinfo)  !unit number of info file
 	end if
 
-c-----------------------------------------------------------------
-c initialization
-c-----------------------------------------------------------------
+!-----------------------------------------------------------------
+! initialization
+!-----------------------------------------------------------------
 
         bdebug1 = .true.
         bdebug1 = .false.
@@ -1770,9 +1770,9 @@ c-----------------------------------------------------------------
 	!  stop 'error stop conzstab: implicit vertical advection'
 	!end if
 
-c	-----------------------------------------------------------------
-c	 fractional time step
-c	-----------------------------------------------------------------
+!	-----------------------------------------------------------------
+!	 fractional time step
+!	-----------------------------------------------------------------
 
 	rstot=istot		!$$istot
 	rso=(isact-1)/rstot
@@ -1782,9 +1782,9 @@ c	-----------------------------------------------------------------
 
 	dt=ddt/rstot
 
-c	-----------------------------------------------------------------
-c	 initialize global arrays for accumulation of implicit terms
-c	-----------------------------------------------------------------
+!	-----------------------------------------------------------------
+!	 initialize global arrays for accumulation of implicit terms
+!	-----------------------------------------------------------------
 
 	do k=1,nkn
           do l=1,nlv
@@ -1800,10 +1800,10 @@ c	-----------------------------------------------------------------
           end do
 	end do
 
-c	-----------------------------------------------------------------
-c	these are aux arrays (bigger than needed) to avoid checking for
-c	what layer we are in -> we never get out of bounds
-c	-----------------------------------------------------------------
+!	-----------------------------------------------------------------
+!	these are aux arrays (bigger than needed) to avoid checking for
+!	what layer we are in -> we never get out of bounds
+!	-----------------------------------------------------------------
 
         do l=0,nlv+1
 	  hdv(l) = 0.		!layer thickness
@@ -1817,9 +1817,9 @@ c	-----------------------------------------------------------------
 	  end do
 	end do
 
-c-----------------------------------------------------------------
-c loop over elements
-c-----------------------------------------------------------------
+!-----------------------------------------------------------------
+! loop over elements
+!-----------------------------------------------------------------
 
         do ie_mpi=1,nel
 
@@ -1837,7 +1837,7 @@ c-----------------------------------------------------------------
         ilevel=ilhv(ie)
         jlevel=jlhv(ie)
 
-c set up vectors for use in assembling contributions
+! set up vectors for use in assembling contributions
 
         do l=jlevel,ilevel
 	  hdv(l) = hdeov(l,ie)		!use old time step -> FIXME
@@ -1858,22 +1858,22 @@ c set up vectors for use in assembling contributions
 	  present(l) = 0.
 	end do
 
-c	set vertical velocities in surface and bottom layer
-c
-c	we do not set wl(0,ii) because otherwise we loose concentration
-c	through surface
-c
-c	we set wl(ilevel,ii) to 0 because we are on the bottom
-c	and there should be no contribution from this element
-c	to the vertical velocity
+!	set vertical velocities in surface and bottom layer
+!
+!	we do not set wl(0,ii) because otherwise we loose concentration
+!	through surface
+!
+!	we set wl(ilevel,ii) to 0 because we are on the bottom
+!	and there should be no contribution from this element
+!	to the vertical velocity
 
 	do ii=1,3
 	  wl(ilevel,ii) = 0.
 	end do
 
-c-----------------------------------------------------------------
-c loop over levels
-c-----------------------------------------------------------------
+!-----------------------------------------------------------------
+! loop over levels
+!-----------------------------------------------------------------
 
         do l=jlevel,ilevel
 
@@ -1886,29 +1886,29 @@ c-----------------------------------------------------------------
 
 	  k=kn(ii)
 
-c	  --------------------------------------------------------
-c	  new weights for horizontal diffusion
-c	  --------------------------------------------------------
+!	  --------------------------------------------------------
+!	  new weights for horizontal diffusion
+!	  --------------------------------------------------------
 
           wdiff(ii) = wdifhv(ii,ii,ie)
 
-c	  --------------------------------------------------------
-c	  contributions from horizontal advection
-c	  --------------------------------------------------------
+!	  --------------------------------------------------------
+!	  contributions from horizontal advection
+!	  --------------------------------------------------------
 
 	  f(ii)=us*b(ii)+vs*c(ii)	!$$azpar - positive if flux into node
 
-c	  --------------------------------------------------------
-c	  contributions from vertical advection
-c	  --------------------------------------------------------
-c
-c	  in fw(ii) is explicit contribution
-c	  now using fwin and fwout
-c	  fw is positive if out of layer
-c
-c	  if we are in last layer, wl(l,ii) is zero
-c	  if we are in first layer, wl(l-1,ii) is zero (see above)
-c	  wl already contains sinking velocity
+!	  --------------------------------------------------------
+!	  contributions from vertical advection
+!	  --------------------------------------------------------
+!
+!	  in fw(ii) is explicit contribution
+!	  now using fwin and fwout
+!	  fw is positive if out of layer
+!
+!	  if we are in last layer, wl(l,ii) is zero
+!	  if we are in first layer, wl(l-1,ii) is zero (see above)
+!	  wl already contains sinking velocity
 
 	  fwin(ii) = 0.
 	  fwout(ii) = 0.
@@ -1927,16 +1927,16 @@ c	  wl already contains sinking velocity
 	    fwout(ii) = fwout(ii) - aat*w
 	  end if
 
-c	  --------------------------------------------------------
-c	  contributions from vertical diffusion
-c	  --------------------------------------------------------
-c
-c	  in fd(ii) is explicit contribution
-c	  the sign is for the term on the left side, therefore
-c	  fd(ii) must be subtracted from the right side
-c
-c	  maybe we should use real layer thickness, or even the
-c	  time dependent layer thickness
+!	  --------------------------------------------------------
+!	  contributions from vertical diffusion
+!	  --------------------------------------------------------
+!
+!	  in fd(ii) is explicit contribution
+!	  the sign is for the term on the left side, therefore
+!	  fd(ii) must be subtracted from the right side
+!
+!	  maybe we should use real layer thickness, or even the
+!	  time dependent layer thickness
 
 	  rvptop = difv(l-1,k) + difmol
 	  rvpbot = difv(l,k) + difmol
@@ -1947,14 +1947,14 @@ c	  time dependent layer thickness
 
 	end do
 
-c	--------------------------------------------------------
-c	sum explicit contributions
-c	--------------------------------------------------------
-c
-c	chigh contains explicit advection (horizontal and vertical)
-c	clow contains explicit horizontal diffusion
-c	cn contains flux due to explicit vertical diffusion
-c	co contains flux due to point sources and nudging
+!	--------------------------------------------------------
+!	sum explicit contributions
+!	--------------------------------------------------------
+!
+!	chigh contains explicit advection (horizontal and vertical)
+!	clow contains explicit horizontal diffusion
+!	cn contains flux due to explicit vertical diffusion
+!	co contains flux due to point sources and nudging
 
 	coadv = 0.
 	ciadv = 0.
@@ -1980,11 +1980,11 @@ c	co contains flux due to point sources and nudging
 
 	end do		! loop over l
 
-c	--------------------------------------------------------
-c	sum volumes
-c	--------------------------------------------------------
-c
-c	cdiag contains volume of finite node
+!	--------------------------------------------------------
+!	sum volumes
+!	--------------------------------------------------------
+!
+!	cdiag contains volume of finite node
 
         do l=jlevel,ilevel
 	  do ii=1,3
@@ -1996,15 +1996,15 @@ c	cdiag contains volume of finite node
 
 	end do		! loop over ie
 
-c-----------------------------------------------------------------
-c compute stability
-c
-c cdiag		volume of cell
-c chigh		flux due to advection
-c clow		flux due to horizontal diffusion
-c cn		flux due to vertical diffusion (explicit)
-c co		flux due to point sources and nudging
-c-----------------------------------------------------------------
+!-----------------------------------------------------------------
+! compute stability
+!
+! cdiag		volume of cell
+! chigh		flux due to advection
+! clow		flux due to horizontal diffusion
+! cn		flux due to vertical diffusion (explicit)
+! co		flux due to point sources and nudging
+!-----------------------------------------------------------------
 
         stabind = 0.		!total max stability index
         stabadv = 0.		!advective max stability index
@@ -2044,14 +2044,14 @@ c-----------------------------------------------------------------
 	raux = stabind			!FIXME - SHYFEM_FIXME
         stabind = shympi_max(raux)
 
-c-----------------------------------------------------------------
-c in stabind is stability index (advection and diffusion)
-c in cdiag is the volume of the node
-c in cwrite is the value of the stability index for each node
-c
-c istot  is saved and returned from subroutine (number of iterations)
-c sindex is saved and returned from subroutine (stability index)
-c-----------------------------------------------------------------
+!-----------------------------------------------------------------
+! in stabind is stability index (advection and diffusion)
+! in cdiag is the volume of the node
+! in cwrite is the value of the stability index for each node
+!
+! istot  is saved and returned from subroutine (number of iterations)
+! sindex is saved and returned from subroutine (stability index)
+!-----------------------------------------------------------------
 
 	rstol = getpar('rstol')
         istot = 1 + stabind / rstol
@@ -2068,38 +2068,38 @@ c-----------------------------------------------------------------
 	    write(6,*) 'writing STB at ',aline,' (more info in fort.197)'
 	    forall(k=1:nkn) c2write(k) = maxval(cwrite(:,k))
             call shy_write_scalar_record2d(id,dtime,75,c2write)
-	    write(197,1010) aline,kstab
-     +			,stabind,stabadv,stabdiff,stabvert,stabpoint
+	    write(197,1010) aline,kstab &
+     &			,stabind,stabadv,stabdiff,stabvert,stabpoint
 	  end if
 	  !call get_orig_timestep(dtorig)
 	  !call output_stability_node(dtorig,cwrite)
 	end if
 
-c-----------------------------------------------------------------
-c deallocation
-c-----------------------------------------------------------------
+!-----------------------------------------------------------------
+! deallocation
+!-----------------------------------------------------------------
 
 	deallocate(cn,co,cdiag)
 	deallocate(clow,chigh)
 	deallocate(cwrite,saux)
 
-c-----------------------------------------------------------------
-c end of routine
-c-----------------------------------------------------------------
+!-----------------------------------------------------------------
+! end of routine
+!-----------------------------------------------------------------
 
 	return
  1010	format(a20,i10,5f10.3)
 	end
 
-c*****************************************************************
-c*****************************************************************
-c*****************************************************************
-c*****************************************************************
-c*****************************************************************
+!*****************************************************************
+!*****************************************************************
+!*****************************************************************
+!*****************************************************************
+!*****************************************************************
 
 	subroutine massconc(mode,cn,nlvddi,mass)
 
-c computes total mass of conc
+! computes total mass of conc
 
 	use levels
 	use basin, only : nkn,nel,ngr,mbw
@@ -2107,12 +2107,12 @@ c computes total mass of conc
 
 	implicit none
 
-c arguments
+! arguments
 	integer mode
 	integer nlvddi
 	real cn(nlvddi,nkn)
 	real mass
-c local
+! local
 	integer k,l,lmax,lmin
         double precision vol
 	double precision sum,masstot
@@ -2141,11 +2141,11 @@ c local
 
 	end
 
-c**************************************************************
+!**************************************************************
 
         subroutine check_scal_bounds(cnv,cmin,cmax,eps,bstop)
 
-c checks if scalar is out of bounds
+! checks if scalar is out of bounds
 
 	use levels
 	use basin, only : nkn,nel,ngr,mbw
@@ -2189,11 +2189,11 @@ c checks if scalar is out of bounds
 
         end
 
-c*****************************************************************
+!*****************************************************************
 
 	subroutine assert_min_max_property(cnv,cov,sbconz,rmin,rmax,eps)
 
-c checks min/max property
+! checks min/max property
 
 	use mod_bound_geom
 	use mod_bound_dynamic
@@ -2227,9 +2227,9 @@ c checks min/max property
 
 	levdbg = nint(getpar('levdbg'))
 
-c---------------------------------------------------------------
-c vertical contribution (normally implicit -> whole column)
-c---------------------------------------------------------------
+!---------------------------------------------------------------
+! vertical contribution (normally implicit -> whole column)
+!---------------------------------------------------------------
 
 	do k=1,nkn
 	  lmax = ilhkv(k)
@@ -2246,9 +2246,9 @@ c---------------------------------------------------------------
 	  end do
 	end do
 
-c---------------------------------------------------------------
-c point sources
-c---------------------------------------------------------------
+!---------------------------------------------------------------
+! point sources
+!---------------------------------------------------------------
 
 	do k=1,nkn
 	  lmax = ilhkv(k)
@@ -2263,9 +2263,9 @@ c---------------------------------------------------------------
 	  end do
 	end do
 
-c---------------------------------------------------------------
-c horizontal contribution
-c---------------------------------------------------------------
+!---------------------------------------------------------------
+! horizontal contribution
+!---------------------------------------------------------------
 
 	do ie=1,nel
 	  lmax = ilhv(ie)
@@ -2286,9 +2286,9 @@ c---------------------------------------------------------------
 	  end do
 	end do
 
-c---------------------------------------------------------------
-c check with new concentration
-c---------------------------------------------------------------
+!---------------------------------------------------------------
+! check with new concentration
+!---------------------------------------------------------------
 
 	ierr = 0
 	dmax = 0.
@@ -2322,9 +2322,9 @@ c---------------------------------------------------------------
 	 end if
 	end do
 
-c---------------------------------------------------------------
-c check error condition
-c---------------------------------------------------------------
+!---------------------------------------------------------------
+! check error condition
+!---------------------------------------------------------------
 
 	if( ierr .gt. 0 ) then
 	  if( drmax .gt. eps .and. dmax .gt. eps ) then
@@ -2338,19 +2338,19 @@ c---------------------------------------------------------------
 	  end if
 	end if
 
-c---------------------------------------------------------------
-c end of routine
-c---------------------------------------------------------------
+!---------------------------------------------------------------
+! end of routine
+!---------------------------------------------------------------
 
 	end
 
-c*****************************************************************
-c*****************************************************************
-c*****************************************************************
+!*****************************************************************
+!*****************************************************************
+!*****************************************************************
 
         subroutine stb_histo(it,nlvddi,nkn,ilhkv,cwrite)
 
-c writes histogram info about stability index
+! writes histogram info about stability index
 
         implicit none
 
@@ -2389,7 +2389,7 @@ c writes histogram info about stability index
 
         end
 
-c*****************************************************************
+!*****************************************************************
 
 	subroutine limit_scalar(what,dtstep,cnv)
 
@@ -2521,7 +2521,7 @@ c*****************************************************************
 	write(6,*) 'tlimit: ',climit0,climit1
 	end
 
-c*****************************************************************
+!*****************************************************************
 
 	subroutine write_out_of_limit(iu,dtstep,what,gtlt,limit,mask,cnv)
 
@@ -2547,8 +2547,8 @@ c*****************************************************************
 	call get_act_timeline(aline)
 
 	dtime = dtime + dtstep
-	write(iu,*) 'time ',dtime,' (',aline,') '
-     +			,trim(what),trim(gtlt),limit
+	write(iu,*) 'time ',dtime,' (',aline,') ' &
+     &			,trim(what),trim(gtlt),limit
 	write(iu,*) '   internal node       layer        value'
 
 	do k=1,nkn
@@ -2561,5 +2561,5 @@ c*****************************************************************
 
 	end
 
-c*****************************************************************
+!*****************************************************************
 
