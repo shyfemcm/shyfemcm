@@ -1,9 +1,20 @@
-SHELL:= /bin/bash
-FC:=ifort
-INCLUDE:=../../fem3d/  # shypre requires param.h and simul.h that are still in fem3d/
-FLAGS:= -I. -I$(INCLUDE) -cpp
+FEMDIR:=../..
+include ../../Rules.make
 
-OBJ:= \
+EXEC = shypre
+
+INCLUDE:=-I.
+INCLUDE+= -I../../fem3d/   # shypre requires param.h and simul.h that are still in fem3d/
+
+#--------------------------------------------------------------------------------------
+
+#--------------------------------------------------------------------------------------
+
+LFLAGS:= 
+
+#--------------------------------------------------------------------------------------
+
+OBJ:=\
 	../../tools/pre/rosen.o \
 	../../src/basin.o \
 	../../src/fem_util.o \
@@ -25,38 +36,24 @@ OBJ:= \
 	../../src/util/apnfile.o \
 	../../src/version.o \
 	../../tools/pre/subclo.o \
-	../../fem3d/subsort.o \
-	../../tools/pre/shypre.o 
+	../../fem3d/subsort.o 
+%.o:%.f
+	${F77} $(FFLAGS) $(INCLUDE) -c $< -o $@
 
 %.o:%.f90
-	${FC} $(FLAGS) -c $< -o $@ 
+	${F77} $(FFLAGS) $(INCLUDE) -c $< -o $@
 
-shypre: $(OBJ)
-	$(FC) -o shypre $(OBJ)
+%.o:%.c
+	${CC} $(CFLAGS) $(INCLUDE) -c $< -o $@
+
+$(EXEC):$(MODULES) $(OBJ) $(LIBFS) $(EXEC).o
+	$(F77) $(FFLAGS) $(INCLUDE) $(LFLAGS) -o $@ $^ $(LIBGS) 
+	cp $(EXEC) ../../bin/	
 
 clean:
-	rm *.mod
-	rm ../../tools/pre/rosen.o 
-	rm ../../src/basin.o 
-	rm ../../src/fem_util.o 
-	rm ../../tools/pre/cuthill_mckee.o 
-	rm ../../src/geom_dynamic.o 
-	rm ../../tools/pre/grd.o 
-	rm ../../tools/pre/grdutil.o 
-	rm ../../src/defnames.o 
-	rm ../../fem3d/subdum.o 
-	rm ../../src/utility.o 
-	rm ../../src/para.o 
-	rm ../../src/nls.o 
-	rm ../../src/strings.o 
-	rm ../../src/sort_util.o 
-	rm ../../src/util/subnsa.o 
-	rm ../../src/def_para.o 
-	rm ../../src/convert.o 
-	rm ../../src/fil.o 
-	rm ../../src/util/apnfile.o 
-	rm ../../src/version.o 
-	rm ../../tools/pre/subclo.o 
-	rm ../../fem3d/subsort.o 
-	rm ../../tools/pre/shypre.o 
-	rm shypre 
+	-rm $(FEMDIR)/*/*.o 
+	-rm $(FEMDIR)/*/*/*.o
+	-rm $(FEMDIR)/*/*/*/*.o
+	-rm $(FEMDIR)/lib/mod/*
+	-rm $(EXEC)
+

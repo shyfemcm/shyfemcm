@@ -357,7 +357,7 @@
 
         INTERFACE shympi_max
         MODULE PROCEDURE   shympi_max_r &
-     &			  ,shympi_max_i
+     &			  ,shympi_max_i &
 !     +			  ,shympi_max_d &
      &			  ,shympi_max_0_r &
      &			  ,shympi_max_0_i
@@ -3090,7 +3090,7 @@
         read(unit=108, fmt="(i12,i12,i12,A12)") pnkn,pnel,pn_threads &
      &                  ,pwhat
 
-        if(pnkn .ne. nkndi .or. pnel .ne. neldi .or. pn_threads
+        if(pnkn .ne. nkndi .or. pnel .ne. neldi .or. pn_threads &
      &          .ne. n_threads .or. pwhat .ne. what) then
          if(my_id .eq. 0) then
           write(6,*)'basin file does not match'

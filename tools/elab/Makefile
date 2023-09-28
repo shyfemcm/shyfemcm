@@ -1,38 +1,65 @@
-SHELL:= /bin/bash
-FC:=mpif90
+FEMDIR:=../..
+include ../../Rules.make
+
+EXEC = shyelab
+
 INCLUDE:=-I.
 INCLUDE+= -I../../fem3d/   # shypre requires param.h simul.h and netcdf.inc that are still in fem3d/
 INCLUDE+= -I../../include/ # contains nosinf.h 
 
-FLAGS:= $(INCLUDE) -cpp 
+#--------------------------------------------------------------------------------------
 
-LFLAGS:= -L$(NETCDF_C_HOME) -lnetcdf -L$(NETCDF_FORTRAN_HOME) -lnetcdff
+ifneq ($(NETCDF),true)
+  NETCDF_OBJ= \
+	elab_nc_dummy.o
+else
+  LIB_NETCDF = -L$(NETCDFDIR)/lib -lnetcdf -L$(NETCDFFDIR)/lib -lnetcdff
+  NETCDF_OBJ=\
+	../../tools/elab/elab_nc.o \
+	../../tools/2nc/netcdf.o \
+	../../tools/2nc/netcdf_util.o 
+endif
+
+
+ifneq ($(PARALLEL_MPI),NONE)
+  LIB_MPI = -L$(MPI_DIR)/lib -lmpi
+  SHYMPI_OBJ=\
+	../../fem3d/mod_shympi_node.o \
+	../../fem3d/mod_shympi_node_internal.o \
+	../../fem3d/shympi_general.o 
+else
+  SHYMPI_OBJ=\
+	../../src/shympi_dummy.o \
+	../../fem3d/shympi_general.o 
+endif
+
+#--------------------------------------------------------------------------------------
+
+LFLAGS:= $(LIB_NETCDF) $(LIB_MPI)
+
+#--------------------------------------------------------------------------------------
 
 OBJ:=\
 	../../src/basin.o \
 	../../src/levels.o \
-	../../fem3d/mod_shympi_node.o \
-	../../fem3d/mod_shympi_node_internal.o \
-	../../fem3d/shympi_general.o \
+        $(SHYMPI_OBJ) \
 	../../src/depth.o \
 	../../src/depth_util.o \
-	../../tools/2nc/netcdf.o \
-	../../src/geom_dynamic.o \
 	../../src/evgeom.o \
+	../../tools/elab/elabtime.o \
+	../../tools/elab/elab_off.o \
+	../../src/geom_dynamic.o \
 	../../tools/pre/subclo.o \
 	../../src/strings.o \
 	../../tools/elab/elabutil.o \
-	../../tools/elab/shyelab_util.o \
-	../../src/ioshy.o \
-	../../fem3d/mod_offline.o \
-	../../tools/elab/elabtime.o \
-	../../tools/elab/elab_off.o \
-	../../tools/elab/shyelab_output.o \
-	../../tools/2nc/netcdf_util.o \
-	../../tools/elab/elab_nc.o \
 	../../tools/elab/elab_gis.o \
 	../../tools/elab/elab_expand.o \
 	../../tools/elab/elab_regular.o \
+	../../src/ioshy.o \
+	../../fem3d/mod_offline.o \
+	../../tools/elab/shyelab_output.o \
+	$(NETCDF_OBJ) \
+	../../tools/elab/shyelab_util.o \
 	../../fem3d/subround.o \
 	../../src/regular.o \
 	../../fem3d/line_util.o \
@@ -90,18 +117,24 @@ OBJ:=\
 	../../tools/elab/elab_resample.o \
 	../../tools/elab/elab_check.o \
 	../../tools/elab/tselab1.o \
-	../../tools/elab/femelab1.o \
-	../../tools/elab/shyelab.o 
+	../../tools/elab/femelab1.o 
+
+%.o:%.f
+	${F77} $(FFLAGS) $(INCLUDE) -c $< -o $@
 
 %.o:%.f90
-	${FC} $(FLAGS) -c $< -o $@ 
+	${F77} $(FFLAGS) $(INCLUDE) -c $< -o $@
 
-shyelab: $(OBJ)
-	$(FC) $(LFLAGS) -o shyelab $(OBJ)
+%.o:%.c
+	${CC} $(CFLAGS) $(INCLUDE) -c $< -o $@
+
+$(EXEC):$(MODULES) $(OBJ) $(LIBFS) $(EXEC).o
+	$(F77) $(FFLAGS) $(INCLUDE) $(LFLAGS) -o $@ $^ $(LIBGS) 
+	cp $(EXEC) ../../bin/	
 
 clean:
-	rm ../../*/*/*.o
-	rm ../../*/*.o
-	rm ../../*/*/*.mod
-	rm ../../*/*.mod
-	rm shyelab
+	-rm $(FEMDIR)/*/*.o 
+	-rm $(FEMDIR)/*/*/*.o
+	-rm $(FEMDIR)/*/*/*/*.o
+	-rm $(FEMDIR)/lib/mod/*
+	-rm $(EXEC)

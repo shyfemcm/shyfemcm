@@ -1,252 +1,172 @@
+FEMDIR:=../..
+include ../../Rules.make
 
-#------------------------------------------------------------------------
-#
-#    Copyright (C) 1985-2020  Georg Umgiesser
-#
-#    This file is part of SHYFEM.
-#
-#------------------------------------------------------------------------
+EXEC = shyplot
 
-#------------------------------------------------------------
+#--------------------------------------------------------------------------------------
 
-DIR	= femplot
+INCLUDE:=-I.
+INCLUDE+= -I../../fem3d/   # shypre requires param.h simul.h and netcdf.inc that are still in fem3d/
+INCLUDE+= -I../../include/ # contains nosinf.h 
+INCLUDE+= -I../../tools/postscript/ # contains psgraph.h
 
-#------------------------------------------------------------ just for default
-FEMDIR = ..
-FEMBIN = $(FEMDIR)/fembin
-DIRLIB = $(FEMDIR)/femlib
-F77    = g77
-FFLAGS =  -O
-LINKER = $(F77)
-#------------------------------------------------------------
+#--------------------------------------------------------------------------------------
 
-include ../Rules.make
 
-#------------------------------------------------------------
-
-LIBFEM  = fem
-LIBPOST = post
-
-NPOBJS  = supbas.o supiso.o supdep.o supano.o \
-		supcol.o col.o \
-		suptim.o supout.o suputi.o supsim.o \
-		supint.o supver.o suplag.o \
-		suplin.o suplin1.o supcust.o \
-		mod_plot2d.o mod_plot3d.o mod_hydro_plot.o \
-		plotutil.o $(MPI_OBJ)
-
-RGFOBJS = suprgf.o
-
-PSOBJS	= supsim.o $(NPOBJS)
-PSOBJS	= $(NPOBJS)
-
-LIBFS   = -L$(DIRLIB) -l$(LIBFEM)
-LIBIFS  = $(DIRLIB)/lib$(LIBFEM).a
-
-LIBPS   = -L$(DIRLIB) -l$(LIBPOST)
-LIBIPS  = $(DIRLIB)/lib$(LIBPOST).a
-
-#------------------------------------------------------------
-
-SPECIAL = Makefile VERSION COMMIT
-
-EXES    = shyplot
-EXESAUX = plotsim line_nodes
-EXESALL = $(EXES) $(EXESAUX)
-EXESLINKS = $(EXES)
-
-MAKEDEPEND = $(FEMBIN)/mkdp.pl
-
-#------------------------------------------------------------
-
-MPI_OBJ = supmpi.o
-ifeq ($(PARALLEL_MPI),NODE)
-  MPI_OBJ = 
-  FFLAGS += $(MPI_COMPILE_FLAGS)
-  LFLAGS += $(MPI_LINK_FLAGS)
+ifneq ($(NETCDF),true)
+  NETCDF_OBJ:= \
+	../../tools/elab/elab_nc_dummy.o 
+else
+  LIB_NETCDF = -L$(NETCDFDIR)/lib -lnetcdf -L$(NETCDFFDIR)/lib -lnetcdff
+  NETCDF_OBJ=\
+	../../tools/2nc/netcdf.o \
+	../../tools/2nc/netcdf_util.o \
+	../../tools/elab/elab_nc.o 
 endif
 
-#------------------------------------------------------------
+#--------------------------------------------------------------------------------------
 
-default: fem
+LFLAGS:= $(LIB_NETCDF) 
 
-fem: $(EXES) links
+#--------------------------------------------------------------------------------------
 
-all: $(EXESALL) links
+OBJ:=\
+	../../src/basin.o \
+	../../src/levels.o \
+	../../fem3d/mod_shympi_node.o \
+	../../fem3d/mod_shympi_node_internal.o \
+	../../fem3d/shympi_general.o \
+	../../src/depth.o \
+	../../src/depth_util.o \
+	../../src/geom_dynamic.o \
+	../../src/evgeom.o \
+	../../tools/pre/subclo.o \
+	../../src/strings.o \
+	../../tools/elab/elabutil.o \
+	../../tools/elab/shyelab_util.o \
+	../../src/ioshy.o \
+	../../fem3d/mod_offline.o \
+	../../tools/elab/elabtime.o \
+	../../tools/elab/elab_off.o \
+	../../tools/elab/shyelab_output.o \
+	$(NETCDF_OBJ) \
+	../../tools/elab/elab_gis.o \
+	../../tools/elab/elab_expand.o \
+	../../tools/elab/elab_regular.o \
+	../../fem3d/subround.o \
+	../../src/regular.o \
+	../../fem3d/line_util.o \
+	../../tools/pre/grd.o \
+	../../tools/elab/shyelab_area.o \
+	../../tools/elab/shyelab_average.o \
+	../../tools/elab/shyelab_nodes.o \
+	../../src/coordinates.o \
+	../../src/projection.o \
+	../../tools/elab/shyelab_proj.o \
+	../../src/chk_NaN.o \
+	../../src/vec_util.o \
+	../../src/shy_util.o \
+	../../fem3d/shyutil.o \
+	../../fem3d/subshyutil2.o \
+	../../fem3d/zadaptutil.o \
+	../../tools/elab/shyelab_extract.o \
+	../../src/iso8601.o \
+	../../fem3d/subdates.o \
+	../../tools/elab/shyelab1.o \
+	../../src/femfile.o \
+	../../src/tsfile.o \
+	../../src/ioflux.o \
+	../../src/ioext.o \
+	../../src/geometrical.o \
+	../../src/ioous.o \
+	../../src/fem_util.o \
+	../../tools/2nc/output_util.o \
+	../../tools/2nc/ousutil.o \
+	../../fem3d/submpi_buffer.o \
+	../../src/sort_util.o \
+	../../src/sigma.o \
+	../../src/ionos.o \
+	../../tools/2nc/nosutil.o \
+	../../src/dts.o \
+	../../fem3d/unitutils.o \
+	../../src/utility.o \
+	../../src/para.o \
+	../../src/nls.o \
+	../../src/util/subnsa.o \
+	../../src/def_para.o \
+	../../src/defnames.o \
+	../../src/fil.o \
+	../../src/util/apnfile.o \
+	../../src/convert.o \
+	../../src/version.o \
+	../../fem3d/sub2linear.o \
+	../../fem3d/lagrange_read.o \
+	../../tools/elab/lgrelab1.o \
+	../../tools/elab/extelab1.o \
+	../../tools/elab/flxelab1.o \
+	../../fem3d/subutil.o \
+	../../src/heat_util.o \
+	../../tools/elab/elab_resample.o \
+	../../tools/elab/elab_check.o \
+	../../tools/elab/tselab1.o \
+	../../tools/elab/femelab1.o \
+	../../tools/shyplot/mod_hydro_plot.o \
+	../../src/geom.o \
+	../../src/hydro_admin.o \
+	../../tools/postscript/general.o \
+	../../tools/postscript/gustd.o \
+	../../src/hydro_vel.o \
+	../../tools/shyplot/colortb.o \
+	../../tools/shyplot/supcust.o \
+	../../tools/postscript/colorutil.o \
+	../../tools/postscript/psgraph.o \
+	../../tools/shyplot/util/col.o \
+	../../tools/shyplot/util/supcol.o \
+	../../tools/shyplot/suptim.o \
+	../../src/intp.o \
+	../../src/time_util.o \
+	../../src/vert_intp.o \
+	../../tools/shyplot/util/suputi.o \
+	../../src/intp_fem_file.o \
+	../../tools/shyplot/supint.o \
+	../../tools/shyplot/supbas.o \
+	../../tools/postscript/psgraphf.o \
+	../../tools/shyplot/supano.o \
+	../../src/lnku.o \
+	../../src/links.o \
+	../../src/hydro_print.o \
+	../../src/topological.o \
+	../../fem3d/subcolor.o \
+	../../tools/shyplot/plotutil.o \
+	../../tools/pre/grdutil.o \
+	../../src/ioeos.o \
+	../../fem3d/submask.o \
+	../../tools/shyplot/supdep.o \
+	../../fem3d/mod_connect.o \
+	../../tools/shyplot/supver.o \
+	../../tools/shyplot/suplin1.o \
+	../../tools/shyplot/supout.o \
+	../../tools/shyplot/suplin.o \
+	../../tools/shyplot/supiso.o \
+	../../tools/shyplot/supsim.o \
+	../../tools/shyplot/suplag.o
 
-help:
-	@echo "help         this screen"
-	@echo "fem          compile standard programs"
-	@echo "plotcolb     compile example for available colors"
+%.o:%.f
+	${F77} $(FFLAGS) $(INCLUDE) -c $< -o $@
 
-shyplot:  shyplot.o $(PSOBJS) $(LIBIFS) $(LIBIPS)
-	$(LINKER) $(LFLAGS) $@.o $(PSOBJS) $(LIBFS) $(LIBPS) -o $@
+%.o:%.f90
+	${F77} $(FFLAGS) $(INCLUDE) -c $< -o $@
 
-plotsim:  plotsim.o $(PSOBJS) $(LIBIFS) $(LIBIPS)
-	$(LINKER) $(LFLAGS) $@.o $(PSOBJS) $(LIBFS) $(LIBPS) -o $@
+%.o:%.c
+	${CC} $(CFLAGS) $(INCLUDE) -c $< -o $@
 
-line_nodes: line_nodes.o $(LIBIFS)
-	$(LINKER) $(LFLAGS) $@.o $(LIBFS) -o $@
+$(EXEC):$(MODULES) $(OBJ) $(LIBFS) $(EXEC).o
+	$(F77) $(FFLAGS) $(INCLUDE) $(LFLAGS) -o $@ $^ $(LIBGS) 
+	cp $(EXEC) ../../bin/	
 
-links:
-	@$(FEMBIN)/symlink $(FEMBIN) $(EXESLINKS)
-
-#------------------------------------------------------------
-
-cleanall: clean cleanzip cleandiff
-
-clean: cleanobj cleanexe cleanvar
-
-cleanobj:
-	-rm -f *.o
-	-rm -f *.stb
-	-rm -f *.mod
-	-rm -f *_genmod.f90
-
-cleanexe:
-	-rm -f $(EXESALL)
-	-rm -f *.exp
-	-rm -f *.exe
-
-cleanvar:
-	-rm -f a.out core
-	-rm -f *.bak *.tmp
-	-rm -f ggg hhh
-	-rm -f mon.out nohup.out gmon.out
-	-rm -f fort.*
-	-rm -f *.0
-	-rm -f *.ps
-	-rm -f .memory
-	-rm -f *~
-	-rm -rf cvsdiff_tmp
-
-cleandiff:
-	-rm -f DIFFS
-
-cleanzip:
-	-rm -f $(DIR).zip
-	-rm -f save.zip
-
-cleanlinks:
-	@$(FEMBIN)/symlink -remove $(FEMBIN) $(EXESALL)
-
-#------------------------------------------------------------
-
-param:
-	
-diff:
-	@$(FEMBIN)/cvsdiff -norcs -ifdiff * > DIFFS
-	@echo "differences written to file DIFFS"
-
-depend:
-	@$(MAKEDEPEND) -moddir=$(MODDIR) *.f
-	
-list:
-	pwd; ls
-
-rcs:
-	ci -l *.f *.h *.c $(SPECIAL)
-
-save:   cleanall
-	@echo $(DIR)
-	-zip $(DIR) *.[fhc]
-	-zip $(DIR) $(SPECIAL)
-
-zip:	save
-
-strip:	$(EXES)
-	-strip $(EXES)
-
-#------------------------------------------------------------
-# Rules -----------------------------------------------------
-#------------------------------------------------------------
-
-.c.o:
-	$(CC)  -c $(CFLAGS) $<
-
-.f.o:
-	$(F77) -c $(FFLAGS) $<
-
-#------------------------------------------------------------
-
-# DO NOT DELETE THIS LINE -- make depend depends on it.
-
-../femlib/mod/color.mod: col.o
-../femlib/mod/mod_bash.mod: supbas.o
-../femlib/mod/mod_hydro_plot.mod: mod_hydro_plot.o
-../femlib/mod/mod_plot.mod: supint.o
-../femlib/mod/mod_plot2d.mod: mod_plot2d.o
-../femlib/mod/mod_plot3d.mod: mod_plot3d.o
-../femlib/mod/plot_fonts.mod: supcust.o
-../femlib/mod/plotutil.mod: plotutil.o
-../femlib/mod/timlim.mod: suptim.o
-line_nodes.o: ../femlib/mod/basin.mod ../femlib/mod/mod_geom.mod
-plotsim.o: ../femlib/mod/basin.mod ../femlib/mod/evgeom.mod \
-		../femlib/mod/levels.mod \
-		../femlib/mod/mod_depth.mod \
-		../femlib/mod/mod_geom.mod \
-		../femlib/mod/mod_hydro.mod \
-		../femlib/mod/mod_hydro_plot.mod \
-		../femlib/mod/mod_hydro_print.mod \
-		../femlib/mod/mod_hydro_vel.mod mkonst.h pkonst.h 
-plotutil.o: ../femlib/mod/basin.mod ../femlib/mod/clo.mod \
-		../femlib/mod/nls.mod ../femlib/mod/shyfile.mod 
-shyplot.o: ../femlib/mod/basin.mod ../femlib/mod/clo.mod \
-		../femlib/mod/elabtime.mod \
-		../femlib/mod/evgeom.mod ../femlib/mod/levels.mod \
-		../femlib/mod/mod_depth.mod \
-		../femlib/mod/mod_geom.mod \
-		../femlib/mod/mod_hydro.mod \
-		../femlib/mod/mod_hydro_plot.mod \
-		../femlib/mod/mod_hydro_print.mod \
-		../femlib/mod/mod_hydro_vel.mod \
-		../femlib/mod/plotutil.mod \
-		../femlib/mod/shyfile.mod ../femlib/mod/shympi.mod \
-		../femlib/mod/shyutil.mod 
-supano.o: ../femlib/mod/basin.mod ../femlib/mod/color.mod \
-		../femlib/mod/mod_bash.mod \
-		../femlib/mod/plot_fonts.mod legend.h simul.h 
-supbas.o: ../femlib/mod/basin.mod ../femlib/mod/mod_geom.mod \
-		../femlib/mod/mod_hydro_plot.mod \
-		../femlib/mod/plot_fonts.mod supout.h 
-supcol.o: ../femlib/mod/color.mod ../femlib/mod/para.mod
-supdep.o: ../femlib/mod/basin.mod ../femlib/mod/evgeom.mod \
-		../femlib/mod/levels.mod \
-		../femlib/mod/mod_depth.mod \
-		../femlib/mod/mod_hydro.mod \
-		../femlib/mod/mod_hydro_plot.mod 
-supint.o: ../femlib/mod/levels.mod ../femlib/mod/para.mod
-supiso.o: ../femlib/mod/basin.mod ../femlib/mod/color.mod \
-		../femlib/mod/mod_hydro_plot.mod 
-suplag.o: ../femlib/mod/basin.mod ../femlib/mod/color.mod \
-		../femlib/mod/mod_hydro_plot.mod \
-		../femlib/mod/plotutil.mod 
-suplin.o: ../femlib/mod/basin.mod ../femlib/mod/color.mod \
-		../femlib/mod/levels.mod \
-		../femlib/mod/mod_hydro_print.mod 
-suplin1.o: ../femlib/mod/basin.mod ../femlib/mod/evgeom.mod \
-		../femlib/mod/levels.mod \
-		../femlib/mod/mod_hydro.mod \
-		../femlib/mod/mod_hydro_plot.mod \
-		../femlib/mod/mod_hydro_print.mod \
-		../femlib/mod/mod_hydro_vel.mod 
-supout.o: ../femlib/mod/basin.mod ../femlib/mod/levels.mod \
-		../femlib/mod/mod_depth.mod \
-		../femlib/mod/mod_hydro.mod \
-		../femlib/mod/mod_hydro_plot.mod \
-		../femlib/mod/mod_hydro_print.mod \
-		../femlib/mod/mod_hydro_vel.mod simul.h supout.h 
-supsim.o: ../femlib/mod/basin.mod ../femlib/mod/levels.mod \
-		../femlib/mod/mod_color.mod \
-		../femlib/mod/mod_depth.mod \
-		../femlib/mod/mod_geom.mod \
-		../femlib/mod/mod_hydro.mod \
-		../femlib/mod/mod_hydro_plot.mod \
-		../femlib/mod/mod_hydro_vel.mod \
-		../femlib/mod/plotutil.mod 
-supver.o: ../femlib/mod/basin.mod ../femlib/mod/evgeom.mod \
-		../femlib/mod/levels.mod \
-		../femlib/mod/mod_hydro.mod \
-		../femlib/mod/mod_hydro_plot.mod \
-		../femlib/mod/mod_hydro_vel.mod 
-
+clean:
+	-rm $(FEMDIR)/*/*.o 
+	-rm $(FEMDIR)/*/*/*.o
+	-rm $(FEMDIR)/*/*/*/*.o
+	-rm $(FEMDIR)/lib/mod/*
+	-rm $(EXEC)

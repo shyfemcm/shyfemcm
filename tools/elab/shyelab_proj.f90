@@ -92,7 +92,7 @@
         write(6,*)'coordinates are not lat,lon'
         write(6,*)'  xmin,xmax: ',minval(xgv),maxval(xgv)
         write(6,*)'  ymin,ymax: ',minval(ygv),maxval(ygv)
-        stop' error stop shy_proj: not lat/lon'
+        stop 'error stop shy_proj: not lat/lon'
         end subroutine shy_proj
        
 !*****************************************************************
