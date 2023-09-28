@@ -25,7 +25,7 @@ ifneq ($(PARALLEL_MPI),NONE)
   LIB_MPI = -L$(MPI_DIR)/lib -lmpi
   SHYMPI_OBJ=\
 	../../src/mpi_node.o \
-	../../fem3d/mod_shympi_node_internal.o \
+	../../src/mpi_node_internal.o \
 	../../src/mpi_general.o 
 else
   SHYMPI_OBJ=\
