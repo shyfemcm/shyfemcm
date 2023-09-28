@@ -99,7 +99,7 @@
      &          nlv == nlv_hydro_plot .and. np == np_hydro_plot ) return
 
         if( nel > 0 .or. nkn > 0 .or. nlv > 0 .or. np > 0 ) then
-          if( nel == 0 .or. nkn == 0 . or. nlv == 0 .or. np == 0 ) then
+          if( nel == 0 .or. nkn == 0 .or. nlv == 0 .or. np == 0 ) then
             write(6,*) 'nel,nkn,nlv,np: ',nel,nkn,nlv,np
             stop 'error stop mod_hydro_plot_init: incompatible params'
           end if

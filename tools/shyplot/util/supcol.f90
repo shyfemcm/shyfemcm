@@ -1,7 +1,7 @@
 
 !--------------------------------------------------------------------------
 !
-!    Copyright (C) 2001,2008-2010  Georg Umgiesser
+!    Copyright (C) 2001,2008-2010,2012-2014,2016-2019  Georg Umgiesser
 !
 !    This file is part of SHYFEM.
 !
@@ -27,14 +27,28 @@
 ! 
 !  revision log :
 ! 
-!  26.10.2001    ggu     in colrd allow only one array to be given
-!  06.06.2008    ggu     new colortable introduced
-!  19.11.2008    ggu     new routine coltst()
-!  09.01.2009    ggu     some re-formatting
-!  09.01.2009    ggu     deleted setcol(), new make_single_isolines()
-!  26.01.2009    ggu     some more color tables
-!  23.02.2010    ggu     new set_default_color_table(), renamed qchsc()
-!  23.03.2010    ggu     make it easier to change between color tables
+!  26.10.2001	ggu	in colrd allow only one array to be given
+!  06.06.2008	ggu	new colortable introduced
+!  19.11.2008	ggu	new routine coltst()
+!  09.01.2009	ggu	some re-formatting
+!  09.01.2009	ggu	deleted setcol(), new make_single_isolines()
+!  26.01.2009	ggu	some more color tables
+!  23.02.2010	ggu	new set_default_color_table(), renamed qchsc()
+!  23.03.2010	ggu	make it easier to change between color tables
+!  29.09.2010	ggu	changed VERS_6_1_12
+!  01.06.2012	ggu	changed VERS_6_1_53
+!  12.09.2013	ggu	changed VERS_6_1_67
+!  18.07.2014	ggu	changed VERS_7_0_1
+!  05.12.2014	ggu	changed VERS_7_0_8
+!  17.06.2016	ggu	changed VERS_7_5_15
+!  30.09.2016	ggu	changed VERS_7_5_18
+!  11.07.2017	ggu	changed VERS_7_5_30
+!  07.12.2017	ggu	changed VERS_7_5_40
+!  24.01.2018	ggu	changed VERS_7_5_41
+!  19.04.2018	ggu	changed VERS_7_5_45
+!  25.10.2018	ggu	changed VERS_7_5_51
+!  18.12.2018	ggu	changed VERS_7_5_52
+!  21.05.2019	ggu	changed VERS_7_5_62
 ! 
 ! ************************************************************
 
@@ -397,6 +411,9 @@
 	ri = rindex
 	ri = min(ri,float(isoanz))
 	ri = max(ri,1.)
+
+	!write(6,*) 'ri: ',rindex,ri,nisord,isoanz,iusear
+	!write(6,*) 'fiso: ',fiso(1:isoanz)
 
 	if( nisord .gt. 0 .or. isoanz .eq. 1 ) then	!values read
 	  val = fiso(nint(ri))
