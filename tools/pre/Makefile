@@ -4,7 +4,7 @@ include ../../Rules.make
 EXEC = shypre
 
 INCLUDE:=-I.
-INCLUDE+= -I../../fem3d/   # shypre requires param.h and simul.h that are still in fem3d/
+INCLUDE+= -I../../include/   # shypre requires param.h and simul.h that are still in fem3d/
 
 #--------------------------------------------------------------------------------------
 
@@ -20,8 +20,8 @@ OBJ:=\
 	../../src/fem_util.o \
 	../../tools/pre/cuthill_mckee.o \
 	../../src/geom_dynamic.o \
-	../../tools/pre/grd.o \
-	../../tools/pre/grdutil.o \
+	../../src/grd.o \
+	../../src/grdutil.o \
 	../../src/defnames.o \
 	../../fem3d/subdum.o \
 	../../src/utility.o \
@@ -35,7 +35,7 @@ OBJ:=\
 	../../src/fil.o \
 	../../src/util/apnfile.o \
 	../../src/version.o \
-	../../tools/pre/subclo.o \
+	../../src/clo.o \
 	../../fem3d/subsort.o 
 %.o:%.f
 	${F77} $(FFLAGS) $(INCLUDE) -c $< -o $@
