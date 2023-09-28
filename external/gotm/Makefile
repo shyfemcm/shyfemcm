@@ -18,8 +18,11 @@
 #
 #--------------------   FILES   ----------------------------
 
+FEMDIR = ../..
+
 include ../../Rules.make
 
+LIBDIR = $(FEMDIR)/lib
 LIB	= $(LIBDIR)/libturbulence$(buildtype).a
 #--------------------   MODULE   ---------------------------
 
@@ -28,7 +31,7 @@ MODDIR = .
 #------------------------------------------------------------
 
 LIBGOTM  = gotm
-LIB = $(DIRLIB)/lib$(LIBGOTM).a
+LIB = $(LIBDIR)/lib$(LIBGOTM).a
 
 #------------------------------------------------------------
 

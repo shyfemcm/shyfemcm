@@ -3,6 +3,7 @@
 #
 #--------------------	FILES	---------------------
 
+FEMDIR = ..
 include ../Rules.make
 
 #--------------------	VARS	---------------------
@@ -12,10 +13,11 @@ EXEC = shyfem
 #----------------------	INCLUDE	----------------------
 
 INCLUDE = -I$(FEMDIR)/include -I$(PETSC_DIR)/include -I$(MPI_DIR)/include
+INCLUDE = -I$(FEMDIR)/include 
 
 #--------------------	GOTM	-----------------------
 ifeq ($(GOTM),true)
-  LIBF_GOTM      = $(DIRLIB)/libgotm.a
+  LIBF_GOTM      = $(LIBDIR)/libgotm.a
 endif
 
 #---------------------	PETSC	-----------------------
@@ -37,7 +39,7 @@ LIBFS= $(LIBF_GOTM)
 OBJ = convert.o utility.o para.o iso8601.o time_util.o levels.o fil.o basin.o system_matrix.o \
       geom.o lnku.o tvd.o mpi_dummy.o mpi_ghost.o shyparts_dummy.o mpi_basin.o mpi_custom.o mpi_buffer.o mpi_time.o \
 		mpi_general.o mpi_debug.o \
-      links.o hydro_admin.o evgeom.o round.o ../contrib/ecological/mercury/mercury_dummy.o regular.o openmp_admin.o bnd_geom.o \
+      links.o hydro_admin.o evgeom.o round.o mercury_dummy.o regular.o openmp_admin.o bnd_geom.o \
       meteo.o waves.o turbulence_util.o sinking.o nudging.o internal.o geom_dynamic.o depth.o \
       bnd_aux.o ts.o hydro_vel.o restart.o gotm_aux.o diff_aux.o bnd_dynamic.o area.o roughness.o diffusion.o hydro_baro.o \
       hydro_print.o dts.o femfile.o tsfile.o sigma.o intp.o defnames.o \
@@ -72,10 +74,11 @@ OBJ = convert.o utility.o para.o iso8601.o time_util.o levels.o fil.o basin.o sy
 
 $(EXEC):$(MODULES) $(OBJ) $(LIBFS) shyfem.o
 	$(F77) $(FFLAGS) $(INCLUDE) $(LFLAGS) -o $@ $^ $(LIBGS) 
-	cp $(EXEC) ../bin/	
-	ar r $(DIRLIB)/libshy.a $(OBJ)
+	cp $(EXEC) $(BINDIR)
+	ar r $(LIBDIR)/libshy.a $(OBJ)
 clean:
-	rm $(MODDIR)/*.mod *.o
-	rm $(EXEC)
-	rm $(DIRLIB)/libshy.a 
+	-rm -f $(MODDIR)/*.mod *.o
+	-rm -f $(EXEC)
+	-rm -f $(BINDIR)/$(EXEC)
+	-rm -f $(LIBDIR)/libshy.a 
 #----------------------------------------------------------------------------------------------------------------
