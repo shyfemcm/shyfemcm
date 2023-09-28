@@ -452,7 +452,7 @@
 		allocate(wl0aux(0:nlv,nkn))
 
 		call box_init		!reads boxfile and sets up things
-		call box_make_stats(nbox,iboxes,nblayers !sets up nblayers &
+		call box_make_stats(nbox,iboxes,nblayers     &   !sets up nblayers &
      &					,barea,bvol2d,bdepth)
 
                 if( nsect .gt. nscboxdim ) then

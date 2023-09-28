@@ -914,7 +914,7 @@
 	call getous(iunit,nvers,nkn,nel,nlv)
 	neli = nel
 
-        if( .not .bdata ) then  !do not read arrays
+        if( .not. bdata ) then  !do not read arrays
 	  neli = 0
           nel = 0
           nlv = 0

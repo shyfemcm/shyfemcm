@@ -250,7 +250,7 @@
 	end if 
 
 	if( bdebug ) then
-          call ice_debug2(i,k,Cl,Fsd_cloud,P_rate,qa,qs
+          call ice_debug2(i,k,Cl,Fsd_cloud,P_rate,qa,qs     &
      &			,Ta,Ua,Sw,deltat,hdm,iceth,0,nvars,vars)
 	end if
 	if ( bdebug ) then
@@ -288,7 +288,7 @@
 	  i = icall
 	  hdm = hm
 	  tdm = vars(1)
-          call ice_debug2(i,k,Cl,Fsd_cloud,P_rate,qa,qs
+          call ice_debug2(i,k,Cl,Fsd_cloud,P_rate,qa,qs     &
      &			,Ta,Ua,Sw,deltat,hdm,iceth,1,nvars,vars)
 	end if
 
@@ -415,8 +415,8 @@
 
         end
 
-        subroutine ice_debug2(i,k,Cl,Fsd_cloud,P_rate,qa,qs
-     &				,Ta,Ua,Sw,deltat,hdm,iceth
+        subroutine ice_debug2(i,k,Cl,Fsd_cloud,P_rate,qa,qs     &
+     &				,Ta,Ua,Sw,deltat,hdm,iceth     &
      &				,j,nvars,vars)
 
 	implicit none

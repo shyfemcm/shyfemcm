@@ -45,7 +45,7 @@
 
 !	This routine allows to reproduce the presence of a tidal turbine (vertical axis) in 2D simulations.
 !	In the first part, there is the process of identifying the grid elements belonging to the turbine.
-C	Then, by using flow local condition, there is the evaluation of Lift and Drag coefficient (CL and CD) in static or dynamic conditions 
+!	Then, by using flow local condition, there is the evaluation of Lift and Drag coefficient (CL and CD) in static or dynamic conditions 
 !	using the  SUBROUTINE FOR STATIC COEFFICIENT or SUBROUTINE FOR DYNAMIC COEFFICIENT respectively.
 ! 	The external text file called 'dati.txt' contains CL and CD tabulated as a function of the Reynolds number and the angle of attack.
 !	The 'dati.txt' file must contain number of rows, numers of columns, Reynolds number values, angle of attack values, CL and CD value in the mentioned order.	

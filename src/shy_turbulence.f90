@@ -496,12 +496,12 @@
      &			,hh,nn,ss,num,nuh,ken,dis,len)
 	    end if
 
- 	    call do_gotm_turb   (
-     &				  numOfLev,dt,depth
-     &				 ,u_taus,u_taub
-     &				 ,z0s,z0b,hh
-     &	                         ,nn,ss
-     &				 ,num,nuh,ken,dis,len
+ 	    call do_gotm_turb   (              &
+     &				  numOfLev,dt,depth     &
+     &				 ,u_taus,u_taub         &
+     &				 ,z0s,z0b,hh            &
+     &	                         ,nn,ss  &
+     &				 ,num,nuh,ken,dis,len   &
      &				 )
 
 	    if( bdeb .and. iudeb > 0 ) then
@@ -798,7 +798,7 @@
 
 !**************************************************************
 
-      subroutine Yevol(Nmx,dt,h,nuh,difmol,Qsour,Yvar,Yd,
+      subroutine Yevol(Nmx,dt,h,nuh,difmol,Qsour,Yvar,Yd,      &
      &                 Bcup,Yup,Bcdw,Ydw,Taur)
 
       implicit none
@@ -862,7 +862,7 @@
           cu(i)=-cnpar*c                                 !i+1,n+1
           au(i)=-cnpar*a                                 !i-1,n+1
           bu(i)=1-au(i)-cu(i)                            !i  ,n+1
-          du(i)=Y(i)+dt*Qsour(i)                         !i  ,n
+          du(i)=Y(i)+dt*Qsour(i)      &                  !i  ,n
      &          +(1-cnpar)*(a*Y(i-1)-(a+c)*Y(i)+c*Y(i+1))
          end do
 
@@ -873,8 +873,8 @@
           a      =2*dt*avh(Nmx-1)/(h(Nmx)+h(Nmx-1))/h(Nmx)
           au(Nmx)=-cnpar*a
           bu(Nmx)=1-au(Nmx)
-          du(Nmx)=Y(Nmx)
-     &            +dt*(Qsour(Nmx)-Yup/h(Nmx))   
+          du(Nmx)=Y(Nmx)                           &
+     &            +dt*(Qsour(Nmx)-Yup/h(Nmx))      &
      &            +(1-cnpar)*a*(Y(Nmx-1)-Y(Nmx))
          else if (Bcup.eq.2) then                    !BC Dirichlet
           au(Nmx)=0.
@@ -889,8 +889,8 @@
           c    =2*dt*avh(1)/(h(1)+h(2))/h(1)
           cu(1)=-cnpar*c 
           bu(1)=1-cu(1)
-          du(1)=Y(1)             
-     &          +dt*(Qsour(1)+Ydw/h(1))
+          du(1)=Y(1)                            & 
+     &          +dt*(Qsour(1)+Ydw/h(1))         &
      &          +(1-cnpar)*c*(Y(2)-Y(1))
          else if (Bcdw.eq.2) then                    !BC Dirichlet
           cu(1)=0.
@@ -1032,30 +1032,30 @@
 	    n2max = max(n2max,n2)
             buoyf2(l,k) = n2
 
-            du = 0.5*(
-     &       (cnpar*abs((uprv(l+1,k)-uprv(l,k))
-     &		*(uprv(l+1,k)-upro(l,k)))+
-     &       (1.-cnpar)*abs((upro(l+1,k)-upro(l,k))
-     &		*(upro(l+1,k)-uprv(l,k))))
-     &       /dh/h(l)
-     &      +(cnpar*abs((uprv(l+1,k)-uprv(l,k))
-     &		*(upro(l+1,k)-uprv(l,k)))+
-     &       (1.-cnpar)*abs((upro(l+1,k)-upro(l,k))
-     &		*(uprv(l+1,k)-upro(l,k))))
-     &       /dh/h(l+1)
+            du = 0.5*(                                   &
+     &       (cnpar*abs((uprv(l+1,k)-uprv(l,k))          &
+     &		*(uprv(l+1,k)-upro(l,k)))+                   &
+     &       (1.-cnpar)*abs((upro(l+1,k)-upro(l,k))      &
+     &		*(upro(l+1,k)-uprv(l,k))))                   &
+     &       /dh/h(l)                                    &
+     &      +(cnpar*abs((uprv(l+1,k)-uprv(l,k))          &
+     &		*(upro(l+1,k)-uprv(l,k)))+                   &
+     &       (1.-cnpar)*abs((upro(l+1,k)-upro(l,k))      &
+     &		*(uprv(l+1,k)-upro(l,k))))                   &
+     &       /dh/h(l+1)                                  &
      &                )
 
-            dv = 0.5*(
-     &       (cnpar*abs((vprv(l+1,k)-vprv(l,k))
-     &		*(vprv(l+1,k)-vpro(l,k)))+
-     &       (1.-cnpar)*abs((vpro(l+1,k)-vpro(l,k))
-     &		*(vpro(l+1,k)-vprv(l,k))))
-     &       /dh/h(l)
-     &      +(cnpar*abs((vprv(l+1,k)-vprv(l,k))
-     &		*(vpro(l+1,k)-vprv(l,k)))+
-     &       (1.-cnpar)*abs((vpro(l+1,k)-vpro(l,k))
-     &		*(vprv(l+1,k)-vpro(l,k))))
-     &       /dh/h(l+1)
+            dv = 0.5*(                                   &
+     &       (cnpar*abs((vprv(l+1,k)-vprv(l,k))          &
+     &		*(vprv(l+1,k)-vpro(l,k)))+                   &
+     &       (1.-cnpar)*abs((vpro(l+1,k)-vpro(l,k))      &
+     &		*(vpro(l+1,k)-vprv(l,k))))                   &
+     &       /dh/h(l)                                    &
+     &      +(cnpar*abs((vprv(l+1,k)-vprv(l,k))          &
+     &		*(vpro(l+1,k)-vprv(l,k)))+                   &
+     &       (1.-cnpar)*abs((vpro(l+1,k)-vpro(l,k))      &
+     &		*(vprv(l+1,k)-vpro(l,k))))                   &
+     &       /dh/h(l+1)                                  &
      &                )
 
             !m2 = du**2 + dv**2

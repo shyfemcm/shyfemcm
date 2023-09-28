@@ -1284,11 +1284,11 @@
 !
 !     internal variables
 !
-      integer i,iter,j,jobu,k,kase,kk,l,ll,lls,lm1,lp1,ls,lu,m,maxit,
-     *        mm,mm1,mp1,nct,nctp1,ncu,nrt,nrtp1
+      integer i,iter,j,jobu,k,kase,kk,l,ll,lls,lm1,lp1,ls,lu,m,maxit,     &
+     &        mm,mm1,mp1,nct,nctp1,ncu,nrt,nrtp1
       double precision ddot,t,r
-      double precision b,c,cs,el,emm1,f,g,dnrm2,scale,shift,sl,sm,sn,
-     *                 smm1,t1,test,ztest
+      double precision b,c,cs,el,emm1,f,g,dnrm2,scale,shift,sl,sm,sn,     &
+     &                 smm1,t1,test,ztest
       logical wantu,wantv
 !
       l = 0	!get rid of compiler warnings (ggu)
@@ -1589,8 +1589,8 @@
 !
 !           calculate the shift.
 !
-            scale = dmax1(dabs(s(m)),dabs(s(m-1)),dabs(e(m-1)),
-     *                    dabs(s(l)),dabs(e(l)))
+            scale = dmax1(dabs(s(m)),dabs(s(m-1)),dabs(e(m-1)),   &
+     &                    dabs(s(l)),dabs(e(l)))
             sm = s(m)/scale
             smm1 = s(m-1)/scale
             emm1 = e(m-1)/scale
@@ -1624,8 +1624,8 @@
                s(k+1) = -sn*e(k) + cs*s(k+1)
                g = sn*e(k+1)
                e(k+1) = cs*e(k+1)
-               if (wantu .and. k .lt. n)
-     *            call drot(n,u(1,k),1,u(1,k+1),1,cs,sn)
+               if (wantu .and. k .lt. n)                    &
+     &            call drot(n,u(1,k),1,u(1,k+1),1,cs,sn)
   560       continue
             e(m-1) = f
             iter = iter + 1
@@ -1650,10 +1650,10 @@
                t = s(l)
                s(l) = s(l+1)
                s(l+1) = t
-               if (wantv .and. l .lt. p)
-     *            call dswap(p,v(1,l),1,v(1,l+1),1)
-               if (wantu .and. l .lt. n)
-     *            call dswap(n,u(1,l),1,u(1,l+1),1)
+               if (wantv .and. l .lt. p)              &
+     &            call dswap(p,v(1,l),1,v(1,l+1),1)
+               if (wantu .and. l .lt. n)              &
+     &            call dswap(n,u(1,l),1,u(1,l+1),1)
                l = l + 1
             go to 590
   600       continue

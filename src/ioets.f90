@@ -898,7 +898,7 @@
 	call getets(iunit,nvers,nkn,nlv,nvar)
 
 	nkni = nkn
-	if( .not .bdata ) then	!do not read arrays
+	if( .not. bdata ) then	!do not read arrays
 	  nkn = 0
 	  nlv = 0
 	  nkni = 0

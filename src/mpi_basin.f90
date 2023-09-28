@@ -256,8 +256,8 @@
 !	-----------------------------------------------------
 !	write domain*.grd files
 !	-----------------------------------------------------
-
-	if( bmpi_debug ) call write_grd_domain
+   ! call commented in merge meeting in Trieste gmicaletto
+	!if( bmpi_debug ) call write_grd_domain
 
 !	-----------------------------------------------------
 !	end of routine

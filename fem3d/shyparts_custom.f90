@@ -53,29 +53,11 @@
 	npart = 0
 	epart = 0
 	write(6,*) 'running do_custom with np = ',nparts
-        call do_custom(nkn,nel,nen3v,nparts,npart)
+        !call do_custom(nkn,nel,nen3v,nparts,npart)
 
 	end
 
 !*******************************************************************
-
-	subroutine check_partition(npart,epart,ierr1,ierr2)
-
-	use basin
-
-	implicit none
-
-        integer npart(nkn)
-        integer epart(nel)
-	integer ierr1,ierr2
-
-	ierr1 = 0
-	ierr2 = 0
-
-	end
-
-!*******************************************************************
-
         subroutine do_custom(nkn,nel,nen3v,nparts,npart)
 
 ! shyparts custom routine

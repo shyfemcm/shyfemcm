@@ -235,7 +235,7 @@
 
 	do
 	  call flx_skip_record(iunit,nvers,atime,ivar)
-	  if( ivar == ivar 0 ) exit
+	  if( ivar == ivar0 ) exit
 	  nvar = nvar + 1
 	end do
 

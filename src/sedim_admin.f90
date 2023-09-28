@@ -1029,8 +1029,7 @@
 
         if( file .ne. ' ' ) then
            iunit = ifileo(0,file,'form','old')
-           write(6,*)'Sediment constants initialized from file: ',
-     $file(1:40)
+           write(6,*)'Sediment constants initialized from file: ', file(1:40)
            if( iunit .le. 0 ) then
             write(6,'(a,a)') 'filename: ',file(1:65)
             stop 'error stop readcon: Cannot open file'
@@ -1672,9 +1671,9 @@
 ! *******************************************************
 ! SUBROUTINE SED_LOOP
 
-        subroutine sed_loop(timedr,nscls,gs,hzoff,totbed,riph,ripl,
-     $	scn,eps,sedx,sedy,gdx,gdy,tao,gskm,percbd,bedn,
-     $  salref,temref,wsink,sload,sflx)
+        subroutine sed_loop(timedr,nscls,gs,hzoff,totbed,riph,ripl,  &
+     &	scn,eps,sedx,sedy,gdx,gdy,tao,gskm,percbd,bedn,             &
+     &  salref,temref,wsink,sload,sflx)
 
 	use mod_waves
 	use mod_layer_thickness
@@ -1818,10 +1817,10 @@
             scns(is) = scn(lmax,k,is)
           end do
 
-          call sedt05(k,D,DL,UZ,Z,CDIR,HT,MPER,PPER,WDIR,GD,riph(k),
-     $ripl(k),BETA,TEM,SAL,bedn(1,1,k),percbd(1,1,k),AULVA,TIMEDR,
-     $nscls,gs,UW,hzoff,scns,sedx(1,k),sedy(1,k),ws,gdx(k),gdy(k),
-     $lmax,eps,tao(k),Z0,sloads,sflx(1,k))
+          call sedt05(k,D,DL,UZ,Z,CDIR,HT,MPER,PPER,WDIR,GD,riph(k),    &
+     &   ripl(k),BETA,TEM,SAL,bedn(1,1,k),percbd(1,1,k),AULVA,TIMEDR,   &
+     &   nscls,gs,UW,hzoff,scns,sedx(1,k),sedy(1,k),ws,gdx(k),gdy(k),   &
+     &   lmax,eps,tao(k),Z0,sloads,sflx(1,k))
 
 	  z0b = real(Z0)
 	  !z0bk(k) = max(z0b,z0bmin)		!GGUZ0
@@ -1833,8 +1832,8 @@
 	  !end if
 
           do is = 1,nscls
-	    totbed(k) = totbed(k) + real(sqrt(sedx(is,k)**2 +
-     $			sedy(is,k)**2)* bedn(1,3,k))
+	    totbed(k) = totbed(k) + real(sqrt(sedx(is,k)**2 +       &
+     &			sedy(is,k)**2)* bedn(1,3,k))
 	    sload(k,is) = sloads(is) * area	!convert to kg/s
           end do
 
@@ -1855,9 +1854,9 @@
 ! ********************************************************************
 ! SUBROUTINE SEDT05
 
-        subroutine sedt05(k,D,DL,UZ,Z,CDIR,HT,MPER,PPER,WDIR,GD,RHINP,
-     $RLINP,BETA,TEM,SAL,BEDCHA,PERCS,AULVA,TIMEDR,nscls,gs,UW,hzoff,
-     $scns,sedx,sedy,ws,gdx,gdy,lmax,eps,taok,Z0,sloads,sflx)
+        subroutine sedt05(k,D,DL,UZ,Z,CDIR,HT,MPER,PPER,WDIR,GD,RHINP,     &
+     &   RLINP,BETA,TEM,SAL,BEDCHA,PERCS,AULVA,TIMEDR,nscls,gs,UW,hzoff,   &
+     &   scns,sedx,sedy,ws,gdx,gdy,lmax,eps,taok,Z0,sloads,sflx)
 
 	use mod_depth
 	use mod_layer_thickness
@@ -2095,10 +2094,10 @@
 !       Calculate bottom stresses for d50
 !       -------------------------------------------------------------------
 
-        CALL FRICFAC(COHES,D,UZ,Z,CDIR,UB,PER,WDIR,AB,GD,VISK,RHOW,
-     $RHOS,Z0C,PHIB,PHI100,DELTACW,USTCS,USTWS,USTCWSB,USTC,USTW,
-     $RPLCOEF,USTBF,USTCRB,USTUP,Z0,FCW,UA,U100,USTCWS,USTCW,RHINP,
-     $RLINP)
+        CALL FRICFAC(COHES,D,UZ,Z,CDIR,UB,PER,WDIR,AB,GD,VISK,RHOW,     &
+     &   RHOS,Z0C,PHIB,PHI100,DELTACW,USTCS,USTWS,USTCWSB,USTC,USTW,   &
+     &   RPLCOEF,USTBF,USTCRB,USTUP,Z0,FCW,UA,U100,USTCWS,USTCW,RHINP,  &
+     &   RLINP)
 
         !if(ustcw.le.0.d0) ustcw=dmax1(ustc,ustw)
         !if(ustcws.le.0.d0) ustcws=dmax1(ustcs,ustws)	!GGGUUU
@@ -2116,9 +2115,9 @@
 
 	dtype = 2
         do is = 1,nscls
-         call vmixcoef(dtype,lmax,hdknv(1,k),D,ws(is),ustc,ustcw,ub,
-     $		       deltacw,ht,per,dxx(is),difv(1,k),visv(1,k),
-     $		       eps(1,k,is))
+         call vmixcoef(dtype,lmax,hdknv(1,k),D,ws(is),ustc,ustcw,ub, &
+     &   		       deltacw,ht,per,dxx(is),difv(1,k),visv(1,k),    &
+     &   		       eps(1,k,is))
         end do
 
 !       -------------------------------------------------------------------
@@ -2133,8 +2132,8 @@
 
 	btype = 0.002d0
 	btype = 3
-	call activelayer(btype,D,Z0,USTCWS,USTCRB,GD,pcoes,PER,
-     $RHOW,RHOS,RHINP,RLINP,BEDCHA,TIMEDR,bmix)
+	call activelayer(btype,D,Z0,USTCWS,USTCRB,GD,pcoes,PER,  &
+     &   RHOW,RHOS,RHINP,RLINP,BEDCHA,TIMEDR,bmix)
 
 !       -------------------------------------------------------------------
 !       Set the surficial layer equal to the active layer (bmix)
@@ -2155,10 +2154,10 @@
 !         COHESIVE SEDIMENT
 !         -------------------------------------------------------------------
 
-          call cohse(BEDCHA,TIMEDR,USTCWS,USTCW,DL,RHOW,
-     $AULVA,UB,CDIR,Z0,nscls,scns,ws,usb,uss,ust,gs,dxx,
-     $Z0C,DELTACW,USTCS,USTWS,USTCWSB,USTC,USTW,RPLCOEF,USTBF,
-     $VISK,pers,RHOS,sloads,sflx)
+          call cohse(BEDCHA,TIMEDR,USTCWS,USTCW,DL,RHOW,             &
+     &   AULVA,UB,CDIR,Z0,nscls,scns,ws,usb,uss,ust,gs,dxx,          &
+     &   Z0C,DELTACW,USTCS,USTWS,USTCWSB,USTC,USTW,RPLCOEF,USTBF,    &
+     &   VISK,pers,RHOS,sloads,sflx)
 
         else
 
@@ -2166,10 +2165,10 @@
 !         NON-COHESIVE SEDIMENT
 !         -------------------------------------------------------------------
 
-          call nonco(BEDCHA,TIMEDR,D,DL,UA,UB,U100,HT,PER,CDIR,
-     $RHOW,USTCWS,USTCW,usb,uss,ust,Z0,BETA,RHOS,FCW,WDIR,
-     $Z0C,DELTACW,USTCS,USTWS,USTCWSB,USTC,USTW,RPLCOEF,USTBF,
-     $PHIB,PHI100,nscls,pers,gs,dxx,ws,scns,sedx,sedy,sloads,sflx)
+          call nonco(BEDCHA,TIMEDR,D,DL,UA,UB,U100,HT,PER,CDIR,         &
+      & RHOW,USTCWS,USTCW,usb,uss,ust,Z0,BETA,RHOS,FCW,WDIR,            &
+      & Z0C,DELTACW,USTCS,USTWS,USTCWSB,USTC,USTW,RPLCOEF,USTBF,        &
+      & PHIB,PHI100,nscls,pers,gs,dxx,ws,scns,sedx,sedy,sloads,sflx)
 
         end if
 
@@ -2184,8 +2183,8 @@
 !	 -4- Harris and Wiberg (2001)
 !        -5- Erosion depth as in SEDTRANS06
 
-        subroutine activelayer(btype,D,Z0,USTCWS,USTCRB,GD,pcoes,
-     $PER,RHOW,RHOS,RHEIGHT,RLENGTH,BEDCHA,TIMEDR,bmix)
+        subroutine activelayer(btype,D,Z0,USTCWS,USTCRB,GD,pcoes,    &
+      & PER,RHOW,RHOS,RHEIGHT,RLENGTH,BEDCHA,TIMEDR,bmix)
 
         use mod_sediment
         use mod_sediment_para
@@ -2330,16 +2329,16 @@
 !         -------------------------------------------------------------------
 
 	  blimit = .true.
-          if( tau0.GT.BEDCHA(1,2) .OR. ( tau0.EQ.BEDCHA(1,2) .AND. 
-     $	      tau0.GE.BEDCHA(2,2) ) ) THEN
+          if( tau0.GT.BEDCHA(1,2) .OR. ( tau0.EQ.BEDCHA(1,2) .AND.     &
+      & 	      tau0.GE.BEDCHA(2,2) ) ) THEN
 
             DO 10, I=2,nlbdim
              IF (BEDCHA(I,1).EQ.0.0d0) GOTO 20
 10          CONTINUE
 20          NBED=I-1
 
-            CALL EROS1(NBED,nlbdim,BEDCHA,tau0,MAXEMASS,EMASS,bmix,
-     $	      TIMEDR,TAUCE)
+            CALL EROS1(NBED,nlbdim,BEDCHA,tau0,MAXEMASS,EMASS,bmix,    &
+      & 	      TIMEDR,TAUCE)
 
 	  end if 
 
@@ -2371,10 +2370,10 @@
 ! This subroutine computes the sediment transport for cohesive
 ! sediments
 
-        subroutine cohse(BEDCHA,TIMEDR,USTCWS,USTCW,DL,RHOW,
-     $AULVA,UB,CDIR,Z0,nscls,scns,ws,usb,uss,ust,gs,dxx,
-     $Z0C,DELTACW,USTCS,USTWS,USTCWSB,USTC,USTW,RPLCOEF,USTBF,
-     $VISK,pers,RHOS,sloads,sflux)
+        subroutine cohse(BEDCHA,TIMEDR,USTCWS,USTCW,DL,RHOW,    &
+      & AULVA,UB,CDIR,Z0,nscls,scns,ws,usb,uss,ust,gs,dxx,    &
+      & Z0C,DELTACW,USTCS,USTWS,USTCWSB,USTC,USTW,RPLCOEF,USTBF,    &
+      & VISK,pers,RHOS,sloads,sflux)
 
         use mod_sediment
         use mod_sediment_para
@@ -2481,16 +2480,16 @@
 !                equal to surface critical erosion stress (BEDCHA(1,2)
 !       -------------------------------------------------------------------
 
-        if( TAU0.GT.BEDCHA(1,2) .OR. ( TAU0.EQ.BEDCHA(1,2).AND.
-     $      TAU0.GE.BEDCHA(2,2) ) ) THEN
+        if( TAU0.GT.BEDCHA(1,2) .OR. ( TAU0.EQ.BEDCHA(1,2).AND.    &
+      &       TAU0.GE.BEDCHA(2,2) ) ) THEN
 
           DO 10, I=2,nlbdim
            IF (BEDCHA(I,1).EQ.0.0d0) GOTO 20
 10        CONTINUE
 20        NBED=I-1
 
-          CALL EROS1(NBED,nlbdim,BEDCHA,TAU0,MAXEMASS,EMASS,ZS,TIMEDR,
-     $TAUCE)
+          CALL EROS1(NBED,nlbdim,BEDCHA,TAU0,MAXEMASS,EMASS,ZS,TIMEDR,    &
+      & TAUCE)
 
 !         -------------------------------------------------------------------
 !         Limit EROSION to sediment in the active layer
@@ -2518,8 +2517,8 @@
 !       -------------------------------------------------------------------
  
         if(TCONC1.gt.0.d0) then 
-          call depos(DL,TIMEDR,NBCC,CONC,TAU0,RHOW,TCONC1,TCONC2,VISK,
-     $DMASS)
+          call depos(DL,TIMEDR,NBCC,CONC,TAU0,RHOW,TCONC1,TCONC2,VISK,    &
+      & DMASS)
 	  
 	  !RHOA = 2.d0/(RHOMUD+BEDCHA(1,3))
 	  RHOA = RHOMUD
@@ -2534,9 +2533,9 @@
 !       -------------------------------------------------------------------
 
         do is = nbcc+1,nscls
-          CALL PROFL(DL,RHOW,ws(is),UB,CDIR,USTCWS,USTCW,usb(is),
-     $uss(is),ust(is),Z0C,DELTACW,USTCS,USTWS,USTCWSB,USTC,USTW,
-     $RPLCOEF,USTBF,Z0,gs(is),dxx(is),RHOS,QS,QSDIR,C0,C0A)
+          CALL PROFL(DL,RHOW,ws(is),UB,CDIR,USTCWS,USTCW,usb(is),    &
+      & uss(is),ust(is),Z0C,DELTACW,USTCS,USTWS,USTCWSB,USTC,USTW,    &
+      & RPLCOEF,USTBF,Z0,gs(is),dxx(is),RHOS,QS,QSDIR,C0,C0A)
 
           C0AI = C0A * pers(is)
   	  C0AI = MIN(C0AI,scns(is))
@@ -2556,10 +2555,10 @@
 ! This subroutine computes the sediment transport for non-cohesive
 ! sediments
 
-        subroutine nonco(BEDCHA,TIMEDR,D,DL,UA,UB,U100,HT,PER,CDIR,
-     $RHOW,USTCWS,USTCW,usb,uss,ust,Z0,BETA,RHOS,FCW,WDIR,
-     $Z0C,DELTACW,USTCS,USTWS,USTCWSB,USTC,USTW,RPLCOEF,USTBF,
-     $PHIB,PHI100,nscls,pers,gs,dxx,ws,scns,sedx,sedy,sloads,sflux)
+        subroutine nonco(BEDCHA,TIMEDR,D,DL,UA,UB,U100,HT,PER,CDIR,    &
+      & RHOW,USTCWS,USTCW,usb,uss,ust,Z0,BETA,RHOS,FCW,WDIR,    &
+      & Z0C,DELTACW,USTCS,USTWS,USTCWSB,USTC,USTW,RPLCOEF,USTBF,    &
+      & PHIB,PHI100,nscls,pers,gs,dxx,ws,scns,sedx,sedy,sloads,sflux)
 
         use mod_sediment
         use mod_sediment_para
@@ -2653,16 +2652,16 @@
 !        -------------------------------------------------------------------
 !        Calculate the duration of the different sediment transport phases
 !        -------------------------------------------------------------------
-         CALL TIMING(RHOW,UA,UB,PER,U100,usb(is),uss(is),USTCWS,
-     $PHIB,USTCS,USTWS,RPLCOEF,TB1,TB2,TS1,PERBED,PERSUSP)
+         CALL TIMING(RHOW,UA,UB,PER,U100,usb(is),uss(is),USTCWS,    &
+      & PHIB,USTCS,USTWS,RPLCOEF,TB1,TB2,TS1,PERBED,PERSUSP)
 
 !        -------------------------------------------------------------------
 !        Calculate sediment transport rate and direction
 !        -------------------------------------------------------------------
-         CALL TRANSPO(D,UA,UB,U100,PER,gs(is),BETA,RHOS,RHOW,
-     $usb(is),ust(is),PHIB,PHI100,USTCS,USTWS,USTCWSB,RPLCOEF,TB1,
-     $TB2,TS1,PERBED,PERSUSP,USTBF,FCW,USTCWS,HT,CDIR,WDIR,IOPT,
-     $dxx(is),ws(is),SED,SEDM,SEDDIR)
+         CALL TRANSPO(D,UA,UB,U100,PER,gs(is),BETA,RHOS,RHOW,    &
+      & usb(is),ust(is),PHIB,PHI100,USTCS,USTWS,USTCWSB,RPLCOEF,TB1,    &
+      & TB2,TS1,PERBED,PERSUSP,USTBF,FCW,USTCWS,HT,CDIR,WDIR,IOPT,    &
+      & dxx(is),ws(is),SED,SEDM,SEDDIR)
 
          if(SEDDIR.le.90.d0.and.SEDDIR.ge.0.d0)   SEDDIR=90.d0-SEDDIR
          if(SEDDIR.le.360.d0.and.SEDDIR.ge.90.d0) SEDDIR=450.d0-SEDDIR
@@ -2688,9 +2687,9 @@
 !        Calculate velocity profile, suspended sediment concentration profile
 !        -------------------------------------------------------------------
 
-         CALL PROFL(DL,RHOW,ws(is),UB,CDIR,USTCWS,USTCW,usb(is),
-     $uss(is),ust(is),Z0C,DELTACW,USTCS,USTWS,USTCWSB,USTC,USTW,
-     $RPLCOEF,USTBF,Z0,gs(is),dxx(is),RHOS,QS,QSDIR,C0,C0A)
+         CALL PROFL(DL,RHOW,ws(is),UB,CDIR,USTCWS,USTCW,usb(is),    &
+      & uss(is),ust(is),Z0C,DELTACW,USTCS,USTWS,USTCWSB,USTC,USTW,    &
+      & RPLCOEF,USTBF,Z0,gs(is),dxx(is),RHOS,QS,QSDIR,C0,C0A)
 
          C0AI = C0A * pers(is)
 
@@ -3006,8 +3005,8 @@
           return
         end if
 
-        alph = (cos(phi)*sin(ksl) + sqrt((cos(ksl))**2.*(tan(beta))**2.
-     $ - (sin(phi))**2.*(sin(ksl))**2.)) / tan(beta)
+        alph = (cos(phi)*sin(ksl) + sqrt((cos(ksl))**2.*(tan(beta))**2.    &
+      &  - (sin(phi))**2.*(sin(ksl))**2.)) / tan(beta)
 
         alph = dmax1(alph,0.2d0)
 
@@ -3018,8 +3017,8 @@
 ! This subroutine manages the bed composition in function of what is eroded
 ! or deposited
 
-        subroutine bedman(gs,nscls,timedr,bflux,sflux,bh,gskm,bdh,
-     $	percbd,bedn)
+        subroutine bedman(gs,nscls,timedr,bflux,sflux,bh,gskm,bdh,    &
+      & 	percbd,bedn)
 
 	use basin, only : nkn
         use mod_sediment
@@ -3218,14 +3217,14 @@
 !         -------------------------------------------------------------------
 
           do is = 1,nscls
-            PERCS(2,is) = (PERCS(1,is)*(BEDCHA(2,1)-bmix) + 
-     $PERCS(2,is)*(BEDCHA(3,1)-BEDCHA(2,1)))/(BEDCHA(3,1)-bmix)
+            PERCS(2,is) = (PERCS(1,is)*(BEDCHA(2,1)-bmix) +     &
+      & PERCS(2,is)*(BEDCHA(3,1)-BEDCHA(2,1)))/(BEDCHA(3,1)-bmix)
           end do
 
-          BEDCHA(2,3) = lin(d0,BEDCHA(2,1),BEDCHA(1,3),
-     $BEDCHA(2,3),bmix)
-          BEDCHA(2,2) = lin(d0,BEDCHA(2,1),BEDCHA(1,2),
-     $BEDCHA(2,2),bmix)
+          BEDCHA(2,3) = lin(d0,BEDCHA(2,1),BEDCHA(1,3),    &
+      & BEDCHA(2,3),bmix)
+          BEDCHA(2,2) = lin(d0,BEDCHA(2,1),BEDCHA(1,2),    &
+      & BEDCHA(2,2),bmix)
           BEDCHA(2,1) = bmix
 
 	else
@@ -3242,8 +3241,8 @@
 125       nlbd = nlbd - 1
 
           do is = 1,nscls			!update PERCS in layer 1
-            PERCS(1,is) = (PERCS(2,is)*(BEDCHA(3,1)-BEDCHA(2,1)) +
-     $PERCS(1,is)*BEDCHA(2,1))/BEDCHA(3,1)
+            PERCS(1,is) = (PERCS(2,is)*(BEDCHA(3,1)-BEDCHA(2,1)) +    &
+      & PERCS(1,is)*BEDCHA(2,1))/BEDCHA(3,1)
           end do
 
           do ib = 2,nlbd			!shift one layer up
@@ -3264,14 +3263,14 @@
 !       -------------------------------------------------------------------
 
         do is = 1,nscls
-          PERCS(1,is) = (PERCS(1,is)*BEDCHA(2,1) + PERCS(2,is)*
-     $(bmix-BEDCHA(2,1)))/bmix
+          PERCS(1,is) = (PERCS(1,is)*BEDCHA(2,1) + PERCS(2,is)*    &
+      & (bmix-BEDCHA(2,1)))/bmix
         end do
 
-        BEDCHA(2,3) = lin(BEDCHA(2,1),BEDCHA(3,1),BEDCHA(2,3),
-     $BEDCHA(3,3),bmix)
-        BEDCHA(2,2) = lin(BEDCHA(2,1),BEDCHA(3,1),BEDCHA(2,2),
-     $BEDCHA(3,2),bmix)
+        BEDCHA(2,3) = lin(BEDCHA(2,1),BEDCHA(3,1),BEDCHA(2,3),    &
+      & BEDCHA(3,3),bmix)
+        BEDCHA(2,2) = lin(BEDCHA(2,1),BEDCHA(3,1),BEDCHA(2,2),    &
+      & BEDCHA(3,2),bmix)
         BEDCHA(2,1) = bmix
 
 	end if
@@ -3300,8 +3299,8 @@
           do is = 1,nscls
             PERCS(nlbd+1,is) = PERCS(nlbd,is)
           end do
-          BEDCHA(nlbd+1,1) = BEDCHA(nlbd,1) + (BEDCHA(nlbd,1) - 
-     $BEDCHA(nlbd-1,1))
+          BEDCHA(nlbd+1,1) = BEDCHA(nlbd,1) + (BEDCHA(nlbd,1) -     &
+      & BEDCHA(nlbd-1,1))
           BEDCHA(nlbd+1,2) = BEDCHA(nlbd,2)
           BEDCHA(nlbd+1,3) = BEDCHA(nlbd,3)
           nlbd = nlbd + 1
@@ -3386,8 +3385,8 @@
           nlbd = nlbd - 1
 
           do is = 1,nscls			!update PERCS in layer 1
-            PERCS(2,is) = (PERCS(2,is)*(BEDCHA(3,1)-BEDCHA(2,1)) +
-     $PERCS(3,is)*(BEDCHA(4,1)-BEDCHA(3,1)))/(BEDCHA(4,1)-BEDCHA(2,1))
+            PERCS(2,is) = (PERCS(2,is)*(BEDCHA(3,1)-BEDCHA(2,1)) +    &
+      & PERCS(3,is)*(BEDCHA(4,1)-BEDCHA(3,1)))/(BEDCHA(4,1)-BEDCHA(2,1))
           end do
 
           do ib = 3,nlbd			!shift one layer up
@@ -3425,8 +3424,8 @@
           do is = 1,nscls
             PERCS(nlbd+1,is) = PERCS(nlbd,is)
           end do
-          BEDCHA(nlbd+1,1) = BEDCHA(nlbd,1) + (BEDCHA(nlbd,1) - 
-     $BEDCHA(nlbd-1,1))
+          BEDCHA(nlbd+1,1) = BEDCHA(nlbd,1) + (BEDCHA(nlbd,1) -     &
+      & BEDCHA(nlbd-1,1))
           BEDCHA(nlbd+1,2) = BEDCHA(nlbd,2)
           BEDCHA(nlbd+1,3) = BEDCHA(nlbd,3)
           nlbd = nlbd + 1
@@ -3582,8 +3581,8 @@
 
 ! ********************************************************************
 
-        subroutine depbed(iss,nlbd,nscls,BEDCHA,PERCS,flux,bnet,btot,
-     $			  gss)
+        subroutine depbed(iss,nlbd,nscls,BEDCHA,PERCS,flux,bnet,btot,    &
+      & 			  gss)
 
         use mod_sediment
         use mod_sediment_para
@@ -3714,10 +3713,10 @@
           end do
           BEDCHA(2,1) = bres
 	  BEDCHA(3,1) = BEDCHA(4,1) - blimit
-          BEDCHA(2,2) = lin(d0,BEDCHA(3,1),BEDCHA(1,2),BEDCHA(3,2),
-     $			BEDCHA(2,1))
-          BEDCHA(2,3) = lin(d0,BEDCHA(3,1),BEDCHA(1,3),BEDCHA(3,3),
-     $			BEDCHA(2,1))
+          BEDCHA(2,2) = lin(d0,BEDCHA(3,1),BEDCHA(1,2),BEDCHA(3,2),    &
+      & 			BEDCHA(2,1))
+          BEDCHA(2,3) = lin(d0,BEDCHA(3,1),BEDCHA(1,3),BEDCHA(3,3),    &
+      & 			BEDCHA(2,1))
 
           nlbd = min(nlbdim-2,nlbd)
 
@@ -3751,8 +3750,7 @@
 
 ! ********************************************************************
        
-        subroutine erobed(iss,nlbd,nscls,BEDCHA,PERCS,flux,bnet,btot,
-     $bpre)
+        subroutine erobed(iss,nlbd,nscls,BEDCHA,PERCS,flux,bnet,btot,bpre)
 
         use mod_sediment
         use mod_sediment_para
@@ -3798,7 +3796,7 @@
           flux = -bpre
 	  bnet = d0
           btot = BEDCHA(2,1) + flux
-	  if (btot. eq. d0 .or. PERCS(1,iss) .gt. 0.999d0) then
+	  if (btot .eq. d0 .or. PERCS(1,iss) .gt. 0.999d0) then
 	    call dellayer(nlbd,nscls,BEDCHA,PERCS)
 	    return
 	  endif
@@ -3853,8 +3851,7 @@
           do is = 1,nscls
             PERCS(nlbd+1,is) = PERCS(nlbd,is)
           end do
-          BEDCHA(nlbd+1,1) = BEDCHA(nlbd,1) + (BEDCHA(nlbd,1) -
-     $BEDCHA(nlbd-1,1))
+          BEDCHA(nlbd+1,1) = BEDCHA(nlbd,1) + (BEDCHA(nlbd,1) - BEDCHA(nlbd-1,1))
           BEDCHA(nlbd+1,2) = BEDCHA(nlbd,2)
           BEDCHA(nlbd+1,3) = BEDCHA(nlbd,3)
         end if
@@ -4411,10 +4408,10 @@
 !           epss(:,:)   = eps(:,:,is)
 !           wsinks(:,:) = wsink(:,:,is)
 ! 	  where( scal < 0. ) scal = 0.			!GGUZ0
-!          call scal_adv_fact(what,is,fact
-!      +                      ,scal,idsedi
-!      +                      ,sedkpar,fact,wsinks,fact,load
-!      +                      ,difhv,epss,difmol)
+!          call scal_adv_fact(what,is,fact                     &
+!      &                      ,scal,idsedi                     &
+!      &                      ,sedkpar,fact,wsinks,fact,load   &
+!      &                      ,difhv,epss,difmol)
 
 !          call sload3d(load,nkn,nlvdi,ilhkv,lload)
 !          scn(:,:,is) = scal(:,:)

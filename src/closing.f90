@@ -2,7 +2,7 @@
 !--------------------------------------------------------------------------
 !
 !    Copyright (C) 1988,1990,1992,1998-1999,2001,2003-2004  Georg Umgiesser
-!    Copyright (C) 2008,2010,2014-2020  Georg Umgiesser
+!    Copyright (C) 2008,2019-2020  Georg Umgiesser
 !
 !    This file is part of SHYFEM.
 !
@@ -36,13 +36,6 @@
 ! subroutine prclos		prints info on closing sections
 ! subroutine tsclos		tests closing sections
 !
-! subroutine insvcl(name,lip,ltot,isc,iweich,ival)
-!			inserts vector in data structure of closing sections
-! subroutine convk(lip,isc,bstop)
-!			converts node to internal number
-!
-! function volag(mode,z)        determination of water volume in whole basin
-!
 ! revision log :
 !
 ! 26.07.1988	ggu	(introduction of ic)
@@ -66,29 +59,393 @@
 ! 09.12.2003	ggu	fix for icl=10 (FIX)
 ! 10.03.2004	ggu	RQVDT - value in rqv is now discharge [m**3/s]
 ! 11.10.2008	ggu	bug in call to nrdnxt (real instead of double p.)
-! 23.03.2010	ggu	changed v6.1.1
-! 05.12.2014	ggu	changed VERS_7_0_8
-! 12.12.2014	ggu	changed VERS_7_0_9
-! 19.12.2014	ggu	changed VERS_7_0_10
-! 23.12.2014	ggu	changed VERS_7_0_11
-! 19.01.2015	ggu	changed VERS_7_1_3
-! 05.05.2015	ggu	changed VERS_7_1_10
-! 17.07.2015	ggu	changed VERS_7_1_80
-! 20.07.2015	ggu	changed VERS_7_1_81
-! 25.05.2016	ggu	changed VERS_7_5_10
-! 14.11.2017	ggu	changed VERS_7_5_36
-! 05.12.2017	ggu	changed VERS_7_5_39
-! 18.12.2018	ggu	changed VERS_7_5_52
-! 16.02.2019	ggu	changed VERS_7_5_60
-! 13.03.2019	ggu	changed VERS_7_5_61
-! 06.11.2019	ggu	setimp adapted
-! 16.02.2020	ggu	femtime eliminated
+! 14.03.2019	ggu	re-written for new framework
+! 12.04.2019	ggu	first finished draft
+! 17.04.2019	ggu	tested on old venlag62
+! 21.05.2019	ggu	changed VERS_7_5_62
+! 05.03.2020	ggu	output streamlined, set rfmax here
+! 26.03.2020	ggu	set vmax here
+! 09.04.2020	ggu	increase non computing elements with ndist
+! 06.12.2020	ggu	deleted close.h
+! 18.05.2023	ccf	include reading closure from file
 !
 !************************************************************************
 
-	subroutine sp136(ic)
+!==================================================================
+        module close
+!==================================================================
 
-! opens and closes sections & inlets
+        implicit none
+
+        type, private :: entry
+
+          integer :: isc
+          integer, allocatable :: kboc(:)
+          double precision, allocatable :: itb(:)
+          integer :: kref
+          integer :: kdir
+          integer :: kout
+          integer :: kin
+          integer :: ibndz
+          integer :: ibnd
+          double precision :: dsoft
+          double precision :: dwait
+          real :: zdate
+          real :: vdate
+          real :: zdiff
+          character*80 :: cfile         !closure file name
+          integer :: idfile             !closure file id
+
+          integer :: ioper		!operation mode (see below is_*)
+          integer :: iact		!where are we in itb
+          integer :: imode
+          real :: scal
+          real :: geyer
+          double precision :: dstart
+
+          real, allocatable :: hdep(:)
+          integer, allocatable :: ieboc(:)
+
+          real, allocatable :: distfact(:)
+
+        end type entry
+
+	integer, save :: iclose = 0	!closing enabled?
+
+	integer, save :: nclose = 0	!total number of closing sects
+	integer, save :: nb13 = 0	!unit for output
+
+	integer, save :: ndist = 0	!distance for not computing terms
+
+        integer, save, private :: ndim = 0
+        type(entry), save, allocatable :: pentry(:)
+
+	integer, parameter :: is_closing = -1
+	integer, parameter :: is_closed_waiting = -2
+	integer, parameter :: is_closed = -3
+	integer, parameter :: is_opening = +1
+	integer, parameter :: is_open_waiting = +2
+	integer, parameter :: is_open = +3
+
+	integer, parameter :: is_operating = 1
+	integer, parameter :: is_waiting = 2
+	integer, parameter :: is_ready = 3
+
+!==================================================================
+        contains
+!==================================================================
+
+        subroutine close_init_alloc
+
+        type(entry), allocatable :: paux(:)
+
+        if( ndim == 0 ) then
+          ndim = 10
+          allocate(pentry(ndim))
+          return
+        else
+          ndim = ndim*2
+          allocate(paux(ndim))
+          paux(1:ndim/2) = pentry(1:ndim/2)
+          call move_alloc(paux,pentry)
+        end if
+
+        end subroutine close_init_alloc
+
+!******************************************************************
+
+        subroutine close_init_new_id(id)
+
+        integer id
+
+        nclose = nclose + 1
+        if( nclose > ndim ) then
+          call close_init_alloc
+        end if
+        id = nclose
+
+        call close_init_id(id)
+
+        end subroutine close_init_new_id
+
+!******************************************************************
+
+        subroutine close_init_id(id)
+
+        integer id
+
+        if( id > ndim ) then
+          stop 'error stop close_init_id: ndim'
+        end if
+
+        pentry(id)%isc = 0
+        pentry(id)%kref = 0
+        pentry(id)%kout = 0
+        pentry(id)%kin = 0
+        pentry(id)%kdir = 0
+        pentry(id)%ibndz = 0
+        pentry(id)%ibnd = 0
+        pentry(id)%dsoft = -1.
+        pentry(id)%dwait = -1.
+        pentry(id)%zdate = 0.
+        pentry(id)%vdate = 0.
+        pentry(id)%zdiff = 0.
+        pentry(id)%cfile = ''
+        pentry(id)%idfile = 0
+
+        pentry(id)%ioper = 0
+        pentry(id)%iact = 0
+        pentry(id)%imode = 0
+        pentry(id)%scal = 0.
+        pentry(id)%dstart = 0.
+
+        end subroutine close_init_id
+
+!==================================================================
+        end module close
+!==================================================================
+
+	subroutine close_init
+
+	use arrays
+	use close
+	use basin
+
+	implicit none
+
+	logical belem
+	integer idim,i,k,ie,id
+	integer nkboc,ibnd,nitb,ibndz,nieboc
+	integer ibtyp
+	integer nvert,nbc
+	integer kvert(10)
+
+	integer nkbnds,nbnds,itybnd
+	real, save :: rfmax = 1./300.		!time scale 5 minutes
+	real, save :: vmax = 10.		!viscosity
+	real hkv(nkn)				!aux array
+	integer index(nkn)
+	integer color(nkn)
+	real dfact(nkn)
+
+        logical bcfile
+        double precision dtime
+        character*80 file       !closure file name
+        integer idfile          !closure file unit
+
+	real getpar
+
+	logical, save :: binit = .false.
+
+	if( binit ) return			!already initialized
+	binit = .true.
+
+	iclose = nint(getpar('iclose'))
+        if(iclose.le.0) return          !no closing enabled
+
+	nbc = nbnds()
+	call makehkv_minmax(hkv,0)		!get average depths
+
+	call set_fric_max(rfmax)  !set maximum friction (inverse tiemscale)
+	call set_vis_max(vmax)    !set maximum viscosity
+
+	do id=1,nclose
+
+        nkboc = size(pentry(id)%kboc)
+	ibnd = pentry(id)%ibnd
+        nitb = size(pentry(id)%itb)
+
+!	-----------------------------------------------
+!	setup nodes in closing section
+!	-----------------------------------------------
+
+	if( ibnd > 0 ) then	!use nodes from boundary
+	  nkboc = nkbnds(ibnd)
+	  call init_array(pentry(id)%kboc,nkboc)
+	  call irbnds(ibnd,nkboc,idim,pentry(id)%kboc)
+	  if( idim /= nkboc ) then
+	    stop 'error stop close_init: internal error (1)'
+	  end if
+	end if
+
+!	-----------------------------------------------
+!	setup other nodes
+!	-----------------------------------------------
+
+	if( pentry(id)%kref <= 0 ) pentry(id)%kref = pentry(id)%kboc(1)
+	if( pentry(id)%kdir <= 0 ) pentry(id)%kdir = pentry(id)%kref
+	if( pentry(id)%kout <= 0 ) pentry(id)%kout = pentry(id)%kref
+	if( pentry(id)%kin  <= 0 ) pentry(id)%kin  = pentry(id)%kref
+
+	ibtyp = 0
+	ibndz = pentry(id)%ibndz
+	if(ibndz.gt.0) then
+	  ibtyp=itybnd(ibndz)
+	  if(iabs(ibtyp).eq.1) pentry(id)%kout = -ibndz
+	end if
+
+!	-----------------------------------------------
+!	find depth on nodes and flag nodes in closing section
+!	-----------------------------------------------
+
+	call init_array(pentry(id)%hdep,nkboc)
+	index = 0
+
+	do i=1,nkboc
+	  k = pentry(id)%kboc(i)
+	  pentry(id)%hdep(i) = hkv(k)
+	  index(k) = 1
+	end do
+
+!	-----------------------------------------------
+!	find elements containing closing section nodes
+!	-----------------------------------------------
+
+	call init_array(pentry(id)%ieboc)
+	nieboc = 0
+
+	do ie=1,nel
+	  call nindex(ie,nvert,kvert)
+	  if( nvert > 3 ) stop 'error stop close_init: internal error (2)'
+	  belem = .false.
+	  do i=1,nvert
+	    k = kvert(i)
+	    if( index(k) > 0 ) belem = .true.
+	  end do
+	  if( belem ) then
+	    call append_to_array_i(pentry(id)%ieboc,nieboc,ie)
+	  end if
+	end do
+
+	call trim_array(pentry(id)%ieboc,nieboc)
+
+!	-----------------------------------------------
+!	compute distance array around closing nodes
+!	-----------------------------------------------
+
+	call init_array(pentry(id)%distfact,nel)
+	color = 0.
+
+	do i=1,nkboc
+	  k = pentry(id)%kboc(i)
+	  color(k) = 1
+	end do
+
+	call flood_fill_progessive(color)
+	dfact = color
+	call adjust_distfact(ndist,dfact,pentry(id)%distfact)
+
+!	-----------------------------------------------
+!	set info if nodes are open boundary
+!	-----------------------------------------------
+
+	ibndz = pentry(id)%ibndz
+
+	if(ibnd.gt.nbc) goto 82
+	if(ibndz.gt.nbc) goto 82
+	if(ibndz.le.0.and.ibnd.gt.0) pentry(id)%ibndz = ibnd
+
+!	-----------------------------------------------
+!	initialize changing parameters
+!	-----------------------------------------------
+
+	pentry(id)%iact = 1
+	pentry(id)%ioper = is_open	!always start open
+	pentry(id)%imode = 0		!nothing before first event
+
+!	-----------------------------------------------
+!	initialize other parameters
+!	-----------------------------------------------
+
+        if( pentry(id)%dsoft < 0 ) pentry(id)%dsoft = 0.
+        if( pentry(id)%dwait < 0 ) pentry(id)%dwait = pentry(id)%dsoft
+
+!	-----------------------------------------------
+!	initialize file
+!	-----------------------------------------------
+
+        call get_act_dtime(dtime)
+
+        file = pentry(id)%cfile
+        bcfile = ( file /= ' ' )
+        if (bcfile) then
+           call iff_ts_init(dtime,file,2,1,idfile)
+           pentry(id)%idfile = idfile
+        end if
+
+	call close_info(id)
+
+	end do
+
+	write(6,*) 'closing sections initialized: ',nclose
+
+	call check_dist		!checks and plots
+
+!	-----------------------------------------------
+!	end of routine
+!	-----------------------------------------------
+
+	return
+   82	continue
+	write(6,*) 'ibnd,ibndz,nbc: ',ibnd,ibndz,nbc
+	stop 'error stop close_init: parameters'
+	end
+
+!******************************************************************
+
+	subroutine close_info(id)
+
+	use close
+
+	implicit none
+
+	integer id
+
+	integer ii
+	integer kref,kdir,kout,kin,nkboc,nieboc
+        character*80 file
+	integer ipext,ieext,ideffi
+
+        if( nb13 == 0 ) then        !open file
+          nb13=ideffi('datdir','runnam','.cls','form','new')
+          if( nb13 .le. 0 ) then
+            stop 'error stop close_info : Cannot open CLS file'
+          end if
+        end if
+
+	kref = pentry(id)%kref
+	kdir = pentry(id)%kdir
+	kout = pentry(id)%kout
+	kin  = pentry(id)%kin
+	nkboc = size(pentry(id)%kboc)
+	nieboc = size(pentry(id)%ieboc)
+	file = pentry(id)%cfile
+
+	write(nb13,*)
+	write(nb13,*) 'first call for closing section nr. : ',id
+	write(nb13,*)
+	write(nb13,*) 'kout,kin  : ',ipext(kout),ipext(kin)
+	write(nb13,*) 'kref,kdir : ',ipext(kref),ipext(kdir)
+	write(nb13,*) 'kboc : ',nkboc
+	write(nb13,*) (ipext(pentry(id)%kboc(ii)),ii=1,nkboc)
+	write(nb13,*) 'hboc : ',nkboc
+	write(nb13,*) (pentry(id)%hdep(ii),ii=1,nkboc)
+	write(nb13,*) 'ieboc : ',nieboc
+	write(nb13,*) (ieext(pentry(id)%ieboc(ii)),ii=1,nieboc)
+	write(nb13,*) 'cfile : ',trim(file)
+	write(nb13,*)
+
+	flush(nb13)
+
+	end
+
+!******************************************************************
+
+	subroutine close_handle(ic)
+
+!---------------------------------------------------------------------------
+!
+! opens and closes sections & inlets (section $close#)
 !
 ! iclose	1 : closing by diminishing depth
 !		2 : closing by diminishing flux
@@ -102,9 +459,9 @@
 ! ibnd		number of open boundary to use for opening/closing
 !		...(kboc and ibnd are mutually esclusive)
 !
-! kref		reference node in section (used for mode)
+! kref		reference node for water level (used for mode)
 ! kin,kout	inner and outer node for section (used for mode)
-! kdir		node defining direction for icl=2,3 : direction = kdir-kref
+! kdir		node defining direction for icl=2,3,10: direction = kdir-kin
 !		...default for nodes kref=kin=kout=kdir and
 !		...kref is middle node in section
 !
@@ -119,725 +476,401 @@
 ! imode		= 100 * icl + iop
 !
 ! icl		0:no closing  1:forced closing
-!		2:vref=0 and change to positive dir. (empty basin)
-!		3:vref=0 and change to negative dir. (full basin)
-!		4:vref>vdate  5:vref<vdate
+!		2:vin=0 and change to positive dir. (empty basin)
+!		3:vin=0 and change to negative dir. (full basin)
+!		4:vin>vdate   5:vin<vdate
 !		6:zout>zdate  7:zout<zdate
-!		8:zin>zdate  9:zin<zdate
+!		8:zin>zdate   9:zin<zdate
+!		10:zref>zdate and positive velocity direction
 !		icl>20:immediate (e.g. 25 <=> icl=5 + immediate)
 !
-! iop		0:no opening  1:forced opening
-!		2:zin>zout  3:zin<zout	(same as 4,5 with zdiff=0.)
+! iop		0:no opening      1:forced opening
+!		2:zin>zout        3:zin<zout	(same as 4,5 with zdiff=0)
 !		4:zin-zout>zdiff  5:zin-zout<zdiff
-!		6:zout>zdate  7:zout<zdate
+!		6:zout>zdate      7:zout<zdate
 !		iop>20:immediate (e.g. 25 <=> icl=5 + immediate)
 !
-! isoft		number of timesteps for which opening/closing
+! dsoft		time [s] over which opening/closing
 !		...has to be distributed
-! mnstp		number of timesteps for which no opening/closing
-!		...can be performed after last action
+! dwait		time [s] after end of opening/closing operations
+!		...where no other operation can be performed
 !
 ! zdate,zdiff	water level variables used in mode
 ! vdate		velocity variable used in mode
+!
+! cfile 	Name of the file for the closure. In file is provided, the
+!		reference nodes and levels are ignored. Format is:
+!  		   datetime flag (with flag=0 open; flag=1 close)
+!
+!---------------------------------------------------------------------------
 
-	use mod_bound_dynamic
-	use mod_diff_visc_fric
-	use mod_hydro_print
-	use mod_hydro
-	use basin
+	use close
 	use shympi
+	use mod_internal
 
 	implicit none
 
 	integer ic		!0 if no change in configuration   (out)
 
-	include 'close.h'
 	include 'mkonst.h'
 
-! local
-	logical bclos,bopen,bimm,bact
-	logical bspec
-	logical bdepcl,bflxcl,bspecl,bchez
+	logical bnewmode,bfirst
+	logical bclos,bopen,bimm
 
-	integer i,ie,j,ii
-        integer nsc,ipful,ivful,jivful,ivdim
-        integer nkboc,jkboc,niboc,jiboc,jhboc
-        integer nitb,jitb,kout,kin,kref,kdir,isoft
-        integer mnstp,iclos,istp,iact,imode
-        integer jflux,ibnd,ibndz
-        real zdate,vdate,scal,href,zdiff
+	integer id,ioper
+        integer nsc
+        integer iact,imode
 
-	integer iclose,isw,kn,kboc
-	integer ibtyp,icltot,ioptot,icl,iop
-	integer k1,k2,k,l
-	integer icycle
-	integer nbc
-	integer it,idt
-	real dt
-	real scalo,zin,zout,zref,u,v,uvref2,dx,dy
-	real h1,h2,z1,z2,hm,flux1,flux2,geyer
-	real fluxnn,rmass,hboc,h
-	real u1,u2,v1,v2,uv1,uv2
-	real volact,dvolac
+	integer icltot,ioptot,icl,iop
+	real geyer
+	character*20 aline
 
-	integer nvert
-	integer kvert(10)
-	real hdep(10)
+	double precision dtime,dstart,dend,dsoft,dwait
+	double precision, parameter :: dflag = -999.
 
-	real czcls(3) !$$3
+	integer idfile
+        logical, save :: bcfile
+        real fclose
 
-	integer iround
-	real getpar
-	real volag,flxnod,areavl
-	real zvbnds
-	integer itybnd,ideffi,nbnds
-	double precision dtime
-
-!---------------------------------------------------------------
-!        integer ipnt,id,isect
-!       ipnt(id,isect) = lhead + lsect*(isect-1) + id
-!---------------------------------------------------------------
-
-! save & data
-	real volmax,volini,dvolin
-	save volmax,volini,dvolin
-	logical binit,bfull,bfalse	!$$ALPHA
-	save binit,bfull,bfalse	!$$ALPHA
-	integer implit
-        save implit
-	integer nb13
-	save nb13
-!	real weight
-!       save weight
-	real hdry
-	save hdry
-
-! data
-	data binit /.true./
-	data bfull /.false./	!write full info every time step
-	data bfalse /.false./	!$$ALPHA
-        data implit /9/   !number of time steps with implicit scheme
-!       data weight /1./  !weight to be used
-	data hdry /-2./
-
-!+++++++++++++++++++++++++++++++++++++++++++++++
-        data czcls /.2,.2,.2/  !$$3
-!+++++++++++++++++++++++++++++++++++++++++++++++
-
-!---------------------------------------------------------------
-        integer ipnt,id,isect
-        ipnt(id,isect) = lhead + lsect*(isect-1) + id
-!---------------------------------------------------------------
-
-	iclose=iround(getpar('iclose'))
 	if(iclose.le.0) return		!no closing enabled
-!
+
 	if( shympi_is_parallel() ) then
 	  stop 'error stop sp136: cannot run in mpi mode'
 	end if
 
-	if(iclose.gt.0.and.iclose.ne.4) then
-	  iclose=2  !$$1 - for new model close only thru flux
-	end if
-
-	bdepcl = iclose.eq.1	!changing depth quota
-	bflxcl = iclose.eq.2	!diminishing flux at boundary
-	bspecl = iclose.eq.3	!as 2 but flux is function of filling
-	bchez  = iclose.eq.4	!partial closing by changing chezy  !$$3
-!
-	if( binit ) then	!open file
-	  nb13=ideffi('datdir','runnam','.cls','form','new')
-	  if( nb13 .le. 0 ) then
-	    stop 'error stop sp136 : Cannot open CLS file'
-	  end if
-	end if
+!	----------------------------------------------
+!	initialize
+!	----------------------------------------------
 
 	ic=0				!&&&&   do not compute new uv-matrix
-	nsc=ipccv(ipnt(lnsect,0))	!number of sections
-	nbc = nbnds()
+	nsc = nclose
 
-	icycle = 4			!cyclic openings
+	rcomputev = 1			!set all elements to compute
 
-	call get_timestep(dt)
 	call get_act_dtime(dtime)
-	idt = nint(dt)
-	it = nint(dtime)
+	call get_act_timeline(aline)
 
-	write(nb13,*) '**********',it,'   **********'
+	write(nb13,*) '********** ',aline,' **********'
 	write(nb13,*) '***********************************'
 	write(nb13,*)
 
-	do j=1,nsc
-!
-	if(binit) then				!first call
-!
-! 		dimension and filling of vectors
-!
-!$$0            ipdim=ipccv(ipnt(lipdim,0))
-		ivdim=ipccv(ipnt(livdim,0))
-!$$0            jipful=ipccv(ipnt(lipful,0))
-		jivful=ipccv(ipnt(livful,0))
-!
-!		parameters for section nodes
-!
-		nkboc=ipccv(ipnt(lnkboc,j))
-		jkboc=ipccv(ipnt(lkboc,j))-1
-!
-!		reserve space for hboc
-!
-		jhboc=jivful
-		jivful=jivful+nkboc
-		ipccv(ipnt(lhboc,j))=jhboc+1
-		if(jivful.gt.ivdim) goto 89
-!
-!		reserve space for flux
-!
-		jflux=jivful
-		jivful=jivful+nkboc
-		ipccv(ipnt(lflux,j))=jflux+1
-		if(jivful.gt.ivdim) goto 89
-!
-!		control nodes
-!
-		kout=ipccv(ipnt(lkout,j))
-		kin=ipccv(ipnt(lkin,j))
-		kref=ipccv(ipnt(lkref,j))
-		kdir=ipccv(ipnt(lkdir,j))
-!
-		if(kref.le.0) kref=ivccv(jkboc+1)	!take first section node
-		if(kdir.le.0) kdir=kref
-		if(kout.le.0) kout=kref
-		if(kin.le.0)  kin=kref
-!
-		ipccv(ipnt(lkout,j))=kout
-		ipccv(ipnt(lkin,j))=kin
-		ipccv(ipnt(lkref,j))=kref
-		ipccv(ipnt(lkdir,j))=kdir
-!
-!		parameters for element index
-!
-		jiboc=jivful
-		niboc=0
-!
-		do ie=1,nel
-		  isw=0		!isw=1 ==> node in element ie found
-!
-!		  depth for control and section nodes
-!
+!	----------------------------------------------
+!	start loop on closing sections
+!	----------------------------------------------
 
-		  call depvele(ie,0,nvert,hdep)
-		  call nindex(ie,nvert,kvert)
+	do id=1,nsc
 
-		  do i=1,nvert
-		    kn = kvert(i)
-		    if(kn.eq.kref) rpccv(ipnt(lhref,j)) = hdep(i)
-		    do ii=1,nkboc
-			kboc=ivccv(jkboc+ii)
-			if(kn.eq.kboc) then
-			  rvccv(jhboc+ii) = hdep(i)
-			  isw=1
-			end if
-		    end do
-		  end do
-!
-!		  put in element index
-!
-		  if(isw.eq.1) then
-			niboc=niboc+1
-			if(jiboc+niboc.gt.ivdim) goto 89
-			ivccv(jiboc+niboc)=ie
-		  end if
-		end do
-!
-!		memorize computed parameters
-!
-		jivful=jivful+niboc
-		ipccv(ipnt(livful,0))=jivful
-		ipccv(ipnt(lniboc,j))=niboc
-		ipccv(ipnt(liboc,j))=jiboc+1
-!
-!		set variables
-!
-		ipccv(ipnt(listp,j))=ipccv(ipnt(lmnstp,j))
-		rpccv(ipnt(lscal,j))=0.
-		ipccv(ipnt(liact,j))=1
-!
-!		control ibnd
-!
-		ibnd=ipccv(ipnt(libnd,j))
-		ibndz=ipccv(ipnt(libndz,j))
-		if(ibnd.gt.nbc) goto 82
-		if(ibndz.gt.nbc) goto 82
-		if(ibndz.le.0.and.ibnd.gt.0) ibndz=ibnd
-		ipccv(ipnt(libndz,j))=ibndz
-!
-!		!&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&
-		write(nb13,*)
-		write(nb13,*) 'first call for closing section nr. : ',j
-		write(nb13,*)
-		write(nb13,*) 'kout,kin  : ',ipv(kout),ipv(kin)
-		write(nb13,*) 'kref,kdir : ',ipv(kref),ipv(kdir)
-		write(nb13,*) 'nkboc : ',nkboc
-		write(nb13,*) 'kboc : '
-		write(nb13,*) (ipv(ivccv(jkboc+ii)),ii=1,nkboc)
-		write(nb13,*) 'href : '
-		write(nb13,*) rpccv(ipnt(lhref,j))
-		write(nb13,*) 'hboc : '
-		write(nb13,*) (rvccv(jhboc+ii),ii=1,nkboc)
-		write(nb13,*) 'niboc : ',niboc
-		write(nb13,*) 'iboc : '
-		write(nb13,*) (ipev(ivccv(jiboc+ii)),ii=1,niboc)
-		write(nb13,*)
-!		!&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&
-!
-		write(nb13,*) '----------------------------'
-		ipful=ipccv(ipnt(lipful,0))
-		ivful=ipccv(ipnt(livful,0))
-!$$4		write(nb13,*) (ipccv(i),i=1,ipful)
-!$$4		write(nb13,*) (rpccv(i),i=1,ipful)
-!$$4		write(nb13,*) (ivccv(i),i=1,ivful)
-!$$4		write(nb13,*) (rvccv(i),i=1,ivful)
-		write(nb13,*) '----------------------------'
-	end if
-!
 ! get parameters
-!
-	nkboc=ipccv(ipnt(lnkboc,j))
-	jkboc=ipccv(ipnt(lkboc,j))-1
-	niboc=ipccv(ipnt(lniboc,j))
-	jiboc=ipccv(ipnt(liboc,j))-1
-	jhboc=ipccv(ipnt(lhboc,j))-1
-	nitb=ipccv(ipnt(lnitb,j))
-	jitb=ipccv(ipnt(litb,j))-1
-	kout=ipccv(ipnt(lkout,j))
-	kin=ipccv(ipnt(lkin,j))
-	kref=ipccv(ipnt(lkref,j))
-	kdir=ipccv(ipnt(lkdir,j))
-	isoft=ipccv(ipnt(lisoft,j))
-	zdate=rpccv(ipnt(lzdate,j))
-	vdate=rpccv(ipnt(lvdate,j))
-	mnstp=ipccv(ipnt(lmnstp,j))
-	iclos=ipccv(ipnt(liclos,j))
-	istp=ipccv(ipnt(listp,j))
-	scalo=rpccv(ipnt(lscal,j))
-	href=rpccv(ipnt(lhref,j))
-	iact=ipccv(ipnt(liact,j))
-	imode=ipccv(ipnt(limode,j))
-	zdiff=rpccv(ipnt(lzdiff,j))
-	jflux=ipccv(ipnt(lflux,j))-1
-	ibnd=ipccv(ipnt(libnd,j))
-	ibndz=ipccv(ipnt(libndz,j))
-!
-	if(bfull) then
-!
-	write(nb13,*) '-------------------------------------------------'
-	write(nb13,*) 'section :',j
-	write(nb13,*) 'nkboc,jkboc,niboc,jiboc :',nkboc,jkboc,niboc,jiboc
-	write(nb13,*) 'jhboc,nitb,jitb :',jhboc,nitb,jitb
-	write(nb13,*) 'kout,kin,kref,kdir :',kout,kin,kref,kdir
-	write(nb13,*) 'isoft,zdate,vdate :',isoft,zdate,vdate
-	write(nb13,*) 'mnstp,iclos,istp :',mnstp,iclos,istp
-	write(nb13,*) 'scal,href,iact,imode :',scal,href,iact,imode
-	write(nb13,*) 'zdiff,jflux,ibnd,ibndz :',zdiff,jflux,ibnd,ibndz
-!
-	write(nb13,*) 'kboc :'
-	write(nb13,*) (ivccv(jkboc+i),i=1,nkboc)
-	write(nb13,*) 'iboc :'
-	write(nb13,*) (ivccv(jiboc+i),i=1,niboc)
-	write(nb13,*) 'hboc :'
-	write(nb13,*) (rvccv(jhboc+i),i=1,nkboc)
-	write(nb13,*) 'flux :'
-	write(nb13,*) (rvccv(jflux+i),i=1,nkboc)
-	write(nb13,*) 'itb :'
-	write(nb13,*) (ivccv(jitb+i),i=1,nitb)
-	write(nb13,*) '-------------------------------------------------'
-!
-	end if
-!
+
+        ioper  = pentry(id)%ioper
+        iact   = pentry(id)%iact
+        imode  = pentry(id)%imode
+        dsoft  = pentry(id)%dsoft
+        dwait  = pentry(id)%dwait
+        idfile = pentry(id)%idfile
+        bcfile = ( idfile /= 0 )
+
+!	----------------------------------------------
 !	new open & close mode
-!
-	bact=.true.
-	do while (iact.gt.0.and.it.ge.ivccv(jitb+iact) &
-     &			.and.ivccv(jitb+iact).ne.-999)
-		imode=ivccv(jitb+iact+1)
-		iact=iact+2
-		if( iact .gt. nitb ) then	!no more data
-		  if( icycle .gt. 0 ) then	!use old data
-		    iact = iact - icycle
-                    !if( iact .le. 0 ) iact = 1
-		  else				!no more closings
-		    iact = 0
-		  end if
-		end if
-!		bact=.false.			!not used (why ?)
-	end do
-!
-!	levels & velocities
-!
-	istp=istp+1
-	zin=xv(3,kin)
-	zout=xv(3,kout)
-        zref=xv(3,kref)
-	zin=znv(kin)
-	zout=znv(kout)
-        zref=znv(kref)
-	!u=xv(1,kref)
-	!v=xv(2,kref)
-	u=xv(1,kin)    !BUG FIX 27.5.2004
-	v=xv(2,kin)
-	uvref2=u*u+v*v
-!
-!	if section is associated to level boundary
-!
-	!ibndz = 0
-	ibtyp = 0
-	if(ibndz.gt.0) then
-		ibtyp=itybnd(ibndz)
-		if(iabs(ibtyp).eq.1) then
-			zout=zvbnds(ibndz)
-		end if
-	end if
-!
-!	current direction at reference node
-!
-	!dx=xgv(kdir)-xgv(kref)
-	!dy=ygv(kdir)-ygv(kref)
-	dx=xgv(kdir)-xgv(kin)  !BUG FIX 27.5.2004
-	dy=ygv(kdir)-ygv(kin)
-	scal=u*dx+v*dy
-!
-!	!&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&
+!	----------------------------------------------
+
+	call print_closing_info(id,'std')
+	bnewmode=.false.
+        call get_new_mode(id,dtime,iact,imode,bnewmode)
+	!if( bnewmode ) call print_closing_info(id,'***')
+
+        if ( bcfile ) call iff_ts_intp1(idfile,dtime,fclose)
+
 	write(nb13,*)
-	write(nb13,'(1x,a,7i5)') 'j,iact,imode,istp,iclos :' &
-     &				,j,iact,imode,istp,iclos,ibndz,ibtyp
-!	write(nb13,'(1x,a,4e12.4)') 'scal,scalo,zin,zout :'
-!     +				,scal,scalo,zin,zout
-	write(nb13,'(1x,a,2e10.2,6f7.3)') 'extra: ',scal,scalo &
-     &				,zref,zout,zin,zdate
+	write(nb13,'(1x,a,4i5)') 'id,iact,imode,ioper :' &
+     &				,id,iact,imode,ioper
 	write(nb13,*)
-!	!&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&
-!
-!	decide closing & opening
-!
+
+!	----------------------------------------------
+!	decide about closing & opening
+!	----------------------------------------------
+
 	icltot=imode/100
 	ioptot=imode-100*icltot
 	icl=icltot
 	if(icl.gt.20) icl=icl-20
 	iop=ioptot
 	if(iop.gt.20) iop=iop-20
-!
+
 	bopen=.false.
 	bclos=.false.
 	bimm=.false.
-	if(istp.le.0) then
-		if(iclos.eq.0) bclos=.true.
-		if(iclos.eq.1) bopen=.true.
-	else if(istp.le.mnstp) then	!too few timesteps since
-!		nothing			!...last close/open
-	else if(iclos.eq.0) then	!inlet is open
-		if(icl.eq.0) then
-			!nothing
-		else if(icl.eq.1) then
-			bclos=.true.
-		else if(icl.eq.2) then
-			if(scal*scalo.lt.0.and.scal.gt.0) then
-				bclos=.true.
-			end if
-		else if(icl.eq.3) then
-			if(scal*scalo.lt.0.and.scal.lt.0) then
-				bclos=.true.
-			end if
-		else if(icl.eq.4) then
-			if(uvref2.gt.vdate*vdate) then
-				bclos=.true.
-			end if
-		else if(icl.eq.5) then
-			if(uvref2.lt.vdate*vdate) then
-				bclos=.true.
-			end if
-		else if(icl.eq.6) then
-			if(zout.gt.zdate) then
-				bclos=.true.
-			end if
-		else if(icl.eq.7) then
-			if(zout.lt.zdate) then
-				bclos=.true.
-			end if
-		else if(icl.eq.8) then
-			if(zin.gt.zdate) then
-				bclos=.true.
-			end if
-		else if(icl.eq.9) then
-			if(zin.lt.zdate) then
-				bclos=.true.
-			end if
-		else if(icl.eq.10) then         !FIX 9.12.2003
-			!if(zref.gt.zdate) then
-			if(zref.gt.zdate.and.scal.gt.0.) then
-				bclos=.true.
-			end if
-		else
-			write(6,*) icl
-			stop 'error stop sp136: no such code for icl'
-		end if
-		if(icltot.gt.20) bimm=.true.
-	else if(iclos.eq.1) then	!inlet is closed
-		if(iop.eq.0) then
-			!nothing
-		else if(iop.eq.1) then
-			bopen=.true.
-		else if(iop.eq.2) then
-			if(zin.gt.zout) then
-				bopen=.true.
-			end if
-		else if(iop.eq.3) then
-			if(zin.lt.zout) then
-				bopen=.true.
-			end if
-		else if(iop.eq.4) then
-			if(zin-zout.gt.zdiff) then
-				bopen=.true.
-			end if
-		else if(iop.eq.5) then
-			if(zin-zout.lt.zdiff) then
-				bopen=.true.
-			end if
-		else if(iop.eq.6) then
-			if(zout.gt.zdate) then
-				bopen=.true.
-			end if
-		else if(iop.eq.7) then
-			if(zout.lt.zdate) then
-				bopen=.true.
-			end if
-		else
-			write(6,*) iop
-			stop 'error stop sp136: no such code for iop'
-		end if
-		if(ioptot.gt.20) bimm=.true.
+	if(icltot.gt.20) bimm=.true.
+	if(ioptot.gt.20) bimm=.true.
+	bimm = bimm .or. (dsoft.le.0.)
+
+	bfirst = .false.
+
+	ioper = pentry(id)%ioper
+
+	if( abs(ioper) == is_operating ) then	!in operation phase
+		if( ioper == is_closing ) bclos=.true.
+		if( ioper == is_opening ) bopen=.true.
+	else if( abs(ioper) == is_waiting ) then	!in waiting phase
+		!nothing
+		if( ioper == is_closed_waiting ) bclos=.true.
+		if( ioper == is_open_waiting ) bopen=.true.
+	else if( ioper == is_open ) then	!inlet is open
+                if (bcfile) then
+                   bclos = (fclose == 1)
+                else
+                   call closing(id,icl,bclos)
+                end if
+	else if( ioper == is_closed ) then	!inlet is closed
+               if (bcfile) then
+                  bopen = (fclose == 0)
+                else
+                  call opening(id,iop,bopen)
+                end if
 	end if
-!
-	bimm = bimm .or. (isoft.le.0)
-	bimm = bimm .or. bchez  !$$3
-	bspec = bspecl .and. .not.bopen .and. (iclos.eq.1)
-!
-	if(bclos.or.bspec) then		!close inlet
-	  if(istp.gt.0.and..not.bspec) istp=-isoft
-	  if(bimm)  istp=0
-	  if(istp.eq.0.or.bimm) iclos=1
-          if(istp.eq.-isoft.or.bimm) then	!$$impli
-		call get_act_dtime(dtime)
-		dtime = dtime + idt*implit
-		call setimp(dtime,1.)
+
+!	----------------------------------------------
+!	closing inlets
+!	----------------------------------------------
+
+	if(bclos) then		!close inlet
+	  if( ioper == is_open ) then		!first step of closure
+	    bfirst = .true.
+	    ioper = is_closing
+	    pentry(id)%dstart = dtime
 	  end if
-!
-	  if(bspecl.or.bflxcl) then
-            if(ibnd.eq.0) goto 87
-            do i=2,nkboc
-              k1=ivccv(jkboc+i-1)
-              k2=ivccv(jkboc+i)
-              h1=rvccv(jhboc+i-1)
-              h2=rvccv(jhboc+i)
-              z1=xv(3,k1)
-              z2=xv(3,k2)
-              hm=(h1+z1+h2+z2)*0.5
-              flux1=rvccv(jflux+i-1)
-              flux2=rvccv(jflux+i)
-              if(istp.eq.-isoft.or.bimm) then
-                dx=xgv(k2)-xgv(k1)
-                dy=ygv(k2)-ygv(k1)
-                l=sqrt(dx*dx+dy*dy)
-                u1=xv(1,k1)
-                u2=xv(1,k2)
-                v1=xv(2,k1)
-                v2=xv(2,k2)
-                uv1=(-u1*dy+v1*dx)/l
-                uv2=(-u2*dy+v2*dx)/l
-                flux1=l*(2.*uv1+uv2)/6.         !RQVDT
-                flux2=l*(uv1+2.*uv2)/6.
-                rvccv(jflux+i-1)=flux1
-                rvccv(jflux+i)=flux2
-                volini=volag(2,zdate)
-                volmax=volag(0,zdate)
-                dvolin=volmax-volini
-!               !&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&
-!                write(nb13,*) 'vol..ini,max,diff:',volini,volmax,dvolin
-!                write(nb13,*) 'u,v,uv1,flux1 ',u1,v1,uv1,flux1
-!                write(nb13,*) 'u,v,uv2,flux2 ',u2,v2,uv2,flux2
-!               !&&&&&&&&&&&&&&&&&&&&&&&&&&&&&
-              end if
-              if(bspecl) then
-                volact=volag(2,zdate)
-                dvolac=volmax-volact
-                geyer=(dvolac/dvolin)**0.5
-                write(nb13,*) 'volact,dvolac :',volact,dvolac
-              else
-!                geyer=-float(istp-1)/float(isoft+1)
-                geyer=-float(istp)/float(isoft+1)  !$$1
-              end if
-!cc              rqv(k1)=rqv(k1)+hm*flux1*geyer
-!cc              rqv(k2)=rqv(k2)+hm*flux2*geyer
-            end do
+	  dstart = pentry(id)%dstart
+	  dend = dstart + pentry(id)%dsoft
+	  if( bimm ) dend = dstart
+	  dwait = dend + pentry(id)%dwait
 
-            if(istp.eq.-isoft.or.bimm) then
-              do i=1,nkboc
-                k1=ivccv(jkboc+i)
-                fluxnn = -flxnod(k1)    !RQVDT
-                rmass=(xv(3,k1)-xv(3,k1+nkn))*areavl(k1)
-                rvccv(jflux+i)=fluxnn
-                write(nb13,*) 'new  ',j,i,fluxnn,rmass
-                rqv(k1)=rqv(k1)+fluxnn
-                rzv(k1)=flag
-              end do
-            else
-              geyer=-float(istp-1)/float(isoft+1)
-              do i=1,nkboc
-                k1=ivccv(jkboc+i)
-                fluxnn=rvccv(jflux+i)
-                rqv(k1)=rqv(k1)+fluxnn*geyer
-                write(nb13,*) 'new  ',j,i,rqv(k1),geyer
-              end do
-            end if
+	  if( dstart == dend ) then
+	    geyer = 0.
+	  else
+	    geyer = (dend-dtime)/(dend-dstart)
+	  end if
 
-		else if(bdepcl) then
-		  do i=1,niboc
-		    ie=ivccv(jiboc+i)
-		    do ii=1,3
-		      kn=nen3v(ii,ie)
-		      do k=1,nkboc
-			kboc=ivccv(jkboc+k)
-			if(kn.eq.kboc) then
-				hboc=rvccv(jhboc+k)
-				h=hdry+(hdry-href) &
-     &					*float(istp)/float(isoft+1)
-				if(istp.ge.0) then
-					h=hdry
-				else if(h.gt.hboc) then
-					h=hboc
-				end if
-				hm3v(ii,ie)=h
-!				!&&&&&&&&&&&&&&&&&
-				write(nb13,*) 'ie,kn,h: ' &
-     &					,ipev(ie),ipv(kn),h
-!				!&&&&&&&&&&&&&&&&&
-			end if
-		      end do
-		    end do
-		  end do
-		end if
-!
-		if(istp.eq.-isoft.or.bimm) then
-			if(iact.gt.0.and.ivccv(jitb+iact).eq.-999 &
-     &					.and.bact) then
-				imode=ivccv(jitb+iact+1)
-				iact=iact+2
-				if( iact .gt. nitb ) then   !no more data
-				  if( icycle .gt. 0 ) then  !use old data
-				    iact = iact - icycle
-				  else			    !no more closings
-				    iact = 0
-				  end if
-				end if
-				bact=.false.
-			end if
-!
-			if(ibnd.gt.0) then
-				ibtyp=itybnd(ibnd)
-				if(.not.bchez) then !$$3
-				  if(ibtyp.lt.0) goto 85
-				  call stybnd(ibnd,-ibtyp)
-				end if
-			end if
-!
-			ic=1	!&&&&&& compute new uv-matrix
-!
-			write(6,*) 'inlet ',j,' closed at it = ',it
-			write(nb13 ,*) 'inlet ',j,' closed at it = ',it
-		end if
+	  if( geyer <= 0. ) ioper = is_closed_waiting
+	  if( dtime >= dwait ) ioper = is_closed
+	  call set_geyer(id,geyer)
+	  !write(6,*) 'ioper,geyer : ',ioper,geyer
+	  !write(67,*) 'ioper,geyer : ',ioper,geyer
+	  write(nb13,*) 'ioper,geyer : ',ioper,geyer
+
+	  if( bfirst ) then
+       		call get_new_mode(id,dflag,iact,imode,bnewmode)
+		write(6,*) 'inlet ',id,' closed at ',aline
+		write(nb13 ,*) 'inlet ',id,' closed at ',aline
+	  end if
 	end if
-!
-        if(bchez.and.iclos.eq.1) then !$$3
-            do i=1,niboc
-              ie=ivccv(jiboc+i)
-              czv(ie)=czcls(j)
-            end do
-!           !&&&&&&&&&&&&&&&&&
-            write(nb13,*) 'chezy : ' &
-     &        ,j,niboc,czv(ie)
-!           !&&&&&&&&&&&&&&&&&
-        end if
-!
+
+!	----------------------------------------------
+!	opening inlets
+!	----------------------------------------------
+
 	if(bopen) then		!open inlet
-          bimm=.true. !$$1 - always open immediately
-
-	  if(istp.gt.0) istp=-isoft
-	  if(bimm)  istp=0
-	  if(istp.eq.0.or.bimm) iclos=0
-          if(istp.eq.-isoft.or.bimm) then	!$$impli
-		call setimp(it+idt*implit,1.)
+	  if( ioper == is_closed ) then		!first step of opening
+	    bfirst = .true.
+	    ioper = is_opening
+	    pentry(id)%dstart = dtime
 	  end if
-!
-		if(istp.eq.-isoft.or.bimm) then
-			if(iact.gt.0.and.ivccv(jitb+iact).eq.-999 &
-     &					.and.bact) then
-				imode=ivccv(jitb+iact+1)
-				iact=iact+2
-				if( iact .gt. nitb ) then   !no more data
-				  if( icycle .gt. 0 ) then  !use old data
-				    iact = iact - icycle
-				  else			    !no more closings
-				    iact = 0
-				  end if
-				end if
-				bact=.false.
-			end if
-!
-			if(ibnd.gt.0) then
-				ibtyp=itybnd(ibnd)
-				if(.not.bchez) then  !$$3
-				  if(ibtyp.gt.0) goto 84
-				  call stybnd(ibnd,-ibtyp)
-				end if
-			end if
-!
-			ic=1	!&&&&&& compute new uv-matrix
-!
-			write(6,*) 'inlet ',j,' opened at it = ',it
-			write(nb13 ,*) 'inlet ',j,' opened at it = ',it
-		end if
+	  dstart = pentry(id)%dstart
+	  dend = dstart + pentry(id)%dsoft
+	  if( bimm ) dend = dstart
+	  dwait = dend + pentry(id)%dwait
+
+	  if( dstart == dend ) then
+	    geyer = 0.
+	  else
+	    geyer = (dend-dtime)/(dend-dstart)
+	  end if
+
+	  if( geyer <= 0. ) ioper = is_open_waiting
+	  if( dtime >= dwait ) ioper = is_open
+	  geyer = 1. - geyer
+	  call set_geyer(id,geyer)
+	  !write(6,*) 'ioper,geyer : ',ioper,geyer
+	  !write(67,*) 'ioper,geyer : ',ioper,geyer
+	  write(nb13,*) 'ioper,geyer : ',ioper,geyer
+
+	  if( bfirst ) then
+       		call get_new_mode(id,dflag,iact,imode,bnewmode)
+		write(6,*) 'inlet ',id,' opened at ',aline
+		write(nb13 ,*) 'inlet ',id,' opened at ',aline
+	  end if
 	end if
-!
-	ipccv(ipnt(liclos,j))=iclos
-	ipccv(ipnt(listp,j))=istp
-	ipccv(ipnt(liact,j))=iact
-	ipccv(ipnt(limode,j))=imode
-	rpccv(ipnt(lscal,j))=scal
-!
+
+!	----------------------------------------------
+!	handle no operations
+!	----------------------------------------------
+
+	if( bclos .and. bopen ) then
+	  write(6,*) 'both closing and opening: ',bclos,bopen
+	  stop 'error stop sp136: internal error (1)'
+	else if( .not. bclos .and. .not. bopen ) then	!out of operation
+	  if( ioper == is_closed ) then			!inlet is closed
+	    call set_geyer(id,0.)			!keep closed
+	  end if
+	end if
+
+!	----------------------------------------------
+!	remember variable parameters
+!	----------------------------------------------
+
+	call compute_aver_geyer(id,pentry(id)%geyer)
+
+        pentry(id)%ioper = ioper
+        pentry(id)%iact = iact
+        pentry(id)%imode = imode
+
 	end do
-!
-	binit=.false.
-!
+
 	write(nb13,*) '***********************************'
-!
-	return
-   82	continue
-	write(6,*) 'Impossible value for ibnd or ibndz'
-	write(6,*) 'ibnd,ibndz,nbc : ',ibnd,ibndz,nbc
-	stop 'error stop : sp136'
-   84	continue
-	write(6,*) 'Wrong type of boundary for opening : ',ibtyp
-	stop 'error stop : sp136'
-   85	continue
-	write(6,*) 'Wrong type of boundary for closing: ',ibtyp
-	stop 'error stop : sp136'
-   87	continue
-	write(6,*) 'For this closing section must be boundary'
-	write(6,*) 'iclose, ibnd : ',iclose,ibnd
-	stop 'error stop : sp136'
-   89	continue
-	write(6,*) 'Dimension error for array ivccv'
-	write(6,*) 'ivdim : ',ivdim
-	stop 'error stop : sp136'
+
+!	----------------------------------------------
+!	end of routine
+!	----------------------------------------------
+
+	end
+
+!********************************************************************
+!********************************************************************
+!********************************************************************
+
+	subroutine closing(id,icl,bclose)
+
+! decides if to close inlet
+
+	use close
+	use mod_hydro
+	use mod_hydro_print
+	use basin
+
+	implicit none
+
+	integer id
+	integer icl
+	logical bclose
+
+	integer kref,kout,kin,kdir
+	real zdiff,zdate
+	real zin,zout,zref
+	real u,v,uvref2,dx,dy,scal,scalo
+	real vdate
+
+	real zvbnds
+
+        kref = pentry(id)%kref
+        kdir = pentry(id)%kdir
+        kout = pentry(id)%kout
+        kin  = pentry(id)%kin
+
+	zdiff = pentry(id)%zdiff
+	zdate = pentry(id)%zdate
+	vdate = pentry(id)%vdate
+	scalo = pentry(id)%scal
+
+	zin=znv(kin)
+        zref=znv(kref)
+	if( kout > 0 ) then
+	  zout=znv(kout)
+	else
+	  zout=zvbnds(-kout)
+	end if
+
+	u=up0v(kin)
+	v=vp0v(kin)
+	uvref2=u*u+v*v
+	dx=xgv(kdir)-xgv(kin)
+	dy=ygv(kdir)-ygv(kin)
+	scal=u*dx+v*dy
+
+	if(icl.eq.0) then
+		!nothing
+	else if(icl.eq.1) then
+		bclose=.true.
+	else if(icl.eq.2) then
+		if(scal*scalo.lt.0.and.scal.gt.0) bclose=.true.
+	else if(icl.eq.3) then
+		if(scal*scalo.lt.0.and.scal.lt.0) bclose=.true.
+	else if(icl.eq.4) then
+		if(uvref2.gt.vdate*vdate) bclose=.true.
+	else if(icl.eq.5) then
+		if(uvref2.lt.vdate*vdate) bclose=.true.
+	else if(icl.eq.6) then
+		if(zout.gt.zdate) bclose=.true.
+	else if(icl.eq.7) then
+		if(zout.lt.zdate) bclose=.true.
+	else if(icl.eq.8) then
+		if(zin.gt.zdate) bclose=.true.
+	else if(icl.eq.9) then
+		if(zin.lt.zdate) bclose=.true.
+	else if(icl.eq.10) then         !FIX 9.12.2003
+		if(zref.gt.zdate.and.scal.gt.0.) bclose=.true.
+        else
+		write(6,*) 'icl = ',icl
+		stop 'error stop closing: no such code for icl'
+        end if
+
+	pentry(id)%scal = scal
+
+	end
+
+!********************************************************************
+
+	subroutine opening(id,iop,bopen)
+
+! decides if to open inlet
+
+	use close
+	use mod_hydro
+
+	implicit none
+
+	integer id
+	integer iop
+	logical bopen
+
+	integer kout,kin
+	real zdiff,zdate
+	real zin,zout,zref
+
+	real zvbnds
+
+        kout = pentry(id)%kout
+        kin  = pentry(id)%kin
+
+	zdiff = pentry(id)%zdiff
+	zdate = pentry(id)%zdate
+
+	zin=znv(kin)
+	if( kout > 0 ) then
+	  zout=znv(kout)
+	else
+	  zout=zvbnds(-kout)
+	end if
+
+        if(iop.eq.0) then
+                !nothing
+        else if(iop.eq.1) then
+                bopen=.true.
+        else if(iop.eq.2) then
+                if(zin.gt.zout) bopen=.true.
+        else if(iop.eq.3) then
+                if(zin.lt.zout) bopen=.true.
+        else if(iop.eq.4) then
+                if(zin-zout.gt.zdiff) bopen=.true.
+        else if(iop.eq.5) then
+                if(zin-zout.lt.zdiff) bopen=.true.
+        else if(iop.eq.6) then
+                if(zout.gt.zdate) bopen=.true.
+        else if(iop.eq.7) then
+                if(zout.lt.zdate) bopen=.true.
+        else
+		write(6,*) 'iop = ',iop
+		stop 'error stop opening: no such code for iop'
+        end if
+
 	end
 
 !********************************************************************
@@ -850,23 +883,11 @@
 
 ! initializes closing sections
 
+	use close
+
 	implicit none
 
-	include 'close.h'
-
-	integer i
-
-	do i=1,ipcdim
-	  ipccv(i) = 0
-	end do
-
-        ipccv(1)=ipcdim         !dimension op ipccv
-        ipccv(2)=ivcdim         !dimension of ivccv
-        ipccv(3)=lhead          !filling of ipccv
-        ipccv(4)=0              !filling of ivccv
-        ipccv(5)=lhead          !size of head
-        ipccv(6)=lsect          !size of section
-        ipccv(7)=0              !number of sections
+	call close_init_alloc
 
 	end
 
@@ -876,54 +897,35 @@
 
 ! reads closing sections
 
+	use close
+	use arrays
+
 	implicit none
 
 	integer isc		!number of actual section to read (in)
-
-	include 'close.h'
 
 	character*6 name
 	character*80 text
 	real value
 	double precision dvalue
 	integer nsc
-	integer ipdim,ivdim,ipful,ivful
+	integer id
 	integer iweich
 	integer ival
+	integer ikboc,iitb
 
-	integer nrdnxt,iround
+	integer nrdnxt
 
-!---------------------------------------------------------------
-	integer ipnt,id,isect
-        ipnt(id,isect) = lhead + lsect*(isect-1) + id
-!---------------------------------------------------------------
+        call close_init_new_id(id)
+	pentry(id)%isc = isc
 
-!	check dimensions and similar
+	ikboc = 0
+	iitb = 0
 
-        nsc = ipccv(ipnt(lnsect,0)) + 1
-	if(nsc.ne.isc) goto 82
-	ipccv(ipnt(lnsect,0)) = nsc
+	call init_array(pentry(id)%kboc)
+	call init_array(pentry(id)%itb)
 
-	ipdim = ipccv(ipnt(lipdim,0))
-	ivdim = ipccv(ipnt(livdim,0))
-	ipful = ipccv(ipnt(lipful,0))
-	ivful = ipccv(ipnt(livful,0))
-
-	ipful = ipful+lsect
-	if(ipful.gt.ipdim) goto 79
-	ipccv(ipnt(lipful,0)) = ipful
-
-!	initialize some of the parameters
-
-        ipccv(ipnt(lmnstp,isc)) = 5
-        rpccv(ipnt(lzdate,isc)) = 0.
-        rpccv(ipnt(lvdate,isc)) = 0.
-        rpccv(ipnt(lzdiff,isc)) = 0.
-
-!	loop for date in str file
-
-        iweich=1
-        do while(iweich.ne.0)
+        do
 
             iweich = nrdnxt(name,dvalue,text)
 	    value = dvalue
@@ -932,61 +934,52 @@
             if( iweich .eq. 2 ) then
               if( name .ne. 'kboc' .and. name .ne. 'itb' ) goto 93
 	    end if
+            if( iweich .eq. 3 ) then
+              if( name .ne. 'cfile' ) goto 93
+	    end if
 
-            if( iweich .eq. 1 .or. iweich .eq. 2 ) then
+	    if( iweich == 0 ) exit
+	    if( iweich > 3 ) goto 98
+	    if( iweich < 0 ) goto 98
 
               if( name .eq. 'kboc' ) then
-	        ival = iround(value)
-	        call insvcl(name,lkboc,lnkboc,isc,iweich,ival)
+	        call append_to_array(pentry(id)%kboc,ikboc,nint(value))
               else if( name .eq. 'itb' ) then
-	        ival = iround(value)
-	        call insvcl(name,litb,lnitb,isc,iweich,ival)
+	        call append_to_array(pentry(id)%itb,iitb,dvalue)
 	      else if(name.eq.'kref') then
-	        ipccv(ipnt(lkref,isc))=iround(value)
+	        pentry(id)%kref=nint(value)
 	      else if(name.eq.'kdir') then
-	        ipccv(ipnt(lkdir,isc))=iround(value)
+	        pentry(id)%kdir=nint(value)
 	      else if(name.eq.'kout') then
-	        ipccv(ipnt(lkout,isc))=iround(value)
+	        pentry(id)%kout=nint(value)
 	      else if(name.eq.'kin') then
-	        ipccv(ipnt(lkin,isc))=iround(value)
+	        pentry(id)%kin=nint(value)
 	      else if(name.eq.'ibndz') then
-	        ipccv(ipnt(libndz,isc))=iround(value)
+	        pentry(id)%ibndz=nint(value)
 	      else if(name.eq.'ibnd') then
-	        ipccv(ipnt(libnd,isc))=iround(value)
-	      else if(name.eq.'isoft') then
-	        ipccv(ipnt(lisoft,isc))=iround(value)
-	      else if(name.eq.'mnstp') then
-	        ipccv(ipnt(lmnstp,isc))=iround(value)
+	        pentry(id)%ibnd=nint(value)
+	      else if(name.eq.'dsoft') then
+	        pentry(id)%dsoft=dvalue
+	      else if(name.eq.'dwait') then
+	        pentry(id)%dwait=dvalue
 	      else if(name.eq.'zdate') then
-	        rpccv(ipnt(lzdate,isc))=value
+	        pentry(id)%zdate=dvalue
 	      else if(name.eq.'vdate') then
-	        rpccv(ipnt(lvdate,isc))=value
+	        pentry(id)%vdate=dvalue
 	      else if(name.eq.'zdiff') then
-	        rpccv(ipnt(lzdiff,isc))=value
+	        pentry(id)%zdiff=dvalue
+	      else if(name.eq.'cfile') then
+	        pentry(id)%cfile=text
 	      else
 		goto 96
 	      end if
 
-	    else if( iweich .eq. 0 ) then
-
-!	      nothing
-
-	    else
-
-	      goto 98
-
-            end if
-
         end do
 
+	call trim_array(pentry(id)%kboc,ikboc)
+	call trim_array(pentry(id)%itb,iitb)
+
 	return
-   79   continue
-        write(6,*) 'Dimension error for ipccv'
-        write(6,*) 'ipdim : ',ipdim
-        stop 'error stop : rdclos'
-   82   continue
-        write(6,*) 'Closing sections out of order : ',isc
-        stop 'error stop : rdclos'
    93   continue
         write(6,*) 'Variable not allowed in this context : ',name
         stop 'error stop : rdclos'
@@ -994,6 +987,7 @@
         write(6,*) 'Not recognized variable name : ',name
         stop 'error stop : rdclos'
    98   continue
+	write(6,*) 'iweich = ',iweich
         write(6,*) 'Read error in closing section : ',isc
         stop 'error stop : rdclos'
 	end
@@ -1004,41 +998,34 @@
 
 ! post-processes closing sections
 
-	implicit none
+	use close
 
-	include 'close.h'
+	implicit none
 
 	logical bstop
 	integer nsc,ivdim,ivful
 	integer nbc
-	integer i,j,k
+	integer i,j,k,id
 	integer nkboc,ibnd,nitb
 	integer knode,kint
 	integer jkboc
 	integer ibndz
 
 	integer ipint
-!	integer iround
 	integer nbnds,nkbnds
-
-!---------------------------------------------------------------
-	integer ipnt,id,isect
-        ipnt(id,isect) = lhead + lsect*(isect-1) + id
-!---------------------------------------------------------------
 
 	bstop = .false.
 
-        nsc=ipccv(ipnt(lnsect,0))
-        ivdim=ipccv(ipnt(livdim,0))
-        ivful=ipccv(ipnt(livful,0))
-
+	nsc = nclose
 	nbc = nbnds()
 
         do j=1,nsc
 
-           nkboc=ipccv(ipnt(lnkboc,j))
-           ibnd=ipccv(ipnt(libnd,j))
-           nitb=ipccv(ipnt(lnitb,j))
+	   id = j
+
+           nkboc = size(pentry(id)%kboc)
+	   ibnd = pentry(id)%ibnd
+           nitb = size(pentry(id)%itb)
 
 !	   nodes of boundary
 
@@ -1052,31 +1039,17 @@
                 write(6,*) '   ibnd must have value of open boundary'
                 write(6,*) '   ibnd : ',ibnd
                 bstop=.true.
-             else
-                jkboc=ivful
-                ipccv(ipnt(lkboc,j))=jkboc+1
-                nkboc=nkbnds(ibnd)
-                ivful=ivful+nkboc
-                if(ivful.gt.ivdim) then
-                   write(6,*) 'Dimension error for ivccv'
-                   write(6,*) 'ivdim : ',ivdim
-                   stop 'error stop : nlsh'
-                end if
-		call irbnds(ibnd,nkboc,k,ivccv(jkboc+1))
-                ipccv(ipnt(lnkboc,j))=nkboc
-                ipccv(ipnt(livful,0))=ivful
              end if
            else if(nkboc.gt.0.and.ibnd.eq.0) then
-             jkboc=ipccv(ipnt(lkboc,j))-1
              do i=1,nkboc
-                knode=ivccv(jkboc+i)
+                knode=pentry(id)%kboc(i)
                 kint=ipint(knode)
-                if(knode.le.0) then
+                if( knode <= 0 .or. kint <= 0 ) then
                    write(6,'(a,i2,a)') ' section CLOSE ',j,' :'
                    write(6,*) '   node not found ',knode
                    bstop=.true.
                 end if
-                ivccv(jkboc+i)=kint
+                pentry(id)%kboc(i) = kint
              end do
            else
              write(6,'(a,i2,a)') ' section CLOSE ',j,' :'
@@ -1087,7 +1060,7 @@
 
 !	   various other checks
 
-           ibndz=ipccv(ipnt(libndz,j))
+	   ibndz = pentry(id)%ibndz
            if(ibndz.gt.nbc) then
                 write(6,'(a,i2,a)') ' section CLOSE ',j,' :'
                 write(6,*) '   ibndz must have value of open boundary'
@@ -1108,10 +1081,10 @@
              bstop=.true.
            end if
 
-	   call convk(lkref,j,bstop)
-	   call convk(lkdir,j,bstop)
-	   call convk(lkout,j,bstop)
-	   call convk(lkin,j,bstop)
+	   call convk(pentry(id)%kref,bstop)
+	   call convk(pentry(id)%kdir,bstop)
+	   call convk(pentry(id)%kout,bstop)
+	   call convk(pentry(id)%kin,bstop)
         end do
 
         if(bstop) stop 'error stop : ckclos'
@@ -1124,84 +1097,37 @@
 
 ! prints info on closing sections
 
+	use close
+
 	implicit none
 
-	include 'close.h'
+	integer j,i,id,nsc
 
-	integer j,i
-	integer nsc,ipful,ivful
-	integer nkboc,jkboc,niboc,jiboc,jhboc
-	integer nitb,jitb,kout,kin,kref,kdir,isoft
-	integer mnstp,iclos,istp,iact,imode
-	integer jflux,ibnd,ibndz
-	real zdate,vdate,scal,href,zdiff
-
-!---------------------------------------------------------------
-	integer ipnt,id,isect
-        ipnt(id,isect) = lhead + lsect*(isect-1) + id
-!---------------------------------------------------------------
-
-        nsc=ipccv(ipnt(lnsect,0))
-        ipful=ipccv(ipnt(lipful,0))
-        ivful=ipccv(ipnt(livful,0))
+	nsc = nclose
 
 	if( nsc .le. 0 ) return
 
 	write(6,*)
-        write(6,*) 'closing sections :'
+        write(6,*) '====== info on closing sections ========='
 
-        write(6,*) '...header :'
-        write(6,*) (ipccv(i),i=1,lhead)
+        write(6,*) ' number of close sections:' ,nsc
 
         do j=1,nsc
 
-        nkboc=ipccv(ipnt(lnkboc,j))
-        jkboc=ipccv(ipnt(lkboc,j))-1
-        niboc=ipccv(ipnt(lniboc,j))
-        jiboc=ipccv(ipnt(liboc,j))-1
-        jhboc=ipccv(ipnt(lhboc,j))-1
-        nitb=ipccv(ipnt(lnitb,j))
-        jitb=ipccv(ipnt(litb,j))-1
-        kout=ipccv(ipnt(lkout,j))
-        kin=ipccv(ipnt(lkin,j))
-        kref=ipccv(ipnt(lkref,j))
-        kdir=ipccv(ipnt(lkdir,j))
-        isoft=ipccv(ipnt(lisoft,j))
-        zdate=rpccv(ipnt(lzdate,j))
-        vdate=rpccv(ipnt(lvdate,j))
-        mnstp=ipccv(ipnt(lmnstp,j))
-        iclos=ipccv(ipnt(liclos,j))
-        istp=ipccv(ipnt(listp,j))
-        scal=rpccv(ipnt(lscal,j))
-        href=rpccv(ipnt(lhref,j))
-        iact=ipccv(ipnt(liact,j))
-        imode=ipccv(ipnt(limode,j))
-        zdiff=rpccv(ipnt(lzdiff,j))
-        jflux=ipccv(ipnt(lflux,j))-1
-        ibnd=ipccv(ipnt(libnd,j))
-        ibndz=ipccv(ipnt(libndz,j))
+	id = j
 
-        write(6,*)
-        write(6,*) 'section :',j
-        write(6,*)
-        write(6,*) 'nkboc,jkboc,niboc,jiboc :',nkboc,jkboc,niboc,jiboc
-        write(6,*) 'jhboc,nitb,jitb :',jhboc,nitb,jitb
-        write(6,*) 'kout,kin,kref,kdir :',kout,kin,kref,kdir
-        write(6,*) 'isoft,zdate,vdate :',isoft,zdate,vdate
-        write(6,*) 'mnstp,iclos,istp :',mnstp,iclos,istp
-        write(6,*) 'scal,href,iact,imode :',scal,href,iact,imode
-        write(6,*) 'zdiff,jflux,ibnd,ibndz :',zdiff,jflux,ibnd,ibndz
-
-        write(6,*) 'kboc :'
-        write(6,*) (ivccv(jkboc+i),i=1,nkboc)
-        write(6,*) 'iboc :'
-        write(6,*) (ivccv(jiboc+i),i=1,niboc)
-        write(6,*) 'hboc :'
-        write(6,*) (rvccv(jhboc+i),i=1,nkboc)
-        write(6,*) 'flux :'
-        write(6,*) (rvccv(jflux+i),i=1,nkboc)
-        write(6,*) 'itb :'
-        write(6,*) (ivccv(jitb+i),i=1,nitb)
+        write(6,*) ' close section number: ', pentry(id)%isc
+        write(6,*) '   kref:  ', pentry(id)%kref
+        write(6,*) '   kout:  ', pentry(id)%kout
+        write(6,*) '   kin:   ', pentry(id)%kin
+        write(6,*) '   ibndz: ', pentry(id)%ibndz
+        write(6,*) '   ibnd:  ', pentry(id)%ibnd
+        write(6,*) '   dsoft: ', pentry(id)%dsoft
+        write(6,*) '   dwait: ', pentry(id)%dwait
+        write(6,*) '   zdate: ', pentry(id)%zdate
+        write(6,*) '   vdate: ', pentry(id)%vdate
+        write(6,*) '   zdiff: ', pentry(id)%zdiff
+        write(6,*) '   cfile: ', trim(pentry(id)%cfile)
 
         end do
 
@@ -1215,301 +1141,384 @@
 
 	implicit none
 
-	include 'close.h'
-
-	integer i
-	integer ipful,ivful
-
-!---------------------------------------------------------------
-	integer ipnt,id,isect
-        ipnt(id,isect) = lhead + lsect*(isect-1) + id
-!---------------------------------------------------------------
-
         write(6,*) '/close/'
 
-        ipful=ipccv(ipnt(lipful,0))
-        ivful=ipccv(ipnt(livful,0))
-
-        write(6,*) '...header :'
-        write(6,*) (ipccv(i),i=1,lhead)
-
-        write(6,*) '...ipccv,rpccv,ivccv,rvccv :'
-        write(6,*) (ipccv(i),i=1,ipful)
-        write(6,*) (rpccv(i),i=1,ipful)
-        write(6,*) (ivccv(i),i=1,ivful)
-        write(6,*) (rvccv(i),i=1,ivful)
+	call prclos
 
 	end
 
 !********************************************************************
+!********************************************************************
+!********************************************************************
+!********************************************************************
+!********************************************************************
 
-	subroutine insvcl(name,lip,ltot,isc,iweich,ival)
+	subroutine set_zdate(iduse,zdate)
 
-! inserts vector in data structure of closing sections
+	use close
 
 	implicit none
 
-	character*(*) name		!name of parameter
-	integer lip			!position of pointer to data
-	integer ltot			!position of pointer to data
-	integer isc			!number of closing section
-	integer iweich			!return value of nrdnxt (1=first call)
-	integer ival			!value to insert
+	integer iduse
+	real zdate
 
-	include 'close.h'
+        integer id,idstart,idend
 
-	integer ip,itot
-	integer ivdim,ivful
-
-!---------------------------------------------------------------
-	integer ipnt,id,isect
-        ipnt(id,isect) = lhead + lsect*(isect-1) + id
-!---------------------------------------------------------------
-
-	ivdim = ipccv(ipnt(livdim,0))
-	ivful = ipccv(ipnt(livful,0))
-
-	ip=ipccv(ipnt(lip,isc))-1
-	itot=ipccv(ipnt(ltot,isc))
-
-	if( iweich .eq. 1 ) then		!first call
-	  if( itot .gt. 0 ) goto 80
-	  ip=ivful
-	  ipccv(ipnt(lip,isc))=ip+1
+	if( iduse <= 0 ) then
+	  idstart = 1
+	  idend = nclose
+	else
+	  idstart = iduse
+	  idend = iduse
 	end if
 
-	itot=itot+1
-	ivful=ivful+1
+	do id=idstart,idend
+	  pentry(id)%zdate = zdate
+	end do
 
-	if(ivful.gt.ivdim) goto 78
-
-	ipccv(ipnt(ltot,isc))=itot
-	ipccv(ipnt(livful,0))=ivful
-
-	ivccv(ip+itot) = ival
-
-	return
-   78   continue
-        write(6,*) 'Dimension error for ivccv'
-        write(6,*) 'ivdim : ',ivdim
-        stop 'error stop : insvcl'
-   80   continue
-        write(6,*) 'Variable called twice : ',name
-        stop 'error stop : insvcl'
 	end
 
-!********************************************************************
+!*****************************************************************
 
-	subroutine convk(lip,isc,bstop)
+	subroutine get_zdate(iduse,zdate)
 
-! converts node to internal number
+	use close
 
 	implicit none
 
-	integer lip			!position of pointer to data (in)
-	integer isc			!number of closing section   (in)
-	logical bstop			!on error set to .true.      (in/out)
+        integer iduse
+	real zdate
 
-	include 'close.h'
+	integer id
 
-	integer k,kint
+	id = iduse
+	if( id <= 0 ) id = 1
+
+	zdate = pentry(id)%zdate
+
+	end
+
+!*****************************************************************
+
+        subroutine get_new_mode(id,dtime,iact,imode,bchange)
+
+	use close
+
+        implicit none
+
+        integer id,iact,imode
+	double precision dtime
+	logical bchange
+
+        double precision, parameter :: dflag = -999.
+	integer nitb
+	double precision dnext
+
+	if( bchange ) return		!already changed mode in this time step
+	if( iact <= 0 ) return
+
+	if( dtime == dflag ) then
+	    dnext = pentry(id)%itb(iact)
+	    if( dnext /= dflag ) return
+	    imode = nint(pentry(id)%itb(iact+1))
+	    call get_new_iact(id,iact)
+	    bchange = .true.
+	else
+	  do
+	    dnext = pentry(id)%itb(iact)
+	    if( dnext == dflag ) exit
+	    if( dtime < dnext ) exit
+	    imode = nint(pentry(id)%itb(iact+1))
+	    call get_new_iact(id,iact)
+	    bchange = .true.
+	    if( iact <= 0 ) exit
+	  end do
+	end if
+
+        end
+
+!*****************************************************************
+
+	subroutine get_new_iact(id,iact)
+
+	use close
+
+	implicit none
+
+	integer id
+	integer iact
+
+        integer, parameter :: icycle = 4
+	integer nitb
+
+	if( iact <= 0 ) return
+
+	nitb = size(pentry(id)%itb)
+
+	iact = iact + 2
+
+	if( iact .gt. nitb ) then	!no more data
+	  if( icycle .gt. 0 ) then	!use old data
+	    iact = iact - icycle
+	  else				!no more closings
+	    iact = 0
+	  end if
+	end if
+
+	end
+
+!*****************************************************************
+
+	subroutine compute_aver_geyer(id,geyer)
+
+! geyer is 0 for closed, 1 for open
+
+	use basin
+	use close
+	use mod_internal
+
+	implicit none
+
+	integer id
+	real geyer
+
+	integer ie,n
+	real f,dist
+
+	n = 0
+	f = 0.
+
+	do ie=1,nel
+	  dist = pentry(id)%distfact(ie)
+	  if( dist <= 0. ) cycle
+	  f = f + rcomputev(ie)
+	  n = n + 1
+	end do
+
+	geyer = f / n
+
+	end
+
+!*****************************************************************
+
+	subroutine set_geyer(id,geyer)
+
+! geyer is 0 for closed, 1 for open
+
+	use basin
+	use close
+	use mod_internal
+
+	implicit none
+
+	integer id
+	real geyer
+
+	integer nieboc,i,ie
+	real g,f,dist
+
+	g = geyer
+	g = min(g,1.)
+	g = max(g,0.)
+
+	do ie=1,nel
+	  dist = pentry(id)%distfact(ie)
+	  if( dist <= 0. ) cycle
+	  f = 1. + dist*(g-1.)
+	  rcomputev(ie) = f
+	end do
+
+	!nieboc = size(pentry(id)%ieboc)
+	!pentry(id)%geyer = g
+
+	!do i=1,nieboc
+	!  ie = pentry(id)%ieboc(i)
+	!  rcomputev(ie) = g
+	!end do
+
+	end
+
+!*****************************************************************
+
+	subroutine convk(k,bstop)
+
+	implicit none
+
+	integer k
+	logical bstop
+
+	integer kint
 	integer ipint
 
-!---------------------------------------------------------------
-	integer ipnt,id,isect
-        ipnt(id,isect) = lhead + lsect*(isect-1) + id
-!---------------------------------------------------------------
+	bstop = .false.
+	if( k <= 0 ) return
 
-        k = ipccv(ipnt(lip,isc))
-
-        if( k .gt. 0 ) then
-          kint = ipint(k)
-          if( kint .le. 0 ) then
-                write(6,'(a,i3,a)') ' section CLOSE ',isc,' :'
-                write(6,*) '   node not found ',k
-                bstop = .true.
-          end if
-          ipccv(ipnt(lip,isc)) = kint
-        end if
+	kint = ipint(k)
+	if( kint <= 0 ) then
+	  write(6,*) 'cannot find node: ',k
+	  bstop = .true.
+	end if
+	k = kint
 
 	end
 
-!********************************************************************
+!*****************************************************************
 
-        function volag(mode,z)
+	subroutine print_closing_info(id,text)
 
-! determination of water volume in whole basin
-!
-! uses  either actual level or a fixed level
-!
-! mode:
-!                0       use fixed level z
-!               +1       use water level of new time step
-!               -1       use water level of old time step
-!
-! z             fixed water level, to be used with mode = 0
-! volag         volume of water in basin (return value)
+	use close
+	use mod_hydro
 
-	use basin, only : nkn,nel,ngr,mbw
+	integer id
+	character*(*) text
 
-        implicit none
+	integer iact,imode,ioper
+	integer kref,kin,kout
+	integer izin,izout,izref,izdate,iflux
+	real zin,zout,zref,zdate,geyer,flux
+	double precision dtime
+	character*80 string1,string2
+	character*20 aline
+	integer, save :: icall = 0
 
-        real volag
-        integer mode
-        real z
+	call get_act_dtime(dtime)
 
+	iact = pentry(id)%iact
+	imode = pentry(id)%imode
+	ioper = pentry(id)%ioper
 
-        integer ie
-        real w,vol,area
+	kref = pentry(id)%kref
+	kin = pentry(id)%kin
+	kout = pentry(id)%kout
 
-        real volele,areaele
+	zdate = pentry(id)%zdate
+	geyer = pentry(id)%geyer
+	scal  = pentry(id)%scal
+	if( scal > 0. ) scal = 1.
+	if( scal < 0. ) scal = -1.
 
-        w=0
+	call get_barotropic_flux(id,flux)
+	iflux = nint(flux)
 
-	if( mode .eq. 0 ) then
-	  do ie=1,nel
-	    vol = volele(ie,0)
-	    area = areaele(ie)
-	    vol = vol + area * z
-	    vol = max(vol,0.)
-	    w = w + vol
-	  end do
+	zin=znv(kin)
+        zref=znv(kref)
+	if( kout > 0 ) then
+	  zout=znv(kout)
 	else
-	  do ie=1,nel
-	    vol = volele(ie,mode)
-	    vol = max(vol,0.)
-	    w = w + vol
+	  zout=zvbnds(-kout)
+	end if
+
+	izin = nint(100.*zin)
+	izout = nint(100.*zout)
+	izref = nint(100.*zref)
+	izdate = nint(100.*zdate)
+
+!	if( id == 1 ) icall = icall + 1
+
+!	string1 = '     time    id  iact imode ioper'
+!     +			//' zdate  zref   zin  zout geyer  scal'
+
+!	string2 = '      date and time   id iact mode oper'
+!     +			//' zctr zref  zin zout geyer  scal   flux'
+
+!	it = nint(dtime)
+!	call get_timeline(dtime,aline)
+!	if( mod(icall-1,50) == 0 ) write(70+id,*) trim(string1)
+!	write(70+id,1000) it,id,iact,imode,ioper
+!     +			,izdate,izref,izin,izout,geyer,scal
+
+!	if( id == 1 ) write(66,*) trim(string1)
+!	write(66,1000) it,id,iact,imode,ioper
+!     +			,izdate,izref,izin,izout,geyer,scal
+! 1000	format(i10,8i6,2f6.2)
+
+!	if( id == 1 ) write(68,*) trim(string2)
+!	write(68,1100) aline,id,iact,imode,ioper
+!     +			,izdate,izref,izin,izout,geyer,scal,iflux
+! 1100	format(a20,8i5,2f6.2,i7)
+
+	end
+
+!*****************************************************************
+
+	subroutine adjust_distfact(ndist,fact,efact)
+
+! sets up array efact - will be between 1 (barriers) and 0 (far field)
+
+	use basin
+
+	implicit none
+
+	integer ndist
+	real fact(nkn)
+	real efact(nel)
+
+	integer k,ie,ii
+	real fdist,fdist2,f,fmax,fdiv
+
+	fdist = ndist + 1
+	!fdist2 = fdist/2
+	fdist2 = 0
+	fdiv = fdist - fdist2
+
+	do k=1,nkn
+	  if( fact(k) == 1 ) then		!starting point - closing 
+	    fact(k) = 1
+	  else if( fact(k) < fdist2 ) then
+	    fact(k) = 1
+	  else if( fact(k) > fdist ) then
+	    fact(k) = 0
+	  else
+	    f = fact(k) - fdist2
+	    fact(k) = 1. - f/fdiv
+	  end if
+	end do
+
+	where( fact > 1 ) fact = 1
+	where( fact < 0 ) fact = 0
+
+	do ie=1,nel
+	  fmax = 0.
+	  do ii=1,3
+	    k = nen3v(ii,ie)
+	    f = fact(k)
+	    fmax = max(fmax,f)
 	  end do
-	end if
-
-        volag=w
-
-        end
-
-!*****************************************************************
-
-	subroutine set_zdate(isc,zdate)
-
-	implicit none
-
-	include 'close.h'
-
-	integer isc
-	real zdate
-
-	integer j
-        integer isc_start,isc_end
-
-!---------------------------------------------------------------
-        integer ipnt,id,isect
-        ipnt(id,isect) = lhead + lsect*(isect-1) + id
-!---------------------------------------------------------------
-
-        call make_obc_range(isc,isc_start,isc_end)
-
-	do j=isc_start,isc_end
-	    rpccv(ipnt(lzdate,j)) = zdate
+	  efact(ie) = fmax
 	end do
 
 	end
 
 !*****************************************************************
 
-	subroutine get_zdate(isc,zdate)
+	subroutine check_dist
+
+	use basin
+	use close
 
 	implicit none
 
-	include 'close.h'
+	integer id
+	real dist(nel)
+	integer check(nel)
 
-	integer isc
-	real zdate
-
-        integer isc_start,isc_end
-
-!---------------------------------------------------------------
-        integer ipnt,id,isect
-        ipnt(id,isect) = lhead + lsect*(isect-1) + id
-!---------------------------------------------------------------
-
-        call make_obc_range(isc,isc_start,isc_end)
-
-	zdate = rpccv(ipnt(lzdate,isc_start))
-
-	end
-
-!*****************************************************************
-
-        subroutine make_obc_range(isc,isc_start,isc_end)
-
-        implicit none
-
-	include 'close.h'
-
-	integer isc
-        integer isc_start
-        integer isc_end
-
-	integer nsc
-
-!---------------------------------------------------------------
-        integer ipnt,id,isect
-        ipnt(id,isect) = lhead + lsect*(isect-1) + id
-!---------------------------------------------------------------
-
-	nsc=ipccv(ipnt(lnsect,0))
-
-	if( isc .le. 0 ) then
-          isc_start = 1
-          isc_end = nsc
-	else if( isc .le. nsc ) then
-          isc_start = isc
-          isc_end = isc
-        else
-	  write(6,*) isc,nsc
-	  stop 'error stop make_obc_range: isc out of bounds'
-	end if
-
-	end
-
-!*****************************************************************
-
-        subroutine get_new_mode(j,it,iact,imode)
-
-        implicit none
-
-        integer j,it,iact,imode
-
-        include 'close.h'
-
-        integer icycle
-	integer jitb,nitb
-
-!---------------------------------------------------------------
-         integer ipnt,id,isect
-         ipnt(id,isect) = lhead + lsect*(isect-1) + id
-!---------------------------------------------------------------
-
-        nitb=ipccv(ipnt(lnitb,j))
-        jitb=ipccv(ipnt(litb,j))-1
-        icycle = 4
-
-	do while (              iact .gt. 0 &
-     &                  .and.   it .ge. ivccv(jitb+iact) &
-     &			.and.   ivccv(jitb+iact) .ne. -999 )
-
-		imode=ivccv(jitb+iact+1)
-		iact=iact+2
-		if( iact .gt. nitb ) then	!no more data
-		  if( icycle .gt. 0 ) then	!use old data
-		    iact = iact - icycle
-                    !if( iact .le. 0 ) iact = 1
-		  else				!no more closings
-		    iact = 0
-		  end if
-		end if
+	check = 0
+	do id=1,nclose
+	  dist = dist + pentry(id)%distfact
+	  where( pentry(id)%distfact > 0 ) check = check + 1
 	end do
 
-        end
+	if( maxval(check) > 1 ) then
+	  write(6,*) 'barriers are too close for chosen value of ndist'
+	  stop 'error stop check_dist: ndist too big'
+	end if
+
+	call basin_to_grd
+	call grd_flag_depth
+	call grd_set_element_depth(dist)
+	call grd_write('dist_close.grd')
+
+	end
 
 !*****************************************************************
 

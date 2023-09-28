@@ -189,8 +189,7 @@ SOLVER = SPARSKIT
 
 # PETSC_DIR it the path to the PETSc installation folder, it is 
 # needed for both the PETSc and the PETSc_AmgX solvers
-PETSC_DIR =  /zeus/opt/impi20.1/petsc/3.7.5/
-MPI_DIR =   /zeus/opt/intel20/intel/compilers_and_libraries_2020.1.217/linux/mpi/intel64/
+PETSC_DIR =
 
 # The next 4 paths must be filled in for the PETSc_AmgX solver only.
 
@@ -359,12 +358,11 @@ DISTRIBUTION_TYPE = experimental
 # DEFINE DIRECTORIES
 ##############################################
 
-FEMBIN = ../bin
 DEFDIR  = $(HOME)
-FEMDIR  = ..
-DIRLIB  = $(FEMDIR)/lib
+LIBDIR  = $(FEMDIR)/lib
+BINDIR  = $(FEMDIR)/bin
 MODDIR  = 
-MODDIR  = $(DIRLIB)/mod
+MODDIR  = $(LIBDIR)/mod
 
 LIBX = -L/usr/X11R6/lib -L/usr/X11/lib -L/usr/lib/X11  -lX11
 
@@ -520,8 +518,8 @@ endif
 # determines major version for compilers
 ##############################################
 
-GMV := $(shell $(FEMBIN)/cmv.sh -quiet gfortran)
-IMV := $(shell $(FEMBIN)/cmv.sh -quiet intel)
+GMV := $(shell $(BINDIR)/cmv.sh -quiet gfortran)
+IMV := $(shell $(BINDIR)/cmv.sh -quiet intel)
 GMV_LE_4  := $(shell [ $(GMV) -le 4 ] && echo true || echo false )
 GMV_LE_8  := $(shell [ $(GMV) -le 8 ] && echo true || echo false )
 IMV_LE_14 := $(shell [ $(IMV) -le 14 ] && echo true || echo false )
@@ -588,9 +586,9 @@ endif
 # end of special treatment
 ##############################################
 
-FGNU_GENERAL = -cpp
+FGNU_GENERAL = -cpp -std=f95
 ifdef MODDIR
-  FGNU_GENERAL = -cpp -J$(MODDIR)
+  FGNU_GENERAL = -cpp -J$(MODDIR) 
 endif
 
 FGNU_PROFILE = 

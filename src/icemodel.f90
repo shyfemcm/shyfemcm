@@ -580,7 +580,7 @@ implicit none
 
 double precision vars(nvars)
 
-!all ice_copy_out(vars)
+call ice_copy_out(vars)
 
 end subroutine
 
@@ -757,33 +757,33 @@ double precision, parameter :: keff_p3=-4.2*1.D4
 double precision :: Si_mix
 integer :: nloop
 
-!all ice_copy_in(vars)
+call ice_copy_in(vars)
 h_mix = hm
 !   FREEZING TEMPERATURE BASED ON SALINITY
-!all freezing_temperature(Sw,Tfr)
+call freezing_temperature(Sw,Tfr)
 
 !   SNOW DENSITY
-!all snow_density(T0(1),ros,ros_new)
+call snow_density(T0(1),ros,ros_new)
 
 !   SNOW PRECIPITATION
-!all snow_precipitation(hs_prec,Ta,hi(1),P_rate,deltat)
+call snow_precipitation(hs_prec,Ta,hi(1),P_rate,deltat)
 
 !   PRECIPITATION IN BUCKET MODEL
-!all precipitation_in_bucket(delta_bucket,hs_prec_bucket(2),ros_av, &
+call precipitation_in_bucket(delta_bucket,hs_prec_bucket(2),ros_av, &
                hs_prec_bucket(1),hs_prec,hs(1),ros,ros_new)
 
 !	THERMAL CONDUCTIVITY OF NEW/OLD SNOW
-!all snow_thermal_conductivity(kks,ks_av,ros_new,ros,hs(1),hs_prec_bucket(2))
+call snow_thermal_conductivity(kks,ks_av,ros_new,ros,hs(1),hs_prec_bucket(2))
 
 !   ALBEDO COMPUTATION	
 ! (after Flato and Brown, 1996 for landfast sea ice of the Arctic)
-!all albedo(alpha,T0(1),hi(1),hs(1),hs_prec_bucket(2),hmi(1))
+call albedo(alpha,T0(1),hi(1),hs(1),hs_prec_bucket(2),hmi(1))
 
 !   EXTICTION COEFFICIENT COMPUTATION
-!all extinction_coeff(ks_snow,kmi_av,ksi_10_av,ksi_av,T0(1),Cl)
+call extinction_coeff(ks_snow,kmi_av,ksi_10_av,ksi_av,T0(1),Cl)
 
 ! 	HEAT FLUXES NOT DEPENDENT ON T0
-!all heat_fluxes(Fs,Fla,Fld,Fw,alpha,Fsd_cloud,qa,Ua,qs,hi(1),Ta,Cl, &
+call heat_fluxes(Fs,Fla,Fld,Fw,alpha,Fsd_cloud,qa,Ua,qs,hi(1),Ta,Cl, &
     Tmix(1))
 
 !	SURFACE TEMPERATURE ITERATION AND FLUXES 
@@ -940,12 +940,12 @@ Ti(2)=Ti_iter;      !   NEW SEA ICE TEMPERATURE
 !Tmix(2)=Tmix_star;  !   NEW MIX LAYER TEMPERATURE
 
 ! ::RASA: ! SEA ICE TEMPERATURE
-!all temperature_of_ice(Tice,hmi(1),kkice_surf,Ti(2),hi(1),Tsi(2),hs(1), &
+call temperature_of_ice(Tice,hmi(1),kkice_surf,Ti(2),hi(1),Tsi(2),hs(1), &
     hs_prec_bucket(2),ks_av,Ts(2),T0(2))
 
 !   RECOMPUTE SURFACE FLUXES
 
-!all surface_fluxes_recompute(Flu,Fl,Fse,F,R(2),Qss,Qmi,Qi_surf,Qi_bott, &
+call surface_fluxes_recompute(Flu,Fl,Fse,F,R(2),Qss,Qmi,Qi_surf,Qi_bott, &
     T0(2),Fld,Ua,Ta,Fs,Fla,ros,Ts(2),Tsi(2),ro_sice_surf(1),Ti(2),Si(1), &
     ro_sice_bott(1))
 
@@ -1259,13 +1259,13 @@ end if
 !   PROPERTIES DEPENDING ON T,S
 
 ! ::RASA: densities
-!all depending_on_TS_densities(Tice_av,Sice_av,F1,F2,roi_surf, &
+call depending_on_TS_densities(Tice_av,Sice_av,F1,F2,roi_surf, &
     ro_sice_surf(2),ro_sice_bott(2),roi_av,ro_sice_bulk(2),ro_br(2),ro_br_i(2),ro_br_5(2), &
     ro_br_bio(2),ro_br_bott(2),Ti(2),Sice_bott(2),Sice(2),Tice,Sbr_ice(2),Sbr_i(2),Sbr_5(2), &
     Sbr_bio(2),Sbr_bott(2))
 
 ! ::RASA: thermal conductivities
-!all depending_on_TS_thermal_conductivity(k0i,kb,k0i_5_bio,kb_5_bio, &
+call depending_on_TS_thermal_conductivity(k0i,kb,k0i_5_bio,kb_5_bio, &
     ki_5_bio(2),k0i_ice_5,kb_ice_5,ki_ice_5(2),k0i_ice_bott,kb_ice_bott, &
     ki_ice_bott(2),k0i_5_bott,kb_5_bott,ki_5_bott(2),k0i_ice_bio,kb_ice_bio, &
     ki_ice_bio(2),k0i_bio_bott,kb_bio_bott,ki_bio_bott(2),Tice_av,Tice_5(2), &
@@ -1282,7 +1282,7 @@ if ( Ta > Tfr .and. hi(2) > hi(1) ) then
     hi(2) = hi(1)
 end if
 
-!all ice_copy_out(vars)
+call ice_copy_out(vars)
 !call ice_new2old
 
 iceth=hi(2)
@@ -3184,7 +3184,7 @@ double precision ISI_it
 I0_it=vis_fr*Fs*exp(-ks_snow*(hs_old+hs_prec_bucket));
 IM_it=I0_it*exp(-kmi_av*hmi_old);
 
-!all temperature_fraction_of_solar_radiation_penetration(ksi_10_av,ksi_av, &
+call temperature_fraction_of_solar_radiation_penetration(ksi_10_av,ksi_av, &
     hi_old,IM_it,ISI_it);
 
 T0_star=((1-Ks/(la+sen+lat+cons))*T0_star_old)+((Ks/(la+sen+lat+cons)) &
@@ -3297,7 +3297,7 @@ double precision ISI_it
 I0_it=vis_fr*Fs*exp(-ks_snow*(hs_old+hs_prec_bucket));
 IM_it=I0_it;
 
-!all temperature_fraction_of_solar_radiation_penetration(ISI_it,ksi_10_av, &
+call temperature_fraction_of_solar_radiation_penetration(ISI_it,ksi_10_av, &
     ksi_av,hi_old,IM_it);
 
 T0_star=((1-Ks/(la+sen+lat+cons))*T0_star_old)+((Ks/(la+sen+lat+cons)) &
@@ -3375,7 +3375,7 @@ double precision ISI_it
 I0_it=vis_fr*Fs*exp(-kmi_av*hmi_old);
 IM_it=I0_it;
 
-!all temperature_fraction_of_solar_radiation_penetration(ISI_it,ksi_10_av, &
+call temperature_fraction_of_solar_radiation_penetration(ISI_it,ksi_10_av, &
     ksi_av,hi_old,IM_it);
 
 T0_star=((1-Kmi/(la+sen+lat+conmi))*T0_star_old)+((Kmi/(la+sen+lat+conmi)) &

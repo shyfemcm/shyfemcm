@@ -221,9 +221,9 @@
                   a(kfirst) = tmp
                endif
             endif
-            if (ja(klast).ge.i)
+            if (ja(klast).ge.i)     &
      &         klast = klast - 1
-            if (ja(kfirst).lt.i)
+            if (ja(kfirst).lt.i)    &
      &         kfirst = kfirst + 1
             go to 130
          endif
