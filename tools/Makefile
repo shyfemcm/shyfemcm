@@ -7,10 +7,16 @@
 #
 #------------------------------------------------------------------------
 
+FEMDIR = ..
+BINDIR = $(FEMDIR)/bin
+SUBDIRS = grid mesh postscript hcbs gridadj
 
-default: nothing
+#------------------------------------------------------------------------
+
+default: fem
 
 fem: nothing
+	$(BINDIR)/recursivemake $@ $(SUBDIRS)
 
 regress: nothing
 
@@ -22,8 +28,10 @@ list:
 depend: nothing
 
 clean: nothing
+	$(BINDIR)/recursivemake $@ $(SUBDIRS)
 
 cleanall: nothing
+	$(BINDIR)/recursivemake $@ $(SUBDIRS)
 
 save: nothing
 

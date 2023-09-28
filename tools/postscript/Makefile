@@ -9,19 +9,19 @@
 
 #-----------------------------------------------------------
 
-DIR    = post
+DIR    = postscript
 
 #----------------------------------------------------------- just for default
-FEMDIR = ..
-FEMBIN    = $(FEMDIR)/fembin
-DIRLIB = $(FEMDIR)/femlib
+FEMDIR = ../..
+FEMBIN    = $(FEMDIR)/bin
+DIRLIB = $(FEMDIR)/lib
 CC     = gcc
 CFLAGS =  -O -Wall -pedantic
 F77    = g77
 FFLAGS =  -O -Wall
 #-----------------------------------------------------------
 
-include ../Rules.make
+include $(FEMDIR)/Rules.make
 
 #-----------------------------------------------------------
 

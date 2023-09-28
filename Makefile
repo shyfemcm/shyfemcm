@@ -146,8 +146,8 @@ bfm_clean:
 	@fembfm/bfm_compile.sh -clean $(BFMDIR)
 
 nograph: checkv directories links test_executable
-	@$(FEMBIN)/recursivemake fem $(FEMNOGRAPH)
-	@femcheck/check_compilation.sh -quiet -nograph
+	#@$(FEMBIN)/recursivemake fem $(FEMNOGRAPH)
+	#@femcheck/check_compilation.sh -quiet -nograph
 
 docs: doc
 doc:
@@ -175,10 +175,10 @@ directories:
 	@if [ ! -f ./arc/Makefile ]; then cp ./var/rules/Makefile ./arc; fi
 
 links:
-	@-rm -fr bin lib
-	@-ln -sf fembin bin
-	@-ln -sf femlib lib
-	@if [ ! -d ./femregress ]; then ln -fs femdummy femregress; fi
+	#@-rm -fr bin lib
+	#@-ln -sf fembin bin
+	#@-ln -sf femlib lib
+	#@if [ ! -d ./femregress ]; then ln -fs femdummy femregress; fi
 
 ctags:
 	@echo "making tags file..."

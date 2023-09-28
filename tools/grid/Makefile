@@ -12,14 +12,14 @@
 DIR    = grid
 
 #---------------------------------------------	just for default
-FEMDIR  = ..
-FEMBIN = $(FEMDIR)/fembin
+FEMDIR  = ../..
+FEMBIN = $(FEMDIR)/bin
 LIBX = -L/usr/X11R6/lib -L/usr/X11/lib -L/usr/lib/X11  -lX11
 CC     = gcc
 CFLAGS =  -O -Wall -pedantic
 #---------------------------------------------
 
-include ../Rules.make
+include $(FEMDIR)/Rules.make
 
 #---------------------------------------------
 
