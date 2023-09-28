@@ -1783,8 +1783,8 @@
  50   ipar(7) = ipar(7) + 1
       ptr = k * (k - 1) / 2 + hes
       p2 = ipar(9)
-      call mgsro(.false.,n,n,k+1,k+1,fpar(11),w,w(ptr+1),
-     $     ipar(12))
+      call mgsro(.false.,n,n,k+1,k+1,fpar(11),w,w(ptr+1),     &
+     &     ipar(12))
       if (ipar(12).lt.0) goto 200
 !
 !     apply previous Givens rotations to column.
@@ -2099,8 +2099,7 @@
  50   ipar(7) = ipar(7) + 1
       ptr = k * (k - 1) / 2 + hess
       p2 = ipar(9)
-      call mgsro(.false.,n,n,k+1,k+1,fpar(11),w,w(ptr+1),
-     $     ipar(12))
+      call mgsro(.false.,n,n,k+1,k+1,fpar(11),w,w(ptr+1), ipar(12))
       if (ipar(12).lt.0) goto 200
 !
 !     apply previous Givens rotations and generate a new one to eliminate
@@ -2420,8 +2419,8 @@
 !     previous vectors
 !
  60   continue
-      call mgsro(full,n,n,lb,jp1,fpar(11),w(iv+1),w(ihm+1),
-     $     ipar(12))
+      call mgsro(full,n,n,lb,jp1,fpar(11),w(iv+1),w(ihm+1),     &
+     &     ipar(12))
       if (ipar(12).lt.0) then
          ipar(1) = -3
          goto 80
@@ -2710,8 +2709,8 @@
  50   ptr = k * (k - 1) / 2 + hess
       p2 = ipar(9)
       ipar(7) = ipar(7) + 1
-      call mgsro(.false.,n,n,k+1,k+1,fpar(11),w,w(ptr+1),
-     $     ipar(12))
+      call mgsro(.false.,n,n,k+1,k+1,fpar(11),w,w(ptr+1),     &
+     &     ipar(12))
       if (ipar(12).lt.0) goto 200
 !
 !     apply previous Givens rotations and generate a new one to eliminate
@@ -2825,8 +2824,8 @@
             ipar(1) = -10
          endif
       endif
- 300  if (fpar(3).ne.zero .and. fpar(6).ne.zero .and.
-     $     ipar(7).gt.ipar(13)) then
+ 300  if (fpar(3).ne.zero .and. fpar(6).ne.zero .and. &
+     &     ipar(7).gt.ipar(13)) then
          fpar(7) = log10(fpar(3) / fpar(6)) / dble(ipar(7)-ipar(13))
       else
          fpar(7) = zero
@@ -3478,7 +3477,7 @@
 !     fpar(1) and fpar(2) can NOT both be zero
 !     Normally returns ipar(1) = -4 to indicate any of above error
 !
-      if (fpar(1).lt.zero .or. fpar(1).ge.one .or. fpar(2).lt.zero .or.
+      if (fpar(1).lt.zero .or. fpar(1).ge.one .or. fpar(2).lt.zero .or.     &
      &     (fpar(1).eq.zero .and. fpar(2).eq.zero)) then
          if (ipar(1).eq.0) then
             ipar(1) = -4

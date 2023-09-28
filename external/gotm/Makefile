@@ -10,33 +10,34 @@
 
 #------------------------------------------------------------------------
 #
-# $Id: Makefile,v 1.6 2005-07-06 14:07:17 kbk Exp $
+#$Id: Makefile,v 1.6 2005-07-06 14:07:17 kbk Exp $
 #
 # Makefile to build the the Turbulence library - libturbulence.a
 #
 # customized by Georg Umgiesser for SHYFEM (GGU)
 #
-#------------------------------------------------------------------------
+#--------------------   FILES   ----------------------------
 
-FEMDIR = ..
-FEMBIN = $(FEMDIR)/fembin
-
-include ../Rules.make
+include ../../Rules.make
 
 LIB	= $(LIBDIR)/libturbulence$(buildtype).a
+#--------------------   MODULE   ---------------------------
+
+MODDIR = .
 
 #------------------------------------------------------------
 
-DIR     = femgotm
 LIBGOTM  = gotm
 LIB = $(DIRLIB)/lib$(LIBGOTM).a
-LIBDIR = $(DIRLIB)
-MODDIR = .
+
+#------------------------------------------------------------
 
 EXTRA_DOCSRC = 		\
 tridiagonal.F90         \
 diff_face.F90           \
 fem_gotm_interface.F90	
+
+#------------------------------------------------------------
 
 EXTRA_MOD =		\
 tridiagonal.o		\
@@ -83,6 +84,8 @@ internal_wave.F90       \
 fk_craig.F90            \
 kpp.F90                 \
 gotm_lib_version.F90
+
+#------------------------------------------------------------
 
 MOD   = \
 $(EXTRA_MOD)		\

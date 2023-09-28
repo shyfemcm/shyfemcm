@@ -359,11 +359,10 @@ DISTRIBUTION_TYPE = experimental
 # DEFINE DIRECTORIES
 ##############################################
 
-FEMBIN = ../bin
 DEFDIR  = $(HOME)
-FEMDIR  = ..
+FEMDIR  = /work/asc/gm30419/newdir/shyfemcm
+FEMBIN = $(FEMDIR)/bin
 DIRLIB  = $(FEMDIR)/lib
-MODDIR  = 
 MODDIR  = $(DIRLIB)/mod
 
 LIBX = -L/usr/X11R6/lib -L/usr/X11/lib -L/usr/lib/X11  -lX11

@@ -420,12 +420,12 @@
 !-----------------------------------------------------------------------
       end
 !----------------------------------------------------------------------
-      subroutine ilutp(n,a,ja,ia,lfil,droptol,permtol,mbloc,alu,
-     *     jlu,ju,iwk,w,jw,iperm,ierr)
+      subroutine ilutp(n,a,ja,ia,lfil,droptol,permtol,mbloc,alu,     &
+     &     jlu,ju,iwk,w,jw,iperm,ierr)
 !-----------------------------------------------------------------------
 !     implicit none
-      integer n,ja(*),ia(n+1),lfil,jlu(*),ju(n),jw(2*n),iwk,
-     *     iperm(2*n),ierr
+      integer n,ja(*),ia(n+1),lfil,jlu(*),ju(n),jw(2*n),iwk,     &
+     &     iperm(2*n),ierr
       real*8 a(*), alu(*), w(n+1), droptol
 !----------------------------------------------------------------------*
 !       *** ILUTP preconditioner -- ILUT with pivoting  ***            *
@@ -518,8 +518,8 @@
 !-----------------------------------------------------------------------
 !     local variables
 !
-      integer k,i,j,jrow,ju0,ii,j1,j2,jpos,len,imax,lenu,lenl,jj,mbloc,
-     *     icut
+      integer k,i,j,jrow,ju0,ii,j1,j2,jpos,len,imax,lenu,lenl,jj,mbloc,    &
+     &     icut
       real*8 s, tmp, tnorm,xmax,xmax0, fact, abs, t, permtol
 !     
       if (lfil .lt. 0) goto 998
@@ -731,8 +731,8 @@
         icut = ii - 1 + mbloc - mod(ii-1,mbloc)
         do k=ii+1,ii+len-1
            t = abs(w(k))
-           if (t .gt. xmax .and. t*permtol .gt. xmax0 .and.
-     *          jw(k) .le. icut) then
+           if (t .gt. xmax .and. t*permtol .gt. xmax0 .and.     &
+     &          jw(k) .le. icut) then
               imax = k
               xmax = t
            endif
@@ -1152,12 +1152,12 @@
 !-----------------------------------------------------------------------
       end
 !----------------------------------------------------------------------
-      subroutine iludp(n,a,ja,ia,alph,droptol,permtol,mbloc,alu,
-     *     jlu,ju,iwk,w,jw,iperm,ierr)
+      subroutine iludp(n,a,ja,ia,alph,droptol,permtol,mbloc,alu,     &
+     &     jlu,ju,iwk,w,jw,iperm,ierr)
 !-----------------------------------------------------------------------
       implicit none
-      integer n,ja(*),ia(n+1),mbloc,jlu(*),ju(n),jw(2*n),iwk,
-     *     iperm(2*n),ierr
+      integer n,ja(*),ia(n+1),mbloc,jlu(*),ju(n),jw(2*n),iwk,     &
+     &     iperm(2*n),ierr
       real*8 a(*), alu(*), w(2*n), alph, droptol, permtol 
 !----------------------------------------------------------------------*
 !                     *** ILUDP preconditioner ***                     *
@@ -1439,8 +1439,8 @@
 ! 
         do k=ii+1,ii+len 
            t = abs(w(k))
-           if (t .gt. xmax .and. t*permtol .gt. xmax0 .and.
-     *          jw(k) .le. icut) then
+           if (t .gt. xmax .and. t*permtol .gt. xmax0 .and.    &
+     &          jw(k) .le. icut) then
               imax = k
               xmax = t
            endif
@@ -1594,8 +1594,8 @@
 !
 !----------------------------------------------------------------------* 
 !     locals
-      integer ju0,k,j1,j2,j,ii,i,lenl,lenu,jj,jrow,jpos,n2,
-     *     jlev, min 
+      integer ju0,k,j1,j2,j,ii,i,lenl,lenu,jj,jrow,jpos,n2,     &
+     &     jlev, min 
       real*8 t, s, fact 
       if (lfil .lt. 0) goto 998
 !-----------------------------------------------------------------------
@@ -2071,8 +2071,8 @@
 !-----------------------------------------------------------------------
            end
 !-----------------------------------------------------------------------
-       subroutine pgmres(n, im, rhs, sol, vv, eps, maxits, iout,
-     *                    aa, ja, ia, alu, jlu, ju, ierr)
+       subroutine pgmres(n, im, rhs, sol, vv, eps, maxits, iout,     &
+     &                    aa, ja, ia, alu, jlu, ju, ierr)
 !-----------------------------------------------------------------------
        implicit real*8 (a-h,o-z)
        integer n, im, maxits, iout, ierr, ja(*), ia(n+1), jlu(*), ju(n)
@@ -2178,8 +2178,7 @@
  21    continue
 !-------------------------------------------------------------
  20    ro = dnrm2(n, vv, 1)
-       if (iout .gt. 0 .and. its .eq. 0)
-     *      write(iout, 199) its, ro
+       if (iout .gt. 0 .and. its .eq. 0)  write(iout, 199) its, ro
        if (ro .eq. 0.0d0) goto 999
        t = 1.0d0/ ro
        do 210 j=1, n
@@ -2240,8 +2239,7 @@
        hh(i,i) = c(i)*hh(i,i) + s(i)*hh(i1,i)
        ro = abs(rs(i1))
 ! 131   format(1h ,2e14.4)
-       if (iout .gt. 0)
-     *      write(iout, 199) its, ro
+       if (iout .gt. 0) write(iout, 199) its, ro
        if (i .lt. im .and. (ro .gt. eps1))  goto 4
 !
 !     now compute solution. first solve upper triangular system.

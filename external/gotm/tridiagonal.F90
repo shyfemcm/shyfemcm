@@ -179,7 +179,7 @@
       qu(i)=(du(i)-cu(i)*qu(i+1))/(bu(i)-cu(i)*ru(i+1))
    end do
 
-   if( N == 2 ) then		!GGU_BUG_FIX_2
+   if( N == 2 ) then    !GGU_BUG_FIX_2
      ru(0) = 0.
      qu(0) = 0.
      ru(N) = 0.

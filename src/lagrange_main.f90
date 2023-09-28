@@ -442,7 +442,7 @@
 !   - particle type 
 !   - curstom properties (nc)
 
-        subroutine lgr_set_properties(bsedim,blarvae,boilsim,pt,ps,pc,
+        subroutine lgr_set_properties(bsedim,blarvae,boilsim,pt,ps,pc,     &
      &                                nc)
 
         use lgr_sedim_module, only : lgr_set_sedim

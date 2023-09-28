@@ -111,8 +111,7 @@
             print *, 'Iterative solver has iterated too many times.'
          else if (ipar(1).eq.-2) then
             print *, 'Iterative solver was not given enough work space.'
-            print *, 'The work space should at least have ', ipar(4),
-     &           ' elements.'
+            print *, 'The work space should at least have ', ipar(4), ' elements.'
          else if (ipar(1).eq.-3) then
             print *, 'Iterative solver is facing a break-down.'
          else
