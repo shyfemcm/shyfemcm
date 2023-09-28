@@ -131,6 +131,7 @@ internal_wave.o
 all: $(MOD) $(OBJ) $(EXTRAOBJ) $(LIB) nothing
 
 $(LIB): $(MOD) $(OBJ)
+	touch $(LIB)
 	ar rvs $(LIB) *.o
 
 $(OBJ): $(MOD)
