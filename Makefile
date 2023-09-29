@@ -24,7 +24,7 @@
 DIR = fem
 RULES_MAKE_VERSION = 0.0	# default if Rules.make cannot be read
 FEMDIR    = .
-FEMBIN    = $(FEMDIR)/fembin
+FEMBIN    = $(FEMDIR)/bin
 
 #---------------------------------------------------------------
 
@@ -53,9 +53,9 @@ export SHYFEMDIR
 #---------------------------------------------------------------
 
 FEMDIR    = .
-DIRLIB    = $(FEMDIR)/femlib
-FEMSRC    = $(FEMDIR)/fem3d
-FEMBIN    = $(FEMDIR)/fembin
+DIRLIB    = $(FEMDIR)/lib
+FEMSRC    = $(FEMDIR)/src
+FEMBIN    = $(FEMDIR)/bin
 TMPDIR    = $(HOME)/fem/tmp
 ACTFEMDIR = `pwd`
 
@@ -112,6 +112,8 @@ FEMNOGRAPH   = $(FEMLIBS) $(FEMEXTRA) $(FEMMESH) $(FEMPROG) $(FEMUTIL)
 # compiling and recursive targets
 #---------------------------------------------------------------
 
+default0: fem
+
 default:
 	@echo "   shyfem - version $(VERSION) $(COMMIT)"
 	@echo '   run "make help" for more information'
@@ -120,9 +122,11 @@ default:
 all: fem doc
 	@cd fem3d; make compatibility
 
-fem: checkv directories links test_executable check_server check_compiler
-	@$(FEMBIN)/recursivemake $@ $(FEMDIRS)
-	@femcheck/check_compilation.sh -quiet
+fem: checkv directories links #test_executable check_server check_compiler
+	cd external/gotm; make
+	cd src; make
+	#@$(FEMBIN)/recursivemake $@ $(FEMDIRS)
+	#@femcheck/check_compilation.sh -quiet
 
 para_get:
 	@cd fempara; ./para_get.sh $(PARADIR)
@@ -142,8 +146,8 @@ bfm_clean:
 	@fembfm/bfm_compile.sh -clean $(BFMDIR)
 
 nograph: checkv directories links test_executable
-	@$(FEMBIN)/recursivemake fem $(FEMNOGRAPH)
-	@femcheck/check_compilation.sh -quiet -nograph
+	#@$(FEMBIN)/recursivemake fem $(FEMNOGRAPH)
+	#@femcheck/check_compilation.sh -quiet -nograph
 
 docs: doc
 doc:
@@ -166,15 +170,15 @@ depend:
 directories:
 	@-mkdir -p tmp arc
 	@-mkdir -p $(HOME)/tmp
-	@-mkdir -p femlib/mod
-	@if [ ! -f ./tmp/Makefile ]; then cp ./femdummy/Makefile ./tmp; fi
-	@if [ ! -f ./arc/Makefile ]; then cp ./femdummy/Makefile ./arc; fi
+	@-mkdir -p lib/mod
+	@if [ ! -f ./tmp/Makefile ]; then cp ./var/rules/Makefile ./tmp; fi
+	@if [ ! -f ./arc/Makefile ]; then cp ./var/rules/Makefile ./arc; fi
 
 links:
-	@-rm -fr bin lib
-	@-ln -sf fembin bin
-	@-ln -sf femlib lib
-	@if [ ! -d ./femregress ]; then ln -fs femdummy femregress; fi
+	#@-rm -fr bin lib
+	#@-ln -sf fembin bin
+	#@-ln -sf femlib lib
+	#@if [ ! -d ./femregress ]; then ln -fs femdummy femregress; fi
 
 ctags:
 	@echo "making tags file..."
@@ -199,6 +203,8 @@ clean: cleanlocal
 
 cleanall: cleanlocal cleanregress
 	$(FEMBIN)/recursivemake $@ $(SUBDIRS)
+	cd external/gotm; make cleanall
+	cd src; make cleanall
 
 cleandist: cleanall
 

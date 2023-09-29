@@ -1,7 +1,7 @@
 
 !--------------------------------------------------------------------------
 !
-!    Copyright (C) 2001,2003,2010  Georg Umgiesser
+!    Copyright (C) 2001,2003,2010,2014,2018-2019  Georg Umgiesser
 !    Copyright (C) 2012  Debora Bellafiore
 !
 !    This file is part of SHYFEM.
@@ -28,11 +28,17 @@
 ! 
 !  revision log :
 ! 
-!  16.10.2001    ggu     new routine fpfeil()
-!  03.09.2003    ggu     bug fix XBXT in fpfeil
-!  05.10.2003    ggu     bug fix S_IS_0 in pfeil
-!  26.03.2010    ggu     new routine fcmpfeil for distorted scales
-!  16.03.2012    dbf     bug fix in fcmpfeil (d was used but not set)
+!  16.10.2001	ggu	new routine fpfeil()
+!  03.09.2003	ggu	bug fix XBXT in fpfeil
+!  05.10.2003	ggu	bug fix S_IS_0 in pfeil
+!  23.03.2010	ggu	changed v6.1.1
+!  26.03.2010	ggu	new routine fcmpfeil for distorted scales
+!  29.09.2010	ggu	changed VERS_6_1_12
+!  16.03.2012	dbf	bug fix in fcmpfeil (d was used but not set)
+!  30.10.2014	ggu	changed VERS_7_0_4
+!  18.12.2018	ggu	changed VERS_7_5_52
+!  13.03.2019	ggu	changed VERS_7_5_61
+!  21.05.2019	ggu	changed VERS_7_5_62
 ! 
 ! **************************************************
 

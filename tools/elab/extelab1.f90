@@ -523,8 +523,8 @@
 	integer, save :: icall = 0
 	integer, save, allocatable :: iusplit(:,:)
 	character*20, save :: time_date = '#          date_time'
-	character*80, save :: title(niu) = ( &
-     &			/'      velx' &
+	character*80, save :: title(niu) =  &
+     &			(/'      velx' &
      &			,'      vely' &
      &			,'      zeta' &
      &			,'     speed' &

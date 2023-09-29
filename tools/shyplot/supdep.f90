@@ -116,7 +116,7 @@
 	  zmin = minval(zenv(:,ie))   !min: z-adapt coords works with zmin
 	  call compute_zadapt_info(zmin,hlv,nsigma,lmax,lmin, &
      & 				   nadapt,hadapt)
-	  call get_layer_thickness(lmax,nsigma,nadapt, &
+	  call get_layer_thickness(lmax,1,nsigma,nadapt, &
      &				   hsigma,hadapt,zeta,hev(ie),hlv,hl)
 	  hetv(ie) = hlthick(level,lmax,hl)
 	end do
@@ -185,7 +185,7 @@
           zmin = minval(zenv(:,ie))   !min: z-adapt coords works with zmin
           call compute_zadapt_info(zmin,hlv,nsigma,lmax,lmin, &
      &                             nadapt,hadapt)
-	  call get_layer_thickness(lmax,nsigma,nadapt, &
+	  call get_layer_thickness(lmax,1,nsigma,nadapt, &
      &			hsigma,hadapt,zeta,hev(ie),hlv,het3v(1,ie))
 !	  call get_layer_thickness_e(ie,lmax,bzeta,nsigma,hsigma
 !     +				,het3v(1,ie))

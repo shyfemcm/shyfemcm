@@ -50,8 +50,8 @@ SHYFEMDIR = ..
 
 #------------------------------------------------------------ just for default
 FEMDIR = ..
-FEMBIN = $(FEMDIR)/fembin
-DIRLIB = $(FEMDIR)/femlib
+FEMBIN = $(FEMDIR)/bin
+DIRLIB = $(FEMDIR)/lib
 F77    = gfortran
 FFLAGS =  -O
 LINKER = $(F77)

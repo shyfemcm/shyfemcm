@@ -37,10 +37,10 @@
 	integer iformat,iwave
         common /supout1/ iformat,iwave
 
-	integer nunit_wave,nunit_ous,nunit_nos,nunit_fvl
-     +			,nunit_eos,nunit_fem
-        common /supout2/ nunit_wave,nunit_ous,nunit_nos,nunit_fvl
-     +                  ,nunit_eos,nunit_fem
+	integer nunit_wave,nunit_ous,nunit_nos,nunit_fvl &
+     &                  ,nunit_eos,nunit_fem
+        common /supout2/ nunit_wave,nunit_ous,nunit_nos,nunit_fvl &
+     &                  ,nunit_eos,nunit_fem
 
 	real regp(7)
 	common /supout3/regp

@@ -12,13 +12,13 @@
 DIR    = mesh
 
 #---------------------------------------------  just for default
-FEMDIR  = ..
-FEMBIN  = $(FEMDIR)/fembin
+FEMDIR  = ../..
+FEMBIN  = $(FEMDIR)/bin
 CC     = gcc
 CFLAGS =  -O -Wall -pedantic
 #---------------------------------------------
 
-include ../Rules.make
+include $(FEMDIR)/Rules.make
 
 #---------------------------------------------
 

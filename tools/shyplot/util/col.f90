@@ -1,7 +1,7 @@
 
 !--------------------------------------------------------------------------
 !
-!    Copyright (C) 2003-2004,2009,2013,2015-2016  Georg Umgiesser
+!    Copyright (C) 2003-2004,2009-2011,2013-2019  Georg Umgiesser
 !
 !    This file is part of SHYFEM.
 !
@@ -27,15 +27,33 @@
 ! 
 !  revision log :
 ! 
-!  05.08.2003    ggu     changed adjcoltab, new cfast, init_cfast
-!  20.08.2003    ggu     some more comments
-!  21.08.2003    ggu     colini is called in colsetup
-!  04.10.2004    ggu     adjust amin and decimal point in colauto
-!  21.04.2009    ggu     allow for constant values (make 2 isolines)
-!  13.06.2013    ggu     small bug fix for computation of dval with rnext
-!  01.10.2013    ggu     bug fix for valmin/valmax too close
-!  06.05.2015    ggu     logarithmic scale introduced (ilog, blog)
-!  15.06.2016    ggu     adjcoltab deleted
+!  05.08.2003	ggu	changed adjcoltab, new cfast, init_cfast
+!  20.08.2003	ggu	some more comments
+!  21.08.2003	ggu	colini is called in colsetup
+!  04.10.2004	ggu	adjust amin and decimal point in colauto
+!  21.04.2009	ggu	allow for constant values (make 2 isolines)
+!  23.03.2010	ggu	changed v6.1.1
+!  09.12.2011	ggu	changed VERS_6_1_38
+!  13.06.2013	ggu	small bug fix for computation of dval with rnext
+!  01.10.2013	ggu	bug fix for valmin/valmax too close
+!  25.10.2013	ggu	changed VERS_6_1_68
+!  18.07.2014	ggu	changed VERS_7_0_1
+!  06.05.2015	ggu	logarithmic scale introduced (ilog, blog)
+!  21.05.2015	ggu	changed VERS_7_1_11
+!  16.11.2015	ggu	changed VERS_7_3_14
+!  18.12.2015	ggu	changed VERS_7_3_17
+!  30.05.2016	ggu	changed VERS_7_5_11
+!  15.06.2016	ggu	adjcoltab deleted
+!  30.09.2016	ggu	changed VERS_7_5_18
+!  13.04.2017	ggu	changed VERS_7_5_25
+!  11.07.2017	ggu	changed VERS_7_5_30
+!  07.12.2017	ggu	changed VERS_7_5_40
+!  24.01.2018	ggu	changed VERS_7_5_41
+!  19.04.2018	ggu	changed VERS_7_5_45
+!  31.08.2018	ggu	changed VERS_7_5_49
+!  18.12.2018	ggu	changed VERS_7_5_52
+!  21.05.2019	ggu	changed VERS_7_5_62
+!  20.09.2022	ggu	in colauto() use absolute value in case val is constant
 ! 
 ! **********************************************************
 ! 
@@ -477,7 +495,7 @@
 
 	  if( valmin .eq. valmax ) then
 	    niso = 2
-	    dval = valmax / 5.
+	    dval = abs(valmax) / 5.
 	    if( dval .eq. 0 ) dval = 1.
 	    amin = valmax - 0.5*dval
 	    amax = amin + dval

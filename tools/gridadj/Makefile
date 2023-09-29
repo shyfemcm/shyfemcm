@@ -9,18 +9,18 @@
 
 #--------------------------------------------- 
 
-DIR	= femadj
+DIR	= gridadj
 
 #--------------------------------------------- just for default
-FEMDIR = ..
-FEMBIN = $(FEMDIR)/fembin
-DIRLIB = $(FEMDIR)/femlib
+FEMDIR = ../..
+FEMBIN = $(FEMDIR)/bin
+DIRLIB = $(FEMDIR)/lib
 F77    = g77
 FFLAGS =  -O -Wall -g
 LINKER = $(F77)
 #---------------------------------------------
 
-include ../Rules.make
+include $(FEMDIR)/Rules.make
 
 #--------------------------------------------- libraries
 
@@ -29,17 +29,24 @@ LIBPOST = post
 
 LIBFS   = -L$(DIRLIB) -l$(LIBFEM)
 LIBIFS  = $(DIRLIB)/lib$(LIBFEM).a
+LIBFS   = 
+LIBIFS  = 
 
 LIBPS   = -L$(DIRLIB) -l$(LIBPOST)
 LIBIPS  = $(DIRLIB)/lib$(LIBPOST).a
 
 #--------------------------------------------- macros
 
-OBJS =
+OBJS =		basin.o depth.o clo.o convert.o vec_util.o \
+		geometrical.o fil.o geom_dynamic.o \
+		grd.o grdutil.o version.o \
+		sort_util.o
 
-ADJOBJS	=	adj4el.o adj5el.o adj7el.o adj575.o \
-		adjplo.o adjgrd.o adjneu.o adjvar.o \
-		mod_adj_grade.o
+ADJOBJS	=	mod_adj_grade.o \
+		adj4el.o adj5el.o adj7el.o adj575.o \
+		adjplo.o adjgrd.o adjneu.o adjvar.o
+
+ALLOBJS =	$(OBJS) $(ADJOBJS) shyadj.o
 
 EXES	=	shyadj
 EXELINKS = 	$(FEMBIN) $(EXES)
@@ -58,8 +65,8 @@ all:	$(EXES)
 links:
 	@$(FEMBIN)/symlink $(EXELINKS)
 
-shyadj:  shyadj.o $(ADJOBJS) $(OBJS) $(LIBIFS) $(LIBIPS)
-	$(LINKER) $(LFLAGS) $@.o $(ADJOBJS) $(OBJS) $(LIBFS) $(LIBPS) -o $@
+shyadj: $(ALLOBJS) $(LIBIFS) $(LIBIPS)
+	$(LINKER) $(LFLAGS) $(ALLOBJS) $(LIBFS) $(LIBPS) -o $@
 
 #--------------------------------------------- clean
 
@@ -114,7 +121,7 @@ diff:
 	@echo "differences written to file DIFFS"
 
 depend:
-	@$(MAKEDEPEND) -moddir=$(MODDIR) *.f
+	@$(MAKEDEPEND) -moddir=$(MODDIR) *.f *.f90
 
 list:
 	pwd; ls
@@ -128,12 +135,15 @@ strip:
 
 #--------------------------------------------- rules
 
-.SUFFIXES: .F
+.SUFFIXES: .F .f90
 
 .c.o:
 	$(CC) -c $(CFLAGS) $*.c
 
 .f.o:
+	$(F77) -c $(FFLAGS) $<
+
+.f90.o:
 	$(F77) -c $(FFLAGS) $<
 
 .F.o:
@@ -145,20 +155,4 @@ strip:
 #--------------------------------------------- makedepend
 
 # DO NOT DELETE THIS LINE -- make depend depends on it.
-
-../femlib/mod/mod_adj_grade.mod: mod_adj_grade.o
-../femlib/mod/mod_adj_static.mod: mod_adj_grade.o
-adj4el.o: ../femlib/mod/basin.mod ../femlib/mod/mod_adj_grade.mod
-adj575.o: ../femlib/mod/basin.mod ../femlib/mod/mod_adj_grade.mod
-adj5el.o: ../femlib/mod/basin.mod ../femlib/mod/mod_adj_grade.mod
-adj7el.o: ../femlib/mod/basin.mod ../femlib/mod/mod_adj_grade.mod
-adjgrd.o: ../femlib/mod/mod_adj_static.mod
-adjneu.o: ../femlib/mod/basin.mod ../femlib/mod/mod_adj_grade.mod \
-		../femlib/mod/mod_depth.mod 
-adjplo.o: ../femlib/mod/basin.mod ../femlib/mod/mod_adj_grade.mod
-adjvar.o: ../femlib/mod/basin.mod ../femlib/mod/mod_adj_grade.mod \
-		../femlib/mod/mod_adj_static.mod 
-shyadj.o: ../femlib/mod/basin.mod ../femlib/mod/clo.mod \
-		../femlib/mod/mod_adj_grade.mod \
-		../femlib/mod/mod_depth.mod 
 

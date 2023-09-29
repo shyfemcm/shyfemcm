@@ -13,9 +13,9 @@ DIR    = hcbs
 
 #-----------------------------------------------------------
 
-FEMDIR = ..
-DIRLIB = $(FEMDIR)/femlib
-FEMBIN = $(FEMDIR)/fembin
+FEMDIR = ../..
+DIRLIB = $(FEMDIR)/lib
+FEMBIN = $(FEMDIR)/bin
 F77    = g77
 FFLAGS =  -O
 LINKER = $(F77)
@@ -25,7 +25,7 @@ CFLAGS = -O -Wall -pedantic
 
 #------------------------------------------------------------
 
-include ../Rules.make
+include $(FEMDIR)/Rules.make
 
 #------------------------------------------------------------
 
