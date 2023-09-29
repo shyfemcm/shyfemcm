@@ -812,9 +812,9 @@
 
 	do ie=1,nel,nchunk
 
-!$OMP TASK FIRSTPRIVATE(ie,bcolin,baroc,az,am,af,at,radv
-!$OMP& 	   ,vismol,rrho0,dt) PRIVATE(ies,iend,rmsdif,rmsmax)
-!$OMP&     SHARED(nel,nchunk)	 DEFAULT(NONE)
+!$OMP TASK FIRSTPRIVATE(ie,bcolin,baroc,az,am,af,at,radv       &
+!$OMP & 	   ,vismol,rrho0,dt) PRIVATE(ies,iend,rmsdif,rmsmax)  &
+!$OMP &     SHARED(nel,nchunk)	 DEFAULT(NONE)
 	 
 	  rmsmax = 0.
  	  iend = ie+nchunk-1

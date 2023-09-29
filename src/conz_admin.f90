@@ -406,8 +406,8 @@
 
 	do i=1,nvar
 
-!$OMP  TASK FIRSTPRIVATE(i,rkpar,wsink,difhv,difv,difmol,idconz,what,
-!$OMP& dt,nlvdi,idecay,blinfo,bage) 
+!$OMP  TASK FIRSTPRIVATE(i,rkpar,wsink,difhv,difv,difmol,idconz,what,   &
+!$OMP& dt,nlvdi,idecay,blinfo,bage)                                     &
 !OMP&  SHARED(conzv,tauv,massv) DEFAULT(NONE)
  
           call scal_adv(what,i &

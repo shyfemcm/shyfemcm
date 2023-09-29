@@ -289,8 +289,8 @@
 !$OMP TASKWAIT
 !!!$OMP TASKGROUP
        do knod=1,ntot,nchunk
-!$OMP TASK FIRSTPRIVATE(knod) PRIVATE(k) DEFAULT(NONE)
-!$OMP& SHARED(cn,cdiag,clow,chigh,cn1,cbound,load,nchunk,
+!$OMP TASK FIRSTPRIVATE(knod) PRIVATE(k) DEFAULT(NONE)      &
+!$OMP& SHARED(cn,cdiag,clow,chigh,cn1,cbound,load,nchunk,   &
 !$OMP&           rload,ad,aa,dt,nlvddi,ntot)
 	 do k=knod,knod+nchunk-1
 	 if(k .le. ntot) then
