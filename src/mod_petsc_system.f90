@@ -465,17 +465,17 @@
      &            self%vecx3,' in row,col=', &
      &           nodes_eleshy2block(:,ie)
 #endif
-          call MatSetValues(self%A, ! the matrix that is set &
-     &                 three,nodes_eleshy2block(:,ie),     ! the number of rows and their global indices  &
-     &                 three,nodes_eleshy2block(:,ie),     ! the number of columns and their global indices &
-     &                 self%mat3x3,         ! the block of values to be inserted &
-     &                 ADD_VALUES,   ! sum with matrix values &
+          call MatSetValues(self%A,                      & ! the matrix that is set &
+     &                 three,nodes_eleshy2block(:,ie),   &     ! the number of rows and their global indices  &
+     &                 three,nodes_eleshy2block(:,ie),   &  ! the number of columns and their global indices &
+     &                 self%mat3x3,                      &         ! the block of values to be inserted &
+     &                 ADD_VALUES,                       &   ! sum with matrix values &
      &                 perr)
 
-          call VecSetValues(self%B, ! the matrix that is set &
-     &                 three,nodes_eleshy2block(:,ie),     ! the number of elements and their global indices  &
-     &                 self%vecx3,         ! the block of values to be inserted &
-     &                 ADD_VALUES,   ! sum with matrix values &
+          call VecSetValues(self%B,                      & ! the matrix that is set &
+     &                 three,nodes_eleshy2block(:,ie),   &     ! the number of elements and their global indices  &
+     &                 self%vecx3,                       &         ! the block of values to be inserted &
+     &                 ADD_VALUES,                       &   ! sum with matrix values &
      &                 perr)
 
        end subroutine add_matvec_values

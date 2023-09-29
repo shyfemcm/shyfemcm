@@ -287,7 +287,7 @@
                   if(numlocnod_per_row(row)+1>=max_nlocnod)then
                       max_nlocnod=max_nlocnod+2
                       call resize_2darray(local_nodes, &
-     &                                  max_nlocnod,rowEnd-rowStart,   ! new sizes of dim 1 and 2 &
+     &                                  max_nlocnod,rowEnd-rowStart,   & ! new sizes of dim 1 and 2 &
      &                                  -1) ! default value
                   endif
                   if( any(local_nodes(:,row)==col) )then

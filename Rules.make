@@ -109,8 +109,8 @@ C_COMPILER = INTEL
 PARALLEL_OMP = false
 #PARALLEL_OMP = true
 
-#PARALLEL_MPI = NONE
-PARALLEL_MPI = NODE
+PARALLEL_MPI = NONE
+#PARALLEL_MPI = NODE
 #PARALLEL_MPI = ELEM
 
 ##############################################
@@ -138,10 +138,11 @@ PARALLEL_MPI = NODE
 #
 ##############################################
 
-PARTS = NONE
-#PARTS = METIS
+#PARTS = NONE
+PARTS = METIS
 #PARTS = PARMETIS
-#METISDIR = /usr/local
+METISDIR = /zeus/opt/intel20.1/metis/5.1.0
+#METISDIR = $(LD_LIBRARY_PATH)
 #PARMETISDIR = /usr/local
 #METISDIR = $(HOME)/lib/metis
 #PARMETISDIR = $(HOME)/lib/parmetis
@@ -189,7 +190,7 @@ SOLVER = SPARSKIT
 
 # PETSC_DIR it the path to the PETSc installation folder, it is 
 # needed for both the PETSc and the PETSc_AmgX solvers
-PETSC_DIR =
+#PETSC_DIR =/zeus/opt/impi20.1/petsc/3.13.2
 
 # The next 4 paths must be filled in for the PETSc_AmgX solver only.
 
@@ -253,8 +254,8 @@ GPU=NONE
 #
 ##############################################
 
-#NETCDF = false
-NETCDF = true
+NETCDF = false
+#NETCDF = true
 NETCDFDIR = $(NETCDF_PATH)
 NETCDFFDIR =$(NETCDFF_PATH)
 

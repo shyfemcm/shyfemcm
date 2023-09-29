@@ -4,7 +4,7 @@
 #--------------------	FILES	---------------------
 
 FEMDIR = ..
-include ../Rules.make
+include $(FEMDIR)/Rules.make
 
 #--------------------	VARS	---------------------
 
@@ -13,16 +13,25 @@ EXEC = shyfem
 #----------------------	INCLUDE	----------------------
 
 INCLUDE = -I$(FEMDIR)/include -I$(PETSC_DIR)/include -I$(MPI_DIR)/include
-INCLUDE = -I$(FEMDIR)/include 
+#INCLUDE = -I$(FEMDIR)/include 
 
 #--------------------	GOTM	-----------------------
 ifeq ($(GOTM),true)
   LIBF_GOTM      = $(LIBDIR)/libgotm.a
 endif
 
-#---------------------	PETSC	-----------------------
+#---------------------	SOLVER	-----------------------
+#SOLVER_OBJ = simsys_lp.o 
+
+#ifeq ($(SOLVER),SPARSKIT)
+   SOLVER_OBJ = simsys_spkaux.o sparskit_admin.o mat_util.o coo_util.o \
+   spk_ilut.o spk_iters.o spk_itaux.o spk_coo.o \
+   spk_itpack.o spk_matvec.o spk_blas.o matrix_inv.o
+#endif
+
 ifeq ($(SOLVER),PETSC)
-  LIBG_PETSC = -L$(PETSC_DIR)/lib -lpetsc
+   LIBG_PETSC = -L$(PETSC_DIR)/lib -lpetsc
+   SOLVER_OBJ		 = spk_blas.o matrix_inv.o amgx_c_wrapper_dummy.o mod_petsc_global.o mod_petsc_system.o simsys_petsc.o
 endif
 
 #---------------------	MPI	-----------------------
@@ -50,6 +59,7 @@ ifeq ($(PARALLEL_MPI),NODE)
    MPI_ASSERT		 = mpi_assert.o	
    MPI_OBJ = $(MPI_NODE_OBJ) $(MPI_GENERAL_OBJ) $(MPI_EXTRA_OBJ)
 endif
+
 #----------------------------------------------------------------------------------------------------------------
 
 OBJ = convert.o utility.o para.o iso8601.o time_util.o levels.o fil.o basin.o system_matrix.o geom.o lnku.o tvd.o geom_dynamic.o grd.o clo.o depth.o \
@@ -69,17 +79,18 @@ OBJ = convert.o utility.o para.o iso8601.o time_util.o levels.o fil.o basin.o sy
       vec_util.o extra.o ets.o ioets.o ets_admin.o modls.o ioshy.o shy_util.o \
       ous_admin.o flux_box.o residual.o find.o tvd_admin.o check.o wetdry.o stability.o time_admin.o \
       model3d_util.o trace.o keps_util.o kepsilon.o eq_state.o mod_offline.o offline_data.o shy_turbulence.o rd_ts.o intp_tst.o \
-      arrays.o grdutil.o closing.o system_spk.o nohydro.o diffusion_admin.o bcvel.o lagrange_data.o lagrange_sedim.o \
+      arrays.o grdutil.o closing.o \
+		$(SOLVER_OBJ) \
+	  	nohydro.o diffusion_admin.o bcvel.o lagrange_data.o lagrange_sedim.o \
       lagrange_flux.o line_util.o lagrange_util.o random_gen.o int_to_cart.o lagrange_vertical.o lagrange_utils.o lagrange_connect.o \
       lagrange_read.o lagrange_inout.o lagrange_cont.o lagrange_larve.o lagrange_decay.o lagrange_init.o lagrange_util_tr.o \
       lagrange_track.o lagrange_dif.o ioeos.o lagrange_stk.o lagrange_main.o lagrange_back.o floodfill.o topological_admin.o \
-      explicit.o sort_util.o coo_matrix.o nudge.o spk_blas.o matrix_inv.o spk_matvec.o \
-      spk_ilut.o spk_itaux.o spk_iters.o spk_coo.o sparskit_admin.o penta.o turbine.o hydrodynamic.o submir.o initialize.o \
+      explicit.o sort_util.o coo_matrix.o nudge.o \
+      penta.o turbine.o hydrodynamic.o submir.o initialize.o \
       bnd_routines.o concentration_omp.o histogram.o concentration.o baroclinic.o def_para.o \
       iostr.o constants.o f_vol.o mkdistance.o conz_admin.o dates.o water_ren_time.o atoxi.o toxical.o custom_admin.o \
       befor_after.o bfm_dummy.o bfm.o test_zeta.o lnkmpi.o poisson.o ww3_dummy.o simple_sedi.o 
 
-      #mod_petsc_global.o mod_petsc_system.o simsys_petsc.o
 #----------------------------------------------------------------------------------------------------------------
 
 %.o: %.f 
