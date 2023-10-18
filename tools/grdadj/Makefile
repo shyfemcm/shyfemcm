@@ -1,7 +1,7 @@
 
 #------------------------------------------------------------------------
 #
-#    Copyright (C) 1985-2020  Georg Umgiesser
+#    Copyright (C) 1985-2023  The SHYFEM team
 #
 #    This file is part of SHYFEM.
 #
@@ -24,23 +24,25 @@ include $(FEMDIR)/Rules.make
 
 #--------------------------------------------- libraries
 
-LIBFEM  = fem
-LIBPOST = post
+LIBPOST     = post
+LIBUTIL     = util
+LIBSHYUTIL  = shyutil
 
-LIBFS   = -L$(DIRLIB) -l$(LIBFEM)
-LIBIFS  = $(DIRLIB)/lib$(LIBFEM).a
-LIBFS   = 
-LIBIFS  = 
+LIBLPS  = -L$(DIRLIB) -l$(LIBPOST)
+LIBFPS  = $(DIRLIB)/lib$(LIBPOST).a
 
-LIBPS   = -L$(DIRLIB) -l$(LIBPOST)
-LIBIPS  = $(DIRLIB)/lib$(LIBPOST).a
+LIBLUT  = -L$(DIRLIB) -l$(LIBUTIL)
+LIBFUT  = $(DIRLIB)/lib$(LIBUTIL).a
+
+LIBLSU  = -L$(DIRLIB) -l$(LIBSHYUTIL)
+LIBFSU  = $(DIRLIB)/lib$(LIBSHYUTIL).a
+
+LIBL = $(LIBLPS) $(LIBLUT) $(LIBLSU)
+LIBF = $(LIBFPS) $(LIBFUT) $(LIBFSU)
 
 #--------------------------------------------- macros
 
-OBJS =		basin.o depth.o clo.o convert.o vec_util.o \
-		geometrical.o fil.o geom_dynamic.o \
-		grd.o grdutil.o version.o \
-		sort_util.o
+OBJS =
 
 ADJOBJS	=	mod_adj_grade.o \
 		adj4el.o adj5el.o adj7el.o adj575.o \
@@ -51,8 +53,8 @@ ALLOBJS =	$(OBJS) $(ADJOBJS) shyadj.o
 EXES	=	shyadj
 EXELINKS = 	$(FEMBIN) $(EXES)
 
-SPECIAL =       Makefile TODO COMMIT VERSION
-SAVEFILES =     *.[fh] $(SPECIAL)
+SPECIAL =       Makefile TODO README
+SAVEFILES =     *.f90 $(SPECIAL)
 
 MAKEDEPEND = $(FEMBIN)/mkdp.pl
 
@@ -65,8 +67,8 @@ all:	$(EXES)
 links:
 	@$(FEMBIN)/symlink $(EXELINKS)
 
-shyadj: $(ALLOBJS) $(LIBIFS) $(LIBIPS)
-	$(LINKER) $(LFLAGS) $(ALLOBJS) $(LIBFS) $(LIBPS) -o $@
+shyadj: $(ALLOBJS) $(LIBF)
+	$(LINKER) $(LFLAGS) $(ALLOBJS) $(LIBL) -o $@
 
 #--------------------------------------------- clean
 

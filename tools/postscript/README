@@ -1,0 +1,14 @@
+
+#------------------------------------------------------------------------
+#
+#    Copyright (C) 1985-2023  The SHYFEM team
+#
+#    This file is part of SHYFEM.
+#
+#------------------------------------------------------------------------
+
+code for writing postscript files from a c or fortran routine
+compatibility code for the CALCOMP plotting library
+
+#------------------------------------------------------------------------
+

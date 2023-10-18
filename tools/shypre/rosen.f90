@@ -168,7 +168,7 @@
         end if
 	mh=kn2-kn1			!bandbreite
 	if(mh.lt.m) goto 90		!naechstes paar
-	if(mh.gt.m) stop'error stop : m to big'
+	if(mh.gt.m) stop 'error stop : m to big'
 !
 ! groesseren index kn2 mit einem kleineren vertauschen
 !

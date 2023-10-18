@@ -177,10 +177,10 @@
 	bwrite = .not. bquiet
 	bww = .not. bsilent
 
-	call pardef
+	!call pardef
 	basnam = grdfile
 	call delete_extension(basnam,'.grd')
-	call putfnm('basnam',grdfile)
+	!call putfnm('basnam',grdfile)
 
 !--------------------------------------------------------
 ! always process whole file

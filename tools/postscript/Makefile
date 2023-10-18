@@ -13,8 +13,8 @@ DIR    = postscript
 
 #----------------------------------------------------------- just for default
 FEMDIR = ../..
-FEMBIN    = $(FEMDIR)/bin
-DIRLIB = $(FEMDIR)/lib
+FEMBIN = $(FEMDIR)/bin
+LIBDIR = $(FEMDIR)/lib
 CC     = gcc
 CFLAGS =  -O -Wall -pedantic
 F77    = g77
@@ -25,17 +25,23 @@ include $(FEMDIR)/Rules.make
 
 #-----------------------------------------------------------
 
-LIBPOST = $(DIRLIB)/libpost
-LIBCALP = $(DIRLIB)/libcalp
+LIBPOST     = post
+LIBCALP     = calp
 
-LIBPS =	-L$(DIRLIB) -lpost
-LIBCS =	-L$(DIRLIB) -lcalp
+LIBLPS  = -L$(LIBDIR) -l$(LIBPOST)
+LIBFPS  = $(LIBDIR)/lib$(LIBPOST).a
+
+LIBLCP  = -L$(LIBDIR) -l$(LIBCALP)
+LIBFCP  = $(LIBDIR)/lib$(LIBCALP).a
+
+LIBL = $(LIBLPS) $(LIBLCP)
+LIBF = $(LIBFPS) $(LIBFCP)
 
 #--------------------------------
 
 EXES = democalp demopost psdemo colorbar pf pc layout
 
-SPECIAL = Makefile CALCOMP COMMIT EPS LOG VERSION pspost.tex ps/cnr.ps
+SPECIAL = Makefile CALCOMP pspost.tex ps/cnr.ps
 
 MAKEDEPEND = $(FEMBIN)/mkdp.pl
 
@@ -45,12 +51,10 @@ default: fem
 
 fem: libs demopost nothing
 
-all: $(EXES) libs nothing
+all: libs $(EXES) nothing
 
 nothing:
 	@true
-
-libs: post calp
 
 democalp: democalp.o pgraph.o general.o pcalp.o
 	$(F77) $@.o pgraph.o general.o pcalp.o -o $@
@@ -58,33 +62,30 @@ democalp: democalp.o pgraph.o general.o pcalp.o
 demopost: demopost.o pgraph.o general.o
 	$(CC) $@.o pgraph.o general.o -o $@
 
-psdemo: psdemo.o post
-	$(F77) $@.o $(LIBPS) -o $@
+psdemo: psdemo.o $(LIBF)
+	$(F77) $@.o $(LIBL) -o $@
 
-colorbar: colorbar.o post
-	$(F77) $@.o $(LIBPS) -o $@
+colorbar: colorbar.o $(LIBF)
+	$(F77) $@.o $(LIBL) -o $@
 
-pf: pf.o post
-	$(F77) $@.o $(LIBPS) -o $@
+pf: pf.o $(LIBF)
+	$(F77) $@.o $(LIBL) -o $@
 
-pc: pc.o post
-	$(CC) $@.o $(LIBPS) -o $@
+pc: pc.o $(LIBF)
+	$(CC) $@.o $(LIBL) -o $@
 
 layout: layout.o
 	$(CC) $@.o -o $@
 
 #---------------------------
 
-calp: $(LIBCALP).a
+libs: $(LIBFPS) $(LIBFCP)
 
-$(LIBCALP).a: general.o pgraph.o pcalp.o pcalpf.o
-	echo $(HOME) $(DIRLIB)
-	ar rvs $(LIBCALP).a $?
+$(LIBFPS): general.o gustd.o psgraph.o psgraphf.o colorutil.o
+	ar rvs $(LIBFPS) *.o
 
-post: $(LIBPOST).a
-
-$(LIBPOST).a: general.o gustd.o psgraph.o psgraphf.o colorutil.o
-	ar rvs $(LIBPOST).a $?
+$(LIBFCP): general.o pgraph.o pcalp.o pcalpf.o
+	ar rvs $(LIBFCP) *.o
 
 #----------------------------- documentation
 
@@ -115,8 +116,8 @@ cleanall : clean cleanlib cleanzip cleandiff
 clean: cleanobj cleanexe cleanvar cleantex
 
 cleanlib:
-	-rm -f $(LIBCALP).a
-	-rm -f $(LIBPOST).a
+	-rm -f $(LIBFPS)
+	-rm -f $(LIBFCP)
 
 cleanexe:
 	-rm -f $(EXES)

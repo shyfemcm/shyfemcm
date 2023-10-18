@@ -12,10 +12,16 @@ EXEC = shyfem
 
 #----------------------	INCLUDE	----------------------
 
-INCLUDE = -I$(FEMDIR)/include -I$(PETSC_DIR)/include -I$(MPI_DIR)/include
-#INCLUDE = -I$(FEMDIR)/include 
+INCLUDE = -I$(FEMDIR)/include
+ifeq ($(SOLVER),PETSC)
+  INCLUDE += -I$(PETSC_DIR)/include
+endif
+ifneq ($(PARALLEL_MPI),NONE)
+  INCLUDE += -I$(MPI_DIR)/include
+endif
 
 #--------------------	GOTM	-----------------------
+
 ifeq ($(GOTM),true)
   LIBF_GOTM      = $(LIBDIR)/libgotm.a
 endif
@@ -31,14 +37,15 @@ endif
 
 ifeq ($(SOLVER),PETSC)
    LIBG_PETSC = -L$(PETSC_DIR)/lib -lpetsc
-   SOLVER_OBJ		 = spk_blas.o matrix_inv.o amgx_c_wrapper_dummy.o mod_petsc_global.o mod_petsc_system.o simsys_petsc.o
+   SOLVER_OBJ		 = spk_blas.o matrix_inv.o \
+	amgx_c_wrapper_dummy.o mod_petsc_global.o \
+	mod_petsc_system.o simsys_petsc.o
 endif
 
 #---------------------	MPI	-----------------------
 ifneq ($(PARALLEL_MPI),NONE)
   LIBG_MPI = -L$(MPI_DIR)/lib -lmpi
 endif
-
 #---------------------	METIS	-----------------------
 ifeq ($(PARTS),METIS)
   LIBG_METIS = -L$(METISDIR)/lib -lmetis
@@ -47,7 +54,7 @@ endif
 LIBGS= $(LIBG_PETSC) $(LIBG_MPI) $(LIBG_METIS)
 LIBFS= $(LIBF_GOTM)
 
-#-----------------------	MPI   -------------------------
+#----------------------- MPI   -------------------------
 MPI_DUMMY_OBJ   = mpi_dummy.o shyparts_dummy.o
 MPI_GENERAL_OBJ = mpi_ghost.o mpi_basin.o mpi_custom.o mpi_buffer.o mpi_time.o #mpi_tripple.o
 MPI_EXTRA_OBJ   = mpi_general.o mpi_debug.o

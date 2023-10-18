@@ -53,6 +53,27 @@ femdoc/texput.log
 
 #-----------------------------------------------
 
+src/shyfem
+bin/shyfem
+tools/shypre/shypre
+bin/shypre
+tools/grdadj/shyadj
+bin/shyadj
+
+bin/grid
+tools/grid/grid
+bin/mesh
+tools/mesh/mesh
+bin/exgrd
+tools/mesh/exgrd
+
+tools/hcbs/tvis
+tools/hcbs/xhcbs
+
+tmp_compile
+
+#-----------------------------------------------
+
 femdoc/P_*.tex
 femdoc/S_*.tex
 femdoc/shyfem.aux

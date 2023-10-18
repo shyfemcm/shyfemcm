@@ -14,8 +14,6 @@ DIR    = hcbs
 #-----------------------------------------------------------
 
 FEMDIR = ../..
-DIRLIB = $(FEMDIR)/lib
-FEMBIN = $(FEMDIR)/bin
 F77    = g77
 FFLAGS =  -O
 LINKER = $(F77)
@@ -29,12 +27,15 @@ include $(FEMDIR)/Rules.make
 
 #------------------------------------------------------------
 
+LIBDIR = $(FEMDIR)/lib
+FEMBIN = $(FEMDIR)/bin
+
 LIBX = -L/usr/X11R6/lib -L/usr/X11/lib -L/usr/lib/X11  -lX11
 
-LIBGRAPPA = grappa
+LIBNAME = grappa
 
-LIBGS   = -L$(DIRLIB) -l$(LIBGRAPPA)
-LIBIGS  = $(DIRLIB)/lib$(LIBGRAPPA).a
+LIBLGS   = -L$(LIBDIR) -l$(LIBNAME)
+LIBFGS  = $(LIBDIR)/lib$(LIBNAME).a
 
 OBJS = xgraph.o xgraphf.o gustd.o general.o
 
@@ -58,8 +59,8 @@ libs: grappa
 xhcbs: xhcbs.o $(OBJS)
 	$(F77) -o $@ $@.o $(OBJS) $(LIBX)
 
-tvis:   tvis.o $(LIBIGS)
-	$(F77) $(LFLAGS) -o $@ $@.o $(LIBGS) $(LIBX)
+tvis:   tvis.o $(LIBFGS)
+	$(F77) $(LFLAGS) -o $@ $@.o $(LIBLGS) $(LIBX)
 
 list:
 	@ls
@@ -73,11 +74,10 @@ depend:
 
 #------------------------------------------------------------
 
-grappa: $(LIBIGS)
+grappa: $(LIBFGS)
 
-$(LIBIGS): general.o gustd.o xgraph.o xgraphf.o
-	ar rv $(LIBIGS) $?
-	ranlib $(LIBIGS)
+$(LIBFGS): general.o gustd.o xgraph.o xgraphf.o
+	ar rvs $(LIBFGS) $?
 
 #------------------------------------------------------------
 
