@@ -14,7 +14,7 @@ DIR	= gridadj
 #--------------------------------------------- just for default
 FEMDIR = ../..
 FEMBIN = $(FEMDIR)/bin
-DIRLIB = $(FEMDIR)/lib
+LIBDIR = $(FEMDIR)/lib
 F77    = g77
 FFLAGS =  -O -Wall -g
 LINKER = $(F77)
@@ -28,14 +28,14 @@ LIBPOST     = post
 LIBUTIL     = util
 LIBSHYUTIL  = shyutil
 
-LIBLPS  = -L$(DIRLIB) -l$(LIBPOST)
-LIBFPS  = $(DIRLIB)/lib$(LIBPOST).a
+LIBLPS  = -L$(LIBDIR) -l$(LIBPOST)
+LIBFPS  = $(LIBDIR)/lib$(LIBPOST).a
 
-LIBLUT  = -L$(DIRLIB) -l$(LIBUTIL)
-LIBFUT  = $(DIRLIB)/lib$(LIBUTIL).a
+LIBLUT  = -L$(LIBDIR) -l$(LIBUTIL)
+LIBFUT  = $(LIBDIR)/lib$(LIBUTIL).a
 
-LIBLSU  = -L$(DIRLIB) -l$(LIBSHYUTIL)
-LIBFSU  = $(DIRLIB)/lib$(LIBSHYUTIL).a
+LIBLSU  = -L$(LIBDIR) -l$(LIBSHYUTIL)
+LIBFSU  = $(LIBDIR)/lib$(LIBSHYUTIL).a
 
 LIBL = $(LIBLPS) $(LIBLUT) $(LIBLSU)
 LIBF = $(LIBFPS) $(LIBFUT) $(LIBFSU)

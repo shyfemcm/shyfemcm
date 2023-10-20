@@ -7,12 +7,13 @@
 #
 #------------------------------------------------------------------------
 
-DIR	= shypre
+DIR	= shybas
 
 #--------------------------------------------- just for default
 FEMDIR = ../..
 FEMBIN = $(FEMDIR)/bin
 LIBDIR = $(FEMDIR)/lib
+SRCDIR = $(FEMDIR)/src
 F77    = g77
 FFLAGS =  -O -Wall -g
 LINKER = $(F77)
@@ -24,8 +25,10 @@ include $(FEMDIR)/Rules.make
 
 #---------------------------------------------
 
-LIBUTIL     = util
-LIBSHYUTIL  = shyutil
+LIBUTIL         = util
+LIBSHYUTIL      = shyutil
+LIBSHYMPI       = shympi
+LIBSHYUTILMPI   = shyutilmpi
 
 LIBLUT  = -L$(LIBDIR) -l$(LIBUTIL)
 LIBFUT  = $(LIBDIR)/lib$(LIBUTIL).a
@@ -33,17 +36,33 @@ LIBFUT  = $(LIBDIR)/lib$(LIBUTIL).a
 LIBLSU  = -L$(LIBDIR) -l$(LIBSHYUTIL)
 LIBFSU  = $(LIBDIR)/lib$(LIBSHYUTIL).a
 
-LIBL = $(LIBLSU) $(LIBLUT)
-LIBF = $(LIBFSU) $(LIBFUT)
+LIBLMP  = -L$(LIBDIR) -l$(LIBSHYMPI)
+LIBFMP  = $(LIBDIR)/lib$(LIBSHYMPI).a
+
+LIBLUM  = -L$(LIBDIR) -l$(LIBSHYUTILMPI)
+LIBFUM  = $(LIBDIR)/lib$(LIBSHYUTILMPI).a
+
+LIBL = $(LIBLUM) $(LIBLMP) $(LIBLSU) $(LIBLUT)
+LIBF = $(LIBFUM) $(LIBFMP) $(LIBFSU) $(LIBFUT)
 
 #----------------------------------------------------------------------------
 
-EXES = shypre
+EXES = shybas
 EXELINKS =      $(FEMBIN) $(EXES)
 
 #----------------------------------------------------------------------------
 
-OBJ := rosen.o cuthill_mckee.o
+OBJ := \
+	msh.o \
+	basutil.o \
+	basutil_smooth.o \
+	basutil_resol.o \
+	basutil_box.o \
+	basutil_custom.o \
+	basutil_bathy.o \
+	basutil_interp.o \
+	basutil_hsigma.o \
+	basutil_part.o \
 
 #----------------------------------------------------------------------------
 

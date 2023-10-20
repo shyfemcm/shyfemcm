@@ -344,7 +344,7 @@
 
 	!use mod_geom
 	use link_structure
-	use shympi, only: my_id
+	!use shympi, only: my_id
 
         implicit none
 
@@ -388,7 +388,7 @@
 	if( .not. bnewlink ) return
 
 	iunit = 0
-	if( bwmpi ) iunit = 660 + my_id
+	!if( bwmpi ) iunit = 660 + my_id
 	bunit = ( iunit > 0 )
 
 	ip = 0

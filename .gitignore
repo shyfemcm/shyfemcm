@@ -59,6 +59,8 @@ tools/shypre/shypre
 bin/shypre
 tools/grdadj/shyadj
 bin/shyadj
+tools/shybas/shybas
+bin/shybas
 
 bin/grid
 tools/grid/grid
@@ -71,6 +73,7 @@ tools/hcbs/tvis
 tools/hcbs/xhcbs
 
 tmp_compile
+demopost
 
 #-----------------------------------------------
 

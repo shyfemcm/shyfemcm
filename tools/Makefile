@@ -9,7 +9,7 @@
 
 FEMDIR = ..
 BINDIR = $(FEMDIR)/bin
-SUBDIRS = grid mesh postscript hcbs gridadj
+SUBDIRS = grid mesh postscript hcbs grdadj shypre shybas
 
 #------------------------------------------------------------------------
 
