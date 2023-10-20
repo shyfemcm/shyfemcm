@@ -61,6 +61,8 @@ tools/grdadj/shyadj
 bin/shyadj
 tools/shybas/shybas
 bin/shybas
+tools/shyelab/shyelab
+bin/shyelab
 
 bin/grid
 tools/grid/grid

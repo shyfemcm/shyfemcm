@@ -104,7 +104,7 @@
 
 	character*(*) file,type
 
-	logical check_nos_file,check_ous_file
+	!logical check_nos_file,check_ous_file
 	logical check_ext_file,check_flx_file
 	logical check_ts_file,fem_file_is_fem_file
 	logical filex
@@ -117,10 +117,10 @@
 	  type = 'SHY'
 	else if( shy_is_lgr_file(file) ) then
 	  type = 'LGR'
-	else if( check_nos_file(file) ) then
-	  type = 'NOS'
-	else if( check_ous_file(file) ) then
-	  type = 'OUS'
+	!else if( check_nos_file(file) ) then
+	!  type = 'NOS'
+	!else if( check_ous_file(file) ) then
+	!  type = 'OUS'
 	else if( check_ext_file(file) ) then
 	  type = 'EXT'
 	else if( check_flx_file(file) ) then
