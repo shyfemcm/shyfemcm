@@ -255,7 +255,7 @@ GPU=NONE
 ##############################################
 
 NETCDF = false
-#NETCDF = true
+NETCDF = true
 NETCDFDIR = $(NETCDF_PATH)
 NETCDFFDIR =$(NETCDFF_PATH)
 

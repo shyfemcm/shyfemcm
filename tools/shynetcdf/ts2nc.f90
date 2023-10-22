@@ -51,7 +51,7 @@
 !  reads file and writes time series to nc file
 
 	use mod_depth
-	use mod_hydro
+	!use mod_hydro
 	use evgeom
 	use levels
 	use basin

@@ -224,7 +224,7 @@
 
         call clo_check_files(1)
         call clo_get_file(1,infile)
-        call ap_set_names(' ',infile)
+        !call ap_set_names(' ',infile)
 
         call clo_get_option('varid',ivar3)
         call clo_get_option('varnum',ivnum)
@@ -459,7 +459,7 @@
 	subroutine init_nls_fnm
 
         call nlsina
-        call fnminh
+        call fnmina
 
 	end subroutine init_nls_fnm
 

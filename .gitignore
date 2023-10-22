@@ -63,6 +63,10 @@ tools/shybas/shybas
 bin/shybas
 tools/shyelab/shyelab
 bin/shyelab
+tools/shynetcdf/nc2fem
+bin/nc2fem
+tools/shyplot/shyplot
+bin/shyplot
 
 bin/grid
 tools/grid/grid

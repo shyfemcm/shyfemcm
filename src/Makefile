@@ -85,7 +85,7 @@ OBJ = convert.o utility.o para.o iso8601.o time_util.o levels.o fil.o basin.o sy
       discharge_flux.o flux_util.o ioflux.o sedim_util.o waves_admin.o substress.o sedim_admin.o flxm.o flux.o geometrical.o volume.o ioext.o random.o depth_util.o \
       vec_util.o extra.o ets.o ioets.o ets_admin.o modls.o ioshy.o shy_util.o \
       ous_admin.o flux_box.o residual.o find.o tvd_admin.o check.o wetdry.o stability.o time_admin.o \
-      model3d_util.o trace.o keps_util.o kepsilon.o eq_state.o mod_offline.o offline_data.o shy_turbulence.o rd_ts.o intp_tst.o \
+      model3d_util.o trace.o keps_util.o kepsilon.o eq_state.o mod_offline.o offline_data.o turbulence.o rd_ts.o intp_tst.o \
       arrays.o grdutil.o closing.o \
 		$(SOLVER_OBJ) \
 	  	nohydro.o diffusion_admin.o bcvel.o lagrange_data.o lagrange_sedim.o \

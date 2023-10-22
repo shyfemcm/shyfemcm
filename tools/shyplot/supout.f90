@@ -94,6 +94,7 @@
 !  25.10.2018	ggu	changed VERS_7_5_51
 !  18.12.2018	ggu	changed VERS_7_5_52
 !  21.05.2019	ggu	changed VERS_7_5_62
+!  21.10.2023	ggu	many unsued routines deleted
 ! 
 ! **********************************************************
 ! **********************************************************
@@ -105,7 +106,8 @@
 
         implicit none
 
-        call ousopen
+        !call ousopen
+	stop 'error stop velopen: no more OUS files'
 
         end
 
@@ -122,7 +124,8 @@
 
         logical outnext, ousnext
 
-        velnext = ousnext(it)
+        !velnext = ousnext(it)
+	velnext = .false.
 
         end
 
@@ -134,9 +137,39 @@
 
         implicit none
 
-        call ousclose
+        !call ousclose
 
         end
+
+! ******************************************************
+! ******************************************************
+! ******************************************************
+
+        function ous_is_available()
+        implicit none
+        logical ous_is_available
+	ous_is_available = .false.
+        end
+
+        subroutine ousclose
+        implicit none
+        end
+
+        subroutine ousinfo(nvers,nkn,nel,nlv)
+        implicit none
+        integer nvers,nkn,nel,nlv
+        end
+
+        subroutine ousopen
+	stop 'error stop velopen: no more OUS files'
+	end
+
+        function ousnext(it)
+	implicit none
+        logical ousnext         !true if record read, flase if EOF
+        integer it              !time of record
+	ousnext = .false.
+	end
 
 ! ******************************************************
 ! ******************************************************
@@ -229,7 +262,8 @@
 	call reset_dry_mask
 	write(6,*) 'calling prepare_dry_mask...'
 
-	if( ous_is_available() ) then			!...handle on elements
+	!if( ous_is_available() ) then			!...handle on elements
+	if( .false. ) then			!...handle on elements
 
 	  write(6,*) 'using zeta for dry areas'
 	  if( bshowdry ) then
@@ -238,7 +272,8 @@
           call set_level_mask(bwater,ilhv,level)	!element has this level
 	  call make_dry_node_mask(bwater,bkwater)	!copy elem to node mask
 
-	else if( fvl_is_available() ) then		!...handle on nodes
+	!else if( fvl_is_available() ) then		!...handle on nodes
+	else if( .false. ) then		!...handle on nodes
 
 	  write(6,*) 'using fvl file for dry areas: ',hdry
 	  call set_dry_volume_mask(bkwater,hdry)	!guess if dry using vol
@@ -303,159 +338,51 @@
 ! ******************************************************
 
         subroutine waveini
-
         implicit none
-
-	include 'supout.h'
-
-	integer icall
-	save icall
-	data icall /0/
-
-	if( bdebug_out ) then
-	  write(6,*) 'debug_out: waveini'
-	  write(6,*) icall,nunit_fvl
-	end if
-
-	if( icall .ne. 0 ) return
-
-	icall = 1
-
-	nunit_wave = 0
-        iwave = 0	! 0 = wave height   1 = wave period
-
         end
-
-! ******************************************************
 
         subroutine waveclose
-
         implicit none
-
-	include 'supout.h'
-
-	if( nunit_wave .gt. 0 ) close(nunit_wave)
-	nunit_wave = 0
-
         end
 
-! ******************************************************
-
-	subroutine waveopen
-
-	use mod_depth
-	use levels
-	use basin, only : nkn,nel,ngr,mbw
-
-	implicit none
-
-	include 'simul.h'
-	include 'supout.h'
-
-	integer nknaux,nelaux,nlvaux
-	integer nknddi,nelddi,nlvddi
-	integer nvers,nvar
-	integer date,time
-
-	integer ifemop
-
-	call waveini
-
-!  open file
-
-        call open_nos_type('.wav','old',nunit)
-
-	call peek_nos_header(nunit,nknaux,nelaux,nlvaux,nvar)
-	if( nkn .ne. nknaux ) goto 99
-	if( nel .ne. nelaux ) goto 99
-        nlv = nlvaux
-	call allocate_simulation(0)
-	call get_dimension_post(nknddi,nelddi,nlvddi)
-        call read_nos_header(nunit,nknddi,nelddi,nlvddi,ilhkv,hlv,hev)
-
-	if( nvar .ne. 3 ) goto 99
-
-	call level_k2e_sh
-        call init_sigma_info(nlv,hlv)
-
-!  initialize time
-
-        call nos_get_date(nunit,date,time)
-        if( date .ne. 0 ) then
-          call dtsini(date,time)
-	  call ptime_set_date_time(date,time)
-	  call ptime_min_max
-	  call iff_init_global_date(date,time)
-        end if
-
-	nunit_wave = nunit
-
-	return
-   99	continue
-	write(6,*) nkn,nel,nlv
-	write(6,*) nknaux,nelaux,nlvaux
-	write(6,*) nvar
-	stop 'error stop waveopen: parameter mismatch'
-        end
-
-! ******************************************************
-
-	function wavenext(it)
-
-	use mod_hydro_plot
-	use levels
-	use basin, only : nkn,nel,ngr,mbw
-
-	implicit none
-
+        function wavenext(it)
+        implicit none
 	logical wavenext
 	integer it
-
-	include 'supout.h'
-
-        integer ierr,nlvddi,ivar
-	real v1v(nkn)
-	real v2v(nkn)
-	real v3v(nkn)
-
-
-	call waveini
-	nunit = nunit_wave
-
 	wavenext = .false.
-	nlvddi = 1
-	call rdnos(nunit,it,ivar,nlvddi,ilhkv,v1v,ierr)
-	if( ierr .gt. 0 ) goto 99
-	if( ierr .lt. 0 ) return
-	if( ivar .ne. 31 ) goto 97
-	call rdnos(nunit,it,ivar,nlvddi,ilhkv,v2v,ierr)
-	if( ierr .gt. 0 ) goto 99
-	if( ierr .lt. 0 ) goto 98
-	if( ivar .ne. 32 ) goto 97
-	call rdnos(nunit,it,ivar,nlvddi,ilhkv,v3v,ierr)
-	if( ierr .gt. 0 ) goto 99
-	if( ierr .lt. 0 ) goto 98
-	if( ivar .ne. 33 ) goto 97
-
-	wavenext = .true.
-
-	if( iwave .eq. 0 ) then
-	  call polar2xy(nkn,v1v,v3v,uvnode,vvnode)
-	else
-	  call polar2xy(nkn,v2v,v3v,uvnode,vvnode)
-	end if
-
-	call ptime_set_itime(it)
-
-	return
-   99	continue
-	stop 'error stop wavenext: error reading data'
-   98	continue
-	stop 'error stop wavenext: not enough records'
-   97	continue
-	stop 'error stop wavenext: records not in order'
         end
 
+	subroutine waveopen
+	implicit none
+	stop 'error stop waveopen: no more NOS files'
+        end
+
+! ******************************************************
+! ******************************************************
+! ******************************************************
+
+        subroutine nosini
+        implicit none
+        end
+
+        subroutine nosclose
+        implicit none
+        end
+
+        function nosnext(it)
+        implicit none
+	logical nosnext
+	integer it
+	nosnext = .false.
+        end
+
+	subroutine nosopen
+	implicit none
+	stop 'error stop nosopen: no more NOS files'
+        end
+
+! ******************************************************
+! ******************************************************
 ! ******************************************************
 
 	subroutine polar2xy(n,speed,dir,uv,vv)
@@ -489,363 +416,6 @@
 ! ******************************************************
 ! ******************************************************
 
-	subroutine ousini
-
-!  initializes internal data structure for OUS file
-
-	implicit none
-
-	include 'supout.h'
-
-	integer icall
-	save icall
-	data icall /0/
-
-	if( bdebug_out ) then
-	  write(6,*) 'debug_out: ousini'
-	  write(6,*) icall,nunit_fvl
-	end if
-
-	if( icall .ne. 0 ) return
-
-	icall = 1
-
-	nunit_ous = 0
-
-	end
-
-! ******************************************************
-
-	function ous_is_available()
-
-!  checks if OUS file is opened
-
-	implicit none
-
-	logical ous_is_available
-
-	include 'supout.h'
-
-	call ousini
-	ous_is_available = nunit_ous .gt. 0
-
-	end
-
-! ******************************************************
-
-	subroutine ousclose
-
-!  closes OUS file
-
-	implicit none
-
-	include 'supout.h'
-
-	call ousini
-	if( nunit_ous .gt. 0 ) close(nunit_ous)
-	nunit_ous = 0
-
-	end
-
-! ******************************************************
-
-        subroutine ousinfo(nvers,nkn,nel,nlv)
-
-!  returns info on OUS parameters
-
-        implicit none
-
-	include 'supout.h'
-
-        integer nvers,nkn,nel,nlv
-
-	call ousini
-        call getous(nunit_ous,nvers,nkn,nel,nlv)
-
-        end
-
-! ******************************************************
-
-	subroutine ousopen
-
-!  opens OUS file and reads header
-
-	use mod_depth
-	use levels
-	use basin, only : nkn,nel,ngr,mbw
-
-	implicit none
-
-	include 'supout.h'
-	include 'simul.h'
-
-	character*80 file
-
-	integer nvers
-	integer nknaux,nelaux,nlvaux,nvar
-	integer nknous,nelous,nlvous
-	integer nknddi,nelddi,nlvddi
-	integer ierr
-        integer i,l
-	integer date,time
-        real href,hzmin
-	integer ifemop
-
-!  initialize routines
-
-	call ousini
-
-!  open and read header
-
-        call open_ous_type('.ous','old',nunit)
-
-	call peek_ous_header(nunit,nknous,nelous,nlvous)
-	if( nkn .ne. nknous ) goto 99
-	if( nel .ne. nelous ) goto 99
-        nlv = nlvous
-	call allocate_simulation(0)
-	call get_dimension_post(nknddi,nelddi,nlvddi)
-        call read_ous_header(nunit,nknddi,nelddi,nlvddi,ilhv,hlv,hev)
-
-	call level_e2k_sh			!computes ilhkv
-        call init_sigma_info(nlv,hlv)
-
-!  initialize time
-
-	call ous_get_date(nunit,date,time)
-	if( date .ne. 0 ) then
-	  call dtsini(date,time)
-	  call ptime_set_date_time(date,time)
-	  call ptime_min_max
-	  call iff_init_global_date(date,time)
-	end if
-
-	nunit_ous = nunit
-
-!  end
-
-	return
-   96	continue
-	stop 'error stop ousopen: cannot open OUS file'
-   97	continue
-	stop 'error stop ousopen: error reading second header'
-   98	continue
-	stop 'error stop ousopen: error reading first header'
-   99	continue
-	write(6,*) 'error in parameters :'
-	write(6,*) 'nkn : ',nkn,nknous
-	write(6,*) 'nel : ',nel,nelous
-	write(6,*) 'nlv : ',nlvdi,nlvous
-	stop 'error stop ousopen'
-	end
-
-! ******************************************************
-
-	function ousnext(it)
-
-!  reads next OUS record - is true if a record has been read, false if EOF
-
-	use mod_hydro
-	use levels
-
-	implicit none
-
-	logical ousnext		!true if record read, flase if EOF
-	integer it		!time of record
-
-	include 'supout.h'
-
-	integer ierr
-
-	call ousini
-	nunit = nunit_ous
-
-	call rdous(nunit,it,nlvdi,ilhv,znv,zenv,utlnv,vtlnv,ierr)
-
-!  set return value
-
-	if( ierr .gt. 0 ) then
-		!stop 'error stop ousnext: error reading data record'
-		write(6,*) '*** ousnext: error reading data record'
-		ousnext = .false.
-	else if( ierr .lt. 0 ) then
-		ousnext = .false.
-	else
-		ousnext = .true.
-	end if
-
-	call ptime_set_itime(it)
-
-	end
-
-! ******************************************************
-! ******************************************************
-! ******************************************************
-!  3d-version of concentration
-! ******************************************************
-! ******************************************************
-! ******************************************************
-
-	subroutine nosini
-
-!  initializes internal data structure for NOS file
-
-	implicit none
-
-	include 'supout.h'
-
-	integer icall
-	save icall
-	data icall /0/
-
-	if( bdebug_out ) then
-	  write(6,*) 'debug_out: nosini'
-	  write(6,*) icall,nunit_fvl
-	end if
-
-	if( icall .ne. 0 ) return
-
-	icall = 1
-
-	nunit_nos = 0
-
-	end
-
-! ******************************************************
-
-	subroutine nosclose
-
-!  closes NOS file
-
-	implicit none
-
-	include 'supout.h'
-
-	call nosini
-	if( nunit_nos .gt. 0 ) close(nunit_nos)
-	nunit_nos = 0
-
-	end
-
-! ******************************************************
-
-	subroutine nosopen(type)
-
-!  opens NOS file and reads header
-
-	use mod_depth
-	use levels
-	use basin, only : nkn,nel,ngr,mbw
-
-	implicit none
-
-	character*(*) type
-
-	include 'supout.h'
-	include 'simul.h'
-
-	character*80 file
-
-	integer nvers
-	integer nknaux,nelaux,nlvaux,nvar
-	integer nknnos,nelnos,nlvnos
-	integer nknddi,nelddi,nlvddi
-	integer date,time
-	integer ierr,l
-	integer ifemop
-
-!  initialize routines
-
-	call nosini
-
-!  open file
-
-	if( type /= ' ' ) then
-          call open_nos_type(type,'old',nunit)
-	else
-          call open_nos_type('.nos','old',nunit)
-	end if
-
-	call peek_nos_header(nunit,nknnos,nelnos,nlvnos,nvar)
-	if( nkn .ne. nknnos ) goto 99
-	if( nel .ne. nelnos ) goto 99
-        nlv = nlvnos
-	call allocate_simulation(0)
-	call get_dimension_post(nknddi,nelddi,nlvddi)
-        call read_nos_header(nunit,nknddi,nelddi,nlvddi,ilhkv,hlv,hev)
-
-	call level_k2e_sh
-        call init_sigma_info(nlv,hlv)
-
-!  initialize time
-
-        call nos_get_date(nunit,date,time)
-        if( date .ne. 0 ) then
-          call dtsini(date,time)
-	  call ptime_set_date_time(date,time)
-	  call ptime_min_max
-	  call iff_init_global_date(date,time)
-        end if
-
-	nunit_nos = nunit
-
-!  end
-
-	!write(6,*) 'gguuuuuu: (nosopen)',nunit,nunit_fvl
-
-	return
-   99	continue
-	write(6,*) 'error in parameters : basin - simulation'
-	write(6,*) 'nkn : ',nkn,nknnos
-	write(6,*) 'nel : ',nel,nelnos
-	write(6,*) 'nlv : ',nlvdi,nlvnos
-	write(6,*) 'parameters are different between basin and simulation'
-	stop 'error stop nosopen'
-	end
-
-! ******************************************************
-
-	function nosnext(it,ivar,nlvddi,array)
-
-!  reads next NOS record - is true if a record has been read, false if EOF
-
-	use levels
-
-	implicit none
-
-	logical nosnext		!true if record read, flase if EOF
-	integer it		!time of record
-	integer ivar		!type of variable
-	integer nlvddi		!dimension of vertical coordinate
-	real array(nlvddi,*)	!values for variable
-
-	include 'supout.h'
-
-	integer ierr
-
-	if( nlvddi .ne. nlvdi ) stop 'error stop nosnext: nlvddi'
-
-	call nosini
-	nunit = nunit_nos
-	!write(6,*) 'gguuuuuu: (nosnext)',nunit,nunit_fvl
-
-	call rdnos(nunit,it,ivar,nlvddi,ilhkv,array,ierr)
-
-!  set return value
-
-	if( ierr .gt. 0 ) then
-		!stop 'error stop nosnext: error reading data record'
-		write(6,*) '*** nosnext: error reading data record'
-		nosnext = .false.
-	else if( ierr .lt. 0 ) then
-		nosnext = .false.
-	else
-		nosnext = .true.
-	end if
-
-	call ptime_set_itime(it)
-
-	end
 
 ! ******************************************************
 ! ******************************************************
@@ -856,27 +426,6 @@
 ! ******************************************************
 
 	subroutine fvlini
-
-!  initializes internal data structure for FVL file
-
-	implicit none
-
-	include 'supout.h'
-
-	integer icall
-	save icall
-	data icall /0/
-
-	if( bdebug_out ) then
-	  write(6,*) 'debug_out: fvlini'
-	  write(6,*) icall,nunit_fvl
-	end if
-
-	if( icall .ne. 0 ) return
-
-	icall = 1
-
-	nunit_fvl = 0
 
 	end
 
@@ -890,10 +439,7 @@
 
 	logical fvl_is_available
 
-	include 'supout.h'
-
-	call fvlini
-	fvl_is_available = nunit_fvl .gt. 0
+	fvl_is_available = .false.
 
 	end
 
@@ -905,12 +451,6 @@
 
 	implicit none
 
-	include 'supout.h'
-
-	call fvlini
-	if( nunit_fvl .gt. 0 ) close(nunit_fvl)
-	nunit_fvl = 0
-
 	end
 
 ! ******************************************************
@@ -919,94 +459,12 @@
 
 !  opens FVL file and reads header
 
-	use mod_depth
-	use levels
-	use basin, only : nkn,nel,ngr,mbw
-
 	implicit none
 
 	character*(*) type
 
-	include 'supout.h'
-	include 'simul.h'
+	stop 'error stop velopen: no more OUS files'
 
-        real hlv1(nlv), hev1(nel)
-        integer ilhkv1(nkn)
-
-	character*80 file
-
-	integer nvers
-	integer nknaux,nelaux,nlvaux,nvar
-	integer ierr
-	integer ifem_choose_file
-
-!  initialize routines
-
-	call fvlini
-
-!  open file
-
-	nunit = ifem_choose_file(type,'old')
-	if( nunit .le. 0 ) then
-		write(6,*) 'Cannot open fvl file ... doing without...'
-		nunit_fvl = 0
-		return
-		!stop 'error stop conopen: cannot open NOS file'
-        else
-                write(6,*) 'fvl file opened :'
-                inquire(nunit,name=file)
-                write(6,*) file
-                write(6,*) 'Reading file ...'
-	end if
-
-!  read first header
-
-	nvers = 3
-	call rfnos(nunit,nvers,nknaux,nelaux,nlvaux,nvar,descrp,ierr)
-
-	if( ierr .ne. 0 ) then
-		stop 'error stop nosopen: error reading first header'
-	end if
-
-        write(6,*)
-        write(6,*)   descrp
-        write(6,*)
-        write(6,*) ' nvers = ', nvers
-        write(6,*) '   nkn = ',nknaux, '   nel = ',nelaux
-        write(6,*) '   nlv = ',nlvaux, '  nvar = ',  nvar
-        write(6,*)
-
-	if( nkn .ne. nknaux ) goto 99
-	if( nelaux .ne. 0 .and. nel .ne. nelaux ) goto 99
-	if( nlv .ne. nlvaux ) goto 99
-	if( nvar .ne. 1 ) goto 99
-
-!  read second header
-
-	call rsnos(nunit,ilhkv1,hlv1,hev1,ierr)
-
-	if( ierr .ne. 0 ) then
-		stop 'error stop nosopen: error reading second header'
-	end if
-
-	call array_i_check(nkn,ilhkv1,ilhkv,'ilhkv')
-	call array_check(nlv,hlv1,hlv,'hlv')
-	call array_check(nel,hev1,hev,'hev')
-
-	nunit_fvl = nunit
-
-!  end
-
-	return
-   99	continue
-	write(6,*) 'error in parameters :'
-	write(6,*) 'nkn : ',nkn,nknaux
-	write(6,*) 'nel : ',nel,nelaux
-	write(6,*) 'nlv : ',nlv,nlvaux
-	write(6,*) 'nvar: ',nvar
-	write(6,*) 'not using FVL file'
-	nunit_fvl = 0
-	!stop 'error stop fvlopen'
 	end
 
 ! ******************************************************
@@ -1023,58 +481,6 @@
 	integer nlvddi		!dimension of vertical coordinate
 	real array(nlvddi,*)	!values for variable
 
-	include 'supout.h'
-
-	integer ierr
-	integer ivar		!type of variable
-
-	integer itfvl
-	save itfvl
-	data itfvl / -1 /
-
-	if( nlvddi .ne. nlvdi ) stop 'error stop fvlnext: nlvddi'
-
-	call fvlini
-	nunit = nunit_fvl
-
-	if( nunit .eq. 0 ) return	!file closed
-	if( it .eq. itfvl ) return	!already read
-
-	if( itfvl .eq. -1 ) itfvl = it - 1	!force first read
-	nunit = abs(nunit)
-	ierr = 0
-	ivar = 66
-
-	do while( ierr .eq. 0 .and. itfvl .lt. it )
-	  call rdnos(nunit,itfvl,ivar,nlvddi,ilhkv,array,ierr)
-	  write(6,*) 'fvl file read...',itfvl,ivar
-	end do
-
-!  set return value
-
-	if( ierr .ne. 0 ) then
-	  if( ierr .gt. 0 ) then
-		!stop 'error stop fvlnext: error reading data record'
-		write(6,*) '*** fvlnext: error reading data record'
-	  else if( ierr .lt. 0 ) then
-		write(6,*) '*** fvlnext: EOF encountered'
-	  end if
-	  itfvl = -1
-	  nunit_fvl = 0
-	  return
-	end if
-
-!  check results
-
-	if( it .ne. itfvl ) nunit_fvl = -abs(nunit_fvl)
-	if( ivar .ne. 66 ) goto 99
-
-!  end
-
-	return
-   99	continue
-	write(6,*) it,itfvl,ivar
-	stop 'error stop fvlnext: time or variable'
 	end
 
 ! ******************************************************
@@ -1091,23 +497,6 @@
 
 	implicit none
 
-	include 'supout.h'
-
-	integer icall
-	save icall
-	data icall /0/
-
-	if( bdebug_out ) then
-	  write(6,*) 'debug_out: eosini'
-	  write(6,*) icall,nunit_fvl
-	end if
-
-	if( icall .ne. 0 ) return
-
-	icall = 1
-
-	nunit_eos = 0
-
 	end
 
 ! ******************************************************
@@ -1117,12 +506,6 @@
 !  closes EOS file
 
 	implicit none
-
-	include 'supout.h'
-
-	call eosini
-	if( nunit_eos .gt. 0 ) close(nunit_eos)
-	nunit_eos = 0
 
 	end
 
@@ -1140,77 +523,8 @@
 
 	character*(*) type
 
-	include 'supout.h'
-	include 'simul.h'
+	stop 'error stop velopen: no more EOS files'
 
-	character*80 file
-
-	integer nvers
-	integer nknaux,nelaux,nlvaux,nvar
-	integer nknddi,nelddi,nlvddi
-	integer ierr
-	integer ifemop
-
-!  initialize routines
-
-	call eosini
-
-!  open file
-
-	nunit = ifemop(type,'unform','old')
-	if( nunit .le. 0 ) then
-		stop 'error stop conopen: cannot open EOS file'
-        else
-                write(6,*) 'File opened :'
-                inquire(nunit,name=file)
-                write(6,*) file
-                write(6,*) 'Reading file ...'
-	end if
-
-!  read first header
-
-	nvers = 3
-	call rfeos(nunit,nvers,nknaux,nelaux,nlvaux,nvar,descrp,ierr)
-
-	if( ierr .ne. 0 ) then
-		stop 'error stop eosopen: error reading first header'
-	end if
-
-        write(6,*)
-        write(6,*)   descrp
-        write(6,*)
-        write(6,*) ' nvers = ', nvers
-        write(6,*) '   nkn = ',nknaux, '   nel = ',nelaux
-        write(6,*) '   nlv = ',nlvaux, '  nvar = ',  nvar
-        write(6,*)
-
-	if( nkn .ne. nknaux ) goto 99
-	if( nelaux .ne. 0 .and. nel .ne. nelaux ) goto 99
-
-	nlv = nlvaux
-	call allocate_simulation(0)
-	call get_dimension_post(nknddi,nelddi,nlvddi)
-	if( nlvddi .lt. nlv ) goto 99
-
-!  read second header
-
-	call rseos(nunit,ilhv,hlv,hev,ierr)
-
-	if( ierr .ne. 0 ) then
-		stop 'error stop eosopen: error reading second header'
-	end if
-
-	call level_e2k_sh		!computes ilhkv
-
-	nunit_eos = nunit
-
-	return
-   99	continue
-	write(6,*) 'error in parameters :'
-	write(6,*) 'nkn : ',nkn,nknaux
-	write(6,*) 'nel : ',nel,nelaux
-	write(6,*) 'nlv : ',nlvdi,nlvaux
-	stop 'error stop eosopen'
 	end
 
 ! ******************************************************
@@ -1229,30 +543,7 @@
 	integer nlvddi		!dimension of vertical coordinate
 	real array(nlvddi,*)	!values for variable
 
-	include 'supout.h'
-
-	integer ierr
-
-	if( nlvddi .ne. nlvdi ) stop 'error stop eosnext: nlvddi'
-
-	call eosini
-	nunit = nunit_eos
-
-	call rdeos(nunit,it,ivar,nlvddi,ilhv,array,ierr)
-
-!  set return value
-
-	if( ierr .gt. 0 ) then
-		!stop 'error stop eosnext: error reading data record'
-		write(6,*) '*** eosnext: error reading data record'
-		eosnext = .false.
-	else if( ierr .lt. 0 ) then
-		eosnext = .false.
-	else
-		eosnext = .true.
-	end if
-
-	call ptime_set_itime(it)
+	eosnext = .false.
 
 	end
 

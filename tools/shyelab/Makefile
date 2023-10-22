@@ -25,10 +25,16 @@ include $(FEMDIR)/Rules.make
 
 #---------------------------------------------
 
+LIB_NETCDF =
+ifeq ($(NETCDF),true)
+  LIB_NETCDF = -L$(NETCDFDIR)/lib -lnetcdf -L$(NETCDFFDIR)/lib -lnetcdff
+endif
+
 LIBUTIL         = util
 LIBSHYUTIL      = shyutil
 LIBSHYMPI       = shympi
 LIBSHYUTILMPI   = shyutilmpi
+LIBNETCDF       = shynetcdf
 
 LIBLUT  = -L$(LIBDIR) -l$(LIBUTIL)
 LIBFUT  = $(LIBDIR)/lib$(LIBUTIL).a
@@ -42,8 +48,11 @@ LIBFMP  = $(LIBDIR)/lib$(LIBSHYMPI).a
 LIBLUM  = -L$(LIBDIR) -l$(LIBSHYUTILMPI)
 LIBFUM  = $(LIBDIR)/lib$(LIBSHYUTILMPI).a
 
-LIBL = $(LIBLUM) $(LIBLMP) $(LIBLSU) $(LIBLUT)
-LIBF = $(LIBFUM) $(LIBFMP) $(LIBFSU) $(LIBFUT)
+LIBLNC  = -L$(LIBDIR) -l$(LIBNETCDF)
+LIBFNC  = $(LIBDIR)/lib$(LIBNETCDF).a
+
+LIBL = $(LIBLNC) $(LIBLUM) $(LIBLMP) $(LIBLSU) $(LIBLUT) $(LIB_NETCDF)
+LIBF = $(LIBFNC) $(LIBFUM) $(LIBFMP) $(LIBFSU) $(LIBFUT)
 
 #---------------------------------------------
 
@@ -52,78 +61,42 @@ EXELINKS =      $(FEMBIN) $(EXES)
 
 #----------------------------------------------------------------------------
 
-ifneq ($(NETCDF),true)
-  NETCDF_OBJ= \
-	$(FEMDIR)/tools/shyelab/elab_nc_dummy.o
-else
-  LIB_NETCDF = -L$(NETCDFDIR)/lib -lnetcdf -L$(NETCDFFDIR)/lib -lnetcdff
-  NETCDF_OBJ=\
-	$(FEMDIR)/tools/shyelab/elab_nc.o \
-	$(FEMDIR)/tools/2nc/netcdf.o \
-	$(FEMDIR)/tools/2nc/netcdf_util.o 
-endif
-
-ifneq ($(PARALLEL_MPI),NONE)
-  LIB_MPI = -L$(MPI_DIR)/lib -lmpi
-  SHYMPI_OBJ=\
-	$(FEMDIR)/src/mpi_node.o \
-	$(FEMDIR)/src/mpi_node_internal.o \
-	$(FEMDIR)/src/mpi_general.o 
-else
-  SHYMPI_OBJ=\
-	$(FEMDIR)/src/mpi_dummy.o \
-	$(FEMDIR)/src/mpi_general.o 
-endif
-
-#----------------------------------------------------------------------------
-
 LFLAGS:= $(LIB_NETCDF) $(LIB_MPI)
 
 #----------------------------------------------------------------------------
 
 OBJ := \
-        $(SHYMPI_OBJ) \
-	$(NETCDF_OBJ) \
-	../../tools/shyelab/elabtime.o \
-	../../tools/shyelab/elab_off.o \
-	../../tools/shyelab/elabutil.o \
-	../../tools/shyelab/elab_gis.o \
-	../../tools/shyelab/elab_expand.o \
-	../../tools/shyelab/elab_regular.o \
-	../../tools/shyelab/shyelab_output.o \
-	../../tools/shyelab/shyelab_util.o \
-	../../tools/shyelab/shyelab_area.o \
-	../../tools/shyelab/shyelab_average.o \
-	../../tools/shyelab/shyelab_nodes.o \
-	../../tools/shyelab/shyelab_proj.o \
-	../../tools/shyelab/shyelab_extract.o \
-	../../tools/shyelab/shyelab1.o \
-	../../tools/shyelab/lgrelab1.o \
-	../../tools/shyelab/extelab1.o \
-	../../tools/shyelab/flxelab1.o \
-	../../tools/shyelab/elab_resample.o \
-	../../tools/shyelab/elab_check.o \
-	../../tools/shyelab/tselab1.o \
-	../../tools/shyelab/femelab1.o \
-	../../tools/2nc/output_util.o \
-	../../src/ioshy.o \
-	../../src/mod_offline.o \
-	../../src/shy_util.o \
-	../../src/zadaptutil.o \
-	../../src/depth_util.o \
-	../../src/heat_util.o \
-	../../src/tsfile.o \
-	../../src/ioflux.o \
-	../../src/ioext.o \
-	../../src/mpi_buffer.o \
-	../../src/def_para.o \
-	../../src/lagrange_read.o \
-	../../src/dates.o \
-	../../fem3d/unitutils.o \
-	../../fem3d/shyutil.o \
-	../../fem3d/subshyutil2.o \
+	elabutil.o \
+	elabtime.o \
+	elab_off.o \
+	elab_gis.o \
+	elab_regular.o \
+	elab_resample.o \
+	elab_check.o \
+	shyelab_output.o \
+	shyelab_util.o \
+	shyelab_area.o \
+	shyelab_average.o \
+	shyelab_nodes.o \
+	shyelab_proj.o \
+	shyelab_extract.o \
+	shyelab1.o \
+	extelab1.o \
+	flxelab1.o \
+	tselab1.o \
+	femelab1.o \
+	lgrelab1.o \
 
 OBSOLETE := \
+	$(NETCDF_OBJ) \
+        $(SHYMPI_OBJ) \
+	../../tools/2nc/output_util.o \
+	../../fem3d/shyutil.o \
+	../../fem3d/subshyutil2.o \
+	../../fem3d/unitutils.o \
+	../../src/def_para.o \
+	../../src/dates.o \
+	../../src/mpi_buffer.o \
 	../../src/to_linear.o \
 	../../src/coordinates.o \
 	../../src/projection.o \

@@ -9,7 +9,10 @@
 
 FEMDIR = ..
 BINDIR = $(FEMDIR)/bin
-SUBDIRS = grid mesh postscript hcbs grdadj shypre shybas
+SUBDIRS = \
+		grid mesh postscript hcbs grdadj \
+		shynetcdf shypre shybas shyelab \
+		shyplot
 
 #------------------------------------------------------------------------
 
@@ -17,6 +20,9 @@ default: fem
 
 fem: nothing
 	$(BINDIR)/recursivemake $@ $(SUBDIRS)
+
+test: nothing
+	$(BINDIR)/recursivemake $@ shynetcdf
 
 regress: nothing
 
