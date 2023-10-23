@@ -132,7 +132,7 @@
 
 !	call inexta
 	!call inflxa
-	call invola
+	!call invola
 	call inarea
 	call inbnds
 
@@ -181,7 +181,7 @@
 
 !	call ckexta	!extra output points
 	!call ckflxa	!flux sections
-	call ckvola	!flux sections
+	!call ckvola	!flux sections
 	call ckarea	!chezy values
 
 ! re-allocate boundary arrays
@@ -216,7 +216,7 @@
 	include 'modules.h'
 
 	!call flxini
-	call volini
+	!call volini
 
 	write(6,*) 'cstsetup: setting up modules'
 	call modules(M_SETUP)

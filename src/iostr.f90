@@ -240,7 +240,7 @@
 
 	call prflxa		!prints flux sections
 
-	call prvola		!prints flux sections
+	!call prvola		!prints flux sections
 
 	call prarea		!prints chezy values
 
@@ -297,7 +297,7 @@
 
 	call tsflxa
 
-	call tsvola
+	!call tsvola
 
 	call tsarea
 
@@ -419,8 +419,8 @@
 			call rdclos(num)
 		else if(section.eq.'flux') then
 			call rdflxa
-		else if(section.eq.'vol') then
-			call rdvola
+		!else if(section.eq.'vol') then
+		!	call rdvola
 		else if(section.eq.'wrt') then		!water renewal time
                         call nrdins(section)
 		else if(section.eq.'wind') then

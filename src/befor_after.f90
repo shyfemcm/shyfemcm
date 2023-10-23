@@ -44,7 +44,7 @@ end subroutine do_befor
 	call wrousa
 !	call wrexta
 	!call wrflxa
-	call wrvola(dtime)
+	!call wrvola(dtime)
 	call wrboxa
 
         call resid

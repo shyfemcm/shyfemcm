@@ -298,7 +298,7 @@
 
         call clo_check_files(1)
         call clo_get_file(1,infile)
-        call ap_set_names(' ',infile)
+        !call ap_set_names(' ',infile)
 
 	breg = ( dreg > 0. )
 	bboxgrd = ( index_file /= ' ' )

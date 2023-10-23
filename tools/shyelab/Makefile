@@ -86,6 +86,7 @@ OBJ := \
 	tselab1.o \
 	femelab1.o \
 	lgrelab1.o \
+	shy_util2.o \
 
 OBSOLETE := \
 	$(NETCDF_OBJ) \

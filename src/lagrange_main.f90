@@ -1035,22 +1035,22 @@
         iunit = ifileo(0,file,'unform','new')
 
         title ='particle in element '
-        call wheos(iunit,nvers &
-     &             ,nkn,nel,nlv,nvar &
-     &             ,ilhv,hlv,hev &
-     &             ,title &
-     &             )
+!        call wheos(iunit,nvers &
+!     &             ,nkn,nel,nlv,nvar &
+!     &             ,ilhv,hlv,hev &
+!     &             ,title &
+!     &             )
         endif
 
         icall = 1
         ivar = 901
         nlvdimi=1
-        call wreos(iunit,it,ivar,nlvdimi,ilhv,aux,ierr)
-        if( ierr .ne. 0 ) stop 'error stop: wreos'
-        call wreos(iunit,it,ivar,nlvdimi,ilhv,aux_t,ierr)
-        if( ierr .ne. 0 ) stop 'error stop: wreos'
-        call wreos(iunit,it,ivar,nlvdimi,ilhv,aux_r,ierr)
-        if( ierr .ne. 0 ) stop 'error stop: wreos'
+!        call wreos(iunit,it,ivar,nlvdimi,ilhv,aux,ierr)
+!        if( ierr .ne. 0 ) stop 'error stop: wreos'
+!        call wreos(iunit,it,ivar,nlvdimi,ilhv,aux_t,ierr)
+!        if( ierr .ne. 0 ) stop 'error stop: wreos'
+!        call wreos(iunit,it,ivar,nlvdimi,ilhv,aux_r,ierr)
+!        if( ierr .ne. 0 ) stop 'error stop: wreos'
 
         do ie=1,nel
          write(99,*) ie,i_count(ie),t_count(ie)

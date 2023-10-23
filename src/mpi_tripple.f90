@@ -39,6 +39,7 @@
 ! 12.04.2023	ggu	fill buffer_in only if my_id == id_from
 ! 07.06.2023    ggu     in exchange_elem_info() use utlov not utlnv (bug-fix)
 ! 09.06.2023    ggu     bug fix for tripple point on external boundary
+! 23.10.2023    ggu     in exchange_areas() eliminated dependency from evgeom
 !
 !******************************************************************
 
@@ -844,17 +845,19 @@
 
 !******************************************************************
 
-	subroutine exchange_areas
+	subroutine exchange_areas(elem_area)
 
 	use mod_geom
 	!use mod_internal
-	use mod_hydro
-	use evgeom
+	!use mod_hydro
+	!use evgeom
 	use levels
 	use basin, only : nkn,nel,ngr,mbw
 	use shympi
 
 	implicit none
+
+	double precision elem_area(nel)
 
 	integer ie,ii,iei,ia,ia0,iee
 	real, parameter :: flag = -777.
@@ -871,7 +874,8 @@
 	do ie=1,nel
 	  do ii=1,3
             iei = ieltv(ii,ie)
-	    if( iei > 0 ) areas(ii,ie) = 12. * ev(10,iei)
+	    !if( iei > 0 ) areas(ii,ie) = 12. * ev(10,iei)
+	    if( iei > 0 ) areas(ii,ie) = elem_area(iei)
 	  end do
 	end do
 

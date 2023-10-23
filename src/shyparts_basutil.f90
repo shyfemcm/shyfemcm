@@ -170,7 +170,7 @@
 	!use evgeom
 	use basin
 	use grd
-	use basutil
+	!use basutil
 	use shympi
 
 	implicit none
