@@ -105,6 +105,7 @@
 	use basin
 	use mod_shypre
 	use mod_sort
+	use evgeom
 
 	implicit none
 
@@ -204,6 +205,13 @@
 	end if
 
 	call grd_to_basin
+
+!--------------------------------------------------------
+! set up internal geometrical structure
+!--------------------------------------------------------
+
+        call ev_init(ne)
+        call set_ev
 
 !--------------------------------------------------------
 ! allocate arrays
@@ -828,7 +836,7 @@
         real area(nel),amin,amax
 	real eps
 
-	real get_area
+	real get_area, area_elem
 
 	amin = 1.e+30
 	amax = -1.e+30
@@ -848,7 +856,8 @@
 	  y2=ygv(k2)
 	  x3=xgv(k3)
 	  y3=ygv(k3)
-          a = get_area(x1,y1,x2,y2,x3,y3)
+          !a = get_area(x1,y1,x2,y2,x3,y3)
+	  a = area_elem(ie)			!honors spherical
 	  a = abs(a)
 	  amin = min(amin,a)
 	  amax = max(amax,a)

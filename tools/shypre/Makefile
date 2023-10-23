@@ -24,8 +24,10 @@ include $(FEMDIR)/Rules.make
 
 #---------------------------------------------
 
-LIBUTIL     = util
-LIBSHYUTIL  = shyutil
+LIBUTIL       = util
+LIBSHYUTIL    = shyutil
+LIBSHYMPI     = shympi
+LIBSHYUTILMPI = shyutilmpi
 
 LIBLUT  = -L$(LIBDIR) -l$(LIBUTIL)
 LIBFUT  = $(LIBDIR)/lib$(LIBUTIL).a
@@ -33,13 +35,18 @@ LIBFUT  = $(LIBDIR)/lib$(LIBUTIL).a
 LIBLSU  = -L$(LIBDIR) -l$(LIBSHYUTIL)
 LIBFSU  = $(LIBDIR)/lib$(LIBSHYUTIL).a
 
-LIBL = $(LIBLSU) $(LIBLUT)
-LIBF = $(LIBFSU) $(LIBFUT)
+LIBLMP  = -L$(LIBDIR) -l$(LIBSHYMPI)
+LIBFMP  = $(LIBDIR)/lib$(LIBSHYMPI).a
+
+LIBLUM  = -L$(LIBDIR) -l$(LIBSHYUTILMPI)
+LIBFUM  = $(LIBDIR)/lib$(LIBSHYUTILMPI).a
+
+LIBL = $(LIBLUM) $(LIBLMP) $(LIBLSU) $(LIBLUT)
+LIBF = $(LIBFUM) $(LIBFMP) $(LIBFSU) $(LIBFUT)
 
 #----------------------------------------------------------------------------
 
 EXES = shypre
-EXELINKS =      $(FEMBIN) $(EXES)
 
 #----------------------------------------------------------------------------
 
@@ -51,11 +58,11 @@ default: fem
 fem: $(EXES) links
 
 links:
-	@$(FEMBIN)/symlink $(EXELINKS)
+	@$(FEMBIN)/symlink $(FEMBIN) $(EXES)
 
 $(EXES): $(OBJ) $(LIBF) $(EXES).o
 	$(F77) $(FFLAGS) $(INCLUDE) $(LFLAGS) $^ $(LIBL) -o $@
-	cp $(EXES) ../../bin/	
+	cp $(EXES) $(FEMBIN)
 
 #----------------------------------------------------------------------------
 
@@ -67,7 +74,7 @@ cleanobj:
 	-rm -f *_genmod.f90
 
 cleanlinks:
-	@$(FEMBIN)/symlink -remove $(EXELINKS)
+	@$(FEMBIN)/symlink -remove $(FEMBIN) $(EXES)
 
 cleanexe:
 	-rm -f $(EXES)
