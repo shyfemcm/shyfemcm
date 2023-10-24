@@ -28,30 +28,26 @@ LIBPOST     = post
 LIBUTIL     = util
 LIBSHYUTIL  = shyutil
 
-LIBLPS  = -L$(LIBDIR) -l$(LIBPOST)
-LIBFPS  = $(LIBDIR)/lib$(LIBPOST).a
+LIBL	 = -L$(LIBDIR)
 
-LIBLUT  = -L$(LIBDIR) -l$(LIBUTIL)
-LIBFUT  = $(LIBDIR)/lib$(LIBUTIL).a
+LIBL	+= -l$(LIBPOST)
+LIBF	+= $(LIBDIR)/lib$(LIBPOST).a
 
-LIBLSU  = -L$(LIBDIR) -l$(LIBSHYUTIL)
-LIBFSU  = $(LIBDIR)/lib$(LIBSHYUTIL).a
+LIBL	+= -l$(LIBUTIL)
+LIBF	+= $(LIBDIR)/lib$(LIBUTIL).a
 
-LIBL = $(LIBLPS) $(LIBLUT) $(LIBLSU)
-LIBF = $(LIBFPS) $(LIBFUT) $(LIBFSU)
+LIBL	+= -l$(LIBSHYUTIL)
+LIBF	+= $(LIBDIR)/lib$(LIBSHYUTIL).a
 
 #--------------------------------------------- macros
 
-OBJS =
+EXES	=	shyadj
 
-ADJOBJS	=	mod_adj_grade.o \
+OBJ	=	mod_adj_grade.o \
 		adj4el.o adj5el.o adj7el.o adj575.o \
 		adjplo.o adjgrd.o adjneu.o adjvar.o
 
-ALLOBJS =	$(OBJS) $(ADJOBJS) shyadj.o
-
-EXES	=	shyadj
-EXELINKS = 	$(FEMBIN) $(EXES)
+ALL	=	$(OBJ)
 
 SPECIAL =       Makefile TODO README
 SAVEFILES =     *.f90 $(SPECIAL)
@@ -65,14 +61,14 @@ fem:	shyadj links
 all:	$(EXES)
 
 links:
-	@$(FEMBIN)/symlink $(EXELINKS)
+	@$(FEMBIN)/symlink $(FEMBIN) $(EXES)
 
-shyadj: $(ALLOBJS) $(LIBF)
-	$(LINKER) $(LFLAGS) $(ALLOBJS) $(LIBL) -o $@
+shyadj: $(ALL) $(LIBF) shyadj.o
+	$(LINKER) $(LFLAGS) $(ALL) $@.o $(LIBL) -o $@
 
 #--------------------------------------------- clean
 
-cleanall: clean cleanzip cleangrd cleandiff
+cleanall: clean cleanzip cleangrd
 
 clean: cleanobj cleanexe cleanvar cleantex cleanlinks
 
@@ -83,7 +79,7 @@ cleanobj:
 	-rm -f *_genmod.f90
 
 cleanlinks:
-	@$(FEMBIN)/symlink -remove $(EXELINKS)
+	@$(FEMBIN)/symlink -remove $(FEMBIN) $(EXES)
 
 cleanexe:
 	-rm -f $(EXES)
@@ -101,11 +97,6 @@ cleanvar:
 	-rm -f errout.dat
 	-rm -f gmon.out
 	-rm -f out.ps plot.ps
-	-rm -f .memory
-	-rm -fr cvsdiff_tmp
-
-cleandiff:
-	-rm -f DIFFS
 
 cleanzip:
 	-rm -f $(DIR).zip
@@ -115,12 +106,6 @@ cleangrd:
 	-rm -f *.grd
 
 #--------------------------------------------- various
-
-param:
-
-diff:
-	@$(FEMBIN)/cvsdiff -norcs -ifdiff * > DIFFS
-	@echo "differences written to file DIFFS"
 
 depend:
 	@$(MAKEDEPEND) -moddir=$(MODDIR) *.f *.f90

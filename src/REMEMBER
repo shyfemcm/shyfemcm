@@ -1,0 +1,44 @@
+
+-----------------------------------------------------------------------
+
+geom.f90		mod_geom
+topological.f90		set_geom()
+links.f90		link_structure
+lnku.f90		utility functions
+lnkmpi.f90		set_geom_mpi()
+
+-----------------------------------------------------------------------
+
+util			generic
+shyutil			basic fem data structures (basin, levels)
+	util
+shympi			mpi files
+	util
+	shyutil
+shyutilmpi		files depending on shyutil and shympi
+	util
+	shyutil
+	shympi
+
+-----------------------------------------------------------------------
+
+modules defined in file bnd.f90:
+  mod_bnd
+modules defined in file bnd_aux.f90:
+  mod_bnd_aux
+modules defined in file bnd_dynamic.f90:
+  mod_bound_dynamic
+modules used in file bnd_geom.f90:
+  mod_bound_geom
+modules defined in file bnd_geom.f90:
+  mod_bound_geom
+
+-----------------------------------------------------------------------
+
+files in src:
+
+mpi_tripple.f90
+mpi_assert.f90
+
+-----------------------------------------------------------------------
+

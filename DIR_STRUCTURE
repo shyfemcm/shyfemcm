@@ -1,0 +1,40 @@
+
+arc
+bin
+docs
+include
+lib
+obsolete
+src
+	contrib
+		ecological
+		paralution
+	external
+		gotm
+		sparskit
+	obsolete
+		fem3d
+		femgotm
+	shyfem (here is the source code of the main model)
+	tools
+		anim
+		femutil
+		grdadj
+		grid
+		hcbs
+		mesh
+		postscript
+		shybas
+		shyelab
+		shynetcdf
+		shyplot
+		shypre
+	util (here go utilities used by shyfem and tools)
+		generic
+		shyutil
+		shympi
+		shyutilmpi
+testcases
+tmp
+var
+
