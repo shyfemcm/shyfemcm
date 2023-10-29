@@ -1,12 +1,49 @@
 
-! 15.11.2018	ccf	call to tide_vuf in do_befor
+--------------------------------------------------------------------------
+!
+!    Copyright (C) 1994-1995,1997-2020  Georg Umgiesser
+!    Copyright (C) 2008,2010,2014,2018  Christian Ferrarin
+!    Copyright (C) 2016  William McKiver
+!
+!    This file is part of SHYFEM.
+!
+!    SHYFEM is free software: you can redistribute it and/or modify
+!    it under the terms of the GNU General Public License as published by
+!    the Free Software Foundation, either version 3 of the License, or
+!    (at your option) any later version.
+!
+!    SHYFEM is distributed in the hope that it will be useful,
+!    but WITHOUT ANY WARRANTY; without even the implied warranty of
+!    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
+!    GNU General Public License for more details.
+!
+!    You should have received a copy of the GNU General Public License
+!    along with SHYFEM. Please see the file COPYING in the main directory.
+!    If not, see <http://www.gnu.org/licenses/>.
+!
+!    Contributions to this file can be found below in the revision log.
+!
+!--------------------------------------------------------------------------
+
+! utility routines for modules (befor, after)
+!
+! contents :
+!
+!       subroutine do_befor
+!       subroutine do_after
+!
+! revision log :
+!
+! 28.09.2023    gml     newly created from subnsh.f (iostr.f90)
+! 29.10.2023    ggu     recovered log
 
 !----------------------------------------------------------------------
         module befor_after
 !----------------------------------------------------------------------
+
+!----------------------------------------------------------------------
         contains
 !----------------------------------------------------------------------
-!********************************************************************
 
 	subroutine do_befor
 
@@ -60,10 +97,6 @@ end subroutine do_befor
 	call custom(dtime)
 
 end subroutine do_after
-
-!*******************************************************************
-!*******************************************************************
-!*******************************************************************
 
 !----------------------------------------------------------------------
         end module befor_after
