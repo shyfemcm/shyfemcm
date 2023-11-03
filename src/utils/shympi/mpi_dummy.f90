@@ -2428,12 +2428,10 @@
 
 !*****************************************************************
 
-	subroutine shympi_check_all(iwhat)
-
-	implicit none
-	integer iwhat
-
-	end subroutine shympi_check_all
+!	subroutine shympi_check_all(iwhat)
+!	implicit none
+!	integer iwhat
+!	end subroutine shympi_check_all
 
 !******************************************************************
 !******************************************************************

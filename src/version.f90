@@ -384,6 +384,7 @@
 ! 24.03.2023	ggu	version 7.5.83  Pre-Istanbul23 edition
 ! 25.09.2023	ggu	version 7.5.84  Pre-community edition
 ! 28.09.2023	ggu	version 8.0.1   First beta community edition
+! 23.10.2023	ggu	version 8.0.2   Second beta community edition
 !
 !*****************************************************************
 
@@ -393,9 +394,9 @@
 
 ! DOCS	START	P_version
 !
-! \newcommand{\VERSION}{8.0.1}
-! \newcommand{\version}{8\_0\_1}
-! \newcommand{\COMMIT}{2023-09-28}
+! \newcommand{\VERSION}{8.0.2}
+! \newcommand{\version}{8\_0\_2}
+! \newcommand{\COMMIT}{2023-10-23}
 !
 ! DOCS	END
 
@@ -403,8 +404,8 @@
 
 	logical, save		:: bshort = .false.
 
-        character*10, parameter :: version = '8.0.1'
-        character*10, parameter :: commit  = '2023-09-28'
+        character*10, parameter :: version = '8.0.2'
+        character*10, parameter :: commit  = '2023-10-23'
         character*17, parameter :: text    = 'SHYFEM VERSION = '
 
         character*40, parameter :: string = text//version//'  '//commit
