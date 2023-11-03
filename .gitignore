@@ -97,6 +97,9 @@ tools/hcbs/xhcbs
 tmp_compile
 demopost
 
+src/utils/shympi/MPI_NODE
+src/utils/shympi/MPI_NONE
+
 #-----------------------------------------------
 
 femdoc/P_*.tex

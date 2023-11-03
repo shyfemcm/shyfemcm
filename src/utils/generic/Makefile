@@ -12,7 +12,7 @@
 DIR	= util
 
 #--------------------------------------------- just for default
-FEMDIR = ../..
+FEMDIR = ../../..
 F77    = g77
 FFLAGS =  -O -Wall -g
 LINKER = $(F77)
@@ -48,7 +48,6 @@ OBJ  = \
 	random_gen.o \
 	round.o \
 	grd.o \
-	strings.o \
 	subsort.o \
 	sort_util.o \
 	util.o \
@@ -61,13 +60,16 @@ OBJ  = \
 	unitutils.o \
 	tsfile.o \
 	heat_util.o \
-	expand.o \
 	connections.o \
 	time_util.o \
 	vert_intp.o \
 	int_to_cart.o \
 	bit10.o \
 	nodelist.o \
+
+OBSOLETE = \
+	expand.o \
+	strings.o \
 
 ALL = $(MOD) $(OBJ)
 

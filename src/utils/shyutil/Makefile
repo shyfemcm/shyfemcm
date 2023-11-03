@@ -12,7 +12,7 @@
 DIR	= shyutil
 
 #--------------------------------------------- just for default
-FEMDIR = ../..
+FEMDIR = ../../..
 F77    = g77
 FFLAGS =  -O -Wall -g
 LINKER = $(F77)
