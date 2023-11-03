@@ -1,0 +1,14 @@
+
+more files into util
+make femutil and fill with files that have no dependency
+	modules defined but not used
+use libutil in tools
+
+converto to module: femtime, simul
+delete etsinf.h histo.h param.h volcomp.h
+check subqfx.h subqufm.h
+check close.h
+check mkonst.h pkonst.h modules.h
+
+run MPI regression
+
