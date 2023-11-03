@@ -3,8 +3,9 @@
 #
 #--------------------	FILES	---------------------
 
-FEMDIR = ..
+FEMDIR = ../..
 include $(FEMDIR)/Rules.make
+FEMBIN = $(FEMDIR)/bin
 
 #--------------------	EXES	---------------------
 
@@ -53,7 +54,7 @@ SOLVER_OBJ = simsys_lp.o
 
 ifeq ($(SOLVER),SPARSKIT)
    SOLVER_OBJ = \
-	simsys_spkaux.o sparskit_admin.o mat_util.o coo_util.o \
+	simsys_spkaux.o sparskit_admin.o coo_util.o \
 	spk_ilut.o spk_iters.o spk_itaux.o spk_coo.o \
 	spk_itpack.o spk_matvec.o spk_blas.o matrix_inv.o
 endif
@@ -75,7 +76,7 @@ LAGRANGE_OBJ = \
       lagrange_data.o lagrange_sedim.o \
       lagrange_flux.o lagrange_util.o \
       lagrange_vertical.o lagrange_utils.o lagrange_connect.o \
-      lagrange_read.o lagrange_inout.o lagrange_cont.o lagrange_larve.o \
+      lagrange_inout.o lagrange_cont.o lagrange_larve.o \
       lagrange_decay.o lagrange_init.o lagrange_util_tr.o \
       lagrange_track.o lagrange_dif.o lagrange_stk.o \
       lagrange_main.o lagrange_back.o \
@@ -92,7 +93,7 @@ ECO_OBJ = \
       ecological.o bfm_dummy.o bfm.o mercury_dummy.o \
 
 SEDIMENT_OBJ = \
-      sedim_admin.o sedim_util.o simple_sedi.o \
+      sedim_util.o simple_sedi.o sedim_admin.o \
 
 MPI_EXTRA_OBJ = \
       mpi_tripple.o mpi_assert.o lnkmpi.o
@@ -100,35 +101,54 @@ MPI_EXTRA_OBJ = \
 OBJ = system_matrix.o tvd.o \
       hydro_admin.o openmp_admin.o \
       turbulence_util.o sinking.o nudging.o internal.o \
-      bnd_aux.o ts.o hydro_vel.o restart.o gotm_aux.o diff_aux.o \
-      bnd_dynamic.o area.o roughness.o diffusion.o hydro_baro.o \
-      hydro_print.o tsfile.o conz_util.o bnd_admin.o \
+      ts.o hydro_vel.o restart.o gotm_aux.o diff_aux.o \
+      area.o roughness.o diffusion.o hydro_baro.o \
+      hydro_print.o conz_util.o \
       bnd_scalar.o subset.o tide_utils.o tidef.o \
       layer_thickness.o bndo.o conz_common.o \
       bclfix_util.o nohyd.o outputd.o elems_dealing.o sigma_admin.o \
       transforms.o tsfile_admin.o fluidmud.o mud_admin.o chezy.o \
       line_admin.o discharge_flux.o flux_util.o \
-      substress.o flxm.o flux.o extra.o modls.o \
-      ous_admin.o flux_box.o residual.o tvd_admin.o \
-      check.o wetdry.o stability.o time_admin.o \
+      flxm.o modls.o \
+      ous_admin.o residual.o tvd_admin.o \
+      wetdry.o stability.o time_admin.o \
       model3d_util.o trace.o keps_util.o kepsilon.o eq_state.o \
-      mod_offline.o offline_data.o turbulence.o rd_ts.o intp_tst.o \
-      arrays.o closing.o nohydro.o diffusion_admin.o bcvel.o \
-      floodfill.o topological_admin.o explicit.o coo_matrix.o nudge.o \
-      penta.o turbine.o hydrodynamic.o submir.o initialize.o \
+      offline_data.o rd_ts.o intp_tst.o \
+      arrays.o closing.o diffusion_admin.o bcvel.o \
+      floodfill.o topological_admin.o coo_matrix.o nudge.o \
+      penta.o turbine.o submir.o initialize.o \
       bnd_routines.o concentration_omp.o histogram.o \
       concentration.o baroclinic.o def_para.o \
       iostr.o constants.o f_vol.o mkdistance.o conz_admin.o \
-      water_ren_time.o atoxi.o toxical.o custom_admin.o \
-      befor_after.o test_zeta.o poisson.o \
+      water_ren_time.o atoxi.o toxical.o \
+      befor_after.o test_zeta.o \
 	$(SOLVER_OBJ) \
-	$(LAGRANGE_OBJ) \
 	$(HEAT_OBJ) \
-	$(ECO_OBJ) \
+	substress.o \
 	$(SEDIMENT_OBJ) \
+	$(LAGRANGE_OBJ) \
+	$(ECO_OBJ) \
 	$(MPI_EXTRA_OBJ) \
+	turbulence.o nohydro.o explicit.o hydrodynamic.o \
+	custom_admin.o poisson.o \
+      flux.o extra.o flux_box.o check.o \
 
-#	$(METIS_OBJ) \
+OBSOLETE = \
+	bnd_aux.o bnd_dynamic.o tsfile.o bnd_admin.o \
+	mod_offline.o \
+
+#------------------------------------------------------------------------
+
+default: fem
+
+fem: $(EXEC)
+
+$(EXEC): $(MODULES) $(OBJ) $(LIBFS) shyfem.o
+	 $(F77) $(FFLAGS) $(INCLUDE) $(LFLAGS) $^ $(LIBL) -o $@
+	 cp $(EXEC) $(BINDIR)
+
+depend:
+	@$(FEMBIN)/mkdp.pl -moddir=$(MODDIR) *.f90
 
 #------------------------------------------------------------------------
 
@@ -138,15 +158,14 @@ OBJ = system_matrix.o tvd.o \
 %.o: %.f90 
 	$(F77) $(FFLAGS) $(INCLUDE) -c $< 
 
-$(EXEC):$(MODULES) $(OBJ) $(LIBFS) shyfem.o
-	$(F77) $(FFLAGS) $(INCLUDE) $(LFLAGS) $^ $(LIBL) -o $@
-	cp $(EXEC) $(BINDIR)
 clean:
-	-rm -f $(MODDIR)/*.mod *.o
+	-rm -f *.o
 	-rm -f $(EXEC)
 	-rm -f $(BINDIR)/$(EXEC)
-	-rm -f $(LIBDIR)/libshy.a 
+
 cleanall: clean
+	-rm -f $(MODDIR)/*.mod
+	-rm -f $(LIBDIR)/libshy.a 
 
 update:
 	cp $(EXEC) /home/georg/work/shyfem_repo/shyfem-mpi/bin
@@ -155,3 +174,6 @@ update:
 	cp $(EXEC) /home/georg/work/shyfem_repo/shyfem/fem3d
 
 #------------------------------------------------------------------------
+
+# DO NOT DELETE THIS LINE -- make depend depends on it.
+
