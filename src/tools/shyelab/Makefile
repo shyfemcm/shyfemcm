@@ -10,7 +10,7 @@
 DIR     = shyelab
 
 #--------------------------------------------- just for default
-FEMDIR = ../..
+FEMDIR = ../../..
 FEMBIN = $(FEMDIR)/bin
 LIBDIR = $(FEMDIR)/lib
 SRCDIR = $(FEMDIR)/src

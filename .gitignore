@@ -59,29 +59,29 @@ src/tools/shypre/shypre
 bin/shypre
 src/tools/shyadj/shyadj
 bin/shyadj
-tools/shybas/shybas
+src/tools/shybas/shybas
 bin/shybas
-tools/shynetcdf/nc2fem
+src/tools/shynetcdf/nc2fem
 bin/nc2fem
-tools/shyplot/shyplot
+src/tools/shyplot/shyplot
 bin/shyplot
-tools/shyelab/shyelab
+src/tools/shyelab/shyelab
 bin/shyelab
-tools/shyelab/extelab
+src/tools/shyelab/extelab
 bin/extelab
-tools/shyelab/femelab
+src/tools/shyelab/femelab
 bin/femelab
-tools/shyelab/flxelab
+src/tools/shyelab/flxelab
 bin/flxelab
-tools/shyelab/lgrelab
+src/tools/shyelab/lgrelab
 bin/lgrelab
-tools/shyelab/tselab
+src/tools/shyelab/tselab
 bin/tselab
-tools/shyelab/shyparts
+src/tools/shyelab/shyparts
 bin/shyparts
-tools/shyelab/shyproj
+src/tools/shyelab/shyproj
 bin/shyproj
-tools/shyelab/ts2nc
+src/tools/shyelab/ts2nc
 bin/ts2nc
 
 bin/grid
@@ -91,8 +91,8 @@ src/tools/mesh/mesh
 bin/exgrd
 src/tools/mesh/exgrd
 
-tools/hcbs/tvis
-tools/hcbs/xhcbs
+src/tools/hcbs/tvis
+src/tools/hcbs/xhcbs
 
 tmp_compile
 demopost
