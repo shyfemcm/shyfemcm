@@ -10,7 +10,7 @@
 DIR     = shyplot
 
 #--------------------------------------------- just for default
-FEMDIR = ../..
+FEMDIR = ../../..
 FEMBIN = $(FEMDIR)/bin
 LIBDIR = $(FEMDIR)/lib
 SRCDIR = $(FEMDIR)/src
@@ -74,11 +74,11 @@ OBJ := \
 	col.o \
 	supcust.o \
 	mod_hydro_plot.o \
-	$(FEMDIR)/tools/shyelab/elabtime.o \
-	$(FEMDIR)/tools/shyelab/elabutil.o \
-	$(FEMDIR)/src/hydro_admin.o \
-	$(FEMDIR)/src/hydro_vel.o \
-	$(FEMDIR)/src/hydro_print.o \
+	$(FEMDIR)/src/tools/shyelab/elabtime.o \
+	$(FEMDIR)/src/tools/shyelab/elabutil.o \
+	$(FEMDIR)/src/shyfem/hydro_admin.o \
+	$(FEMDIR)/src/shyfem/hydro_vel.o \
+	$(FEMDIR)/src/shyfem/hydro_print.o \
 	plotutil.o \
 	supbas.o \
 	supano.o \
@@ -94,11 +94,13 @@ OBJ := \
 	suptim.o \
 	supver.o \
 	supout.o \
-	util/suputi.f90 \
-	util/supcol.f90 \
 	genutil.o \
 	def_para_post.o \
 	subnsa.o \
+
+WHAT = \
+	util/suputi.o \
+	util/supcol.o \
 
 #----------------------------------------------------------------------------
 
@@ -110,7 +112,6 @@ links:
 
 $(EXES): $(OBJ) $(LIBF) $(EXES).o
 	$(F77) $(FFLAGS) $(INCLUDE) $(LFLAGS) $^ $(LIBL) -o $@
-	cp $(EXES) ../../bin/	
 
 #----------------------------------------------------------------------------
 

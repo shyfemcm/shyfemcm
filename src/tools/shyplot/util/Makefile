@@ -12,7 +12,7 @@
 DIR	= femplot
 
 #------------------------------------------------------------ just for default
-FEMDIR = ../..
+FEMDIR = ../../../..
 FEMBIN = $(FEMDIR)/fembin
 DIRLIB = $(FEMDIR)/femlib
 F77    = g77
@@ -27,7 +27,7 @@ include $(FEMDIR)/Rules.make
 LIBFEM  = fem
 LIBPOST = post
 
-COLOR  = supcol.o col.o suputi.o
+COLOR  = col.o supcol.o suputi.o
 
 RGFOBJS = subrgf.o
 
@@ -60,7 +60,7 @@ help:
 	@echo "help         this screen"
 	@echo "all          compile utility programs"
 
-plotcolb: plotcolb.o $(COLOR) $(LIBIFS) $(LIBIPS)
+plotcolb: $(COLOR) plotcolb.o $(LIBIFS) $(LIBIPS)
 	$(LINKER) $(LFLAGS) $@.o $(COLOR) $(LIBFS) $(LIBPS) -o $@
 
 windrose: windrose.o $(LIBIPS)
@@ -147,10 +147,15 @@ strip:	$(EXES)
 # Rules -----------------------------------------------------
 #------------------------------------------------------------
 
+.SUFFIXES: .f90
+
 .c.o:
 	$(CC)  -c $(CFLAGS) $<
 
 .f.o:
+	$(F77) -c $(FFLAGS) $<
+
+.f90.o:
 	$(F77) -c $(FFLAGS) $<
 
 #------------------------------------------------------------
