@@ -12,7 +12,7 @@
 DIR    = postscript
 
 #----------------------------------------------------------- just for default
-FEMDIR = ../..
+FEMDIR = ../../..
 FEMBIN = $(FEMDIR)/bin
 LIBDIR = $(FEMDIR)/lib
 CC     = gcc

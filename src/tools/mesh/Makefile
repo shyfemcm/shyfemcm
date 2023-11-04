@@ -12,7 +12,7 @@
 DIR    = mesh
 
 #---------------------------------------------  just for default
-FEMDIR  = ../..
+FEMDIR  = ../../..
 FEMBIN  = $(FEMDIR)/bin
 CC     = gcc
 CFLAGS =  -O -Wall -pedantic

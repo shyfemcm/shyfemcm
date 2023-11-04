@@ -55,9 +55,9 @@ femdoc/texput.log
 
 src/shyfem
 bin/shyfem
-tools/shypre/shypre
+src/tools/shypre/shypre
 bin/shypre
-tools/shyadj/shyadj
+src/tools/shyadj/shyadj
 bin/shyadj
 tools/shybas/shybas
 bin/shybas
@@ -85,11 +85,11 @@ tools/shyelab/ts2nc
 bin/ts2nc
 
 bin/grid
-tools/grid/grid
+src/tools/grid/grid
 bin/mesh
-tools/mesh/mesh
+src/tools/mesh/mesh
 bin/exgrd
-tools/mesh/exgrd
+src/tools/mesh/exgrd
 
 tools/hcbs/tvis
 tools/hcbs/xhcbs
