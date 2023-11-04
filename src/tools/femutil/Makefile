@@ -8,8 +8,8 @@
 #------------------------------------------------------------------------
 
 
-FEMDIR    = ..
-FEMBIN    = $(FEMDIR)/fembin
+FEMDIR    = ../../..
+FEMBIN    = $(FEMDIR)/bin
 
 FEMDIRS   = femfiles mpi stab
 

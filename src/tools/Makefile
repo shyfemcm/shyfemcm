@@ -14,7 +14,8 @@ SUBDIRS = \
 		shynetcdf shypre shybas shyelab \
 		shyplot
 SUBDIRS = \
-	grid mesh postscript hcbs shypre shyadj
+	grid mesh postscript hcbs shypre shyadj shybas \
+	shyparts
 
 #------------------------------------------------------------------------
 

@@ -10,7 +10,7 @@
 DIR	= shybas
 
 #--------------------------------------------- just for default
-FEMDIR = ../..
+FEMDIR = ../../..
 FEMBIN = $(FEMDIR)/bin
 LIBDIR = $(FEMDIR)/lib
 SRCDIR = $(FEMDIR)/src
@@ -74,7 +74,7 @@ links:
 
 $(EXES): $(OBJ) $(LIBF) $(EXES).o
 	$(F77) $(FFLAGS) $(INCLUDE) $(LFLAGS) $^ $(LIBL) -o $@
-	cp $(EXES) ../../bin/	
+	cp $(EXES) $(FEMBIN)/bin/	
 
 #----------------------------------------------------------------------------
 
