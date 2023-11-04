@@ -43,6 +43,7 @@ OBJ  = \
 	defnames.o \
 	geom_dynamic.o \
 	regular.o \
+	expand.o \
 	geom.o \
 	levels.o \
 	links.o \

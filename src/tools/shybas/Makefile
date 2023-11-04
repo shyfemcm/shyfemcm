@@ -74,7 +74,7 @@ links:
 
 $(EXES): $(OBJ) $(LIBF) $(EXES).o
 	$(F77) $(FFLAGS) $(INCLUDE) $(LFLAGS) $^ $(LIBL) -o $@
-	cp $(EXES) $(FEMBIN)/bin/	
+	cp $(EXES) $(FEMBIN)
 
 #----------------------------------------------------------------------------
 

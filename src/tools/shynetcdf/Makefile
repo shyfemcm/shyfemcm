@@ -12,7 +12,7 @@
 DIR	= shynetcdf
 
 #--------------------------------------------- just for default
-FEMDIR = ../..
+FEMDIR = ../../..
 FEMBIN = $(FEMDIR)/bin
 F77    = g77
 FFLAGS =  -O -Wall -g
