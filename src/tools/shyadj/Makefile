@@ -12,7 +12,7 @@
 DIR	= gridadj
 
 #--------------------------------------------- just for default
-FEMDIR = ../..
+FEMDIR = ../../..
 FEMBIN = $(FEMDIR)/bin
 LIBDIR = $(FEMDIR)/lib
 F77    = g77
