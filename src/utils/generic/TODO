@@ -12,3 +12,5 @@ check mkonst.h pkonst.h modules.h
 
 run MPI regression
 
+routines for connections:
+color connections

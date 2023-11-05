@@ -79,6 +79,7 @@ OBJ := \
 	$(FEMDIR)/src/shyfem/hydro_admin.o \
 	$(FEMDIR)/src/shyfem/hydro_vel.o \
 	$(FEMDIR)/src/shyfem/hydro_print.o \
+	$(FEMDIR)/src/tools/shyelab/shy_util2.o \
 	plotutil.o \
 	supbas.o \
 	supano.o \
@@ -97,6 +98,8 @@ OBJ := \
 	genutil.o \
 	def_para_post.o \
 	subnsa.o \
+	plotgeneric.o \
+	color_table.o \
 
 WHAT = \
 	util/suputi.o \
