@@ -1,0 +1,18 @@
+
+#------------------------------------------------------------------------
+#
+#    Copyright (C) 1985-2023  The SHYFEM team
+#
+#    This file is part of SHYFEM.
+#
+#------------------------------------------------------------------------
+
+this directory contains external routines that are not part of SHYFEM
+
+contents:
+
+gotm		the GOTM turbulence library
+sparskit	the Sparskit library and other files for solving linear systems
+
+#------------------------------------------------------------------------
+

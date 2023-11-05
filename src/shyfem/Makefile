@@ -24,6 +24,7 @@ LIBUTIL         = util
 LIBSHYUTIL      = shyutil
 LIBSHYMPI       = shympi
 LIBSHYUTILMPI   = shyutilmpi
+LIBSPARSKIT     = sparskit
 
 LIBLUT  = -L$(LIBDIR) -l$(LIBUTIL)
 LIBFUT  = $(LIBDIR)/lib$(LIBUTIL).a
@@ -37,9 +38,12 @@ LIBFMP  = $(LIBDIR)/lib$(LIBSHYMPI).a
 LIBLUM  = -L$(LIBDIR) -l$(LIBSHYUTILMPI)
 LIBFUM  = $(LIBDIR)/lib$(LIBSHYUTILMPI).a
 
-LIBF = $(LIBFUM) $(LIBFMP) $(LIBFSU) $(LIBFUT)
+LIBLSP  = -L$(LIBDIR) -l$(LIBSPARSKIT)
+LIBFSP  = $(LIBDIR)/lib$(LIBSPARSKIT).a
+
+LIBF = $(LIBFUM) $(LIBFMP) $(LIBFSU) $(LIBFUT) $(LIBFSP)
 LIBL = $(LIBLUM) $(LIBLMP) $(LIBLSU) $(LIBLUT) $(LIBLGOTM) $(LIBG_METIS)
-LIBL += $(LIBLGOTM) $(LIBG_METIS) $(LIBG_PETSC)
+LIBL += $(LIBLGOTM) $(LIBG_METIS) $(LIBG_PETSC) $(LIBLSP)
 
 #--------------------	GOTM	-----------------------
 
@@ -57,6 +61,9 @@ ifeq ($(SOLVER),SPARSKIT)
 	simsys_spkaux.o sparskit_admin.o coo_util.o \
 	spk_ilut.o spk_iters.o spk_itaux.o spk_coo.o \
 	spk_itpack.o spk_matvec.o spk_blas.o matrix_inv.o
+   SOLVER_OBJ = \
+	simsys_spkaux.o sparskit_admin.o coo_util.o \
+	matrix_inv.o
 endif
 
 ifeq ($(SOLVER),PETSC)
@@ -145,7 +152,6 @@ fem: $(EXEC)
 
 $(EXEC): $(MODULES) $(OBJ) $(LIBFS) shyfem.o
 	 $(F77) $(FFLAGS) $(INCLUDE) $(LFLAGS) $^ $(LIBL) -o $@
-	 cp $(EXEC) $(BINDIR)
 
 depend:
 	@$(FEMBIN)/mkdp.pl -moddir=$(MODDIR) *.f90

@@ -18,9 +18,9 @@
 #
 #--------------------   FILES   ----------------------------
 
-FEMDIR = ../..
+FEMDIR = ../../..
 
-include ../../Rules.make
+include $(FEMDIR)/Rules.make
 
 LIBDIR = $(FEMDIR)/lib
 LIB	= $(LIBDIR)/libturbulence$(buildtype).a

@@ -1,0 +1,29 @@
+
+#------------------------------------------------------------------------
+#
+#    Copyright (C) 1985-2023  The SHYFEM team
+#
+#    This file is part of SHYFEM.
+#
+#------------------------------------------------------------------------
+
+this directory contains tools for the SHYFEM framework
+
+contents:
+
+anim		create animations
+femutil		various utilities
+grid		grid routine for visualizing .grd files
+hcbs		plotting library for X11
+mesh		automatic mesh generator
+postscript	plotting library for postscript
+shyadj		adjust grid for regularization
+shybas		elaborate .grd and .bas files
+shyelab		elaborate shyfem output files
+shynetcdf	interface to netcdf library
+shyparts	partitioning routines for MPI
+shyplot		general routine for plotting shyfem results
+shypre		preprocessor for .grd files to create .bas files
+
+#------------------------------------------------------------------------
+
