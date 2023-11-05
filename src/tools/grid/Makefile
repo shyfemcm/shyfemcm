@@ -182,18 +182,6 @@ save:   cleanall cleangrd cleanzip
 
 #----------------------
 
-install: $(FEMBIN)/grid
-
-$(FEMBIN)/grid: grid
-	cp -f grid $(FEMBIN)
-
-strip:
-	-strip grid
-
-stub:
-	strip grid
-	coff2exe grid
-
 list:
 	@ls
 

@@ -16,18 +16,19 @@ SUBDIRS = \
 
 SUBDIRS = \
 	grid mesh postscript hcbs \
-	shypre shyadj shybas \
-	shyparts shynetcdf shyelab shyplot
+	shyadj shybas \
+	shyelab shynetcdf \
+	shyparts shyplot shypre \
 
 #------------------------------------------------------------------------
 
 default: fem
 
 fem: nothing
-	$(BINDIR)/recursivemake $@ $(SUBDIRS)
+	@$(BINDIR)/recursivemake $@ $(SUBDIRS)
 
 test: nothing
-	$(BINDIR)/recursivemake $@ shynetcdf
+	@$(BINDIR)/recursivemake $@ shynetcdf
 
 regress: nothing
 
@@ -39,10 +40,10 @@ list:
 depend: nothing
 
 clean: nothing
-	$(BINDIR)/recursivemake $@ $(SUBDIRS)
+	@$(BINDIR)/recursivemake $@ $(SUBDIRS)
 
 cleanall: nothing
-	$(BINDIR)/recursivemake $@ $(SUBDIRS)
+	@$(BINDIR)/recursivemake $@ $(SUBDIRS)
 
 save: nothing
 

@@ -43,11 +43,13 @@
 	use evgeom
 	use basin
 
-	integer iapini
+	!integer iapini
 
-        if(iapini(1,0,0,0).eq.0) then
-                stop 'error stop : iapini'
-        end if
+        !if(iapini(1,0,0,0).eq.0) then
+        !        stop 'error stop : iapini'
+        !end if
+	! we have to read the basin somehow...
+
 	call set_ev
 	write(6,*) nkn,nel
 

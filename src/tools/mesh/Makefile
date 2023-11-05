@@ -145,22 +145,6 @@ save:   cleanall
 
 #----------------------
 
-install: $(FEMBIN)/mesh $(FEMBIN)/exgrd
-
-$(FEMBIN)/mesh: mesh
-	cp -f mesh $(FEMBIN)
-
-$(FEMBIN)/exgrd: exgrd
-	cp -f exgrd $(FEMBIN)
-
-strip:
-	-strip mesh exgrd
-
-stub:
-	strip mesh exgrd
-	coff2exe mesh
-	coff2exe exgrd
-
 list:
 	@ls
 

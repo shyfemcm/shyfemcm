@@ -119,6 +119,7 @@ $(EXES): $(OBJ) $(LIBF) $(EXES).o
 #----------------------------------------------------------------------------
 
 clean: cleanobj cleanlinks cleanexe
+	cd util; make clean
 
 cleanobj:
 	-rm -f *.o
@@ -132,6 +133,7 @@ cleanexe:
 	-rm -f $(EXES)
 
 cleanall: clean
+	cd util; make cleanall
 
 #----------------------------------------------------------------------------
 

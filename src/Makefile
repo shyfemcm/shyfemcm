@@ -9,17 +9,17 @@
 
 FEMDIR = ..
 BINDIR = $(FEMDIR)/bin
-SUBDIRS = utils shyfem
+SUBDIRS = utils shyfem tools
 
 #------------------------------------------------------------------------
 
 default: fem
 
 fem: nothing
-	$(BINDIR)/recursivemake $@ $(SUBDIRS)
+	@$(BINDIR)/recursivemake $@ $(SUBDIRS)
 
 test: nothing
-	$(BINDIR)/recursivemake $@ $(SUBDIRS)
+	@$(BINDIR)/recursivemake $@ $(SUBDIRS)
 
 regress: nothing
 
@@ -31,10 +31,10 @@ list:
 depend: nothing
 
 clean: nothing
-	$(BINDIR)/recursivemake $@ $(SUBDIRS)
+	@$(BINDIR)/recursivemake $@ $(SUBDIRS)
 
 cleanall: nothing
-	$(BINDIR)/recursivemake $@ $(SUBDIRS)
+	@$(BINDIR)/recursivemake $@ $(SUBDIRS)
 
 save: nothing
 
@@ -42,4 +42,6 @@ zip: nothing
 
 nothing:
 	@true
+
+#------------------------------------------------------------------------
 

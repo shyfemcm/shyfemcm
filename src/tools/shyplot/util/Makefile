@@ -13,8 +13,8 @@ DIR	= femplot
 
 #------------------------------------------------------------ just for default
 FEMDIR = ../../../..
-FEMBIN = $(FEMDIR)/fembin
-DIRLIB = $(FEMDIR)/femlib
+FEMBIN = $(FEMDIR)/bin
+DIRLIB = $(FEMDIR)/lib
 F77    = g77
 FFLAGS =  -O
 LINKER = $(F77)
@@ -24,18 +24,34 @@ include $(FEMDIR)/Rules.make
 
 #------------------------------------------------------------
 
-LIBFEM  = fem
-LIBPOST = post
+OBJ := \
+	../col.o \
+	../color_table.o \
+	../plotgeneric.o \
 
-COLOR  = col.o supcol.o suputi.o
+LIBUTIL         = util
+LIBSHYUTIL      = shyutil
+LIBSHYMPI       = shympi
+LIBSHYUTILMPI   = shyutilmpi
+LIBPOST         = post
 
-RGFOBJS = subrgf.o
+LIBLUT  = -L$(LIBDIR) -l$(LIBUTIL)
+LIBFUT  = $(LIBDIR)/lib$(LIBUTIL).a
 
-LIBFS   = -L$(DIRLIB) -l$(LIBFEM)
-LIBIFS  = $(DIRLIB)/lib$(LIBFEM).a
+LIBLSU  = -L$(LIBDIR) -l$(LIBSHYUTIL)
+LIBFSU  = $(LIBDIR)/lib$(LIBSHYUTIL).a
 
-LIBPS   = -L$(DIRLIB) -l$(LIBPOST)
-LIBIPS  = $(DIRLIB)/lib$(LIBPOST).a
+LIBLMP  = -L$(LIBDIR) -l$(LIBSHYMPI)
+LIBFMP  = $(LIBDIR)/lib$(LIBSHYMPI).a
+
+LIBLUM  = -L$(LIBDIR) -l$(LIBSHYUTILMPI)
+LIBFUM  = $(LIBDIR)/lib$(LIBSHYUTILMPI).a
+
+LIBLPS  = -L$(LIBDIR) -l$(LIBPOST)
+LIBFPS  = $(LIBDIR)/lib$(LIBPOST).a
+
+LIBL = $(LIBLNC) $(LIBLUM) $(LIBLMP) $(LIBLSU) $(LIBLUT) $(LIBLPS)
+LIBF = $(LIBFNC) $(LIBFUM) $(LIBFMP) $(LIBFSU) $(LIBFUT)
 
 #------------------------------------------------------------
 
@@ -60,20 +76,20 @@ help:
 	@echo "help         this screen"
 	@echo "all          compile utility programs"
 
-plotcolb: $(COLOR) plotcolb.o $(LIBIFS) $(LIBIPS)
-	$(LINKER) $(LFLAGS) $@.o $(COLOR) $(LIBFS) $(LIBPS) -o $@
+plotcolb: $(OBJ) plotcolb.o $(LIBF)
+	$(LINKER) $(LFLAGS) $@.o $(OBJ) $(LIBL) -o $@
 
-windrose: windrose.o $(LIBIPS)
-	$(LINKER) $(LFLAGS) $@.o $(LIBPS) -o $@
+windrose: windrose.o $(LIBF)
+	$(LINKER) $(LFLAGS) $@.o $(LIBL) -o $@
 
-testdash: testdash.o $(LIBIFS) $(LIBIPS)
-	$(LINKER) $(LFLAGS) $@.o $(LIBFS) $(LIBPS) -o $@
+testdash: testdash.o  $(LIBF)
+	$(LINKER) $(LFLAGS) $@.o $(LIBL) -o $@
 
-plotbug: plotbug.o $(LIBIFS) $(LIBIPS)
-	$(LINKER) $(LFLAGS) $@.o $(LIBFS) $(LIBPS) -o $@
+plotbug: plotbug.o $(LIBF)
+	$(LINKER) $(LFLAGS) $@.o $(LIBL) -o $@
 
-lagxitest: lagxitest.o $(LIBIFS) $(LIBIPS)
-	$(LINKER) $(LFLAGS) $@.o $(LIBFS) $(LIBPS) -o $@
+lagxitest: lagxitest.o $(LIBF)
+	$(LINKER) $(LFLAGS) $@.o $(LIBL) -o $@
 
 links:
 
