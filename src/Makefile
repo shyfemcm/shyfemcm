@@ -9,7 +9,7 @@
 
 FEMDIR = ..
 BINDIR = $(FEMDIR)/bin
-SUBDIRS = utils shyfem tools
+SUBDIRS = external utils shyfem tools
 
 #------------------------------------------------------------------------
 

@@ -86,7 +86,7 @@ cleanall: clean cleanlib cleanzip
 clean: cleanobj cleanexe cleanvar
 
 cleanlib:
-	-rm -f $(LIBIGS)
+	-rm -f $(LIBFGS)
 
 cleanexe:
 	-rm -f $(EXES)

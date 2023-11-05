@@ -1,0 +1,20 @@
+
+#------------------------------------------------------------------------
+#
+#    Copyright (C) 1985-2023  The SHYFEM team
+#
+#    This file is part of SHYFEM.
+#
+#------------------------------------------------------------------------
+
+this directory contains routines from the Sparskit library
+it also contains some other routines for solving linear systems
+
+contents:
+
+spk*.f90		Sparskit routines
+penta.f90		routines for solving penta-diagonal system
+submir.f90		other linear system solver routines
+
+#------------------------------------------------------------------------
+
