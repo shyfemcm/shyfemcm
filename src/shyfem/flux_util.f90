@@ -57,6 +57,7 @@
 ! 03.04.2018	ggu	changed VERS_7_5_43
 ! 16.02.2019	ggu	changed VERS_7_5_60
 ! 27.05.2022	ggu	prepared for mpi use, fluxes now double
+! 28.10.2023	ggu	bug fix for node at boundary with ibtyp==3
 !
 ! notes :
 !
@@ -337,6 +338,7 @@
 
 	if( nsect .lt. 0 ) then
 	  write(6,*) 'errors setting up fluxes ',nsect
+	  write(6,*) 'error happens in klineck '
 	  stop 'error stop : flx_init'
 	end if
 
@@ -391,7 +393,11 @@
 	  if( k == 0 ) stop 'error stop flxinf: (1)'
 	  if( k < 0 ) cycle
 	  ngood = ngood + 1
-	  ktype = flxtype(k)
+	  if( n == 1 ) then	!one node section ... must be ibtyp == 3
+	    ktype = 1		!fake inner node
+	  else
+	    ktype = flxtype(k)
+	  end if
 
 	  iflux(1,i) = ktype
 

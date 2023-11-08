@@ -1,0 +1,107 @@
+#!/bin/sh
+#
+# displays history of files in git repository
+#
+#--------------------------------------
+
+Usage()
+{
+  echo "Usage: git-log [-h|-help] [-options] file(s)"
+}
+
+FullUsage()
+{
+  Usage
+  echo ""
+  echo "Available options:"
+  echo "  -h|-help         this help"
+  echo "  -verbose         be verbose"
+  echo "  -quiet           be quiet"
+  echo "  -full            show full log messages messages"
+  echo "  -short           show short log messages messages"
+  echo "  -oneline         show one line for each commit (default)"
+  echo "  -first           show first commit"
+  echo "  -last            show last commit"
+  echo "  -names           show file names"
+  echo "  -orig            same as -names -first"
+  echo "  -new             same as -names -last"
+  echo ""
+}
+
+PrintLog()
+{
+  if [ $show = "full" ]; then
+    cat tmp.tmp
+  elif [ $show = "short" ]; then
+    grep -v "^$" tmp.tmp
+  elif [ $show = "oneline" ]; then
+    git-log.pl tmp.tmp
+  elif [ $show = "first" ]; then
+    git-log.pl tmp.tmp | tail -1
+  elif [ $show = "last" ]; then
+    git-log.pl tmp.tmp | head -1
+  else
+    echo "unknown option..."
+  fi
+}
+
+#--------------------------------------
+
+show=
+verbose=NO
+quiet=NO
+names=NO
+
+while [ -n "$1" ]
+do
+   case $1 in
+        -quiet)         quiet="YES";;
+        -verbose)       verbose="YES";;
+        -full)          show="full";;
+        -short)         show="short";;
+        -oneline)       show="oneline";;
+        -first)         show="first";;
+        -last)          show="last";;
+        -names)         names="YES";;
+        -orig)          names="YES"; show="first";;
+        -new)           names="YES"; show="last";;
+        -h|-help)       FullUsage; exit 0;;
+        -*)             echo "No such option: $1"; exit 1;;
+        *)              break;;
+   esac
+   shift
+done
+
+[ $# -eq 0 ] && Usage && exit 0
+
+[ -z "$show" ] && show=oneline
+single="NO"
+[ $show = "first" ] && single="YES"
+[ $show = "last" ] && single="YES"
+[ $names = "YES" ] && single="YES"
+
+#--------------------------------------------------
+
+date="format-local:'%Y-%m-%d::%H:%M:%S'"
+
+[ -f tmp.tmp ] && rm -f tmp.tmp
+
+for file in $*
+do
+  [ $names = "YES" ] && echo "===================== $file" >> tmp.tmp
+  git log --follow --date=$date $file >> tmp.tmp
+  if [ $single = "YES" ]; then
+    PrintLog
+    [ -f tmp.tmp ] && rm -f tmp.tmp
+  fi
+done
+
+if [ $single = "NO" ]; then
+  PrintLog
+  [ -f tmp.tmp ] && rm -f tmp.tmp
+fi
+
+#rm tmp.tmp
+
+#--------------------------------------------------
+

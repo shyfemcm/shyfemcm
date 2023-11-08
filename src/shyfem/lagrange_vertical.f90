@@ -47,6 +47,7 @@
 ! 16.02.2019	ggu	changed VERS_7_5_60
 ! 22.05.2023	ggu	get_layer_thickness() was missing an argument
 ! 05.06.2023    lrp     introduce z-star
+! 28.09.2023    lrp     bug fix for zstar (wrong declaration nadapt/hadapt)
 
 !
 !******************************************************

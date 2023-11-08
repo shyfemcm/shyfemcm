@@ -123,7 +123,7 @@ OBJ = system_matrix.o tvd.o \
       offline_data.o rd_ts.o intp_tst.o \
       arrays.o closing.o diffusion_admin.o bcvel.o \
       floodfill.o topological_admin.o coo_matrix.o nudge.o \
-      penta.o turbine.o submir.o initialize.o \
+      turbine.o initialize.o \
       bnd_routines.o concentration_omp.o histogram.o \
       concentration.o baroclinic.o def_para.o \
       iostr.o constants.o f_vol.o mkdistance.o conz_admin.o \
@@ -138,7 +138,7 @@ OBJ = system_matrix.o tvd.o \
 	$(MPI_EXTRA_OBJ) \
 	turbulence.o nohydro.o explicit.o hydrodynamic.o \
 	custom_admin.o poisson.o \
-      flux.o extra.o flux_box.o check.o \
+      flux.o extra.o boxes.o check.o \
 
 OBSOLETE = \
 	bnd_aux.o bnd_dynamic.o tsfile.o bnd_admin.o \

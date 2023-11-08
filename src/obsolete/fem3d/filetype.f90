@@ -83,25 +83,25 @@
 ! NOS file
 !-------------------------------------------------------------
 
-	iunit = ifileo(0,file,'unformatted','old')
-	call nos_is_nos_file(iunit,nvers)
-	if( nvers > 0 ) then
-	  write(6,*) 'file format is NOS'
-	  stop
-	end if
-	if( iunit > 0 ) close(iunit)
+!	iunit = ifileo(0,file,'unformatted','old')
+!	call nos_is_nos_file(iunit,nvers)
+!	if( nvers > 0 ) then
+!	  write(6,*) 'file format is NOS'
+!	  stop
+!	end if
+!	if( iunit > 0 ) close(iunit)
 
 !-------------------------------------------------------------
 ! OUS file
 !-------------------------------------------------------------
 
-	iunit = ifileo(0,file,'unformatted','old')
-	call ous_is_ous_file(iunit,nvers)
-	if( nvers > 0 ) then
-	  write(6,*) 'file format is OUS'
-	  stop
-	end if
-	if( iunit > 0 ) close(iunit)
+!	iunit = ifileo(0,file,'unformatted','old')
+!	call ous_is_ous_file(iunit,nvers)
+!	if( nvers > 0 ) then
+!	  write(6,*) 'file format is OUS'
+!	  stop
+!	end if
+!	if( iunit > 0 ) close(iunit)
 
 !-------------------------------------------------------------
 ! BAS file
@@ -130,13 +130,13 @@
 ! ETS file
 !-------------------------------------------------------------
 
-	iunit = ifileo(0,file,'formatted','old')
-	call ets_is_ets_file(iunit,nvers)
-	if( nvers > 0 ) then
-	  write(6,*) 'file format is ETS'
-	  stop
-	end if
-	if( iunit > 0 ) close(iunit)
+!	iunit = ifileo(0,file,'formatted','old')
+!	call ets_is_ets_file(iunit,nvers)
+!	if( nvers > 0 ) then
+!	  write(6,*) 'file format is ETS'
+!	  stop
+!	end if
+!	if( iunit > 0 ) close(iunit)
 
 !-------------------------------------------------------------
 ! unknown
