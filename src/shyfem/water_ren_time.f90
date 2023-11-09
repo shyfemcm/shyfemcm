@@ -158,10 +158,9 @@
 	use mod_renewal_time
 	use shympi
 	use custom_dates
+	use simul
 
         implicit none
-
-	include 'simul.h'
 
         logical, save :: bnoret,bstir,blog,badj
 	logical breset,bcompute,binit,belab

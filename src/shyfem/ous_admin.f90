@@ -69,10 +69,9 @@
 	use basin, only : nkn,nel,ngr,mbw
 	use shyfile
 	use shympi
+	use simul
 
 	implicit none
-
-	include 'simul.h'
 
 	logical bdebug
 	integer itmout,ierr

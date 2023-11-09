@@ -90,11 +90,11 @@
 	use mod_hydro
 	use levels
 	use basin, only : nkn,nel,ngr,mbw
+	use simul
 
 	implicit none
 
 ! common
-	include 'simul.h'
 ! local
 	character*80 nam,dir,file
 	integer ierr,ii,ie,k,id
@@ -267,11 +267,11 @@
 	use levels
 	use basin
 	use mod_layer_thickness
+	use simul
 
 	implicit none
 
 ! common
-	include 'simul.h'
 ! local
 	double precision rr,dtime
 	logical bout

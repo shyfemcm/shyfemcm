@@ -170,11 +170,11 @@
 ! writes output to terminal or log file
 
 	use shympi
+	use simul
 
 	implicit none
 
 	include 'modules.h'
-	include 'simul.h'
 
 	character*80 name
         integer nrb,nbc
@@ -269,14 +269,13 @@
 ! id    identifier
 
 	use basin
+	use simul
 
 	implicit none
 
 	integer id
 
 	include 'modules.h'
-
-	include 'simul.h'
 
 	write(6,*)
 	write(6,*) '============================================='
@@ -545,9 +544,9 @@
 
 ! reads title section
 
-	implicit none
+	use simul
 
-	include 'simul.h'
+	implicit none
 
 	character*80 line,extra
 

@@ -86,6 +86,8 @@
 !
 ! iunit		unit number of file
 
+	use simul
+
 	implicit none
 
 	integer iu		!unit where file is open
@@ -104,8 +106,6 @@
 	real getpar
 
 	logical compare_svars
-
-	include 'simul.h'
 
 	bdebug = .true.
 	bdebug = .false.
@@ -184,10 +184,11 @@
 
 ! reads title section of apn files
 
+	use simul
+
         implicit none
 
 	include 'param.h'
-	include 'simul.h'
 
         character*80 line
 

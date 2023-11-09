@@ -265,10 +265,9 @@
 	use levels
 	use extra
 	use shympi
+	use simul
 
 	implicit none
-
-	include 'simul.h'
 
 	logical blast
 	integer nbext,ierr

@@ -593,12 +593,11 @@
 	subroutine shy_set_simul_params(id)
 
 	use shyfile
+	use simul
 
 	implicit none
 
 	integer id
-
-	include 'simul.h'
 
 	integer date,time
 	real simpar(3)

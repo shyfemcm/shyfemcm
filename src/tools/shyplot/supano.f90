@@ -101,11 +101,11 @@
 
 !  writes annotation for simulation
 
+	use simul
+
 	implicit none
 
 	character*(*) var
-
-	include 'simul.h'
 
 	character*80 line
         logical debug

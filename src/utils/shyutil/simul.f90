@@ -1,7 +1,8 @@
 
 !--------------------------------------------------------------------------
 !
-!    Copyright (C) 2023  Georg Umgiesser
+!    Copyright (C) 2015,2019  Georg Umgiesser
+!    Copyright (C) 2023  The SHYFEM team
 !
 !    This file is part of SHYFEM.
 !

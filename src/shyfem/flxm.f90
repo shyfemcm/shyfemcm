@@ -172,6 +172,7 @@
      &				,kflux_ext,nlayers,chflx)
 
 	use shympi
+	use simul
 
 	implicit none
 
@@ -183,8 +184,6 @@
 	integer kflux_ext(kfluxm)
 	integer nlayers(nsect)
 	character*80 chflx(nsect)
-
-	include 'simul.h'
 
 	logical debug
 	integer nbflx,nvers,idtflx,nlmax

@@ -692,13 +692,13 @@
 	use mod_depth
 	use levels
 	use basin, only : nkn,nel,ngr,mbw
+	use simul
 
 	implicit none
 
 	character*(*) type
 
 	include 'supout.h'
-	include 'simul.h'
 
 	character*80 file
 

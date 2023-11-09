@@ -381,10 +381,9 @@
 	use box_arrays
 	use mod_debug
 	use shympi
+	use simul
 
 	implicit none
-
-	include 'simul.h'
 
 	integer j,i,k,l,lmax,nlmax,ivar,nvers,nk_ob
 	integer date,time

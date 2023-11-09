@@ -55,11 +55,11 @@
 	use evgeom
 	use levels
 	use basin
+	use simul
 
 	implicit none
 
         include 'param.h'
-	include 'simul.h'
 
 	integer ndsdim
 	parameter(ndsdim=1)

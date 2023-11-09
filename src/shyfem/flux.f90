@@ -700,10 +700,9 @@
 	use levels, only : nlvdi,nlv
 	use basin, only : nkn
 	use flux
+	use simul
 
 	implicit none
-
-	include 'simul.h'
 
 	character*(*) ext		!extension of new file (e.g., '.fxw')
 	integer ivbase			!base for variable numbers
