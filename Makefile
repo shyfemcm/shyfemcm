@@ -61,7 +61,7 @@ ACTFEMDIR = `pwd`
 
 REGRESSDIR = femregress
 
-SUBDIRS   = `ls -dF * | grep  '/' | sed -e 's/\///'`
+SUBDIRS   = src
 FEMLIBS   = femcheck post hcbs
 FEMGRID   = grid
 FEMMESH   = mesh
@@ -122,11 +122,8 @@ default:
 all: fem doc
 	@cd fem3d; make compatibility
 
-fem: checkv directories links #test_executable check_server check_compiler
-	cd external/gotm; make
+fem:
 	cd src; make
-	#@$(FEMBIN)/recursivemake $@ $(FEMDIRS)
-	#@femcheck/check_compilation.sh -quiet
 
 para_get:
 	@cd fempara; ./para_get.sh $(PARADIR)
@@ -203,8 +200,6 @@ clean: cleanlocal
 
 cleanall: cleanlocal cleanregress
 	$(FEMBIN)/recursivemake $@ $(SUBDIRS)
-	cd external/gotm; make cleanall
-	cd src; make cleanall
 
 cleandist: cleanall
 
