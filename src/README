@@ -14,6 +14,7 @@ contents:
 shyfem		the SHYFEM model
 utils		libraries that SHYFEM depends on
 tools		utilities for the SHYFEM framework
+contrib		various contributions loosely connected to shyfem
 external	external code and libraries
 obsolete	files not needed anymore
 
