@@ -1,3 +1,11 @@
 
+#------------------------------------------------------------------------
+#
+#    Copyright (C) 1985-2023  The SHYFEM team
+#
+#    This file is part of SHYFEM.
+#
+#------------------------------------------------------------------------
+
 for nearly all needs use unf_info to check what is in an unformatted file
 

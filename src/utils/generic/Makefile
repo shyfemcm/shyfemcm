@@ -66,6 +66,7 @@ OBJ  = \
 	int_to_cart.o \
 	bit10.o \
 	nodelist.o \
+	color_utils.o \
 
 OBSOLETE = \
 	expand.o \
