@@ -84,8 +84,6 @@
 	double precision ahigh
 	parameter(ahigh=4000.*365.*86400.)
 
-	!include 'timlim.h'
-
 !  the first 4 variables might be useless
 
         itmin = -ihigh
@@ -116,8 +114,6 @@
 	use timlim
 
         implicit none
-
-	!include 'timlim.h'
 
 	integer iauto
 	integer itanf,itend
@@ -171,8 +167,6 @@
 
 	implicit none
 
-	!include 'timlim.h'
-
 	write(6,*) '---------- ptime_info -----------'
 	write(6,*) 'itmin,itmax: ',itmin,itmax
 	write(6,*) 'itact: ',itact
@@ -198,8 +192,6 @@
 
 	integer date,time
 
-	!include 'timlim.h'
-
 	atime0 = 0.
 
 	if( date > 0 ) then
@@ -221,8 +213,6 @@
 
 	integer it
 
-	!include 'timlim.h'
-
 	atimeact = atime0 + it
 
 	end
@@ -236,8 +226,6 @@
 	implicit none
 
 	double precision atime
-
-	!include 'timlim.h'
 
 	atimeact = atime
 
@@ -253,8 +241,6 @@
 
 	double precision dtime
 
-	!include 'timlim.h'
-
 	atimeact = atime0 + dtime
 
 	end
@@ -268,8 +254,6 @@
 	implicit none
 
 	integer it
-
-	!include 'timlim.h'
 
 	it = nint( atimeact - atime0 )
 
@@ -285,8 +269,6 @@
 
 	double precision atime
 
-	!include 'timlim.h'
-
 	atime = atimeact
 
 	end
@@ -300,8 +282,6 @@
 	implicit none
 
 	double precision dtime
-
-	!include 'timlim.h'
 
 	dtime = atimeact - atime0
 
@@ -317,8 +297,6 @@
 
 	integer it
 	double precision atime
-
-	!include 'timlim.h'
 
 	atime = atime0 + it
 
@@ -337,8 +315,6 @@
         implicit none
 
 	logical ptime_ok
-
-	!include 'timlim.h'
 
 	integer it
         double precision, save :: atimeold = -1
@@ -384,8 +360,6 @@
         implicit none
 
 	logical ptime_end
-
-	!include 'timlim.h'
 
 	ptime_end = atimeact .gt. atimemax
 

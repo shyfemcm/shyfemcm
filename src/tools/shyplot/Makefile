@@ -81,6 +81,7 @@ OBJ := \
 	$(FEMDIR)/src/shyfem/hydro_print.o \
 	$(FEMDIR)/src/tools/shyelab/shy_util2.o \
 	plotutil.o \
+	supout.o \
 	supbas.o \
 	supano.o \
 	supdep.o \
@@ -94,7 +95,6 @@ OBJ := \
 	supsim.o \
 	suptim.o \
 	supver.o \
-	supout.o \
 	genutil.o \
 	def_para_post.o \
 	subnsa.o \

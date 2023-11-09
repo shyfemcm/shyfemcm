@@ -97,6 +97,29 @@
 ! 
 ! ***************************************************************
 
+	module legend
+
+	implicit none
+
+        integer legdim			!maximum number of legend entries
+        parameter(legdim=400)
+
+        integer, save :: nleg,nlegdi,iplotleg
+
+        real, save :: xleg(2,legdim), yleg(2,legdim)
+
+        character*80, save :: legleg(legdim)
+
+        character*4, save :: whatleg(legdim)
+
+        integer, save :: legsiz(legdim)
+
+        real, save :: aleg(legdim), cleg(legdim)
+
+	end module legend
+
+! ***************************************************************
+
 	subroutine annotes(var)
 
 !  writes annotation for simulation
@@ -926,9 +949,9 @@
 
 !  initializes legend
 
-        implicit none
+	use legend
 
-	include 'legend.h'
+        implicit none
 
 	integer icall
 	save icall
@@ -947,11 +970,11 @@
 
 	subroutine set_plotleg(ipl)
 
+	use legend
+
 	implicit none
 
 	integer ipl
-
-	include 'legend.h'
 
 	iplotleg = ipl
 
@@ -963,9 +986,9 @@
 
 !  error message for legend
 
-        implicit none
+	use legend
 
-	include 'legend.h'
+        implicit none
 
 	if( nlegdi .ne. legdim ) then
                 write(6,*) 'internal error: nlegdi .ne. legdim'
@@ -984,9 +1007,9 @@
 
 !  reads legend from str file
 
-        implicit none
+	use legend
 
-	include 'legend.h'
+        implicit none
 
         character*80 line
         integer i
@@ -1043,11 +1066,11 @@
 ! 		A	gives A B C D ...
 ! 		1	gives 1 2 3 4 ...
 
+	use legend
+
 	implicit none
 
 	character*(*) line
-
-	include 'legend.h'
 
 	character*80 text,keyword
 	logical bdebug
@@ -1158,9 +1181,9 @@
 
 !  plots legend
 
-        implicit none
+	use legend
 
-	include 'legend.h'
+        implicit none
 
         logical bdebug
 	character*4 what,what1

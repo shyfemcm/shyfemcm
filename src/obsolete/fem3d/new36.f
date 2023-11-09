@@ -146,13 +146,12 @@
 	use mod_hydro
 	use basin
 	use shympi
+	use close
 
 	implicit none
 
 	integer ic		!0 if no change in configuration   (out)
 
-	include 'close.h'
-	include 'mkonst.h'
 
 ! local
 	logical bclos,bopen,bimm,bact
@@ -252,7 +251,7 @@
 	  end if
 	end if
 
-	ic=0				!&&&&   do not compute new uv-matrix
+	ic=0				!----   do not compute new uv-matrix
 	nsc=ipccv(ipnt(lnsect,0))	!number of sections
 	nbc = nbnds()
 
@@ -371,7 +370,7 @@
 		if(ibndz.le.0.and.ibnd.gt.0) ibndz=ibnd
 		ipccv(ipnt(libndz,j))=ibndz
 !
-!		!&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&
+!		!-----------------------------------------
 		write(nb13,*)
 		write(nb13,*) 'first call for closing section nr. : ',j
 		write(nb13,*)
@@ -388,7 +387,7 @@
 		write(nb13,*) 'iboc : '
 		write(nb13,*) (ipev(ivccv(jiboc+ii)),ii=1,niboc)
 		write(nb13,*)
-!		!&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&
+!		!-----------------------------------------
 !
 		write(nb13,*) '----------------------------'
 		ipful=ipccv(ipnt(lipful,0))
@@ -506,7 +505,7 @@
 	dy=ygv(kdir)-ygv(kin)
 	scal=u*dx+v*dy
 !
-!	!&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&
+!	!------------------------------------
 	write(nb13,*)
 	write(nb13,'(1x,a,7i5)') 'j,iact,imode,istp,iclos :' &
      &				,j,iact,imode,istp,iclos,ibndz,ibtyp
@@ -515,7 +514,7 @@
 	write(nb13,'(1x,a,2e10.2,6f7.3)') 'extra: ',scal,scalo &
      &				,zref,zout,zin,zdate
 	write(nb13,*)
-!	!&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&
+!	!------------------------------------
 !
 !	decide closing & opening
 !
@@ -660,11 +659,11 @@
                 volini=volag(2,zdate)
                 volmax=volag(0,zdate)
                 dvolin=volmax-volini
-!               !&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&
+!               !----------------
 !                write(nb13,*) 'vol..ini,max,diff:',volini,volmax,dvolin
 !                write(nb13,*) 'u,v,uv1,flux1 ',u1,v1,uv1,flux1
 !                write(nb13,*) 'u,v,uv2,flux2 ',u2,v2,uv2,flux2
-!               !&&&&&&&&&&&&&&&&&&&&&&&&&&&&&
+!               !----------------
               end if
               if(bspecl) then
                 volact=volag(2,zdate)
@@ -716,10 +715,10 @@
 					h=hboc
 				end if
 				hm3v(ii,ie)=h
-!				!&&&&&&&&&&&&&&&&&
+!				!----------------
 				write(nb13,*) 'ie,kn,h: ' &
      &					,ipev(ie),ipv(kn),h
-!				!&&&&&&&&&&&&&&&&&
+!				!----------------
 			end if
 		      end do
 		    end do
@@ -749,7 +748,7 @@
 				end if
 			end if
 !
-			ic=1	!&&&&&& compute new uv-matrix
+			ic=1	!------ compute new uv-matrix
 !
 			write(6,*) 'inlet ',j,' closed at it = ',it
 			write(nb13 ,*) 'inlet ',j,' closed at it = ',it
@@ -761,10 +760,10 @@
               ie=ivccv(jiboc+i)
               czv(ie)=czcls(j)
             end do
-!           !&&&&&&&&&&&&&&&&&
+!           !----------------
             write(nb13,*) 'chezy : ' &
      &        ,j,niboc,czv(ie)
-!           !&&&&&&&&&&&&&&&&&
+!           !----------------
         end if
 !
 	if(bopen) then		!open inlet
@@ -800,7 +799,7 @@
 				end if
 			end if
 !
-			ic=1	!&&&&&& compute new uv-matrix
+			ic=1	!------ compute new uv-matrix
 !
 			write(6,*) 'inlet ',j,' opened at it = ',it
 			write(nb13 ,*) 'inlet ',j,' opened at it = ',it
@@ -850,9 +849,9 @@
 
 ! initializes closing sections
 
-	implicit none
+	use close
 
-	include 'close.h'
+	implicit none
 
 	integer i
 
@@ -876,11 +875,11 @@
 
 ! reads closing sections
 
+	use close
+
 	implicit none
 
 	integer isc		!number of actual section to read (in)
-
-	include 'close.h'
 
 	character*6 name
 	character*80 text
@@ -1004,9 +1003,9 @@
 
 ! post-processes closing sections
 
-	implicit none
+	use close
 
-	include 'close.h'
+	implicit none
 
 	logical bstop
 	integer nsc,ivdim,ivful
@@ -1124,9 +1123,9 @@
 
 ! prints info on closing sections
 
-	implicit none
+	use close
 
-	include 'close.h'
+	implicit none
 
 	integer j,i
 	integer nsc,ipful,ivful
@@ -1213,9 +1212,9 @@
 
 ! tests closing sections
 
-	implicit none
+	use close
 
-	include 'close.h'
+	implicit none
 
 	integer i
 	integer ipful,ivful
@@ -1247,6 +1246,8 @@
 
 ! inserts vector in data structure of closing sections
 
+	use close
+
 	implicit none
 
 	character*(*) name		!name of parameter
@@ -1255,8 +1256,6 @@
 	integer isc			!number of closing section
 	integer iweich			!return value of nrdnxt (1=first call)
 	integer ival			!value to insert
-
-	include 'close.h'
 
 	integer ip,itot
 	integer ivdim,ivful
@@ -1304,13 +1303,13 @@
 
 ! converts node to internal number
 
+	use close
+
 	implicit none
 
 	integer lip			!position of pointer to data (in)
 	integer isc			!number of closing section   (in)
 	logical bstop			!on error set to .true.      (in/out)
-
-	include 'close.h'
 
 	integer k,kint
 	integer ipint
@@ -1390,9 +1389,9 @@
 
 	subroutine set_zdate(isc,zdate)
 
-	implicit none
+	use close
 
-	include 'close.h'
+	implicit none
 
 	integer isc
 	real zdate
@@ -1417,9 +1416,9 @@
 
 	subroutine get_zdate(isc,zdate)
 
-	implicit none
+	use close
 
-	include 'close.h'
+	implicit none
 
 	integer isc
 	real zdate
@@ -1441,9 +1440,9 @@
 
         subroutine make_obc_range(isc,isc_start,isc_end)
 
-        implicit none
+	use close
 
-	include 'close.h'
+        implicit none
 
 	integer isc
         integer isc_start
@@ -1475,11 +1474,11 @@
 
         subroutine get_new_mode(j,it,iact,imode)
 
+	use close
+
         implicit none
 
         integer j,it,iact,imode
-
-        include 'close.h'
 
         integer icycle
 	integer jitb,nitb

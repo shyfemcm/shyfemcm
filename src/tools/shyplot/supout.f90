@@ -100,6 +100,24 @@
 ! **********************************************************
 ! **********************************************************
 
+	module supout
+
+	logical bdebug_out
+	parameter (bdebug_out = .false.)
+
+	integer, save :: nunit
+
+	integer, save :: iformat,iwave
+
+	integer, save :: nunit_wave,nunit_ous,nunit_nos,nunit_fvl &
+     &                  ,nunit_eos,nunit_fem
+
+	real, save :: regp(7)
+
+	end module supout
+
+! **********************************************************
+
         subroutine velopen
 
 !  opens velocity file (2d and 3d)
@@ -645,9 +663,9 @@
 
 !  initializes internal data structure for FEM files
 
-	implicit none
+	use supout
 
-	include 'supout.h'
+	implicit none
 
 	integer icall
 	save icall
@@ -673,9 +691,9 @@
 
 !  closes FEM file
 
-	implicit none
+	use supout
 
-	include 'supout.h'
+	implicit none
 
 	call femini
 	if( nunit_fem .gt. 0 ) close(nunit_fem)
@@ -693,12 +711,11 @@
 	use levels
 	use basin, only : nkn,nel,ngr,mbw
 	use simul
+	use supout
 
 	implicit none
 
 	character*(*) type
-
-	include 'supout.h'
 
 	character*80 file
 
@@ -808,6 +825,7 @@
 !  reads next FEM record - is true if a record has been read, false if EOF
 
 	use levels
+	use supout
 
 	implicit none
 
@@ -818,8 +836,6 @@
 	integer nlvddi			!dimension of vertical coordinate
 	integer nkn			!number of points needed
 	real array(nlvddi,nkn,1)	!values for variable
-
-	include 'supout.h'
 
 	logical bfound,bformat,bregdata,bwind,bvel
 	integer ierr

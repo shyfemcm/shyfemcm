@@ -1356,9 +1356,9 @@
 
         subroutine setreg_grid(regpar)
 
-        implicit none
+	use supout
 
-        include 'supout.h'
+        implicit none
 
         real regpar(7)
 
@@ -1373,10 +1373,9 @@
 !  plots regular points
 
 	use mod_bash
+	use supout
 
 	implicit none
-
-	include 'supout.h'
 
 	integer nx,ny
 	real ddx,ddy,dxy
