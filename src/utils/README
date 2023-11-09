@@ -1,0 +1,20 @@
+
+#------------------------------------------------------------------------
+#
+#    Copyright (C) 1985-2023  The SHYFEM team
+#
+#    This file is part of SHYFEM.
+#
+#------------------------------------------------------------------------
+
+this directory contains utilities used by the model and tools
+
+contents:
+
+generic		generic routines that self-sufficient
+shyutil		routines providing basic functionality for shyfem (basin,levels)
+shympi		routines dealing with MPI implementation
+shyutilmpi	routines depending on shyutil and shympi
+
+#------------------------------------------------------------------------
+

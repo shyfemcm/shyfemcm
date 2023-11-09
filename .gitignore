@@ -53,7 +53,7 @@ femdoc/texput.log
 
 #-----------------------------------------------
 
-src/shyfem
+src/shyfem/shyfem
 bin/shyfem
 src/tools/shypre/shypre
 bin/shypre
