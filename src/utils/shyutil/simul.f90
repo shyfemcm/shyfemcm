@@ -27,6 +27,8 @@
 !
 ! revision log :
 !
+! 19.01.2015	ggu	changed VERS_7_1_3
+! 16.02.2019	ggu	changed VERS_7_5_60
 ! 21.10.2023    ggu     created module - still to eliminate include
 !
 !******************************************************************
@@ -35,7 +37,7 @@
 	module simul
 !==================================================================
 
-	include 'simul.h'
+        character*80, save :: descrp
 
 !==================================================================
 	end module simul

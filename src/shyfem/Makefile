@@ -148,13 +148,16 @@ OBSOLETE = \
 
 default: fem
 
-fem: $(EXEC)
+fem: $(EXEC) nothing
 
 $(EXEC): $(MODULES) $(OBJ) $(LIBFS) shyfem.o
 	 $(F77) $(FFLAGS) $(INCLUDE) $(LFLAGS) $^ $(LIBL) -o $@
 
 depend:
 	@$(FEMBIN)/mkdp.pl -moddir=$(MODDIR) *.f90
+
+nothing:
+	@true
 
 #------------------------------------------------------------------------
 
