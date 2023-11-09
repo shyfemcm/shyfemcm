@@ -126,11 +126,11 @@
 	use mod_diff_visc_fric
 	use levels, only : nlvdi,nlv
 	use basin, only : nkn,nel,ngr,mbw
+	use pkonst
 
 	implicit none
 
 	include 'femtime.h'
-	include 'pkonst.h'
 
 !---------------------------------------------------------------
 ! aux arrays superposed onto other aux arrays
@@ -241,11 +241,11 @@
 	use levels, only : nlvdi,nlv
 	use basin
 	use shympi
+	use pkonst
 
 	implicit none
 
 	include 'femtime.h'
-	include 'pkonst.h'
 
 	double precision dt
 	double precision u_taus,u_taub
@@ -997,6 +997,7 @@
 	use mod_hydro_print
 	use basin, only : nkn,nel,ngr,mbw
 	use shympi
+	use pkonst
 
 	implicit none
 
@@ -1004,8 +1005,6 @@
 	real buoyf2(nldim,nkn)
 	real shearf2(nldim,nkn)
 
-	include 'pkonst.h'
-	include 'femtime.h'
 
 	integer k,l,nlev,flev
 	real aux,dh,du,dv,m2,dbuoy

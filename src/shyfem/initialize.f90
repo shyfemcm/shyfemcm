@@ -1212,6 +1212,8 @@
 	use basin
         use coordinates
 	use shympi
+	use pkonst
+	use mkonst
 
 	implicit none
 
@@ -1219,9 +1221,6 @@
 	parameter ( omega2 = 2.0 * 0.729E-4 )
 	real rearth	!radius of earth
 	parameter ( rearth = 6371000. )
-
-	include 'mkonst.h'
-	include 'pkonst.h'
 
 	logical bgeo
 	integer k,ie,ii

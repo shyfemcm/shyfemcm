@@ -286,14 +286,13 @@
 	use mod_hydro
 	use evgeom
 	use basin
+	use pkonst
 
 	implicit none
 
 	integer ielem		!element (0 for total energy - all elements)
 	real kenerg		!kinetic energy (return)
 	real penerg		!potential energy relative to z=0 (return)
-
-	include 'pkonst.h'
 
 	integer ie,ii,ie1,ie2
 	double precision aj,pot,kin,z,zz
@@ -340,6 +339,7 @@
 	use levels
 	use basin
 	use shympi
+	use pkonst
 
 	implicit none
 
@@ -347,8 +347,6 @@
 	real penergy		!potential energy relative to z=0 (return)
 	real ksurf		!kinetic energy of surface layer (return)
 	integer ia_ignore	!area code to be ignored
-
-	include 'pkonst.h'
 
 	integer ie,ii,l,lmax,lmin,ia,k,ntot
 	double precision area,pot,kin,kinsurf,z,zz,ke

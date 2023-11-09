@@ -196,10 +196,9 @@
         use mod_ts
         use mod_bstress
         use shympi
+	use pkonst
 
         implicit none
-
-        include 'pkonst.h'
 
         real, intent(out)	:: taucur(nkn)
 
@@ -268,14 +267,14 @@
 
 	subroutine compute_wave_bottom_stress(h,p,depth,z0,tauw)
 
+	use pkonst
+
 	implicit none
 
 	real h,p	!wave height and period
 	real depth	!depth of water column
 	real z0		!bottom roughness
 	real tauw	!stress at bottom (return)
-
-	include 'pkonst.h'
 
 	real omega,zeta,a,eta,fw,uw
 	real, parameter :: pi = 3.14159

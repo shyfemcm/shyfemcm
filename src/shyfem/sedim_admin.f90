@@ -4351,10 +4351,9 @@
         use basin, only : nkn
 	use mod_sediment
         use mod_sediment_para
+	use mkonst
 
         implicit none
-
-        include 'mkonst.h'
 
         integer, intent(in)		:: idsedi(*)
 	integer, intent(in)		:: nscls

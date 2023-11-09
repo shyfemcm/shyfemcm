@@ -91,12 +91,12 @@
 
 ! set up constants and parameters
 
+	use pkonst
+	use mkonst
+
 	implicit none
 
 	include 'modules.h'
-
-	include 'mkonst.h'
-	include 'pkonst.h'
 
 ! parameters %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
@@ -157,14 +157,14 @@
 	use mod_bnd
 	use mod_bound_geom
 	use basin, only : nkn,nel,ngr,mbw
+	use pkonst
+	use mkonst
 
 	implicit none
 
 	include 'modules.h'
 
 	include 'param.h'
-	include 'mkonst.h'
-	include 'pkonst.h'
 
 	integer ibarcl
         real getpar
@@ -269,9 +269,9 @@
 
 ! set coriolis parameter
 
-	implicit none
+	use pkonst
 
-	include 'pkonst.h'
+	implicit none
 
 	real dlat
 

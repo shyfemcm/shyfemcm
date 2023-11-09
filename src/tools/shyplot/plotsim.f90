@@ -101,13 +101,12 @@
 	use evgeom
 	use levels
 	use basin
+	use pkonst
+	use mkonst
 
 	implicit none
 
 !  parameters
-
-	include 'mkonst.h'
-	include 'pkonst.h'
 
 !  local
 	character*20 what

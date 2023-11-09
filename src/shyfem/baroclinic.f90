@@ -203,14 +203,14 @@
 	use levels
 	use basin
 	use shympi
+	use pkonst
+	use mkonst
 
 	implicit none
 !
 ! arguments
 	integer mode
 ! common
-	include 'pkonst.h'
-	include 'mkonst.h'
 
 ! local
 	logical debug
@@ -637,12 +637,12 @@
 	use mod_ts
 	use levels
 	use basin, only : nkn,nel,ngr,mbw
+	use pkonst
 
 	implicit none
 
 	real resid
 ! common
-	include 'pkonst.h'
 
 ! local
 	logical bdebug,debug,bsigma
@@ -730,11 +730,11 @@
 	use mod_ts
 	use levels
 	use basin, only : nkn,nel,ngr,mbw
+	use pkonst
 
 	implicit none
 
 ! common
-	include 'pkonst.h'
 
 ! local
 	logical bdebug,debug,bsigma

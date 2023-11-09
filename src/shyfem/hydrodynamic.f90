@@ -482,6 +482,8 @@
 	use basin
 	use shympi
         use mod_zeta_system, only : kn,hia,hik,solver_type
+	use pkonst
+	use mkonst
          
 	implicit none
 
@@ -489,9 +491,6 @@
 
 	double precision drittl
 	parameter (drittl=1./3.)
-
-	include 'mkonst.h'
-	include 'pkonst.h'
 
         integer afix            !chao dbf
 	logical bcolin
@@ -736,11 +735,10 @@
 	subroutine hydro_transports
 
 	use basin, only : nkn,nel,ngr,mbw
+	use pkonst
 !$	use omp_lib
 
 	implicit none
-
-	include 'pkonst.h'
 
 	integer ie
 	integer ies,iend
@@ -876,6 +874,8 @@
 	use evgeom
 	use levels
 	use basin
+	use pkonst
+	use mkonst
 	!use ieee_exceptions
 
 	implicit none
@@ -892,8 +892,6 @@
 	double precision drittl
 	parameter (drittl=1./3.)
 ! common
-	include 'mkonst.h'
-	include 'pkonst.h'
 ! local
 
 	logical bbaroc,barea0                  !$$BAROC_AREA0
@@ -1448,11 +1446,10 @@
 	use levels
 	use basin
 	use shympi
+	use pkonst
+	use mkonst
 
 	implicit none
-
-	include 'mkonst.h'
-	include 'pkonst.h'
 
 	logical bcolin,bdebug
 	integer ie,ii,l,kk,ie_mpi

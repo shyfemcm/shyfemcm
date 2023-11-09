@@ -206,12 +206,11 @@
 	use basin, only : nkn,nel,ngr,mbw
 	use intp_fem_file
 	use shympi
+	use mkonst
 
 	implicit none
 
 	integer mode
-
-	include 'mkonst.h'
 
 	real rwv2(nkn)
 	integer, save, allocatable :: ids(:)		!id values for BC
@@ -782,11 +781,10 @@
 	use mod_hydro_print
 	use mod_hydro
 	use basin
+	use pkonst
 
 	implicit none
 
-	include 'pkonst.h'
-	include 'mkonst.h'
 
 	integer ibc,ibtyp,kranf,krend,ktilt,k,kn1,kn2
 	integer nbc
@@ -1223,6 +1221,7 @@
 	use levels
 	use basin, only : nkn,nel,ngr,mbw
 	use shympi
+	use mkonst
 
 	implicit none
 
@@ -1233,8 +1232,6 @@
 	real sflux(nlvdi,nkn)	!mass flux for each finite volume (return)
 	real sconz(nlvdi,nkn)	!concentration for each finite volume (return)
 	real ssurf		!value of scalar for surface flux
-
-	include 'mkonst.h'
 
 	logical bdebug
 	integer iunit
@@ -1357,14 +1354,13 @@
 	use mod_bound_dynamic
 	use levels
 	use basin, only : nkn,nel,ngr,mbw
+	use mkonst
 
 	implicit none
 
 	character*(*) what
 	real scal(nlvdi,nkn)	!concentration of scalar
 	real sconz(nlvdi,nkn)	!concentration for each finite volume
-
-	include 'mkonst.h'
 
 	integer k,l,lmax,lmin,ks
 	real cconz,qflux,mflux
@@ -1402,12 +1398,11 @@
 
 	use levels, only : nlvdi,nlv
 	use basin, only : nkn,nel,ngr,mbw
+	use mkonst
 
 	implicit none
 
 	real r3v(nlvdi,nkn)
-
-	include 'mkonst.h'
 
 	integer k,l
 
@@ -1427,13 +1422,12 @@
 
 	use levels, only : nlvdi,nlv
 	use basin, only : nkn,nel,ngr,mbw
+	use mkonst
 
 	implicit none
 
 	real r3v(nlvdi,nkn)
 	real value
-
-	include 'mkonst.h'
 
 	integer k,l
 
@@ -1529,12 +1523,11 @@
 
 	use levels, only : nlvdi,nlv
 	use basin, only : nkn,nel,ngr,mbw
+	use mkonst
 
 	implicit none
 
 	real r3v(nlvdi,nkn)
-
-	include 'mkonst.h'
 
 	integer k,l
 	real value

@@ -156,6 +156,8 @@
 	use levels
 	use basin
         use mod_zeta_system, only : kn,hia,hik
+	use pkonst
+	use mkonst
 
 	implicit none
 
@@ -164,9 +166,6 @@
 	real drittl
 	parameter (drittl=1./3.)
 
-	include 'mkonst.h'
-	include 'pkonst.h'
- 
 	integer ie,i,j,j1,j2,n,m,kk,l,k
 	integer ngl
 	integer ilevel
@@ -308,6 +307,8 @@
 	use evgeom
 	use levels
 	use basin
+	use pkonst
+	use mkonst
 
 	implicit none
 
@@ -316,9 +317,6 @@
 	real drittl
 	parameter (drittl=1./3.)
 
-	include 'mkonst.h'
-	include 'pkonst.h'
- 
 	integer kn(3)
 	integer ie,i,j,j1,j2,n,m,kk,l,k,iii
 	integer ngl
@@ -458,13 +456,12 @@
 
 	use basin
 	use poisson
+	use mkonst
 
 	implicit none
 
 	integer nlvdi
 	real pvar(nlvdi,nkn)
-
-	include 'mkonst.h'
 
 	integer k,l
 	real bnd

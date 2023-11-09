@@ -572,6 +572,7 @@
 	use basin, only : nkn,nel,ngr,mbw
 	use shympi
 	use shympi_debug
+	use mkonst
 
 	implicit none
 
@@ -598,7 +599,6 @@
 	!parameter ( istot_max = 300 )
 	parameter ( istot_max = 1000 )
 ! common
-	include 'mkonst.h'
 ! local
         real, allocatable :: saux(:,:)		!aux array
         real, allocatable :: sbflux(:,:)	!flux boundary conditions
@@ -1625,6 +1625,7 @@
 	use levels
 	use basin
 	use shympi
+	use mkonst
 
 	implicit none
 !
@@ -1640,7 +1641,6 @@
 	real wsinkv(0:nlvddi,nkn)
 	integer istot,isact
 ! common
-	include 'mkonst.h'
 ! local
 	logical bdebug,bdebug1
 	integer k,ie,ii,l,iii,id,ie_mpi

@@ -737,13 +737,12 @@
 	use basin
 	use mod_hydro
 	use shympi
+	use pkonst
 
 	implicit none
 
 	real gindex
 	real garray(nel)
-
-	include 'pkonst.h'
 
 	integer ie,ii,ii1,k1,k2
 	real distmin,d,dx,dy

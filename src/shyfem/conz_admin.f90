@@ -299,11 +299,10 @@
 	use mod_diff_visc_fric
 	use levels, only : nlvdi,nlv
 	use basin, only : nkn,nel,ngr,mbw
+	use mkonst
 	!use shympi
 
 	implicit none
-
-	include 'mkonst.h'
 
 	logical bfirst
 	real wsink
@@ -372,10 +371,9 @@
 	use mod_diff_visc_fric
 	use levels, only : nlvdi,nlv
 	use basin, only : nkn,nel,ngr,mbw
+	use mkonst
 
 	implicit none
-
-	include 'mkonst.h'
 
 	logical blinfo,bfirst
 	integer nvar,i

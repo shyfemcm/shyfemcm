@@ -507,12 +507,11 @@
 	use close
 	use shympi
 	use mod_internal
+	use mkonst
 
 	implicit none
 
 	integer ic		!0 if no change in configuration   (out)
-
-	include 'mkonst.h'
 
 	logical bnewmode,bfirst
 	logical bclos,bopen,bimm

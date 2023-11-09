@@ -63,6 +63,8 @@ OBJ  = \
 	zadaptutil.o \
 	submask.o \
 	topological.o \
+	pkonst.o \
+	mkonst.o \
 
 ALL = $(MOD) $(OBJ)
 

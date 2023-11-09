@@ -252,12 +252,11 @@
 	use mod_hydro
 	use levels
 	use basin
+	use pkonst
 
 	implicit none
 
 	real, parameter :: drittl = 1./3.
-
-	include 'pkonst.h'
 
 	integer ie,ii,k,lmax
 	integer ireib

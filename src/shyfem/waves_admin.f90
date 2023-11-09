@@ -286,12 +286,12 @@
 	use mod_roughness
 	use levels, only : nlvdi,nlv
 	use basin, only : nkn,nel,ngr,mbw
+	use pkonst
 
         implicit none
 
 ! common
 	include 'param.h'
-	include 'pkonst.h'
 
 ! local
         double precision, allocatable :: stokesx(:,:)	!stokes velocity x
@@ -755,6 +755,7 @@
 	use evgeom
 	use levels
 	use basin
+	use pkonst
 
         implicit none
 
@@ -769,7 +770,6 @@
 	real wavefy(nlv,nel)		!y wave forcing term
 
 ! common
-	include 'pkonst.h'
 
 ! local
         real, allocatable :: stokesz(:,:)	!z stokes velocity on node k

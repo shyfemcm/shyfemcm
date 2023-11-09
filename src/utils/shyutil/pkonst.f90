@@ -2,6 +2,7 @@
 !--------------------------------------------------------------------------
 !
 !    Copyright (C) 2014,2019  Georg Umgiesser
+!    Copyright (C) 2023 The SHYFEM team
 !
 !    This file is part of SHYFEM.
 !
@@ -27,14 +28,15 @@
 !
 ! 23.12.2014	ggu	changed VERS_7_0_11
 ! 16.02.2019	ggu	changed VERS_7_5_60
+! 09.11.2023	ggu	converted to module
 
-	real grav,fcor,dcor,dirn,rowass,roluft
-	common /pkonst/ grav,fcor,dcor,dirn,rowass,roluft
-	save /pkonst/
+!--------------------------------------------------------------------------
 
-	!real dcor,dirn
-	!common /pbasin/ dcor,dirn
+	module pkonst
 
-	!real grav,fcor,rowass,roluft
-	!common /psimul/ grav,fcor,rowass,roluft
+	real, save :: grav,fcor,dcor,dirn,rowass,roluft
+
+	end module pkonst
+
+!--------------------------------------------------------------------------
 

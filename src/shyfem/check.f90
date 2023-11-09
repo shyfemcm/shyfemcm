@@ -413,6 +413,7 @@
 	use evgeom
 	use levels
 	use basin
+	use mkonst
 
 	implicit none
 
@@ -420,7 +421,6 @@
 
 ! common
 	include 'femtime.h'
-	include 'mkonst.h'
 
 	integer ie,ii,kk,l,i
 	integer ilevel
@@ -687,10 +687,9 @@
 	use levels
 	use basin
 	use shympi
+	use mkonst
 
 	implicit none
-
-	include 'mkonst.h'
 
 	logical berror,bdebug
 	integer ie,l,ii,k,lmin,lmax,mode,ks,kss

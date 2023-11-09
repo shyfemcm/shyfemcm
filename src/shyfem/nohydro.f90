@@ -218,11 +218,11 @@
         use levels
         use basin
         use mod_internal
+	use pkonst
 
         implicit none
 
 ! parameters
-        include 'pkonst.h'
         include 'femtime.h'
 
 ! local
@@ -534,11 +534,10 @@
         use evgeom
         use levels
         use basin
+	use pkonst
 
         implicit none
         
-        include 'pkonst.h'
-        include 'femtime.h'
 
 ! local
         integer k,l,ie,ii,lmax
@@ -605,14 +604,13 @@
         use mod_hydro
         use mod_hydro_vel
         use mod_zeta_system, only : solver_type
+	use pkonst
+	use mkonst
 
 	implicit none
 
 	real pvar(nlvdi,nkn)
 
-	include 'mkonst.h'
-	include 'pkonst.h'
-	include 'femtime.h'
  
 	integer kn(3)
 	integer ie,i,j,j1,j2,n,m,kk,l,k
@@ -770,10 +768,9 @@
         use evgeom
         use levels
         use basin
+	use pkonst
 
         implicit none
-
-        include 'pkonst.h'
 
 ! local
         integer kn(3)

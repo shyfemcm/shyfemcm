@@ -1009,11 +1009,10 @@
 	use evgeom
 	use levels
 	use basin
+	use pkonst
 
         implicit none
          
-	include 'pkonst.h'
-
         integer k,l,ie,ii			!was BUG
         real dt
         real rrho0
@@ -1094,11 +1093,10 @@
 	use evgeom
 	use levels
 	use basin
+	use pkonst
 
         implicit none
          
-	include 'pkonst.h'
-
 	logical bsigma
         integer k,l,ie,ii,lmax,lmin
         double precision hlayer,hhi
@@ -1161,11 +1159,10 @@
 	use evgeom
 	use levels
 	use basin
+	use pkonst
 
         implicit none
          
-	include 'pkonst.h'
-
         integer k,l,ie,ii,lmax,lmin
         double precision hlayer,hhi
         double precision xbcl,ybcl
@@ -1240,11 +1237,10 @@
 	use basin
 	use shympi
 	use shympi_debug
+	use pkonst
 
         implicit none
          
-	include 'pkonst.h'
-
 !---------- DEB SIG
 	real hkk
 	!real hkko(0:nlvdi,nkn)	!depth of interface at node

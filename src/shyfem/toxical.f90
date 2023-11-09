@@ -77,11 +77,11 @@
 	use mod_diff_visc_fric
 	use levels
 	use basin
+	use mkonst
 
 	implicit none
 
 	include 'param.h'
-	include 'mkonst.h'
 
 	integer nstate
 	parameter( nstate = 1 )

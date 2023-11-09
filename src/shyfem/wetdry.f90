@@ -624,10 +624,9 @@
 	use evgeom
 	use basin
 	use shympi
+	use mkonst
 
         implicit none
-
-	include 'mkonst.h'
 
 ! local
         integer ie,ii,k,ie_mpi
