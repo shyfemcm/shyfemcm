@@ -53,9 +53,9 @@
 !
 ! radiation is positive if into the water
 
-        implicit none
+	use heat_const
 
-	include 'subqfxm.h'
+        implicit none
 
         real dt                 !time step
         real dh                 !layer depth

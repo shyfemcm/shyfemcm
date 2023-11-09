@@ -101,9 +101,9 @@
 !
 ! heat fluxes are positive upward (from sea to atmosphere)
 
-	implicit none
+	use heat_const
 
-	include 'subqfxm.h'
+	implicit none
 
 	real t		!air temperature [C]			- in
 	real p		!pressure [mb]				- in
@@ -340,8 +340,6 @@
 !
 !---------------------------------------------------------------------
 
-      include 'subqfxm.h'
-
       parameter ( pstd = 1013.25 )
       parameter (const = 0.622/pstd)
       parameter (cgs = 1.e-4/4.19)
@@ -568,6 +566,7 @@
 !     else
 !	      print*,'zero wind',w,k
 !      endif !DEB
+
       end
 !
 !=====================================================================

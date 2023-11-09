@@ -65,6 +65,7 @@ OBJ  = \
 	topological.o \
 	pkonst.o \
 	mkonst.o \
+	heat_const.o \
 
 ALL = $(MOD) $(OBJ)
 

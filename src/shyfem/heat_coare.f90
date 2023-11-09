@@ -68,9 +68,9 @@
 	subroutine heatcoare(airt,airp,ws,rh,cloud,sst,prec,rad,    &
       &			qsens,qlat,qlong,evap,cd)
 
-	implicit none
+	use heat_const
 
-	include 'subqfxm.h'
+	implicit none
 
 ! input
         real, intent(in)    :: airt       !air temperature [C] 
@@ -144,9 +144,9 @@
 !
 	subroutine humidity(hum,airp,tw,ta,es,ea,qs,qa,rhoa)
 
-	implicit none
+	use heat_const
 
-	include 'subqfxm.h'
+	implicit none
 
 ! input
 	real, intent(in)        :: hum		!humidity [%]
@@ -245,9 +245,9 @@
 
 	function psi(iflag, ZoL)
 
-	implicit none
+	use heat_const
 
-	include 'subqfxm.h'
+	implicit none
 
 	real  :: psi
 ! input
@@ -329,9 +329,9 @@
 !
 	subroutine back_radiation(method,tw_c,ta_c,ea,qa,cloud,qb)
 
-	implicit none
+	use heat_const
 
-	include 'subqfxm.h'
+	implicit none
 
 ! input
 	integer, intent(in)             :: method
@@ -447,9 +447,9 @@
 
 	subroutine coare25(sst,airt,w,rain,qs,qa,rhoa,evap,qe,qh,Cd)
 
-	implicit none
+	use heat_const
 
-	include 'subqfxm.h'
+	implicit none
 
 ! input
 	real, intent(in)      :: sst		!water temperature [C]
@@ -693,9 +693,9 @@
 
 	subroutine coare30(sst,airt,ws,rain,Rns,Rnl,Qs,Q,rhoa,evap,qsens,qlat,Cd)
 
-	implicit none
+	use heat_const
 
-	include 'subqfxm.h'
+	implicit none
 
 ! input
         real, intent(in) 	:: airt         !air temperature [C]
@@ -991,9 +991,9 @@
 
 	subroutine tw_skin(rad,qrad,tw,hb,usw,dt,dtw,tws)
 
-	implicit none
+	use heat_const
 
-	include 'subqfxm.h'
+	implicit none
 
 ! input
 	real, intent(in)	:: rad	!Net shortwave flux [W/m2] (+ down)

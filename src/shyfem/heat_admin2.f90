@@ -176,10 +176,9 @@
 	use levels
         use basin, only : xgv,ygv  
         use mod_hydro_print  
+	use heat_const
 
 	implicit none
-
-        include 'subqfxm.h'
 
 	double precision dtime
 	real dt

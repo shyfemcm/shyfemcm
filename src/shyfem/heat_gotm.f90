@@ -50,9 +50,9 @@
 
 	subroutine heatgotm(airt,airp,ws,rh,cloud,sst,qh,qe,qb,evap)
 
-	implicit none
+	use heat_const
 
-	include 'subqfxm.h'
+	implicit none
 
         real airt       !air temperature [C]                    - in
         real airp       !pressure [mb]                          - in
@@ -172,9 +172,9 @@
 
 	subroutine heatgotm_exchange_coeff(w,cdd,chd,ced)
 
-	implicit none
+	use heat_const
 
-	include 'subqfxm.h'
+	implicit none
 
 	real w,cdd,chd,ced
 

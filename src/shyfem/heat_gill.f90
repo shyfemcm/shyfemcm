@@ -48,9 +48,9 @@
 !
 ! heat fluxes are positive upward (from sea to atmosphere)
 
-	implicit none
+	use heat_const
 
-	include 'subqfxm.h'
+	implicit none
 
 	real t		!air temperature [C]			- in
 	real p		!pressure [mb]				- in
@@ -152,9 +152,9 @@
 !
 ! heat fluxes are positive upward (from sea to atmosphere)
 
-	implicit none
+	use heat_const
 
-	include 'subqfxm.h'
+	implicit none
 
 	real dt		!time step [s]				- in
 	real dh		!depth of layer [m]			- in

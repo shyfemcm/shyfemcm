@@ -59,6 +59,7 @@
 ! 24.01.2018	ggu	changed VERS_7_5_41
 ! 16.02.2019	ggu	changed VERS_7_5_60
 ! 13.03.2019	ggu	changed VERS_7_5_61
+! 09.11.2023	ggu	converted include to module
 !
 ! notes :
 !
@@ -75,15 +76,46 @@
 !
 !***********************************************************
 
+	module subqfx
+
+        integer, save :: ifunit,itfold,itfnew,itfact,itperiod,irhumid
+
+!-----------------------------------------------------------
+! values of old time level
+!-----------------------------------------------------------
+
+        real, save :: qsold,taold,tbold,uwold,ccold &
+     &			,urold,pold,eold,rold,qold
+
+!-----------------------------------------------------------
+! values of new time level
+!-----------------------------------------------------------
+
+        real, save :: qsnew,tanew,tbnew,uwnew,ccnew &
+     &			,urnew,pnew,enew,rnew,qnew
+
+!-----------------------------------------------------------
+! values of actual time level
+!-----------------------------------------------------------
+
+        real, save :: qsact,taact,tbact,uwact,ccact &
+     &			,uract,pact,eact,ract,qact
+
+!-----------------------------------------------------------
+
+	end module subqfx
+
+!***********************************************************
+
 	subroutine qfinit(file)
 
 ! initializes heat flux module
 
+	use subqfx
+
 	implicit none
 
 	character*(*) file
-
-        include 'subqfx.h'
 
 	integer ier
 	integer ifileo
@@ -128,9 +160,9 @@
 
 ! internal initialization routine
 
-	implicit none
+	use subqfx
 
-        include 'subqfx.h'
+	implicit none
 
 	integer icall
 	save    icall
@@ -162,11 +194,11 @@
 ! r     mixing ratio [0-1]
 ! q     specific humidity [0-1]
 
+	use subqfx
+
         implicit none
 
 	real qs,ta,tb,uw,cc,ur,p,e,r,q
-
-        include 'subqfx.h'
 
 	qs = qsact
 	ta = taact
@@ -187,11 +219,11 @@
 
 ! gets unit of heat flux file
 
+	use subqfx
+
         implicit none
 
         integer iu
-
-        include 'subqfx.h'
 
         iu = ifunit
 
@@ -203,11 +235,11 @@
 
 ! reads from heat flux file and makes vars
 
+	use subqfx
+
 	implicit none
 
 	integer it
-
-        include 'subqfx.h'
 
 	character*80 file
 	logical bdebug,bwrite
@@ -322,14 +354,14 @@
 ! it qs ta tb uw cc
 ! it qs ta ur uw cc
 
+	use subqfx
+
 	implicit none
 
 	integer it
 	real qs,ta,tb,uw,cc
 	real ur,p,e,r,q
 	integer ier
-
-        include 'subqfx.h'
 
         real pstd
         parameter ( pstd = 1013.25 )
@@ -474,11 +506,11 @@
 
 ! sets itperiod - can be called at any time
 
+	use subqfx
+
 	implicit none
 
 	integer itp
-
-        include 'subqfx.h'
 
 	call qfinit_internal
 	itperiod = itp
@@ -493,11 +525,11 @@
 !
 ! irh==1  =>  relative humidity is given (default)
 
+	use subqfx
+
 	implicit none
 
 	integer irh
-
-        include 'subqfx.h'
 
 	call qfinit_internal
 	irhumid = irh

@@ -100,9 +100,9 @@
 !
 !  L. Zampato - Dicembre 1997
 
-      implicit none
+	use heat_const
 
-      include 'subqfxm.h'
+      implicit none
 
       real dt
       real dh
@@ -159,9 +159,9 @@
 
 ! same as subtem, but use heatlucia
 
-      implicit none
+	use heat_const
 
-      include 'subqfxm.h'
+      implicit none
 
       real dt
       real dh
