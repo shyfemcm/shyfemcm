@@ -58,8 +58,6 @@
 
 	implicit none
 
-        include 'param.h'
-
                 
 	real uadv(1), vadv(1)
         
@@ -86,8 +84,6 @@
 
         implicit none
         
-        include 'param.h'
-
         integer i
         real xb,yb
         
@@ -108,8 +104,6 @@
 
 	implicit none
 	
-        include 'param.h'
-
 	integer i,ie,id,lb
 	real x,y,z
 	real dt,ttime
@@ -152,8 +146,6 @@
 
         implicit none
 
-        include 'param.h'
-        
 	real uadv(1), vadv(1)
 
                 

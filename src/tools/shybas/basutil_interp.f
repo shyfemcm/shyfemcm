@@ -612,8 +612,6 @@ c interpolates depth values with auto-correlation
 	real at(np)
 	real ht(np)
 
-	include 'param.h'
-
 
 
 

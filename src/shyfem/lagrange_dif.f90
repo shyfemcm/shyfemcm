@@ -667,8 +667,6 @@
 
         implicit none
         
-        include 'param.h'
-        
         
         real k ! coefficiente di diffusione        
         
@@ -721,8 +719,6 @@
         subroutine lag_rand(k,ttime,dx,dy)
 
         implicit none
-
-        include 'param.h'
 
         real ttime
         real k

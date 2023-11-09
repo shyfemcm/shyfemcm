@@ -44,8 +44,6 @@
 
 	implicit none
 
-	include 'param.h'
-
 	integer i,ie,ii
 	real rlinit,x,y,z,rl
         double precision xx,yy

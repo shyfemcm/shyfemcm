@@ -62,6 +62,8 @@
 ! - * FIXME -> number of levels nlvdim, and not 1 (done)
 ! - wind speed and air temp is not available -> introduce (wmeteo)
 !
+! this routine has to be completely revised
+!
 !********************************************************************
 !********************************************************************
 !********************************************************************
@@ -81,7 +83,8 @@
 
 	implicit none
 
-	include 'param.h'
+	integer, parameter :: nlvdim = 1
+	integer, parameter :: nkndim = 1
 
 	integer nstate
 	parameter( nstate = 1 )
@@ -494,7 +497,8 @@
 
 	implicit none
 
-	include 'param.h'
+	integer, parameter :: nlvdim = 1
+	integer, parameter :: nkndim = 1
 
 	integer nstate
 	parameter( nstate = 1 )

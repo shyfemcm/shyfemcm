@@ -86,8 +86,6 @@
 
         implicit none
 
-        include 'param.h'
-
 	real ldecay
 
 	real tdd    !probability of survival
@@ -126,8 +124,6 @@
 
         implicit none
 
-        include 'param.h'
-
 	real rdc    !tasso di mortalita'
         real dt     !eta' della particella n-esima
 
@@ -158,8 +154,6 @@
 	use femtime
 
         implicit none
-
-        include 'param.h'
 
         integer i
         
@@ -192,8 +186,6 @@
 	use femtime
 
         implicit none
-
-        include 'param.h'
 
 	integer icount
 	data icount /0/

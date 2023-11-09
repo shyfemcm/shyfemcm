@@ -49,8 +49,6 @@
 	integer ext(2),i,el
 	integer p1,p2
 	
-	include 'param.h'
-	
         real x1,y1,x2,y2
         real cy,cx,b ! parametri retta cyY=cxX+b
 	
@@ -108,8 +106,6 @@
 	use basin
 
 	implicit none
-	
-	include 'param.h'
 	
 	integer pb(2),ipb(2),pi
 	
@@ -285,7 +281,6 @@
         real d ! distanza dal punto piu lontano
 	integer near,far ! puntatore dell'estremo piu lontano e piu vicino
 			 ! rispetto al punto x,y
-	include 'param.h'
 
         integer p1,p2,el
         real x1,x2,y1,y2

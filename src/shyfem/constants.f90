@@ -162,8 +162,6 @@
 
 	implicit none
 
-	include 'param.h'
-
 	integer ibarcl
         real getpar
         integer nkbnd

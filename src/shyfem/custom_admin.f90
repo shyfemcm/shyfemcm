@@ -241,8 +241,6 @@
 
 	integer it
 
-	include 'param.h'
-
 	integer iwet,ie
 	real area,voldry,volwet,vol,a,v
 
@@ -292,8 +290,6 @@
 	integer ipint,ieint
 	integer n,ibase
 
-	include 'param.h'
-
 	integer icall,k1,k2,ie1,ie2,ie3
 	save icall,k1,k2,ie1,ie2,ie3
 !	data icall,k1,k2,ie1,ie2,ie3 /0,556,555,777,788,788/
@@ -330,8 +326,6 @@
 
 	integer it
 
-	include 'param.h'
-
 	integer i
 	real rit
 
@@ -363,8 +357,6 @@
 	real hm,h,hlido,hmala,hchio
 	real getpar
 
-
-	include 'param.h'
 
 	write(6,*) 'adjusting depth at inlets...'
 
@@ -524,8 +516,6 @@
 
 	implicit none
 
-	include 'param.h'
-
 	integer it
 
  
@@ -623,8 +613,6 @@
 
 	implicit none
 
-	include 'param.h'
-
 	integer it
 
 
@@ -686,8 +674,6 @@
 	use basin
 
 	implicit none
-
-	include 'param.h'
 
 	integer it
 
@@ -799,8 +785,6 @@
 
 	implicit none
 
-	include 'param.h'
-
 	integer it
 
 
@@ -878,8 +862,6 @@
 
 	integer it
 
-	include 'param.h'
-
 
 	real res
 	integer i,ie,iweg
@@ -936,8 +918,6 @@
         integer iunit
         integer it
         integer k
-
-        include 'param.h'
 
 
         integer nlev
@@ -1059,8 +1039,6 @@
 
 	implicit none
 
-	include 'param.h'
-! local
         integer ie,ii,k
 !	integer ibc,nbc
 	integer ibc
@@ -1233,8 +1211,6 @@
         integer it
         integer k
 
-        include 'param.h'
-
 
         integer nlev
 	integer l
@@ -1271,8 +1247,6 @@
 	implicit none
 
 	integer it
-
-	include 'param.h'
 
 
 	logical berror
@@ -1318,8 +1292,6 @@
 	implicit none
 
 	integer it
-
-	include 'param.h'
 
 
 	integer l,k,lmax
@@ -1393,8 +1365,6 @@
 	use femtime
 
         implicit none
-
-        include 'param.h'
 
 
         integer ie,ii,k,lmax,l,ia
@@ -1716,8 +1686,6 @@
 
         implicit none
 
-        include 'param.h'
-
 
         integer ie,ii,k,lmax,l,ia
         logical bnoret,breset,bstir
@@ -1944,8 +1912,6 @@
 
 	implicit none
 
-	include 'param.h'
-
 	real kenerg,penerg,tenerg
 
 	integer icall
@@ -1987,8 +1953,6 @@
 	use femtime
 
 	implicit none
-
-	include 'param.h'
 
 	real kenerg,penerg,tenerg
 
@@ -2141,8 +2105,6 @@
 
         implicit none 
 
-        include 'param.h' 
-
 
         integer edim
         parameter(edim = 20) !20!number of element near the open boundary
@@ -2225,8 +2187,6 @@
 	use basin, only : nkn,nel,ngr,mbw
 
         implicit none 
-
-        include 'param.h' 
 
 
         integer edim
@@ -2344,8 +2304,6 @@
 
 	implicit none
 
-        include 'param.h'
-
 	integer ie,k,i,l,it
         integer itype
 
@@ -2383,8 +2341,6 @@
 	use basin
 
 	implicit none
-
-	include 'param.h'
 
 	integer k,ie,ii
 	real xmin,xmax,ymin,ymax
@@ -2443,8 +2399,6 @@
 	use levels
 
 	implicit none
-
-	include 'param.h'
 
 	integer it
 
@@ -2508,8 +2462,6 @@
 	use femtime
 
 	implicit none
-
-	include 'param.h'
 
 	integer ndim
 	parameter (ndim=101)
@@ -2642,8 +2594,6 @@
 
 	implicit none
 
-	include 'param.h'
-
 	integer it
 	integer ndim
 	real xv(ndim),yv(ndim)
@@ -2699,8 +2649,6 @@
 
 	implicit none
 
-	include 'param.h'
-
 	integer it,k0
 	real rk,c0,ct0
         real cv(nlvdi,nkn)
@@ -2743,8 +2691,6 @@
 	use basin
 
 	implicit none
-
-	include 'param.h'
 
         real cv(nlvdi,nkn)
 	integer ndim
@@ -2862,8 +2808,6 @@
 
 	implicit none
 
-	include 'param.h'
-
 	integer ie
 	real x,y
 	real cv(nlvdi,nkn)
@@ -2895,8 +2839,6 @@
 	use basin
 
 	implicit none
-
-	include 'param.h'
 
         real cv(nlvdi,nkn)
 	integer ndim
@@ -2947,8 +2889,6 @@
 	use femtime
 
 	implicit none
-
-	include 'param.h'
 
 	integer k,k0,k1,i
 	real c0,cmed
@@ -3007,8 +2947,6 @@
 
 	implicit none
 
-	include 'param.h'
-
 
 	integer k,i,l
 
@@ -3052,8 +2990,6 @@
 	implicit none
 
 	integer mode
-
-	include 'param.h'
 
 	integer k,i,l,lc,lmax
 	integer it0
@@ -3120,8 +3056,6 @@
 
         implicit none
 
-        include 'param.h'
-
 
         integer k,l,m
         real u,v
@@ -3160,8 +3094,6 @@
 	use basin
 
 	implicit none
-
-        include 'param.h'
 
 
 
@@ -3309,8 +3241,6 @@
 
         implicit none
 
-        include 'param.h'
-
 
 	integer ks
 
@@ -3339,8 +3269,6 @@
         implicit none
 
 	integer it
-
-        include 'param.h'
 
 	integer ndim
 	parameter (ndim=2000)
@@ -3469,8 +3397,6 @@
 	use basin
 
 	implicit none
-
-	include 'param.h'
 
 	integer k,l
 	real xc1,yc1,xc2,yc2
@@ -3735,8 +3661,6 @@
 
 	implicit none
 
-	include 'param.h'
-
 
 
 	integer ks,lmax,l
@@ -3821,8 +3745,6 @@
 
 	implicit none
 
-	include 'param.h'
-
 
 	integer l,k,lmax,ks
 	real qs,ta,rh,wb,uw,cc,p
@@ -3856,8 +3778,6 @@
 	use femtime
 
 	implicit none
-
-	include 'param.h'
 
 
 	integer l,k,lmax
@@ -4082,8 +4002,6 @@
 
 	implicit none
 
-	include 'param.h'
-
 
 !	integer ndim
 !	parameter (ndim=10)	!must be at least the number of layers used
@@ -4145,8 +4063,6 @@
 
 	implicit none
 
-	include 'param.h'
-
 	integer k,l,lmax
 
 	integer icall
@@ -4207,8 +4123,6 @@
 	use basin
 
 	implicit none
-
-	include 'param.h'
 
 
 

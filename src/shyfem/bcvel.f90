@@ -217,8 +217,6 @@
 
         implicit none 
 
-        include 'param.h' 
-
 	real tnudge	!relaxation time for nudging [s]
 	real tramp	!time for smooth init
 

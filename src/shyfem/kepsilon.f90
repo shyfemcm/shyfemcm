@@ -328,7 +328,6 @@
 	real k(0:lmax)		!turbulent kinetic energy		(out)
 	real eps(0:lmax)	!turbulent dissipation			(out)
 ! parameters
-!	include 'param.h'
 	integer nlevdi
 	parameter(nlevdi=200)
 

@@ -188,8 +188,6 @@
 
         implicit none
 
-	include 'param.h'
-
         character*80 line
 
         integer nrdlin

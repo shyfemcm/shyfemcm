@@ -291,7 +291,6 @@
         implicit none
 
 ! common
-	include 'param.h'
 
 ! local
         double precision, allocatable :: stokesx(:,:)	!stokes velocity x
@@ -557,8 +556,6 @@
 
         implicit none
 
-	!include 'param.h'
-
 	real, allocatable	:: ddl(:,:) !3D layer depth (in the middle of layer)
 	real, allocatable 	:: h(:)
         integer it              !time [s]
@@ -707,8 +704,6 @@
 
         implicit none
 
-        !include 'param.h'
-
         real SXX3D(nlv,nkn)       !radiation stress xx
         real SYY3D(nlv,nkn)       !radiation stress yy
         real SXY3D(nlv,nkn)       !radiation stress xy
@@ -758,9 +753,6 @@
 	use pkonst
 
         implicit none
-
-! parameters
-        !include 'param.h'
 
 ! arguments
         double precision stokesx(nlv,nkn) !x stokes velocity
@@ -927,7 +919,6 @@
         implicit none
 
 ! parameters
-        include 'param.h'
 ! arguments
         real vf(nlv,nkn)		!auxiliary array
         real va(nlv,nkn)		!auxiliary array

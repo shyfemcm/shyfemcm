@@ -59,8 +59,6 @@
 
 	implicit none
 
-        include 'param.h'
-
 	integer ndsdim
 	parameter(ndsdim=1)
 

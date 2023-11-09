@@ -68,8 +68,6 @@
 
         implicit none
         
-	include 'param.h' 
- 
 	real time	!total time to travel
 	integer bdy	!number of body
 	integer ie	!number of element of body
@@ -674,8 +672,6 @@
 
         implicit none
         
-	include 'param.h' 
-
 	real time	!total time to travel
 	integer bdy	!number of body
 	integer ie	!number of element of body

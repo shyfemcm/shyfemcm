@@ -73,8 +73,6 @@
 
 	implicit none
 
-        include 'param.h'
-
 	integer k1,k2
 	integer ibc,nk,i,ibtyp,np
 	real dt
@@ -138,8 +136,6 @@
 
 	implicit none
 
-        include 'param.h'
-
 	integer k1,k2
 	integer ibc,nk,i,ibtyp,np
 	real totdist,dxy,part,dt
@@ -202,8 +198,6 @@
 	use mod_lagrange
 
 	implicit none
-
-        include 'param.h'
 
 	integer k,k1,k2
 	integer ibc,nk,i,ibtyp,np
@@ -295,8 +289,6 @@
 	integer ity
 	integer np,k1,k2
 
-	include 'param.h'
-
 	integer i,ie1,ie2
 	real x1,y1,x2,y2,dx,dy
 	real rl,rt,x,y
@@ -344,8 +336,6 @@
 	real get_bflux_ppv
 	integer k1,k2
 
-        include 'param.h'
-
 	integer ie1,ie2,ii
 
 	integer inext
@@ -379,8 +369,6 @@
 	real ppts		!particles to be released per time step
 	integer k		!node where particle is released
 	integer n
-
-	include 'param.h'
 
 	integer ie
 	real x,y

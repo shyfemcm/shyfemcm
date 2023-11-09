@@ -204,8 +204,6 @@
 	real xinit,yinit	!lido for rachel
 	parameter (xinit=38889.,yinit=32745.2)
 
-	include 'param.h'
-
 	logical bintmiss
 	logical bnearpoint
 	logical bnodry
@@ -298,8 +296,6 @@
 	integer itp,itold,itnew
 	real zp
 
-	include 'param.h'
-
 	real zold,znew
 
 	call femintp(iep,zeov(1,iep),xp,yp,zold)
@@ -320,8 +316,6 @@
 	use levels
 
 	implicit none
-
-	include 'param.h'
 
 	integer iep
 	real xp,yp
@@ -470,8 +464,6 @@
 	integer get_nearest_point
 	real xp,yp
 
-
-	include 'param.h'
 
 	integer knear,k
 	real dist,d
