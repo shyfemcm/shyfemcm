@@ -663,13 +663,12 @@
         subroutine lag_diff(ie,bdy,x,y)
 
 	use mod_lagrange
+	use femtime
 
         implicit none
         
         include 'param.h'
         
-	include 'femtime.h'
-        real dt,ttime
         
         real k ! coefficiente di diffusione        
         
@@ -680,6 +679,7 @@
       
         real cy,cx,b ! coefficienti traiettoria  
        
+	real dt,ttime
         real xold,yold,xnew,ynew,lt_ex
         integer ieold,ienew
 	integer icount

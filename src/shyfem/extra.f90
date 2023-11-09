@@ -114,11 +114,11 @@
 
 	subroutine mod_ext(mode)
 
+	use befor_after
+
 	implicit none
 
 	integer mode
-
-	include 'modules.h'
 
 	if( mode .eq. M_AFTER ) then
 	   call wrexta

@@ -50,10 +50,10 @@
 
 ! handles decay of particles
 
+	use femtime
+
         implicit none
         
-	include 'femtime.h'
-
         integer n
         
         real getpar
@@ -82,14 +82,13 @@
 ! applies decay to all particles
 
 	use mod_lagrange
+	use femtime
 
         implicit none
 
         include 'param.h'
 
 	real ldecay
-
-	include 'femtime.h'
 
 	real tdd    !probability of survival
         real age    !age of particle
@@ -123,12 +122,11 @@
 ! allora la particella sparisce dal calcolo
 
 	use mod_lagrange
+	use femtime
 
         implicit none
 
         include 'param.h'
-
-	include 'femtime.h'
 
 	real rdc    !tasso di mortalita'
         real dt     !eta' della particella n-esima
@@ -157,13 +155,12 @@
         subroutine lagr_conc(i)
 
 	use mod_lagrange
+	use femtime
 
         implicit none
 
         include 'param.h'
 
-	include 'femtime.h'
-        
         integer i
         
         real time,a,b,c,di
@@ -192,12 +189,11 @@
 ! particles older than tdead are eliminated
 
 	use mod_lagrange
+	use femtime
 
         implicit none
 
         include 'param.h'
-
-	include 'femtime.h'
 
 	integer icount
 	data icount /0/

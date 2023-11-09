@@ -125,15 +125,37 @@
 !**********************************************************************
 !**********************************************************************
 
+	module femtime
+
+	implicit none
+
+	integer, save :: itanf,itend,idt,nits,niter,it
+
+        integer, save :: itunit,idtorig
+
+	double precision, save :: t_act,dt_act,dt_orig,atime0,dtanf,dtend
+
+	logical, save :: bsync
+
+	character*20, save :: aline_act
+
+	integer, parameter :: ncpu = 10
+	double precision, save :: cputime(ncpu)
+	double precision, save :: acutime(ncpu)
+
+	end module femtime
+
+!**********************************************************************
+
 	subroutine is_time_first(bfirst)
 
 ! true if in initialization phase
 
+	use femtime
+
 	implicit none
 
 	logical bfirst
-
-	include 'femtime.h'
 
 	bfirst = t_act .eq. dtanf
 
@@ -145,11 +167,11 @@
 
 ! true if in last time step
 
+	use femtime
+
 	implicit none
 
 	logical blast
-
-	include 'femtime.h'
 
 	blast = t_act .eq. dtend
 
@@ -161,11 +183,11 @@
 
 ! returns actual time (double)
 
+	use femtime
+
         implicit none
 
 	double precision dtact
-
-	include 'femtime.h'
 
 	dtact = t_act
 
@@ -177,12 +199,13 @@
 
 ! returns time as string
 
+	use femtime
+
         implicit none
 
 	double precision dtime
 	character*(*) aline
 
-	include 'femtime.h'
 	double precision atime
 
 	atime = atime0 + dtime
@@ -196,11 +219,11 @@
 
 ! returns actual time as string
 
+	use femtime
+
         implicit none
 
 	character*(*) aline
-
-	include 'femtime.h'
 
 	aline = aline_act
 
@@ -212,11 +235,11 @@
 
 ! returns actual time
 
+	use femtime
+
         implicit none
 
 	double precision atime
-
-	include 'femtime.h'
 
 	atime = t_act + atime0
 
@@ -228,11 +251,11 @@
 
 ! returns actual time
 
+	use femtime
+
         implicit none
 
 	double precision atime_ref
-
-	include 'femtime.h'
 
 	atime_ref = atime0
 
@@ -244,11 +267,11 @@
 
 ! returns time passed since start of simulation
 
+	use femtime
+
         implicit none
 
 	double precision dtime
-
-	include 'femtime.h'
 
 	dtime = t_act - dtanf
 
@@ -260,11 +283,11 @@
 
 ! returns first (initial) time
 
+	use femtime
+
         implicit none
 
 	double precision dtime
-
-	include 'femtime.h'
 
 	dtime = dtanf
 
@@ -276,11 +299,11 @@
 
 ! returns end time
 
+	use femtime
+
         implicit none
 
 	double precision dtime
-
-	include 'femtime.h'
 
 	dtime = dtend
 
@@ -292,11 +315,11 @@
 
 ! returns time step (in seconds - double version)
 
+	use femtime
+
         implicit none
 
 	double precision ddt		!time step (return)
-
-	include 'femtime.h'
 
 	ddt = dt_act
 
@@ -308,11 +331,11 @@
 
 ! returns time step (in seconds - real version)
 
+	use femtime
+
         implicit none
 
 	real dt		!time step (return)
-
-	include 'femtime.h'
 
 	dt = dt_act
 
@@ -324,11 +347,11 @@
 
 ! returns original real time step (in real seconds)
 
+	use femtime
+
         implicit none
 
 	real dt		!time step (return)
-
-	include 'femtime.h'
 
 	dt = idtorig
 
@@ -340,12 +363,12 @@
 
 ! returns iterations, already done and still to do
 
+	use femtime
+
         implicit none
 
 	integer nit_done
 	integer nit_todo
-
-	include 'femtime.h'
 
 	nit_done = niter
 	nit_todo = nits
@@ -423,9 +446,9 @@
 
         subroutine cpu_time_init
 
-        implicit none
+	use femtime
 
-	include 'femtime.h'
+        implicit none
 
 	cputime = 0.
 	acutime = 0.
@@ -436,13 +459,13 @@
 
         subroutine cpu_time_start(itime)
 
+	use femtime
+
         implicit none
 
 	integer itime
 
 	real time
-
-	include 'femtime.h'
 
 	if( itime < 1 ) stop 'error stop cpu_time_accum: itime'
 	if( itime > ncpu ) stop 'error stop cpu_time_accum: itime'
@@ -456,14 +479,14 @@
 
         subroutine cpu_time_end(itime)
 
+	use femtime
+
         implicit none
 
 	integer itime
 
 	real time
 	double precision dtime
-
-	include 'femtime.h'
 
 	if( itime < 1 ) stop 'error stop cpu_time_accum: itime'
 	if( itime > ncpu ) stop 'error stop cpu_time_accum: itime'
@@ -478,12 +501,12 @@
 
         subroutine cpu_time_get(itime,time)
 
+	use femtime
+
         implicit none
 
 	integer itime
 	real time
-
-	include 'femtime.h'
 
 	if( itime < 1 ) stop 'error stop cpu_time_accum: itime'
 	if( itime > ncpu ) stop 'error stop cpu_time_accum: itime'

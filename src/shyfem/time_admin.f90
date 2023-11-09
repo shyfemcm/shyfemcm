@@ -135,10 +135,9 @@
 ! prints time after time step
 
 	use shympi
+	use femtime
 
 	implicit none
-
-	include 'femtime.h'
 
         integer nit1,nit2,naver
 	integer idtfrac,i
@@ -289,10 +288,9 @@
 ! prints stats after last time step
 
 	use shympi
+	use femtime
 
 	implicit none
-
-	include 'femtime.h'
 
 	if( .not. shympi_is_master() ) return
 
@@ -309,9 +307,9 @@
 
 ! setup and check time parameters
 
-	implicit none
+	use femtime
 
-	include 'femtime.h'
+	implicit none
 
 	integer date,time
 	double precision didtm,atime,didt
@@ -467,10 +465,9 @@
 ! controls time step and adjusts it
 
 	use shympi
+	use femtime
 
         implicit none
-
-	include 'femtime.h'
 
 	logical bdebug
         integer idtdone,idtrest,idts
@@ -767,13 +764,13 @@
 !
 ! dt is the new time step, all the rest can be computed from dt
 
+	use femtime
+
 	implicit none
 
 	real rindex,cmax
 	double precision dt
 	integer istot
-
-	include 'femtime.h'
 
 	integer idtnew
 	real ri
@@ -808,6 +805,8 @@
 
 ! to be deleted later
 
+	use femtime
+
 	implicit none
 
 	character*(*) text
@@ -815,8 +814,6 @@
 	integer, save :: nbcheck = 0
 	double precision, save :: t_old = 0
 	integer ifemop
-
-	include 'femtime.h'
 
 ! -1372895700.0000
 ! -3520376896.0000

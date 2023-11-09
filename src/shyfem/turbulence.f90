@@ -127,10 +127,9 @@
 	use levels, only : nlvdi,nlv
 	use basin, only : nkn,nel,ngr,mbw
 	use pkonst
+	use femtime
 
 	implicit none
-
-	include 'femtime.h'
 
 !---------------------------------------------------------------
 ! aux arrays superposed onto other aux arrays
@@ -242,10 +241,9 @@
 	use basin
 	use shympi
 	use pkonst
+	use femtime
 
 	implicit none
-
-	include 'femtime.h'
 
 	double precision dt
 	double precision u_taus,u_taub

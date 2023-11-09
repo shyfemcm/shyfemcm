@@ -219,11 +219,11 @@
         use basin
         use mod_internal
 	use pkonst
+	use femtime
 
         implicit none
 
 ! parameters
-        include 'femtime.h'
 
 ! local
 	logical blast

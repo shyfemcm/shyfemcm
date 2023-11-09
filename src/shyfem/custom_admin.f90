@@ -1002,10 +1002,10 @@
 
 	subroutine close_inlets
 
+	use femtime
+
 	implicit none
 
-	include 'femtime.h'
-! local
         integer ie,ii,k
 !	integer ibc,nbc
 	integer ibc,nbc
@@ -1055,11 +1055,11 @@
 
 	use mod_hydro
 	use basin, only : nkn,nel,ngr,mbw
+	use femtime
 
 	implicit none
 
 	include 'param.h'
-	include 'femtime.h'
 ! local
         integer ie,ii,k
 !	integer ibc,nbc
@@ -1390,12 +1390,11 @@
 	use mod_conz, only : cnv
 	use levels
 	use basin
+	use femtime
 
         implicit none
 
         include 'param.h'
-
-	include 'femtime.h'
 
 
         integer ie,ii,k,lmax,l,ia
@@ -1713,12 +1712,11 @@
 	use mod_conz
 	use levels
 	use basin
+	use femtime
 
         implicit none
 
         include 'param.h'
-
-	include 'femtime.h'
 
 
         integer ie,ii,k,lmax,l,ia
@@ -1942,11 +1940,11 @@
 
 	subroutine oscillation
 
+	use femtime
+
 	implicit none
 
 	include 'param.h'
-
-	include 'femtime.h'
 
 	real kenerg,penerg,tenerg
 
@@ -1986,11 +1984,11 @@
 
 	subroutine kreis
 
+	use femtime
+
 	implicit none
 
 	include 'param.h'
-
-	include 'femtime.h'
 
 	real kenerg,penerg,tenerg
 
@@ -2139,13 +2137,12 @@
 	use mod_hydro_vel
 	use mod_hydro
 	use basin, only : nkn,nel,ngr,mbw
+	use femtime
 
         implicit none 
 
         include 'param.h' 
 
-
-	include 'femtime.h'
 
         integer edim
         parameter(edim = 20) !20!number of element near the open boundary
@@ -2508,12 +2505,11 @@
 
 	use mod_conz
 	use levels, only : nlvdi,nlv
+	use femtime
 
 	implicit none
 
 	include 'param.h'
-
-	include 'femtime.h'
 
 	integer ndim
 	parameter (ndim=101)
@@ -2948,12 +2944,11 @@
 ! test for horizontal diffusion algorithm
 
 	use mod_conz
+	use femtime
 
 	implicit none
 
 	include 'param.h'
-
-	include 'femtime.h'
 
 	integer k,k0,k1,i
 	real c0,cmed
@@ -3008,12 +3003,11 @@
 
 	use mod_hydro_print
 	use levels, only : nlvdi,nlv
+	use femtime
 
 	implicit none
 
 	include 'param.h'
-
-	include 'femtime.h'
 
 
 	integer k,i,l
@@ -3053,14 +3047,13 @@
 	use mod_conz
 	use levels
 	use basin, only : nkn,nel,ngr,mbw
+	use femtime
 
 	implicit none
 
 	integer mode
 
 	include 'param.h'
-
-	include 'femtime.h'
 
 	integer k,i,l,lc,lmax
 	integer it0
@@ -3738,12 +3731,11 @@
 	use mod_hydro
 	use levels
 	use basin, only : nkn,nel,ngr,mbw
+	use femtime
 
 	implicit none
 
 	include 'param.h'
-
-	include 'femtime.h'
 
 
 
@@ -3786,9 +3778,9 @@
 
 ! debugging skadar application
 
-	implicit none
+	use femtime
 
-	include 'femtime.h'
+	implicit none
 
 	integer ie,it0
 
@@ -3825,12 +3817,11 @@
 	use mod_ts
 	use levels
 	use basin, only : nkn,nel,ngr,mbw
+	use femtime
 
 	implicit none
 
 	include 'param.h'
-
-	include 'femtime.h'
 
 
 	integer l,k,lmax,ks
@@ -3862,12 +3853,11 @@
 	use mod_ts
 	use levels
 	use basin, only : nkn,nel,ngr,mbw
+	use femtime
 
 	implicit none
 
 	include 'param.h'
-
-	include 'femtime.h'
 
 
 	integer l,k,lmax
@@ -3896,10 +3886,9 @@
 	use mod_ts
 	use evgeom
 	use basin
+	use femtime
 
 	implicit none
-
-	include 'femtime.h'
 
 	logical binit,blast
 	integer ie,n,k,ii
@@ -4089,12 +4078,11 @@
 	use mod_ts
 	use levels
 	use basin, only : nkn,nel,ngr,mbw
+	use femtime
 
 	implicit none
 
 	include 'param.h'
-
-	include 'femtime.h'
 
 
 !	integer ndim
@@ -4716,10 +4704,9 @@
 	use basin
 	use levels
 	use mod_conz
+	use femtime
 
         implicit none
-
-	include 'femtime.h'
 
         integer ie,ii,itype,il,k
         integer ks

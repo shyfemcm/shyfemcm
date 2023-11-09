@@ -77,10 +77,9 @@
 
 	use mod_lagrange
         use basin, only : neldi,iarv
+	use femtime
  
 	implicit none
-
-	include 'femtime.h'
 
 	integer ie	!element of particle - if unknown use 0
 	integer ity	!particle type
@@ -926,10 +925,9 @@
 ! deletes particles not in system and compresses array
 
 	use mod_lagrange
+	use femtime
 
 	implicit none
-
-	include 'femtime.h'
 
 	integer ifree,icopy,i
 	integer nbefore

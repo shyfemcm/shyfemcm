@@ -134,10 +134,9 @@
         use lgr_sedim_module
 	use shyfile
 	use shympi
+	use femtime
 
 	implicit none
-
-	include 'femtime.h'
 
         double precision, save		:: dtlanf,dtlend
 	double precision, save		:: ddtl,dtranf,dtrend,dtrnext

@@ -162,10 +162,9 @@
 
 	use mod_lagrange
 	use connectivity
+	use femtime
 
 	implicit none
-
-	include 'femtime.h'
 
 	logical brelease	!is inside release times?
 
@@ -487,10 +486,9 @@
 	use mod_lagrange
 	use connectivity
 	use mod_debug
+	use femtime
 
 	implicit none
-
-	include 'femtime.h'
 
 	integer ibdy		!number of particle
 	integer ie_to		!element into which particle enters
@@ -613,11 +611,10 @@
 
 	use basin
 	use connectivity
+	use femtime
 	!use mod_depth
 
 	implicit none
-
-	include 'femtime.h'
 
 	integer np
 

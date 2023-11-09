@@ -171,10 +171,9 @@
 
 	use shympi
 	use simul
+	use befor_after
 
 	implicit none
-
-	include 'modules.h'
 
 	character*80 name
         integer nrb,nbc
@@ -270,12 +269,11 @@
 
 	use basin
 	use simul
+	use befor_after
 
 	implicit none
 
 	integer id
-
-	include 'modules.h'
 
 	write(6,*)
 	write(6,*) '============================================='
@@ -328,9 +326,9 @@
 
 ! to do before time loop
 
-	implicit none
+	use befor_after
 
-	include 'modules.h'
+	implicit none
 
 	call wrboxa
 	call wrousa
@@ -347,12 +345,11 @@
 
 	use levels
 	use nls
+	use befor_after
 
 	implicit none
 
 	integer iunit
-
-	include 'modules.h'
 
 !---------------------------------------------------------------
 !---------------------------------------------------------------

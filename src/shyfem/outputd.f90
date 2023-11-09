@@ -119,9 +119,9 @@
 
 ! sets-up output frequency and first output
 
-	implicit none
+	use femtime
 
-	include 'femtime.h'
+	implicit none
 
 	double precision itmout		!minimum time for output
 	double precision idtout		!time step for output
@@ -190,11 +190,11 @@
 
 ! makes sure that itout > itmout
 
+	use femtime
+
 	implicit none
 
 	double precision da_out(4)
-
-	include 'femtime.h'
 
 	double precision idtout,itmout,itout
 
@@ -218,12 +218,12 @@
 
 ! checks if output phase has started (it > itmout)
 
+	use femtime
+
 	implicit none
 
 	logical is_over_output_d
 	double precision da_out(4)
-
-	include 'femtime.h'
 
 	is_over_output_d = ( t_act > da_out(2) )
 
@@ -235,12 +235,12 @@
 
 ! checks if we are at starting of output (it == itmout)
 
+	use femtime
+
 	implicit none
 
 	logical is_first_output_d
 	double precision da_out(4)
-
-	include 'femtime.h'
 
 	is_first_output_d = ( t_act == da_out(2) )
 
@@ -252,12 +252,12 @@
 
 ! checks if we arrived at output phase (it >= itmout)
 
+	use femtime
+
 	implicit none
 
 	logical is_in_output_d
 	double precision da_out(4)
-
-	include 'femtime.h'
 
 	is_in_output_d = ( t_act >= da_out(2) )
 
@@ -284,12 +284,12 @@
 
 ! checks if time has come for output
 
+	use femtime
+
 	implicit none
 
 	logical next_output_d
 	double precision da_out(4)
-
-	include 'femtime.h'
 
 	double precision idtout,itout
 
@@ -315,12 +315,12 @@
 
 ! writes info on da_output
 
+	use femtime
+
 	implicit none
 
 	character*(*) text
 	double precision da_out(4)
-
-	include 'femtime.h'
 
 	logical bready
 	logical has_output_d,next_output_d

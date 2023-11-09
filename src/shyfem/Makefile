@@ -126,9 +126,10 @@ OBJ = system_matrix.o tvd.o \
       turbine.o initialize.o \
       bnd_routines.o concentration_omp.o histogram.o \
       concentration.o baroclinic.o def_para.o \
-      iostr.o constants.o f_vol.o mkdistance.o conz_admin.o \
+      f_vol.o mkdistance.o conz_admin.o \
       water_ren_time.o atoxi.o toxical.o \
-      befor_after.o test_zeta.o \
+      befor_after.o iostr.o constants.o \
+      test_zeta.o \
 	$(SOLVER_OBJ) \
 	$(HEAT_OBJ) \
 	substress.o \

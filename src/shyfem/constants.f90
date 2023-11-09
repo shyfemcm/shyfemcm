@@ -93,10 +93,9 @@
 
 	use pkonst
 	use mkonst
+	use befor_after
 
 	implicit none
-
-	include 'modules.h'
 
 ! parameters %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
@@ -159,10 +158,9 @@
 	use basin, only : nkn,nel,ngr,mbw
 	use pkonst
 	use mkonst
+	use befor_after
 
 	implicit none
-
-	include 'modules.h'
 
 	include 'param.h'
 
@@ -211,9 +209,9 @@
 
 ! sets up modules
 
-	implicit none
+	use befor_after
 
-	include 'modules.h'
+	implicit none
 
 	!call flxini
 	!call volini

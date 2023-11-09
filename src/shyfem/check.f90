@@ -414,13 +414,13 @@
 	use levels
 	use basin
 	use mkonst
+	use femtime
 
 	implicit none
 
 	integer k
 
 ! common
-	include 'femtime.h'
 
 	integer ie,ii,kk,l,i
 	integer ilevel
@@ -976,10 +976,9 @@
 	use evgeom
 	use levels
 	use basin, only : nkn,nel,ngr,mbw
+	use femtime
 
 	implicit none
-
-	include 'femtime.h'
 
 	integer icrc,iucrc
 	save iucrc
@@ -1134,12 +1133,11 @@
 	use basin
 	use mod_hydro_print
         use mod_nohyd
+	use femtime
 
 	implicit none
 
 	integer k
-
-	include 'femtime.h'
 
 	integer iu
 	integer l,lmax,lmin,kk
@@ -1192,12 +1190,11 @@
 	use evgeom
 	use levels
 	use basin
+	use femtime
 
 	implicit none
 
 	integer ie
-
-	include 'femtime.h'
 
 	integer iu
 	integer l,lmin,lmax,ii

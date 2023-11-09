@@ -41,6 +41,15 @@
         module befor_after
 !----------------------------------------------------------------------
 
+	integer, parameter :: M_INIT = 1	!initialization stand-alone
+	integer, parameter :: M_READ = 2	!read in section
+	integer, parameter :: M_CHECK = 3	!check data read in
+	integer, parameter :: M_SETUP = 4	!set up data structures
+	integer, parameter :: M_PRINT = 5	!print out details for log file
+	integer, parameter :: M_TEST = 6	!test output for debug
+	integer, parameter :: M_BEFOR = 7	!do at beginning of time loop
+	integer, parameter :: M_AFTER = 8	!do at end of time loop
+
 !----------------------------------------------------------------------
         contains
 !----------------------------------------------------------------------
@@ -49,9 +58,9 @@
 
 ! to do in time loop before time step
 
-	implicit none
+	!use befor_after
 
-	include 'modules.h'
+	implicit none
 
 	call modules(M_BEFOR)
 
@@ -67,9 +76,9 @@ end subroutine do_befor
 
 ! to do in time loop after time step
 
-	implicit none
+	!use befor_after
 
-	include 'modules.h'
+	implicit none
 
 	double precision dtime
 
