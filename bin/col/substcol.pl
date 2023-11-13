@@ -31,6 +31,9 @@ while(<>) {
   chomp;
   s/^\s+//;
   s/,/ /g;
+  next if /^\#.*/;      #comment line -> ignore
+  s/#.*//;              #comment -> delete
+
   my @f = split;
   $i++;
 
