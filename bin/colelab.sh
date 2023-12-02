@@ -36,6 +36,7 @@ ErrorOption()
 #---------------------------------------------------------------
 
 bindir=$( dirname $0 )
+bindir=$bindir/col
 #echo "script run from directory $bindir"
 
 what="none"
