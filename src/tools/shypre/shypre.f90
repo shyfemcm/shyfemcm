@@ -832,6 +832,8 @@
 
 	logical bwarn
         integer ie,ii,ii2,ii3,k1,k2,k3,ke,i
+	integer nsmall
+	integer, parameter :: nsmax = 20
         real a,x1,x2,x3,y1,y2,y3,p
         real area(nel),amin,amax
 	real eps
@@ -875,6 +877,8 @@
 	!call histo_area(nel,area)
 	!stop
 
+	nsmall = 0
+
 	do ie=1,nel
 	  a = area(ie)
 	  p = a / amax
@@ -884,13 +888,22 @@
      &                     ,' is zero'
             bstop=.true.
           else if(p.lt.eps) then
-            write(6,1000)' warning: element ',ipev(ie) &
+	    nsmall = nsmall + 1
+	    if( nsmall < nsmax ) then
+              write(6,1000)' warning: element ',ipev(ie) &
      &                     ,' seems too small:',a,p
+	    end if
+	    if( nsmall == nsmax ) then
+	      write(6,*) ' ... more small elements not showing'
+	    end if
             bwarn=.true.
           end if
 	end do
 
 	if( .not. bquiet .and. bwarn ) then
+	  if( nsmall > 0 ) then
+	    write(6,*) ' total number of small elements: ',nsmall
+	  end if
 	  write(6,*) ' area amin,amax: = ',amin,amax,amin/amax
 	end if
 

@@ -4,17 +4,9 @@
 #
 #-----------------------------------------------
 
-base="$HOME/shyfemcm/shyfemcm"
+base="$HOME/shyfemcm"
 
-src="src/shyfem src/utils/generic src/utils/shyutil \
-		src/utils/shympi src/utils/shyutilmpi"
-tools="src/tools/shybas \
-	src/tools/shypre \
-	src/tools/shyadj src/tools/shynetcdf src/tools/shyparts \
-	src/tools/shyelab src/tools/shyplot \
-	src/tools/shyplot/util \
-	"
-alldir="$src $tools"
+alldir=$( find $base/src -type d )
 
 actdir=$( pwd )
 
@@ -22,7 +14,7 @@ actdir=$( pwd )
 
 Usage()
 {
-  echo "Usage: shyfind.sh [-h|-help] [-options] pattern"
+  echo "Usage: shyfind.sh [-h|-help] [-options] {file|pattern}"
 }
 
 FullUsage()
@@ -30,13 +22,28 @@ FullUsage()
   Usage
   
   echo ""
+  echo "looks for file names or pattterns in standard locations"
+  echo ""
   echo "Available options:"
   echo "  -h|-help         this help"
   echo "  -verbose         be verbose"
   echo "  -quiet           be quiet"
   echo "  -file            look for pattern in file names"
   echo "  -pattern         look for pattern in files"
+  echo "  -obsolete        look also in obsolete dirs"
+  echo "  -dirs            show directories where to look"
   echo ""
+}
+
+SkipObsolete()
+{
+  echo $dir | grep -q obsolete 
+
+  if [ $? -eq 0 -a $show_obsolete = "NO" ]; then
+    return 0
+  else
+    return 1
+  fi
 }
 
 Do_File()
@@ -44,9 +51,13 @@ Do_File()
   echo "looking for file $*"
   for dir in $alldir
   do
-    echo "---- $dir ----" >&2
-    cd $base/$dir
-    ls $* 2> /dev/null
+    if SkipObsolete; then continue; fi
+    cd $dir
+    result=$( ls $* 2> /dev/null )
+    if [ -n "$result" ]; then
+      echo "---- $dir ----" >&2
+      ls -1 $* 2> /dev/null
+    fi
     cd $actdir
   done
 }
@@ -56,9 +67,13 @@ Do_Pattern()
   echo "looking for pattern $*"
   for dir in $alldir
   do
-    echo "---- $dir ----" >&2
-    cd $base/$dir
-    grep $* *.f90 *.f 2> /dev/null
+    if SkipObsolete; then continue; fi
+    cd $dir
+    result=$( grep $* *.f90 *.f 2> /dev/null )
+    if [ -n "$result" ]; then
+      echo "---- $dir ----" >&2
+      grep $* *.f90 *.f 2> /dev/null
+    fi
     cd $actdir
   done
 }
@@ -67,8 +82,11 @@ Do_Pattern()
 
 do_file=NO
 do_pattern=NO
+do_dirs=NO
 quiet=NO
 verbose=NO
+show_obsolete="NO"
+
 while [ -n "$1" ]
 do
    case $1 in
@@ -76,12 +94,19 @@ do
         -verbose)       verbose="YES";;
         -file)          do_file="YES";;
         -pattern)       do_pattern="YES";;
+        -obsolete)      show_obsolete="YES";;
+        -dirs)          do_dirs="YES";;
         -h|-help)       FullUsage; exit 0;;
         -*)             echo "No such option: $1"; exit 1;;
         *)              break;;
    esac
    shift
 done
+
+if [ $do_dirs = "YES" ]; then
+  echo $alldir
+  exit 0
+fi
 
 [ $# -eq 0 ] && Usage && exit 0
 

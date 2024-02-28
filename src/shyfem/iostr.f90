@@ -39,7 +39,7 @@
 ! subroutine impini		initializes parameters for semi-implicit time
 ! function bimpli(it)		checks if semi-implicit time-step is active
 ! function getimp		gets weight for semi-implicit time-step
-! subroutine setimp(it,aweigh)	sets parameters for semi-implicit time-step
+! subroutine setimp(dtime,aweigh) sets parameters for semi-implicit time-step
 !
 ! revision log :
 !
@@ -583,9 +583,9 @@
 ! routines for handling semi-implicit time-step
 !
 ! the only routines that should be necessary to be called are
-! setimp(it,weight) and getazam(az,am)
+! setimp(dtime,weight) and getazam(az,am)
 !
-! setimp sets the implicit parameter until time it to weight
+! setimp sets the implicit parameter until dtime to weight
 ! getazam returns az,am with the actual weight
 !
 ! usage: call setimp in a program that would like to change the

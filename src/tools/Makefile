@@ -9,10 +9,6 @@
 
 FEMDIR = ../..
 BINDIR = $(FEMDIR)/bin
-SUBDIRS = \
-		grid mesh postscript hcbs shyadj \
-		shynetcdf shypre shybas shyelab \
-		shyplot
 
 SUBDIRS = \
 	grid mesh postscript hcbs \

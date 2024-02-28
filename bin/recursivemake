@@ -1,4 +1,4 @@
-#!/bin/sh
+#!/bin/bash
 #
 #------------------------------------------------------------------------
 #
@@ -89,14 +89,23 @@ target=$1; shift
 
 home=`pwd`
 
+if [ -z "$level" ]; then
+  export level=0
+  export space=""
+fi
+
+level=$(( level + 1 ))
+localspace=$space
+space="$space  "
+
 if [ $quiet = "NO" ]; then
-  echo "making target $target in subdirectories..."
-  echo "$*"
+  echo "$space making target $target in subdirectories ($level): $*"
+  #echo "  $*"
 fi
 
 for dir
 do
-  [ $quiet = "NO" ] && echo $dir
+  [ $quiet = "NO" ] && echo "$space entering $dir"
   if [ -d $dir ]; then
     cd $dir
     [ $copy != "NO" ] && CopyMakefile
@@ -106,6 +115,9 @@ do
     echo "*** no such directory: $dir ... skipping"
   fi
 done
+
+level=$(( level - 1 ))
+space=$localspace
 
 #------------------------------------------------------------------
 

@@ -177,6 +177,9 @@
 ! 28.04.2023    ggu     update function calls for belem
 ! 22.05.2023    ggu     new names for closing: close_init, close_handle
 ! 05.06.2023    lrp     introduce z-star
+! 11.12.2023    ggu     f90 style format
+! 11.12.2023    ggu     create subroutines for init/run/finalize
+! 12.12.2023    ggu     introduce dtmax to make limited run
 !
 !*****************************************************************
 !
@@ -191,6 +194,12 @@
 !----------------------------------------------------------------
 
 	program shyfem
+	call shyfem_main
+	end program
+
+!================================================================
+	module mod_shyfem
+!================================================================
 
 	use mod_bound_geom
 	use mod_geom
@@ -225,20 +234,17 @@
 !$	use omp_lib	!ERIC
 	use shympi
 	use mod_test_zeta
-   use befor_after
+	use befor_after
 #ifdef W3_SHYFEM
 	use subww3
 #endif
 
-
-!----------------------------------------------------------------
-
 	implicit none
 
-! local variables
+! internal variables
 
 	logical bdebout,bdebug,bmpirun
-	logical bfirst
+	logical, save ::  bfirst = .true.
 	integer k,ic,n
 	integer iwhat
 	integer date,time
@@ -251,11 +257,34 @@
 	double precision mpi_t_solve
 	double precision dtime,dtanf,dtend
         double precision atime_start,atime_end
+        double precision, parameter :: zero = 0.
         character*20 aline_start,aline_end
 	character*80 strfile
 	character*80 mpi_code,omp_code
 
-	real getpar
+!================================================================
+	end module mod_shyfem
+!================================================================
+
+	subroutine shyfem_main
+	use mod_shyfem
+	implicit none
+	call shyfem_initialize
+	call shyfem_run(zero)
+	call shyfem_finalize
+	end subroutine shyfem_main
+
+!*****************************************************************
+
+	subroutine shyfem_initialize
+
+!-----------------------------------------------------------
+! start of program
+!-----------------------------------------------------------
+
+	use mod_shyfem
+
+	implicit none
 
 	call cpu_time(time1)
 	call cpu_time_init
@@ -357,8 +386,8 @@
 	call check_point('checking ht 2')
 
 	call get_date_time(date,time)
-	call iff_init_global(nkn,nel,nlv,ilhkv,ilhv &
-     &				,hkv_max,hev,hlv,date,time)
+        call iff_init_global(nkn,nel,nlv,ilhkv,ilhv                     &
+     &                          ,hkv_max,hev,hlv,date,time)
 
 	call init_zadaptation
 	call sp111(1)           !here zenv, utlnv, vtlnv are initialized
@@ -368,7 +397,6 @@
 !-----------------------------------------------------------
 
 	call setweg(0,n)
-	!if( bmpi .and. n > 0 ) goto 95
 	call setznv		! -> change znv since zenv has changed
 
         call rst_perform_restart        !restart
@@ -479,20 +507,33 @@
 	call test_zeta_init
 	call cpu_time_start(2)
 
+	end subroutine shyfem_initialize
+
 !%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 !%%%%%%%%%%%%%%%%%%%%%%%%% time loop %%%%%%%%%%%%%%%%%%%%%%%%%%%%
 !%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
-	bfirst = .true.
+	subroutine shyfem_run(dtstep)
 
-	do while( dtime .lt. dtend )
+	use mod_shyfem
+
+	implicit none
+
+	double precision dtstep		!time step to run, 0: run to end
+
+	double precision dtmax		!run to this time
+
+	dtmax = dtend
+	if( dtstep > 0. ) dtmax = dtime + dtstep
+
+	do while( dtime .lt. dtmax )
 
            if(bmpi_debug) call shympi_check_all(0)	!checks arrays
 
 	   call check_crc
 	   call set_dry
 
-           call set_timestep		!sets dt and t_act
+           call set_timestep(dtmax)		!sets dt and t_act
            call get_timestep(dt)
 	   call get_act_dtime(dtime)
 
@@ -553,11 +594,19 @@
 
 	end do
 
-	call cpu_time_end(2)
+	end subroutine shyfem_run
 
 !%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 !%%%%%%%%%%%%%%%%%%%%%% end of time loop %%%%%%%%%%%%%%%%%%%%%%%%
 !%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+	subroutine shyfem_finalize
+
+	use mod_shyfem
+
+	implicit none
+
+	call cpu_time_end(2)
 
 	call print_end_time
 	call ww3_finalize
@@ -590,8 +639,8 @@
 
 	call cpu_time(time2)
 	print *,"TIME TO SOLUTION (CPU)  = ",time2-time1,my_id
-	print *,"TIME TO SOLUTION PARALLEL REGION (CPU) = " &
-     &				,time2-time3,my_id
+        print *,"TIME TO SOLUTION PARALLEL REGION (CPU) = "             &
+     &                          ,time2-time3,my_id
 
 	call cpu_time_get(1,time0)
 	write(6,1200) 'cpu time (total):        ',time0
@@ -632,11 +681,7 @@
 	call shympi_exit(99)
 	call exit(99)
 
-	stop
-   95	continue
-        write(6,*) 'no wetting and drying for mpi yet...',n
-        stop 'error stop shyfem: not yet ready'
-        end
+        end subroutine shyfem_finalize
 
 !*****************************************************************
 !*****************************************************************
@@ -680,13 +725,13 @@
         call clo_add_option('silent',.false.,'be silent')
 
 	call clo_add_sep('mpi options:')
-        call clo_add_option('mpi',.false. &
-     &			,'runs in MPI mode (experimental)')
+        call clo_add_option('mpi',.false.                               &
+     &                  ,'runs in MPI mode (experimental)')
 
 	call clo_add_sep('debug options:')
         call clo_add_option('debug',.false.,'enable debugging')
-        call clo_add_option('debout',.false. &
-     &			,'writes debugging information to file')
+        call clo_add_option('debout',.false.                            &
+     &                  ,'writes debugging information to file')
         call clo_add_option('mpi_debug',.false.,'enable mpi debugging')
 
         call clo_parse_options
@@ -952,7 +997,7 @@
 	      iunit = 200
               call find_unit(iunit)
               if( iunit == 0 ) goto 98
-              open(iunit,file=file,status='unknown',form='unformatted' &
+              open(iunit,file=file,status='unknown',form='unformatted'  &
      &                          ,iostat=ios)
               if( ios /= 0 ) goto 99
 	      call set_debug_unit(iunit)
@@ -1444,7 +1489,7 @@
 
 	do while( dtime .lt. dtend )
 
-           call set_timestep		!sets dt and t_act
+           call set_timestep(dtend)		!sets dt and t_act
            call get_timestep(dt)
 	   call get_act_dtime(dtime)
 

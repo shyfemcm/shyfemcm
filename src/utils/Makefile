@@ -9,6 +9,7 @@
 
 FEMDIR = ../..
 BINDIR = $(FEMDIR)/bin
+
 SUBDIRS = generic shyutil shympi shyutilmpi
 
 #------------------------------------------------------------------------

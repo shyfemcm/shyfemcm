@@ -82,6 +82,7 @@
 ! 16.02.2019	ggu	changed VERS_7_5_60
 ! 16.02.2020    ggu     femtime eliminated
 ! 20.03.2022    ggu     upgraded to da_out
+! 28.09.2023    ggu     include substituted by module
 !
 ! notes :
 !
@@ -104,6 +105,19 @@
 !               volinf
 !       volstats        (commented)
 !
+!******************************************************************
+
+	module volcomp
+
+	implicit none
+
+	integer, parameter :: nfxdim = 1
+
+        integer, save :: nvols,kvold,kvolm,kvol(nfxdim)
+        integer, save :: ivolm,ivol(nfxdim)
+
+	end module volcomp
+
 !******************************************************************
 
         subroutine mod_vol(mode)
@@ -149,10 +163,9 @@
 ! kvolm		total number of nodes defining areas
 ! kvol()	node numbers defining areas
 
-        implicit none
+	use volcomp
 
-	include 'param.h'
-	include 'volcomp.h'
+        implicit none
 
         nvols = -1	!must still be initialized
         kvold = 0	!is set later
@@ -166,10 +179,9 @@
 
         subroutine rdvola
 
-        implicit none
+	use volcomp
 
-	include 'param.h'
-	include 'volcomp.h'
+        implicit none
 
 	integer nfxdi
         integer nrdveci
@@ -184,7 +196,7 @@
 
         if( kvolm .lt. 0 ) then
           if( kvolm .eq. -1 ) then
-            write(6,*) 'dimension error nvodin in section $VOL : ' &
+            write(6,*) 'dimension error nvodin in section $VOL : '      &
      &                          ,nfxdi
           else
             write(6,*) 'read error in section $VOL'
@@ -198,11 +210,9 @@
 
         subroutine ckvola
 
+	use volcomp
+
         implicit none
-
-	include 'param.h'
-	include 'volcomp.h'
-
 
 	integer k,ii
         logical berror
@@ -224,12 +234,10 @@
 
 	subroutine prvola
 
+	use volcomp
+
 	implicit none
 
-	include 'param.h'
-	include 'volcomp.h'
-
-	
 	integer nnode,ifirst,ilast
 	integer ntotal,ns
 	integer i,ii
@@ -307,12 +315,10 @@
 
 	subroutine tsvola
 
+	use volcomp
+
 	implicit none
 
-	include 'param.h'
-	include 'volcomp.h'
-
-	
 	integer i,ii
 
 	write(6,*) '/kvolc/'
@@ -331,15 +337,14 @@
 
 ! write of vol data
 
+	use volcomp
+
 	implicit none
 
 	double precision dtime
 
         integer iscdim
         parameter(iscdim=500)
-
-	include 'param.h'
-	include 'volcomp.h'
 
 	integer idtvol
 	integer i
@@ -520,7 +525,6 @@
 	real voltotal
 	logical bz	!if true use new zeta to compute volume
 
-
 	integer ie,mode
 	real volume
 
@@ -629,15 +633,11 @@
 
 ! initializes vol routines finally
 
+	use volcomp
 	use mod_geom
 
 	implicit none
 
-	include 'param.h'
-	include 'volcomp.h'
-
-
-	
 	integer idummy
 
 	integer klineck
@@ -838,9 +838,6 @@
 	integer kline(1)
 	real xline(1), yline(1)
 
-	include 'param.h'
-
-
 	integer i,k
 	integer kfirst,kstart,knext
 
@@ -864,8 +861,8 @@
 	kstart = kline(n)
 	knext = kantv(1,kstart)
 
-	do while( knext .ne. kfirst .and. knext .ne. kstart  &
-     &			.and. knext .gt. 0 )
+        do while( knext .ne. kfirst .and. knext .ne. kstart             &
+     &                  .and. knext .gt. 0 )
 
 	  nnodes = nnodes + 1
 
@@ -920,8 +917,8 @@
 	    v3v(kn(ii)) = 1.
 	  end do
 
-	  write(iunit,2000) 2,ipev(ie),ietype,nvert &
-     &				,(ipv(kn(ii)),ii=1,nvert),hmed
+          write(iunit,2000) 2,ipev(ie),ietype,nvert                     &
+     &                          ,(ipv(kn(ii)),ii=1,nvert),hmed
 
 	end do
 
@@ -949,9 +946,6 @@
 	integer n
 	integer inodes(1)
 	integer il,iltype
-
-
-	include 'param.h'
 
 	integer k,i
 	integer istart

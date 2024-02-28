@@ -17,7 +17,7 @@ FEMBIN = $(FEMDIR)/bin
 
 #--------------------	EXES	---------------------
 
-EXEC = shyfem
+EXES = shyfem
 
 #----------------------	INCLUDE	----------------------
 
@@ -157,10 +157,13 @@ OBSOLETE = \
 
 default: fem
 
-fem: $(EXEC) nothing
+fem: $(EXES) links nothing
 
-$(EXEC): $(MODULES) $(OBJ) $(LIBFS) shyfem.o
+$(EXES): $(MODULES) $(OBJ) $(LIBFS) shyfem.o
 	 $(F77) $(FFLAGS) $(INCLUDE) $(LFLAGS) $^ $(LIBL) -o $@
+
+links:
+	@$(FEMBIN)/symlink $(FEMBIN) $(EXES)
 
 depend:
 	@$(FEMBIN)/mkdp.pl -moddir=$(MODDIR) *.f90
@@ -178,18 +181,18 @@ nothing:
 
 clean:
 	-rm -f *.o
-	-rm -f $(EXEC)
-	-rm -f $(BINDIR)/$(EXEC)
+	-rm -f $(EXES)
+	-rm -f $(BINDIR)/$(EXES)
 
 cleanall: clean
 	-rm -f $(MODDIR)/*.mod
 	-rm -f $(LIBDIR)/libshy.a 
 
-update:
-	cp $(EXEC) /home/georg/work/shyfem_repo/shyfem-mpi/bin
-	cp $(EXEC) /home/georg/work/shyfem_repo/shyfem-mpi/fem3d
-	cp $(EXEC) /home/georg/work/shyfem_repo/shyfem/bin
-	cp $(EXEC) /home/georg/work/shyfem_repo/shyfem/fem3d
+#update:
+#	cp $(EXES) /home/georg/work/shyfem_repo/shyfem-mpi/bin
+#	cp $(EXES) /home/georg/work/shyfem_repo/shyfem-mpi/fem3d
+#	cp $(EXES) /home/georg/work/shyfem_repo/shyfem/bin
+#	cp $(EXES) /home/georg/work/shyfem_repo/shyfem/fem3d
 
 #------------------------------------------------------------------------
 
