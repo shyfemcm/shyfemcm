@@ -1,5 +1,63 @@
 ============================================================
 
+Wed Feb 28 11:41:05 CET 2024
+
+new routines in bin
+
+ COMMIT                            |  38 ++++++++++++++
+ VERSION                           |   4 +-
+ bin/git/git-commit                |  62 ++++++++++++++++++++---
+ bin/joincol                       | 102 ++++++++++++++++++++++++++++++++++++++
+ bin/rename.sh                     |  36 ++++++++++++++
+ bin/shyfem_util/shyfem_version.pl |   2 +-
+ bin/splitcol                      |   1 +
+ src/utils/shyutil/version.f90     |   4 +-
+ 8 files changed, 236 insertions(+), 13 deletions(-)
+ new file:
+   bin/joincol
+   bin/rename.sh
+   bin/splitcol
+
+============================================================
+
+Wed Feb 28 10:35:25 CET 2024
+
+last changes from old repository included
+
+ bin/average.pl                     |  34 +++
+ bin/find_pattern.sh                |   8 +
+ bin/gp                             |  24 +-
+ bin/recursivemake                  |  20 +-
+ bin/shyfind.sh                     |  61 ++--
+ bin/strparse.pl                    |   4 +-
+ docs/mwr/Makefile                  |  23 ++
+ lib/perl/date.pm                   |  34 ++-
+ lib/perl/spline.pm                 |   2 +-
+ src/obsolete/fem3d/bin/f2f90.pl    |  80 +++++-
+ src/obsolete/fem3d/bin/usemod.pl   |  27 +-
+ src/obsolete/fem3d/new36.f         |   6 +-
+ src/obsolete/var/volume.f90        |  70 +++--
+ src/shyfem/Makefile                |  23 +-
+ src/shyfem/bnd_routines.f90        |  86 ++++++
+ src/shyfem/boxes.f90               | 562 ++++++++++++++++++++++++++-----------
+ src/shyfem/discharge_flux.f90      | 320 ++++++++++++++++++---
+ src/shyfem/heat_areg.f90           |   4 +
+ src/shyfem/iostr.f90               |   6 +-
+ src/shyfem/lagrange_vertical.f90   |   6 +-
+ src/shyfem/shyfem.f90              |  99 +++++--
+ src/shyfem/time_admin.f90          |  19 +-
+ src/shyfem/waves_admin.f90         | 262 ++++++++++-------
+ src/tools/Makefile                 |   4 -
+ src/tools/shybas/shybas            | Bin 1922272 -> 1923888 bytes
+ src/tools/shynetcdf/nc_tutil.f     |  10 +-
+ src/tools/shypre/shypre.f90        |  15 +-
+ src/utils/Makefile                 |   1 +
+ src/utils/generic/iso8601.f90      |   9 +-
+ src/utils/shyutil/femfile_util.f90 |  29 +-
+ 30 files changed, 1415 insertions(+), 433 deletions(-)
+
+============================================================
+
 Thu Sep 28 11:50:21 CEST 2023
 
 Rules.make

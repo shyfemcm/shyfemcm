@@ -1,4 +1,6 @@
-   commit_2023-09-28
+version  8_0_2    23-10-2024    VERS_8_0_2   commit_2024-02-28
+
+version  8_0_2    23-10-2024    VERS_8_0_2
 
 version  7_5_84    25-09-2023    VERS_7_5_84
 
@@ -23559,4 +23561,4 @@ last version of old model : 19 June 1996
 ==========================================================
 Do not delete last line - needed for logging.
 ==========================================================
-fem3d/subver.f
+src/utils/shyutil/version.f90

@@ -396,7 +396,7 @@
 !
 ! \newcommand{\VERSION}{8.0.2}
 ! \newcommand{\version}{8\_0\_2}
-! \newcommand{\COMMIT}{2023-10-23}
+! \newcommand{\COMMIT}{2024-02-28}
 !
 ! DOCS	END
 
@@ -405,7 +405,7 @@
 	logical, save		:: bshort = .false.
 
         character*10, parameter :: version = '8.0.2'
-        character*10, parameter :: commit  = '2023-10-23'
+        character*10, parameter :: commit  = '2024-02-28'
         character*17, parameter :: text    = 'SHYFEM VERSION = '
 
         character*40, parameter :: string = text//version//'  '//commit
