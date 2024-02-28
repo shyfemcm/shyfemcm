@@ -1,5 +1,34 @@
 ============================================================
 
+Wed Feb 28 11:56:27 CET 2024
+
+some more new files (bin, lib, docs)
+
+ docs/mwr/discret2d.tex                  | 515 +++++++++++++++++++++++++++
+ docs/mwr/discret3d.tex                  | 604 ++++++++++++++++++++++++++++++++
+ lib/perl/Makefile                       |  38 ++
+ lib/perl/histo.pm                       | 149 ++++++++
+ lib/perl/regress.pl                     | 404 +++++++++++++++++++++
+ lib/perl/regress.sh                     |  31 ++
+ src/obsolete/fem3d/bin/check_various.sh |  87 +++++
+ src/obsolete/fem3d/bin/f902f.pl         |  18 +
+ src/obsolete/fem3d/bin/i2m.pl           | 102 ++++++
+ src/obsolete/fem3d/bin/i2m.sh           |  29 ++
+ 10 files changed, 1977 insertions(+)
+ new file:
+   docs/mwr/discret2d.tex
+   docs/mwr/discret3d.tex
+   lib/perl/Makefile
+   lib/perl/histo.pm
+   lib/perl/regress.pl
+   lib/perl/regress.sh
+   src/obsolete/fem3d/bin/check_various.sh
+   src/obsolete/fem3d/bin/f902f.pl
+   src/obsolete/fem3d/bin/i2m.pl
+   src/obsolete/fem3d/bin/i2m.sh
+
+============================================================
+
 Wed Feb 28 11:41:05 CET 2024
 
 new routines in bin
