@@ -117,6 +117,11 @@ save:   zip
 zip:	cleanall
 	-zip $(DIR) $(SAVEFILES)
 
+#--------------------------------------------- special
+
+submir.o: submir.f90
+	$(F77) -c $(FFLAGS) -std=legacy $<
+
 #--------------------------------------------- rules
 
 .SUFFIXES: .F .f90

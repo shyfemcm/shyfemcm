@@ -141,10 +141,14 @@ PARALLEL_MPI = NONE
 PARTS = NONE
 #PARTS = METIS
 #PARTS = PARMETIS
+METISDIR = 
 #METISDIR = /usr/local
-#PARMETISDIR = /usr/local
 #METISDIR = $(HOME)/lib/metis
+#METISDIR = $(LD_LIBRARY_PATH)
+PARMETISDIR = 
+#PARMETISDIR = /usr/local
 #PARMETISDIR = $(HOME)/lib/parmetis
+#PARMETISDIR = $(LD_LIBRARY_PATH)
 
 ##############################################
 # Solver for matrix solution
@@ -355,13 +359,13 @@ RULES_MAKE_VERSION = 1.10
 DISTRIBUTION_TYPE = experimental
 
 ##############################################
-# DEFINE DIRECTORIES
+# DEFINE DIRECTORIES (FEMDIR is defined in calling Makefile)
 ##############################################
 
 DEFDIR  = $(HOME)
-DIRLIB  = $(FEMDIR)/femlib
-MODDIR  = 
-MODDIR  = $(DIRLIB)/mod
+LIBDIR  = $(FEMDIR)/lib
+BINDIR  = $(FEMDIR)/bin
+MODDIR  = $(LIBDIR)/mod
 
 LIBX = -L/usr/X11R6/lib -L/usr/X11/lib -L/usr/lib/X11  -lX11
 
@@ -517,8 +521,8 @@ endif
 # determines major version for compilers
 ##############################################
 
-GMV := $(shell $(FEMBIN)/cmv.sh -quiet gfortran)
-IMV := $(shell $(FEMBIN)/cmv.sh -quiet intel)
+GMV := $(shell $(BINDIR)/cmv.sh -quiet gfortran)
+IMV := $(shell $(BINDIR)/cmv.sh -quiet intel)
 GMV_LE_4  := $(shell [ $(GMV) -le 4 ] && echo true || echo false )
 GMV_LE_8  := $(shell [ $(GMV) -le 8 ] && echo true || echo false )
 IMV_LE_14 := $(shell [ $(IMV) -le 14 ] && echo true || echo false )
@@ -585,7 +589,7 @@ endif
 # end of special treatment
 ##############################################
 
-FGNU_GENERAL = -cpp
+FGNU_GENERAL = -cpp -std=f95
 ifdef MODDIR
   FGNU_GENERAL = -cpp -J$(MODDIR)
 endif

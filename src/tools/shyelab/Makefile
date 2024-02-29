@@ -57,7 +57,7 @@ LIBL    += $(LIB_NETCDF)
 
 #---------------------------------------------
 
-EXES = shyelab extelab flxelab lgrelab tselab femelab ts2nc shyproj
+EXES = shyelab extelab flxelab lgrelab tselab femelab shyproj
 
 #----------------------------------------------------------------------------
 
@@ -113,9 +113,6 @@ femelab: $(OBJ) $(LIBF) femelab.o
 
 tselab: $(OBJ) $(LIBF) tselab.o
 	$(F77) $(FFLAGS) $(INCLUDE) $(LFLAGS) $(OBJ) $@.o $(LIBL) -o $@
-
-ts2nc: $(LIBF) ts2nc.o
-	$(F77) $(FFLAGS) $(INCLUDE) $(LFLAGS) $@.o $(LIBL) -o $@
 
 shyproj: $(LIBF) shyproj.o
 	$(F77) $(FFLAGS) $(INCLUDE) $(LFLAGS) $@.o $(LIBL) -o $@

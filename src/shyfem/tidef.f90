@@ -174,7 +174,7 @@
 
         do k = 1,nkn,nchunk
 
-!$OMP TASK FIRSTPRIVATE(k) PRIVATE(iks,ikend) 
+!$OMP TASK FIRSTPRIVATE(k) PRIVATE(iks,ikend) &
 !$OMP&     SHARED(nkn,nchunk) DEFAULT(NONE)
 
           call omp_compute_minmax(nchunk,nkn,k,ikend)
@@ -287,8 +287,8 @@
 
         do k = 1,nkn,nchunk
 
-!$OMP TASK FIRSTPRIVATE(k) PRIVATE(iks,ikend,lat)
-!$OMP&     SHARED(nkn,nchunk,ygeov,vvk,uvk,fvk)
+!$OMP TASK FIRSTPRIVATE(k) PRIVATE(iks,ikend,lat) &
+!$OMP&     SHARED(nkn,nchunk,ygeov,vvk,uvk,fvk) &
 !$OMP&     DEFAULT(NONE)
 
           call omp_compute_minmax(nchunk,nkn,k,ikend)
@@ -423,8 +423,8 @@
 
         do k = 1,nkn,nchunk
 
-!$OMP TASK FIRSTPRIVATE(k) PRIVATE(iks,ikend,dat,x,i1,i2,acovl)
-!$OMP&     SHARED(nequ,nkn,nchunk,znv,vvk,uvk,fvk,tvar,bcov,acov)
+!$OMP TASK FIRSTPRIVATE(k) PRIVATE(iks,ikend,dat,x,i1,i2,acovl) &
+!$OMP&     SHARED(nequ,nkn,nchunk,znv,vvk,uvk,fvk,tvar,bcov,acov) &
 !$OMP&     DEFAULT(NONE)
 
           call omp_compute_minmax(nchunk,nkn,k,ikend)
@@ -471,8 +471,8 @@
 
         do k = 1,nkn,nchunk
 
-!$OMP TASK FIRSTPRIVATE(k) PRIVATE(iks,ikend)
-!$OMP&     SHARED(nequ,ndat,nkn,nchunk,tvar,acov,bcov,tideh,tideg)
+!$OMP TASK FIRSTPRIVATE(k) PRIVATE(iks,ikend) &
+!$OMP&     SHARED(nequ,ndat,nkn,nchunk,tvar,acov,bcov,tideh,tideg) &
 !$OMP&     DEFAULT(NONE)
 
           call omp_compute_minmax(nchunk,nkn,k,ikend)

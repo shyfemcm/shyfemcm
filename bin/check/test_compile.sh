@@ -10,6 +10,10 @@
 #
 # compiles with different available compilers
 #
+# need the follwing routines:
+#	check_server.sh
+#	subst_make.pl
+#
 #--------------------------------------------------------
 
 compilers="GNU_GFORTRAN INTEL PGI"
@@ -17,13 +21,17 @@ compilers="GNU_GFORTRAN INTEL PGI"
 #compilers="INTEL"
 #compilers="PGI"
 
-rules_arc_dir=./arc/rules
-rules_dist_dir=./femcheck/rules
+femdir=$( pwd )
+
+rules_arc_dir=$femdir/arc/rules
+rules_dist_dir=$femdir/var/rules
 
 rules_save=$rules_arc_dir/Rules.save
 rules_dist=$rules_dist_dir/Rules.dist
 
-femdir=$( pwd )
+subst_make=$femdir/bin/subst_make.pl
+check_server=$femdir/var/servers/check_server.sh
+
 export FEMDIR=$femdir
 
 debug="YES"
@@ -37,6 +45,17 @@ catch_warnings="YES"
 trap Clean_up 1 2 15
 
 #--------------------------------------------------------
+
+Error()
+{
+  echo "*** $*"
+  exit 1
+}
+
+ExitOnError()
+{
+  [ $? -ne 0 ] && Error $*
+}
 
 Clean_up()
 {
@@ -103,7 +122,7 @@ WrapUp()
 CompTest()
 {
   echo "running CompTest"
-  $femdir/femcheck/servers/check_server.sh -show
+  $check_server -show
   Comp "NETCDF=false PARALLEL_OMP=true"
 }
 
@@ -116,6 +135,9 @@ CompAll()
   #Comp "ECOLOGICAL=ERSEM GOTM=true NETCDF=true SOLVER=GAUSS"
   Comp "ECOLOGICAL=NONE NETCDF=true SOLVER=SPARSKIT"
   Comp "ECOLOGICAL=AQUABC NETCDF=false PARALLEL_OMP=true"
+  Comp "ECOLOGICAL=NONE GOTM=true NETCDF=false SOLVER=SPARSKIT \
+	PARALLEL_OMP=false PARALLEL_MPI=NODE \
+	PARTS=METIS METISDIR=$HOME/lib/metis"
 
   [ "$regress" = "NO" ] && return
 
@@ -172,9 +194,9 @@ Rules()
 {
   # sets variables in Rules.make
 
-  fembin/subst_make.pl -quiet -first "$1" Rules.make > tmp.tmp
+  $subst_make -quiet -first "$1" Rules.make > tmp.tmp
+  ExitOnError "error executing subst_make.pl ...aborting"
   mv tmp.tmp Rules.make
-  #fembin/subst_make.pl   "$1" Rules.make > tmp.tmp
 
   echo "setting macros: $1"
   echo "setting macros: $1" >> allstdout.txt
@@ -197,10 +219,11 @@ SetCompiler()
 {
   local comp=$1
 
-  local basedir=$femdir/femcheck/servers
-  local script=check_server.sh
-  local server=$( $basedir/$script -server )
   local compiler
+  local basedir=$femdir/var/servers
+  local script=$check_server
+  [ ! -x $script ] && Error "script not existing: $script"
+  local server=$( $script -server )
 
   [ "$debug" = "YES" ] && echo "SetCompiler: $comp $hostname"
 
@@ -240,11 +263,11 @@ do
   echo "compiling with $comp"
   echo "================================="
 
-  RulesReset
-  Rules "FORTRAN_COMPILER=$comp"
-
   SetCompiler $comp
   [ $? -ne 0 ] && continue
+
+  RulesReset
+  Rules "FORTRAN_COMPILER=$comp"
 
   make compiler_version > /dev/null 2>&1
   [ $? -ne 0 ] && echo "*** compiler $comp is not available..." && continue

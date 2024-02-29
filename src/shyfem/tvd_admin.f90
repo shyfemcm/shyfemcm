@@ -181,7 +181,7 @@
 
 	do ie=1,nel,nchunk
 
-!$OMP TASK FIRSTPRIVATE(ie)            PRIVATE(ies,ieend)
+!$OMP TASK FIRSTPRIVATE(ie)            PRIVATE(ies,ieend) &
 !$OMP&     SHARED(nel,nchunk,bsphe)    DEFAULT(NONE)
 
 	  call omp_compute_minmax(nchunk,nel,ie,ieend)

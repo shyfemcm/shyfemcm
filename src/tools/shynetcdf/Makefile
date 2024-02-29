@@ -29,6 +29,8 @@ LIBDIR  = $(FEMDIR)/lib
 INCLUDE = -I$(FEMDIR)/include
 FFLAGS += $(INCLUDE)
 
+FLAGS   = $(FFLAGS) $(INCLUDE) $(LFLAGS)
+
 #--------------------------------------------- macros
 
 LIB_NETCDF = 
@@ -37,7 +39,7 @@ NETCDF_OBJ = elab_nc_dummy.o
 
 ifeq ($(NETCDF),true)
   LIB_NETCDF = -L$(NETCDFDIR)/lib -lnetcdf -L$(NETCDFFDIR)/lib -lnetcdff
-  NCDF_TARGETS = lib nc2fem
+  NCDF_TARGETS = lib nc2fem ts2nc
   NETCDF_OBJ = \
         elab_nc.o \
         netcdf.o \
@@ -54,7 +56,7 @@ SPECIAL =       Makefile
 
 #--------------------------------------------- EXES
 
-EXES = nc2fem links
+EXES = nc2fem ts2nc links
 
 LIB = $(LIBDIR)/lib$(LIBNAME).a
 
@@ -91,7 +93,10 @@ LIBL = $(LIBLNC) $(LIBLUM) $(LIBLMP) $(LIBLSU) $(LIBLUT) $(LIB_NETCDF)
 LIBF = $(LIBFNC) $(LIBFUM) $(LIBFMP) $(LIBFSU) $(LIBFUT)
 
 nc2fem: $(NC2FEM_OBJ)
-	$(F77) $(FFLAGS) $(INCLUDE) $(LFLAGS) $(NC2FEM_OBJ) $(LIBL) -o $@
+	$(F77) $(FLAGS) $(NC2FEM_OBJ) $(LIBL) -o $@
+
+ts2nc: ts2nc.o
+	$(F77) $(FLAGS) ts2nc.o $(LIBL) -o $@
 
 links:
 	@$(FEMBIN)/symlink $(FEMBIN) $(EXES)
@@ -103,7 +108,7 @@ test: lib main_dummy
 main_dummy:
 	@echo " write(6,*) 'all dependencies ok'\n end" > main_dummy.f90
 	$(F77) $(FFLAGS) -c $@.f90 
-	$(F77) $(FFLAGS) $(INCLUDE) $(LFLAGS) $(ALL) $(LIBL) $@.o -o $@
+	$(F77) $(FLAGS) $(ALL) $(LIBL) $@.o -o $@
 	@echo "...running main_dummy"
 	@./main_dummy
 	@-rm -f main_dummy main_dummy.f90 main_dummy.o
@@ -165,7 +170,7 @@ zip:	cleanall
 	$(F77) -c -cpp $(FFLAGS) $<
 
 .for.obj:
-	$(FLC) $< , $(<,B).OBJ $(FLFLAGS)
+	$(FLC) $< , $(<,B).OBJ $(FFLAGS)
 
 #--------------------------------------------- makedepend
 

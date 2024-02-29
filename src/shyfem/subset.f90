@@ -266,9 +266,9 @@
 	 check_indipendency_global = 0
 	  
 	   ! loop on just assigned element
-!$OMP PARALLEL DO PRIVATE(j)  
-!$OMP& FIRSTPRIVATE(numsubset,i) DEFAULT(NONE)
-!$OMP& SHARED(subset,nel) SCHEDULE(GUIDED)
+!$OMP PARALLEL DO PRIVATE(j) &
+!$OMP& FIRSTPRIVATE(numsubset,i) DEFAULT(NONE) &
+!$OMP& SHARED(subset,nel) SCHEDULE(GUIDED) &
 !$OMP& REDUCTION(+:check_indipendency_global)
 	   do j=1,nel
 	   

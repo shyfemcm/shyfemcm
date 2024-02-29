@@ -110,7 +110,7 @@ PARALLEL_OMP = false
 #PARALLEL_OMP = true
 
 PARALLEL_MPI = NONE
-PARALLEL_MPI = NODE
+#PARALLEL_MPI = NODE
 #PARALLEL_MPI = ELEM
 
 ##############################################
@@ -138,14 +138,17 @@ PARALLEL_MPI = NODE
 #
 ##############################################
 
-#PARTS = NONE
-PARTS = METIS
+PARTS = NONE
+#PARTS = METIS
 #PARTS = PARMETIS
-#METISDIR = /zeus/opt/intel20.1/metis/5.1.0
+METISDIR = 
+#METISDIR = /usr/local
+#METISDIR = $(HOME)/lib/metis
 #METISDIR = $(LD_LIBRARY_PATH)
+PARMETISDIR = 
 #PARMETISDIR = /usr/local
-METISDIR = $(HOME)/lib/metis
 #PARMETISDIR = $(HOME)/lib/parmetis
+#PARMETISDIR = $(LD_LIBRARY_PATH)
 
 ##############################################
 # Solver for matrix solution
@@ -190,7 +193,7 @@ SOLVER = SPARSKIT
 
 # PETSC_DIR it the path to the PETSc installation folder, it is 
 # needed for both the PETSc and the PETSc_AmgX solvers
-#PETSC_DIR =/zeus/opt/impi20.1/petsc/3.13.2
+PETSC_DIR =
 
 # The next 4 paths must be filled in for the PETSc_AmgX solver only.
 
@@ -255,9 +258,8 @@ GPU=NONE
 ##############################################
 
 NETCDF = false
-NETCDF = true
-NETCDFDIR = $(NETCDF_PATH)
-NETCDFFDIR =$(NETCDFF_PATH)
+#NETCDF = true
+#NETCDFDIR =
 
 ##############################################
 # GOTM library
@@ -357,13 +359,12 @@ RULES_MAKE_VERSION = 1.10
 DISTRIBUTION_TYPE = experimental
 
 ##############################################
-# DEFINE DIRECTORIES
+# DEFINE DIRECTORIES (FEMDIR is defined in calling Makefile)
 ##############################################
 
 DEFDIR  = $(HOME)
 LIBDIR  = $(FEMDIR)/lib
 BINDIR  = $(FEMDIR)/bin
-MODDIR  = 
 MODDIR  = $(LIBDIR)/mod
 
 LIBX = -L/usr/X11R6/lib -L/usr/X11/lib -L/usr/lib/X11  -lX11
@@ -590,7 +591,7 @@ endif
 
 FGNU_GENERAL = -cpp -std=f95
 ifdef MODDIR
-  FGNU_GENERAL = -cpp -J$(MODDIR) 
+  FGNU_GENERAL = -cpp -J$(MODDIR)
 endif
 
 FGNU_PROFILE = 

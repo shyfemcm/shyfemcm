@@ -238,14 +238,16 @@
 !!!$OMP TASKGROUP 
        do jel=1,subset_el(i),nchunk
 
-!$OMP TASK FIRSTPRIVATE(jel,i) DEFAULT(NONE)
-!$OMP& PRIVATE(j,ie)
-!$OMP& SHARED(nlvddi,nlev,itvd,itvdv,istot,isact,aa,nchunk)
-!$OMP& SHARED(difmol,robs,wsink,rload,ddt,rkpar,az,ad)
-!$OMP& SHARED(an,ant)
-!$OMP& SHARED(azt,adt,aat,rso,rsn,rsot,rsnt,dt,nkn)
-!$OMP& SHARED(cn,co,cdiag,clow,chigh,subset_el,cn1,co1) 
-!$OMP& SHARED(subset_num,indipendent_subset) 
+!$OMP TASK &
+!$OMP& DEFAULT(NONE) &
+!$OMP& FIRSTPRIVATE(jel,i) &
+!$OMP& PRIVATE(j,ie) &
+!$OMP& SHARED(nlvddi,nlev,itvd,itvdv,istot,isact,aa,nchunk) &
+!$OMP& SHARED(difmol,robs,wsink,rload,ddt,rkpar,az,ad) &
+!$OMP& SHARED(an,ant) &
+!$OMP& SHARED(azt,adt,aat,rso,rsn,rsot,rsnt,dt,nkn) &
+!$OMP& SHARED(cn,co,cdiag,clow,chigh,subset_el,cn1,co1) &
+!$OMP& SHARED(subset_num,indipendent_subset) &
 !$OMP& SHARED(difhv,cbound,gradxv,gradyv,cobs,rtauv,load,difv,wsinkv)
 
        do j=jel,jel+nchunk-1 	! loop over elements in subset

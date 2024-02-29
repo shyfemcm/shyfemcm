@@ -59,6 +59,8 @@ FEMBIN    = $(FEMDIR)/bin
 TMPDIR    = $(HOME)/fem/tmp
 ACTFEMDIR = `pwd`
 
+FEMCHECK  = $(FEMBIN)/check
+
 REGRESSDIR = femregress
 
 SUBDIRS   = src
@@ -143,8 +145,6 @@ bfm_clean:
 	@fembfm/bfm_compile.sh -clean $(BFMDIR)
 
 nograph: checkv directories links test_executable
-	#@$(FEMBIN)/recursivemake fem $(FEMNOGRAPH)
-	#@femcheck/check_compilation.sh -quiet -nograph
 
 docs: doc
 doc:
@@ -281,20 +281,20 @@ info: version
 
 check: check_software
 check_software:
-	@cd femcheck; ./check_software.sh
+	@cd $(FEMCHECK); ./check_software.sh
 
 configure:
-	@cd femcheck; ./configure.sh
+	@cd $(FEMCHECK); ./configure.sh
 
 check_compilation:
-	@femcheck/check_compilation.sh
+	@$(FEMCHECK)/check_compilation.sh
 
 modified: changed
 changed:
-	@femcheck/find_changed.sh
+	@$(FEMCHECK)/find_changed.sh
 
 changed_zip:
-	zip changed_zip.zip `femcheck/find_changed.sh`
+	zip changed_zip.zip `$(FEMCHECK)/find_changed.sh`
 	@echo "changed files have bin zipped to changed_zip.zip"
 
 advance_time:
@@ -304,7 +304,7 @@ advance_time:
 # copyright and revision log
 #--------------------------------------------------------
 
-FEMCOPY = $(FEMDIR)/femcheck/copyright
+FEMCOPY = $(FEMDIR)/var/copyright
 
 check_files:
 	@$(FEMCOPY)/copyright.sh -check_all
@@ -378,16 +378,16 @@ rules:
 	@echo "rules_diff         difference between Rules.make and Rules.dist"
 
 test_compile:
-	@femcheck/test_compile.sh
+	@$(FEMCHECK)/test_compile.sh
 
 compile_regress:
-	@femcheck/test_compile.sh -regress
+	@$(FEMCHECK)/test_compile.sh -regress
 
 test_stable:
-	@femcheck/test_stable.sh
+	@$(FEMCHECK)/test_stable.sh
 
 check_var:
-	@femcheck/check_var.sh
+	@$(FEMCHECK)/check_var.sh
 
 regress:
 	if [ -d $(REGRESSDIR) ]; then SHYFEMDIR=$(PWD); \
@@ -397,65 +397,52 @@ revision:
 	 $(FEMBIN)/revision_last.sh
 
 test_mpi:
-	@cd femcheck/parallel; make mpi
+	@cd var/parallel; make mpi
 	
 #------------------------------------------------------------
 
+RULES_DIST_DIR = var/rules
+RULES_SAVE_DIR = arc/rules
+
 rules_save:
-	mkdir -p arc/rules
-	cp -f ./Rules.make arc/rules/Rules.save
-	cp -f femcheck/rules/Rules.dist ./Rules.make
+	mkdir -p $(RULES_SAVE_DIR)
+	cp -f ./Rules.make $(RULES_SAVE_DIR)/Rules.save
+	cp -f $(RULES_DIST_DIR)/Rules.dist ./Rules.make
 
 rules_restore:
-	cp -f arc/rules/Rules.save ./Rules.make
+	cp -f $(RULES_SAVE_DIR)/Rules.save ./Rules.make
 
 rules_dist:
-	cp -f femcheck/rules/Rules.dist ./Rules.make
+	cp -f $(RULES_DIST_DIR)/Rules.dist ./Rules.make
 
 rules_new:
-	cp -f ./Rules.make femcheck/rules/Rules.dist
+	cp -f ./Rules.make $(RULES_DIST_DIR)/Rules.dist
 
 rules_diff:
-	@-diff femcheck/rules/Rules.dist ./Rules.make || true
+	@-diff $(RULES_DIST_DIR)/Rules.dist ./Rules.make || true
 
 rules_std:
-	fembin/rules.sh std
+	$(RULES_DIST_DIR)/rules.sh std
 
 rules_mpi:
-	fembin/rules.sh mpi
+	$(RULES_DIST_DIR)/rules.sh mpi
 
 rules_omp:
-	fembin/rules.sh omp
+	$(RULES_DIST_DIR)/rules.sh omp
 
 rules_petsc:
-	fembin/rules.sh petsc
+	$(RULES_DIST_DIR)/rules.sh petsc
 
 rules_intel:
-	fembin/rules.sh intel
+	$(RULES_DIST_DIR)/rules.sh intel
 
 #------------------------------------------------------------
 
 dist: cleandist
 	mkdir -p arc/rules
-	mv --backup=numbered ./Rules.make arc/rules/Rules.save
-	cp -f femcheck/rules/Rules.dist ./Rules.make
+	mv --backup=numbered ./Rules.make $(RULES_SAVE_DIR)/Rules.save
+	cp -f $(RULES_DIST_DIR)/Rules.dist ./Rules.make
 	make doc; make clean
-
-stable:
-	@stable/make_stable.sh $(FEMDIR)/arc/shyfem-$(VERSNAME).tar.gz
-
-beta: cleanall
-	date > LASTTAR
-	echo "$(BETANAME)"
-	rm -rf $(TMPDIR)/fem.tar $(TMPDIR)/fem_VERS_* $(TMPDIR)/shyfem-*
-	mkdir -p $(BETADIR)
-	cp -al $(FEMTOTS) $(SPECIAL) $(BETADIR)
-	cd $(BETADIR); ./fembin/shyfem_beta.sh
-	cd $(TMPDIR); tar cvf fem.tar shyfem-*
-	mv -f $(TMPDIR)/fem.tar .
-	gzip -f fem.tar
-	rm -rf $(TMPDIR)/fem.tar $(BETADIR)
-	mv fem.tar.gz shyfem-$(BETANAME).tar.gz
 
 publish:
 	@fembin/fempub.sh shyfem_$(TARNAME).tar.gz
@@ -479,20 +466,20 @@ compat:
 
 rules_ggu_save:
 	mkdir -p arc/rules
-	cp -f ./Rules.make arc/rules/Rules.ggu
-	cp -f femcheck/rules/Rules.dist ./Rules.make
+	cp -f ./Rules.make $(RULES_SAVE_DIR)/Rules.ggu
+	cp -f $(RULES_DIST_DIR)/Rules.dist ./Rules.make
 
 rules_ggu_restore:
-	cp -f arc/rules/Rules.ggu ./Rules.make
+	cp -f $(RULES_SAVE_DIR)/Rules.ggu ./Rules.make
 
 rules_nemunas:
-	cp -f arc/rules/Rules.nemunas ./Rules.make
+	cp -f $(RULES_SAVE_DIR)/Rules.nemunas ./Rules.make
 
 rules_lagoon:
-	cp -f arc/rules/Rules.lagoon ./Rules.make
+	cp -f $(RULES_SAVE_DIR)/Rules.lagoon ./Rules.make
 
 rules_carbonium:
-	cp -f arc/rules/Rules.carbonium ./Rules.make
+	cp -f $(RULES_SAVE_DIR)/Rules.carbonium ./Rules.make
 
 nemon:
 	fem3d/bin/nemunas_adjust.sh -nemunas
@@ -504,10 +491,10 @@ git_nemunas:
 	. fem3d/bin/nemunas-git.sh
 
 check_server:
-	@femcheck/servers/check_server.sh -check $(FORTRAN_COMPILER)
+	@var/servers/check_server.sh -check $(FORTRAN_COMPILER)
 
 show_server:
-	@femcheck/servers/check_server.sh -show $(FORTRAN_COMPILER)
+	@var/servers/check_server.sh -show $(FORTRAN_COMPILER)
 
 #---------------------------------------------------------------
 # special ggu
@@ -521,7 +508,7 @@ nompi:
 #---------------------------------------------------------------
 
 check_compiler:
-	@femcheck/check_compiler.sh "$(CC) $(CINFOFLAGS)" \
+	@$(FEMCHECK)/check_compiler.sh "$(CC) $(CINFOFLAGS)" \
 		"$(F77) $(FINFOFLAGS)"
 
 test_executable:

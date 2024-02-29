@@ -1252,8 +1252,8 @@
         call omp_compute_chunk(nel,nchunk)
 
         do ie=1,nel
-!$OMP TASK FIRSTPRIVATE(ie)
-!$OMP&     SHARED(nchunk)
+!$OMP TASK FIRSTPRIVATE(ie) &
+!$OMP&     SHARED(nchunk) &
 !$OMP&     DEFAULT(NONE)
           call compute_waves_on_element(ie)
 !$OMP END TASK
@@ -1416,9 +1416,9 @@
 
 	do ie=1,nel
 
-!$OMP TASK FIRSTPRIVATE(ie)
-!$OMP&     PRIVATE(wx,wy,ii,k,fice)
-!$OMP&     SHARED(nel,nchunk,icecover,nen3v,wxv,wyv,winds,windd)
+!$OMP TASK FIRSTPRIVATE(ie) &
+!$OMP&     PRIVATE(wx,wy,ii,k,fice) &
+!$OMP&     SHARED(nel,nchunk,icecover,nen3v,wxv,wyv,winds,windd) &
 !$OMP&     DEFAULT(NONE)
 
 	  wx = 0.
@@ -1475,9 +1475,9 @@
 
         do ie = 1,nel
           
-!$OMP TASK FIRSTPRIVATE(ie,rad)
-!$OMP&     PRIVATE(xe,ye,wid,wdir,ierr,fff,ddd)
-!$OMP&     SHARED(nel,nchunk,windd,fet,daf)
+!$OMP TASK FIRSTPRIVATE(ie,rad) &
+!$OMP&     PRIVATE(xe,ye,wid,wdir,ierr,fff,ddd) &
+!$OMP&     SHARED(nel,nchunk,windd,fet,daf) &
 !$OMP&     DEFAULT(NONE)
         
           call baric_cart(ie,xe,ye)

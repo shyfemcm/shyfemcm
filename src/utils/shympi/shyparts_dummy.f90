@@ -89,16 +89,33 @@
 
 	integer ic,k,ia
 	integer netot,neint
-	   integer min,max
+	integer min,max
 
-      integer, allocatable  :: nc(:)                  !array for check
-      integer, allocatable  :: ne(:)                  !array for check
-      integer, allocatable  :: ni(:)                  !array for check
-
-      return
+        integer, allocatable  :: nc(:)                  !array for check
+        integer, allocatable  :: ne(:)                  !array for check
+        integer, allocatable  :: ni(:)                  !array for check
 
 	end
 
+!*******************************************************************
 
+        subroutine write_partition_to_grd(grdfile,bdebug &
+     &                  ,nparts,npart,epart)
+
+! write grd files
+
+        use basin
+        !use grd
+
+        implicit none
+
+        character*(*) grdfile
+        logical bdebug
+        integer nparts
+        integer npart(nkn)
+        integer epart(nel)
+
+	end
 
 !*******************************************************************
+

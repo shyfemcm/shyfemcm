@@ -1,5 +1,42 @@
 ============================================================
 
+Thu Feb 29 09:32:10 CET 2024
+
+some last bug fixes
+
+ Makefile                                   |  91 +++++++++++++----------------
+ Rules.make                                 |  25 ++++----
+ bin/check/test_compile.sh                  |  47 +++++++++++----
+ bin/subst_make.pl                          |  14 ++++-
+ bin/tabs2space.pl                          |  34 +++++++++++
+ src/external/sparskit/Makefile             |   5 ++
+ src/shyfem/baroclinic.f90                  |  12 ++--
+ src/shyfem/concentration_omp.f90           |  18 +++---
+ src/shyfem/conz_admin.f90                  |   2 +-
+ src/shyfem/subset.f90                      |   6 +-
+ src/shyfem/tidef.f90                       |  14 ++---
+ src/shyfem/tvd_admin.f90                   |   2 +-
+ src/shyfem/waves_admin.f90                 |  16 ++---
+ src/tools/shybas/shybas                    | Bin 1923888 -> 0 bytes
+ src/tools/shyelab/Makefile                 |   5 +-
+ src/tools/shynetcdf/Makefile               |  15 +++--
+ src/tools/{shyelab => shynetcdf}/ts2nc.f90 |   0
+ src/tools/shyparts/shyparts                | Bin 1398816 -> 0 bytes
+ src/utils/shympi/shyparts_dummy.f90        |  29 +++++++--
+ var/rules/Rules.dist                       |  20 ++++---
+ {bin => var/rules}/rules.sh                |   0
+ 21 files changed, 219 insertions(+), 136 deletions(-)
+ new file:
+   bin/tabs2space.pl
+ deleted:
+    src/tools/shybas/shybas
+    src/tools/shyparts/shyparts
+ renamed:
+    src/tools/shyelab/ts2nc.f90 -> src/tools/shynetcdf/ts2nc.f90
+    bin/rules.sh -> var/rules/rules.sh
+
+============================================================
+
 Wed Feb 28 11:56:27 CET 2024
 
 some more new files (bin, lib, docs)
