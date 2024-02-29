@@ -38,6 +38,8 @@ tags
 *.stp
 *.tmp
 *.bak
+*.aux
+*.log
 *.swp
 *__genmod.f90
 
@@ -48,8 +50,6 @@ tags
 a.out
 DIFFS
 errout.dat
-fem3d/main_dummy.f
-femdoc/texput.log
 
 #-----------------------------------------------
 
@@ -102,16 +102,16 @@ src/utils/shympi/MPI_NONE
 
 #-----------------------------------------------
 
-femdoc/P_*.tex
-femdoc/S_*.tex
-femdoc/shyfem.aux
-femdoc/shyfem.bbl
-femdoc/shyfem.blg
-femdoc/shyfem.dvi
-femdoc/shyfem.log
-femdoc/shyfem.pdf
-femdoc/shyfem.ps
-femdoc/shyfem.toc
+docs/P_*.tex
+docs/S_*.tex
+docs/shyfem.aux
+docs/shyfem.bbl
+docs/shyfem.blg
+docs/shyfem.dvi
+docs/shyfem.log
+docs/shyfem.pdf
+docs/shyfem.ps
+docs/shyfem.toc
 
 fem3d/basbathy
 fem3d/basinf

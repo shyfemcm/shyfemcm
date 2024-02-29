@@ -1,5 +1,22 @@
 ============================================================
 
+Thu Feb 29 16:45:15 CET 2024
+
+documentation etc..
+
+ .gitignore                                         |  24 ++++++++---------
+ Makefile                                           |   6 ++---
+ bin/git/git_info/git_info_version.txt              |   2 +-
+ docs/femdoc.sh                                     |  30 +++++++++++++--------
+ docs/final/shyfem.pdf                              | Bin 333920 -> 334914 bytes
+ .../fem3d => contrib/ecological/bio3d}/bio3d.f90   |   0
+ src/utils/shyutil/version.f90                      |   9 ++++---
+ 7 files changed, 40 insertions(+), 31 deletions(-)
+ renamed:
+    src/obsolete/fem3d/bio3d.f90 -> src/contrib/ecological/bio3d/bio3d.f90
+
+============================================================
+
 Thu Feb 29 14:20:43 CET 2024
 
 make depend implemented, other fixes

@@ -148,7 +148,7 @@ nograph: checkv directories links test_executable
 
 docs: doc
 doc:
-	@cd femdoc; make doc
+	@cd docs; make doc
 
 dirs:
 	@echo "listing subdirectories (first level)"
@@ -439,7 +439,7 @@ rules_intel:
 #------------------------------------------------------------
 
 dist: cleandist
-	mkdir -p arc/rules
+	mkdir -p $(RULES_SAVE_DIR)
 	mv --backup=numbered ./Rules.make $(RULES_SAVE_DIR)/Rules.save
 	cp -f $(RULES_DIST_DIR)/Rules.dist ./Rules.make
 	make doc; make clean
@@ -465,7 +465,7 @@ compat:
 #---------------------------------------------------------------
 
 rules_ggu_save:
-	mkdir -p arc/rules
+	mkdir -p $(RULES_SAVE_DIR)
 	cp -f ./Rules.make $(RULES_SAVE_DIR)/Rules.ggu
 	cp -f $(RULES_DIST_DIR)/Rules.dist ./Rules.make
 

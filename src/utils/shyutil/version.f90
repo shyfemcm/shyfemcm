@@ -385,6 +385,7 @@
 ! 25.09.2023	ggu	version 7.5.84  Pre-community edition
 ! 28.09.2023	ggu	version 8.0.1   First beta community edition
 ! 23.10.2023	ggu	version 8.0.2   Second beta community edition
+! 29.02.2024	ggu	version 8.0.3   Third beta community edition
 !
 !*****************************************************************
 
@@ -394,8 +395,8 @@
 
 ! DOCS	START	P_version
 !
-! \newcommand{\VERSION}{8.0.2}
-! \newcommand{\version}{8\_0\_2}
+! \newcommand{\VERSION}{8.0.3}
+! \newcommand{\version}{8\_0\_3}
 ! \newcommand{\COMMIT}{2024-02-29}
 !
 ! DOCS	END
@@ -404,7 +405,7 @@
 
 	logical, save		:: bshort = .false.
 
-        character*10, parameter :: version = '8.0.2'
+        character*10, parameter :: version = '8.0.3'
         character*10, parameter :: commit  = '2024-02-29'
         character*17, parameter :: text    = 'SHYFEM VERSION = '
 
@@ -413,7 +414,7 @@
 	character*50, parameter :: acronym =                        &
       &	    	'System of HydrodYnamic Finite Element Modules'
 	character*50, parameter :: copyright =                      &
-      &		'Copyright (C) The Shyfem Team 1985-2023'
+      &		'Copyright (C) The Shyfem Team 1985-2024'
 
 !=================================================================
 	end module shyfem_version
