@@ -108,7 +108,7 @@ cleangrd:
 #--------------------------------------------- various
 
 depend:
-	@$(MAKEDEPEND) -moddir=$(MODDIR) *.f *.f90
+	@-$(MAKEDEPEND) -moddir=$(MODDIR) *.f90
 
 list:
 	pwd; ls
@@ -142,4 +142,27 @@ strip:
 #--------------------------------------------- makedepend
 
 # DO NOT DELETE THIS LINE -- make depend depends on it.
+
+../../../lib/mod/mod_adj_grade.mod: mod_adj_grade.o
+../../../lib/mod/mod_adj_static.mod: mod_adj_grade.o
+adj4el.o: ../../../lib/mod/basin.mod \
+		../../../lib/mod/mod_adj_grade.mod 
+adj575.o: ../../../lib/mod/basin.mod \
+		../../../lib/mod/mod_adj_grade.mod 
+adj5el.o: ../../../lib/mod/basin.mod \
+		../../../lib/mod/mod_adj_grade.mod 
+adj7el.o: ../../../lib/mod/basin.mod \
+		../../../lib/mod/mod_adj_grade.mod 
+adjgrd.o: ../../../lib/mod/mod_adj_static.mod
+adjneu.o: ../../../lib/mod/basin.mod \
+		../../../lib/mod/mod_adj_grade.mod \
+		../../../lib/mod/mod_depth.mod 
+adjplo.o: ../../../lib/mod/basin.mod \
+		../../../lib/mod/mod_adj_grade.mod 
+adjvar.o: ../../../lib/mod/basin.mod \
+		../../../lib/mod/mod_adj_grade.mod \
+		../../../lib/mod/mod_adj_static.mod 
+shyadj.o: ../../../lib/mod/basin.mod ../../../lib/mod/clo.mod \
+		../../../lib/mod/mod_adj_grade.mod \
+		../../../lib/mod/mod_depth.mod 
 

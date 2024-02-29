@@ -113,6 +113,8 @@ check_utils:
 list:
 	pwd; ls
 
+depend: nothing
+
 save:   zip
 zip:	cleanall
 	-zip $(DIR) $(SAVEFILES)

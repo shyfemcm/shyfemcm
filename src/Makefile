@@ -9,7 +9,7 @@
 
 FEMDIR = ..
 BINDIR = $(FEMDIR)/bin
-SUBDIRS = external utils shyfem tools
+SUBDIRS = contrib external utils shyfem tools
 
 #------------------------------------------------------------------------
 
@@ -29,6 +29,7 @@ list:
 	pwd; ls
 
 depend: nothing
+	@$(BINDIR)/recursivemake $@ $(SUBDIRS)
 
 clean: nothing
 	@$(BINDIR)/recursivemake $@ $(SUBDIRS)

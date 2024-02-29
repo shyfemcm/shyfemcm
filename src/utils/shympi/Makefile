@@ -13,6 +13,7 @@ DIR	= shympi
 
 #--------------------------------------------- just for default
 FEMDIR = ../../..
+FEMBIN = $(FEMDIR)/bin
 F77    = g77
 FFLAGS =  -O -Wall -g
 LINKER = $(F77)
@@ -59,6 +60,8 @@ OBJ  = \
 ALL = $(MOD) $(OBJ) $(METIS_OBJ)
 
 SPECIAL =       Makefile
+
+MAKEDEPEND = $(FEMBIN)/mkdp.pl
 
 #--------------------------------------------- EXES
 
@@ -135,6 +138,9 @@ cleanlib:
 
 #--------------------------------------------- various
 
+depend:
+	@-$(MAKEDEPEND) -moddir=$(MODDIR) *.f90
+
 check:
 	#~/shyfem/fem3d/bin/compile.sh -single *.f90
 	~/shyfem/fem3d/bin/usemod.pl *.f90
@@ -168,4 +174,35 @@ zip:	cleanall
 #--------------------------------------------- makedepend
 
 # DO NOT DELETE THIS LINE -- make depend depends on it.
+
+../../../lib/mod/mod_save_index.mod: shyparts_basutil.o
+../../../lib/mod/shympi_aux.mod: mpi_node_internal.o
+../../../lib/mod/shympi_debug.mod: mpi_debug.o
+../../../lib/mod/shympi_time.mod: mpi_time.o
+mpi_basin.o: ../../../lib/mod/basin.mod \
+		../../../lib/mod/shympi.mod 
+mpi_custom.o: ../../../lib/mod/basin.mod \
+		../../../lib/mod/shympi.mod 
+mpi_debug.o: ../../../lib/mod/shympi.mod
+mpi_dummy.o: ../../../lib/mod/basin.mod \
+		../../../lib/mod/levels.mod 
+mpi_general.o: ../../../lib/mod/basin.mod \
+		../../../lib/mod/shympi.mod 
+mpi_ghost.o: ../../../lib/mod/basin.mod \
+		../../../lib/mod/shympi.mod 
+mpi_node.o: ../../../lib/mod/basin.mod ../../../lib/mod/levels.mod
+mpi_node_internal.o: ../../../lib/mod/shympi.mod
+shyparts_basutil.o: ../../../lib/mod/basin.mod \
+		../../../lib/mod/grd.mod \
+		../../../lib/mod/mod_depth.mod \
+		../../../lib/mod/mod_geom.mod \
+		../../../lib/mod/shympi.mod 
+shyparts_custom.o: ../../../lib/mod/basin.mod \
+		../../../lib/mod/mod_color.mod \
+		../../../lib/mod/mod_flood.mod 
+shyparts_dummy.o: ../../../lib/mod/basin.mod
+shyparts_metis.o: ../../../lib/mod/basin.mod \
+		../../../lib/mod/mod_geom.mod 
+shyparts_util.o: ../../../lib/mod/basin.mod \
+		../../../lib/mod/grd.mod 
 

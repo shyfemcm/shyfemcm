@@ -246,6 +246,7 @@ cleanall: clean
 ../../lib/mod/mod_sediment.mod: sedim_admin.o
 ../../lib/mod/mod_sediment_para.mod: sedim_admin.o
 ../../lib/mod/mod_sedtrans05.mod: sedim_util.o
+../../lib/mod/mod_shyfem.mod: shyfem.o
 ../../lib/mod/mod_sinking.mod: sinking.o
 ../../lib/mod/mod_subset.mod: subset.o
 ../../lib/mod/mod_system.mod: system_matrix.o
@@ -441,6 +442,7 @@ discharge_flux.o: ../../lib/mod/basin.mod ../../lib/mod/evgeom.mod \
 		../../lib/mod/levels.mod \
 		../../lib/mod/mod_bound_dynamic.mod \
 		../../lib/mod/mod_bound_geom.mod \
+		../../lib/mod/mod_debug.mod \
 		../../lib/mod/mod_geom.mod \
 		../../lib/mod/mod_geom_dynamic.mod \
 		../../lib/mod/mod_hydro.mod \

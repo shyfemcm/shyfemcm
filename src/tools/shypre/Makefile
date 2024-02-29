@@ -48,9 +48,9 @@ LIBF = $(LIBFUM) $(LIBFMP) $(LIBFSU) $(LIBFUT)
 
 EXES = shypre
 
-#----------------------------------------------------------------------------
-
 OBJ := rosen.o cuthill_mckee.o
+
+MAKEDEPEND = $(FEMBIN)/mkdp.pl
 
 #----------------------------------------------------------------------------
 
@@ -82,6 +82,11 @@ cleanall: clean
 
 #----------------------------------------------------------------------------
 
+depend:
+	@-$(MAKEDEPEND) -moddir=$(MODDIR) *.f90
+
+#----------------------------------------------------------------------------
+
 %.o:%.f
 	${F77} $(FFLAGS) $(INCLUDE) -c $< -o $@
 
@@ -92,4 +97,12 @@ cleanall: clean
 	${CC} $(CFLAGS) $(INCLUDE) -c $< -o $@
 
 #----------------------------------------------------------------------------
+
+# DO NOT DELETE THIS LINE -- make depend depends on it.
+
+../../../lib/mod/mod_shypre.mod: shypre.o
+shypre.o: ../../../lib/mod/basin.mod ../../../lib/mod/clo.mod \
+		../../../lib/mod/evgeom.mod \
+		../../../lib/mod/grd.mod \
+		../../../lib/mod/mod_sort.mod 
 

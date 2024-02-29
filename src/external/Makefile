@@ -30,6 +30,7 @@ list:
 	pwd; ls
 
 depend: nothing
+	@$(BINDIR)/recursivemake $@ $(SUBDIRS)
 
 clean: nothing
 	@$(BINDIR)/recursivemake $@ $(SUBDIRS)

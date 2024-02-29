@@ -64,6 +64,8 @@ LIBF = $(LIBFNC) $(LIBFUM) $(LIBFMP) $(LIBFSU) $(LIBFUT)
 EXES = shyplot
 EXELINKS =      $(FEMBIN) $(EXES)
 
+MAKEDEPEND = $(FEMBIN)/mkdp.pl
+
 #----------------------------------------------------------------------------
 
 LFLAGS:= $(LIB_NETCDF) $(LIB_MPI)
@@ -137,6 +139,11 @@ cleanall: clean
 
 #----------------------------------------------------------------------------
 
+depend:
+	@$(MAKEDEPEND) -moddir=$(MODDIR) *.f90
+
+#----------------------------------------------------------------------------
+
 %.o:%.f
 	${F77} $(FFLAGS) $(INCLUDE) -c $< -o $@
 
@@ -147,4 +154,87 @@ cleanall: clean
 	${CC} $(CFLAGS) $(INCLUDE) -c $< -o $@
 
 #----------------------------------------------------------------------------
+
+# DO NOT DELETE THIS LINE -- make depend depends on it.
+
+../../../lib/mod/color.mod: col.o
+../../../lib/mod/legend.mod: supano.o
+../../../lib/mod/mod_bash.mod: supbas.o
+../../../lib/mod/mod_hydro_plot.mod: mod_hydro_plot.o
+../../../lib/mod/mod_plot.mod: supint.o
+../../../lib/mod/plot_fonts.mod: supcust.o
+../../../lib/mod/plotutil.mod: plotutil.o
+../../../lib/mod/supout.mod: supout.o
+../../../lib/mod/timlim.mod: suptim.o
+color_table.o: ../../../lib/mod/color.mod \
+		../../../lib/mod/para.mod 
+def_para_post.o: ../../../lib/mod/para.mod
+line_nodes.o: ../../../lib/mod/basin.mod \
+		../../../lib/mod/mod_geom.mod 
+plotutil.o: ../../../lib/mod/basin.mod ../../../lib/mod/clo.mod \
+		../../../lib/mod/nls.mod \
+		../../../lib/mod/shyfile.mod 
+shyplot.o: ../../../lib/mod/basin.mod ../../../lib/mod/clo.mod \
+		../../../lib/mod/elabtime.mod \
+		../../../lib/mod/evgeom.mod \
+		../../../lib/mod/levels.mod \
+		../../../lib/mod/mod_depth.mod \
+		../../../lib/mod/mod_geom.mod \
+		../../../lib/mod/mod_hydro.mod \
+		../../../lib/mod/mod_hydro_plot.mod \
+		../../../lib/mod/mod_hydro_print.mod \
+		../../../lib/mod/mod_hydro_vel.mod \
+		../../../lib/mod/plotutil.mod \
+		../../../lib/mod/shyfile.mod \
+		../../../lib/mod/shympi.mod \
+		../../../lib/mod/shyutil.mod 
+subnsa.o: ../../../lib/mod/simul.mod
+supano.o: ../../../lib/mod/basin.mod ../../../lib/mod/color.mod \
+		../../../lib/mod/mod_bash.mod \
+		../../../lib/mod/plot_fonts.mod \
+		../../../lib/mod/simul.mod 
+supbas.o: ../../../lib/mod/basin.mod ../../../lib/mod/mod_geom.mod \
+		../../../lib/mod/mod_hydro_plot.mod \
+		../../../lib/mod/plot_fonts.mod \
+		../../../lib/mod/supout.mod 
+supdep.o: ../../../lib/mod/basin.mod ../../../lib/mod/evgeom.mod \
+		../../../lib/mod/levels.mod \
+		../../../lib/mod/mod_depth.mod \
+		../../../lib/mod/mod_hydro.mod \
+		../../../lib/mod/mod_hydro_plot.mod 
+supint.o: ../../../lib/mod/levels.mod ../../../lib/mod/para.mod
+supiso.o: ../../../lib/mod/basin.mod ../../../lib/mod/color.mod \
+		../../../lib/mod/mod_hydro_plot.mod 
+suplag.o: ../../../lib/mod/basin.mod ../../../lib/mod/color.mod \
+		../../../lib/mod/mod_hydro_plot.mod \
+		../../../lib/mod/plotutil.mod 
+suplin.o: ../../../lib/mod/basin.mod ../../../lib/mod/color.mod \
+		../../../lib/mod/levels.mod \
+		../../../lib/mod/mod_hydro_print.mod 
+suplin1.o: ../../../lib/mod/basin.mod ../../../lib/mod/evgeom.mod \
+		../../../lib/mod/levels.mod \
+		../../../lib/mod/mod_hydro.mod \
+		../../../lib/mod/mod_hydro_plot.mod \
+		../../../lib/mod/mod_hydro_print.mod \
+		../../../lib/mod/mod_hydro_vel.mod 
+supout.o: ../../../lib/mod/basin.mod ../../../lib/mod/levels.mod \
+		../../../lib/mod/mod_depth.mod \
+		../../../lib/mod/mod_hydro.mod \
+		../../../lib/mod/mod_hydro_plot.mod \
+		../../../lib/mod/mod_hydro_print.mod \
+		../../../lib/mod/mod_hydro_vel.mod \
+		../../../lib/mod/simul.mod 
+supsim.o: ../../../lib/mod/basin.mod ../../../lib/mod/levels.mod \
+		../../../lib/mod/mod_color.mod \
+		../../../lib/mod/mod_depth.mod \
+		../../../lib/mod/mod_geom.mod \
+		../../../lib/mod/mod_hydro.mod \
+		../../../lib/mod/mod_hydro_plot.mod \
+		../../../lib/mod/mod_hydro_vel.mod \
+		../../../lib/mod/plotutil.mod 
+supver.o: ../../../lib/mod/basin.mod ../../../lib/mod/evgeom.mod \
+		../../../lib/mod/levels.mod \
+		../../../lib/mod/mod_hydro.mod \
+		../../../lib/mod/mod_hydro_plot.mod \
+		../../../lib/mod/mod_hydro_vel.mod 
 

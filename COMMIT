@@ -1,5 +1,35 @@
 ============================================================
 
+Thu Feb 29 14:20:43 CET 2024
+
+make depend implemented, other fixes
+
+ Makefile                                        |   2 +-
+ bin/check/check_var.sh                          |  11 ++-
+ src/Makefile                                    |   3 +-
+ src/external/Makefile                           |   1 +
+ src/external/sparskit/Makefile                  |   2 +
+ src/shyfem/Makefile                             |   2 +
+ src/tools/Makefile                              |   1 +
+ src/tools/shyadj/Makefile                       |  25 +++++-
+ src/tools/shybas/Makefile                       |  15 ++++
+ src/tools/shyelab/Makefile                      | 105 ++++++++++++++++++++++++
+ src/tools/shynetcdf/Makefile                    |  69 ++++++++++++++--
+ src/tools/shyparts/Makefile                     |   9 +-
+ src/tools/shyparts/{shyparts.f => shyparts.f90} |   4 +-
+ src/tools/shyplot/Makefile                      |  90 ++++++++++++++++++++
+ src/tools/shypre/Makefile                       |  17 +++-
+ src/utils/Makefile                              |   1 +
+ src/utils/generic/Makefile                      |  29 +++++++
+ src/utils/shympi/Makefile                       |  37 +++++++++
+ src/utils/shyutil/Makefile                      |  43 ++++++++++
+ src/utils/shyutilmpi/Makefile                   |  37 +++++++++
+ 20 files changed, 485 insertions(+), 18 deletions(-)
+ renamed:
+    src/tools/shyparts/shyparts.f -> src/tools/shyparts/shyparts.f90
+
+============================================================
+
 Thu Feb 29 09:32:10 CET 2024
 
 some last bug fixes

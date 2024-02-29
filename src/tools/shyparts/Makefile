@@ -114,7 +114,7 @@ cleangrd:
 #--------------------------------------------- various
 
 depend:
-	@$(MAKEDEPEND) -moddir=$(MODDIR) *.f *.f90
+	@$(MAKEDEPEND) -moddir=$(MODDIR) *.f90
 
 list:
 	pwd; ls
@@ -148,4 +148,11 @@ strip:
 #--------------------------------------------- makedepend
 
 # DO NOT DELETE THIS LINE -- make depend depends on it.
+
+../../../lib/mod/mod_shyparts.mod: shyparts.o
+shyparts.o: ../../../lib/mod/basin.mod ../../../lib/mod/clo.mod \
+		../../../lib/mod/evgeom.mod \
+		../../../lib/mod/grd.mod \
+		../../../lib/mod/mod_geom.mod \
+		../../../lib/mod/shympi.mod 
 

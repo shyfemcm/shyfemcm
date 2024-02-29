@@ -50,6 +50,8 @@ LIBF = $(LIBFUM) $(LIBFMP) $(LIBFSU) $(LIBFUT)
 EXES = shybas
 EXELINKS =      $(FEMBIN) $(EXES)
 
+MAKEDEPEND = $(FEMBIN)/mkdp.pl
+
 #----------------------------------------------------------------------------
 
 OBJ := \
@@ -94,6 +96,11 @@ cleanall: clean
 
 #----------------------------------------------------------------------------
 
+depend:
+	@-$(MAKEDEPEND) -moddir=$(MODDIR) *.f90
+
+#----------------------------------------------------------------------------
+
 %.o:%.f
 	${F77} $(FFLAGS) $(INCLUDE) -c $< -o $@
 
@@ -104,4 +111,12 @@ cleanall: clean
 	${CC} $(CFLAGS) $(INCLUDE) -c $< -o $@
 
 #----------------------------------------------------------------------------
+
+# DO NOT DELETE THIS LINE -- make depend depends on it.
+
+../../../lib/mod/basutil.mod: basutil.o
+basutil.o: ../../../lib/mod/basin.mod ../../../lib/mod/clo.mod \
+		../../../lib/mod/mod_depth.mod 
+msh.o: ../../../lib/mod/grd.mod \
+		../../../lib/mod/mod_geom_dynamic.mod 
 

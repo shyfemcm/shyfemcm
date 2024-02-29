@@ -23,6 +23,8 @@ include $(FEMDIR)/Rules.make
 #--------------------------------------------- libraries
 
 LIBNAME = $(DIR)
+FEMBIN  = $(FEMDIR)/bin
+BINDIR  = $(FEMDIR)/bin
 LIBDIR  = $(FEMDIR)/lib
 INCDIR = $(FEMDIR)/include
 INCLUDE = -I$(INCDIR)
@@ -75,6 +77,8 @@ OBSOLETE = \
 ALL = $(MOD) $(OBJ)
 
 SPECIAL =       Makefile
+
+MAKEDEPEND = $(FEMBIN)/mkdp.pl
 
 #--------------------------------------------- EXES
 
@@ -132,6 +136,9 @@ cleanlib:
 
 #--------------------------------------------- various
 
+depend:
+	@-$(MAKEDEPEND) -moddir=$(MODDIR) *.f90 
+
 check:
 	~/shyfem/fem3d/bin/compile.sh -single *.f90
 	~/shyfem/fem3d/bin/compile.sh *.f90
@@ -169,4 +176,26 @@ zip:	cleanall
 #--------------------------------------------- makedepend
 
 # DO NOT DELETE THIS LINE -- make depend depends on it.
+
+../../../lib/mod/clo.mod: clo.o
+../../../lib/mod/custom_dates.mod: dates.o
+../../../lib/mod/dts.mod: dts.o
+../../../lib/mod/fem_file.mod: femfile.o
+../../../lib/mod/femtime.mod: time_util.o
+../../../lib/mod/grd.mod: grd.o
+../../../lib/mod/iso8601.mod: iso8601.o
+../../../lib/mod/mod_color.mod: color.o
+../../../lib/mod/mod_connect.mod: connections.o
+../../../lib/mod/mod_debug.mod: chk_NaN.o
+../../../lib/mod/mod_random.mod: random.o
+../../../lib/mod/mod_sort.mod: subsort.o
+../../../lib/mod/nls.mod: nls.o
+../../../lib/mod/para.mod: para.o
+../../../lib/mod/projection.mod: projection.o
+../../../lib/mod/scan_string.mod: convert.o
+../../../lib/mod/shyelab_unit.mod: unitutils.o
+dates.o: ../../../lib/mod/iso8601.mod
+nls.o: ../../../lib/mod/para.mod
+time_util.o: ../../../lib/mod/iso8601.mod
+tsfile.o: ../../../lib/mod/iso8601.mod
 

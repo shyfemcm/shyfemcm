@@ -162,7 +162,7 @@ list:
 	@$(FEMBIN)/recursivemake $@ $(FEMDIRS)
 
 depend:
-	@$(FEMBIN)/recursivemake $@ $(FEMDIRS)
+	cd src; make depend
 
 directories:
 	@-mkdir -p tmp arc
