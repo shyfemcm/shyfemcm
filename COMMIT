@@ -1,5 +1,122 @@
 ============================================================
 
+Sun Mar  3 18:12:22 CET 2024
+
+fem3d/bin routines to bin/fem3d
+
+ {src/obsolete/fem3d/bin => bin/fem3d}/README            | 0
+ {src/obsolete/fem3d/bin => bin/fem3d}/check_h.sh        | 0
+ {src/obsolete/fem3d/bin => bin/fem3d}/check_header.pl   | 0
+ {src/obsolete/fem3d/bin => bin/fem3d}/check_include.pl  | 0
+ {src/obsolete/fem3d/bin => bin/fem3d}/check_revlog.pl   | 0
+ {src/obsolete/fem3d/bin => bin/fem3d}/check_revlog.sh   | 0
+ {src/obsolete/fem3d/bin => bin/fem3d}/check_utils.sh    | 0
+ {src/obsolete/fem3d/bin => bin/fem3d}/check_various.sh  | 0
+ {src/obsolete/fem3d/bin => bin/fem3d}/clean.pl          | 0
+ {src/obsolete/fem3d/bin => bin/fem3d}/commonproc.pl     | 0
+ {src/obsolete/fem3d/bin => bin/fem3d}/compile.sh        | 0
+ {src/obsolete/fem3d/bin => bin/fem3d}/compile_all.sh    | 0
+ {src/obsolete/fem3d/bin => bin/fem3d}/compile_stats.sh  | 0
+ {src/obsolete/fem3d/bin => bin/fem3d}/compile_test.sh   | 0
+ {src/obsolete/fem3d/bin => bin/fem3d}/depend.sh         | 0
+ {src/obsolete/fem3d/bin => bin/fem3d}/depend_compile.sh | 0
+ {src/obsolete/fem3d/bin => bin/fem3d}/dependency.pl     | 0
+ {src/obsolete/fem3d/bin => bin/fem3d}/dependency.sh     | 0
+ {src/obsolete/fem3d/bin => bin/fem3d}/diff.sh           | 0
+ {src/obsolete/fem3d/bin => bin/fem3d}/elab_freq.pl      | 0
+ {src/obsolete/fem3d/bin => bin/fem3d}/elab_freq1.pl     | 0
+ {src/obsolete/fem3d/bin => bin/fem3d}/ext.sh            | 0
+ {src/obsolete/fem3d/bin => bin/fem3d}/f2f90.pl          | 0
+ {src/obsolete/fem3d/bin => bin/fem3d}/f902f.pl          | 0
+ {src/obsolete/fem3d/bin => bin/fem3d}/fct.pl            | 0
+ {src/obsolete/fem3d/bin => bin/fem3d}/fhead.pl          | 0
+ {src/obsolete/fem3d/bin => bin/fem3d}/find_pardlib.sh   | 0
+ {src/obsolete/fem3d/bin => bin/fem3d}/fortinf.pl        | 0
+ {src/obsolete/fem3d/bin => bin/fem3d}/fortran.pm        | 0
+ {src/obsolete/fem3d/bin => bin/fem3d}/getlog.sh         | 0
+ {src/obsolete/fem3d/bin => bin/fem3d}/handle_common.sh  | 0
+ {src/obsolete/fem3d/bin => bin/fem3d}/ht_struct.sh      | 0
+ {src/obsolete/fem3d/bin => bin/fem3d}/i2m.pl            | 0
+ {src/obsolete/fem3d/bin => bin/fem3d}/i2m.sh            | 0
+ {src/obsolete/fem3d/bin => bin/fem3d}/include.pl        | 0
+ {src/obsolete/fem3d/bin => bin/fem3d}/incstats.pl       | 0
+ {src/obsolete/fem3d/bin => bin/fem3d}/incstats.sh       | 0
+ {src/obsolete/fem3d/bin => bin/fem3d}/mkexport.sh       | 0
+ {src/obsolete/fem3d/bin => bin/fem3d}/mklahey.sh        | 0
+ {src/obsolete/fem3d/bin => bin/fem3d}/mklmake.pl        | 0
+ {src/obsolete/fem3d/bin => bin/fem3d}/nemunas-git.sh    | 0
+ {src/obsolete/fem3d/bin => bin/fem3d}/nemunas_adjust.pl | 0
+ {src/obsolete/fem3d/bin => bin/fem3d}/nemunas_adjust.sh | 0
+ {src/obsolete/fem3d/bin => bin/fem3d}/newstruct.pl      | 0
+ {src/obsolete/fem3d/bin => bin/fem3d}/newsubst.pl       | 0
+ {src/obsolete/fem3d/bin => bin/fem3d}/rcsauto.sh        | 0
+ {src/obsolete/fem3d/bin => bin/fem3d}/search.pl         | 0
+ {src/obsolete/fem3d/bin => bin/fem3d}/show_routines.pl  | 0
+ {src/obsolete/fem3d/bin => bin/fem3d}/struct.pl         | 0
+ {src/obsolete/fem3d/bin => bin/fem3d}/struct_wasp.pl    | 0
+ {src/obsolete/fem3d/bin => bin/fem3d}/uncomment.pl      | 0
+ {src/obsolete/fem3d/bin => bin/fem3d}/unix2other.pl     | 0
+ {src/obsolete/fem3d/bin => bin/fem3d}/usemod.pl         | 0
+ {src/obsolete/fem3d/bin => bin/fem3d}/warning.sh        | 0
+ 54 files changed, 0 insertions(+), 0 deletions(-)
+ renamed:
+    src/obsolete/fem3d/bin/README -> bin/fem3d/README
+    src/obsolete/fem3d/bin/check_h.sh -> bin/fem3d/check_h.sh
+    src/obsolete/fem3d/bin/check_header.pl -> bin/fem3d/check_header.pl
+    src/obsolete/fem3d/bin/check_include.pl -> bin/fem3d/check_include.pl
+    src/obsolete/fem3d/bin/check_revlog.pl -> bin/fem3d/check_revlog.pl
+    src/obsolete/fem3d/bin/check_revlog.sh -> bin/fem3d/check_revlog.sh
+    src/obsolete/fem3d/bin/check_utils.sh -> bin/fem3d/check_utils.sh
+    src/obsolete/fem3d/bin/check_various.sh -> bin/fem3d/check_various.sh
+    src/obsolete/fem3d/bin/clean.pl -> bin/fem3d/clean.pl
+    src/obsolete/fem3d/bin/commonproc.pl -> bin/fem3d/commonproc.pl
+    src/obsolete/fem3d/bin/compile.sh -> bin/fem3d/compile.sh
+    src/obsolete/fem3d/bin/compile_all.sh -> bin/fem3d/compile_all.sh
+    src/obsolete/fem3d/bin/compile_stats.sh -> bin/fem3d/compile_stats.sh
+    src/obsolete/fem3d/bin/compile_test.sh -> bin/fem3d/compile_test.sh
+    src/obsolete/fem3d/bin/depend.sh -> bin/fem3d/depend.sh
+    src/obsolete/fem3d/bin/depend_compile.sh -> bin/fem3d/depend_compile.sh
+    src/obsolete/fem3d/bin/dependency.pl -> bin/fem3d/dependency.pl
+    src/obsolete/fem3d/bin/dependency.sh -> bin/fem3d/dependency.sh
+    src/obsolete/fem3d/bin/diff.sh -> bin/fem3d/diff.sh
+    src/obsolete/fem3d/bin/elab_freq.pl -> bin/fem3d/elab_freq.pl
+    src/obsolete/fem3d/bin/elab_freq1.pl -> bin/fem3d/elab_freq1.pl
+    src/obsolete/fem3d/bin/ext.sh -> bin/fem3d/ext.sh
+    src/obsolete/fem3d/bin/f2f90.pl -> bin/fem3d/f2f90.pl
+    src/obsolete/fem3d/bin/f902f.pl -> bin/fem3d/f902f.pl
+    src/obsolete/fem3d/bin/fct.pl -> bin/fem3d/fct.pl
+    src/obsolete/fem3d/bin/fhead.pl -> bin/fem3d/fhead.pl
+    src/obsolete/fem3d/bin/find_pardlib.sh -> bin/fem3d/find_pardlib.sh
+    src/obsolete/fem3d/bin/fortinf.pl -> bin/fem3d/fortinf.pl
+    src/obsolete/fem3d/bin/fortran.pm -> bin/fem3d/fortran.pm
+    src/obsolete/fem3d/bin/getlog.sh -> bin/fem3d/getlog.sh
+    src/obsolete/fem3d/bin/handle_common.sh -> bin/fem3d/handle_common.sh
+    src/obsolete/fem3d/bin/ht_struct.sh -> bin/fem3d/ht_struct.sh
+    src/obsolete/fem3d/bin/i2m.pl -> bin/fem3d/i2m.pl
+    src/obsolete/fem3d/bin/i2m.sh -> bin/fem3d/i2m.sh
+    src/obsolete/fem3d/bin/include.pl -> bin/fem3d/include.pl
+    src/obsolete/fem3d/bin/incstats.pl -> bin/fem3d/incstats.pl
+    src/obsolete/fem3d/bin/incstats.sh -> bin/fem3d/incstats.sh
+    src/obsolete/fem3d/bin/mkexport.sh -> bin/fem3d/mkexport.sh
+    src/obsolete/fem3d/bin/mklahey.sh -> bin/fem3d/mklahey.sh
+    src/obsolete/fem3d/bin/mklmake.pl -> bin/fem3d/mklmake.pl
+    src/obsolete/fem3d/bin/nemunas-git.sh -> bin/fem3d/nemunas-git.sh
+    src/obsolete/fem3d/bin/nemunas_adjust.pl -> bin/fem3d/nemunas_adjust.pl
+    src/obsolete/fem3d/bin/nemunas_adjust.sh -> bin/fem3d/nemunas_adjust.sh
+    src/obsolete/fem3d/bin/newstruct.pl -> bin/fem3d/newstruct.pl
+    src/obsolete/fem3d/bin/newsubst.pl -> bin/fem3d/newsubst.pl
+    src/obsolete/fem3d/bin/rcsauto.sh -> bin/fem3d/rcsauto.sh
+    src/obsolete/fem3d/bin/search.pl -> bin/fem3d/search.pl
+    src/obsolete/fem3d/bin/show_routines.pl -> bin/fem3d/show_routines.pl
+    src/obsolete/fem3d/bin/struct.pl -> bin/fem3d/struct.pl
+    src/obsolete/fem3d/bin/struct_wasp.pl -> bin/fem3d/struct_wasp.pl
+    src/obsolete/fem3d/bin/uncomment.pl -> bin/fem3d/uncomment.pl
+    src/obsolete/fem3d/bin/unix2other.pl -> bin/fem3d/unix2other.pl
+    src/obsolete/fem3d/bin/usemod.pl -> bin/fem3d/usemod.pl
+    src/obsolete/fem3d/bin/warning.sh -> bin/fem3d/warning.sh
+
+============================================================
+
 Thu Feb 29 16:46:19 CET 2024
 
 New version 8_0_3
