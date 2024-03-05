@@ -9,6 +9,13 @@
 #------------------------------------------------------------------------
 #
 # writes extra comments into ps/eps files
+#
+#--------------------------------------------------------------
+
+script=$(realpath $0)
+FEMBIN=$(dirname $script)
+
+gpswrite=$FEMBIN/gpswrite.pl
 
 #--------------------------------------------------------------
 
@@ -41,7 +48,7 @@ for file
 do
   [ -f $file ] || NoFile $file
   echo $file
-  gpswrite.pl "$string AW" $file > tmp.tmp
+  $gpswrite "$string AW" $file > tmp.tmp
   mv $file $file.bak
   mv tmp.tmp $file
 done

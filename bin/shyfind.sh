@@ -31,6 +31,7 @@ FullUsage()
   echo "  -file            look for pattern in file names"
   echo "  -pattern         look for pattern in files"
   echo "  -obsolete        look also in obsolete dirs"
+  echo "  -full            show full path with file name"
   echo "  -dirs            show directories where to look"
   echo ""
 }
@@ -55,8 +56,12 @@ Do_File()
     cd $dir
     result=$( ls $* 2> /dev/null )
     if [ -n "$result" ]; then
-      echo "---- $dir ----" >&2
-      ls -1 $* 2> /dev/null
+      if [ $full_name = "YES" ]; then
+        ls -1 $PWD/$* 2> /dev/null
+      else
+        echo "---- $dir ----" >&2
+        ls -1 $* 2> /dev/null
+      fi
     fi
     cd $actdir
   done
@@ -71,8 +76,12 @@ Do_Pattern()
     cd $dir
     result=$( grep $* *.f90 *.f 2> /dev/null )
     if [ -n "$result" ]; then
-      echo "---- $dir ----" >&2
-      grep $* *.f90 *.f 2> /dev/null
+      if [ $full_name = "YES" ]; then
+        grep -l $* $PWD/*.f90 $PWD/*.f 2> /dev/null
+      else
+        echo "---- $dir ----" >&2
+        grep $* *.f90 *.f 2> /dev/null
+      fi
     fi
     cd $actdir
   done
@@ -86,6 +95,7 @@ do_dirs=NO
 quiet=NO
 verbose=NO
 show_obsolete="NO"
+full_name="NO"
 
 while [ -n "$1" ]
 do
@@ -95,6 +105,7 @@ do
         -file)          do_file="YES";;
         -pattern)       do_pattern="YES";;
         -obsolete)      show_obsolete="YES";;
+        -full)          full_name="YES";;
         -dirs)          do_dirs="YES";;
         -h|-help)       FullUsage; exit 0;;
         -*)             echo "No such option: $1"; exit 1;;

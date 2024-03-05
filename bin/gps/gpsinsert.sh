@@ -9,6 +9,13 @@
 #------------------------------------------------------------------------
 #
 # inserts eps file into other ps/eps files
+#
+#--------------------------------------------------------------
+
+script=$(realpath $0)
+FEMBIN=$(dirname $script)
+
+gpsinsert=$FEMBIN/gpsinsert.pl
 
 #--------------------------------------------------------------
 
@@ -91,7 +98,7 @@ for file
 do
   [ -f $file ] || NoFile $file
   echo $file
-  gpsinsert.pl $options "$where" $epsfile $file > tmp.tmp
+  $gpsinsert $options "$where" $epsfile $file > tmp.tmp
   [ -z "$prefix" ] && mv $file $file.bak
   mv tmp.tmp $prefix$file
 done

@@ -9,7 +9,7 @@
 
 # makefile for fem/bin
 
-DIR = fembin
+DIR = bin
 
 DEFDIR  = $(HOME)
 FEMDIR  = ..

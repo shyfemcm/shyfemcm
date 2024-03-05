@@ -12,8 +12,9 @@
 #
 #########################################################
 
-version=2.01
+version=2.02
 
+# 2.02	03.03.2024	use absolute paths in calling other scripts
 # 2.01	27.01.2024	new option -solid
 # 2.00	09.09.2023	can accept 24 hours date (GetSecs)
 # 1.99	29.11.2022	use -u if given for 2 data column
@@ -53,10 +54,8 @@ version=2.01
 
 ######################################################### defaults
 
-FEMDIR=${SHYFEMDIR:=$HOME/shyfem}
-FEMDIR=$HOME/shyfem
-
-fembin=$FEMDIR/fembin
+script=$(realpath $0)
+FEMBIN=$(dirname $script)
 
 gpversion=$( gnuplot --version | sed -e 's/ *patchlevel.*//' \
 			| sed -e 's/gnuplot *//' )
@@ -93,18 +92,20 @@ outfile=""
 ghost='gv'
 
 logo="0"
-logo_file=$fembin/logo/logo.eps			#file to be included as logo
+logo_file=$FEMBIN/logo/logo.eps			#file to be included as logo
 logo_where="0.92 0.92 0 0.99"			#position of included file
 
 ######################################################### programs
 
 gnuplot="/usr/bin/gnuplot"
-psgnu="$fembin/psgnu"
-extractcol="$fembin/extractcol"
-scalecol="$fembin/scalecol"
-range="$fembin/range"
-xrange_pl="$fembin/xrange.pl"
-gpsmerge="$fembin/gpsmerge"
+psgnu="$FEMBIN/psgnu"
+extractcol="$FEMBIN/extractcol"
+scalecol="$FEMBIN/scalecol"
+range="$FEMBIN/range"
+xrange_pl="$FEMBIN/xrange.pl"
+gpsmerge="$FEMBIN/gpsmerge"
+gpsinsert="$FEMBIN/gpsinsert"
+gpgnustyle="$FEMBIN/gpgnustyle.pl"
 
 ######################################################### copyright
 
@@ -607,7 +608,7 @@ AdjustSpecial()
   #for some reason special must always be last option -> color problems
   laststyle=`grep '^LT' out.ps | tail -1`
   echo "adjusting special style: $laststyle"
-  gpgnustyle.pl $1 out.ps > out.tmp
+  $gpgnustyle $1 out.ps > out.tmp
   mv out.tmp out.ps
 }
 
@@ -963,7 +964,7 @@ PlotFiles
 ######################################################### insert logo
 
 if [ $logo -ne 0 ]; then
-  $fembin/gpsinsert -relative "$logo_where" $logo_file out.ps
+  $gpsinsert -relative "$logo_where" $logo_file out.ps
   mv incl_out.ps out.ps
 fi
 

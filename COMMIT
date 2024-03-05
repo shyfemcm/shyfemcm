@@ -1,5 +1,48 @@
 ============================================================
 
+Tue Mar  5 15:58:00 CET 2024
+
+bug fixes, gp and gps routines
+
+ bin/Makefile                   |   2 +-
+ bin/gp                         |  29 +-
+ bin/{ps => gps}/epsextract.pl  |   0
+ bin/gps/gps.sh                 |  35 +-
+ bin/gps/gps2pdf.sh             |   2 +-
+ bin/gps/gpsinsert.sh           |   9 +-
+ bin/gps/gpswrite.sh            |   9 +-
+ bin/{parr => gps/parr.pl}      |   0
+ bin/{ps => gps}/pschange.pl    |   0
+ bin/{ps => gps}/pscolor.pl     |   0
+ bin/{ps => gps}/psgnu.pl       |   0
+ bin/{ps => gps}/pslands.pl     |   0
+ bin/{ps => gps}/psmakebb.sh    |   0
+ bin/{ps => gps}/pspages.pl     |   0
+ bin/{ps => gps}/pspages.sh     |   0
+ bin/{ps => gps}/psportr.pl     |   0
+ bin/{ps => gps}/psresetbb.sh   |   0
+ bin/shyfind.sh                 |  19 +-
+ bin/shypath.sh                 | 105 +++++
+ src/shyfem/initialize.f90      |   7 +-
+ src/tools/shynetcdf/netcdf.f90 | 872 ++++++++++++++++++++++-------------------
+ 21 files changed, 646 insertions(+), 443 deletions(-)
+ new file:
+   bin/shypath.sh
+ renamed:
+    bin/ps/epsextract.pl -> bin/gps/epsextract.pl
+    bin/parr -> bin/gps/parr.pl
+    bin/ps/pschange.pl -> bin/gps/pschange.pl
+    bin/ps/pscolor.pl -> bin/gps/pscolor.pl
+    bin/ps/psgnu.pl -> bin/gps/psgnu.pl
+    bin/ps/pslands.pl -> bin/gps/pslands.pl
+    bin/ps/psmakebb.sh -> bin/gps/psmakebb.sh
+    bin/ps/pspages.pl -> bin/gps/pspages.pl
+    bin/ps/pspages.sh -> bin/gps/pspages.sh
+    bin/ps/psportr.pl -> bin/gps/psportr.pl
+    bin/ps/psresetbb.sh -> bin/gps/psresetbb.sh
+
+============================================================
+
 Sun Mar  3 18:12:22 CET 2024
 
 fem3d/bin routines to bin/fem3d

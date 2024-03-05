@@ -32,6 +32,29 @@ copy4="e-mail: georg@isdgm.ve.cnr.it"
 
 ######################################################### help - usage
 
+script=$(realpath $0)
+FEMBIN=$(dirname $script)
+
+gps2eps=$FEMBIN/gps2eps.pl
+psresetbb=$FEMBIN/psresetbb.sh
+parr=$FEMBIN/parr.pl
+ps2pdf=ps2pdf
+
+#--------------------------------------------------------
+
+CheckExec()
+{
+  for r in $*
+  do
+    if [ ! -x $r ]; then
+      echo "No such executable: $r"
+      exit 1
+    fi
+  done
+}
+
+#--------------------------------------------------------
+
 Copy()
 {
   echo "$copy2"
@@ -229,7 +252,7 @@ ConvertPDF()
 
     [ $quiet = "NO" ] && echo "$source  ->  $target"
 
-    epstopdf $source
+    $ps2pdf $source
   done
 }
 
@@ -280,6 +303,8 @@ done
 
 ######################################################### no file -> write help
 
+CheckExec $gps2eps $psresetbb $parr $ps2pdf
+
 if [ $# -le 0 ]; then
   Usage
   exit 1;
@@ -295,9 +320,9 @@ if [ $split = "YES" -o -n "$pages" ]; then
     filename=`basename $file .ps`
     rm -f $filename.[0-9]*.ps
     if [ $split = "YES" ]; then
-      parr -A $file
+      $parr -A $file
     else
-      parr -A -o $pages $file
+      $parr -A -o $pages $file
     fi
     newfile=`ls -m $filename.[0-9]*.ps`
     [ $quiet = "NO" ] && echo "$file -> $newfile"
@@ -338,8 +363,8 @@ if [ $eps = "YES" ]; then
     [ $quiet = "NO" ] && echo "$psfile  ->  $epsfile"
 
     #ps2eps $psfile -o$epsfile  2> /dev/null
-    gps2eps $psfile > $epsfile
-    psresetbb.sh $epsfile
+    $gps2eps $psfile > $epsfile
+    $psresetbb $epsfile
     auxfiles="$auxfiles $epsfile"
   done
   newfiles=$auxfiles

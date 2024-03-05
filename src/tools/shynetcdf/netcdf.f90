@@ -24,76 +24,77 @@
 !
 !--------------------------------------------------------------------------
 
-!  netcdf utility routines
-! 
-!  revision log :
-! 
-!  05.12.2011	ggu&dbf	written from scratch
-!  26.03.2012	ggu	standardized implicit routines, compiler warnings
-!  20.09.2012	ggu	new routines for regular output
-!  25.10.2012	ggu	changed VERS_6_1_59
-!  21.01.2013	ggu	routines for handling scalar variables
-!  25.01.2013	ggu	new part for nos variable initialization
-!  28.01.2013	dbf	different types of vertical coordinates
-!  03.05.2013	ggu	changed VERS_6_1_63
-!  25.09.2013	ggu	new routines for writing time series
-!  25.10.2013	ggu	changed VERS_6_1_68
-!  19.01.2015	ggu	changed VERS_7_1_3
-!  10.07.2015	ggu	changed VERS_7_1_50
-!  17.07.2015	ggu	changed VERS_7_1_53
-!  17.07.2015	ggu	changed VERS_7_1_80
-!  20.07.2015	ggu	changed VERS_7_1_81
-!  15.04.2016	ggu	changed VERS_7_5_8
-!  31.05.2016	ggu	changed time variable to double precision
-!  07.06.2016	ggu	changed VERS_7_5_12
-!  09.05.2017	ggu	changed VERS_7_5_26
-!  16.05.2017	ggu	changed VERS_7_5_27
-!  13.06.2017	ggu	changed VERS_7_5_29
-!  11.07.2017	ggu	changed VERS_7_5_30
-!  02.09.2017	ggu	changed VERS_7_5_31
-!  17.11.2017	ggu	changed VERS_7_5_37
-!  05.12.2017	ggu	changed VERS_7_5_39
-!  24.01.2018	ggu	changed VERS_7_5_41
-!  22.02.2018	ggu	changed VERS_7_5_42
-!  25.10.2018	ggu	changed VERS_7_5_51
-!  16.02.2019	ggu	changed VERS_7_5_60
-!  13.03.2019	ggu	changed VERS_7_5_61
-!  14.05.2019	ggu	wrong definition of dimensions in nc_write_data_3d_reg
-!  16.05.2019	ggu	new version of nc_rewrite_3d_reg(), new nc_set_quiet()
-!  08.01.2020	ggu	allow for double user data
-!  29.01.2020	ggu	insert extra information for error message
-!  22.04.2021	ggu	accept short data type (NF_SHORT)
-!  20.03.2022	ggu	accept int64 data type for time variable
-!  20.06.2022	ggu	maximum dimensions updated
-!  09.05.2023    lrp     write vertical velocity and density
-! 
-!  notes :
-! 
-!  information on unstructured grids:
-!  https://publicwiki.deltares.nl/display/NETCDF/Unstructured+grids
-! 
-!  for non dimensional vertical coordinates (sigma etc) see:
-!  http://cf-pcmdi.llnl.gov/documents/cf-conventions/1.1/cf-conventions.html
-!  in appendic D.6 - D.9
-! 
-!  information on f77 interface description:
-!  http://www.unidata.ucar.edu/software/netcdf/docs/netcdf-f77/
-! 
-!  CF compliance checker:
-!  http://puma.nerc.ac.uk/cgi-bin/cf-checker.pl
-!  http://titania.badc.rl.ac.uk/cgi-bin/cf-checker.pl
-! 
-!  this file implements CF 1.4 compliance
-! 
-!  still to be implemented:
-! 	sigma/hybrid coordinates
-! 	get file name
-! 
-! ******************************************************************
-! ******************************************************************
-!  module
-! ******************************************************************
-! ******************************************************************
+! netcdf utility routines
+!
+! revision log :
+!
+! 05.12.2011	ggu&dbf	written from scratch
+! 26.03.2012	ggu	standardized implicit routines, compiler warnings
+! 20.09.2012	ggu	new routines for regular output
+! 25.10.2012	ggu	changed VERS_6_1_59
+! 21.01.2013	ggu	routines for handling scalar variables
+! 25.01.2013	ggu	new part for nos variable initialization
+! 28.01.2013	dbf	different types of vertical coordinates
+! 03.05.2013	ggu	changed VERS_6_1_63
+! 25.09.2013	ggu	new routines for writing time series
+! 25.10.2013	ggu	changed VERS_6_1_68
+! 19.01.2015	ggu	changed VERS_7_1_3
+! 10.07.2015	ggu	changed VERS_7_1_50
+! 17.07.2015	ggu	changed VERS_7_1_53
+! 17.07.2015	ggu	changed VERS_7_1_80
+! 20.07.2015	ggu	changed VERS_7_1_81
+! 15.04.2016	ggu	changed VERS_7_5_8
+! 31.05.2016	ggu	changed time variable to double precision
+! 07.06.2016	ggu	changed VERS_7_5_12
+! 09.05.2017	ggu	changed VERS_7_5_26
+! 16.05.2017	ggu	changed VERS_7_5_27
+! 13.06.2017	ggu	changed VERS_7_5_29
+! 11.07.2017	ggu	changed VERS_7_5_30
+! 02.09.2017	ggu	changed VERS_7_5_31
+! 17.11.2017	ggu	changed VERS_7_5_37
+! 05.12.2017	ggu	changed VERS_7_5_39
+! 24.01.2018	ggu	changed VERS_7_5_41
+! 22.02.2018	ggu	changed VERS_7_5_42
+! 25.10.2018	ggu	changed VERS_7_5_51
+! 16.02.2019	ggu	changed VERS_7_5_60
+! 13.03.2019	ggu	changed VERS_7_5_61
+! 14.05.2019	ggu	wrong definition of dimensions in nc_write_data_3d_reg
+! 16.05.2019	ggu	new version of nc_rewrite_3d_reg(), new nc_set_quiet()
+! 08.01.2020	ggu	allow for double user data
+! 29.01.2020	ggu	insert extra information for error message
+! 22.04.2021	ggu	accept short data type (NF_SHORT)
+! 20.03.2022	ggu	accept int64 data type for time variable
+! 20.06.2022	ggu	maximum dimensions updated
+! 09.05.2023    lrp     write vertical velocity and density
+! 02.03.2024    ccf     new entries for sediments
+!
+! notes :
+!
+! information on unstructured grids:
+! https://publicwiki.deltares.nl/display/NETCDF/Unstructured+grids
+!
+! for non dimensional vertical coordinates (sigma etc) see:
+! http://cf-pcmdi.llnl.gov/documents/cf-conventions/1.1/cf-conventions.html
+! in appendic D.6 - D.9
+!
+! information on f77 interface description:
+! http://www.unidata.ucar.edu/software/netcdf/docs/netcdf-f77/
+!
+! CF compliance checker:
+! http://puma.nerc.ac.uk/cgi-bin/cf-checker.pl
+! http://titania.badc.rl.ac.uk/cgi-bin/cf-checker.pl
+!
+! this file implements CF 1.4 compliance
+!
+! still to be implemented:
+!	sigma/hybrid coordinates
+!	get file name
+!
+!******************************************************************
+!******************************************************************
+! module
+!******************************************************************
+!******************************************************************
 
 !==================================================================
 	module netcdf_params
@@ -134,11 +135,11 @@
 	end module netcdf_params
 !==================================================================
 
-! ******************************************************************
-! ******************************************************************
-!  open routines
-! ******************************************************************
-! ******************************************************************
+!******************************************************************
+!******************************************************************
+! open routines
+!******************************************************************
+!******************************************************************
 
 	subroutine nc_init
 
@@ -149,7 +150,7 @@
 
 	end
 
-! ******************************************************************
+!******************************************************************
 
 	subroutine nc_open_reg(ncid,nx,ny,nlv,flag,date0,time0,iztype)
 
@@ -180,26 +181,26 @@
 
 	integer nc_ichanm
 
-! -----------------------------------------
-!  initialize parameters
-! -----------------------------------------
+!-----------------------------------------
+! initialize parameters
+!-----------------------------------------
 
 	file_name = 'netcdf_reg.nc'
 	file_name = 'netcdf.nc'
 	file_name = 'out.nc'
 
-! -----------------------------------------
-!  Create the file.
-! -----------------------------------------
+!-----------------------------------------
+! Create the file.
+!-----------------------------------------
 
 	retval = nf_create(FILE_NAME, nf_clobber, ncid)
 	call nc_handle_err(retval,'open_reg create')
 
-! -----------------------------------------
-!  Define the dimensions. The record dimension is defined to have
-!  unlimited length - it can grow as needed. In this example it is
-!  the time dimension.
-! -----------------------------------------
+!-----------------------------------------
+! Define the dimensions. The record dimension is defined to have
+! unlimited length - it can grow as needed. In this example it is
+! the time dimension.
+!-----------------------------------------
 
 	lmax = max(1,nlv)	!be sure to have at least one layer
 
@@ -215,16 +216,16 @@
 	matrix_dimid(1) = nx_dimid
 	matrix_dimid(2) = ny_dimid
 
-! -----------------------------------------
-!  Define the coordinate variables
-! -----------------------------------------
+!-----------------------------------------
+! Define the coordinate variables
+!-----------------------------------------
 
-! -----------------------------------------
-!  Assign units attributes to coordinate variables.
-! -----------------------------------------
+!-----------------------------------------
+! Assign units attributes to coordinate variables.
+!-----------------------------------------
 
-	retval = nf_def_var(ncid, 'lon', NF_REAL, 1, nx_dimid &
-     &				,lon_varid)
+        retval = nf_def_var(ncid, 'lon', NF_REAL, 1, nx_dimid           &
+     &                          ,lon_varid)
 	call nc_handle_err(retval,'open_reg')
 	varid = lon_varid
 
@@ -240,10 +241,10 @@
 	text = 'X'
 	call nc_define_attr(ncid,what,text,varid)
 
-! ---------------------
+!---------------------
 
-	retval = nf_def_var(ncid, 'lat', NF_REAL, 1, ny_dimid &
-     &				,lat_varid)
+        retval = nf_def_var(ncid, 'lat', NF_REAL, 1, ny_dimid           &
+     &                          ,lat_varid)
 	call nc_handle_err(retval,'open_reg')
 	varid = lat_varid
 
@@ -259,14 +260,14 @@
 	text = 'Y'
 	call nc_define_attr(ncid,what,text,varid)
 
-! ---------------------
-!  for non dimensional vertical coordinates (sigma etc) see:
-!  http://cf-pcmdi.llnl.gov/documents/cf-conventions/1.1/cf-conventions.html
-!  in appendic D.6 - D.9
-! ---------------------
+!---------------------
+! for non dimensional vertical coordinates (sigma etc) see:
+! http://cf-pcmdi.llnl.gov/documents/cf-conventions/1.1/cf-conventions.html
+! in appendic D.6 - D.9
+!---------------------
 
-	retval = nf_def_var(ncid, 'level', NF_REAL, 1, lvl_dimid &
-     &				,lvl_varid)
+        retval = nf_def_var(ncid, 'level', NF_REAL, 1, lvl_dimid        &
+     &                          ,lvl_varid)
 	call nc_handle_err(retval,'open_reg')
 	varid = lvl_varid
 
@@ -291,10 +292,11 @@
 	text = 'down'
 	call nc_define_attr(ncid,what,text,varid)
 
-! ---------------------
+!---------------------
 
-	retval = nf_def_var(ncid, 'total_depth', NF_REAL, 2, matrix_dimid &
-     &				,dep_varid)
+        retval = nf_def_var(ncid, 'total_depth', NF_REAL                &
+     &                          , 2, matrix_dimid                       &
+     &                          ,dep_varid)
 	call nc_handle_err(retval,'open_reg')
 	varid = dep_varid
 
@@ -312,13 +314,13 @@
 
 	call nc_define_range(ncid,-100.0,+10000.0,flag,varid)
 
-! ---------------------
+!---------------------
 
 !	retval = nf_def_var(ncid, 'time', NF_INT, 1, rec_dimid
 !     +				,rec_varid)
 
-	retval = nf_def_var(ncid, 'time', NF_DOUBLE, 1, rec_dimid &
-     &				,rec_varid)
+        retval = nf_def_var(ncid, 'time', NF_DOUBLE, 1, rec_dimid       &
+     &                          ,rec_varid)
 	call nc_handle_err(retval,'open_reg')
 	varid = rec_varid
 
@@ -339,9 +341,9 @@
 	text = 'T'
 	call nc_define_attr(ncid,what,text,varid)
 
-! -----------------------------------------
-!  define dimensions to remember
-! -----------------------------------------
+!-----------------------------------------
+! define dimensions to remember
+!-----------------------------------------
 
 	dimids_2d(1) = nx_dimid
 	dimids_2d(2) = ny_dimid
@@ -357,13 +359,13 @@
 	coord_varid(3) = lvl_varid
 	coord_varid(4) = dep_varid
 
-! -----------------------------------------
-!  end of routine
-! -----------------------------------------
+!-----------------------------------------
+! end of routine
+!-----------------------------------------
 
 	end
 
-! ******************************************************************
+!******************************************************************
 
 	subroutine nc_open_fem(ncid,nkn,nel,nlv,date0,time0,iztype)
 
@@ -394,25 +396,25 @@
 
 	integer nc_ichanm
 
-! -----------------------------------------
-!  initialize parameters
-! -----------------------------------------
+!-----------------------------------------
+! initialize parameters
+!-----------------------------------------
 
 	file_name = 'netcdf.nc'
 	file_name = 'out.nc'
 
-! -----------------------------------------
-!  Create the file.
-! -----------------------------------------
+!-----------------------------------------
+! Create the file.
+!-----------------------------------------
 
 	retval = nf_create(FILE_NAME, nf_clobber, ncid)
 	call nc_handle_err(retval,'open_fem')
 
-! -----------------------------------------
-!  Define the dimensions. The record dimension is defined to have
-!  unlimited length - it can grow as needed. In this example it is
-!  the time dimension.
-! -----------------------------------------
+!-----------------------------------------
+! Define the dimensions. The record dimension is defined to have
+! unlimited length - it can grow as needed. In this example it is
+! the time dimension.
+!-----------------------------------------
 
 	lmax = max(1,nlv)	!be sure to have at least one layer
 
@@ -430,16 +432,16 @@
 	eix_dimid(1) = vertex_dimid
 	eix_dimid(2) = elem_dimid
 
-! -----------------------------------------
-!  Define the coordinate variables
-! -----------------------------------------
+!-----------------------------------------
+! Define the coordinate variables
+!-----------------------------------------
 
-! -----------------------------------------
-!  Assign units attributes to coordinate variables.
-! -----------------------------------------
+!-----------------------------------------
+! Assign units attributes to coordinate variables.
+!-----------------------------------------
 
-	retval = nf_def_var(ncid, 'longitude', NF_REAL, 1, node_dimid &
-     &				,lon_varid)
+        retval = nf_def_var(ncid, 'longitude', NF_REAL, 1, node_dimid   &
+     &                          ,lon_varid)
 	call nc_handle_err(retval,'open_fem')
 	varid = lon_varid
 
@@ -451,10 +453,10 @@
 	text = 'longitude'
 	call nc_define_attr(ncid,what,text,varid)
 
-! ---------------------
+!---------------------
 
-	retval = nf_def_var(ncid, 'latitude', NF_REAL, 1, node_dimid &
-     &				,lat_varid)
+        retval = nf_def_var(ncid, 'latitude', NF_REAL, 1, node_dimid    &
+     &                          ,lat_varid)
 	call nc_handle_err(retval,'open_fem')
 	varid = lat_varid
 
@@ -466,14 +468,14 @@
 	text = 'latitude'
 	call nc_define_attr(ncid,what,text,varid)
 
-! ---------------------
-!  for non dimensional vertical coordinates (sigma etc) see:
-!  http://cf-pcmdi.llnl.gov/documents/cf-conventions/1.1/cf-conventions.html
-!  in appendic D.6 - D.9
-! ---------------------
+!---------------------
+! for non dimensional vertical coordinates (sigma etc) see:
+! http://cf-pcmdi.llnl.gov/documents/cf-conventions/1.1/cf-conventions.html
+! in appendic D.6 - D.9
+!---------------------
 
-	retval = nf_def_var(ncid, 'level', NF_REAL, 1, lvl_dimid &
-     &				,lvl_varid)
+        retval = nf_def_var(ncid, 'level', NF_REAL, 1, lvl_dimid        &
+     &                          ,lvl_varid)
 	call nc_handle_err(retval,'open_fem')
 	varid = lvl_varid
 
@@ -498,10 +500,10 @@
 	text = 'down'
 	call nc_define_attr(ncid,what,text,varid)
 
-! ---------------------
+!---------------------
 
-	retval = nf_def_var(ncid, 'total_depth', NF_REAL, 1, node_dimid &
-     &				,dep_varid)
+        retval = nf_def_var(ncid, 'total_depth', NF_REAL, 1, node_dimid &
+     &                          ,dep_varid)
 	call nc_handle_err(retval,'open_fem')
 	varid = dep_varid
 
@@ -517,10 +519,10 @@
 	text = 'total depth at nodes'
 	call nc_define_attr(ncid,what,text,varid)
 
-! ---------------------
+!---------------------
 
-	retval = nf_def_var(ncid, 'element_index', NF_INT, 2, eix_dimid &
-     &				,eix_varid)
+        retval = nf_def_var(ncid, 'element_index', NF_INT, 2, eix_dimid &
+     &                          ,eix_varid)
 	call nc_handle_err(retval,'open_fem')
 	varid = eix_varid
 
@@ -536,8 +538,8 @@
 	text = 'maps every element to its three vertices'
 	call nc_define_attr(ncid,what,text,varid)
 
-	retval = nf_def_var(ncid, 'topology', NF_INT, 0, 0 &
-     &				,top_varid)
+        retval = nf_def_var(ncid, 'topology', NF_INT, 0, 0              &
+     &                          ,top_varid)
 	call nc_handle_err(retval,'open_fem')
 	varid = top_varid
 
@@ -553,13 +555,13 @@
 	text = '2'
 	call nc_define_attr(ncid,what,text,varid)
 
-! ---------------------
+!---------------------
 
 !	retval = nf_def_var(ncid, 'time', NF_INT, 1, rec_dimid
 !     +				,rec_varid)
 
-	retval = nf_def_var(ncid, 'time', NF_DOUBLE, 1, rec_dimid &
-     &				,rec_varid)
+        retval = nf_def_var(ncid, 'time', NF_DOUBLE, 1, rec_dimid       &
+     &                          ,rec_varid)
 	call nc_handle_err(retval,'open_fem')
 	varid = rec_varid
 
@@ -580,9 +582,9 @@
 	text = 'T'
 	call nc_define_attr(ncid,what,text,varid)
 
-! -----------------------------------------
-!  define dimensions to remember
-! -----------------------------------------
+!-----------------------------------------
+! define dimensions to remember
+!-----------------------------------------
 
 	dimids_2d(1) = node_dimid
 	dimids_2d(2) = rec_dimid
@@ -598,17 +600,17 @@
 	coord_varid(5) = eix_varid
 	coord_varid(6) = top_varid
 
-! -----------------------------------------
-!  end of routine
-! -----------------------------------------
+!-----------------------------------------
+! end of routine
+!-----------------------------------------
 
 	end
 
-! ******************************************************************
+!******************************************************************
 
 	subroutine nc_open_ts(ncid,node,date0,time0)
 
-!  opens nc file for time series write
+! opens nc file for time series write
 
 	use netcdf_params
 
@@ -631,41 +633,41 @@
 
 	integer nc_ichanm
 
-! -----------------------------------------
-!  initialize parameters
-! -----------------------------------------
+!-----------------------------------------
+! initialize parameters
+!-----------------------------------------
 
 	file_name = 'netcdfts.nc'
 	file_name = 'netcdf.nc'
 
-! -----------------------------------------
-!  Create the file.
-! -----------------------------------------
+!-----------------------------------------
+! Create the file.
+!-----------------------------------------
 
 	retval = nf_create(FILE_NAME, nf_clobber, ncid)
 	call nc_handle_err(retval,'open_ts')
 
-! -----------------------------------------
-!  Define the dimensions. The record dimension is defined to have
-!  unlimited length - it can grow as needed. In this example it is
-!  the time dimension.
-! -----------------------------------------
+!-----------------------------------------
+! Define the dimensions. The record dimension is defined to have
+! unlimited length - it can grow as needed. In this example it is
+! the time dimension.
+!-----------------------------------------
 
 	retval = nf_def_dim(ncid, 'node', 1, node_dimid)
 	call nc_handle_err(retval,'open_ts')
 	retval = nf_def_dim(ncid, 'time', NF_UNLIMITED, rec_dimid)
 	call nc_handle_err(retval,'open_ts')
 
-! -----------------------------------------
-!  Define the coordinate variables
-! -----------------------------------------
+!-----------------------------------------
+! Define the coordinate variables
+!-----------------------------------------
 
-! -----------------------------------------
-!  Assign units attributes to coordinate variables.
-! -----------------------------------------
+!-----------------------------------------
+! Assign units attributes to coordinate variables.
+!-----------------------------------------
 
-	retval = nf_def_var(ncid, 'longitude', NF_REAL, 1,node_dimid &
-     &				,lon_varid)
+        retval = nf_def_var(ncid, 'longitude', NF_REAL, 1,node_dimid    &
+     &                          ,lon_varid)
 	write(6,*)'lon_varid',lon_varid
 	call nc_handle_err(retval,'open_ts')
 	varid = lon_varid
@@ -678,10 +680,10 @@
 	text = 'longitude'
 	call nc_define_attr(ncid,what,text,varid)
 
-! ---------------------
+!---------------------
 
-	retval = nf_def_var(ncid, 'latitude', NF_REAL, 1, node_dimid &
-     &				,lat_varid)
+        retval = nf_def_var(ncid, 'latitude', NF_REAL, 1, node_dimid    &
+     &                          ,lat_varid)
 	write(6,*)'lat_varid',lat_varid
 	call nc_handle_err(retval,'open_ts')
 	varid = lat_varid
@@ -694,13 +696,13 @@
 	text = 'latitude'
 	call nc_define_attr(ncid,what,text,varid)
 
-! ---------------------
+!---------------------
 
 !	retval = nf_def_var(ncid, 'time', NF_INT, 1, rec_dimid
 !     +				,rec_varid)
 
-	retval = nf_def_var(ncid, 'time', NF_DOUBLE, 1, rec_dimid &
-     &				,rec_varid)
+        retval = nf_def_var(ncid, 'time', NF_DOUBLE, 1, rec_dimid       &
+     &                          ,rec_varid)
 	call nc_handle_err(retval,'open_ts')
 	varid = rec_varid
 
@@ -721,9 +723,9 @@
 	text = 'T'
 	call nc_define_attr(ncid,what,text,varid)
 
-! -----------------------------------------
-!  define dimensions to remember
-! -----------------------------------------
+!-----------------------------------------
+! define dimensions to remember
+!-----------------------------------------
 
 	dimids_2d(1) = node_dimid
 	dimids_2d(2) = rec_dimid
@@ -731,20 +733,20 @@
 	coord_varid(1) = lon_varid
 	coord_varid(2) = lat_varid
 
-! -----------------------------------------
-!  end of routine
-! -----------------------------------------
+!-----------------------------------------
+! end of routine
+!-----------------------------------------
 
 	end
 
-! *****************************************************************
+!*****************************************************************
 
 
-! *****************************************************************
+!*****************************************************************
 
         subroutine make_vertical_coordinate(iztype,what,text)
 
-!  defines definition for vertical coordinate
+! defines definition for vertical coordinate
 
         implicit none
 
@@ -767,11 +769,11 @@
 
         end
 
-! *****************************************************************
-! *****************************************************************
-!  read dimensions
-! *****************************************************************
-! *****************************************************************
+!*****************************************************************
+!*****************************************************************
+! read dimensions
+!*****************************************************************
+!*****************************************************************
 
 	subroutine nc_open_read(ncid,file)
 
@@ -795,7 +797,7 @@
 
 	end
 
-! *****************************************************************
+!*****************************************************************
 
 	subroutine nc_dims_info(ncid)
 
@@ -822,7 +824,7 @@
 
 	end
 
-! *****************************************************************
+!*****************************************************************
 
         subroutine nc_get_dim_totnum(ncid,ndims)
 
@@ -840,7 +842,7 @@
 
 	end
 
-! *****************************************************************
+!*****************************************************************
 
         subroutine nc_get_dim_name(ncid,dim_id,name)
 
@@ -859,7 +861,7 @@
 
         end
 
-! *****************************************************************
+!*****************************************************************
 
 	subroutine nc_get_dim_id(ncid,name,dim_id)
 
@@ -878,7 +880,7 @@
 
 	end
 
-! *****************************************************************
+!*****************************************************************
 
         subroutine nc_has_dim_name(ncid,name,dim_id)
 
@@ -897,7 +899,7 @@
 
         end
 
-! *****************************************************************
+!*****************************************************************
 
 	subroutine nc_get_dim_len(ncid,dim_id,dim_len)
 
@@ -916,11 +918,11 @@
 
 	end
 
-! *****************************************************************
-! *****************************************************************
-!  read time records
-! *****************************************************************
-! *****************************************************************
+!*****************************************************************
+!*****************************************************************
+! read time records
+!*****************************************************************
+!*****************************************************************
 
 	subroutine nc_get_time_rec(ncid,irec,t)
 
@@ -988,7 +990,7 @@
 
 	end
 
-! *****************************************************************
+!*****************************************************************
 
 	subroutine nc_get_time_recs(ncid,trecs)
 
@@ -1019,11 +1021,11 @@
 
 	end
 
-! *****************************************************************
-! *****************************************************************
-!  read variables
-! *****************************************************************
-! *****************************************************************
+!*****************************************************************
+!*****************************************************************
+! read variables
+!*****************************************************************
+!*****************************************************************
 
 	subroutine nc_var_info(ncid,var_id,bverb)
 
@@ -1054,7 +1056,7 @@
  1010     format(3i5,a,a)
 
 	  if( blong ) then
-	    do ia=1,natts
+	    do ia=1,n atts
 	      retval = nf_inq_attname(ncid,var_id,ia,aname)
 	      call nc_handle_err(retval,'get_var_info')
 	      retval = nf_inq_att(ncid,var_id,aname,xtype,length)
@@ -1071,7 +1073,7 @@
 
 	end
 
-! *****************************************************************
+!*****************************************************************
 
 	subroutine nc_vars_info(ncid,bverb)
 
@@ -1096,11 +1098,11 @@
 
 	end
 
-! *****************************************************************
+!*****************************************************************
 
 	subroutine nc_get_var_id(ncid,name,var_id)
 
-!  returns var_id = 0 if not found (no error)
+! returns var_id = 0 if not found (no error)
 
 	use netcdf_params
 
@@ -1121,7 +1123,7 @@
 
 	end
 
-! *****************************************************************
+!*****************************************************************
 
 	subroutine nc_get_var_name(ncid,var_id,name)
 
@@ -1140,7 +1142,7 @@
 
 	end
 
-! *****************************************************************
+!*****************************************************************
 
 	subroutine nc_get_var_totnum(ncid,nvars)
 
@@ -1158,13 +1160,13 @@
 
 	end
 
-! *****************************************************************
+!*****************************************************************
 
 	subroutine nc_get_var_ndims(ncid,var_id,ndims,dimids)
 
-!  if ndims == 0 -> just compute total number of dimensions
-! 
-!  if ndims > 0 and smaller than total number of dimensions -> negative return value
+! if ndims == 0 -> just compute total number of dimensions
+!
+! if ndims > 0 and smaller than total number of dimensions -> negative return value
 
 	use netcdf_params
 
@@ -1194,7 +1196,7 @@
 
 	end
 
-! *****************************************************************
+!*****************************************************************
 
 	subroutine nc_check_var_type(ncid,var_id,type)
 
@@ -1230,7 +1232,7 @@
 	stop 'error stop nc_check_type: type mismatch'
 	end
 
-! *****************************************************************
+!*****************************************************************
 
 	subroutine nc_get_global_attr(ncid,aname,atext)
 
@@ -1246,7 +1248,7 @@
 
 	end
 
-! *****************************************************************
+!*****************************************************************
 
 	subroutine nc_get_var_attr(ncid,var_id,aname,atext)
 
@@ -1320,7 +1322,7 @@
 
 	end
 
-! *****************************************************************
+!*****************************************************************
 
 	function nc_has_var_attrib(ncid,var_id,aname)
 
@@ -1345,7 +1347,7 @@
 
 	end function nc_has_var_attrib
 
-! *****************************************************************
+!*****************************************************************
 
 	subroutine nc_get_var_attrib(ncid,var_id,aname,atext,avalue)
 
@@ -1398,7 +1400,7 @@
 	stop 'error stop nc_get_var_attrib: len > 1000'
 	end
 
-! *****************************************************************
+!*****************************************************************
 
 	subroutine nc_get_var_int(ncid,var_id,data)
 
@@ -1417,7 +1419,7 @@
 
 	end
 
-! *****************************************************************
+!*****************************************************************
 
 	subroutine nc_get_var_real(ncid,var_id,data)
 
@@ -1436,12 +1438,12 @@
 
 	end
 
-! *****************************************************************
+!*****************************************************************
 
-	subroutine nc_get_var_data(ncid,name,trec,ndim,ndimens &
-     &					,dims,data)
+        subroutine nc_get_var_data(ncid,name,trec,ndim,ndimens          &
+     &                                  ,dims,data)
 
-!  reads time record trec of variable name
+! reads time record trec of variable name
 
 	use netcdf_params
 
@@ -1563,11 +1565,11 @@
 	stop 'error stop nc_get_var_data: itime'
 	end
 
-! *****************************************************************
-! *****************************************************************
-!  define variables for write
-! *****************************************************************
-! *****************************************************************
+!*****************************************************************
+!*****************************************************************
+! define variables for write
+!*****************************************************************
+!*****************************************************************
 
 	subroutine nc_define_2d_reg(ncid,what,var_id)
 
@@ -1581,13 +1583,13 @@
 
 	integer retval
 
-	retval = nf_def_var(ncid, what, NF_REAL, 3, dimids_2d &
-     &				,var_id)
+        retval = nf_def_var(ncid, what, NF_REAL, 3, dimids_2d           &
+     &                          ,var_id)
 	call nc_handle_err(retval,'define_2d_reg')
 
 	end
 
-! *****************************************************************
+!*****************************************************************
 
 	subroutine nc_define_3d_reg(ncid,what,var_id)
 
@@ -1601,13 +1603,13 @@
 
 	integer retval
 
-	retval = nf_def_var(ncid, what, NF_REAL, 4, dimids_3d &
-     &				,var_id)
+        retval = nf_def_var(ncid, what, NF_REAL, 4, dimids_3d           &
+     &                          ,var_id)
 	call nc_handle_err(retval,'define_3d_reg')
 
 	end
 
-! *****************************************************************
+!*****************************************************************
 
 	subroutine nc_define_2d(ncid,what,var_id)
 
@@ -1621,13 +1623,13 @@
 
 	integer retval
 
-	retval = nf_def_var(ncid, what, NF_REAL, 2, dimids_2d &
-     &				,var_id)
+        retval = nf_def_var(ncid, what, NF_REAL, 2, dimids_2d           &
+     &                          ,var_id)
 	call nc_handle_err(retval,'define_2d')
 
 	end
 
-! *****************************************************************
+!*****************************************************************
 
 	subroutine nc_define_3d(ncid,what,var_id)
 
@@ -1641,17 +1643,17 @@
 
 	integer retval
 
-	retval = nf_def_var(ncid, what, NF_REAL, 3, dimids_3d &
-     &				,var_id)
+        retval = nf_def_var(ncid, what, NF_REAL, 3, dimids_3d           &
+     &                          ,var_id)
 	call nc_handle_err(retval,'define_3d')
 
 	end
 
-! *****************************************************************
-! *****************************************************************
-!  define attributes for write
-! *****************************************************************
-! *****************************************************************
+!*****************************************************************
+!*****************************************************************
+! define attributes for write
+!*****************************************************************
+!*****************************************************************
 
 	subroutine nc_define_attr(ncid,what,def,var_id)
 
@@ -1669,13 +1671,13 @@
 	integer nc_ichanm
 
         ldef = nc_ichanm(def)
-	retval = nf_put_att_text(ncid, var_id, what, ldef &
-     &				,def)
+        retval = nf_put_att_text(ncid, var_id, what, ldef               &
+     &                          ,def)
 	call nc_handle_err(retval,'define_attr')
 
 	end
 
-! *****************************************************************
+!*****************************************************************
 
 	subroutine nc_define_attr_real(ncid,what,value,var_id)
 
@@ -1692,13 +1694,13 @@
 	integer retval
 
         ldef = 1
-	retval = nf_put_att_real(ncid, var_id, what, NF_FLOAT, ldef &
-     &				,value)
+        retval = nf_put_att_real(ncid, var_id, what, NF_FLOAT, ldef     &
+     &                          ,value)
 	call nc_handle_err(retval,'define_attr_real')
 
 	end
 
-! *****************************************************************
+!*****************************************************************
 
 	subroutine nc_define_range(ncid,rmin,rmax,flag,var_id)
 
@@ -1716,29 +1718,29 @@
 	rminmax(1) = rmin
 	rminmax(2) = rmax
 
-! 	retval = nf_put_att_real(ncid, var_id, 'valid_range', NF_REAL
-!      +				,2,rminmax)
-! 	call nc_handle_err(retval,'define_range')
+!	retval = nf_put_att_real(ncid, var_id, 'valid_range', NF_REAL
+!     +				,2,rminmax)
+!	call nc_handle_err(retval,'define_range')
 
-	retval = nf_put_att_real(ncid, var_id, 'valid_min', NF_REAL &
-     &				,1,rmin)
+        retval = nf_put_att_real(ncid, var_id, 'valid_min', NF_REAL     &
+     &                          ,1,rmin)
 	call nc_handle_err(retval,'define_range')
 
-	retval = nf_put_att_real(ncid, var_id, 'valid_max', NF_REAL &
-     &				,1,rmax)
+        retval = nf_put_att_real(ncid, var_id, 'valid_max', NF_REAL     &
+     &                          ,1,rmax)
 	call nc_handle_err(retval,'define_range')
 
-! 	retval = nf_put_att_real(ncid, var_id, 'missing_value', NF_REAL
-!      +				,1,flag)
-! 	call nc_handle_err(retval,'define_range')
+!	retval = nf_put_att_real(ncid, var_id, 'missing_value', NF_REAL
+!     +				,1,flag)
+!	call nc_handle_err(retval,'define_range')
 
-	retval = nf_put_att_real(ncid, var_id, '_FillValue', NF_REAL &
-     &				,1,flag)
+        retval = nf_put_att_real(ncid, var_id, '_FillValue', NF_REAL    &
+     &                          ,1,flag)
 	call nc_handle_err(retval,'define_range')
 
 	end
 
-! *****************************************************************
+!*****************************************************************
 
 	subroutine nc_end_define(ncid)
 
@@ -1755,13 +1757,13 @@
 
 	end
 
-! *****************************************************************
-! *****************************************************************
-! *****************************************************************
+!*****************************************************************
+!*****************************************************************
+!*****************************************************************
 
 	subroutine nc_has_vertical_dimension(ncid,name,bvert)
 
-!  checks if variable is 3d
+! checks if variable is 3d
 
 	use netcdf_params
 
@@ -1791,11 +1793,11 @@
 
 	end
 
-! *****************************************************************
+!*****************************************************************
 
 	subroutine nc_has_time_dimension(ncid,name,btime)
 
-!  checks if variable name has time dimension
+! checks if variable name has time dimension
 
 	use netcdf_params
 
@@ -1825,7 +1827,7 @@
 
 	end
 
-! *****************************************************************
+!*****************************************************************
 
 	subroutine nc_set_time_name(time_d,time_v)
 
@@ -1840,7 +1842,7 @@
 
 	end
 
-! *****************************************************************
+!*****************************************************************
 
 	subroutine nc_get_time_name(time_d,time_v)
 
@@ -1855,14 +1857,14 @@
 
 	end
 
-! *****************************************************************
-! *****************************************************************
-!  write coordinate information
-! *****************************************************************
-! *****************************************************************
+!*****************************************************************
+!*****************************************************************
+! write coordinate information
+!*****************************************************************
+!*****************************************************************
 
-	subroutine nc_write_coords_reg(ncid,nx,ny,nlv &
-     &					,xlon,ylat,depth,hlv)
+        subroutine nc_write_coords_reg(ncid,nx,ny,nlv                   &
+     &                                  ,xlon,ylat,depth,hlv)
 
 	use netcdf_params
 
@@ -1885,9 +1887,9 @@
 	lvl_varid = coord_varid(3)
 	dep_varid = coord_varid(4)
 
-! -----------------------------------------
-!  write coordinate data
-! -----------------------------------------
+!-----------------------------------------
+! write coordinate data
+!-----------------------------------------
 
 	retval = nf_put_var_real(ncid, lon_varid, xlon)
 	call nc_handle_err(retval,'write_coords_reg')
@@ -1901,16 +1903,16 @@
 	retval = nf_put_var_real(ncid, dep_varid, depth)
 	call nc_handle_err(retval,'write_coords_reg')
 
-! -----------------------------------------
-!  end of routine
-! -----------------------------------------
+!-----------------------------------------
+! end of routine
+!-----------------------------------------
 
 	end
 
-! *****************************************************************
+!*****************************************************************
 
-	subroutine nc_write_coords_fem(ncid,nkn,nel,nlv &
-     &				,xgv,ygv,hkv,nen3v,hlv)
+        subroutine nc_write_coords_fem(ncid,nkn,nel,nlv                 &
+     &                          ,xgv,ygv,hkv,nen3v,hlv)
 
 	!use mod_depth
 	!use levels
@@ -1937,9 +1939,9 @@
 	eix_varid = coord_varid(5)
 	top_varid = coord_varid(6)
 
-! -----------------------------------------
-!  write coordinate data
-! -----------------------------------------
+!-----------------------------------------
+! write coordinate data
+!-----------------------------------------
 
 	retval = nf_put_var_real(ncid, lon_varid, xgv)
 	call nc_handle_err(retval,'write_coords_fem')
@@ -1959,13 +1961,13 @@
 	retval = nf_put_var_int(ncid, top_varid, 2)
 	call nc_handle_err(retval,'write_coords_fem')
 
-! -----------------------------------------
-!  end of routine
-! -----------------------------------------
+!-----------------------------------------
+! end of routine
+!-----------------------------------------
 
 	end
 
-! *****************************************************************
+!*****************************************************************
 
 	subroutine nc_write_coords_ts(ncid,lon,lat)
 
@@ -1982,9 +1984,9 @@
 	lon_varid = coord_varid(1)
 	lat_varid = coord_varid(2)
 
-! -----------------------------------------
-!  write coordinate data
-! -----------------------------------------
+!-----------------------------------------
+! write coordinate data
+!-----------------------------------------
 
 	retval = nf_put_var_real(ncid, lon_varid, lon)
 	call nc_handle_err(retval,'write_coords_ts')
@@ -1992,17 +1994,17 @@
 	retval = nf_put_var_real(ncid, lat_varid, lat)
 	call nc_handle_err(retval,'write_coords_ts')
 
-! -----------------------------------------
-!  end of routine
-! -----------------------------------------
+!-----------------------------------------
+! end of routine
+!-----------------------------------------
 
 	end
 
-! *****************************************************************
-! *****************************************************************
-!  write time record
-! *****************************************************************
-! *****************************************************************
+!*****************************************************************
+!*****************************************************************
+! write time record
+!*****************************************************************
+!*****************************************************************
 
 	subroutine nc_write_time(ncid,irec,it)
 
@@ -2023,7 +2025,7 @@
 
 	end
 
-! *****************************************************************
+!*****************************************************************
 
 	subroutine nc_write_dtime(ncid,irec,dtime)
 
@@ -2042,11 +2044,11 @@
 
 	end
 
-! *****************************************************************
-! *****************************************************************
-!  write data
-! *****************************************************************
-! *****************************************************************
+!*****************************************************************
+!*****************************************************************
+! write data
+!*****************************************************************
+!*****************************************************************
 
 	subroutine nc_write_data_2d_reg(ncid,var_id,irec,nx,ny,var2d)
 
@@ -2076,7 +2078,7 @@
 
 	end
 
-! *****************************************************************
+!*****************************************************************
 
 	subroutine nc_write_data_3d_reg(ncid,var_id,irec,nlv,nx,ny,var3d)
 
@@ -2110,11 +2112,11 @@
 
 	end
 
-! *****************************************************************
+!*****************************************************************
 
 	subroutine nc_rewrite_3d_reg(nlvddi,lmax,nx,ny,var3d,vnc3d)
 
-!  re-writes a 3d array to be CF compliant
+! re-writes a 3d array to be CF compliant
 
 	use netcdf_params
 
@@ -2137,7 +2139,7 @@
 
 	end
 
-! *****************************************************************
+!*****************************************************************
 
 	subroutine nc_write_data_2d(ncid,var_id,irec,nkn,var2d)
 
@@ -2165,7 +2167,7 @@
 
 	end
 
-! *****************************************************************
+!*****************************************************************
 
 	subroutine nc_write_data_3d(ncid,var_id,irec,nlv,nkn,var3d)
 
@@ -2196,11 +2198,11 @@
 
 	end
 
-! *****************************************************************
-! *****************************************************************
-!  compact data for write
-! *****************************************************************
-! *****************************************************************
+!*****************************************************************
+!*****************************************************************
+! compact data for write
+!*****************************************************************
+!*****************************************************************
 
 	subroutine nc_compact_3d_reg(nlvddi,nlv,nx,ny,var_in,var_out)
 
@@ -2223,7 +2225,7 @@
 
 	end
 
-! *****************************************************************
+!*****************************************************************
 
 	subroutine nc_compact_3d(nlvddi,nlv,nkn,var_in,var_out)
 
@@ -2244,11 +2246,11 @@
 
 	end
 
-! *****************************************************************
-! *****************************************************************
-!  various routines
-! *****************************************************************
-! *****************************************************************
+!*****************************************************************
+!*****************************************************************
+! various routines
+!*****************************************************************
+!*****************************************************************
 
 	subroutine nc_close(ncid)
 
@@ -2265,11 +2267,11 @@
 
 	end
 
-! *****************************************************************
+!*****************************************************************
 
 	subroutine nc_global(ncid,title)
 
-!  writes global conventions
+! writes global conventions
 
 	use netcdf_params
 
@@ -2324,9 +2326,9 @@
 
 	end
 
-! *****************************************************************
-! *****************************************************************
-! *****************************************************************
+!*****************************************************************
+!*****************************************************************
+!*****************************************************************
 
 	subroutine nc_handle_err(errcode,string)
 
@@ -2345,7 +2347,7 @@
 	stop 'error stop nc_handle_err'
 	end
 
-! *****************************************************************
+!*****************************************************************
 
 	function nc_has_err(errcode)
 
@@ -2360,19 +2362,19 @@
 
 	end
 
-! *****************************************************************
-! *****************************************************************
-!  string utility routines
-! *****************************************************************
-! *****************************************************************
+!*****************************************************************
+!*****************************************************************
+! string utility routines
+!*****************************************************************
+!*****************************************************************
 
         function nc_ichanm(line)
 
-!  computes length of line without trailing blanks
-! 
-!  line          line of text
-!  ichanm        length of line (return value)
-!                ... 0 : line is all blank
+! computes length of line without trailing blanks
+!
+! line          line of text
+! ichanm        length of line (return value)
+!               ... 0 : line is all blank
 
 	implicit none
 
@@ -2397,15 +2399,15 @@
         return
         end
 
-! *****************************************************************
+!*****************************************************************
 
         subroutine nc_strip(line)
 
-!  strip blank lines
-! 
-!  line          line of text
-!  ichanm        length of line (return value)
-!                ... 0 : line is all blank
+! strip blank lines
+!
+! line          line of text
+! ichanm        length of line (return value)
+!               ... 0 : line is all blank
 
 	implicit none
 
@@ -2432,11 +2434,11 @@
         return
         end
 
-! *****************************************************************
+!*****************************************************************
 
 	subroutine nc_subst_char(line,orig,subst)
 
-!  substitutes in line character orig with subst
+! substitutes in line character orig with subst
 
 	implicit none
 
@@ -2453,15 +2455,15 @@
 
 	end
 
-! *****************************************************************
-! *****************************************************************
-!  date and time routines
-! *****************************************************************
-! *****************************************************************
+!*****************************************************************
+!*****************************************************************
+! date and time routines
+!*****************************************************************
+!*****************************************************************
 
 	subroutine nc_unpack_date(ipack,i1,i2,i3)
 
-!  unpacks date in ipack to integers
+! unpacks date in ipack to integers
 
 	implicit none
 
@@ -2482,11 +2484,11 @@
 
 	end
 
-! *****************************************************************
+!*****************************************************************
 
 	subroutine nc_format_date(date,year,month,day,hour,min,sec,zone)
 
-!  formats date string
+! formats date string
 
 	implicit none
 
@@ -2503,11 +2505,11 @@
 
 	end
 
-! *****************************************************************
+!*****************************************************************
 
 	subroutine nc_convert_date(date0,time0,date)
 
-!  converts data n integer to character
+! converts data n integer to character
 
 	implicit none
 
@@ -2518,9 +2520,9 @@
 	integer hour,min,sec
 	integer i
 
-! -----------------------------------------------
-!  convert date and time
-! -----------------------------------------------
+!-----------------------------------------------
+! convert date and time
+!-----------------------------------------------
 
 	aux = date0
 	if( aux .lt. 10000 ) aux = 10000 * aux
@@ -2532,19 +2534,19 @@
 	!write(6,*) 'date0: ',date0,year,month,day
 	!write(6,*) 'time0: ',time0,hour,min,sec
 
-! -----------------------------------------------
-!  prepare date
-! -----------------------------------------------
+!-----------------------------------------------
+! prepare date
+!-----------------------------------------------
 
 	call nc_format_date(date,year,month,day,hour,min,sec,'UTC')
 
-! -----------------------------------------------
-!  end of routine
-! -----------------------------------------------
+!-----------------------------------------------
+! end of routine
+!-----------------------------------------------
 
 	end
 
-! *****************************************************************
+!*****************************************************************
 
 	subroutine nc_current_time(cdate)
 
@@ -2577,11 +2579,11 @@
 
 	end
 	
-! *****************************************************************
-! *****************************************************************
-!  variable initialization
-! *****************************************************************
-! *****************************************************************
+!*****************************************************************
+!*****************************************************************
+! variable initialization
+!*****************************************************************
+!*****************************************************************
 
 	subroutine nc_init_variable(ncid,breg,dim,ivar,flag,var_id)
 
@@ -2711,6 +2713,48 @@
 	  units = 'm'
 	  cmin = 0.
 	  cmax = 100.
+	else if( ivar .eq. 800 ) then	! suspended sediment concentration
+	  name = 'ssc'
+	  what = 'long_name'
+	  std = 'suspended_sediment_concentration'
+	  units = 'kg m-3'
+	  cmin = 0.
+	  cmax = 10000.
+	else if( ivar .eq. 891 ) then	! sediment erosion-deposition
+	  name = 'erosion-deposition'
+	  what = 'long_name'
+	  std = 'erosion-deposition'
+	  units = 'm'
+	  cmin = 0.
+	  cmax = 100.
+	else if( ivar .eq. 892 ) then	! sediment grainsize
+	  name = 'sediment_grainsize'
+	  what = 'long_name'
+	  std = 'average sediment grainsize'
+	  units = 'm'
+	  cmin = 0.
+	  cmax = 1.
+	else if( ivar .eq. 893 ) then	! bottom_shear_stress
+	  name = 'bottom_shear_stress'
+	  what = 'long_name'
+	  std = 'bottom_shear_stress'
+	  units = 'm'
+	  cmin = 0.
+	  cmax = 100.
+	else if( ivar .eq. 894 ) then	! mud_fraction
+	  name = 'mud_fraction'
+	  what = 'long_name'
+	  std = 'mud_fraction'
+	  units = ''
+	  cmin = 0.
+	  cmax = 1.
+	else if( ivar .eq. 895 ) then	! bedload_transport
+	  name = 'bedload_transport'
+	  what = 'long_name'
+	  std = 'bedload_transport'
+	  units = 'kg/ms'
+	  cmin = 0.
+	  cmax = 1.
 	else
 	  write(6,*) 'unknown variable: ',ivar
 	  stop 'error stop descr_var'
@@ -2740,11 +2784,11 @@
 
 	end
 
-! *****************************************************************
-! *****************************************************************
-!  auxiliary routines
-! *****************************************************************
-! *****************************************************************
+!*****************************************************************
+!*****************************************************************
+! auxiliary routines
+!*****************************************************************
+!*****************************************************************
 
 	subroutine nc_set_quiet(bquiet)
 
@@ -2758,17 +2802,17 @@
 
 	end
 
-! *****************************************************************
-! *****************************************************************
-!  test routines
-! *****************************************************************
-! *****************************************************************
+!*****************************************************************
+!*****************************************************************
+! test routines
+!*****************************************************************
+!*****************************************************************
 
 	subroutine wrnetcdf
 	implicit none
 	end
 
-! *****************************************************************
+!*****************************************************************
 
 	function next_record(it,znv)
 
@@ -2782,7 +2826,7 @@
 
 	end
 
-! *****************************************************************
+!*****************************************************************
 
 	subroutine test_nc
 
@@ -2833,12 +2877,12 @@
 
 	end
 
-! ******************************************************************
+!******************************************************************
 
-! 	program test_nc_main
-! 	implicit none
-! 	call test_nc
-! 	end
+!	program test_nc_main
+!	implicit none
+!	call test_nc
+!	end
 
-! ******************************************************************
+!******************************************************************
 

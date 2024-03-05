@@ -132,6 +132,7 @@
 ! 20.07.2021	ggu	test if file has been opened for velocities
 ! 21.10.2022	ggu	in init_vertical() bug fix - update sigma_info (GGUBS)
 ! 28.04.2023	ggu	possible nkn=nel bug flagged with GGU_NKN_NEL
+! 03.03.2024	ggu	bug fix in init_file_uv() - reset np
 !
 ! notes :
 !
@@ -1597,9 +1598,9 @@
         nodes = 0
         nvar = 2
         nintp = 2
-        np = nkn			!velocities must be on node - relax later
+        np = nkn		!velocities must be on node - relax later
         lmax = nlvdi
-        ibc = 0                         !no lateral boundary
+        ibc = 0                 !no lateral boundary
         what = 'uv init'
         uvconst = 0.
 
@@ -1624,6 +1625,8 @@
 	  write(6,*) 'read error from file ',trim(name)
 	  stop 'error stop init_file_uv: np'
 	end if
+
+        np = nkn		!velocities must be on node - relax later
 
         call iff_init(dtime,name,nvar,np,lmax,nintp &
      &                          ,nodes,uvconst,idvel)
