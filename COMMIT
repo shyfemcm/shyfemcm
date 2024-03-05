@@ -1,5 +1,16 @@
 ============================================================
 
+Tue Mar  5 17:44:11 CET 2024
+
+last minute changes
+
+ bin/shypath.sh                 |   4 ++++
+ docs/final/shyfem.pdf          | Bin 334914 -> 334911 bytes
+ src/tools/shynetcdf/netcdf.f90 |   2 +-
+ 3 files changed, 5 insertions(+), 1 deletion(-)
+
+============================================================
+
 Tue Mar  5 15:58:00 CET 2024
 
 bug fixes, gp and gps routines

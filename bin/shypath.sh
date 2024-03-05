@@ -66,6 +66,7 @@ CleanPath()
 
 bindir=$( dirname ${BASH_SOURCE[0]} | pwd -P )
 bindir=$( dirname $0 | pwd -P )
+shyfemdir=$( echo $bindir | sed -E 's/\/[^\/]*$//' )
 
 path=$( echo $PATH | tr ':' ' ' )
 CleanPath $path
@@ -73,6 +74,7 @@ path=$( echo $newpath | tr ' ' ':' )
 
 [ $debug = "YES" ] && echo "bindir: $bindir"
 echo "bindir: $bindir"
+echo "shyfemdir: $shyfemdir"
 
 if [ $# -eq 0 ]; then
   echo $PATH
@@ -86,6 +88,7 @@ elif [ $1 = "new" ]; then
 elif [ $1 = "old" ]; then
   set_path="YES"
   AddAbsolutePath $HOME/shyfem/bin
+  shyfemdir=$HOME/shyfem
 else
   set_path="YES"
   AddAbsolutePath $bindir
@@ -99,6 +102,7 @@ fi
 if [ $set_path = "YES" ]; then
   echo $path
   export PATH=$path
+  export SHYFEMDIR=$shyfemdir
 fi
 
 #-----------------------------------------------------------
