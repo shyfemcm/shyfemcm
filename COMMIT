@@ -1,5 +1,15 @@
 ============================================================
 
+Wed Mar  6 14:20:16 CET 2024
+
+new release 8.0.4
+
+ RELEASE_NOTES                 | 12 ++++--------
+ src/utils/shyutil/version.f90 |  7 ++++---
+ 2 files changed, 8 insertions(+), 11 deletions(-)
+
+============================================================
+
 Wed Mar  6 13:55:16 CET 2024
 
 helper routines
