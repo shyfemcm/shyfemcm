@@ -121,10 +121,7 @@ default:
 	@echo '   run "make help" for more information'
 	@echo '   if you are new to shyfem run "make first_time"'
 
-all: fem doc
-	@cd fem3d; make compatibility
-
-fem:
+fem: libmod
 	cd src; make
 
 para_get:
@@ -145,6 +142,10 @@ bfm_clean:
 	@fembfm/bfm_compile.sh -clean $(BFMDIR)
 
 nograph: checkv directories links test_executable
+
+libmod: $(FEMDIR)/lib/mod nothing
+$(FEMDIR)/lib/mod:
+	mkdir -p lib/mod
 
 docs: doc
 doc:
@@ -180,6 +181,9 @@ links:
 ctags:
 	@echo "making tags file..."
 	ctags -R .
+
+nothing:
+	@true
 
 #---------------------------------------------------------------
 # cleaning
