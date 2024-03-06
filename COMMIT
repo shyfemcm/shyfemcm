@@ -1,5 +1,15 @@
 ============================================================
 
+Wed Mar  6 14:34:12 CET 2024
+
+minor
+
+ bin/git/git-release                   | 4 +++-
+ bin/git/git_info/git_info_version.txt | 2 +-
+ 2 files changed, 4 insertions(+), 2 deletions(-)
+
+============================================================
+
 Wed Mar  6 14:21:14 CET 2024
 
 New version 8_0_4

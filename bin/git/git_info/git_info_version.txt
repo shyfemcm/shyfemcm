@@ -30,7 +30,7 @@ git-commit
 # before tagging make sure that RELEASE_NOTES has latest version number
 
 git-tag
-git push origin develop --tags
+git push --tags
 git-release -full_release
 
 git-pack (or git-tar tag; mail_shyfem.sh file(s); tag can also be commit)
