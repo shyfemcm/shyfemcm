@@ -8,6 +8,8 @@
 # "shypath [dirs]" sets new path to shyfemcm and subdirs dirs
 # "shypath old"    resets path to old shyfem distribution
 #
+# in order to work this script must be sourced (called as ". shypath.sh"
+#
 #-----------------------------------------------------------
 
 all="git fem3d grd"
@@ -73,11 +75,13 @@ CleanPath $path
 path=$( echo $newpath | tr ' ' ':' )
 
 [ $debug = "YES" ] && echo "bindir: $bindir"
+
 echo "bindir: $bindir"
 echo "shyfemdir: $shyfemdir"
+echo "SHYFEMDIR: $SHYFEMDIR"
 
 if [ $# -eq 0 ]; then
-  echo $PATH
+  echo "PATH: $PATH"
 elif [ $1 = "all" ]; then
   set_path="YES"
   AddAbsolutePath $bindir
@@ -100,7 +104,7 @@ if [ $has_dot = "YES" ]; then
 fi
 
 if [ $set_path = "YES" ]; then
-  echo $path
+  echo "new PATH: $path"
   export PATH=$path
   export SHYFEMDIR=$shyfemdir
 fi

@@ -10,7 +10,7 @@
 #
 #---------------------------------------------------
 
-gitdir=$HOME/shyfem/fembin/git_info
+gitdir=$SHYFEMDIR/bin/git/git_info
 
 if [ $# -eq 1 ]; then
   what=$1

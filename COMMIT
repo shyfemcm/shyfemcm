@@ -1,5 +1,21 @@
 ============================================================
 
+Wed Mar  6 13:55:16 CET 2024
+
+helper routines
+
+ .gitignore                            |   8 +++----
+ bin/git/git-info                      |   2 +-
+ bin/git/git_info/git_info_version.txt |   2 ++
+ bin/shyfem_util/shyfem_dir.sh         |  42 +++++++++++++++++++++++++---------
+ bin/shyfem_util/shyfem_profile.sh     |  21 ++++++++++-------
+ bin/shyfem_util/shyfem_version.sh     |  15 +++++++++---
+ bin/shypath.sh                        |   8 +++++--
+ docs/final/shyfem.pdf                 | Bin 334911 -> 334911 bytes
+ 8 files changed, 69 insertions(+), 29 deletions(-)
+
+============================================================
+
 Tue Mar  5 17:44:11 CET 2024
 
 last minute changes

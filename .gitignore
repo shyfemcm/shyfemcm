@@ -63,6 +63,8 @@ src/tools/shybas/shybas
 bin/shybas
 src/tools/shynetcdf/nc2fem
 bin/nc2fem
+src/tools/shynetcdf/ts2nc
+bin/ts2nc
 src/tools/shyplot/shyplot
 bin/shyplot
 src/tools/shyelab/shyelab
@@ -77,12 +79,10 @@ src/tools/shyelab/lgrelab
 bin/lgrelab
 src/tools/shyelab/tselab
 bin/tselab
-src/tools/shyelab/shyparts
-bin/shyparts
 src/tools/shyelab/shyproj
 bin/shyproj
-src/tools/shyelab/ts2nc
-bin/ts2nc
+src/tools/shyparts/shyparts
+bin/shyparts
 
 bin/grid
 src/tools/grid/grid

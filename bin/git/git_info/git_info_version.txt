@@ -27,6 +27,8 @@ make dist
 git add -u
 git-commit
 
+# before tagging make sure that RELEASE_NOTES has latest version number
+
 git-tag
 git push origin develop --tags
 git-release -full_release
