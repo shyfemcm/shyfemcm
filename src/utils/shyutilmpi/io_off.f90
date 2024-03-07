@@ -57,6 +57,7 @@
 ! 09.10.2020	ggu	added comments and error checking
 ! 13.10.2020	ggu	default values for T/S introduced
 ! 06.04.2021	ggu	better error message in off_check_vertical()
+! 07.03.2024	ggu	off write routine prepared for use with MPI, new vers 4
 !
 ! contents :
 !
@@ -95,6 +96,9 @@
 
 	integer, parameter :: nintp = 4		!2 (linear) or 4 (cubic)
 
+	integer, parameter :: nvers_max = 4	!last version
+
+	integer, save :: nvers = 0		!actual version
 	integer, save :: ioffline = 0
 	integer, save :: idtoff,itmoff,itoff
 	integer, save :: iwhat			!0 (none), 1 (write), 2 (read)
@@ -188,18 +192,32 @@
 ! writes one record to offline file
 
 	use mod_offline
+	use shympi
 
 	implicit none
 
 	integer iu,it
 
+	logical bwrite,bvers4
 	integer ie,ii,k,i
 	integer nlin,nlink,nline
 	integer iunit
 	integer nkn,nel,nlv,nlvdi
+	integer nkng,nelg,nlvg
+	double precision dtime
 	
+	integer, allocatable :: ilkg(:), ileg(:)
 	double precision, save, allocatable :: wnaux(:,:)
-	double precision, save, allocatable :: rlin(:)
+	double precision, save, allocatable :: dlin(:)
+	double precision, save, allocatable :: delemg(:,:)
+	double precision, save, allocatable :: dnodeg(:,:)
+	double precision, save, allocatable :: d2nodeg(:)
+	double precision, save, allocatable :: dezg(:,:)
+	double precision, save, allocatable :: dkzg(:)
+	real, save, allocatable :: rezg(:,:)
+	real, save, allocatable :: rkzg(:)
+	real, save, allocatable :: rez(:,:)
+	real, save, allocatable :: rkz(:)
 
 	if( .not. bvinit ) then
 	  stop 'error stop off_write_record: bvinit is false'
@@ -211,67 +229,95 @@
 ! initialize
 !----------------------------------------------------------
 
+	bvers4 = ( nvers_max > 3 )
+	bwrite = shympi_is_master()
+
 	iunit = iu
 	nkn = nkn_off
 	nel = nel_off
 	nlv = nlv_off
 	nlvdi = nlv
 
+	nkng = nkn_global
+	nelg = nel_global
+	nlvg = nlv_global
+
 !----------------------------------------------------------
 ! set up auxiliary arrays
 !----------------------------------------------------------
 
-        call count_linear(nlvdi,nkn,1,ilk,nlink)
-        call count_linear(nlvdi,nel,1,ile,nline)
+	allocate(ilkg(nkng),ileg(nelg))
+	call shympi_l2g_array(ilk,ilkg)
+	call shympi_l2g_array(ile,ileg)
+        call count_linear(nlvg,nkng,1,ilkg,nlink)
+        call count_linear(nlvg,nelg,1,ileg,nline)
 	nlin = max(nlink,nline)
-        if( .not. allocated(rlin) ) allocate(rlin(nlin))
-        if( .not. allocated(wnaux) ) allocate(wnaux(nlvdi,nkn))
+
+        if( .not. allocated(dlin) ) allocate(dlin(nlin))
+        if( .not. allocated(dnodeg) ) allocate(dnodeg(nlvg,nkng))
+        if( .not. allocated(d2nodeg) ) allocate(d2nodeg(nkng))
+        if( .not. allocated(delemg) ) allocate(delemg(nlvg,nelg))
+        if( .not. allocated(dezg) ) allocate(dezg(3,nelg))
+        if( .not. allocated(dkzg) ) allocate(dkzg(nkng))
+        if( .not. allocated(rezg) ) allocate(rezg(3,nelg))
+        if( .not. allocated(rkzg) ) allocate(rkzg(nkng))
+        if( .not. allocated(rez) ) allocate(rez(3,nel))
+        if( .not. allocated(rkz) ) allocate(rkz(nkn))
+        if( .not. allocated(wnaux) ) allocate(wnaux(nlv,nkn))
 
 !----------------------------------------------------------
 ! write header
 !----------------------------------------------------------
 
-	write(iunit) it,nkn,nel,3
-	write(iunit) (ile(ie),ie=1,nel)
-	write(iunit) (ilk(k),k=1,nkn)
+	dtime = it
+
+	if( bwrite ) then
+	  write(iunit) it,nkng,nelg,nvers_max
+	  if( bvers4 ) write(iunit) nlv,dtime		! new version 4
+	  write(iunit) (ileg(ie),ie=1,nelg)
+	  write(iunit) (ilkg(k),k=1,nkng)
+	end if
 
 !----------------------------------------------------------
 ! write currents
 !----------------------------------------------------------
 
         nlin = nline
-        call dvals2linear(nlvdi,nel,1,ile,ut,rlin,nlin)
-        write(iunit) (rlin(i),i=1,nlin)
-        call dvals2linear(nlvdi,nel,1,ile,vt,rlin,nlin)
-        write(iunit) (rlin(i),i=1,nlin)
-
-	!write(iunit) ((ut(l,ie,1),l=1,ile(ie)),ie=1,nel)
-	!write(iunit) ((vt(l,ie,1),l=1,ile(ie)),ie=1,nel)
+	call shympi_l2g_array(ut(:,:,1),delemg)
+        call dvals2linear(nlvg,nelg,1,ileg,delemg,dlin,nlin)
+        if( bwrite ) write(iunit) (dlin(i),i=1,nlin)
+	call shympi_l2g_array(vt(:,:,1),delemg)
+        call dvals2linear(nlvg,nelg,1,ileg,delemg,dlin,nlin)
+        if( bwrite ) write(iunit) (dlin(i),i=1,nlin)
 
 !----------------------------------------------------------
 ! write water levels and vertical velocities
 !----------------------------------------------------------
 
         nlin = nlink
-	write(iunit) ((ze(ii,ie,1),ii=1,3),ie=1,nel)
+
+	call shympi_l2g_array(3,ze(:,:,1),dezg)
+	if( bwrite ) write(iunit) ((dezg(ii,ie),ii=1,3),ie=1,nelg)
+
         wnaux(1:nlvdi,:) = wn(1:nlvdi,:,1)
-        call dvals2linear(nlvdi,nkn,1,ilk,wnaux,rlin,nlin)
-        write(iunit) (rlin(i),i=1,nlin)
-	!write(iunit) ((wn(l,k,1),l=1,ilk(k)),k=1,nkn)
-	write(iunit) (zn(k,1),k=1,nkn)
+	call shympi_l2g_array(wnaux,dnodeg)
+        call dvals2linear(nlvg,nkng,1,ilkg,dnodeg,dlin,nlin)
+        if( bwrite ) write(iunit) (dlin(i),i=1,nlin)
+
+	call shympi_l2g_array(zn(:,1),dkzg)
+	if( bwrite ) write(iunit) (dkzg(k),k=1,nkng)
 
 !----------------------------------------------------------
 ! write T/S
 !----------------------------------------------------------
 
         nlin = nlink
-        call dvals2linear(nlvdi,nkn,1,ilk,sn,rlin,nlin)
-        write(iunit) (rlin(i),i=1,nlin)
-        call dvals2linear(nlvdi,nkn,1,ilk,tn,rlin,nlin)
-        write(iunit) (rlin(i),i=1,nlin)
-
-	!write(iunit) ((sn(l,k,1),l=1,ilk(k)),k=1,nkn)
-	!write(iunit) ((tn(l,k,1),l=1,ilk(k)),k=1,nkn)
+	call shympi_l2g_array(sn(:,:,1),dnodeg)
+        call dvals2linear(nlvg,nkng,1,ilkg,dnodeg,dlin,nlin)
+        if( bwrite ) write(iunit) (dlin(i),i=1,nlin)
+	call shympi_l2g_array(tn(:,:,1),dnodeg)
+        call dvals2linear(nlvg,nkng,1,ilkg,dnodeg,dlin,nlin)
+        if( bwrite ) write(iunit) (dlin(i),i=1,nlin)
 
 !----------------------------------------------------------
 ! end of routine
@@ -295,7 +341,7 @@
 	integer ie,ii,k,i
 	integer nlin,nlink,nline
 	integer iunit
-	integer nknaux,nelaux
+	integer nknaux,nelaux,nlvaux
 	integer nkn,nel,nlv,nlvdi
 	integer itype
 	
@@ -323,10 +369,11 @@
 ! read header
 !----------------------------------------------------------
 
-	read(iunit,err=99,end=98) it,nknaux,nelaux,itype
+	call off_read_header(iunit,it,nknaux,nelaux,nlvaux,ierr)
+	if( ierr > 0 ) goto 95
+	if( ierr < 0 ) goto 98
 	if( nkn .ne. nknaux .or. nel .ne. nelaux ) goto 97
-	if( itype .ne. 3 ) goto 96
-	iread = itype
+	if( nlv .ne. nlvaux ) goto 97
 
 	time(ig) = it
 
@@ -421,12 +468,12 @@
 	ierr = 0
 
 	return
-   96	continue
-	write(6,*) 'type: ',itype
-	stop 'error stop off_read: we must have type == 3'
+   95	continue
+	stop 'error stop off_read: read error'
    97	continue
 	write(6,*) 'nkn,nknaux: ',nkn,nknaux
 	write(6,*) 'nel,nelaux: ',nel,nelaux
+	write(6,*) 'nlv,nlvaux: ',nlv,nlvaux
 	stop 'error stop off_read: parameter mismatch'
    98	continue
 	!write(6,*) 'EOF encountered: ',iu,ig
@@ -452,14 +499,22 @@
 	integer it,nkn,nel,nlv
 	integer ierr
 
-	integer itype
 	integer ie,k,n
 	integer nlve,nlvk
+	double precision dtime
 
 	integer, allocatable :: il(:)
 
-	read(iu,err=99,end=98) it,nkn,nel,itype
-	if( itype .ne. 3 ) goto 96
+	ierr = 0
+
+	read(iu,err=99,end=98) it,nkn,nel,nvers
+	if( nvers < 3 ) goto 96
+	if( nvers > nvers_max ) goto 96
+
+	if( nvers > 3 ) then
+	  read(iu,err=97,end=97) nlv,dtime
+	  return
+	end if
 
 ! determine nlv - this should be deleted once we write nlv to file
 
@@ -474,19 +529,21 @@
 
 	nlv = max(nlve,nlvk)
 
-	ierr = 0
-
 	return
    96	continue
-	write(6,*) 'type: ',itype
-	stop 'error stop off_read_header: we must have type == 3'
+	write(6,*) 'nvers: ',nvers
+	write(6,*) 'allowed nvers: >= 3 and <= ',nvers_max
+	stop 'error stop off_read_header: nvers'
+   97	continue
+	write(6,*) iu
+	stop 'error stop off_read_header: error reading second header'
    98	continue
 	write(6,*) 'EOF encountered: ',iu
 	ierr = -1
 	return
    99	continue
 	write(6,*) iu
-	stop 'error stop off_read_header: error reading record'
+	stop 'error stop off_read_header: error reading header'
 	end
 
 !****************************************************************

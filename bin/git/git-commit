@@ -1,4 +1,4 @@
-#!/bin/sh
+#!/bin/bash
 #
 #------------------------------------------------------------------------
 #
@@ -48,6 +48,18 @@ GetVersion()
 
 Fetch()
 {
+  this_branch=$( git branch -vv | grep -E '^\*' | sed -e 's/\* //' )
+  tracking=$( echo $this_branch | sed -e 's/.*\[(.*)\].*/$1/' )
+  echo "branch: $this_branch"
+  if [[ $this_branch =~ (\[.*\]) ]]; then
+    tracking=${BASH_REMATCH[1]}
+    echo "branch is tracking remote $tracking"
+  else
+    echo "no remote tracking branch setup"
+    tracking=""
+    return
+  fi
+
   ret=$( git fetch --dry-run 2>&1 )
 
   if [ "$ret" != "" ]; then

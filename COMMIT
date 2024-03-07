@@ -1,5 +1,17 @@
 ============================================================
 
+Thu Mar  7 19:14:49 CET 2024
+
+started offline with mpi
+
+ bin/git/git-commit              |  14 +++-
+ src/utils/shympi/mpi_dummy.f90  |  28 +++++++-
+ src/utils/shympi/mpi_node.f90   | 134 +++++++++++++++++++++++++++++++++++++-
+ src/utils/shyutilmpi/io_off.f90 | 141 ++++++++++++++++++++++++++++------------
+ 4 files changed, 271 insertions(+), 46 deletions(-)
+
+============================================================
+
 Thu Mar  7 08:12:34 CET 2024
 
 offline file renamed, other small stuff

@@ -59,6 +59,7 @@
 ! 27.03.2023    ggu     new shympi_l2g_array_fix_i, shympi_gather_array_fix_i
 ! 03.05.2023    ggu     new routine shympi_bdebug()
 ! 09.06.2023    ggu     new routine error_stop()
+! 07.03.2024    ggu     double routines for shympi_l2g_array_fix_d/2d_d
 !
 !******************************************************************
 
@@ -371,11 +372,13 @@
         INTERFACE shympi_l2g_array
         MODULE PROCEDURE   shympi_l2g_array_2d_r &
      &                    ,shympi_l2g_array_2d_i &
+     &                    ,shympi_l2g_array_2d_d &
      &                    ,shympi_l2g_array_3d_r &
      &                    ,shympi_l2g_array_3d_i &
      &                    ,shympi_l2g_array_3d_d &
      &                    ,shympi_l2g_array_fix_i &
-     &                    ,shympi_l2g_array_fix_r
+     &                    ,shympi_l2g_array_fix_r &
+     &                    ,shympi_l2g_array_fix_d
         END INTERFACE
 
         INTERFACE shympi_g2l_array
@@ -1598,6 +1601,18 @@
 
 !*******************************
 
+        subroutine shympi_l2g_array_fix_d(nfix,vals,val_out)
+
+	integer nfix
+        double precision vals(:,:)
+        double precision val_out(:,:)
+
+	val_out = vals
+
+        end subroutine shympi_l2g_array_fix_d
+
+!*******************************
+
         subroutine shympi_l2g_array_2d_r(vals,val_out)
 
         real vals(:)
@@ -1617,6 +1632,17 @@
 	val_out = vals
 
         end subroutine shympi_l2g_array_2d_i
+
+!*******************************
+
+        subroutine shympi_l2g_array_2d_d(vals,val_out)
+
+        double precision vals(:)
+        double precision val_out(:)
+
+	val_out = vals
+
+        end subroutine shympi_l2g_array_2d_d
 
 !******************************************************************
 !******************************************************************

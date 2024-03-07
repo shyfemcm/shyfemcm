@@ -76,6 +76,7 @@
 ! 03.05.2023    ggu     new routine shympi_bdebug()
 ! 18.05.2023    ggu     in shympi_gather_array() eliminate rectify array
 ! 09.06.2023    ggu     new routine error_stop()
+! 07.03.2024    ggu     double routines for shympi_l2g_array_fix_d/2d_d
 !
 !******************************************************************
 
@@ -299,7 +300,8 @@
      &                   ,shympi_gather_array_3d_r &
      &                   ,shympi_gather_array_3d_d &
      &			 ,shympi_gather_array_fix_i &
-     &			 ,shympi_gather_array_fix_r
+     &			 ,shympi_gather_array_fix_r &
+     &			 ,shympi_gather_array_fix_d
         END INTERFACE
 
         INTERFACE shympi_gather_root
@@ -388,11 +390,13 @@
         INTERFACE shympi_l2g_array
         MODULE PROCEDURE   shympi_l2g_array_2d_r &
      &			  ,shympi_l2g_array_2d_i &
+     &			  ,shympi_l2g_array_2d_d &
      &			  ,shympi_l2g_array_3d_r &
      &			  ,shympi_l2g_array_3d_i &
      &			  ,shympi_l2g_array_3d_d &
      &			  ,shympi_l2g_array_fix_i &
-     &			  ,shympi_l2g_array_fix_r
+     &			  ,shympi_l2g_array_fix_r &
+     &			  ,shympi_l2g_array_fix_d
         END INTERFACE
 
         INTERFACE shympi_g2l_array
@@ -1744,6 +1748,34 @@
 
 	end subroutine shympi_gather_array_fix_r
 
+!*******************************
+
+	subroutine shympi_gather_array_fix_d(nfix,val,vals)
+
+	integer nfix
+	double precision val(:,:)
+	double precision vals(:,:,:)
+
+	integer ni1,ni2,no1,no2
+	integer ni,no
+
+	ni1 = size(val,1)
+	ni2 = size(val,2)
+	no1 = size(vals,1)
+	no2 = size(vals,2)
+
+	if( ni1 /= nfix .or. no1 /= nfix ) then
+	  write(6,*) nfix,ni1,no1
+	  stop 'error stop shympi_gather_array_fix: incomp first dim'
+	end if
+
+	ni = ni1 * ni2
+	no = no1 * no2
+
+	call shympi_allgather_d_internal(ni,no,val,vals)
+
+	end subroutine shympi_gather_array_fix_d
+
 !******************************************************************
 !******************************************************************
 !******************************************************************
@@ -2093,6 +2125,36 @@
 
 !*******************************
 
+	subroutine shympi_l2g_array_2d_d(vals,val_out)
+
+	double precision vals(:)
+	double precision val_out(:)
+
+	logical bnode,belem
+	integer nous
+	double precision val_domain(nn_max,n_threads)
+
+	nous = size(val_out,1)
+
+        bnode = ( nous == nkn_global )
+        belem = ( nous == nel_global )
+
+	call shympi_gather_array_2d_d(vals,val_domain)
+
+	if( bnode ) then
+	  call shympi_copy_2d_d(val_domain,nous,val_out &
+     &				,nkn_domains,nk_max,ip_int_nodes)
+	else if( belem ) then
+	  call shympi_copy_2d_d(val_domain,nous,val_out &
+     &				,nel_domains,ne_max,ip_int_elems)
+	else
+	  stop 'error stop shympi_l2g_array_2d_d: (1)'
+	end if
+
+	end subroutine shympi_l2g_array_2d_d
+
+!*******************************
+
 	subroutine shympi_l2g_array_3d_r(vals,val_out)
 
 	real vals(:,:)
@@ -2320,6 +2382,50 @@
 
 	end subroutine shympi_l2g_array_fix_r
 
+!*******************************
+
+	subroutine shympi_l2g_array_fix_d(nfix,vals,val_out)
+
+	integer nfix
+	double precision vals(:,:)
+	double precision val_out(:,:)
+
+	logical bnode,belem
+	integer noh,nov
+	integer nih,niv
+	double precision, allocatable :: val_domain(:,:,:)
+
+	nih = size(vals,2)
+	niv = size(vals,1)
+	noh = size(val_out,2)
+	nov = size(val_out,1)
+
+        bnode = ( noh == nkn_global )
+        belem = ( noh == nel_global )
+
+	if( niv /= nfix .or. nov /= nfix ) then
+	  write(6,*) nfix,niv,nov
+	  stop 'error stop shympi_l2g_array_fix: incomp first dim'
+	end if
+
+	allocate(val_domain(nfix,nn_max,n_threads))
+	val_domain = 0.
+
+	call shympi_gather_array_fix_d(nfix,vals,val_domain)
+
+	if( bnode ) then
+	  call shympi_copy_3d_d(val_domain,nov,noh,val_out &
+     &				,nkn_domains,nk_max,ip_int_nodes)
+	else if( belem ) then
+	  call shympi_copy_3d_d(val_domain,nov,noh,val_out &
+     &				,nel_domains,ne_max,ip_int_elems)
+	else
+	  write(6,*) noh,nov,nkn_global,nel_global
+	  stop 'error stop shympi_l2g_array_fix: (1)'
+	end if
+
+	end subroutine shympi_l2g_array_fix_d
+
 !******************************************************************
 !******************************************************************
 !******************************************************************
@@ -2534,6 +2640,30 @@
         end do
 
 	end subroutine shympi_copy_2d_r
+
+!*******************************
+
+	subroutine shympi_copy_2d_d(val_domain,nous,val_out &
+     &				,ndomains,nmax,ip_ints)
+
+	double precision val_domain(nn_max,n_threads)
+	integer nous
+	double precision val_out(nous)
+	integer ndomains(n_threads)
+	integer nmax
+	integer ip_ints(nmax,n_threads)
+
+	integer ia,i,n,ip
+
+        do ia=1,n_threads
+          n=ndomains(ia)
+          do i=1,n
+            ip = ip_ints(i,ia)
+	    val_out(ip) = val_domain(i,ia)
+          end do
+        end do
+
+	end subroutine shympi_copy_2d_d
 
 !*******************************
 
