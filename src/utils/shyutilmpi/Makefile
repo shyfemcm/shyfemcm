@@ -43,6 +43,7 @@ OBJ  = \
 	intp_fem_file.o \
 	coordinates.o \
 	find.o \
+	io_off.o \
 
 ALL = $(MOD) $(OBJ)
 
@@ -161,6 +162,7 @@ zip:	cleanall
 ../../../lib/mod/coordinates.mod: coordinates.o
 ../../../lib/mod/evgeom.mod: evgeom.o
 ../../../lib/mod/intp_fem_file.mod: intp_fem_file.o
+../../../lib/mod/mod_offline.mod: io_off.o
 ../../../lib/mod/shyutil.mod: shy_util1.o
 bnd_admin.o: ../../../lib/mod/mod_bnd.mod \
 		../../../lib/mod/mod_bound_geom.mod \

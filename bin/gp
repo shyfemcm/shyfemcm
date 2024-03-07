@@ -12,8 +12,9 @@
 #
 #########################################################
 
-version=2.02
+version=2.03
 
+# 2.03	07.03.2024	adjust paths for helper routines
 # 2.02	03.03.2024	use absolute paths in calling other scripts
 # 2.01	27.01.2024	new option -solid
 # 2.00	09.09.2023	can accept 24 hours date (GetSecs)
@@ -98,13 +99,12 @@ logo_where="0.92 0.92 0 0.99"			#position of included file
 ######################################################### programs
 
 gnuplot="/usr/bin/gnuplot"
-psgnu="$FEMBIN/psgnu"
-extractcol="$FEMBIN/extractcol"
-scalecol="$FEMBIN/scalecol"
-range="$FEMBIN/range"
+psgnu="$FEMBIN/gps/psgnu.pl"
+extractcol="$FEMBIN/col/extractcol.pl"
+scalecol="$FEMBIN/col/scalecol.pl"
 xrange_pl="$FEMBIN/xrange.pl"
-gpsmerge="$FEMBIN/gpsmerge"
-gpsinsert="$FEMBIN/gpsinsert"
+gpsmerge="$FEMBIN/gps/gpsmerge.pl"
+gpsinsert="$FEMBIN/gps/gpsinsert.sh"
 gpgnustyle="$FEMBIN/gpgnustyle.pl"
 
 ######################################################### copyright
@@ -557,7 +557,7 @@ PlotFiles()
     indices=""
     special="NO"
 
-    for f in `$range $ppp`
+    for f in `seq $ppp`
     do
       file=${afiles[$index]}
       fnames="$fnames $file"

@@ -60,7 +60,6 @@ OBJ  = \
 	io_ext.o \
 	io_flx.o \
 	io_lgr.o \
-	io_off.o \
 	zadaptutil.o \
 	submask.o \
 	topological.o \
@@ -188,7 +187,6 @@ zip:	cleanall
 ../../../lib/mod/mod_depth.mod: depth.o
 ../../../lib/mod/mod_geom.mod: geom.o
 ../../../lib/mod/mod_geom_dynamic.mod: geom_dynamic.o
-../../../lib/mod/mod_offline.mod: io_off.o
 ../../../lib/mod/pkonst.mod: pkonst.o
 ../../../lib/mod/regular.mod: regular.o
 ../../../lib/mod/shyfem_strings.mod: strings.o

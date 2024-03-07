@@ -1,5 +1,20 @@
 ============================================================
 
+Thu Mar  7 08:12:34 CET 2024
+
+offline file renamed, other small stuff
+
+ bin/gp                                       | 16 ++++++++--------
+ src/shyfem/offline_data.f90                  |  4 ++++
+ src/utils/shyutil/Makefile                   |  2 --
+ src/utils/shyutilmpi/Makefile                |  2 ++
+ src/utils/{shyutil => shyutilmpi}/io_off.f90 |  0
+ 5 files changed, 14 insertions(+), 10 deletions(-)
+ renamed:
+    src/utils/shyutil/io_off.f90 -> src/utils/shyutilmpi/io_off.f90
+
+============================================================
+
 Wed Mar  6 17:38:45 CET 2024
 
 info

@@ -56,6 +56,10 @@
 ! 28.04.2020	ggu	routines dealing with records in new file mod_offline.f
 ! 20.03.2022	ggu	upgraded to suboutputd.f
 !
+! notes :
+!
+!	uses still time as integer -> pass to double
+!
 !****************************************************************
 
 	subroutine offline(mode)
