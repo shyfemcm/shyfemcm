@@ -50,7 +50,8 @@ Fetch()
 {
   this_branch=$( git branch -vv | grep -E '^\*' | sed -e 's/\* //' )
   tracking=$( echo $this_branch | sed -e 's/.*\[(.*)\].*/$1/' )
-  echo "branch: $this_branch"
+  #echo "branch: $this_branch"
+
   if [[ $this_branch =~ (\[.*\]) ]]; then
     tracking=${BASH_REMATCH[1]}
     echo "branch is tracking remote $tracking"

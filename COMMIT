@@ -1,5 +1,24 @@
 ============================================================
 
+Mon Mar 11 13:43:27 CET 2024
+
+finished first part of offline (mpi-mode)
+
+ bin/colors.sh                          |  32 +++++
+ bin/git/git-commit                     |   3 +-
+ bin/recursivemake                      |   2 +
+ src/shyfem/Makefile                    |   2 +-
+ src/shyfem/offline_data.f90            | 229 +++++++++++++-------------------
+ src/shyfem/shyfem.f90                  |   8 +-
+ src/utils/shyutilmpi/intp_fem_file.f90 |   4 +-
+ src/utils/shyutilmpi/io_off.f90        | 233 ++++++++++++++++++++++++++-------
+ var/rules/rules.sh                     |   4 +-
+ 9 files changed, 325 insertions(+), 192 deletions(-)
+ new file:
+   bin/colors.sh
+
+============================================================
+
 Thu Mar  7 19:14:49 CET 2024
 
 started offline with mpi

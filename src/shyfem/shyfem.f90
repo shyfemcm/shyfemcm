@@ -481,8 +481,8 @@
 
 	call poisson_compute
 
-	call offline(2)
-	call offline(1)
+	call handle_offline(2)
+	call handle_offline(1)
 
 	call init_nudging
 
@@ -543,7 +543,7 @@
 	   call nonhydro_copy   	!copies non hydrostatic pressure terms
 	   call copy_depth		!copies layer depth to old
 
-	   call offline(2)		!read from offline file
+	   call handle_offline(2)	!read from offline file
 	   call sp111(2)		!boundary conditions
            call read_wwm		!wwm wave model
 	   
@@ -568,7 +568,7 @@
 
            call lagrange
 
-	   call offline(1)		!write to offline file
+	   call handle_offline(1)	!write to offline file
 
 	   call do_after
 

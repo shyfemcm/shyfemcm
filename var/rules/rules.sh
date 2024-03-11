@@ -29,7 +29,8 @@ SetNewMacro()
 {
   echo "setting $1 to $2"
   cat Rules.make | sed -E "s|^$1|#$1|" > rules.aux
-  cat rules.aux | sed -E "s|^#$1 *= *$|$1 = $2|" > Rules.make
+  #cat rules.aux | sed -E "s|^#$1 *= *$|$1 = $2|" > Rules.make
+  cat rules.aux | sed -E "s|^#$1 *= *$|#$1 = \n$1 = $2|" > Rules.make
 }
 
 CleanUp()
@@ -65,6 +66,7 @@ do
   elif [ $target = "mpi" ]; then
     SetMacro PARALLEL_MPI NODE
     SetMacro PARTS METIS
+    SetNewMacro METISDIR $HOME/lib/metis
     SetMacro NETCDF true
   elif [ $target = "omp" ]; then
     SetMacro PARALLEL_OMP true

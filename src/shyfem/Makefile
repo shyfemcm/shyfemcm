@@ -159,7 +159,7 @@ default: fem
 
 fem: $(EXES) links nothing
 
-$(EXES): $(MODULES) $(OBJ) $(LIBFS) shyfem.o
+$(EXES): $(MODULES) $(OBJ) $(LIBF) shyfem.o
 	 $(F77) $(FFLAGS) $(INCLUDE) $(LFLAGS) $^ $(LIBL) -o $@
 
 links:

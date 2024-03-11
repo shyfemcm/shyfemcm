@@ -86,6 +86,17 @@
 !	  off_read_record()
 !	end do
 !
+! ioffline:
+!		1	hydro
+!		2	T/S
+!		4	turbolence
+!		7	all of the above
+!
+! notes :
+!
+!	reading not yet ready for mpi
+!	should use dtime and not it
+!
 !****************************************************************
 
 !==================================================================
@@ -96,19 +107,25 @@
 
 	integer, parameter :: nintp = 4		!2 (linear) or 4 (cubic)
 
-	integer, parameter :: nvers_max = 4	!last version
+	integer, parameter :: nvers_max = 5	!last version
+	integer, parameter :: ioff_max = 3	!maximum we can do
+
+	logical, parameter :: bwhydro = .true.	!write hydro results
+	logical, parameter :: bwts = .true.	!write TS results
+	logical, parameter :: bwturb = .false.	!write trubulence results
 
 	integer, save :: nvers = 0		!actual version
 	integer, save :: ioffline = 0
 	integer, save :: idtoff,itmoff,itoff
-	integer, save :: iwhat			!0 (none), 1 (write), 2 (read)
-	integer, save :: iread			!what is in file
+	!double precision, save :: idtoff,itmoff,itoff
+	integer, save :: iread = 0		!what is in file
+	integer, save :: iwrite = 0		!what has been written to file
 	integer, save :: iuoff			!unit to read/write
 	integer, save :: icall = 0
 	logical, save :: bfirst = .true.
 	logical, save :: bdebug = .false.
 
-	integer, save :: nkn_off = 0
+	integer, save :: nkn_off = 0		!values of local domain
 	integer, save :: nel_off = 0
 	integer, save :: nlv_off = 0
 
@@ -198,7 +215,7 @@
 
 	integer iu,it
 
-	logical bwrite,bvers4
+	logical bwrite,bvers4,bvers5
 	integer ie,ii,k,i
 	integer nlin,nlink,nline
 	integer iunit
@@ -214,10 +231,6 @@
 	double precision, save, allocatable :: d2nodeg(:)
 	double precision, save, allocatable :: dezg(:,:)
 	double precision, save, allocatable :: dkzg(:)
-	real, save, allocatable :: rezg(:,:)
-	real, save, allocatable :: rkzg(:)
-	real, save, allocatable :: rez(:,:)
-	real, save, allocatable :: rkz(:)
 
 	if( .not. bvinit ) then
 	  stop 'error stop off_write_record: bvinit is false'
@@ -230,6 +243,7 @@
 !----------------------------------------------------------
 
 	bvers4 = ( nvers_max > 3 )
+	bvers5 = ( nvers_max == 5 )
 	bwrite = shympi_is_master()
 
 	iunit = iu
@@ -259,21 +273,26 @@
         if( .not. allocated(delemg) ) allocate(delemg(nlvg,nelg))
         if( .not. allocated(dezg) ) allocate(dezg(3,nelg))
         if( .not. allocated(dkzg) ) allocate(dkzg(nkng))
-        if( .not. allocated(rezg) ) allocate(rezg(3,nelg))
-        if( .not. allocated(rkzg) ) allocate(rkzg(nkng))
-        if( .not. allocated(rez) ) allocate(rez(3,nel))
-        if( .not. allocated(rkz) ) allocate(rkz(nkn))
         if( .not. allocated(wnaux) ) allocate(wnaux(nlv,nkn))
 
 !----------------------------------------------------------
 ! write header
 !----------------------------------------------------------
 
+	!write(6,*) 'offline nlv: ',my_id,nlv,nlvg
+
 	dtime = it
+
+	iwrite = 0
+	if( bwhydro ) iwrite = iwrite + 1
+	if( bwts ) iwrite = iwrite + 2
+	if( bwturb ) iwrite = iwrite + 4
 
 	if( bwrite ) then
 	  write(iunit) it,nkng,nelg,nvers_max
-	  if( bvers4 ) write(iunit) nlv,dtime		! new version 4
+	  if( bvers4 ) write(iunit) nlvg,dtime		! new version 4
+	  if( bvers4 ) write(iunit) nlink,nline		! new version 4
+	  if( bvers5 ) write(iunit) iwrite		! new version 5
 	  write(iunit) (ileg(ie),ie=1,nelg)
 	  write(iunit) (ilkg(k),k=1,nkng)
 	end if
@@ -282,42 +301,54 @@
 ! write currents
 !----------------------------------------------------------
 
-        nlin = nline
-	call shympi_l2g_array(ut(:,:,1),delemg)
-        call dvals2linear(nlvg,nelg,1,ileg,delemg,dlin,nlin)
-        if( bwrite ) write(iunit) (dlin(i),i=1,nlin)
-	call shympi_l2g_array(vt(:,:,1),delemg)
-        call dvals2linear(nlvg,nelg,1,ileg,delemg,dlin,nlin)
-        if( bwrite ) write(iunit) (dlin(i),i=1,nlin)
+	if( bwhydro ) then
+          nlin = nline
+	  call shympi_l2g_array(ut(:,:,1),delemg)
+          call dvals2linear(nlvg,nelg,1,ileg,delemg,dlin,nlin)
+          if( bwrite ) write(iunit) (dlin(i),i=1,nlin)
+	  call shympi_l2g_array(vt(:,:,1),delemg)
+          call dvals2linear(nlvg,nelg,1,ileg,delemg,dlin,nlin)
+          if( bwrite ) write(iunit) (dlin(i),i=1,nlin)
+	end if
 
 !----------------------------------------------------------
 ! write water levels and vertical velocities
 !----------------------------------------------------------
 
-        nlin = nlink
-
-	call shympi_l2g_array(3,ze(:,:,1),dezg)
-	if( bwrite ) write(iunit) ((dezg(ii,ie),ii=1,3),ie=1,nelg)
-
-        wnaux(1:nlvdi,:) = wn(1:nlvdi,:,1)
-	call shympi_l2g_array(wnaux,dnodeg)
-        call dvals2linear(nlvg,nkng,1,ilkg,dnodeg,dlin,nlin)
-        if( bwrite ) write(iunit) (dlin(i),i=1,nlin)
-
-	call shympi_l2g_array(zn(:,1),dkzg)
-	if( bwrite ) write(iunit) (dkzg(k),k=1,nkng)
+	if( bwhydro ) then
+          nlin = nlink
+	  call shympi_l2g_array(3,ze(:,:,1),dezg)
+	  if( bwrite ) write(iunit) ((dezg(ii,ie),ii=1,3),ie=1,nelg)
+          wnaux(1:nlvdi,:) = wn(1:nlvdi,:,1)
+	  call shympi_l2g_array(wnaux,dnodeg)
+          call dvals2linear(nlvg,nkng,1,ilkg,dnodeg,dlin,nlin)
+          if( bwrite ) write(iunit) (dlin(i),i=1,nlin)
+	  call shympi_l2g_array(zn(:,1),dkzg)
+	  if( bwrite ) write(iunit) (dkzg(k),k=1,nkng)
+	end if
 
 !----------------------------------------------------------
 ! write T/S
 !----------------------------------------------------------
 
-        nlin = nlink
-	call shympi_l2g_array(sn(:,:,1),dnodeg)
-        call dvals2linear(nlvg,nkng,1,ilkg,dnodeg,dlin,nlin)
-        if( bwrite ) write(iunit) (dlin(i),i=1,nlin)
-	call shympi_l2g_array(tn(:,:,1),dnodeg)
-        call dvals2linear(nlvg,nkng,1,ilkg,dnodeg,dlin,nlin)
-        if( bwrite ) write(iunit) (dlin(i),i=1,nlin)
+	if( bwts ) then
+          nlin = nlink
+	  call shympi_l2g_array(sn(:,:,1),dnodeg)
+          call dvals2linear(nlvg,nkng,1,ilkg,dnodeg,dlin,nlin)
+          if( bwrite ) write(iunit) (dlin(i),i=1,nlin)
+	  call shympi_l2g_array(tn(:,:,1),dnodeg)
+          call dvals2linear(nlvg,nkng,1,ilkg,dnodeg,dlin,nlin)
+          if( bwrite ) write(iunit) (dlin(i),i=1,nlin)
+	end if
+
+!----------------------------------------------------------
+! write turbulence
+!----------------------------------------------------------
+
+	if( bwturb ) then
+	  write(6,*) 'cannot yet write turbulence in offline'
+	  stop 'error stop off_write_record: turbulence'
+	end if
 
 !----------------------------------------------------------
 ! end of routine
@@ -330,6 +361,8 @@
 	subroutine off_read_record(iu,ig,it,ierr)
 
 ! reads one record from offline file
+!
+! this is still not working with mpi
 
 	use mod_offline
 
@@ -342,8 +375,8 @@
 	integer nlin,nlink,nline
 	integer iunit
 	integer nknaux,nelaux,nlvaux
+	integer nlinkaux,nlineaux
 	integer nkn,nel,nlv,nlvdi
-	integer itype
 	
 	double precision, save, allocatable :: wnaux(:,:)
 	double precision, save, allocatable :: rlin(:)
@@ -358,7 +391,7 @@
 ! initialize
 !----------------------------------------------------------
 
-	nkn = nkn_off
+	nkn = nkn_off		! these are values of local domain
 	nel = nel_off
 	nlv = nlv_off
 	nlvdi = nlv
@@ -369,7 +402,8 @@
 ! read header
 !----------------------------------------------------------
 
-	call off_read_header(iunit,it,nknaux,nelaux,nlvaux,ierr)
+	call off_read_header(iunit,it,nknaux,nelaux,nlvaux &
+     &			,nlinkaux,nlineaux,iread,ierr)
 	if( ierr > 0 ) goto 95
 	if( ierr < 0 ) goto 98
 	if( nkn .ne. nknaux .or. nel .ne. nelaux ) goto 97
@@ -401,6 +435,8 @@
 
         call count_linear(nlvdi,nkn,1,ilk,nlink)
         call count_linear(nlvdi,nel,1,ile,nline)
+	if( nlinkaux > 0 .and. nlink /= nlinkaux ) goto 91
+	if( nlineaux > 0 .and. nline /= nlineaux ) goto 91
 	nlin = max(nlink,nline)
         if( .not. allocated(rlin) ) allocate(rlin(nlin))
         if( .not. allocated(wnaux) ) allocate(wnaux(nlvdi,nkn))
@@ -468,6 +504,10 @@
 	ierr = 0
 
 	return
+   91	continue
+	write(6,*) 'nlink: ',nlink,nlinkaux
+	write(6,*) 'nline: ',nline,nlineaux
+	stop 'error stop off_read: inconsistency in nlink/nline'
    95	continue
 	stop 'error stop off_read: read error'
    97	continue
@@ -487,7 +527,8 @@
 
 !****************************************************************
 
-	subroutine off_read_header(iu,it,nkn,nel,nlv,ierr)
+	subroutine off_read_header(iu,it,nkn,nel,nlv,nlink,nline &
+     &			,itype,ierr)
 
 ! reads header and sets nlv
 
@@ -497,8 +538,11 @@
 
 	integer iu
 	integer it,nkn,nel,nlv
+	integer nlink,nline
+	integer itype			! what has been read
 	integer ierr
 
+	logical bvers4,bvers5
 	integer ie,k,n
 	integer nlve,nlvk
 	double precision dtime
@@ -510,11 +554,21 @@
 	read(iu,err=99,end=98) it,nkn,nel,nvers
 	if( nvers < 3 ) goto 96
 	if( nvers > nvers_max ) goto 96
+	bvers4 = ( nvers >= 4 )
+	bvers5 = ( nvers >= 5 )
 
-	if( nvers > 3 ) then
+	nlink = 0
+	nline = 0
+	itype = 3
+	if( bvers4 ) then
 	  read(iu,err=97,end=97) nlv,dtime
-	  return
+	  read(iu,err=97,end=97) nlink,nline
+	  if( bvers5 ) then
+	    read(iu,err=97,end=97) itype
+	  end if
 	end if
+
+	if( bvers4 ) return
 
 ! determine nlv - this should be deleted once we write nlv to file
 
@@ -548,7 +602,8 @@
 
 !****************************************************************
 
-	subroutine off_peek_header(iu,it,nkn,nel,nlv,ierr)
+	subroutine off_peek_header(iu,it,nkn,nel,nlv,nlink,nline &
+     &					,itype,ierr)
 
 ! peeks into header and sets nlv
 
@@ -558,9 +613,12 @@
 
 	integer iu
 	integer it,nkn,nel,nlv
+	integer nlink,nline
+	integer itype
 	integer ierr
 
-	call off_read_header(iu,it,nkn,nel,nlv,ierr)
+	call off_read_header(iu,it,nkn,nel,nlv,nlink,nline &
+     &				,itype,ierr)
 
 	rewind(iu)
 
@@ -623,6 +681,87 @@
 	write(6,*) 'layers: ',il(i),ilaux(i)
 	stop 'error stop off_check_vertical: not compatible'
 	end 
+
+!****************************************************************
+!****************************************************************
+!****************************************************************
+
+	function off_has_record(iwant,iread)
+
+	implicit none
+
+	logical off_has_record
+	integer iwant		! what we want
+	integer iread		! what we have read
+
+	off_has_record = ( mod(iread/iwant,2) /= 0 )
+
+	end
+
+!****************************************************************
+
+        subroutine is_offline(itype,boff)
+
+! this checks if the requested offline data (itype) is wanted and available
+!
+! itype: 1 hydro, 2 T/S, 4 turb, combinations are possible: 3,7
+! itype == 0 -> any offline
+!
+! iwant is what we want for offline
+! iread is what has been read
+
+        use mod_offline
+
+        implicit none
+
+        integer itype    !should we use this offline data?
+        logical boff    !data is available and should be used (return)
+
+        integer iwant
+
+        iwant = ioffline                !this is what we want (from idtoff)
+
+        if( itype < 1 .and. itype > 4 ) then         	!check itype
+          write(6,*) 'value for itype not allowed: ',itype
+          stop 'error stop is_offline: itype'
+        else if( iwant .le. 0 ) then        		!no offline
+          boff = .false.
+        else
+          boff = mod(iwant/itype,2) .ne. 0
+        end if
+
+        end
+
+!****************************************************************
+
+        subroutine can_do_offline
+
+! checks if all offline data needed is in file
+
+        use mod_offline
+
+        implicit none
+
+        logical bwant,bread
+        integer iwant,i
+
+        iwant = ioffline        !this is what we want
+
+        i = 1
+        do while( i .le. 4 )
+          bwant = mod(iwant/i,2) .ne. 0
+          bread = mod(iread/i,2) .ne. 0
+          if( bwant .and. .not. bread ) goto 99
+          i = i * 2
+        end do
+
+        return
+   99   continue
+        write(6,*) 'iread = ',iread,'  iwant = ',iwant
+        write(6,*) 'type = ',i
+        write(6,*) 'offline data requested has not been read'
+        stop 'error stop can_do_offline: no such data'
+        end
 
 !****************************************************************
 !****************************************************************

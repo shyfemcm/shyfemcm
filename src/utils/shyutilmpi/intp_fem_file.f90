@@ -109,6 +109,7 @@
 ! 09.05.2023    lrp     introduce top layer index variable
 ! 22.05.2023    ggu     new routine iff_ts_intp1()
 ! 05.06.2023    lrp     introduce z-star
+! 08.03.2024    ccf     changed error message for too many files opened
 !
 !****************************************************************
 !
@@ -655,7 +656,8 @@
 	idlast = idlast + 1
 	if( idlast > ndim ) then
 	  write(6,*) 'too many files opened: ',ndim
-	  write(6,*) 'please increase value of ndim in subfemintp.f'
+	  write(6,*) 'please increase value of ndim'
+	  write(6,*) 'file to change: intp_fem_file.f90'
 	  stop 'error stop iff_init: too many files opened'
 	end if
 	id = idlast
