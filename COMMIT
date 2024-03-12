@@ -1,5 +1,16 @@
 ============================================================
 
+Tue Mar 12 11:20:34 CET 2024
+
+upgraded README
+
+ Makefile              |   7 ++----
+ README                |  58 +++++++++++++++++++++++++++++++++++++-------------
+ docs/final/shyfem.pdf | Bin 334911 -> 334907 bytes
+ 3 files changed, 45 insertions(+), 20 deletions(-)
+
+============================================================
+
 Mon Mar 11 13:43:27 CET 2024
 
 finished first part of offline (mpi-mode)

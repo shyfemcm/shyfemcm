@@ -114,12 +114,9 @@ FEMNOGRAPH   = $(FEMLIBS) $(FEMEXTRA) $(FEMMESH) $(FEMPROG) $(FEMUTIL)
 # compiling and recursive targets
 #---------------------------------------------------------------
 
-default0: fem
+default: fem
 
-default:
-	@echo "   shyfem - version $(VERSION) $(COMMIT)"
-	@echo '   run "make help" for more information'
-	@echo '   if you are new to shyfem run "make first_time"'
+all: fem doc
 
 fem: libmod
 	cd src; make
