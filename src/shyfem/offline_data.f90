@@ -165,9 +165,9 @@
 	    iuoff = iu
 	    if( bwrite ) write(6,*) 'Start writing offline file'
 	  else					! reading offline
-	    if( shympi_is_parallel() ) then
-	      stop 'error stop offline: reading not ready for mpi'
-	    end if
+	    !if( shympi_is_parallel() ) then
+	    !  stop 'error stop offline: reading not ready for mpi'
+	    !end if
             call getfnm('offlin',name)
 	    if( name == ' ' ) then
               write(6,*) '*** No offline file given'
@@ -630,13 +630,13 @@
 	do ie=1,nel_off
 	  lmax = ile(ie)
 	  do l=1,lmax
-	    ut(l,ie,1) = ut(l,ie,1) + utlnv(l,ie) * dtt
-	    vt(l,ie,1) = vt(l,ie,1) + vtlnv(l,ie) * dtt
+	    !ut(l,ie,1) = ut(l,ie,1) + utlnv(l,ie) * dtt
+	    !vt(l,ie,1) = vt(l,ie,1) + vtlnv(l,ie) * dtt
 	    ut(l,ie,1) = utlnv(l,ie)
 	    vt(l,ie,1) = vtlnv(l,ie)
 	  end do
 	  do ii=1,3
-	    ze(ii,ie,1) = ze(ii,ie,1) + zenv(ii,ie) * dtt
+	    !ze(ii,ie,1) = ze(ii,ie,1) + zenv(ii,ie) * dtt
 	    ze(ii,ie,1) = zenv(ii,ie)
 	  end do
 	end do
@@ -644,16 +644,16 @@
 	do k=1,nkn_off
 	  lmax = ilk(k)
 	  do l=1,lmax
-	    wn(l,k,1) = wn(l,k,1) + wlnv(l,k) * dtt
+	    !wn(l,k,1) = wn(l,k,1) + wlnv(l,k) * dtt
 	    wn(l,k,1) = wlnv(l,k)
-	    sn(l,k,1) = sn(l,k,1) + saltv(l,k) * dtt
+	    !sn(l,k,1) = sn(l,k,1) + saltv(l,k) * dtt
 	    sn(l,k,1) = saltv(l,k)
-	    tn(l,k,1) = tn(l,k,1) + tempv(l,k) * dtt
+	    !tn(l,k,1) = tn(l,k,1) + tempv(l,k) * dtt
 	    tn(l,k,1) = tempv(l,k)
 	  end do
-	  zn(k,1) = zn(k,1) + znv(k) * dtt
+	  !zn(k,1) = zn(k,1) + znv(k) * dtt
 	  zn(k,1) = znv(k)
-	  wn(0,k,1) = wn(0,k,1) + wlnv(0,k) * dtt
+	  !wn(0,k,1) = wn(0,k,1) + wlnv(0,k) * dtt
 	  wn(0,k,1) = wlnv(0,k)
 	end do
 
@@ -812,9 +812,8 @@
 
         subroutine off_read(iu,ig,ierr)
 
-        !use levels
-        !use basin, only : nkn,nel,ngr,mbw
         use mod_offline
+        use shympi
 
         implicit none
 
@@ -825,7 +824,9 @@
 
         call off_read_record(iu,ig,it,ierr)
 
-        !write(6,*) 'offline record read: ',it,ig
+	if( shympi_is_master() ) then
+          write(6,*) 'reading offline record for time ',it
+	end if
 
 	end
 

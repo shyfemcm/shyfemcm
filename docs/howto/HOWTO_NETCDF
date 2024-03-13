@@ -13,7 +13,7 @@ explicitly in NETCDFDIR.
 
 ===============================
 
-Renminder:
+Reminder:
 
 For nemunas server set:
 NETCDFDIR = /opt/sw

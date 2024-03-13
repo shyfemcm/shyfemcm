@@ -194,7 +194,13 @@
 	allocate(ile(ne))
 	allocate(ilk(nk))
 
+	ut = 0.
+	vt = 0.
+	ze = 0.
 	wn = 0.
+	zn = 0.
+	sn = 0.
+	tn = 0.
 
 	end subroutine mod_offline_init
 
@@ -228,7 +234,6 @@
 	double precision, save, allocatable :: dlin(:)
 	double precision, save, allocatable :: delemg(:,:)
 	double precision, save, allocatable :: dnodeg(:,:)
-	double precision, save, allocatable :: d2nodeg(:)
 	double precision, save, allocatable :: dezg(:,:)
 	double precision, save, allocatable :: dkzg(:)
 
@@ -269,7 +274,6 @@
 
         if( .not. allocated(dlin) ) allocate(dlin(nlin))
         if( .not. allocated(dnodeg) ) allocate(dnodeg(nlvg,nkng))
-        if( .not. allocated(d2nodeg) ) allocate(d2nodeg(nkng))
         if( .not. allocated(delemg) ) allocate(delemg(nlvg,nelg))
         if( .not. allocated(dezg) ) allocate(dezg(3,nelg))
         if( .not. allocated(dkzg) ) allocate(dkzg(nkng))
@@ -365,6 +369,7 @@
 ! this is still not working with mpi
 
 	use mod_offline
+	use shympi
 
 	implicit none
 
@@ -374,14 +379,21 @@
 	integer ie,ii,k,i
 	integer nlin,nlink,nline
 	integer iunit
-	integer nknaux,nelaux,nlvaux
+	integer nkng,nelg,nlvg
 	integer nlinkaux,nlineaux
 	integer nkn,nel,nlv,nlvdi
 	
-	double precision, save, allocatable :: wnaux(:,:)
-	double precision, save, allocatable :: rlin(:)
 	integer, save, allocatable :: ileaux(:)
 	integer, save, allocatable :: ilkaux(:)
+
+	integer, allocatable :: ilkg(:), ileg(:)
+	double precision, save, allocatable :: wnaux(:,:)
+	double precision, save, allocatable :: dlin(:)
+	double precision, save, allocatable :: delemg(:,:)
+	double precision, save, allocatable :: dnodeg(:,:)
+	double precision, save, allocatable :: dezg(:,:)
+	double precision, save, allocatable :: dkzg(:)
+
 
 	if( nkn_off <= 0  ) then
 	  stop 'error stop off_read_record: offline not initialized'
@@ -402,12 +414,12 @@
 ! read header
 !----------------------------------------------------------
 
-	call off_read_header(iunit,it,nknaux,nelaux,nlvaux &
+	call off_read_header(iunit,it,nkng,nelg,nlvg &
      &			,nlinkaux,nlineaux,iread,ierr)
 	if( ierr > 0 ) goto 95
 	if( ierr < 0 ) goto 98
-	if( nkn .ne. nknaux .or. nel .ne. nelaux ) goto 97
-	if( nlv .ne. nlvaux ) goto 97
+	if( nkn_global .ne. nkng .or. nel_global .ne. nelg ) goto 97
+	if( nlv_global .ne. nlvg ) goto 97
 
 	time(ig) = it
 
@@ -415,13 +427,17 @@
 ! read vertical indices
 !----------------------------------------------------------
 
+	if( .not. allocated(ileg) ) allocate(ileg(nelg))
+	if( .not. allocated(ilkg) ) allocate(ilkg(nkng))
 	if( .not. allocated(ileaux) ) allocate(ileaux(nel))
 	if( .not. allocated(ilkaux) ) allocate(ilkaux(nkn))
-	read(iunit,iostat=ierr) (ileaux(ie),ie=1,nel)
+	read(iunit,iostat=ierr) (ileg(ie),ie=1,nelg)
 	call off_error(ierr,it,'reading ile')
-	read(iunit,iostat=ierr) (ilkaux(k),k=1,nkn)
+	read(iunit,iostat=ierr) (ilkg(k),k=1,nkng)
 	call off_error(ierr,it,'reading ilk')
 
+	call shympi_g2l_array(ilkg,ilkaux)
+	call shympi_g2l_array(ileg,ileaux)
 	if( .not. bvinit ) then
 	  call off_init_vertical(nkn,nel,ileaux,ilkaux)
 	end if
@@ -433,60 +449,66 @@
 ! set up auxiliary arrays
 !----------------------------------------------------------
 
-        call count_linear(nlvdi,nkn,1,ilk,nlink)
-        call count_linear(nlvdi,nel,1,ile,nline)
+        call count_linear(nlvg,nkng,1,ilkg,nlink)
+        call count_linear(nlvg,nelg,1,ileg,nline)
 	if( nlinkaux > 0 .and. nlink /= nlinkaux ) goto 91
 	if( nlineaux > 0 .and. nline /= nlineaux ) goto 91
 	nlin = max(nlink,nline)
-        if( .not. allocated(rlin) ) allocate(rlin(nlin))
-        if( .not. allocated(wnaux) ) allocate(wnaux(nlvdi,nkn))
+
+        if( .not. allocated(dlin) ) allocate(dlin(nlin))
+        if( .not. allocated(dnodeg) ) allocate(dnodeg(nlvg,nkng))
+        if( .not. allocated(delemg) ) allocate(delemg(nlvg,nelg))
+        if( .not. allocated(dezg) ) allocate(dezg(3,nelg))
+        if( .not. allocated(dkzg) ) allocate(dkzg(nkng))
+        if( .not. allocated(wnaux) ) allocate(wnaux(nlv,nkn))
 
 !----------------------------------------------------------
 ! read currents
 !----------------------------------------------------------
 
 	nlin = nline
-        read(iunit,iostat=ierr) (rlin(i),i=1,nlin)
+        read(iunit,iostat=ierr) (dlin(i),i=1,nlin)
 	call off_error(ierr,it,'reading ut')
-        call dlinear2vals(nlvdi,nel,1,ile,ut(1,1,ig),rlin,nlin)
-        read(iunit,iostat=ierr) (rlin(i),i=1,nlin)
+        call dlinear2vals(nlvg,nelg,1,ileg,delemg,dlin,nlin)
+	call shympi_g2l_array(delemg,ut(:,:,ig))
+        read(iunit,iostat=ierr) (dlin(i),i=1,nlin)
 	call off_error(ierr,it,'reading vt')
-        call dlinear2vals(nlvdi,nel,1,ile,vt(1,1,ig),rlin,nlin)
-
-	!read(iunit) ((ut(l,ie,ig),l=1,ile(ie)),ie=1,nel)
-	!read(iunit) ((vt(l,ie,ig),l=1,ile(ie)),ie=1,nel)
+        call dlinear2vals(nlvg,nelg,1,ileg,delemg,dlin,nlin)
+	call shympi_g2l_array(delemg,vt(:,:,ig))
 
 !----------------------------------------------------------
 ! read water levels and vertical velocities
 !----------------------------------------------------------
 
 	nlin = nlink
-	read(iunit,iostat=ierr) ((ze(ii,ie,ig),ii=1,3),ie=1,nel)
+	read(iunit,iostat=ierr) ((dezg(ii,ie),ii=1,3),ie=1,nelg)
 	call off_error(ierr,it,'reading ze')
-        read(iunit,iostat=ierr) (rlin(i),i=1,nlin)
+	call shympi_g2l_array(3,dezg,ze(:,:,1))
+
+        read(iunit,iostat=ierr) (dlin(i),i=1,nlin)
 	call off_error(ierr,it,'reading wn')
-        call dlinear2vals(nlvdi,nkn,1,ilk,wnaux,rlin,nlin)
-	wn(1:nlvdi,:,ig) = wnaux(1:nlvdi,:)
+        call dlinear2vals(nlvg,nkng,1,ilkg,dnodeg,dlin,nlin)
+	call shympi_g2l_array(dnodeg,wnaux)
+	wn(1:nlv,:,ig) = wnaux(1:nlv,:)
 	wn(0,:,ig) = 0.
-	!read(iunit) ((wn(l,k,ig),l=1,ilk(k)),k=1,nkn)
-	read(iunit,iostat=ierr) (zn(k,ig),k=1,nkn)
+
+	read(iunit,iostat=ierr) (dkzg(k),k=1,nkng)
 	call off_error(ierr,it,'reading zn')
+	call shympi_g2l_array(dkzg,zn(:,ig))
 
 !----------------------------------------------------------
 ! read T/S
 !----------------------------------------------------------
 
 	nlin = nlink
-        read(iunit,iostat=ierr) (rlin(i),i=1,nlin)
+        read(iunit,iostat=ierr) (dlin(i),i=1,nlin)
 	call off_error(ierr,it,'reading sn')
-        call dlinear2vals(nlvdi,nkn,1,ilk,sn(1,1,ig),rlin,nlin)
-	nlin = nlink
-        read(iunit,iostat=ierr) (rlin(i),i=1,nlin)
+        call dlinear2vals(nlvg,nkng,1,ilkg,dnodeg,dlin,nlin)
+	call shympi_g2l_array(dnodeg,sn(:,:,ig))
+        read(iunit,iostat=ierr) (dlin(i),i=1,nlin)
 	call off_error(ierr,it,'reading tn')
-        call dlinear2vals(nlvdi,nkn,1,ilk,tn(1,1,ig),rlin,nlin)
-
-	!read(iunit) ((sn(l,k,ig),l=1,ilk(k)),k=1,nkn)
-	!read(iunit) ((tn(l,k,ig),l=1,ilk(k)),k=1,nkn)
+        call dlinear2vals(nlvg,nkng,1,ilkg,dnodeg,dlin,nlin)
+	call shympi_g2l_array(dnodeg,tn(:,:,ig))
 
 !----------------------------------------------------------
 ! if needed set default values for T/S
@@ -501,6 +523,8 @@
 ! end of routine
 !----------------------------------------------------------
 
+	call off_debug_var
+
 	ierr = 0
 
 	return
@@ -511,9 +535,9 @@
    95	continue
 	stop 'error stop off_read: read error'
    97	continue
-	write(6,*) 'nkn,nknaux: ',nkn,nknaux
-	write(6,*) 'nel,nelaux: ',nel,nelaux
-	write(6,*) 'nlv,nlvaux: ',nlv,nlvaux
+	write(6,*) 'nkng,nkn_global: ',nkng,nkn_global
+	write(6,*) 'nelg,nel_global: ',nelg,nel_global
+	write(6,*) 'nlvg,nlv_global: ',nlvg,nlv_global
 	stop 'error stop off_read: parameter mismatch'
    98	continue
 	!write(6,*) 'EOF encountered: ',iu,ig
@@ -762,6 +786,124 @@
         write(6,*) 'offline data requested has not been read'
         stop 'error stop can_do_offline: no such data'
         end
+
+!****************************************************************
+!****************************************************************
+!****************************************************************
+
+	subroutine off_debug_var
+
+	use mod_offline
+	use basin
+	use shympi
+
+	implicit none
+
+	integer nelg,nkng
+	integer ie_int,ie_ext
+	integer ik_int,ik_ext
+	integer i,ie,ik,iu,lmax,it
+	double precision dtime
+	character*80 name
+
+	integer, save, allocatable :: ies(:)
+	integer, save, allocatable :: iks(:)
+	integer, save, allocatable :: iue(:)
+	integer, save, allocatable :: iuk(:)
+	integer, save :: nie = 0
+	integer, save :: nik = 0
+	integer, save :: icall_local = 0
+
+	integer ieint, ipint
+	integer ieext, ipext
+
+	nelg = nel_global
+	nkng = nkn_global
+
+        call get_act_dtime(dtime)
+        it = nint(dtime)
+
+	if( icall_local == 0 ) then
+
+	  allocate(ies(nel))
+	  allocate(iks(nkn))
+	  allocate(iue(nel))
+	  allocate(iuk(nkn))
+
+	  iu = 300
+
+	  do ie_ext=1,nelg,nelg/20
+	    ie_int = ieint(ie_ext)
+	    if( ie_int > 0 .and. shympi_is_unique_elem(ie_int) ) then
+	      nie = nie + 1
+	      ies(nie) = ie_int
+	      iu = iu + 1
+	      iue(nie) = iu
+	      call make_name('elem',ie_ext,name)
+	      open(iu,file=name,status='unknown',form='formatted')
+	    end if
+	  end do
+
+	  do ik_ext=1,nkng,nkng/20
+	    ik_int = ipint(ik_ext)
+	    if( ik_int > 0 .and. shympi_is_unique_node(ik_int) ) then
+	      nik = nik + 1
+	      iks(nik) = ik_int
+	      iu = iu + 1
+	      iuk(nik) = iu
+	      call make_name('node',ik_ext,name)
+	      open(iu,file=name,status='unknown',form='formatted')
+	    end if
+	  end do
+
+	  icall_local = 1
+	end if
+
+	do i=1,nie
+	  ie = ies(i)
+	  ie_ext = ieext(ie)
+	  iu = iue(i)
+	  lmax = ile(ie)
+	  write(iu,*) it,dtime
+	  write(iu,*) ie_ext,lmax
+	  write(iu,*) ze(:,ie,:)
+	  write(iu,*) ut(1:lmax,ie,:)
+	  write(iu,*) vt(1:lmax,ie,:)
+	end do
+
+	do i=1,nik
+	  ik = iks(i)
+	  ik_ext = ipext(ik)
+	  iu = iuk(i)
+	  lmax = ilk(ik)
+	  write(iu,*) it,dtime
+	  write(iu,*) ik_ext,lmax
+	  write(iu,*) zn(ik,:)
+	  write(iu,*) wn(1:lmax,ik,:)
+	  write(iu,*) sn(1:lmax,ik,:)
+	  write(iu,*) tn(1:lmax,ik,:)
+	end do
+
+	end
+
+!****************************************************************
+
+	subroutine make_name(base,n,name)
+
+	implicit none
+
+	character*(*) base
+	integer n
+	character*(*) name
+
+	character*80 aux
+
+	write(aux,'(i10)') n
+	aux = adjustl(aux)
+
+	name = trim(base) // '.' // trim(aux) // '.aux'
+	
+	end
 
 !****************************************************************
 !****************************************************************

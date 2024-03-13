@@ -60,6 +60,7 @@
 ! 03.05.2023    ggu     new routine shympi_bdebug()
 ! 09.06.2023    ggu     new routine error_stop()
 ! 07.03.2024    ggu     double routines for shympi_l2g_array_fix_d/2d_d
+! 12.03.2024    ggu     double routines for shympi_g2l_array_fix_ird/2d_d
 !
 !******************************************************************
 
@@ -358,16 +359,8 @@
         END INTERFACE
 
 !-------------------------------------------------------
-!       exchanges array to get one global array
+!       copies local to global arrays and viceversa
 !-------------------------------------------------------
-
-        INTERFACE shympi_exchange_array                 !old name - do not use
-        MODULE PROCEDURE   shympi_l2g_array_2d_r &
-     &                    ,shympi_l2g_array_2d_i &
-     &                    ,shympi_l2g_array_3d_r &
-     &                    ,shympi_l2g_array_3d_i &
-     &                    ,shympi_l2g_array_3d_d
-        END INTERFACE
 
         INTERFACE shympi_l2g_array
         MODULE PROCEDURE   shympi_l2g_array_2d_r &
@@ -384,9 +377,13 @@
         INTERFACE shympi_g2l_array
         MODULE PROCEDURE   shympi_g2l_array_2d_r &
      &                    ,shympi_g2l_array_2d_i &
+     &                    ,shympi_g2l_array_2d_d &
      &                    ,shympi_g2l_array_3d_r &
      &                    ,shympi_g2l_array_3d_i &
-     &                    ,shympi_g2l_array_3d_d
+     &                    ,shympi_g2l_array_3d_d &
+     &                    ,shympi_g2l_array_fix_i &
+     &                    ,shympi_g2l_array_fix_r &
+     &                    ,shympi_g2l_array_fix_d
         END INTERFACE
 
 !-------------------------------------------------------
@@ -584,8 +581,6 @@
 
 	integer nk,ne
 
-	!write(6,*) 'shympi_alloc_id: ',nk,ne
-
 	allocate(id_node(nk))
 	allocate(id_elem(0:3,ne))
 
@@ -605,13 +600,8 @@
 	if( allocated(ip_sort_node) ) deallocate(ip_sort_node)
 	if( allocated(ip_sort_elem) ) deallocate(ip_sort_elem)
 
-!	write(6,*) 'allocating sort arrays: ',nk,ne
-
         allocate(ip_sort_node(nk))
         allocate(ip_sort_elem(ne))
-
-!	write(6,*) 'allocated sort arrays: '
-!     +			,size(ip_sort_node),size(ip_sort_elem)
 
         ip_sort_node = 0
         ip_sort_elem = 0
@@ -662,6 +652,12 @@
 	use basin
 
 	integer n
+
+        if( allocated(ghost_areas) ) then
+          deallocate(ghost_areas)
+          deallocate(ghost_nodes_out,ghost_nodes_in)
+          deallocate(ghost_elems_out,ghost_elems_in)
+        end if
 
 	allocate(ghost_areas(5,n_ghost_areas))
         allocate(ghost_nodes_out(n,n_ghost_areas))
@@ -1273,12 +1269,6 @@
 
 	integer ni,no
 
-	!normally this error goes away by recompiling everything
-	!ni = size(val)
-	!no = size(vals,1)
-	!write(6,*) 'shympi_gather_array_2d_r: ',ni,no,n_threads
-	!flush(6)
-
 	vals(:,1) = val(:)
 
         end subroutine shympi_gather_array_2d_r
@@ -1577,6 +1567,39 @@
 
 !*******************************
 
+        subroutine shympi_l2g_array_2d_r(vals,val_out)
+
+        real vals(:)
+        real val_out(:)
+
+	val_out = vals
+
+        end subroutine shympi_l2g_array_2d_r
+
+!*******************************
+
+        subroutine shympi_l2g_array_2d_i(vals,val_out)
+
+        integer vals(:)
+        integer val_out(:)
+
+	val_out = vals
+
+        end subroutine shympi_l2g_array_2d_i
+
+!*******************************
+
+        subroutine shympi_l2g_array_2d_d(vals,val_out)
+
+        double precision vals(:)
+        double precision val_out(:)
+
+	val_out = vals
+
+        end subroutine shympi_l2g_array_2d_d
+
+!*******************************
+
         subroutine shympi_l2g_array_fix_i(nfix,vals,val_out)
 
 	integer nfix
@@ -1611,39 +1634,6 @@
 
         end subroutine shympi_l2g_array_fix_d
 
-!*******************************
-
-        subroutine shympi_l2g_array_2d_r(vals,val_out)
-
-        real vals(:)
-        real val_out(:)
-
-	val_out = vals
-
-        end subroutine shympi_l2g_array_2d_r
-
-!*******************************
-
-        subroutine shympi_l2g_array_2d_i(vals,val_out)
-
-        integer vals(:)
-        integer val_out(:)
-
-	val_out = vals
-
-        end subroutine shympi_l2g_array_2d_i
-
-!*******************************
-
-        subroutine shympi_l2g_array_2d_d(vals,val_out)
-
-        double precision vals(:)
-        double precision val_out(:)
-
-	val_out = vals
-
-        end subroutine shympi_l2g_array_2d_d
-
 !******************************************************************
 !******************************************************************
 !******************************************************************
@@ -1667,6 +1657,17 @@
         val_l = val_g
 
         end subroutine shympi_g2l_array_2d_i
+
+!*******************************
+
+        subroutine shympi_g2l_array_2d_d(val_g,val_l)
+
+        double precision val_g(:)
+        double precision val_l(:)
+
+        val_l = val_g
+
+        end subroutine shympi_g2l_array_2d_d
 
 !*******************************
 
@@ -1700,6 +1701,42 @@
         val_l = val_g
 
         end subroutine shympi_g2l_array_3d_d
+
+!*******************************
+
+        subroutine shympi_g2l_array_fix_i(nfix,val_g,val_l)
+
+	integer nfix 
+        integer val_g(:,:)
+        integer val_l(:,:)
+
+        val_l = val_g
+
+        end subroutine shympi_g2l_array_fix_i
+
+!*******************************
+
+        subroutine shympi_g2l_array_fix_r(nfix,val_g,val_l)
+
+	integer nfix 
+        real val_g(:,:)
+        real val_l(:,:)
+
+        val_l = val_g
+
+        end subroutine shympi_g2l_array_fix_r
+
+!*******************************
+
+        subroutine shympi_g2l_array_fix_d(nfix,val_g,val_l)
+
+	integer nfix 
+        double precision val_g(:,:)
+        double precision val_l(:,:)
+
+        val_l = val_g
+
+        end subroutine shympi_g2l_array_fix_d
 
 !******************************************************************
 !******************************************************************

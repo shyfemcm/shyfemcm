@@ -1,5 +1,24 @@
 ============================================================
 
+Wed Mar 13 14:59:25 CET 2024
+
+mpi g2l routines added, bmpi_skip
+
+ bin/shyfind.sh                  |   6 +-
+ docs/howto/HOWTO_GIT            |  21 +-
+ docs/howto/HOWTO_GIT_REPO       |  84 ++++++++
+ docs/howto/HOWTO_NETCDF         |   2 +-
+ src/shyfem/discharge_flux.f90   |  13 +-
+ src/shyfem/offline_data.f90     |  29 +--
+ src/utils/shympi/mpi_dummy.f90  | 137 ++++++++-----
+ src/utils/shympi/mpi_node.f90   | 440 +++++++++++++++++++++++++++++++++++++---
+ src/utils/shyutilmpi/io_off.f90 | 218 ++++++++++++++++----
+ 9 files changed, 813 insertions(+), 137 deletions(-)
+ new file:
+   docs/howto/HOWTO_GIT_REPO
+
+============================================================
+
 Tue Mar 12 11:20:34 CET 2024
 
 upgraded README

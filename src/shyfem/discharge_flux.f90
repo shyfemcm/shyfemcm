@@ -78,6 +78,7 @@
 ! 11.12.2023	ggu	prepared for new 3d flux computation
 ! 18.12.2023	ggu	finished for new 3d flux computation
 ! 20.12.2023	ggu	debugged 3d flux computation, still to be cleaned
+! 13.03.2024	ggu	bwrite introduced to write flux divergence
 !
 ! info :
 !
@@ -398,6 +399,7 @@
 
 	logical bdebug,bcheck
 	logical bw
+	logical bwrite
 	logical bdiverg		!write error on flux divergence
 	logical, parameter ::  bold = .true.
 	integer i,n,ne,nepres
@@ -436,6 +438,7 @@
 	bdiverg = .false.
 	bdiverg = .true.
 	bcheck = .true.
+	bwrite = .false.	!write flux divergence occurence
 
 !---------------------------------------------------------
 ! compute transport through finite volume k
@@ -474,9 +477,11 @@
 	    if( tabs > 0 ) rtot = abs(ttot)/tabs
 	    if( bdiverg ) then
 	     if( rtot .gt. epsdiv .and. abs(ttot) > 1. ) then
-	      write(6,*) '*** flx3d (divergence): '
-	      write(6,*) k,l,n,lkmax,istype
-	      write(6,*) ttot,tabs,tlmax,rtot
+	      if( bwrite ) then
+	       write(6,*) '*** flx3d (divergence): '
+	       write(6,*) k,l,n,lkmax,istype
+	       write(6,*) ttot,tabs,tlmax,rtot
+	      end if
 	     end if
 	    end if
 	    tlmax = max(tlmax,abs(ttot))
@@ -557,7 +562,7 @@
 	    dabs = 0.5 * (abs(tt(l))+abs(ttnew(l)))
 	    drflux = 0.
 	    if( dabs > 0 ) drflux = dflux/dabs
-	    if( drflux > reps ) then
+	    if( bwrite .and. drflux > reps ) then
 	    write(6,*) '*** dflux ----------'
 	    write(6,*) k,ipext(k),l,n,nepres
 	    write(6,*) istype,ibefor,iafter

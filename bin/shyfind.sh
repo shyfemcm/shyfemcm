@@ -74,13 +74,13 @@ Do_Pattern()
   do
     if SkipObsolete; then continue; fi
     cd $dir
-    result=$( grep $* *.f90 *.f 2> /dev/null )
+    result=$( grep "$*" *.f90 *.f 2> /dev/null )
     if [ -n "$result" ]; then
       if [ $full_name = "YES" ]; then
-        grep -l $* $PWD/*.f90 $PWD/*.f 2> /dev/null
+        grep -l "$*" $PWD/*.f90 $PWD/*.f 2> /dev/null
       else
         echo "---- $dir ----" >&2
-        grep $* *.f90 *.f 2> /dev/null
+        grep "$*" *.f90 *.f 2> /dev/null
       fi
     fi
     cd $actdir
