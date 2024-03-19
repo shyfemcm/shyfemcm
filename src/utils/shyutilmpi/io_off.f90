@@ -58,6 +58,8 @@
 ! 13.10.2020	ggu	default values for T/S introduced
 ! 06.04.2021	ggu	better error message in off_check_vertical()
 ! 07.03.2024	ggu	off write routine prepared for use with MPI, new vers 4
+! 13.03.2024	ggu	turbulence implemented
+! 15.03.2024	ggu	time to iitime, more on turbulence
 !
 ! contents :
 !
@@ -108,11 +110,11 @@
 	integer, parameter :: nintp = 4		!2 (linear) or 4 (cubic)
 
 	integer, parameter :: nvers_max = 5	!last version
-	integer, parameter :: ioff_max = 3	!maximum we can do
+	integer, parameter :: ioff_max = 7	!maximum we can do
 
-	logical, parameter :: bwhydro = .true.	!write hydro results
-	logical, parameter :: bwts = .true.	!write TS results
-	logical, parameter :: bwturb = .false.	!write trubulence results
+	logical, save :: bwhydro = .true.	!write hydro results
+	logical, save :: bwts = .true.		!write TS results
+	logical, save :: bwturb = .true.	!write turbulence results
 
 	integer, save :: nvers = 0		!actual version
 	integer, save :: ioffline = 0
@@ -130,7 +132,7 @@
 	integer, save :: nlv_off = 0
 
 	double precision, save :: dtr = 0.
-	integer, save :: time(nintp)
+	integer, save :: iitime(nintp)
 
 	integer, save :: idef = 0		!use default values for T/S
 	real, save :: tdef = 0
@@ -143,6 +145,8 @@
 	double precision, save, allocatable :: zn(:,:)
 	double precision, save, allocatable :: sn(:,:,:)
 	double precision, save, allocatable :: tn(:,:,:)
+	double precision, save, allocatable :: vd(:,:,:)	!visv
+	double precision, save, allocatable :: dd(:,:,:)	!difv
 
 	integer, save, allocatable :: ile(:)
 	integer, save, allocatable :: ilk(:)
@@ -176,6 +180,8 @@
 	  deallocate(zn)
 	  deallocate(sn)
 	  deallocate(tn)
+	  deallocate(vd)
+	  deallocate(dd)
 	  deallocate(ile)
 	  deallocate(ilk)
 	end if
@@ -191,6 +197,8 @@
 	allocate(zn(nk,nintp))
 	allocate(sn(nl,nk,nintp))
 	allocate(tn(nl,nk,nintp))
+	allocate(vd(0:nl,nk,nintp))
+	allocate(dd(0:nl,nk,nintp))
 	allocate(ile(ne))
 	allocate(ilk(nk))
 
@@ -201,6 +209,8 @@
 	zn = 0.
 	sn = 0.
 	tn = 0.
+	vd = 0.
+	dd = 0.
 
 	end subroutine mod_offline_init
 
@@ -219,13 +229,14 @@
 
 	implicit none
 
-	integer iu,it
+	integer iu
+	integer it
 
-	logical bwrite,bvers4,bvers5
+	logical bwrite,bvers4,bvers5,b3d
 	integer ie,ii,k,i
-	integer nlin,nlink,nline
+	integer nlin,nlink,nline,nlinv
 	integer iunit
-	integer nkn,nel,nlv,nlvdi
+	integer nkn,nel,nlv
 	integer nkng,nelg,nlvg
 	double precision dtime
 	
@@ -247,6 +258,8 @@
 ! initialize
 !----------------------------------------------------------
 
+	b3d = ( nlvg > 1 )
+
 	bvers4 = ( nvers_max > 3 )
 	bvers5 = ( nvers_max == 5 )
 	bwrite = shympi_is_master()
@@ -255,7 +268,6 @@
 	nkn = nkn_off
 	nel = nel_off
 	nlv = nlv_off
-	nlvdi = nlv
 
 	nkng = nkn_global
 	nelg = nel_global
@@ -286,6 +298,9 @@
 	!write(6,*) 'offline nlv: ',my_id,nlv,nlvg
 
 	dtime = it
+
+	bwturb = ( bwturb .and. b3d )	! do turb only for 3d
+	if( nvers_max == 3 ) bwturb = .false.
 
 	iwrite = 0
 	if( bwhydro ) iwrite = iwrite + 1
@@ -323,7 +338,7 @@
           nlin = nlink
 	  call shympi_l2g_array(3,ze(:,:,1),dezg)
 	  if( bwrite ) write(iunit) ((dezg(ii,ie),ii=1,3),ie=1,nelg)
-          wnaux(1:nlvdi,:) = wn(1:nlvdi,:,1)
+          wnaux(1:nlv,:) = wn(1:nlv,:,1)
 	  call shympi_l2g_array(wnaux,dnodeg)
           call dvals2linear(nlvg,nkng,1,ilkg,dnodeg,dlin,nlin)
           if( bwrite ) write(iunit) (dlin(i),i=1,nlin)
@@ -350,8 +365,15 @@
 !----------------------------------------------------------
 
 	if( bwturb ) then
-	  write(6,*) 'cannot yet write turbulence in offline'
-	  stop 'error stop off_write_record: turbulence'
+          nlin = nlink
+          wnaux(1:nlv,:) = vd(1:nlv,:,1)
+	  call shympi_l2g_array(wnaux,dnodeg)
+          call dvals2linear(nlvg,nkng,1,ilkg,dnodeg,dlin,nlin)
+          if( bwrite ) write(iunit) (dlin(i),i=1,nlin)
+          wnaux(1:nlv,:) = dd(1:nlv,:,1)
+	  call shympi_l2g_array(wnaux,dnodeg)
+          call dvals2linear(nlvg,nkng,1,ilkg,dnodeg,dlin,nlin)
+          if( bwrite ) write(iunit) (dlin(i),i=1,nlin)
 	end if
 
 !----------------------------------------------------------
@@ -373,15 +395,17 @@
 
 	implicit none
 
-	integer iu,ig,it
+	integer iu,ig
+	integer it
 	integer ierr
 
+	logical bread
 	integer ie,ii,k,i
 	integer nlin,nlink,nline
 	integer iunit
 	integer nkng,nelg,nlvg
 	integer nlinkaux,nlineaux
-	integer nkn,nel,nlv,nlvdi
+	integer nkn,nel,nlv
 	
 	integer, save, allocatable :: ileaux(:)
 	integer, save, allocatable :: ilkaux(:)
@@ -394,6 +418,7 @@
 	double precision, save, allocatable :: dezg(:,:)
 	double precision, save, allocatable :: dkzg(:)
 
+	logical off_has_record
 
 	if( nkn_off <= 0  ) then
 	  stop 'error stop off_read_record: offline not initialized'
@@ -406,7 +431,6 @@
 	nkn = nkn_off		! these are values of local domain
 	nel = nel_off
 	nlv = nlv_off
-	nlvdi = nlv
 
 	iunit = iu
 
@@ -421,7 +445,7 @@
 	if( nkn_global .ne. nkng .or. nel_global .ne. nelg ) goto 97
 	if( nlv_global .ne. nlvg ) goto 97
 
-	time(ig) = it
+	iitime(ig) = it
 
 !----------------------------------------------------------
 ! read vertical indices
@@ -466,49 +490,81 @@
 ! read currents
 !----------------------------------------------------------
 
-	nlin = nline
-        read(iunit,iostat=ierr) (dlin(i),i=1,nlin)
-	call off_error(ierr,it,'reading ut')
-        call dlinear2vals(nlvg,nelg,1,ileg,delemg,dlin,nlin)
-	call shympi_g2l_array(delemg,ut(:,:,ig))
-        read(iunit,iostat=ierr) (dlin(i),i=1,nlin)
-	call off_error(ierr,it,'reading vt')
-        call dlinear2vals(nlvg,nelg,1,ileg,delemg,dlin,nlin)
-	call shympi_g2l_array(delemg,vt(:,:,ig))
+	bread = off_has_record(1,iread)
+
+	if( bread ) then
+	  nlin = nline
+          read(iunit,iostat=ierr) (dlin(i),i=1,nlin)
+	  call off_error(ierr,it,'reading ut')
+          call dlinear2vals(nlvg,nelg,1,ileg,delemg,dlin,nlin)
+	  call shympi_g2l_array(delemg,ut(:,:,ig))
+          read(iunit,iostat=ierr) (dlin(i),i=1,nlin)
+	  call off_error(ierr,it,'reading vt')
+          call dlinear2vals(nlvg,nelg,1,ileg,delemg,dlin,nlin)
+	  call shympi_g2l_array(delemg,vt(:,:,ig))
+	end if
 
 !----------------------------------------------------------
 ! read water levels and vertical velocities
 !----------------------------------------------------------
 
-	nlin = nlink
-	read(iunit,iostat=ierr) ((dezg(ii,ie),ii=1,3),ie=1,nelg)
-	call off_error(ierr,it,'reading ze')
-	call shympi_g2l_array(3,dezg,ze(:,:,1))
+	bread = off_has_record(1,iread)
 
-        read(iunit,iostat=ierr) (dlin(i),i=1,nlin)
-	call off_error(ierr,it,'reading wn')
-        call dlinear2vals(nlvg,nkng,1,ilkg,dnodeg,dlin,nlin)
-	call shympi_g2l_array(dnodeg,wnaux)
-	wn(1:nlv,:,ig) = wnaux(1:nlv,:)
-	wn(0,:,ig) = 0.
+	if( bread ) then
+	  nlin = nlink
+	  read(iunit,iostat=ierr) ((dezg(ii,ie),ii=1,3),ie=1,nelg)
+	  call off_error(ierr,it,'reading ze')
+	  call shympi_g2l_array(3,dezg,ze(:,:,1))
 
-	read(iunit,iostat=ierr) (dkzg(k),k=1,nkng)
-	call off_error(ierr,it,'reading zn')
-	call shympi_g2l_array(dkzg,zn(:,ig))
+          read(iunit,iostat=ierr) (dlin(i),i=1,nlin)
+	  call off_error(ierr,it,'reading wn')
+          call dlinear2vals(nlvg,nkng,1,ilkg,dnodeg,dlin,nlin)
+	  call shympi_g2l_array(dnodeg,wnaux)
+	  wn(1:nlv,:,ig) = wnaux(1:nlv,:)
+	  !wn(0,:,ig) = 0.
+
+	  read(iunit,iostat=ierr) (dkzg(k),k=1,nkng)
+	  call off_error(ierr,it,'reading zn')
+	  call shympi_g2l_array(dkzg,zn(:,ig))
+	end if
 
 !----------------------------------------------------------
 ! read T/S
 !----------------------------------------------------------
 
-	nlin = nlink
-        read(iunit,iostat=ierr) (dlin(i),i=1,nlin)
-	call off_error(ierr,it,'reading sn')
-        call dlinear2vals(nlvg,nkng,1,ilkg,dnodeg,dlin,nlin)
-	call shympi_g2l_array(dnodeg,sn(:,:,ig))
-        read(iunit,iostat=ierr) (dlin(i),i=1,nlin)
-	call off_error(ierr,it,'reading tn')
-        call dlinear2vals(nlvg,nkng,1,ilkg,dnodeg,dlin,nlin)
-	call shympi_g2l_array(dnodeg,tn(:,:,ig))
+	bread = off_has_record(2,iread)
+
+	if( bread ) then
+	  nlin = nlink
+          read(iunit,iostat=ierr) (dlin(i),i=1,nlin)
+	  call off_error(ierr,it,'reading sn')
+          call dlinear2vals(nlvg,nkng,1,ilkg,dnodeg,dlin,nlin)
+	  call shympi_g2l_array(dnodeg,sn(:,:,ig))
+          read(iunit,iostat=ierr) (dlin(i),i=1,nlin)
+	  call off_error(ierr,it,'reading tn')
+          call dlinear2vals(nlvg,nkng,1,ilkg,dnodeg,dlin,nlin)
+	  call shympi_g2l_array(dnodeg,tn(:,:,ig))
+	end if
+
+!----------------------------------------------------------
+! write turbulence
+!----------------------------------------------------------
+
+	bread = off_has_record(4,iread)
+
+	if( bread ) then
+	  nlin = nlink
+          read(iunit,iostat=ierr) (dlin(i),i=1,nlin)
+	  call off_error(ierr,it,'reading vd')
+          call dlinear2vals(nlvg,nkng,1,ilkg,dnodeg,dlin,nlin)
+	  call shympi_g2l_array(dnodeg,wnaux)
+	  vd(1:nlv,:,ig) = wnaux(1:nlv,:)
+          read(iunit,iostat=ierr) (dlin(i),i=1,nlin)
+	  call off_error(ierr,it,'reading dd')
+          call dlinear2vals(nlvg,nkng,1,ilkg,dnodeg,dlin,nlin)
+	  call shympi_g2l_array(dnodeg,wnaux)
+	  dd(1:nlv,:,ig) = wnaux(1:nlv,:)
+	end if
 
 !----------------------------------------------------------
 ! if needed set default values for T/S
@@ -523,7 +579,7 @@
 ! end of routine
 !----------------------------------------------------------
 
-	call off_debug_var
+	!call off_debug_var
 
 	ierr = 0
 
@@ -646,6 +702,45 @@
 
 	rewind(iu)
 
+	end
+
+!****************************************************************
+
+	subroutine off_peek_next_record(iu,it,ierr)
+
+! checks info on next record
+
+	implicit none
+
+	integer iu,it,ierr
+
+	integer nknaux,nelaux,nv
+	integer nlvaux
+	double precision dtime
+
+	read(iu,err=99,end=98) it,nknaux,nelaux,nv
+
+	if( nv >= 4 ) then
+	  read(iu,err=97,end=97) nlvaux,dtime
+	  backspace(iu)
+	else
+	  dtime = it
+	end if
+
+	backspace(iu)
+	ierr = 0
+
+	return
+   97	continue
+	write(6,*) iu,nv
+	stop 'error stop off_peek_next_record: error reading 2 record'
+   98	continue
+	it = 0
+	ierr = -1
+	return
+   99	continue
+	write(6,*) iu
+	stop 'error stop off_peek_next_record: error reading record'
 	end
 
 !****************************************************************
@@ -882,6 +977,8 @@
 	  write(iu,*) wn(1:lmax,ik,:)
 	  write(iu,*) sn(1:lmax,ik,:)
 	  write(iu,*) tn(1:lmax,ik,:)
+	  write(iu,*) vd(1:lmax,ie,:)
+	  write(iu,*) dd(1:lmax,ie,:)
 	end do
 
 	end
@@ -926,32 +1023,6 @@
 	write(6,*) trim(text)
 	stop 'error stop off_error'
 
-	end
-
-!****************************************************************
-
-	subroutine off_next_record(iu,it,ierr)
-
-! checks info on next record
-
-	implicit none
-
-	integer iu,it,ierr
-
-	integer nknaux,nelaux
-
-	read(iu,err=99,end=98) it,nknaux,nelaux
-	backspace(iu)
-	ierr = 0
-
-	return
-   98	continue
-	it = 0
-	ierr = -1
-	return
-   99	continue
-	write(6,*) iu
-	stop 'error stop off_next_record: error reading record'
 	end
 
 !****************************************************************

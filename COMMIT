@@ -1,5 +1,18 @@
 ============================================================
 
+Tue Mar 19 13:13:24 CET 2024
+
+more on offline, turbulence implemented
+
+ bin/colors.sh                   |   4 +
+ src/shyfem/check.f90            | 129 +++++++++++++++++++++++
+ src/shyfem/offline_data.f90     |  75 +++++++++-----
+ src/shyfem/shyfem.f90           |   4 +
+ src/utils/shyutilmpi/io_off.f90 | 221 ++++++++++++++++++++++++++--------------
+ 5 files changed, 333 insertions(+), 100 deletions(-)
+
+============================================================
+
 Wed Mar 13 14:59:25 CET 2024
 
 mpi g2l routines added, bmpi_skip

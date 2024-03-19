@@ -499,6 +499,8 @@
 
 	call check_parameter_values('before main')
 
+	call debug_write_var
+
 	if( bdebout ) call handle_debug_output(dtime)
 
         !call test_forcing(dtime,dtend)
@@ -585,6 +587,8 @@
 
            call write_wwm
 	   call ww3_loop
+
+	   call debug_write_var
 
 	   call mpi_debug(dtime)
 	   if( bdebout ) call handle_debug_output(dtime)

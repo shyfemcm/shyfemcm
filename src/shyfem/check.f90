@@ -109,6 +109,7 @@
 ! 27.03.2021	ggu	some femtime.h eliminated (not all), cleanup
 ! 31.05.2021	ggu	write time line in node/elem debug
 ! 02.04.2023	ggu	only master writes to iuinfo
+! 15.03.2024	ggu	new routine debug_write_var()
 !
 !*************************************************************
 
@@ -1327,6 +1328,134 @@
 	end do
 
 	end
+
+!*************************************************************
+
+        subroutine debug_write_var
+
+! this writes specific values on nodes and elements to file for comparison
+
+	use mod_hydro
+	use mod_hydro_vel
+	use mod_ts
+	use mod_diff_visc_fric
+        use basin
+        use levels
+        use shympi
+
+        implicit none
+
+        integer nelg,nkng
+	integer nktot,netot
+        integer ie_int,ie_ext
+        integer ik_int,ik_ext
+        integer i,ie,ik,lmax
+	integer iu,iubase,iumax
+	integer ihour
+        double precision dtime
+        character*80 name
+
+        integer, save, allocatable :: ies(:)
+        integer, save, allocatable :: iks(:)
+        integer, save, allocatable :: iue(:)
+        integer, save, allocatable :: iuk(:)
+        integer, save :: nie = 0
+        integer, save :: nik = 0
+        integer, save :: icall_local = 0
+
+        integer ieint, ipint
+        integer ieext, ipext
+
+	return
+
+        iubase = 700	! base unit
+	iumax = 0
+	nktot = 20	! how many nodes to write (0 for none)
+	netot = 20	! how many elems to write (0 for none)
+
+        nelg = nel_global
+        nkng = nkn_global
+
+        call get_act_dtime(dtime)
+
+        if( icall_local == 0 ) then
+
+          allocate(ies(nel))
+          allocate(iks(nkn))
+          allocate(iue(nel))
+          allocate(iuk(nkn))
+
+	  if( netot > 0 ) then
+            do i=1,nelg,nelg/netot
+	      ie_ext = ip_ext_elem(i)
+              ie_int = ieint(ie_ext)
+              if( ie_int > 0 .and. shympi_is_unique_elem(ie_int) ) then
+                nie = nie + 1
+                ies(nie) = ie_int
+                iu = iubase + ie_ext
+		iumax = max(iu,iumax)
+                iue(nie) = iu
+                call make_name('e',ie_ext,name)
+                open(iu,file=name,status='unknown',form='formatted')
+              end if
+            end do
+	  end if
+
+	  if( nktot > 0 ) then
+            do i=1,nkng,nkng/nktot
+	      ik_ext = ip_ext_node(i)
+              ik_int = ipint(ik_ext)
+              if( ik_int > 0 .and. shympi_is_unique_node(ik_int) ) then
+                nik = nik + 1
+                iks(nik) = ik_int
+                iu = iumax + ik_ext
+                iuk(nik) = iu
+                call make_name('n',ik_ext,name)
+                open(iu,file=name,status='unknown',form='formatted')
+              end if
+            end do
+	  end if
+
+          icall_local = 1
+        end if
+
+	!write(6,*) 'writing debug to files: ',nie,iue(1),nik,iuk(1)
+
+	ihour = dtime/3600
+	if( 3600*ihour /= dtime ) return
+
+        do i=1,nie
+          iu = iue(i)
+          ie = ies(i)
+          ie_ext = ieext(ie)
+          lmax = ilhv(ie)
+          write(iu,*) dtime
+          write(iu,*) ie_ext,lmax
+          write(iu,*) 'ze: ',zenv(:,ie)
+          write(iu,*) 'ut: ',utlnv(1:lmax,ie)
+          write(iu,*) 'vt: ',vtlnv(1:lmax,ie)
+	  flush(iu)
+        end do
+
+        do i=1,nik
+          iu = iuk(i)
+          ik = iks(i)
+          ik_ext = ipext(ik)
+          lmax = ilhkv(ik)
+          write(iu,*) dtime
+          write(iu,*) ik_ext,lmax
+          write(iu,*) 'zn: ',znv(ik)
+          write(iu,*) 'wn: ',wlnv(0:lmax,ik)
+          write(iu,*) 'salt: ',saltv(1:lmax,ik)
+          write(iu,*) 'temp: ',tempv(1:lmax,ik)
+          write(iu,*) 'vis: ',visv(0:lmax,ik)
+          write(iu,*) 'dif: ',difv(0:lmax,ik)
+	  flush(iu)
+        end do
+
+	call shympi_barrier
+
+        end
 
 !*************************************************************
 

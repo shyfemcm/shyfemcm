@@ -55,6 +55,7 @@
 ! 17.02.2020	ggu	femtime eliminated
 ! 28.04.2020	ggu	routines dealing with records in new file mod_offline.f
 ! 20.03.2022	ggu	upgraded to suboutputd.f
+! 15.03.2024	ggu	time to iitime; prepared for turbulence (bturb)
 !
 ! notes :
 !
@@ -99,8 +100,7 @@
 	integer mode
 
 	logical bwrite
-	integer itstart,it
-	integer time_first
+	integer itstart,it,itime_first
 	integer ierr,ig,iu
 	double precision dtime
 	real dt
@@ -245,8 +245,8 @@
 	      if( ierr .ne. 0 ) goto 97
 	    end do
 	    call can_do_offline
-	    time_first = time(1)		!first time available in file
-	    if( it .lt. time_first ) goto 99
+	    itime_first = iitime(1)		!first time available in file
+	    if( it .lt. itime_first ) goto 99
 	    call get_timestep(dt)
 	    if( it .eq. itmoff ) then
 	      itstart = it
@@ -279,11 +279,11 @@
 
 	return
    97	continue
-	write(6,*) time
+	write(6,*) iitime
 	write(6,*) nintp,ig
 	stop 'error stop handle_offline: read error at start'
    99	continue
-	write(6,*) it,time
+	write(6,*) it,iitime
 	stop 'error stop handle_offline: no time available'
 	end
 
@@ -296,6 +296,7 @@
 	use mod_ts
 	use mod_hydro_vel
 	use mod_hydro
+	use mod_diff_visc_fric
 	use levels
 	use basin, only : nkn,nel,ngr,mbw
 	use mod_offline
@@ -305,7 +306,7 @@
 	integer iu
 	integer it
 
-	logical boff,bhydro,bts
+	logical boff,bhydro,bts,bturb
 	integer ierr
 	integer ip,i,itnext
 	integer ilhkw(nkn)
@@ -323,21 +324,22 @@
 
 	call is_offline(1,bhydro)		!hydro
 	call is_offline(2,bts)			!T/S
+	call is_offline(4,bturb)		!turbulence
 
 !	---------------------------------------------------------
 !	find new records for time
 !	---------------------------------------------------------
 
-	do while( ieof .eq. 0 .and. it .gt. time(ip) )
-	  call off_next_record(iu,itnext,ieof)
+	do while( ieof .eq. 0 .and. it .gt. iitime(ip) )
+	  call off_peek_next_record(iu,itnext,ieof)
 	  if( ieof .ne. 0 ) exit
 	  call off_copy
 	  call off_read(iu,nintp,ierr)
 	end do
 
-	if( it .gt. time(nintp) ) goto 99
+	if( it .gt. iitime(nintp) ) goto 99
 
-	!write(67,*) it,(time(i),i=1,nintp)
+	!write(67,*) it,(iitime(i),i=1,nintp)
 	!write(6,*) it,bhydro,bts,iwhat
 
 !	---------------------------------------------------------
@@ -353,18 +355,24 @@
 !	interpolation
 !	---------------------------------------------------------
 
+	ilhkw = ilhkv + 1	!one more vertical value for wn
+
 	if( bhydro ) then
-	  ilhkw = ilhkv + 1	!one more vertical value for wn
-	  call off_intp(nintp,it,time,nlvdi,nel,ilhv,nel,ut,utlnv)
-	  call off_intp(nintp,it,time,nlvdi,nel,ilhv,nel,vt,vtlnv)
-	  call off_intp(nintp,it,time,1,3*nel,ilhv,3*nel,ze,zenv)
-	  call off_intp(nintp,it,time,nlvdi+1,nkn,ilhkw,nkn,wn,wlnv)
-	  call off_intp(nintp,it,time,1,nkn,ilhkv,nkn,zn,znv)
+	  call off_intp(nintp,it,iitime,nlvdi,nel,ilhv,nel,ut,utlnv)
+	  call off_intp(nintp,it,iitime,nlvdi,nel,ilhv,nel,vt,vtlnv)
+	  call off_intp(nintp,it,iitime,1,3*nel,ilhv,3*nel,ze,zenv)
+	  call off_intp(nintp,it,iitime,nlvdi+1,nkn,ilhkw,nkn,wn,wlnv)
+	  call off_intp(nintp,it,iitime,1,nkn,ilhkv,nkn,zn,znv)
 	end if
 
 	if( bts ) then
-	  call off_intp(nintp,it,time,nlvdi,nkn,ilhkv,nkn,sn,saltv)
-	  call off_intp(nintp,it,time,nlvdi,nkn,ilhkv,nkn,tn,tempv)
+	  call off_intp(nintp,it,iitime,nlvdi,nkn,ilhkv,nkn,sn,saltv)
+	  call off_intp(nintp,it,iitime,nlvdi,nkn,ilhkv,nkn,tn,tempv)
+	end if
+
+	if( bturb ) then
+	  call off_intp(nintp,it,iitime,nlvdi+1,nkn,ilhkw,nkn,vd,visv)
+	  call off_intp(nintp,it,iitime,nlvdi+1,nkn,ilhkw,nkn,dd,difv)
 	end if
 
 !	---------------------------------------------------------
@@ -390,7 +398,7 @@
    99	continue
 	write(6,*) 'time to interpolate: it = ',it
 	write(6,*) 'time values available in time(): '
-	write(6,*) (time(i),i=1,nintp)
+	write(6,*) (iitime(i),i=1,nintp)
 	stop 'error stop off_intp_all: no such time'
 	end
 
@@ -441,6 +449,8 @@
 
 	subroutine off_intp4(it)
 
+! not used
+
 	use mod_hydro_vel
 	use mod_hydro
 	!use levels
@@ -460,7 +470,7 @@
 
 	t = it
 	do i=1,nintpol
-	  x(i) = time(i)
+	  x(i) = iitime(i)
 	end do
 	
 	do ie=1,nel_off
@@ -503,6 +513,8 @@
 
 	subroutine off_intp2(it)
 
+! not used
+
 	use mod_hydro_vel
 	use mod_hydro
 	!use levels
@@ -517,8 +529,8 @@
 	integer it1,it2
 	double precision rr,rt
 
-	it1 = time(1)
-	it2 = time(2)
+	it1 = iitime(1)
+	it2 = iitime(2)
 
 	rr = 0.
 	if( it2 .gt. it1 ) rr = float(it-it1)/float(it2-it1)
@@ -564,7 +576,7 @@
 
 	  ifrom = ito + 1
 
-	  time(ito) = time(ifrom)
+	  iitime(ito) = iitime(ifrom)
 
 	  ut(:,:,ito) = ut(:,:,ifrom)
 	  vt(:,:,ito) = vt(:,:,ifrom)
@@ -574,6 +586,8 @@
 	  wn(:,:,ito) = wn(:,:,ifrom)
 	  sn(:,:,ito) = sn(:,:,ifrom)
 	  tn(:,:,ito) = tn(:,:,ifrom)
+	  vd(:,:,ito) = vd(:,:,ifrom)
+	  dd(:,:,ito) = dd(:,:,ifrom)
 	  
 	end do
 
@@ -600,6 +614,8 @@
 	wn(:,:,1) = 0.
 	sn(:,:,1) = 0.
 	tn(:,:,1) = 0.
+	vd(:,:,1) = 0.
+	dd(:,:,1) = 0.
 
 	end
 
@@ -612,6 +628,7 @@
 	use mod_ts
 	use mod_hydro_vel
 	use mod_hydro
+	use mod_diff_visc_fric
 	!use levels
 	!use basin, only : nkn,nel,ngr,mbw
 	use mod_offline
@@ -650,11 +667,15 @@
 	    sn(l,k,1) = saltv(l,k)
 	    !tn(l,k,1) = tn(l,k,1) + tempv(l,k) * dtt
 	    tn(l,k,1) = tempv(l,k)
+	    vd(l,k,1) = visv(l,k)
+	    dd(l,k,1) = difv(l,k)
 	  end do
 	  !zn(k,1) = zn(k,1) + znv(k) * dtt
 	  zn(k,1) = znv(k)
 	  !wn(0,k,1) = wn(0,k,1) + wlnv(0,k) * dtt
 	  wn(0,k,1) = wlnv(0,k)
+	  vd(0,k,1) = visv(0,k)
+	  dd(0,k,1) = difv(0,k)
 	end do
 
 	end
@@ -692,9 +713,13 @@
 	    wn(l,k,1) = wn(l,k,1) * rr
 	    sn(l,k,1) = sn(l,k,1) * rr
 	    tn(l,k,1) = tn(l,k,1) * rr
+	    vd(l,k,1) = vd(l,k,1) * rr
+	    dd(l,k,1) = dd(l,k,1) * rr
 	  end do
 	  zn(k,1) = zn(k,1) * rr
 	  wn(0,k,1) = wn(0,k,1) * rr
+	  vd(0,k,1) = vd(0,k,1) * rr
+	  dd(0,k,1) = dd(0,k,1) * rr
 	end do
 
 	end
@@ -761,7 +786,7 @@
 
 	if( ierr .gt. 0 ) then
 	  write(6,*) 'errors checking variables read from file'
-	  write(6,*) time(ig),ig,ierr
+	  write(6,*) iitime(ig),ig,ierr
 	  stop 'error stop off_check: out of range'
 	else
 	  !write(6,*) 'finished offline error check... ok... ',it

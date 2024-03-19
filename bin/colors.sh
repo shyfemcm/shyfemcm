@@ -2,6 +2,10 @@
 #
 # sets colors to be used in bash scripts
 #
+# example how to use:
+#
+# echo "... $name is ${green}installed${normal}"
+#
 #--------------------------------------------------------------
 
 SetColors()
