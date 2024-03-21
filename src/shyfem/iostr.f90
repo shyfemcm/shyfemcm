@@ -326,12 +326,16 @@
 
 ! to do before time loop
 
+	use mod_trace_point
 	use befor_after
 
 	implicit none
 
+	call trace_point('calling wrboxa')
 	call wrboxa
+	call trace_point('calling wrousa')
 	call wrousa
+	call trace_point('finished do_init')
 
 	end
 

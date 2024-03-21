@@ -44,6 +44,7 @@ OBJ  = \
 	coordinates.o \
 	find.o \
 	io_off.o \
+	trace_point.o \
 
 ALL = $(MOD) $(OBJ)
 
@@ -163,6 +164,7 @@ zip:	cleanall
 ../../../lib/mod/evgeom.mod: evgeom.o
 ../../../lib/mod/intp_fem_file.mod: intp_fem_file.o
 ../../../lib/mod/mod_offline.mod: io_off.o
+../../../lib/mod/mod_trace_point.mod: trace_point.o
 ../../../lib/mod/shyutil.mod: shy_util1.o
 bnd_admin.o: ../../../lib/mod/mod_bnd.mod \
 		../../../lib/mod/mod_bound_geom.mod \
@@ -177,7 +179,9 @@ evgeom.o: ../../../lib/mod/basin.mod ../../../lib/mod/shympi.mod
 find.o: ../../../lib/mod/basin.mod ../../../lib/mod/evgeom.mod \
 		../../../lib/mod/mod_geom.mod 
 intp_fem_file.o: ../../../lib/mod/shympi.mod
+io_off.o: ../../../lib/mod/basin.mod ../../../lib/mod/shympi.mod
 shy_util.o: ../../../lib/mod/basin.mod ../../../lib/mod/levels.mod \
+		../../../lib/mod/mod_trace_point.mod \
 		../../../lib/mod/shyfile.mod \
 		../../../lib/mod/shympi.mod \
 		../../../lib/mod/simul.mod 
@@ -190,4 +194,5 @@ topo_update.o: ../../../lib/mod/basin.mod \
 		../../../lib/mod/mod_geom.mod \
 		../../../lib/mod/mod_geom_dynamic.mod \
 		../../../lib/mod/shympi.mod 
+trace_point.o: ../../../lib/mod/shympi.mod
 

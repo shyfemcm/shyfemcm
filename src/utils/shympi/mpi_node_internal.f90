@@ -66,6 +66,7 @@
 	integer, save :: my_p_id = 0		!id of this thread
 	logical, save :: bpmaster = .true.	!is this the master?
 	logical, save :: bpmpi = .false.	!use mpi? (threads > 1)
+	logical, save :: bpdebug = .false.	!write debug messages
 
 !==================================================================
         end module shympi_aux
@@ -241,7 +242,7 @@
 	integer my_id,nt
 	integer root,ierr,i
 	integer count
-	integer local
+	integer local(1)
 	integer, allocatable :: buf(:)
 
         call MPI_COMM_RANK( MPI_COMM_WORLD, my_id, ierr )
@@ -749,6 +750,8 @@
 
         integer ierr
 
+	if( bpdebug ) write(6,*) 'allgather i start: ',bpmpi,n,no,my_id
+
 	if( bpmpi ) then
           call MPI_ALLGATHER (val,n,MPI_DOUBLE &
      &                  ,vals,no,MPI_DOUBLE &
@@ -758,6 +761,8 @@
 	else
 	  vals(1:n,1) = val(:)
 	end if
+
+	if( bpdebug ) write(6,*) 'allgather i end: ',bpmpi,n,no,my_id
 
         end subroutine shympi_allgather_d_internal
 

@@ -226,6 +226,7 @@
 
 	use mod_offline
 	use shympi
+	use mod_trace_point
 
 	implicit none
 
@@ -258,8 +259,6 @@
 ! initialize
 !----------------------------------------------------------
 
-	b3d = ( nlvg > 1 )
-
 	bvers4 = ( nvers_max > 3 )
 	bvers5 = ( nvers_max == 5 )
 	bwrite = shympi_is_master()
@@ -272,6 +271,8 @@
 	nkng = nkn_global
 	nelg = nel_global
 	nlvg = nlv_global
+
+	b3d = ( nlvg > 1 )
 
 !----------------------------------------------------------
 ! set up auxiliary arrays
@@ -336,7 +337,9 @@
 
 	if( bwhydro ) then
           nlin = nlink
+	  call trace_point('calling shympi_l2g_array_fix for ze')
 	  call shympi_l2g_array(3,ze(:,:,1),dezg)
+	  call trace_point('end calling shympi_l2g_array_fix for ze')
 	  if( bwrite ) write(iunit) ((dezg(ii,ie),ii=1,3),ie=1,nelg)
           wnaux(1:nlv,:) = wn(1:nlv,:,1)
 	  call shympi_l2g_array(wnaux,dnodeg)

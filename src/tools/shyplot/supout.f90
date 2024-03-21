@@ -387,15 +387,18 @@
         implicit none
         end
 
-        function nosnext(it)
+        function nosnext(it,ivaria,nlvdi,p3)
+	use basin
         implicit none
 	logical nosnext
-	integer it
+	integer it,ivaria,nlvdi
+	real p3(nlvdi,nel)
 	nosnext = .false.
         end
 
-	subroutine nosopen
+	subroutine nosopen(type)
 	implicit none
+	character*(*) type
 	stop 'error stop nosopen: no more NOS files'
         end
 

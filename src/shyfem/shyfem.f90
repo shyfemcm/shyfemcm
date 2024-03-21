@@ -235,6 +235,7 @@
 	use shympi
 	use mod_test_zeta
 	use befor_after
+	use mod_trace_point
 #ifdef W3_SHYFEM
 	use subww3
 #endif
@@ -481,14 +482,18 @@
 
 	call poisson_compute
 
+	call trace_point('handle offline')
 	call handle_offline(2)
 	call handle_offline(1)
 
 	call init_nudging
 
+	call trace_point('handle do_init')
 	call do_init
 
+	call trace_point('handle sp111')
 	call sp111(2)           	!initialize BC and read first data
+	call trace_point('finished sp111')
 
 	!call custom(it)		!call for initialization
 

@@ -110,6 +110,11 @@ main_dummy:
 
 MPI_TARGET = $(shell [ ! -f MPI_NODE ] && echo reset )
 
+ifeq ($(COMPILER_PROFILE),CHECK)
+shyparts_metis.o: shyparts_metis.f90
+	$(F77) -c $(FFLAG_SPECIAL) shyparts_metis.f90
+endif
+
 #--------------------------------------------- clean
 
 cleanall: clean cleanlib

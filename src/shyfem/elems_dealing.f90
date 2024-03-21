@@ -127,6 +127,7 @@
 ! 02.04.2023	ggu	to compute total mass only run over nkn_inner
 ! 09.05.2023    lrp     introduce top layer index variable
 ! 05.06.2023    lrp     introduce z-star
+! 20.03.2024    ggu     bug fix for hlast
 !
 !****************************************************************
 
@@ -1035,8 +1036,9 @@
 		  hl(lmink,ii) = hl(lmink,ii) + z
 		  hdkn(lmink,k) = hdkn(lmink,k) + areafv * z
 		end if
-		hl(lmax,ii) = htot - hlv(lmax-1)
+	        hlast = htot - hlv(lmax-1)
 		if( hlast .lt. 0. ) goto 77
+	        hl(lmax,ii) = hlast
 	        hdkn(lmax,k) = hdkn(lmax,k) + areafv * hl(lmax,ii)
 	      end if
 	    end if

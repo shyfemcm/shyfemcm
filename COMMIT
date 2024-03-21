@@ -1,5 +1,30 @@
 ============================================================
 
+Thu Mar 21 14:55:08 CET 2024
+
+intermediate - mpi bug not yet resolved
+
+ Rules.make                             |  2 +-
+ bin/shypath.sh                         | 23 ++++++++-
+ src/shyfem/elems_dealing.f90           |  4 +-
+ src/shyfem/iostr.f90                   |  4 ++
+ src/shyfem/ous_admin.f90               |  5 ++
+ src/shyfem/shyfem.f90                  |  5 ++
+ src/tools/shyplot/supout.f90           |  9 ++--
+ src/utils/shympi/Makefile              |  5 ++
+ src/utils/shympi/mpi_node.f90          | 68 +++++++++++++++++++-------
+ src/utils/shympi/mpi_node_internal.f90 |  7 ++-
+ src/utils/shyutilmpi/Makefile          |  5 ++
+ src/utils/shyutilmpi/io_off.f90        |  7 ++-
+ src/utils/shyutilmpi/shy_util.f90      |  8 +++
+ src/utils/shyutilmpi/trace_point.f90   | 89 ++++++++++++++++++++++++++++++++++
+ var/rules/Rules.dist                   |  2 +-
+ 15 files changed, 214 insertions(+), 29 deletions(-)
+ new file:
+   src/utils/shyutilmpi/trace_point.f90
+
+============================================================
+
 Tue Mar 19 13:13:24 CET 2024
 
 more on offline, turbulence implemented

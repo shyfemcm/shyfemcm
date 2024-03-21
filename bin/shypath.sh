@@ -64,10 +64,29 @@ CleanPath()
   done
 }
 
+MakeBinDir()
+{
+  # in order for this to work we must be in the directory tree of the repo
+
+  local dir=$execdir
+
+  while [ -n "$dir" ]
+  do
+    #echo "looking for bin in $dir"
+    if [ -d $dir/bin ]; then
+      bindir=$dir/bin
+      #echo "bindir found: $bindir"
+      return
+    else
+      dir=$( dirname $dir )
+    fi
+  done
+}
+
 #-----------------------------------------------------------
 
-bindir=$( dirname ${BASH_SOURCE[0]} | pwd -P )
-bindir=$( dirname $0 | pwd -P )
+execdir=$( dirname ${BASH_SOURCE[0]} | pwd -P )
+MakeBinDir
 shyfemdir=$( echo $bindir | sed -E 's/\/[^\/]*$//' )
 
 path=$( echo $PATH | tr ':' ' ' )

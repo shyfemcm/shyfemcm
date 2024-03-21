@@ -1148,6 +1148,7 @@
 
 	subroutine shy_write_hydro_records(id,dtime,nlvddi,z,ze,u,v)
 
+	use mod_trace_point
 	use basin
 	use shyfile
 	use shympi
@@ -1168,17 +1169,24 @@
 
 	if( id <= 0 ) return
 
+	call trace_point('call shy_get_params')
 	call shy_get_params(id,iaux,iaux,iaux,nlv,iaux)	!nlv is global here
 	!nlv = min(nlv,nlvddi)
 
 	ivar = 1
+	call trace_point('call shy_write_output_record z')
 	call shy_write_output_record(id,dtime,ivar,bn,nkn,1,1,1,z)
+	call trace_point('call shy_write_output_record ze')
 	call shy_write_output_record(id,dtime,ivar,be,nel,3,1,1,ze)
 	ivar = 3
+	call trace_point('call shy_write_output_record u/v')
 	call shy_write_output_record(id,dtime,ivar,be,nel,1,nlv,nlvddi,u)
+	call trace_point('finished shy_write_hydro_records u')
 	call shy_write_output_record(id,dtime,ivar,be,nel,1,nlv,nlvddi,v)
+	call trace_point('finished shy_write_hydro_records v')
 
 	call shy_sync(id)
+	call trace_point('finished shy_write_hydro_records')
 
 	end
 

@@ -101,7 +101,8 @@
 	logical, save :: bmpi_support = .true.
 	logical, save :: bmpi_unit = .false.		!write debug to my_unit
 	logical, save :: bmpi_allgather = .true.	!do allgather
-	logical, save :: bmpi_skip = .true.		!skip if not bmpi
+	logical, save :: bmpi_skip = .false.		!skip if not bmpi
+	logical, save :: bmpi_ldebug = .false.		!local debug
 
 	logical, parameter :: blocal_shympi_debug = .false. !write debug
 
@@ -456,6 +457,11 @@
         MODULE PROCEDURE  error_stop_2 &
      &			, error_stop_1 &
      &			, error_stop_0
+        END INTERFACE
+
+        INTERFACE shympi_bdebug
+        MODULE PROCEDURE  shympi_bdebug_0 &
+     &			, shympi_bdebug_3 
         END INTERFACE
 
 !-------------------------------------------------------
@@ -1852,10 +1858,12 @@
 	  stop 'error stop shympi_gather_array_fix: incomp first dim'
 	end if
 
+	call shympi_bdebug('in_gather_fix',nfix,ni2,no2)
 	ni = ni1 * ni2
 	no = no1 * no2
 
 	call shympi_allgather_d_internal(ni,no,val,vals)
+	call shympi_bdebug('after_allgather',nfix,ni,no)
 
 	end subroutine shympi_gather_array_fix_d
 
@@ -2568,10 +2576,14 @@
 	  stop 'error stop shympi_l2g_array_fix: incomp first dim'
 	end if
 
+	call shympi_bdebug('allocate_before_gather',nfix,nn_max,n_threads)
+
 	allocate(val_domain(nfix,nn_max,n_threads))
 	val_domain = 0.
 
+	call shympi_bdebug('before_gather',nn_max,nih,noh)
 	call shympi_gather_array_fix_d(nfix,vals,val_domain)
+	call shympi_bdebug('after_gather')
 
 	if( bnode ) then
 	  call shympi_copy_3d_d(val_domain,nov,noh,val_out &
@@ -2583,6 +2595,8 @@
 	  write(6,*) noh,nov,nkn_global,nel_global
 	  stop 'error stop shympi_l2g_array_fix: (1)'
 	end if
+
+	call shympi_bdebug('copy_finished')
 
 	end subroutine shympi_l2g_array_fix_d
 
@@ -3717,23 +3731,6 @@
 
 !******************************************************************
 
-	subroutine shympi_bdebug(text)
-
-	implicit none
-
-	character*(*) text
-
-	if( .not. blocal_shympi_debug ) return
-	if( my_id /= 0 ) return
-
-	!call shympi_syncronize
-	write(6,*) 'shympi_bdebug: ',trim(text)
-	flush(6)
-
-	end subroutine shympi_bdebug
-
-!******************************************************************
-
 	subroutine error_stop_2(routine,text)
 
 	implicit none
@@ -3771,6 +3768,41 @@
 	call shympi_abort
 
 	end subroutine error_stop_0
+
+!******************************************************************
+
+	subroutine shympi_bdebug_0(text)
+
+	implicit none
+
+	character*(*) text
+
+	if( .not. blocal_shympi_debug ) return
+
+        call shympi_barrier
+        write(6,*) trim(text),my_id
+        flush(6)
+        call shympi_barrier
+
+	end subroutine shympi_bdebug_0
+
+!******************************************************************
+
+	subroutine shympi_bdebug_3(text,i1,i2,i3)
+
+	implicit none
+
+	character*(*) text
+	integer i1,i2,i3
+
+	if( .not. blocal_shympi_debug ) return
+
+        call shympi_barrier
+        write(6,*) trim(text),i1,i2,i3,my_id
+        flush(6)
+        call shympi_barrier
+
+	end subroutine shympi_bdebug_3
 
 !==================================================================
         end module shympi
