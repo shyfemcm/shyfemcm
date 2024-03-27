@@ -1,5 +1,25 @@
 ============================================================
 
+Wed Mar 27 12:44:03 CET 2024
+
+more on trace_points
+
+ src/shyfem/baroclinic.f90              |  15 ++
+ src/shyfem/shyfem.f90                  |   9 ++
+ src/tools/shyelab/elab_nc.f90          | 246 ---------------------------------
+ src/tools/shyelab/elab_nc_dummy.f90    | 112 ---------------
+ src/tools/shynetcdf/elab_nc_dummy.f90  |   3 +-
+ src/utils/shympi/mpi_node_internal.f90 |   7 +-
+ src/utils/shyutilmpi/io_off.f90        |   8 ++
+ src/utils/shyutilmpi/shy_util.f90      |  23 ++-
+ src/utils/shyutilmpi/trace_point.f90   |   4 +-
+ 9 files changed, 62 insertions(+), 365 deletions(-)
+ deleted:
+    src/tools/shyelab/elab_nc.f90
+    src/tools/shyelab/elab_nc_dummy.f90
+
+============================================================
+
 Wed Mar 27 09:57:56 CET 2024
 
 more on mpi bug

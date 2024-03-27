@@ -321,6 +321,8 @@
 ! write currents
 !----------------------------------------------------------
 
+	call trace_point('writing hydro')
+
 	if( bwhydro ) then
           nlin = nline
 	  call shympi_l2g_array(ut(:,:,1),delemg)
@@ -334,6 +336,8 @@
 !----------------------------------------------------------
 ! write water levels and vertical velocities
 !----------------------------------------------------------
+
+	call trace_point('writing levels')
 
 	if( bwhydro ) then
           nlin = nlink
@@ -353,6 +357,8 @@
 ! write T/S
 !----------------------------------------------------------
 
+	call trace_point('writing T/S')
+
 	if( bwts ) then
           nlin = nlink
 	  call shympi_l2g_array(sn(:,:,1),dnodeg)
@@ -366,6 +372,8 @@
 !----------------------------------------------------------
 ! write turbulence
 !----------------------------------------------------------
+
+	call trace_point('writing turbulence')
 
 	if( bwturb ) then
           nlin = nlink

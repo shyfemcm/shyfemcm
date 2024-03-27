@@ -720,18 +720,23 @@
 
         integer ierr
 
+	!call shympi_barrier_internal
 	!write(6,*) 'start internal: ',bpmpi,n,no,my_id       !GGURST
+	!call shympi_barrier_internal
 
 	if( bpmpi ) then
           call MPI_ALLGATHER (val,n,MPI_REAL &
      &                  ,vals,no,MPI_REAL &
      &                  ,MPI_COMM_WORLD,ierr)
-	  !write(6,*) 'finished internal: ',bpmpi,n,no,my_id
 	  call shympi_error('shympi_allgather_r_internal' &
      &			,'gather',ierr)
 	else
 	  vals(1:n,1) = val(:)
 	end if
+
+	!call shympi_barrier_internal
+	!write(6,*) 'end internal: ',bpmpi,n,no,my_id       !GGURST
+	!call shympi_barrier_internal
 
         end subroutine shympi_allgather_r_internal
 

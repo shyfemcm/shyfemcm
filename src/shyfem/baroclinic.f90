@@ -205,6 +205,7 @@
 	use shympi
 	use pkonst
 	use mkonst
+	use mod_trace_point
 
 	implicit none
 !
@@ -294,6 +295,7 @@
 
 	if(icall.eq.0) then	!first time
 
+		call trace_point('initalizing barocl')
 		call shympi_bdebug('initalizing barocl')
 
 		ibarcl=iround(getpar('ibarcl'))
@@ -323,6 +325,7 @@
 !		--------------------------------------------
 
 		call get_first_dtime(dtime0)
+		call trace_point('initalizing S/T')
 
 		if( .not. rst_use_restart(3) ) then   !no restart of T/S values
 		  saltv = 0.
@@ -355,6 +358,8 @@
 !		initialize open boundary conditions
 !		--------------------------------------------
 
+		call trace_point('initalizing OBC of S/T')
+
 		nbc = nbnds()
 		allocate(idtemp(nbc))
 		allocate(idsalt(nbc))
@@ -375,6 +380,8 @@
 !		initialize rhov
 !		--------------------------------------------
 
+		call trace_point('initalizing rhov')
+
 !		rhov depends on pressure and viceversa
 !		-> we iterate to the real solution
 
@@ -389,7 +396,10 @@
 !		initialize output files
 !		--------------------------------------------
 
+		call trace_point('initalizing output')
+
 		call bcl_open_output(da_out,itemp,isalt,irho)
+		call trace_point('writing output')
 		call bcl_write_output(dtime0,da_out,itemp,isalt,irho)
 
 		if( shympi_is_master() ) then
@@ -402,6 +412,8 @@
 	icall=icall+1
 
 	if(mode.eq.0) return
+
+	call trace_point('barocl normal call')
 
 !----------------------------------------------------------
 ! normal call
@@ -1099,6 +1111,7 @@
 ! opens output of T/S
 
 	use levels
+	use mod_trace_point
 
 	implicit none
 
@@ -1118,7 +1131,9 @@
 	call init_output_d('itmcon','idtcon',da_out)
 
 	if( has_output_d(da_out) ) then
+	  call trace_point('initalizing scalar file of T/S')
 	  call shyfem_init_scalar_file('ts',nvar,b2d,id)
+	  call trace_point('finished initalizing scalar file of T/S')
 	  da_out(4) = id
 	end if
 

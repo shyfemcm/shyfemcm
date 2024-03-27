@@ -157,6 +157,7 @@
 	use basin
 	use shyfile
 	use shympi
+	use mod_trace_point
 
 	implicit none
 
@@ -172,7 +173,7 @@
 	bdebug = .true.					!mpi_debug_ggguuu
 	bdebug = .false.				!mpi_debug_ggguuu
 
-	call shympi_bdebug('starting shy_copy_basin_to_shy')
+	call trace_point('starting shy_copy_basin_to_shy')
 	!get parameters - nk,ne,nl are global values
 	call shy_get_params(id,nk,ne,np,nl,nvar)
 	!write(6,*) 'shy_copy_basin_to_shy: ',my_id,ne,nk,nl
@@ -184,22 +185,28 @@
 
 	call shy_set_elemindex(id,nen3v_global)
 
+	call trace_point('before xgv')
 	call shympi_l2g_array(xgv,xg)
+	call trace_point('before ygv')
 	call shympi_l2g_array(ygv,yg)
+	call trace_point('after x/ygv')
 	call shy_set_coords(id,xg,yg)
 
+	call trace_point('before hm3v')
 	call shympi_l2g_array(3,hm3v,hm3)
 	call shy_set_depth(id,hm3)
 
+	call trace_point('before ipev')
 	call shympi_l2g_array(ipev,ie)
 	call shympi_l2g_array(ipv,in)
 	call shy_set_extnumbers(id,ie,in)
 
+	call trace_point('before iarv')
 	call shympi_l2g_array(iarv,ie)
 	call shympi_l2g_array(iarnv,in)
 	call shy_set_areacode(id,ie,in)
 
-	call shympi_bdebug('finished shy_copy_basin_to_shy')
+	call trace_point('finished shy_copy_basin_to_shy')
 
 	if( .not. bdebug ) return
 
@@ -475,6 +482,7 @@
 
         use levels
         use shympi
+	use mod_trace_point
 
         implicit none
 
@@ -493,12 +501,14 @@
         nlg = nlv_global
         if( b2d ) nlg = 1
 
-	call shympi_bdebug('start shyfem_init_scalar_file')
+	call trace_point('start shyfem_init_scalar_file')
         call shy_make_output_name(trim(ext),file)
+	call trace_point('start open file')
         call shy_open_output_file(file,npr,nlg,nvar,ftype,id)
+	call trace_point('start set params')
         call shy_set_simul_params(id)
         call shy_make_header(id)
-	call shympi_bdebug('end shyfem_init_scalar_file')
+	call trace_point('end shyfem_init_scalar_file')
 
         end
 
@@ -647,6 +657,7 @@
 	use basin
 	use shyfile
 	use shympi
+	use mod_trace_point
 
 	implicit none
 
@@ -677,12 +688,16 @@
 ! initialize data structure
 !-----------------------------------------------------
 
+	call trace_point('shy_open_output_file')
 	call shy_set_params(id,nkn_global,nel_global,npr,nlg,nvar)
         call shy_set_ftype(id,ftype)
 
 	call shy_alloc_arrays(id)
+	call trace_point('after alloc')
 	call shy_copy_basin_to_shy(id)
+	call trace_point('after shy_copy_basin_to_shy')
 	call shy_copy_levels_to_shy(id)
+	call trace_point('after shy_copy_levels_to_shy')
 
 	if( bopen ) then
 	  write(6,*) 'initialized shy file ',trim(file)

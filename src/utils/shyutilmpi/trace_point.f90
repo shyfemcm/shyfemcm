@@ -64,8 +64,10 @@
 	  bwrite = .true.
 	end if
 	  
+	call shympi_barrier
+
 	if( bwrite ) then
-	  write(6,*) trim(text),my_id
+	  write(6,*) 'trace_point: ',trim(text),my_id
 	  flush(6)
 	end if
 

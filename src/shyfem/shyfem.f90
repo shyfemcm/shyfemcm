@@ -422,11 +422,14 @@
 !-----------------------------------------------------------
 
 	call check_point('checking ht 3')
+	call trace_point('bndo_init')
 
 	call bndo_init
 	if( bdebug ) then
 	  call bndo_info_file('bndo_info.dat')
 	end if
+
+	call trace_point('after bndo_init')
 
 !-----------------------------------------------------------
 ! initialize transports and velocities
@@ -434,13 +437,18 @@
 
 	call init_uv            !set vel, w, pr, ... from transports
 	call copy_uvz		!copy new to old
+	call trace_point('calling barocl')
 	call barocl(0)
+	call trace_point('wrfvla')
 	call wrfvla		!write finite volume
 	call nonhydro_init
+	call trace_point('init_wave')
 	call init_wave		!waves
 	call ww3_init
 	call initsed		!sediments
         call init_bstress	!bottom shear stress
+
+	call trace_point('after init of velocities')
 
 !-----------------------------------------------------------
 ! initialize modules
@@ -464,6 +472,7 @@
 	call handle_gotm_init
 	call tripple_points_handle
 
+	call trace_point('cstsetup')
 	call cstsetup
 
 !-----------------------------------------------------------

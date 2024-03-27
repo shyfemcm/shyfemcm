@@ -35,7 +35,7 @@
 
 !********************************************************************
 
-	subroutine nc_output_init(ncid,title,nvar,ivars)
+	subroutine nc_output_init(ncid,title,nvar,ivars,b2d)
 
 	implicit none
 
@@ -43,6 +43,7 @@
 	character*(*) title		!name of simulation
 	integer nvar			!total number of variables to be written
 	integer ivars(nvar)		!variable id of SHYFEM
+	logical b2d
 
 	write(6,*) 'Cannot initialize NETCDF module'
 	write(6,*) 'NETCDF support has not been enabled'
