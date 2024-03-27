@@ -724,6 +724,8 @@ sub collect_str {
       print STDERR "  copying file $file to $input\n";
       system("cp $file $input");
       $item->{"newdir"} = "$newinput/";
+    } elsif( $file =~ /^\s*$/ ) {		# empty file path
+      $item->{"newdir"} = "";
     } else {
       my $type = `$::scriptpath/shyfile $file`;
       chomp($type);
@@ -731,6 +733,7 @@ sub collect_str {
         print STDERR "  reducing ($type) $file to $input as $filename\n";
         my $command = "femelab -tmin $itanf -tmax $itend";
         my $options = "-out -inclusive";
+	print "executing: $command $options $file";
         system("[ -f out.fem ] && rm -f out.fem");
         system("$command $options $file > /dev/null");
         system("mv out.fem $input/$filename");

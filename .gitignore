@@ -69,6 +69,8 @@ src/tools/shyplot/shyplot
 bin/shyplot
 src/tools/shyelab/shyelab
 bin/shyelab
+src/tools/shyelab/shyfile
+bin/shyfile
 src/tools/shyelab/extelab
 bin/extelab
 src/tools/shyelab/femelab

@@ -57,7 +57,7 @@ LIBL    += $(LIB_NETCDF)
 
 #---------------------------------------------
 
-EXES = shyelab extelab flxelab lgrelab tselab femelab shyproj
+EXES = shyelab extelab flxelab lgrelab tselab femelab shyproj shyfile
 
 MAKEDEPEND = $(FEMBIN)/mkdp.pl
 
@@ -117,6 +117,9 @@ tselab: $(OBJ) $(LIBF) tselab.o
 	$(F77) $(FFLAGS) $(INCLUDE) $(LFLAGS) $(OBJ) $@.o $(LIBL) -o $@
 
 shyproj: $(LIBF) shyproj.o
+	$(F77) $(FFLAGS) $(INCLUDE) $(LFLAGS) $@.o $(LIBL) -o $@
+
+shyfile: $(LIBF) shyfile.o
 	$(F77) $(FFLAGS) $(INCLUDE) $(LFLAGS) $@.o $(LIBL) -o $@
 
 #----------------------------------------------------------------------------

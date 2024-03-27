@@ -2199,7 +2199,7 @@
 
 	logical bnode,belem
 	integer nous
-	real val_domain(nn_max,n_threads)
+	real, allocatable :: val_domain(:,:)
 
 	if( bmpi_skip ) then
 	  val_out = vals
@@ -2211,6 +2211,7 @@
         bnode = ( nous == nkn_global )
         belem = ( nous == nel_global )
 
+	allocate( val_domain(nn_max,n_threads) )
 	call shympi_gather_array_2d_r(vals,val_domain)
 
 	if( bnode ) then
@@ -2234,7 +2235,7 @@
 
 	logical bnode,belem
 	integer nous
-	integer val_domain(nn_max,n_threads)
+	integer, allocatable :: val_domain(:,:)
 
 	if( bmpi_skip ) then
 	  val_out = vals
@@ -2246,6 +2247,7 @@
         bnode = ( nous == nkn_global )
         belem = ( nous == nel_global )
 
+	allocate( val_domain(nn_max,n_threads) )
 	call shympi_gather_array_2d_i(vals,val_domain)
 
 	if( bnode ) then
@@ -2269,7 +2271,7 @@
 
 	logical bnode,belem
 	integer nous
-	double precision val_domain(nn_max,n_threads)
+	double precision, allocatable :: val_domain(:,:)
 
 	if( bmpi_skip ) then
 	  val_out = vals
@@ -2281,6 +2283,7 @@
         bnode = ( nous == nkn_global )
         belem = ( nous == nel_global )
 
+	allocate( val_domain(nn_max,n_threads) )
 	call shympi_gather_array_2d_d(vals,val_domain)
 
 	if( bnode ) then

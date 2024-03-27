@@ -1,5 +1,20 @@
 ============================================================
 
+Wed Mar 27 09:57:56 CET 2024
+
+more on mpi bug
+
+ .gitignore                    |   2 +
+ bin/strparse.pl               |   3 ++
+ src/tools/shyelab/Makefile    |   5 +-
+ src/tools/shyelab/shyfile.f90 | 112 ++++++++++++++++++++++++++++++++++++++++++
+ src/utils/shympi/mpi_node.f90 |   9 ++--
+ 5 files changed, 127 insertions(+), 4 deletions(-)
+ new file:
+   src/tools/shyelab/shyfile.f90
+
+============================================================
+
 Thu Mar 21 14:55:08 CET 2024
 
 intermediate - mpi bug not yet resolved
