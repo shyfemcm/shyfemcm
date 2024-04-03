@@ -1637,6 +1637,7 @@
 	real vals(:,:)
 
 	integer ni,no
+	real, allocatable :: aux(:)
 
 	if( bmpi_skip ) then
 	  vals(:,1) = val(:)
@@ -1645,7 +1646,12 @@
 
 	ni = size(val)
 	no = size(vals,1)
-	call shympi_allgather_r_internal(ni,no,val,vals)
+
+	allocate(aux(no))
+	aux = 0.
+	aux(1:ni) = val(1:ni)
+
+	call shympi_allgather_r_internal(no,no,val,vals)
 
 	end subroutine shympi_gather_array_2d_r
 

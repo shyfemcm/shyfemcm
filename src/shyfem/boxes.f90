@@ -205,7 +205,8 @@
         integer, save :: nfxboxdim = 0	!maximum for kfluxm
 
 	real, parameter :: eps2d = 1.e-3	!eps for 2d mass balance
-	real, parameter :: eps3d = 1.e-3	!eps for 3d mass balance
+	!real, parameter :: eps3d = 1.e-3	!eps for 3d mass balance
+	real, parameter :: eps3d = 0.0		!eps for 3d mass balance
 
         integer, save :: nbox		!total number of boxes
         integer, save :: nbc_ob		!total number of open boundaries

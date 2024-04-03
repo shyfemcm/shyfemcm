@@ -47,6 +47,7 @@
 ! 09.10.2022	ggu	rectify 3d arrays with nlv+1 (nextra)
 ! 27.03.2023	ggu	new routines shympi_receive_internal_*()
 ! 13.04.2023	ggu	introduced bnode, belem (distinguish calls to node/elem)
+! 27.03.2024	ggu	introduced aux array to make dims equal in gather
 !
 !******************************************************************
 
@@ -674,64 +675,76 @@
 !******************************************************************
 !******************************************************************
 
-        subroutine shympi_allgather_i_internal(n,no,val,vals)
+        subroutine shympi_allgather_i_internal(ni,no,val,vals)
 
 	use shympi_aux
 	use shympi
 
 	implicit none
 
-	integer n,no
-        integer val(n)
+	integer ni,no
+        integer val(ni)
         integer vals(no,n_threads)
 
-        integer ierr
+        integer ierr,nn
+	integer, allocatable :: aux(:)
 
-	if( n > no ) then
-	  write(6,*) 'n > no... ',n,no
+	if( ni > no ) then
+	  write(6,*) 'n > no... ',ni,no
 	  !commenting next statement creates mpi error and backtrace
 	  !stop 'error stop shympi_allgather_i_internal: n > no'
 	end if
 
+	allocate(aux(no))
+	aux = 0.
+	aux(1:ni) = val(1:ni)
+	nn = no
+
 	if( bpmpi ) then
-          call MPI_ALLGATHER (val,n,MPI_INTEGER &
+          call MPI_ALLGATHER (aux,nn,MPI_INTEGER &
      &                  ,vals,no,MPI_INTEGER &
      &                  ,MPI_COMM_WORLD,ierr)
 	  call shympi_error('shympi_allgather_i_internal' &
      &			,'gather',ierr)
 	else
-	  vals(1:n,1) = val(:)
+	  vals(1:ni,1) = val(:)
 	end if
 
         end subroutine shympi_allgather_i_internal
 
 !******************************************************************
 
-        subroutine shympi_allgather_r_internal(n,no,val,vals)
+        subroutine shympi_allgather_r_internal(ni,no,val,vals)
 
 	use shympi_aux
 	use shympi
 
 	implicit none
 
-	integer n,no
-        real val(n)
+	integer ni,no
+        real val(ni)
         real vals(no,n_threads)
 
-        integer ierr
+        integer ierr,nn
+        real, allocatable :: aux(:)
 
 	!call shympi_barrier_internal
-	!write(6,*) 'start internal: ',bpmpi,n,no,my_id       !GGURST
+	!write(6,*) 'start internal: ',bpmpi,ni,no,my_id       !GGURST
 	!call shympi_barrier_internal
+
+	allocate(aux(no))
+	aux = 0.
+	aux(1:ni) = val(1:ni)
+	nn = no
 
 	if( bpmpi ) then
-          call MPI_ALLGATHER (val,n,MPI_REAL &
+          call MPI_ALLGATHER (aux,nn,MPI_REAL &
      &                  ,vals,no,MPI_REAL &
      &                  ,MPI_COMM_WORLD,ierr)
 	  call shympi_error('shympi_allgather_r_internal' &
      &			,'gather',ierr)
 	else
-	  vals(1:n,1) = val(:)
+	  vals(1:ni,1) = val(:)
 	end if
 
 	!call shympi_barrier_internal
@@ -742,32 +755,38 @@
 
 !******************************************************************
 
-        subroutine shympi_allgather_d_internal(n,no,val,vals)
+        subroutine shympi_allgather_d_internal(ni,no,val,vals)
 
 	use shympi_aux
 	use shympi
 
 	implicit none
 
-	integer n,no
-        double precision val(n)
+	integer ni,no
+        double precision val(ni)
         double precision vals(no,n_threads)
 
-        integer ierr
+        integer ierr,nn
+        double precision, allocatable :: aux(:)
 
-	if( bpdebug ) write(6,*) 'allgather i start: ',bpmpi,n,no,my_id
+	if( bpdebug ) write(6,*) 'allgather i start: ',bpmpi,ni,no,my_id
+
+	allocate(aux(no))
+	aux = 0.
+	aux(1:ni) = val(1:ni)
+	nn = no
 
 	if( bpmpi ) then
-          call MPI_ALLGATHER (val,n,MPI_DOUBLE &
+          call MPI_ALLGATHER (aux,nn,MPI_DOUBLE &
      &                  ,vals,no,MPI_DOUBLE &
      &                  ,MPI_COMM_WORLD,ierr)
 	  call shympi_error('shympi_allgather_d_internal' &
      &			,'gather',ierr)
 	else
-	  vals(1:n,1) = val(:)
+	  vals(1:ni,1) = val(:)
 	end if
 
-	if( bpdebug ) write(6,*) 'allgather i end: ',bpmpi,n,no,my_id
+	if( bpdebug ) write(6,*) 'allgather i end: ',bpmpi,ni,no,my_id
 
         end subroutine shympi_allgather_d_internal
 

@@ -29,7 +29,7 @@
 !
 ! revision log :
 !
-! 30.08.1995    ggu     $$AUST - austausch coefficient introduced
+! 15.03.2024    ggu     written from scratch
 !
 !--------------------------------------------------------------------------
 

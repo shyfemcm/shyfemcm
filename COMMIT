@@ -1,5 +1,17 @@
 ============================================================
 
+Wed Apr  3 11:35:38 CEST 2024
+
+MPI debugging (aux arrays to make dims equal) real commit
+
+ src/shyfem/boxes.f90                   |  3 +-
+ src/utils/shympi/mpi_node.f90          |  8 ++++-
+ src/utils/shympi/mpi_node_internal.f90 | 65 ++++++++++++++++++++++------------
+ src/utils/shyutilmpi/trace_point.f90   |  2 +-
+ 4 files changed, 52 insertions(+), 26 deletions(-)
+
+============================================================
+
 Wed Apr  3 11:34:47 CEST 2024
 
 MPI debugging (aux arrays to make dims equal)
