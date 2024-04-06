@@ -114,6 +114,7 @@
 	integer,save :: n_ghost_nodes_max = 0
 	integer,save :: n_ghost_elems_max = 0
 	integer,save :: n_ghost_max = 0
+	integer,save :: n_ghost_max_global = 0
 	integer,save :: n_buffer = 0
 
         integer,save,pointer :: n_domains(:)

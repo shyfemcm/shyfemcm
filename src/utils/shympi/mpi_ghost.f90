@@ -38,6 +38,17 @@
 ! 27.03.2023	ggu	bug fix... iloop == 4 eliminated
 ! 27.03.2023	ggu	bug fix... no ieaux
 ! 19.04.2023	ggu	in ghost_exchange adapt call to shympi_check_array()
+! 05.04.2024	ggu	set n_ghost_max_global
+
+! notes :
+!
+! n_ghost_areas, na	total number of bordering domains
+! ghost_areas(5,na)	info on ghost nodes and elements
+!   ghost_areas(1,ia)	id (color) of bordering domain
+!   ghost_areas(2,ia)	total number of outer ghost nodes
+!   ghost_areas(3,ia)	total number of inner ghost nodes
+!   ghost_areas(4,ia)	total number of outer ghost elems
+!   ghost_areas(5,ia)	total number of inner ghost nodes
 
 !*****************************************************************
 !*****************************************************************
@@ -200,7 +211,8 @@
 !	--------------------------------------------------
 
 	n_ghost_max = max(n_ghost_nodes_max,n_ghost_elems_max)
-	write(my_unit,*) 'n_ghost_max: ',n_ghost_max
+	n_ghost_max_global = shympi_max(n_ghost_max)
+	write(my_unit,*) 'n_ghost_max: ',n_ghost_max,n_ghost_max_global
 	call shympi_alloc_ghost(n_ghost_max)
 	ghost_areas(1,:) = ga(:)
 	deallocate(ga)
@@ -302,11 +314,11 @@
 	  if( nc > ncsmax ) goto 99
 	  write(my_unit,*) 'node test: ',my_id,nkn
 	  do k=1,nkn
-	    write(my_unit,*) k,ipv(k),id_node(k)
+	    !write(my_unit,*) k,ipv(k),id_node(k)
 	  end do
 	  write(my_unit,*) 'elem test: ',my_id,nel
 	  do ie=1,nel
-	    write(my_unit,*) ie,ipev(ie),id_elem(:,ie)
+	    !write(my_unit,*) ie,ipev(ie),id_elem(:,ie)
 	  end do
 	  write(my_unit,*) 'ghost test: ',my_id,ia,ic
 	  nc = ghost_areas(5,ia)
@@ -526,6 +538,7 @@
 	implicit none
 
 	integer ia,ic,nc,i,k,ie,iu
+	integer na
 	integer kext,iext
 	integer ipext,ieext
 
@@ -535,12 +548,17 @@
 	write(iu,*) 'writing ghost_debug: ',my_id
 	write(iu,*) '=================================='
 
+	na = n_ghost_areas
 	write(iu,*) 'n_ghost_areas = ',n_ghost_areas
-	write(iu,*) 'ghost_areas: ',ghost_areas
-	write(iu,*) 'ghost_nodes_out: ',ghost_nodes_out
-	write(iu,*) 'ghost_nodes_in: ',ghost_nodes_in
-	write(iu,*) 'ghost_elems_out: ',ghost_elems_out
-	write(iu,*) 'ghost_elems_in: ',ghost_elems_in
+	write(iu,*) 'ghost_areas: '
+	write(iu,*) '     ic   nkout    nkin   neout    nein'
+	do ia=1,na
+	  write(iu,'(5i8)') ghost_areas(:,ia)
+	end do
+	!write(iu,*) 'ghost_nodes_out: ',ghost_nodes_out
+	!write(iu,*) 'ghost_nodes_in: ',ghost_nodes_in
+	!write(iu,*) 'ghost_elems_out: ',ghost_elems_out
+	!write(iu,*) 'ghost_elems_in: ',ghost_elems_in
 
 	do ia=1,n_ghost_areas
 	  ic = ghost_areas(1,ia)
@@ -549,31 +567,35 @@
 	  write(iu,*) '-----------------------------'
 	  nc = ghost_areas(2,ia)
 	  write(iu,*) 'outer nodes',nc
+	  write(iu,*) '        i         k      kext'
 	  do i=1,nc
 	    k = ghost_nodes_out(i,ia)
 	    kext = ipext(k)
-	    write(iu,*) i,k,kext
+	    write(iu,'(3i10)') i,k,kext
 	  end do
 	  nc = ghost_areas(3,ia)
 	  write(iu,*) 'inner nodes',nc
+	  write(iu,*) '        i         k      kext'
 	  do i=1,nc
 	    k = ghost_nodes_in(i,ia)
 	    kext = ipext(k)
-	    write(iu,*) i,k,kext
+	    write(iu,'(3i10)') i,k,kext
 	  end do
 	  nc = ghost_areas(4,ia)
 	  write(iu,*) 'outer elems',nc
+	  write(iu,*) '        i        ie     ieext'
 	  do i=1,nc
 	    ie = ghost_elems_out(i,ia)
 	    iext = ieext(ie)
-	    write(iu,*) i,ie,iext
+	    write(iu,'(3i10)') i,ie,iext
 	  end do
 	  nc = ghost_areas(5,ia)
 	  write(iu,*) 'inner elems',nc
+	  write(iu,*) '        i        ie     ieext'
 	  do i=1,nc
 	    ie = ghost_elems_in(i,ia)
 	    iext = ieext(ie)
-	    write(iu,*) i,ie,iext
+	    write(iu,'(3i10)') i,ie,iext
 	  end do
 	end do
 

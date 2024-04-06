@@ -295,6 +295,7 @@
 	!use basin, only : nkn,nel,ngr,mbw
 	use basin
 	use shympi
+	use shympi_debug
         use mod_zeta_system, only : solver_type
 
 	implicit none
@@ -396,6 +397,16 @@
 	end do
 
 	call hydro_transports_final	!final transports (also barotropic)
+
+	call shympi_barrier
+	!write(6,*) 'utlnv has been computed...'
+	!call shympi_print_elem(159344,utlnv)
+	!call shympi_barrier
+	call shympi_exchange_3d_elem(utlnv)
+	call shympi_exchange_3d_elem(utlnv)
+	!write(6,*) 'utlnv has been exchanged...'
+	!call shympi_print_elem(159344,utlnv)
+	!call shympi_barrier
 
 !-----------------------------------------------------------------
 ! end of soulution for hydrodynamic variables

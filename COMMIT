@@ -1,5 +1,33 @@
 ============================================================
 
+Sat Apr  6 17:55:14 CEST 2024
+
+debugging intel mpi compiler (not yet finished)
+
+ Rules.make                             |  4 +--
+ bin/git/git-gui                        |  7 ++--
+ src/external/sparskit/Makefile         |  7 +++-
+ src/shyfem/elems_dealing.f90           |  4 +++
+ src/shyfem/hydrodynamic.f90            | 11 ++++++
+ src/shyfem/initialize.f90              | 12 +++++--
+ src/shyfem/meteo_forcing.f90           |  4 +++
+ src/shyfem/mpi_assert.f90              | 19 +++++++++++
+ src/shyfem/shyfem.f90                  | 11 ++++--
+ src/shyfem/turbulence.f90              | 61 ++++++++++++++++++++++------------
+ src/utils/shympi/Makefile              |  3 ++
+ src/utils/shympi/README                | 28 ++++++++++++++++
+ src/utils/shympi/mpi_debug.f90         | 39 ++++++++++++++++++++++
+ src/utils/shympi/mpi_dummy.f90         |  1 +
+ src/utils/shympi/mpi_ghost.f90         | 46 ++++++++++++++++++-------
+ src/utils/shympi/mpi_node.f90          | 45 +++++++++++++++++--------
+ src/utils/shympi/mpi_node_internal.f90 | 47 +++++++++++++++++++++-----
+ src/utils/shyutilmpi/coordinates.f90   | 18 ++++++++--
+ src/utils/shyutilmpi/trace_point.f90   |  2 +-
+ var/rules/Rules.dist                   |  4 +--
+ 20 files changed, 304 insertions(+), 69 deletions(-)
+
+============================================================
+
 Wed Apr  3 11:35:38 CEST 2024
 
 MPI debugging (aux arrays to make dims equal) real commit

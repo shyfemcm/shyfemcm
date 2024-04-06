@@ -1224,7 +1224,7 @@
 	parameter ( rearth = 6371000. )
 
 	logical bgeo
-	integer k,ie,ii
+	integer k,ie,ii,ie_mpi,iu
 	integer icor
 	integer isphe
 	real yc,ym,y,ymin,ymax,dlat
@@ -1277,6 +1277,10 @@
 
 	if( bgeo ) dlat = yc		! get directly from basin
 
+	!iu = 670 + my_id
+	!write(iu,*) my_id,icor,bgeo,isphe
+	!write(iu,'(i10,3f16.10)') my_id,ymin,ymax,yc
+
 	aux1 = 0.
 	aux2 = 0.
 
@@ -1295,7 +1299,9 @@
 	write(6,*) 'f_0, beta    : ',aux1,aux2
 	write(6,*) 'yc,ymin,ymax : ',yc,ymin,ymax
 
-	do ie=1,nel
+	do ie_mpi=1,nel
+          ie = ip_sort_elem(ie_mpi)
+
 	  ym=0.
 	  do ii=1,3
 	    ym=ym+yaux(nen3v(ii,ie))
@@ -1312,6 +1318,8 @@
 	    stop 'error stop init_coriolis: value for isphe not allowed'
 	  end if
 	end do
+
+	call shympi_exchange_2d_elem(fcorv)
 
 	end
 

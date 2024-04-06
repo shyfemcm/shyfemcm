@@ -685,6 +685,8 @@
 	  end do
 	end do
 
+	!write(6,*) 'ggguuu set_area before: ',my_id
+
 	if( shympi_partition_on_elements() ) then
           !call shympi_comment('shympi_elem: exchange areakv')
           call shympi_exchange_and_sum_3d_nodes(areakv)
@@ -692,6 +694,8 @@
 	  !call shympi_comment('exchanging areakv')
 	  call shympi_exchange_3d_node(areakv)
 	end if
+
+	!write(6,*) 'ggguuu set_area after: ',my_id
 
 	!call shympi_barrier
 

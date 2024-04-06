@@ -110,6 +110,9 @@ main_dummy:
 
 MPI_TARGET = $(shell [ ! -f MPI_NODE ] && echo reset )
 
+mpi_node_internal.o: mpi_node_internal.f90
+	$(F77) -c $(FFLAG_SPECIAL) mpi_node_internal.f90
+
 ifeq ($(COMPILER_PROFILE),CHECK)
 shyparts_metis.o: shyparts_metis.f90
 	$(F77) -c $(FFLAG_SPECIAL) shyparts_metis.f90

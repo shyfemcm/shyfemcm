@@ -296,6 +296,7 @@
 	use mod_depth
 	use levels
 	use basin, only : nkn,nel,ngr,mbw
+	use shympi
 
 	character*60 windfile,heatfile,rainfile,icefile
 	character*4 what
@@ -503,6 +504,9 @@
 
 	call output_debug_data
 	call output_meteo_data
+
+	call shympi_exchange_2d_node(tauxnv)
+	call shympi_exchange_2d_node(tauynv)
 
 !------------------------------------------------------------------
 ! end of routine

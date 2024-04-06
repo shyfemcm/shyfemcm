@@ -48,6 +48,7 @@
 ! 27.03.2023	ggu	new routines shympi_receive_internal_*()
 ! 13.04.2023	ggu	introduced bnode, belem (distinguish calls to node/elem)
 ! 27.03.2024	ggu	introduced aux array to make dims equal in gather
+! 05.04.2024	ggu	changes in shympi_exchange_internal_r()
 !
 !******************************************************************
 
@@ -291,7 +292,6 @@
      &						,n,val_in,val_out)
 
 	use shympi_aux
-
 	use shympi
 
 	implicit none
@@ -338,7 +338,6 @@
      &						,n,val_in,val_out)
 
 	use shympi_aux
-
 	use shympi
 
 	implicit none
@@ -416,7 +415,6 @@
      &						,g_in,g_out,val)
 
 	use shympi_aux
-
 	use shympi
 
 	implicit none
@@ -504,7 +502,6 @@
      &						,g_in,g_out,val)
 
 	use shympi_aux
-
 	use shympi
 
 	implicit none
@@ -518,13 +515,17 @@
 
 	integer tag,ir,ia,id
 	integer i,k,nc,ierr
-	integer nb
+	integer nb,nvert
+	integer iaux
 	integer iout,iin
 	integer nbs(2,n_ghost_areas)
 	integer status(status_size,2*n_threads)
 	integer request(2*n_threads)
 	real, allocatable :: buffer_in(:,:)
 	real, allocatable :: buffer_out(:,:)
+	logical bw
+
+	bw = .false.
 
         tag=122
 	ir = 0
@@ -536,43 +537,65 @@
 	  iin = 5
 	end if
 
-	nb = (nlvddi-n0+1) * n_ghost_max
+	nvert = nlv_global
+	if( nvert == 0 ) then
+	  nvert = 1000
+	  write(6,*) 'increasing nvert ',nvert,my_id
+	end if
+
+	!nb = (nlvddi-n0+1) * n_ghost_max_global
+	nb = (nvert-n0+1) * n_ghost_max_global
 	call shympi_alloc_buffer(nb)
 	allocate(buffer_in(nb,n_ghost_areas))
 	allocate(buffer_out(nb,n_ghost_areas))
+	buffer_in = 11111.
+	buffer_out = 11111.
 
 	do ia=1,n_ghost_areas
 	  nc = ghost_areas(iout,ia)
-	  call count_buffer(n0,nlvddi,n,nc,il,g_out(:,ia),nb)
+	  !call count_buffer(n0,nlvddi,n,nc,il,g_out(:,ia),nb)
 	  nbs(1,ia) = nb
 	  nc = ghost_areas(iin,ia)
-	  call count_buffer(n0,nlvddi,n,nc,il,g_in(:,ia),nb)
+	  !call count_buffer(n0,nlvddi,n,nc,il,g_in(:,ia),nb)
 	  nbs(2,ia) = nb
+	  if( nbs(1,ia) /= nbs(2,ia) ) then
+	    nb = (nlvddi-n0+1) * n_ghost_max
+	    write(6,*) nb,nbs(1,ia),nbs(2,ia),my_id
+	    stop 'error stop nbs'
+	  end if
 	end do
 
 !ccgguccc!$OMP CRITICAL
+
+	!call shympi_barrier
 
 	do ia=1,n_ghost_areas
 	  ir = ir + 1
 	  id = ghost_areas(1,ia)
 	  nc = ghost_areas(iout,ia)
 	  nb = nbs(1,ia)
+	if(bw) write(6,*) 'irec ',belem,ia,nc,nb,id,my_id
           call MPI_Irecv(buffer_out(:,ia),nb,MPI_REAL,id &
      &	          ,tag,MPI_COMM_WORLD,request(ir),ierr)
 	end do
+
+	!call shympi_barrier
 
 	do ia=1,n_ghost_areas
 	  ir = ir + 1
 	  id = ghost_areas(1,ia)
 	  nc = ghost_areas(iin,ia)
-	  nb = nbs(2,ia)
 	  call to_buffer_r(n0,nlvddi,n,nc,il &
      &		,g_in(:,ia),val,nb,buffer_in(:,ia))
+	  nb = nbs(2,ia)
+	if(bw) write(6,*) 'isend ',belem,ia,nc,nb,id,my_id
+	if(bw) write(6,*) 'buffer before: ',nc,buffer_in(nc,ia),my_id
           call MPI_Isend(buffer_in(:,ia),nb,MPI_REAL,id &
      &	          ,tag,MPI_COMM_WORLD,request(ir),ierr)
 	end do
 
         call MPI_WaitAll(ir,request,status,ierr)
+	!call shympi_barrier
 
 !ccgguccc!$OMP END CRITICAL
 
@@ -580,8 +603,14 @@
 	  id = ghost_areas(1,ia)
 	  nc = ghost_areas(iout,ia)
 	  nb = nbs(1,ia)
+	if(bw) write(6,*) 'copy ',belem,ia,nc,nb,id,my_id
+	if(bw) write(6,*) 'buffer after: ',nc,buffer_out(nc,ia),my_id
 	  call from_buffer_r(n0,nlvddi,n,nc,il &
      &		,g_out(:,ia),val,nb,buffer_out(:,ia))
+	!if( nc == 104 ) then
+	!  iaux = g_out(104,ia)
+	!  if(bw) write(6,*) 'val after: ',nc,iaux,val(1,iaux),my_id
+	!end if
 	end do
 
 	end subroutine shympi_exchange_internal_r

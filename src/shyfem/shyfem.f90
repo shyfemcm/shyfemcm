@@ -341,11 +341,13 @@
 ! initialize triangles
 !-----------------------------------------------------------
 
+	call trace_point('initialize grid')
 	!call levels_init_2d(nkn,nel)	!maybe not needed
 	call set_spherical
 	call set_ev
 	call adjust_spherical
 	call print_spherical
+	call trace_point('handle projection')
 	call handle_projection
 	call set_geom
 	call set_geom_mpi		!adjusts boundaries
@@ -357,6 +359,7 @@
 ! inititialize time independent vertical arrays
 !-----------------------------------------------------------
 
+	call trace_point('handle depth and vertical stuff')
 	call adjust_depth	!adjusts hm3v
 	call init_vertical	!makes nlv,hlv,hldv,ilhv,ilhkv, adjusts hm3v
 
@@ -722,11 +725,12 @@
         use clo
         use shympi
 	use mod_zeta_system
+	use mod_trace_point
 
         implicit none
 
         character*(*) strfile
-        logical bdebug,bdebout,bmpirun,bmpidebug
+        logical bdebug,bdebout,bmpirun,bmpidebug,bltrace
         logical bquiet,bsilent
 
         character*80 version
@@ -744,13 +748,14 @@
 
 	call clo_add_sep('mpi options:')
         call clo_add_option('mpi',.false.                               &
-     &                  ,'runs in MPI mode (experimental)')
+     &                  ,'deprecated and useless option')
 
 	call clo_add_sep('debug options:')
         call clo_add_option('debug',.false.,'enable debugging')
         call clo_add_option('debout',.false.                            &
      &                  ,'writes debugging information to file')
         call clo_add_option('mpi_debug',.false.,'enable mpi debugging')
+        call clo_add_option('trace',.false.,'enable writing of trace points')
 
         call clo_parse_options
 
@@ -762,10 +767,12 @@
         call clo_get_option('debug',bdebug)
         call clo_get_option('debout',bdebout)
         call clo_get_option('mpi_debug',bmpidebug)
+        call clo_get_option('trace',bltrace)
 
         if( bsilent ) bquiet = .true.
         !if( bmpirun ) call shympi_set_debug(bmpidebug)
         call shympi_set_debug(bmpidebug)
+	call set_trace_point(bltrace)
 
 	if( shympi_is_master() ) then
          call shyfem_set_short_copyright(bquiet)

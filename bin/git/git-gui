@@ -29,13 +29,16 @@ fi
 
 gui="YES"			#use gui for diffing
 showdate="NO"			#use gui for diffing
+tool=""
 if [ "$1" = "-h" -o "$1" = "-help" ]; then
-  echo "Usage: git-gui [-h|-help] [-nogui|-showdate]"
+  echo "Usage: git-gui [-h|-help] [-nogui|-showdate|-tool tool]"
   exit 0
 elif [ "$1" = "-nogui" ]; then
   gui="NO"
 elif [ "$1" = "-showdate" ]; then
   showdate="YES"
+elif [ "$1" = "-tool" ]; then
+  tool="-tool $2"
 fi
 
 #files=$( git s|grep modified:|sed -e 's/\s*modified:\s*//'|sed -e 's/#//' )
@@ -87,7 +90,7 @@ do
     file=${array[$choice]}
     echo "diffing $file"
     if [ $gui = "YES" ]; then
-      git-diff $file
+      git-diff $tool $file
     else
       git diff $file | less
     fi

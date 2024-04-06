@@ -121,8 +121,13 @@ zip:	cleanall
 
 #--------------------------------------------- special
 
+LEGACY = ""
+ifeq ($(FORTRAN_COMPILER),GNU_GFORTRAN)
+  LEGACY = "-std=legacy"
+endif
+
 submir.o: submir.f90
-	$(F77) -c $(FFLAGS) -std=legacy $<
+	$(F77) -c $(FFLAGS) $(LEGACY) $<
 
 #--------------------------------------------- rules
 

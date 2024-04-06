@@ -79,6 +79,7 @@
 ! 07.03.2024    ggu     double routines for shympi_l2g_array_fix_d/2d_d
 ! 12.03.2024    ggu     double routines for shympi_g2l_array_fix_ird/2d_d
 ! 13.03.2024    ggu     bmpi_skip introduced
+! 05.04.2024    ggu     shympi_check_3d_elem_r(), nghost_max_global
 !
 !******************************************************************
 
@@ -134,6 +135,7 @@
 	integer,save :: n_ghost_nodes_max = 0
 	integer,save :: n_ghost_elems_max = 0
 	integer,save :: n_ghost_max = 0
+	integer,save :: n_ghost_max_global = 0
 	integer,save :: n_buffer = 0
 
 	integer,save,pointer :: n_domains(:)
@@ -1116,6 +1118,7 @@
 
 	if( bmpi_skip ) return
 
+	!write(6,*) 'calling shympi_exchange_3d0_node_r',my_id
 	call shympi_exchange_internal_r(belem,0,nlvdi,nkn,ilhkv &
      &			,ghost_nodes_in,ghost_nodes_out,val)
 
@@ -1167,6 +1170,7 @@
 
 	if( bmpi_skip ) return
 
+	!write(6,*) 'calling shympi_exchange_2d_node_r',my_id
 	call shympi_exchange_internal_r(belem,1,1,nkn,ilhkv &
      &			,ghost_nodes_in,ghost_nodes_out,val)
 
@@ -1420,14 +1424,21 @@
 
 	logical, parameter :: belem = .true.
 	integer nt
-	real aux(nlvdi,nel)
+	!real aux(nlvdi,nel)
+	real, allocatable :: aux(:,:)
 
 	if( bmpi_skip ) return
 
+	allocate(aux(nlvdi,nel))
+
 	nt = nlvdi*nel
 	aux = val
+	call shympi_barrier
+	!write(6,*) 'before gggguuuu ',trim(text),my_id
 	call shympi_exchange_3d_elem_r(aux)
 	call shympi_check_array_r(belem,nlvdi,nel,nt,val,aux,text)
+	!call shympi_barrier
+	!write(6,*) 'after gggguuuu ',trim(text),my_id
 
 	end subroutine shympi_check_3d_elem_r
 
@@ -1443,16 +1454,20 @@
 	character*(*) text
 
 	integer i,icount,ih,il,id
-	character*80 texto,text1,text2
 	integer, parameter :: imax = 10
+	integer maxdif
 
         if( .not. all( a1 == a2 ) ) then
+	  maxdif = maxval( abs(a1-a2) )
           write(6,*) 'arrays are different on ghost items: ' // text
           write(6,*) 'process id: ',my_id
           write(6,*) 'belem: ',belem
           write(6,*) 'total array size: ',n
           write(6,*) 'total differences: ',count(a1/=a2)
-          write(6,*) 'showing only maximum ',imax,' differences'
+          write(6,*) 'max difference: ',maxdif
+	  if( count(a1/=a2) > imax ) then
+            write(6,*) 'showing only maximum ',imax,' differences'
+	  end if
           write(6,*) '      id       i   ihext      ih      l'
 	  call shympi_make_debug_text(belem,nh)
           write(6,*) trim(textd)
@@ -1470,8 +1485,7 @@
 	    if( imax > 0 .and. icount >= imax ) exit
 	  end do
 	  flush(6)
-	  call shympi_abort
-          stop 'error stop shympi_check_array_i'
+	  call error_stop('error stop shympi_check_array_i')
         end if
 
 	return
@@ -1501,7 +1515,9 @@
           write(6,*) 'array size: ',n,nh,nl
           write(6,*) 'total differences: ',count(a1/=a2)
           write(6,*) 'max difference: ',maxdif
-          write(6,*) 'showing only maximum ',imax,' differences'
+	  if( count(a1/=a2) > imax ) then
+            write(6,*) 'showing only maximum ',imax,' differences'
+	  end if
 	  call shympi_make_debug_text(belem,nh)
           write(6,*) trim(textd)
 	  icount = 0
@@ -1516,8 +1532,7 @@
 	    if( imax > 0 .and. icount >= imax ) exit
 	  end do
 	  flush(6)
-	  call shympi_abort
-          stop 'error stop shympi_check_array_r'
+	  call error_stop('error stop shympi_check_array_r')
         end if
 
 	return
@@ -1535,13 +1550,18 @@
 
 	integer i,icount,ih,il
 	integer, parameter :: imax = 10
+	double precision maxdif
 
         if( .not. all( a1 == a2 ) ) then
+	  maxdif = maxval( abs(a1-a2) )
           write(6,*) 'arrays are different on ghost items: ' // text
           write(6,*) 'process id: ',my_id
           write(6,*) 'total array size: ',n
           write(6,*) 'total differences: ',count(a1/=a2)
-          write(6,*) 'showing only maximum ',imax,' differences'
+          write(6,*) 'max difference: ',maxdif
+	  if( count(a1/=a2) > imax ) then
+            write(6,*) 'showing only maximum ',imax,' differences'
+	  end if
 	  call shympi_make_debug_text(belem,nh)
           write(6,*) trim(textd)
 	  icount = 0
@@ -1556,8 +1576,7 @@
 	    if( imax > 0 .and. icount >= imax ) exit
 	  end do
 	  flush(6)
-	  call shympi_abort
-          stop 'error stop shympi_check_array_d'
+	  call error_stop('error stop shympi_check_array_d')
         end if
 
 	return
@@ -1571,8 +1590,8 @@
 	logical belem
 	integer nh
 
-        textk = '      id       i    kext       k       l'
-        texte = '      id       i   ieext      ie       l'
+        textk = '   my_id       i    kext       k       l'
+        texte = '   my_id       i   ieext      ie       l'
 	text2 = '              val1              val2'
 !                1234567890123456789012345678901234567890
 	if( belem ) then
