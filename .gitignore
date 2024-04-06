@@ -85,6 +85,8 @@ src/tools/shyelab/shyproj
 bin/shyproj
 src/tools/shyparts/shyparts
 bin/shyparts
+src/utils/shympi/check_shympi_debug
+bin/check_shympi_debug
 
 bin/grid
 src/tools/grid/grid
