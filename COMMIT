@@ -1,5 +1,17 @@
 ============================================================
 
+Sat Apr  6 21:48:17 CEST 2024
+
+check_shympi_debug.f90
+
+ src/utils/shympi/Makefile               |   21 +-
+ src/utils/shympi/check_shympi_debug.f90 | 1269 +++++++++++++++++++++++++++++++
+ 2 files changed, 1286 insertions(+), 4 deletions(-)
+ new file:
+   src/utils/shympi/check_shympi_debug.f90
+
+============================================================
+
 Sat Apr  6 17:55:14 CEST 2024
 
 debugging intel mpi compiler (not yet finished)

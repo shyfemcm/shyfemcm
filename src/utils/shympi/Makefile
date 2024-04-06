@@ -61,15 +61,18 @@ ALL = $(MOD) $(OBJ) $(METIS_OBJ)
 
 SPECIAL =       Makefile
 
+EXES = check_shympi_debug
+
 MAKEDEPEND = $(FEMBIN)/mkdp.pl
 
 #--------------------------------------------- EXES
 
 LIB = $(LIBDIR)/lib$(LIBNAME).a
 
-default: lib
-all:	lib
-fem: lib
+default: fem
+all:	fem
+fem: lib $(EXES) links
+#fem: lib
 lib: $(MPI_TARGET) $(LIB) nothing
 
 nothing:
@@ -93,6 +96,12 @@ LIBFSU  = $(LIBDIR)/lib$(LIBSHYUTIL).a
 
 LIBL = $(LIBLSU) $(LIBLUT) $(LIBG_METIS)
 LIBF = $(LIBFSU) $(LIBFUT)
+
+links:
+	@$(FEMBIN)/symlink $(FEMBIN) $(EXES)
+
+check_shympi_debug: $(LIBF) check_shympi_debug.o
+	$(F77) $(FFLAGS) $(INCLUDE) $(LFLAGS) $@.o $(LIBL) -o $@
 
 #--------------------------------------------- test compile
 
@@ -123,7 +132,7 @@ endif
 cleanall: clean cleanlib
 	-rm -f MPI_*
 
-clean: cleanobj cleanvar
+clean: cleanobj cleanvar cleanlinks
 
 cleanobj:
 	-rm -f *.o
@@ -131,6 +140,7 @@ cleanobj:
 	-rm -f *_genmod.f90
 
 cleanvar:
+	-rm -f $(EXES)
 	-rm -f main_dummy main_dummy.f90
 	-rm -f a.out core
 	-rm -f *.bak *.tmp
@@ -140,6 +150,9 @@ cleanvar:
 	-rm -f gmon.out
 	-rm -f out.ps plot.ps
 	-rm -f MPI_NODE MPI_NONE
+
+cleanlinks:
+	@$(FEMBIN)/symlink -remove $(FEMBIN) $(EXES)
 
 cleanlib:
 	-rm -f $(LIB)
