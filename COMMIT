@@ -1,5 +1,31 @@
 ============================================================
 
+Thu Apr 11 13:45:24 CEST 2024
+
+changes to howto files
+
+ docs/howto/{HOWTO_BUG => HOWTO_BUG.txt}           |  0
+ docs/howto/{HOWTO_GIT => HOWTO_GIT.txt}           | 11 ++++++-----
+ docs/howto/{HOWTO_GIT_REPO => HOWTO_GIT_REPO.txt} |  0
+ docs/howto/{HOWTO_MPI => HOWTO_MPI.txt}           |  0
+ docs/howto/{HOWTO_NETCDF => HOWTO_NETCDF.txt}     |  0
+ docs/howto/{HOWTO_PETSC => HOWTO_PETSC.txt}       |  2 +-
+ docs/howto/{INFO_INSTALL => INFO_INSTALL.txt}     |  0
+ docs/howto/Makefile                               |  8 ++++++++
+ 8 files changed, 15 insertions(+), 6 deletions(-)
+ new file:
+   docs/howto/Makefile
+ renamed:
+    docs/howto/HOWTO_BUG -> docs/howto/HOWTO_BUG.txt
+    docs/howto/HOWTO_GIT -> docs/howto/HOWTO_GIT.txt
+    docs/howto/HOWTO_GIT_REPO -> docs/howto/HOWTO_GIT_REPO.txt
+    docs/howto/HOWTO_MPI -> docs/howto/HOWTO_MPI.txt
+    docs/howto/HOWTO_NETCDF -> docs/howto/HOWTO_NETCDF.txt
+    docs/howto/HOWTO_PETSC -> docs/howto/HOWTO_PETSC.txt
+    docs/howto/INFO_INSTALL -> docs/howto/INFO_INSTALL.txt
+
+============================================================
+
 Thu Apr 11 10:54:56 CEST 2024
 
 New version 8_0_5

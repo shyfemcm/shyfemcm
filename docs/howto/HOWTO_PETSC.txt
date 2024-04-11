@@ -87,7 +87,7 @@ HOWTO use the PETSC library
 
 try to compile:
 
-	cd shyfem (or whereever your shyfem installation is)
+	cd shyfem (or wherever your shyfem installation is)
 	make cleanall
 	make rules_std rules_petsc
 	make fem

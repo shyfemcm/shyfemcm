@@ -25,11 +25,12 @@ Howto install the model with git
 	You have two choices. The first is the preferred one.
 
 	a) clone directly in your current directory
-		git clone https://github.com/shyfemcm/shyfemcm.git
-		this will create a directory shyfem in your current directory
+		git clone https://github.com/shyfemcm/shyfemcm.git myshyfem
+		this will create a directory myshyfem in your current directory
 		this directory contains the model code
-		be sure not to have an existing shyfem directory
+		be sure not to have an existing myshyfem directory
 			in your current directory
+		you can give any name to the new shyfem directory
 	
 	b) download from Github
 		goto https://github.com/shyfemcm/shyfemcm
@@ -45,7 +46,7 @@ Howto install the model with git
 3) compile the model
 
 	go into the directory that has been created and run
-		make fem
+		make
 	this should compile the model with standard flags
 	you can always run "make help" to see other targets
 	running "make check_software" will tell you what software 
@@ -71,7 +72,7 @@ Howto install the model with git
 	goto the shyfem directory where the model is installed
 		git fetch
 		git pull
-		make fem
+		make
 
 	this will get the latest model version and compile it
 
