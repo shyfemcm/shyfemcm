@@ -277,6 +277,7 @@ baroclinic.o: ../../lib/mod/basin.mod ../../lib/mod/levels.mod \
 		../../lib/mod/mod_hydro.mod \
 		../../lib/mod/mod_hydro_print.mod \
 		../../lib/mod/mod_layer_thickness.mod \
+		../../lib/mod/mod_trace_point.mod \
 		../../lib/mod/mod_ts.mod ../../lib/mod/pkonst.mod \
 		../../lib/mod/shympi.mod 
 bcvel.o: ../../lib/mod/basin.mod ../../lib/mod/levels.mod \
@@ -544,8 +545,10 @@ initialize.o: ../../lib/mod/basin.mod \
 		../../lib/mod/pkonst.mod ../../lib/mod/shympi.mod 
 intp_tst.o: ../../lib/mod/basin.mod ../../lib/mod/mod_hydro.mod
 iostr.o: ../../lib/mod/basin.mod ../../lib/mod/befor_after.mod \
-		../../lib/mod/levels.mod ../../lib/mod/nls.mod \
-		../../lib/mod/shympi.mod ../../lib/mod/simul.mod 
+		../../lib/mod/levels.mod \
+		../../lib/mod/mod_trace_point.mod \
+		../../lib/mod/nls.mod ../../lib/mod/shympi.mod \
+		../../lib/mod/simul.mod 
 lagrange_back.o: ../../lib/mod/basin.mod \
 		../../lib/mod/mod_depth.mod \
 		../../lib/mod/mod_hydro.mod \
@@ -694,14 +697,17 @@ nudge.o: ../../lib/mod/basin.mod ../../lib/mod/intp_fem_file.mod \
 		../../lib/mod/mod_nudging.mod \
 		../../lib/mod/shympi.mod 
 offline_data.o: ../../lib/mod/basin.mod ../../lib/mod/levels.mod \
+		../../lib/mod/mod_diff_visc_fric.mod \
 		../../lib/mod/mod_hydro.mod \
 		../../lib/mod/mod_hydro_print.mod \
 		../../lib/mod/mod_hydro_vel.mod \
 		../../lib/mod/mod_offline.mod \
+		../../lib/mod/mod_trace_point.mod \
 		../../lib/mod/mod_ts.mod ../../lib/mod/shympi.mod 
 ous_admin.o: ../../lib/mod/basin.mod ../../lib/mod/levels.mod \
 		../../lib/mod/mod_depth.mod \
 		../../lib/mod/mod_hydro.mod \
+		../../lib/mod/mod_trace_point.mod \
 		../../lib/mod/shyfile.mod ../../lib/mod/shympi.mod \
 		../../lib/mod/simul.mod 
 outputd.o: ../../lib/mod/femtime.mod
@@ -775,11 +781,13 @@ shyfem.o: ../../lib/mod/basin.mod ../../lib/mod/befor_after.mod \
 		../../lib/mod/mod_meteo.mod \
 		../../lib/mod/mod_nohyd.mod \
 		../../lib/mod/mod_nudging.mod \
+		../../lib/mod/mod_offline.mod \
 		../../lib/mod/mod_roughness.mod \
 		../../lib/mod/mod_sediment.mod \
 		../../lib/mod/mod_sinking.mod \
 		../../lib/mod/mod_subset.mod \
 		../../lib/mod/mod_test_zeta.mod \
+		../../lib/mod/mod_trace_point.mod \
 		../../lib/mod/mod_ts.mod ../../lib/mod/mod_tvd.mod \
 		../../lib/mod/mod_waves.mod \
 		../../lib/mod/mod_zeta_system.mod \

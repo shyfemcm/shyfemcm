@@ -179,7 +179,9 @@ evgeom.o: ../../../lib/mod/basin.mod ../../../lib/mod/shympi.mod
 find.o: ../../../lib/mod/basin.mod ../../../lib/mod/evgeom.mod \
 		../../../lib/mod/mod_geom.mod 
 intp_fem_file.o: ../../../lib/mod/shympi.mod
-io_off.o: ../../../lib/mod/basin.mod ../../../lib/mod/shympi.mod
+io_off.o: ../../../lib/mod/basin.mod \
+		../../../lib/mod/mod_trace_point.mod \
+		../../../lib/mod/shympi.mod 
 shy_util.o: ../../../lib/mod/basin.mod ../../../lib/mod/levels.mod \
 		../../../lib/mod/mod_trace_point.mod \
 		../../../lib/mod/shyfile.mod \

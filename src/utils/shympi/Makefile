@@ -224,7 +224,10 @@ shyparts_basutil.o: ../../../lib/mod/basin.mod \
 		../../../lib/mod/mod_geom.mod \
 		../../../lib/mod/shympi.mod 
 shyparts_custom.o: ../../../lib/mod/basin.mod \
-		../../../lib/mod/mod_color.mod 
+		../../../lib/mod/mod_color.mod \
+		../../../lib/mod/mod_connect.mod \
+		../../../lib/mod/mod_flood.mod \
+		../../../lib/mod/mod_sort.mod 
 shyparts_dummy.o: ../../../lib/mod/basin.mod
 shyparts_metis.o: ../../../lib/mod/basin.mod \
 		../../../lib/mod/mod_geom.mod 

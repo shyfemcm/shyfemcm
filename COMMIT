@@ -1,5 +1,20 @@
 ============================================================
 
+Thu Apr 11 10:54:01 CEST 2024
+
+new version 8.0.5
+
+ RELEASE_NOTES                 |   6 ++++++
+ docs/final/shyfem.pdf         | Bin 334907 -> 334907 bytes
+ src/shyfem/Makefile           |  12 ++++++++++--
+ src/tools/shyelab/Makefile    |  10 ++--------
+ src/utils/shympi/Makefile     |   5 ++++-
+ src/utils/shyutil/version.f90 |   7 ++++---
+ src/utils/shyutilmpi/Makefile |   4 +++-
+ 7 files changed, 29 insertions(+), 15 deletions(-)
+
+============================================================
+
 Thu Apr 11 09:29:07 CEST 2024
 
 finished offline

@@ -166,14 +166,6 @@ depend:
 elab_check.o: ../../../lib/mod/iso8601.mod
 elab_gis.o: ../../../lib/mod/basin.mod \
 		../../../lib/mod/shyfem_strings.mod 
-elab_nc.o: ../../../lib/mod/basin.mod \
-		../../../lib/mod/elabutil.mod \
-		../../../lib/mod/levels.mod \
-		../../../lib/mod/mod_depth.mod \
-		../../../lib/mod/shyelab_out.mod 
-elab_nc_dummy.o: ../../../lib/mod/basin.mod \
-		../../../lib/mod/levels.mod \
-		../../../lib/mod/shyelab_out.mod 
 elab_off.o: ../../../lib/mod/basin.mod ../../../lib/mod/evgeom.mod \
 		../../../lib/mod/levels.mod 
 elab_regular.o: ../../../lib/mod/basin.mod \
@@ -251,6 +243,8 @@ shyelab_util.o: ../../../lib/mod/basin.mod \
 		../../../lib/mod/evgeom.mod \
 		../../../lib/mod/levels.mod \
 		../../../lib/mod/mod_depth.mod 
+shyfile.o: ../../../lib/mod/clo.mod ../../../lib/mod/elabutil.mod \
+		../../../lib/mod/shyfile.mod 
 tselab1.o: ../../../lib/mod/clo.mod ../../../lib/mod/elabtime.mod \
 		../../../lib/mod/elabutil.mod \
 		../../../lib/mod/shyfem_strings.mod 

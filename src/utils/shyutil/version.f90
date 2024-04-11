@@ -387,6 +387,7 @@
 ! 23.10.2023	ggu	version 8.0.2   Second beta community edition
 ! 29.02.2024	ggu	version 8.0.3   Third beta community edition
 ! 06.03.2024	ggu	version 8.0.4   First community edition
+! 11.04.2024	ggu	version 8.0.5   Offline edition
 !
 !*****************************************************************
 
@@ -396,8 +397,8 @@
 
 ! DOCS	START	P_version
 !
-! \newcommand{\VERSION}{8.0.4}
-! \newcommand{\version}{8\_0\_4}
+! \newcommand{\VERSION}{8.0.5}
+! \newcommand{\version}{8\_0\_5}
 ! \newcommand{\COMMIT}{2024-04-11}
 !
 ! DOCS	END
@@ -406,7 +407,7 @@
 
 	logical, save		:: bshort = .false.
 
-        character*10, parameter :: version = '8.0.4'
+        character*10, parameter :: version = '8.0.5'
         character*10, parameter :: commit  = '2024-04-11'
         character*17, parameter :: text    = 'SHYFEM VERSION = '
 
