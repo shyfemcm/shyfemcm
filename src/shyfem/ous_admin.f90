@@ -125,9 +125,8 @@
 	  call get_act_dtime(dtime)
 	  call shy_write_hydro_records(id,dtime,nlvdi,znv,zenv &
      &					,utlnv,vtlnv)
+	  call trace_point('finished writing hydro_records in wrousa')
 	end if
-
-	call trace_point('finished wrousa')
 
 	return
    77   continue

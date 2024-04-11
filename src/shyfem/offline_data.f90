@@ -56,6 +56,7 @@
 ! 28.04.2020	ggu	routines dealing with records in new file mod_offline.f
 ! 20.03.2022	ggu	upgraded to suboutputd.f
 ! 15.03.2024	ggu	time to iitime; prepared for turbulence (bturb)
+! 10.04.2024	ggu	finished offline
 !
 ! notes :
 !
@@ -121,7 +122,6 @@
 	call get_act_dtime(dtime)
 	it = nint(dtime)
 
-
 	if( bfirst ) then
 	  ioffline = 0
 
@@ -147,6 +147,8 @@
 	  if( iwhat .le. 0 ) icall = -1
 	  if( idtoff .eq. 0 ) icall = -1
 	  if( icall .lt. 0 ) return
+
+	  ioff_mode = iwhat
 
 	  !if( shympi_is_parallel() ) then
 	  !  stop 'error stop offline: not ready for mpi'
@@ -300,6 +302,7 @@
 	use levels
 	use basin, only : nkn,nel,ngr,mbw
 	use mod_offline
+	use mod_trace_point
 
 	implicit none
 
@@ -311,9 +314,7 @@
 	integer ip,i,itnext
 	integer ilhkw(nkn)
 
-	integer ieof
-	save ieof
-	data ieof / 0 /
+	integer, save :: ieof = 0
 
 !	---------------------------------------------------------
 !	initialize
@@ -325,6 +326,8 @@
 	call is_offline(1,bhydro)		!hydro
 	call is_offline(2,bts)			!T/S
 	call is_offline(4,bturb)		!turbulence
+
+	!if( btrace ) write(6,*) 'trace offline: ',bhydro,bts,bturb
 
 !	---------------------------------------------------------
 !	find new records for time
@@ -358,6 +361,7 @@
 	ilhkw = ilhkv + 1	!one more vertical value for wn
 
 	if( bhydro ) then
+	  !call trace_point('offline interpolating hydro')
 	  call off_intp(nintp,it,iitime,nlvdi,nel,ilhv,nel,ut,utlnv)
 	  call off_intp(nintp,it,iitime,nlvdi,nel,ilhv,nel,vt,vtlnv)
 	  call off_intp(nintp,it,iitime,1,3*nel,ilhv,3*nel,ze,zenv)
@@ -366,11 +370,13 @@
 	end if
 
 	if( bts ) then
+	  !call trace_point('offline interpolating T/S')
 	  call off_intp(nintp,it,iitime,nlvdi,nkn,ilhkv,nkn,sn,saltv)
 	  call off_intp(nintp,it,iitime,nlvdi,nkn,ilhkv,nkn,tn,tempv)
 	end if
 
 	if( bturb ) then
+	  !call trace_point('offline interpolating turbulence')
 	  call off_intp(nintp,it,iitime,nlvdi+1,nkn,ilhkw,nkn,vd,visv)
 	  call off_intp(nintp,it,iitime,nlvdi+1,nkn,ilhkw,nkn,dd,difv)
 	end if
@@ -723,6 +729,28 @@
 	end do
 
 	end
+
+!****************************************************************
+!****************************************************************
+!****************************************************************
+
+        subroutine off_print_debug_var
+
+        use mod_offline
+
+        implicit none
+
+	logical, parameter :: bprintoffvar = .false.
+	logical is_time_for_offline
+
+	if( .not. bprintoffvar ) return
+
+	if( is_time_for_offline() ) then
+	  write(6,*) 'off_print_debug_var'
+	  call print_debug_var
+	end if
+
+        end
 
 !****************************************************************
 !****************************************************************

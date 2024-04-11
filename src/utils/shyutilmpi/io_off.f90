@@ -60,6 +60,7 @@
 ! 07.03.2024	ggu	off write routine prepared for use with MPI, new vers 4
 ! 13.03.2024	ggu	turbulence implemented
 ! 15.03.2024	ggu	time to iitime, more on turbulence
+! 10.04.2024	ggu	finsihed offline, bug fix when reading ze
 !
 ! contents :
 !
@@ -124,6 +125,7 @@
 	integer, save :: iwrite = 0		!what has been written to file
 	integer, save :: iuoff			!unit to read/write
 	integer, save :: icall = 0
+	integer, save :: ioff_mode = 0		!read/write mode
 	logical, save :: bfirst = .true.
 	logical, save :: bdebug = .false.
 
@@ -321,9 +323,8 @@
 ! write currents
 !----------------------------------------------------------
 
-	call trace_point('writing hydro')
-
 	if( bwhydro ) then
+	  call trace_point('offline writing hydro')
           nlin = nline
 	  call shympi_l2g_array(ut(:,:,1),delemg)
           call dvals2linear(nlvg,nelg,1,ileg,delemg,dlin,nlin)
@@ -337,13 +338,10 @@
 ! write water levels and vertical velocities
 !----------------------------------------------------------
 
-	call trace_point('writing levels')
-
 	if( bwhydro ) then
+	  call trace_point('offline writing levels')
           nlin = nlink
-	  call trace_point('calling shympi_l2g_array_fix for ze')
 	  call shympi_l2g_array(3,ze(:,:,1),dezg)
-	  call trace_point('end calling shympi_l2g_array_fix for ze')
 	  if( bwrite ) write(iunit) ((dezg(ii,ie),ii=1,3),ie=1,nelg)
           wnaux(1:nlv,:) = wn(1:nlv,:,1)
 	  call shympi_l2g_array(wnaux,dnodeg)
@@ -357,9 +355,8 @@
 ! write T/S
 !----------------------------------------------------------
 
-	call trace_point('writing T/S')
-
 	if( bwts ) then
+	  call trace_point('offline writing T/S')
           nlin = nlink
 	  call shympi_l2g_array(sn(:,:,1),dnodeg)
           call dvals2linear(nlvg,nkng,1,ilkg,dnodeg,dlin,nlin)
@@ -373,9 +370,8 @@
 ! write turbulence
 !----------------------------------------------------------
 
-	call trace_point('writing turbulence')
-
 	if( bwturb ) then
+	  call trace_point('offline writing turbulence')
           nlin = nlink
           wnaux(1:nlv,:) = vd(1:nlv,:,1)
 	  call shympi_l2g_array(wnaux,dnodeg)
@@ -403,6 +399,7 @@
 
 	use mod_offline
 	use shympi
+	use mod_trace_point
 
 	implicit none
 
@@ -504,6 +501,7 @@
 	bread = off_has_record(1,iread)
 
 	if( bread ) then
+	  call trace_point('offline reading hydro')
 	  nlin = nline
           read(iunit,iostat=ierr) (dlin(i),i=1,nlin)
 	  call off_error(ierr,it,'reading ut')
@@ -522,10 +520,11 @@
 	bread = off_has_record(1,iread)
 
 	if( bread ) then
+	  call trace_point('offline reading levels')
 	  nlin = nlink
 	  read(iunit,iostat=ierr) ((dezg(ii,ie),ii=1,3),ie=1,nelg)
 	  call off_error(ierr,it,'reading ze')
-	  call shympi_g2l_array(3,dezg,ze(:,:,1))
+	  call shympi_g2l_array(3,dezg,ze(:,:,ig))
 
           read(iunit,iostat=ierr) (dlin(i),i=1,nlin)
 	  call off_error(ierr,it,'reading wn')
@@ -546,6 +545,7 @@
 	bread = off_has_record(2,iread)
 
 	if( bread ) then
+	  call trace_point('offline reading T/S')
 	  nlin = nlink
           read(iunit,iostat=ierr) (dlin(i),i=1,nlin)
 	  call off_error(ierr,it,'reading sn')
@@ -564,6 +564,7 @@
 	bread = off_has_record(4,iread)
 
 	if( bread ) then
+	  call trace_point('offline reading turbulence')
 	  nlin = nlink
           read(iunit,iostat=ierr) (dlin(i),i=1,nlin)
 	  call off_error(ierr,it,'reading vd')
@@ -816,6 +817,41 @@
 !****************************************************************
 !****************************************************************
 
+        function is_time_for_offline()
+
+! this checks if it is time for offline read/write
+
+        use mod_offline
+
+        implicit none
+
+        logical is_time_for_offline    !it is offline time
+
+	integer it
+	double precision dtime
+
+	is_time_for_offline = .false.
+
+	if( ioff_mode == 0 ) return
+
+        call get_act_dtime(dtime)
+        it = nint(dtime)
+
+	if( ioff_mode == 1 ) then			!write
+	  if( mod(it-itmoff,idtoff) /= 0 ) return
+	else if( ioff_mode == 2 ) then			!read
+	  write(6,*) 'iitime: ',it,iitime
+	  if( count( iitime==it ) == 0 ) return
+	else
+	  stop 'error stop is_time_for_offline: ioff_mode'
+	end if
+
+	is_time_for_offline = .true.
+
+	end
+
+!****************************************************************
+
 	function off_has_record(iwant,iread)
 
 	implicit none
@@ -945,7 +981,7 @@
 	      ies(nie) = ie_int
 	      iu = iu + 1
 	      iue(nie) = iu
-	      call make_name('elem',ie_ext,name)
+	      call make_name_with_number('elem',ie_ext,'aux',name)
 	      open(iu,file=name,status='unknown',form='formatted')
 	    end if
 	  end do
@@ -957,7 +993,7 @@
 	      iks(nik) = ik_int
 	      iu = iu + 1
 	      iuk(nik) = iu
-	      call make_name('node',ik_ext,name)
+	      call make_name_with_number('node',ik_ext,'aux',name)
 	      open(iu,file=name,status='unknown',form='formatted')
 	    end if
 	  end do
@@ -995,25 +1031,6 @@
 	end
 
 !****************************************************************
-
-	subroutine make_name(base,n,name)
-
-	implicit none
-
-	character*(*) base
-	integer n
-	character*(*) name
-
-	character*80 aux
-
-	write(aux,'(i10)') n
-	aux = adjustl(aux)
-
-	name = trim(base) // '.' // trim(aux) // '.aux'
-	
-	end
-
-!****************************************************************
 !****************************************************************
 !****************************************************************
 
@@ -1048,6 +1065,98 @@
 	tdef = t
 	sdef = s
 
+	end
+
+!****************************************************************
+!****************************************************************
+!****************************************************************
+
+	subroutine off_visv_d_debug(it,nlvddi,nkn,a3d)
+
+	use shympi
+
+	implicit none
+
+	integer it
+	integer nlvddi,nkn
+	double precision a3d(nlvddi,nkn)
+
+	logical bdebug
+	integer ik_ext, ik_int, iudbg
+	integer ipint
+
+	ik_ext = 1152
+	ik_int = ipint(ik_ext)
+	bdebug = ik_int > 0
+	iudbg = 750 + my_id
+
+	if( .not. bdebug ) return
+
+	write(iudbg,*) 'it: ',it,ik_ext,ik_int,nlvddi
+	write(iudbg,*) 'vvv: ',a3d(:,ik_int)
+
+	flush(iudbg)
+	
+	end
+
+!****************************************************************
+
+	subroutine off_zenv_d_debug(it,nel,zenv)
+
+	use shympi
+
+	implicit none
+
+	integer it
+	integer nel
+	double precision zenv(3,nel)
+
+	logical bdebug
+	integer ie_ext, ie_int, iudbg
+	integer ieint
+
+	ie_ext = 4309
+	ie_int = ieint(ie_ext)
+	bdebug = ie_int > 0
+	iudbg = 730 + my_id
+
+	if( .not. bdebug ) return
+
+	write(iudbg,*) 'it: ',it,ie_ext,ie_int
+	write(iudbg,*) 'zzz: ',zenv(:,ie_int)
+
+	flush(iudbg)
+	
+	end
+
+!****************************************************************
+
+	subroutine off_zenv_r_debug(it,nel,zenv)
+
+	use shympi
+
+	implicit none
+
+	integer it
+	integer nel
+	real zenv(3,nel)
+
+	logical bdebug
+	integer ie_ext, ie_int, iudbg
+	integer ieint
+
+	ie_ext = 4309
+	ie_int = ieint(ie_ext)
+	bdebug = ie_int > 0
+	iudbg = 740 + my_id
+
+	if( .not. bdebug ) return
+
+	write(iudbg,*) 'it: ',it,ie_ext,ie_int
+	write(iudbg,*) 'zzz: ',zenv(:,ie_int)
+
+	flush(iudbg)
+	
 	end
 
 !****************************************************************

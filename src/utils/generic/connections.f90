@@ -50,6 +50,13 @@
 	integer, save, allocatable :: ecv(:,:)
 	integer, save, allocatable :: bound(:)
 
+! nk = nlist(0,k) is total number of neighboring nodes of node k
+! nlist(1:nk,k) is list of neighboring nodes of node k
+! ek = elist(0,k) is total number of connected elems of node k
+! elist(1:ek,k) is list of connected elems of node k
+! ecv(3,e) is list of elements connected to elem e
+! bound(k) is indicator if k is boundary node
+
 !==================================================================
 	contains
 !==================================================================

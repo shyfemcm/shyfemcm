@@ -69,6 +69,8 @@ OBJ  = \
 	bit10.o \
 	nodelist.o \
 	color_utils.o \
+	flood.o \
+	queue.o \
 
 OBSOLETE = \
 	expand.o \
@@ -187,14 +189,18 @@ zip:	cleanall
 ../../../lib/mod/mod_color.mod: color.o
 ../../../lib/mod/mod_connect.mod: connections.o
 ../../../lib/mod/mod_debug.mod: chk_NaN.o
+../../../lib/mod/mod_flood.mod: flood.o
 ../../../lib/mod/mod_random.mod: random.o
 ../../../lib/mod/mod_sort.mod: subsort.o
 ../../../lib/mod/nls.mod: nls.o
 ../../../lib/mod/para.mod: para.o
 ../../../lib/mod/projection.mod: projection.o
+../../../lib/mod/queue.mod: queue.o
 ../../../lib/mod/scan_string.mod: convert.o
 ../../../lib/mod/shyelab_unit.mod: unitutils.o
 dates.o: ../../../lib/mod/iso8601.mod
+flood.o: ../../../lib/mod/mod_connect.mod \
+		../../../lib/mod/queue.mod 
 nls.o: ../../../lib/mod/para.mod
 time_util.o: ../../../lib/mod/iso8601.mod
 tsfile.o: ../../../lib/mod/iso8601.mod

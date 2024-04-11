@@ -31,6 +31,7 @@
 ! 15.07.2020	ggu	bug fix for counting elements
 ! 22.04.2021	ggu	resolve bound check error (not yet finished)
 ! 12.04.2022	ggu	preapred for online partitioning
+! 10.04.2024	ggu	new routine write_single_nodes()
 !
 !****************************************************************
 
@@ -134,7 +135,7 @@
         ianv = npart
         name = trim(basnam)//'.'//trim(numb)//'.'//'node.grd'
         call grd_write(name)
-	write(6,*) ''
+	!write(6,*) ''
 	write(6,*) 'Grid with partition on nodes in file: ',trim(name)
 
         iaev = epart
@@ -191,6 +192,35 @@
 	  end do
           call grd_write(name)
 	end do
+
+	end
+
+!*******************************************************************
+
+        subroutine write_single_nodes(name,n,ks,itype)
+
+	use basin
+
+	implicit none
+
+	character*(*) name
+	integer n
+	integer ks(n)
+	integer itype
+
+	integer, save :: iu = 100
+	integer i,k
+
+	write(6,*) 'writing single nodes grd files...'
+
+        open(iu,file=name,status='unknown',form='formatted')
+
+	do i=1,n
+	  k = ks(i)
+	  write(iu,'(i1,2i10,2f16.8)') 1,i,itype,xgv(k),ygv(k)
+	end do
+
+	close(iu)
 
 	end
 

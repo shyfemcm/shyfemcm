@@ -62,6 +62,7 @@
 ! 16.02.2019	ggu	changed VERS_7_5_60
 ! 03.05.2019	ggu	new routines to get extension and name
 ! 21.05.2019	ggu	changed VERS_7_5_62
+! 08.04.2024	ggu	new routine make_name_with_number()
 !
 ! notes :
 !
@@ -616,6 +617,30 @@
 	ext = file(i+1:)
 
 	end
+
+!**************************************************************
+
+        subroutine make_name_with_number(base,n,ext,name)
+
+! makes name as: base.n.ext and returns it back in name
+!
+! extension ext should be supplied without "."
+
+        implicit none
+
+        character*(*) base
+        integer n
+        character*(*) ext
+        character*(*) name
+
+        character*80 aux
+
+        write(aux,'(i10)') n
+        aux = adjustl(aux)
+
+        name = trim(base) // '.' // trim(aux) // '.' // trim(ext)
+
+        end
 
 !**************************************************************
 

@@ -30,6 +30,7 @@
 ! revision log :
 !
 ! 15.03.2024    ggu     written from scratch
+! 10.04.2024    ggu     some documentation
 !
 !--------------------------------------------------------------------------
 
@@ -39,9 +40,11 @@
 
 	implicit none
 
-        logical, parameter :: btrace = .true.		!enables trace point
+        logical, parameter :: btrace_enable = .true.	!enables trace point
+        logical, parameter :: btrace_master = .false.	!only master writes
+
         logical, save      :: btrace_do = .true.	!user trace point
-        logical, parameter :: btrace_master = .false.	!only master
+        logical, save      :: btrace = btrace_enable	!final decsion
 
 !================================================================
         contains
@@ -56,7 +59,6 @@
 	logical bwrite
 
 	if( .not. btrace ) return
-	if( .not. btrace_do ) return
 
 	if( btrace_master ) then
 	  bwrite = ( my_id == 0 )
@@ -79,9 +81,14 @@
 
 	subroutine set_trace_point(bt)
 
+	use shympi
+
 	logical bt
 
 	btrace_do = bt
+
+	btrace = btrace_do .and. btrace_enable
+	if( btrace_master .and. my_id /= 0 ) btrace = .false.
 
 	end subroutine set_trace_point
 

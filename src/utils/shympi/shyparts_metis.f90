@@ -98,7 +98,7 @@
 ! Call METIS for patitioning on nodes
 !-----------------------------------------------------------------
 
-	!write(6,*) 'partitioning with METIS...'
+	write(6,*) 'partitioning with METIS...'
         call METIS_PartMeshNodal(nel, nkn, eptr, eind, vwgt, vsize,  &
      &       nparts, tpwgts, options, objval, epart, npart)
 

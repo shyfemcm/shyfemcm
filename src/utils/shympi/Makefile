@@ -29,6 +29,9 @@ LIBDIR  = $(FEMDIR)/lib
 #--------------------------------------------- macros
 
 METIS_OBJ = shyparts_dummy.o
+ifeq ($(PARTS),SDDA)
+  METIS_OBJ = shyparts_basutil.o shyparts_custom.o shyparts_util.o
+endif
 ifeq ($(PARTS),METIS)
   METIS_OBJ = shyparts_basutil.o shyparts_metis.o shyparts_util.o
   LIBG_METIS = -L$(METISDIR)/lib -lmetis
@@ -197,9 +200,11 @@ zip:	cleanall
 # DO NOT DELETE THIS LINE -- make depend depends on it.
 
 ../../../lib/mod/mod_save_index.mod: shyparts_basutil.o
+../../../lib/mod/mod_shympi_debug.mod: check_shympi_debug.o
 ../../../lib/mod/shympi_aux.mod: mpi_node_internal.o
 ../../../lib/mod/shympi_debug.mod: mpi_debug.o
 ../../../lib/mod/shympi_time.mod: mpi_time.o
+check_shympi_debug.o: ../../../lib/mod/clo.mod
 mpi_basin.o: ../../../lib/mod/basin.mod \
 		../../../lib/mod/shympi.mod 
 mpi_custom.o: ../../../lib/mod/basin.mod \
@@ -219,8 +224,7 @@ shyparts_basutil.o: ../../../lib/mod/basin.mod \
 		../../../lib/mod/mod_geom.mod \
 		../../../lib/mod/shympi.mod 
 shyparts_custom.o: ../../../lib/mod/basin.mod \
-		../../../lib/mod/mod_color.mod \
-		../../../lib/mod/mod_flood.mod 
+		../../../lib/mod/mod_color.mod 
 shyparts_dummy.o: ../../../lib/mod/basin.mod
 shyparts_metis.o: ../../../lib/mod/basin.mod \
 		../../../lib/mod/mod_geom.mod 

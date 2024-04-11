@@ -517,6 +517,7 @@
 	call check_parameter_values('before main')
 
 	call debug_write_var
+	call off_print_debug_var
 
 	if( bdebout ) call handle_debug_output(dtime)
 
@@ -525,6 +526,8 @@
 
 	call test_zeta_init
 	call cpu_time_start(2)
+
+	call trace_point('finished shyfem_initialize')
 
 	end subroutine shyfem_initialize
 
@@ -544,6 +547,8 @@
 
 	dtmax = dtend
 	if( dtstep > 0. ) dtmax = dtime + dtstep
+
+	call trace_point('starting shyfem_run')
 
 	do while( dtime .lt. dtmax )
 
@@ -606,6 +611,7 @@
 	   call ww3_loop
 
 	   call debug_write_var
+	   call off_print_debug_var
 
 	   call mpi_debug(dtime)
 	   if( bdebout ) call handle_debug_output(dtime)
@@ -614,6 +620,8 @@
 	   call test_zeta_write
 
 	end do
+
+	call trace_point('finished shyfem_run')
 
 	end subroutine shyfem_run
 
@@ -692,7 +700,7 @@
 
 	call test_zeta_close
 
-        !call ht_finished
+        !call shyfem_finished
 
 	!call pripar(15)
 	!call prifnm(15)
@@ -708,7 +716,7 @@
 !*****************************************************************
 !*****************************************************************
 
-        subroutine ht_finished
+        subroutine shyfem_finished
 
         implicit none
 
@@ -1716,6 +1724,123 @@
 	end do
 
 	end
+
+!*****************************************************************
+
+        subroutine print_debug_var
+
+        use mod_offline
+        use basin
+        use levels
+        use shympi
+        use mod_hydro_print
+        use mod_hydro_vel
+        use mod_hydro
+        use mod_diff_visc_fric
+        use mod_ts
+
+        implicit none
+
+        integer nelg,nkng
+        integer ie_int,ie_ext
+        integer ik_int,ik_ext
+        integer i,ie,ik,iu,lmax,it
+        double precision dtime
+        character*80 name
+
+        integer, parameter :: nmax = 20         ! max nuber of vars written
+        integer, parameter :: iubase = 400      ! base for unit numbers
+
+        integer, save, allocatable :: ies(:)
+        integer, save, allocatable :: iks(:)
+        integer, save, allocatable :: iue(:)
+        integer, save, allocatable :: iuk(:)
+        integer, save :: nie = 0
+        integer, save :: nik = 0
+        integer, save :: icall_local = 0
+
+        integer ieint, ipint
+        integer ieext, ipext
+        logical is_time_for_offline
+
+        nelg = nel_global
+        nkng = nkn_global
+
+        call get_act_dtime(dtime)
+        it = nint(dtime)
+
+        if( icall_local == 0 ) then
+
+          allocate(ies(nmax+1))
+          allocate(iks(nmax+1))
+          allocate(iue(nmax+1))
+          allocate(iuk(nmax+1))
+          iu = iubase
+
+          do ie=1,nelg,nelg/nmax
+            ie_ext = ip_ext_elem(ie)
+            ie_int = ieint(ie_ext)
+            if( ie_int > 0 .and. shympi_is_unique_elem(ie_int) ) then
+              nie = nie + 1
+              if( nie > nmax+1 ) stop 'error stop off_print_debug_var: nie>nmax'
+              ies(nie) = ie_int
+              iu = iu + 1
+              iue(nie) = iu
+              call make_name_with_number('elem',ie_ext,'aux',name)
+              open(iu,file=name,status='unknown',form='formatted')
+            end if
+          end do
+
+          do ik=1,nkng,nkng/nmax
+            ik_ext = ip_ext_node(ik)
+            ik_int = ipint(ik_ext)
+            if( ik_int > 0 .and. shympi_is_unique_node(ik_int) ) then
+              nik = nik + 1
+              if( nik > nmax+1 ) stop 'error stop off_print_debug_var: nik>nmax'
+              iks(nik) = ik_int
+              iu = iu + 1
+              iuk(nik) = iu
+              call make_name_with_number('node',ik_ext,'aux',name)
+              open(iu,file=name,status='unknown',form='formatted')
+            end if
+          end do
+
+          icall_local = 1
+        end if
+
+        write(6,*)  'running print_debug_var: ',it
+
+        do i=1,nie
+          ie = ies(i)
+          ie_ext = ieext(ie)
+          iu = iue(i)
+          lmax = ilhv(ie)
+          write(iu,*) 'time ',it,dtime
+          write(iu,*) 'ie, lmax ',ie_ext,lmax
+          write(iu,*) 'zenv ',zenv(:,ie)
+          write(iu,*) 'utlnv ',utlnv(1:lmax,ie)
+          write(iu,*) 'vtlnv ',vtlnv(1:lmax,ie)
+	  flush(iu)
+        end do
+        do i=1,nik
+          ik = iks(i)
+          ik_ext = ipext(ik)
+          iu = iuk(i)
+          lmax = ilhkv(ik)
+          write(iu,*) 'time ',it,dtime
+          write(iu,*) 'ie, lmax ',ik_ext,lmax
+          write(iu,*) 'znv ',znv(ik)
+          write(iu,*) 'wlnv ',wlnv(1:lmax,ik)
+          write(iu,*) 'saltv ',saltv(1:lmax,ik)
+          write(iu,*) 'tempv ',tempv(1:lmax,ik)
+          write(iu,*) 'visv ',visv(1:lmax,ik)
+          write(iu,*) 'difv ',difv(1:lmax,ik)
+	  flush(iu)
+        end do
+
+	call shympi_barrier
+
+        end
 
 !*****************************************************************
 
