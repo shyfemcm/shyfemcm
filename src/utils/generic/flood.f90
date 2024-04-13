@@ -123,6 +123,8 @@
 	end
 
 !******************************************************************
+!******************************************************************
+!******************************************************************
 
 	subroutine floodfill_node(nkn,acode,ac,iareas)
 
@@ -133,32 +135,86 @@
 	integer ac		!area code to look for
 	integer iareas		!number of connected domains with area code ac
 
-	integer k
-	integer aaux(nkn)	!aux array to remember what has been filled
+	integer ainfo(2,1)
 
 	iareas = 0
-	aaux = 0
-
-	do
-
-	  do k=1,nkn
-	    if( acode(k) == ac .and. aaux(k) == 0 ) exit
-	  end do
-
-	  if( k > nkn ) return
-	  iareas = iareas + 1
-
-	  call fill_node_area(nkn,acode,k,aaux)
-
-	end do
+	call floodfill_node_info(nkn,acode,ac,iareas,ainfo)
 
 	end
 
 !******************************************************************
 
-	subroutine fill_node_area(nkn,acode,k,aaux)
+	subroutine floodfill_node_info(nkn,acode,ac,iareas,ainfo)
 
-! flags aaux with 1 if can be reached from element ie and has acode of ie
+	implicit none
+
+	integer nkn		!total number of nodes
+	integer acode(nkn)	!area code of nodes
+	integer ac		!area code to look for
+	integer iareas		!number of connected domains with area code ac
+	integer ainfo(2,iareas)	!info on domains of color ac (return)
+
+	integer k,kstart
+	integer ndim
+	integer nnode
+	integer aaux(nkn)	!aux array to remember what has been filled
+
+	ndim = iareas
+
+	iareas = 0
+	aaux = 0
+	kstart = 1
+
+	do
+
+	  do k=kstart,nkn
+	    if( acode(k) == ac .and. aaux(k) == 0 ) exit
+	  end do
+
+	  if( k > nkn ) return
+
+	  call fill_node_area(nkn,acode,k,aaux,nnode)
+	  kstart = k
+
+	  iareas = iareas + 1
+	  if( ndim > 0 ) then
+	    if( iareas > ndim ) goto 99
+	    ainfo(1,iareas) = k
+	    ainfo(2,iareas) = nnode
+	  end if
+
+	end do
+
+	return
+   99	continue
+	stop 'error stop floodfill_node_info: iareas>ndim'
+	end
+
+!******************************************************************
+
+	subroutine floodfill_node_color(nkn,acode,acnew,k)
+
+	implicit none
+
+	integer nkn		!total number of nodes
+	integer acode(nkn)	!area code of nodes
+	integer acnew		!new area code to color area
+	integer k		!node to start from
+
+	integer nnode
+	integer aaux(nkn)	!aux array to remember what has been filled
+
+	aaux = 0
+	call fill_node_area(nkn,acode,k,aaux,nnode)
+	where( aaux > 0 ) acode = acnew
+
+	end
+
+!******************************************************************
+
+	subroutine fill_node_area(nkn,acode,k,aaux,nnode)
+
+! flags aaux with 1 if it can be reached from node k and has acode of k
 
 	use queue
 	use mod_connect
@@ -169,10 +225,11 @@
 	integer acode(nkn)	!area code of nodes
 	integer k		!node to start with
 	integer aaux(nkn)	!aux array to show what has been filled
+	integer nnode		!number of nodes in area (return)
 
 	integer ac,i,n,ko,kn,id
-	integer, allocatable :: nen3v(:,:)
 
+	nnode = 0
 	ac = acode(k)
 
 	call queue_init(id)
@@ -184,6 +241,7 @@
 
 	  aaux(ko) = aaux(ko) + 1
 	  if( aaux(ko) > 1 ) cycle
+	  nnode = nnode + 1
 
 	  n = nlist(0,ko)
 	  do i=1,n
@@ -199,4 +257,5 @@
 
 	end
 
+!******************************************************************
 

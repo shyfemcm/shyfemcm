@@ -49,9 +49,9 @@
 	write(6,*) 'using SDDA algorithm for partitioning'
 	write(6,*) 'running do_custom with np = ',nparts
 
-        call do_sdda(nkn,nel,nen3v,nparts,npart)
+        call do_sdda(nkn,nel,nen3v,nparts,npart,epart)
 
-	call info_partition(nparts,npart)
+	!call info_partition(nparts,npart)
 
 	end
 
@@ -74,7 +74,7 @@
 
 !*******************************************************************
 
-        subroutine do_sdda(nkn,nel,nen3v,nparts,npart)
+        subroutine do_sdda(nkn,nel,nen3v,nparts,npart,epart)
 
 ! shyparts custom routine
 
@@ -86,14 +86,14 @@
         integer nen3v(3,nel)
         integer nparts
         integer npart(nkn)
+        integer epart(nel)
 
 	logical bdebug
 	integer nroots
-	integer ic,icnew
+	integer ic,icnew,nic
 	integer np,ngr,ngrmin,k,ncol,nmax,knew,i,itype
 	integer kroots(nparts+1)
 	integer, allocatable :: ngrade(:),egrade(:)
-	integer, allocatable :: epart(:)
 	integer, allocatable :: ncolor(:)
 	integer, allocatable :: matrix(:,:)
 	integer, allocatable :: dist(:,:)
@@ -102,7 +102,6 @@
 	np = nparts
 
 	allocate(ngrade(nkn),egrade(nkn))
-	allocate(epart(nel))
 	allocate(ncolor(nkn))
 	allocate(dist(nkn,0:nparts))
 
@@ -118,8 +117,10 @@
 	npart = ic
 	epart = 0
 	call divide_domain(ic,icnew,nkn,npart)
-	call write_partition_to_grd('domain_divide',bdebug &
-     &		,np,npart,epart)
+	call make_epart(nkn,nel,nen3v,npart,epart)
+	call exchange_nodes_between_two(ic,icnew,nkn,npart,nel,nen3v)
+!	call write_partition_to_grd('domain_divide',bdebug &
+!     &		,np,npart,epart)
 
 	return
 
@@ -491,6 +492,149 @@
 
 !*******************************************************************
 !*******************************************************************
+!*******************************************************************
+
+	subroutine exchange_nodes_between_two(ic,icnew,nkn,npart,nel,nen3v)
+
+	use queue
+	use mod_connect
+	use mod_flood
+
+	implicit none
+
+	integer ic
+	integer icnew
+	integer nkn
+	integer npart(nkn)
+	integer nel
+	integer nen3v(3,nel)
+
+	integer id
+	integer ic1,ic2,nc1,nc2,nic1,nic2
+	integer k,kk,i,ie,ii,ne,nk,ieo
+	integer nfill
+	integer iloop
+	integer ics(3)
+	integer, allocatable :: cinfo(:,:)
+	integer icc,kcc,ncc
+	integer :: ainfo(2,nkn)
+
+        call queue_init(id)
+
+	nc1 = count( npart == ic )
+	nc2 = count( npart == icnew )
+
+	if( nc1 > nc2 ) then		! convert ic to icnew
+	  ic1 = ic
+	  ic2 = icnew
+	else				! convert icnew to ic
+	  ic1 = icnew
+	  ic2 = ic
+	end if
+
+	nc1 = count( npart == ic1 )
+	nc2 = count( npart == ic2 )
+	write(6,*) 'ic1 -> ic2',ic1,ic2,nc1,nc2
+
+	do k=1,nkn
+	  if( npart(k) /= ic1 ) cycle
+	  call enqueue_if_color(id,ic2,k,nkn,npart,nel,nen3v)
+	end do
+	
+	iloop = 0
+	nfill = queue_fill(id)
+	write(6,*) 'queue filled: ',nfill
+
+	write(6,*) '           iloop   nfill     nc1     nc2' // &
+     &			'    nic1    nic2'
+
+        do
+	  if( nc2 > nc1 ) exit
+	  nfill = queue_fill(id)
+	  if( nfill <= 0 ) exit
+	  if( mod(iloop,100) == 0 ) then
+	    nic1 = nkn
+	    call floodfill_node_info(nkn,npart,ic1,nic1,ainfo)
+	    nic2 = 1
+	    !call floodfill_node(nkn,npart,ic2,nic2)
+	    write(6,'(a,6i8)') 'in loop: ',iloop,nfill,nc1,nc2,nic1,nic2
+	    if( nic1 > 1 ) then
+	      ncc = minval(ainfo(2,:))
+	      icc = findloc(ainfo(2,:),ncc,1)
+	      kcc = ainfo(1,icc)
+	      call floodfill_node_color(nkn,npart,ic2,kcc)
+	      nc1 = nc1 - ncc
+	      nc2 = nc2 + ncc
+	      nic1 = nic1 - 1
+	      write(6,*) 'detached area found: ',ncc
+	      write(6,'(a,6i8)') 'in loop: ',iloop,nfill,nc1,nc2,nic1,nic2
+	      iloop = iloop - 1
+	    end if
+	  end if
+          if( .not. queue_dequeue(id,ieo) ) exit
+	  do ii=1,3
+	    kk = nen3v(ii,ieo)
+	    ics(ii) = npart(kk)
+	  end do
+	  ic = count( ics == ic1 )
+	  if( ic == 0 ) then			!already changed
+	    ! nothing
+	  else if( ic == 1 ) then		!change ic1 to ic2
+	    !iloop = 0
+	    nc1 = nc1 - 1
+	    nc2 = nc2 + 1
+	    ii = findloc(ics,ic1,1)
+	    kk = nen3v(ii,ieo)
+	    npart(kk) = ic2
+	    call enqueue_if_color(id,ic1,kk,nkn,npart,nel,nen3v)
+	  else					!put in queue again
+	    if( ii < 4 ) call queue_enqueue(id,ieo)
+	  end if
+	  iloop = iloop + 1
+	end do
+
+        call queue_delete(id)
+
+	write(6,*) 'ics: ',nc1,nc2
+	nc1 = count( npart == ic1 )
+	nc2 = count( npart == ic2 )
+	write(6,*) 'ics: ',nc1,nc2
+
+	call floodfill_node(nkn,npart,ic1,nic1)
+	call floodfill_node(nkn,npart,ic2,nic2)
+
+	write(6,*) 'connected: ',nic1,nic2
+	write(6,*) 'iloop = ',iloop
+
+	end
+
+!*******************************************************************
+
+	subroutine enqueue_if_color(id,ic,k,nkn,npart,nel,nen3v)
+
+	use mod_connect
+	use queue
+
+	integer id,k,ic
+	integer nkn
+	integer npart(nkn)
+	integer nel
+	integer nen3v(3,nel)
+
+	integer ne,i,ie,ii,kk
+
+	  ne = elist(0,k)
+	  do i=1,ne
+	    ie = elist(i,k)
+	    do ii=1,3
+	      kk = nen3v(ii,ie)
+	      if( npart(kk) == ic ) exit
+	    end do
+	    if( ii < 4 ) call queue_enqueue(id,ie)
+	  end do
+
+	end
+
 !*******************************************************************
 
 	subroutine divide_domain(ic,icnew,nkn,npart)

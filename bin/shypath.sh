@@ -85,6 +85,8 @@ MakeBinDir()
 
 #-----------------------------------------------------------
 
+#actdir=$( pwd )
+
 execdir=$( dirname ${BASH_SOURCE[0]} | pwd -P )
 MakeBinDir
 shyfemdir=$( echo $bindir | sed -E 's/\/[^\/]*$//' )
@@ -95,6 +97,7 @@ path=$( echo $newpath | tr ' ' ':' )
 
 [ $debug = "YES" ] && echo "bindir: $bindir"
 
+#echo "actdir: $actdir"
 echo "bindir: $bindir"
 echo "shyfemdir: $shyfemdir"
 echo "SHYFEMDIR: $SHYFEMDIR"
@@ -127,6 +130,8 @@ if [ $set_path = "YES" ]; then
   export PATH=$path
   export SHYFEMDIR=$shyfemdir
 fi
+
+#cd $actdir
 
 #-----------------------------------------------------------
 

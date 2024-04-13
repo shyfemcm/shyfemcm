@@ -1,5 +1,26 @@
 ============================================================
 
+Sat Apr 13 16:24:31 CEST 2024
+
+mpi_tripple reviewed
+
+ bin/fem3d/usemod.pl                          |   6 +-
+ bin/shypath.sh                               |   5 +
+ src/shyfem/Makefile                          |   8 +-
+ src/shyfem/explicit.f90                      |  31 +++---
+ src/shyfem/shyfem.f90                        |   2 +-
+ src/utils/generic/flood.f90                  |  73 ++++++++++--
+ src/utils/generic/queue.f90                  |  11 +-
+ src/utils/shympi/Makefile                    |   9 +-
+ src/{shyfem => utils/shympi}/mpi_tripple.f90 | 102 +++++++++++++----
+ src/utils/shympi/shyparts_custom.f90         | 160 +++++++++++++++++++++++++--
+ src/utils/shympi/shyparts_util.f90           |  17 +++
+ 11 files changed, 361 insertions(+), 63 deletions(-)
+ renamed:
+    src/shyfem/mpi_tripple.f90 -> src/utils/shympi/mpi_tripple.f90
+
+============================================================
+
 Thu Apr 11 13:45:24 CEST 2024
 
 changes to howto files

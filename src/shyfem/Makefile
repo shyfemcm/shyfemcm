@@ -111,7 +111,7 @@ SEDIMENT_OBJ = \
       sedim_util.o simple_sedi.o sedim_admin.o \
 
 MPI_EXTRA_OBJ = \
-      mpi_tripple.o mpi_assert.o lnkmpi.o
+      mpi_assert.o lnkmpi.o
 
 OBJ = system_matrix.o tvd.o \
       hydro_admin.o openmp_admin.o \
@@ -261,7 +261,6 @@ cleanall: clean
 ../../lib/mod/poisson.mod: poisson.o
 ../../lib/mod/semi_implicit.mod: iostr.o
 ../../lib/mod/shyice_model.mod: ice.o
-../../lib/mod/shympi_tripple.mod: mpi_tripple.o
 ../../lib/mod/simple_sediments.mod: simple_sedi.o
 ../../lib/mod/stab.mod: stability.o
 ../../lib/mod/subqfx.mod: heat_admin.o
@@ -665,11 +664,6 @@ mpi_assert.o: ../../lib/mod/basin.mod ../../lib/mod/evgeom.mod \
 		../../lib/mod/mod_hydro_vel.mod \
 		../../lib/mod/mod_layer_thickness.mod \
 		../../lib/mod/mod_ts.mod ../../lib/mod/shympi.mod 
-mpi_tripple.o: ../../lib/mod/basin.mod ../../lib/mod/evgeom.mod \
-		../../lib/mod/levels.mod \
-		../../lib/mod/mod_geom.mod \
-		../../lib/mod/mod_hydro.mod \
-		../../lib/mod/shympi.mod 
 mud_admin.o: ../../lib/mod/basin.mod ../../lib/mod/levels.mod \
 		../../lib/mod/mod_fluidmud.mod 
 nohydro.o: ../../lib/mod/basin.mod ../../lib/mod/evgeom.mod \

@@ -40,6 +40,7 @@
 ! 07.06.2023    ggu     in exchange_elem_info() use utlov not utlnv (bug-fix)
 ! 09.06.2023    ggu     bug fix for tripple point on external boundary
 ! 23.10.2023    ggu     in exchange_areas() eliminated dependency from evgeom
+! 13.04.2024    ggu     introduced buffer_tripple_in, elim hydro dependency
 !
 !******************************************************************
 
@@ -67,7 +68,8 @@
 	integer, save :: nmax_tripple = 0
 	integer, save :: itrtot = -1
 	integer, save, allocatable :: ielist(:,:)
-	real, save, allocatable :: buffer_tripple(:,:)
+	real, save, allocatable :: buffer_tripple_in(:,:)
+	real, save, allocatable :: buffer_tripple_out(:,:)
 	integer, save, allocatable :: ietrp(:,:)
 
 !==================================================================
@@ -151,7 +153,8 @@
 	write(6,*) 'total numbers of tripple points: ',my_id,itr,itrtot
 
 	nmax_tripple = 2 * (nlv_global+1)
-	allocate(buffer_tripple(nmax_tripple,itrtot))
+	allocate(buffer_tripple_in(nmax_tripple,itrtot))
+	allocate(buffer_tripple_out(nmax_tripple,itrtot))
 	allocate(ielist(nexch,itrtot))
 	ielist = 0
 
@@ -358,8 +361,8 @@
 	subroutine exchange_elem_info(id_from,id_to,iint,iext,lmax,itr)
 
 	use levels
-	use evgeom
-	use mod_hydro
+	!use evgeom
+	!use mod_hydro
 	use shympi
 	use shympi_tripple
 
@@ -369,7 +372,7 @@
 
 	logical bdebug
 	integer iu
-	integer l,n
+	integer l,n,i
 	integer nmax
 	real buffer_in(nmax_tripple)
 	real buffer_out(nmax_tripple)
@@ -381,27 +384,40 @@
 	nmax = nmax_tripple
 	n = 2*lmax + 2
 
-        buffer_in = 0.
-        if( id_from == my_id ) then
-	  buffer_in(1) = lmax
-	  buffer_in(2) = 12. * ev(10,iint)
-	  buffer_in(3:lmax+2) = utlov(1:lmax,iint)
-	  buffer_in(lmax+3:2*lmax+2) = vtlov(1:lmax,iint)
-	end if
-
 	if( n > nmax ) then
 	  write(6,*) 'n,nmax: ',n,nmax
 	  stop 'error stop exchange_elem_info: n>nmax'
 	end if
 
+        !buffer_in = 0.
+        !if( id_from == my_id ) then
+	!  buffer_in(1) = lmax
+	!  buffer_in(2) = 12. * ev(10,iint)
+	!  buffer_in(3:lmax+2) = utlov(1:lmax,iint)
+	!  buffer_in(lmax+3:2*lmax+2) = vtlov(1:lmax,iint)
+	!end if
+
+	!write(6,*) 'exchanging tripple points...',my_id
+        !if( id_from == my_id ) then
+	!if( any(buffer_in(1:n)/=buffer_tripple_in(1:n,itr)) ) then
+	!  write(6,*) 'nbuffer = ',n,itr,my_id
+	!  do i=1,n
+	!    write(6,*) i,buffer_in(i),buffer_tripple_in(i,itr)
+	!  end do
+	!  stop 'error stop: buffer not equal...'
+	!end if
+	!end if
+
+	buffer_in(1:n) = buffer_tripple_in(1:n,itr)
+
 	if( bmpi ) then
 	  iu = 300 + my_id
 	  buffer_out = 0.
 	  call shympi_receive(id_from,id_to,n,buffer_in,buffer_out)
-	  buffer_tripple(:,itr) = buffer_out(:)
+	  buffer_tripple_out(1:n,itr) = buffer_out(1:n)
 	else
 	  iu = 400
-	  buffer_out = buffer_in
+	  buffer_out(1:n) = buffer_in(1:n)
 	end if
 
 	if( bdebug ) then
@@ -425,8 +441,8 @@
 	integer itr,lmax
 	real area
 
-	lmax = nint(buffer_tripple(1,itr))
-	area = buffer_tripple(2,itr)
+	lmax = nint(buffer_tripple_out(1,itr))
+	area = buffer_tripple_out(2,itr)
 
 	end
 
@@ -447,22 +463,66 @@
 	u = 0
 	v = 0
 
-	lmax = nint(buffer_tripple(1,itr))
-	area = buffer_tripple(2,itr)
+	lmax = nint(buffer_tripple_out(1,itr))
+	area = buffer_tripple_out(2,itr)
 
 	if( lmax > nl ) then
 	  write(6,*) lmax,nl
 	  stop 'error stop tripple_point_get_values: lmax>nl'
 	end if
 
-	u(1:lmax) = buffer_tripple(3:lmax+2,itr)
-	v(1:lmax) = buffer_tripple(lmax+3:2*lmax+2,itr)
+	u(1:lmax) = buffer_tripple_out(3:lmax+2,itr)
+	v(1:lmax) = buffer_tripple_out(lmax+3:2*lmax+2,itr)
 
 	!write(555,*) lmax,area
 	!write(555,*) u(1:lmax)
 	!write(555,*) v(1:lmax)
 
 	end 
+
+!******************************************************************
+
+	subroutine tripple_point_set_values(nlvddi,evdim,nel,ev,ut,vt)
+
+! gets lmax, area, and u/v from neighbor element
+
+	use shympi
+	use shympi_tripple
+
+	implicit none
+
+	integer nlvddi,evdim,nel
+	double precision ev(evdim,nel)
+	real ut(nlvddi,nel),vt(nlvddi,nel)
+
+	integer i,iint,id_from,lmax,itr
+
+	!write(6,*) 'tripple_point_set_values: itrtot = ',itrtot,my_id
+
+	if( itrtot == 0 ) return
+	if( itrtot < 0 ) then
+	  stop 'error stop tripple_points_exchange: no init'
+	end if
+
+	buffer_tripple_in = 0.
+
+	do i=1,itrtot
+	  !write(6,'(a,10i8)') 'tr_exchange: ',my_id,ielist(:,i)
+	  iint = ielist(4,i)
+	  id_from = ielist(6,i)
+	  lmax = ielist(7,i)
+	  itr = i
+          if( id_from == my_id ) then
+	    buffer_tripple_in(1,itr) = lmax
+	    buffer_tripple_in(2,itr) = 12. * ev(10,iint)
+	    buffer_tripple_in(3:lmax+2,itr) = ut(1:lmax,iint)
+	    buffer_tripple_in(lmax+3:2*lmax+2,itr) = vt(1:lmax,iint)
+	  end if
+	end do
+
+	call shympi_syncronize
+	
+	end
 
 !******************************************************************
 !******************************************************************

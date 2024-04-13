@@ -32,7 +32,8 @@
 ! 26.09.2017	ggu	changed VERS_7_5_32
 ! 24.01.2018	ggu	changed VERS_7_5_41
 ! 14.02.2019	ggu	changed VERS_7_5_56
-! 08.04.2024	ggu	bug fix for dequeueing when no valyue available
+! 08.04.2024	ggu	bug fix for dequeueing when no value available
+! 12.04.2024	ggu	new function queue_fill()
 
 !===============================================================
 	module queue
@@ -69,6 +70,7 @@
 	public :: queue_enqueue		!call queue_enqueue(id,value)
 	public :: queue_dequeue		!logical queue_dequeue(id,value)
 	public :: queue_peek		!logical queue_peek(id,value)
+	public :: queue_fill		!integer queue_fill(id)
 	public :: queue_is_empty	!logical queue_is_empty(id)
 	public :: queue_info		!call queue_info(id)
 
@@ -333,6 +335,13 @@
 	value = pentry(id)%array(pentry(id)%front)
 	queue_peek_d = .true.
 	end function queue_peek_d
+
+!--------------------
+
+	integer function queue_fill(id)
+	integer id
+	queue_fill = pentry(id)%fill
+	end function queue_fill
 
 !--------------------
 

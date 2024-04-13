@@ -120,8 +120,13 @@
 	integer npart(nkn)
 	integer epart(nel)
 
+	logical bldebug
+	integer i,nmax,ntot,ic
 	character*3 numb
 	character*80 basnam,name
+
+	bldebug = .true.
+	bldebug = .false.
 
 	write(6,*) 'writing grd-file...'
 	call basin_to_grd
@@ -137,6 +142,18 @@
         call grd_write(name)
 	!write(6,*) ''
 	write(6,*) 'Grid with partition on nodes in file: ',trim(name)
+
+	if( bldebug ) then
+	  nmax = maxval(epart)
+	  ntot = 0
+	  write(6,*) 'max colors in epart:'
+	  do i=-1,nmax
+	    ic = count( epart == i )
+	    write(6,*) i,ic
+	    ntot = ntot + ic
+	  end do
+	  write(6,*) 'total elements: ',ntot,nel
+	end if
 
         iaev = epart
         name = trim(basnam)//'.'//trim(numb)//'.'//'elem.grd'

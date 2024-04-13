@@ -109,6 +109,7 @@
 ! 09.05.2023    lrp     introduce top layer index variable
 ! 24.05.2023    ggu     momentum_viscous_stability(): must run over nel_unique
 ! 05.06.2023    lrp     introduce z-star
+! 13.04.2024    ggu     use tripple_point_set_values, also in hydro_stability
 !
 ! notes :
 !
@@ -322,6 +323,14 @@
 	!allocate(raux(nel),rauxg(nel_global))
 	!allocate(rdistvg(nel_global))
 
+! in the next call we initialize lmaxi and areai, dstab is a dummy
+
+	if( icall == 0 ) then		!just do it the first time
+	  call tripple_points_init	!just in case
+	  call tripple_point_set_values(nlvdi,evdim,nel,ev,dstab,dstab)
+	  call tripple_points_exchange
+	end if
+
 	do ie=1,nel_unique
 
 	  lmax = ilhv(ie)
@@ -365,20 +374,6 @@
 ! debug section
 
 	icall = icall + 1
-	if( icall > 0 ) return
-
-	do ie=1,nel
-	  !iext(ie) = ipev(ie)
-	end do
-	!call shympi_l2g_array(dstab2d,dstab2dg)
-	!call shympi_l2g_array(iext,iextg)
-	!call shympi_l2g_array(rdistv,rdistvg)
-	if( my_id == 0 ) then
-	do ie=1,nel_global
-	  !write(270,*) icall,ie,iextg(ie),dstab2dg(ie)
-	  !write(270,*) icall,ie,iextg(ie),dstab2dg(ie),rdistvg(ie)
-	end do
-	end if
 
 	end
 
@@ -423,7 +418,9 @@
 
 	nl = nlv_global
 
-	call tripple_points_handle
+	call tripple_points_init	!just in case
+	call tripple_point_set_values(nlvdi,evdim,nel,ev,utlov,vtlov)
+	call tripple_points_exchange
 
         noslip = nint(getpar('noslip'))
 	bnoslip = noslip .ne. 0
@@ -521,7 +518,9 @@
 
 	call get_timestep(dt)
 
-	call tripple_points_handle
+	call tripple_points_init	!just in case
+	call tripple_point_set_values(nlvdi,evdim,nel,ev,utlov,vtlov)
+	call tripple_points_exchange
 
         ahpar = getpar('ahpar')
 	if( ahpar .le. 0 ) return

@@ -126,8 +126,12 @@ sub print_summary
   }
 
   if( scalar @::defined ) {
+    my %list = ();
+    foreach my $m (@::defined) {
+      $list{$m}++;
+    }
     print "summary of modules defined in all files:\n";
-    foreach my $m (sort @::defined) {
+    foreach my $m (sort keys %list) {
       print "  $m\n";
     }
   }

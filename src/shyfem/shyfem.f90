@@ -473,7 +473,7 @@
 	call tidepar_init
 	call submud_init
 	call handle_gotm_init
-	call tripple_points_handle
+	call tripple_points_init
 
 	call trace_point('cstsetup')
 	call cstsetup
