@@ -45,6 +45,7 @@
 ! 16.02.2019	ggu	changed VERS_7_5_60
 ! 13.12.2019	ggu	return always time in dtime (converting from string)
 ! 08.12.2020	ggu	better documentation
+! 17.04.2024	ggu	new routine ts_get_time_info()
 !
 ! notes :
 !
@@ -111,6 +112,62 @@
 
 	if( ierr > 0 ) nvar = 0	!return error only on read error, not EOF
 
+	close(iunit)
+
+	end
+
+!*************************************************************
+
+	subroutine ts_get_time_info(file,itime)
+
+! get info on time column: relative or absolute
+
+	use iso8601
+
+	implicit none
+
+	character*(*) file	!file name
+	integer itime		!0: relative  1:absolute  -1:error
+
+	integer iunit,ierr,ios
+	integer is,iend,nvar
+	integer datetime(2)
+	double precision dtime
+	character*2048 line
+	character*80 stime
+
+	integer ichafs,istod,istot
+
+	itime = -1
+
+	nvar = 0
+	call ts_open_file(file,nvar,datetime,line,iunit)
+	if( iunit <= 0 ) return
+	if( nvar <= 0 ) goto 99
+
+	do
+	  read(iunit,'(a)',iostat=ios) line
+	  if( ios /= 0 ) goto 99
+	  if( line(1:1) /= '#' ) exit
+	end do
+
+	is = ichafs(line)
+	iend = len_trim(line)
+	if( iend > 2000 ) goto 99
+
+	ios = istod(line,dtime,is)		!read time column
+	if( ios == -1 ) then			!time colum may be string
+	  ios = istot(line,stime,is)		!read time column as string
+	  if( ios /= 1 ) goto 99
+	  dtime = 0.
+	  call string2date(stime,datetime,ierr)
+	  if( ierr /= 0 ) goto 99
+	  itime = 1
+	else
+	  itime = 0
+	end if
+
+   99	continue
 	close(iunit)
 
 	end

@@ -70,6 +70,7 @@
 ! 29.11.2022	ggu	new routine write_minmax(), write files with -write
 ! 30.11.2022	ggu	if facts or offset given set output
 ! 30.11.2022	ggu	rain_elab() revised
+! 23.04.2024	ggu	conversion routines for wind implemented
 !
 !******************************************************************
 
@@ -114,7 +115,7 @@
 	real ffact,foff
 	real depth
 	real hdp(1)
-	logical bfirst,bskip,btskip,bnewstring
+	logical bfirst,bskip,btskip,bnewstring,bwind_convert
 	logical bhuman,blayer,bcustom
 	logical bdtok,bextract,bexpand,bcondense_txt
 	logical bread,breg
@@ -234,7 +235,10 @@
 	boutput = boutput .or. offstring /= ' '
 	boutput = boutput .or. bexpand
 	boutput = boutput .or. bresample
+	boutput = boutput .or. bconvwindxy .or. bconvwindsd
 	if( bextract ) boutput = .false.
+
+	bwind_convert = bconvwindxy .or. bconvwindsd
 
         if( boutput ) then
           iout = iunit + 1
@@ -496,6 +500,11 @@
 	      end where
 	    end if
 	  end do
+
+	  if( bwind_convert ) then
+	    call wind_convert(bconvwindsd,nlvdi,np,strings,nvar,ivars &
+     &				,flag,strings_out,data)
+	  end if
 
 	  if( bcustom ) then
 	    call custom_elab_all(nlvdi,np,strings_out,nvar &
@@ -1971,6 +1980,147 @@
         end if
 
         end
+
+!*****************************************************************
+!*****************************************************************
+!*****************************************************************
+! wind conversion
+!*****************************************************************
+!*****************************************************************
+!*****************************************************************
+
+	subroutine wind_convert(bconvwindsd,nlvdi,np,strings,nvar,ivars &
+     &					,flag,strings_out,data)
+
+	implicit none
+
+	logical bconvwindsd			!convert to speed/direction
+	integer nlvdi,np,nvar
+	character*(*) strings(nvar)
+	integer ivars(nvar)
+	real flag
+	character*(*) strings_out(nvar)
+	real data(nlvdi,np,nvar)
+
+	logical bwindxy,bwindsd
+	logical, parameter :: bmeteo = .true.
+	integer iv,ivar
+	integer ix,iy,is,id
+	integer ls,ip
+	real u,v,s,d
+	character*80 string
+
+	ix = 0
+	iy = 0
+	is = 0
+	id = 0
+	bwindxy = .false.
+	bwindsd = .false.
+
+!---------------------------------------------------------
+! check if data is 2d
+!---------------------------------------------------------
+
+	if( nlvdi > 1 ) then
+	  write(6,*) 'data is not 2d: ',nlvdi
+	  stop 'error stop wind_convert: cannot convert'
+	end if
+
+!---------------------------------------------------------
+! see what wind data we have
+!---------------------------------------------------------
+
+	do iv=1,nvar
+	  ivar = ivars(iv)
+	  string = strings(iv)
+	  !write(6,*) iv,ivar,'  ',trim(string)
+	  if( ivar == 21 ) then
+	    ls = len_trim(string)
+	    if( string(ls:ls) == 'x' ) then
+	      ix = iv
+	    else if( string(ls:ls) == 'y' ) then
+	      iy = iv
+	    else
+	      write(6,*) 'cannot parse string: trim(string)'
+	      write(6,*) 'missing final x/y'
+	      stop 'error stop wind_convert: cannot parse string'
+	    end if
+	    bwindxy = .true.
+	  else if( ivar == 28 ) then
+	    is = iv
+	    bwindsd = .true.
+	  else if( ivar == 29 ) then
+	    id = iv
+	    bwindsd = .true.
+	  end if
+	end do
+
+!---------------------------------------------------------
+! see if wind format is appropriate
+!---------------------------------------------------------
+
+	if( bconvwindsd ) then
+	  if( .not. bwindxy ) then
+	    write(6,*) 'wind is not in format x/y-coordinates'
+	    stop 'error stop wind_convert: cannot convert'
+	  end if
+	else
+	  if( .not. bwindsd ) then
+	    write(6,*) 'wind is not in format speed/direction'
+	    stop 'error stop wind_convert: cannot convert'
+	  end if
+	end if
+
+!---------------------------------------------------------
+! see if we really have all needed wind data
+!---------------------------------------------------------
+
+	if( bwindxy ) then
+	  if( ix == 0 .or. iy == 0 ) then
+	    write(6,*) 'missing x or y coordinate: ',ix,iy
+	    stop 'error stop wind_convert: cannot convert'
+	  end if
+	  strings_out(ix) = 'wind speed'
+	  strings_out(iy) = 'wind direction'
+	else if( bwindsd ) then
+	  if( is == 0 .or. id == 0 ) then
+	    write(6,*) 'missing speed/direction: ',is,id
+	    stop 'error stop wind_convert: cannot convert'
+	  end if
+	  strings_out(is) = 'wind velocity - x'
+	  strings_out(id) = 'wind velocity - y'
+	else
+	  write(6,*) 'no wind data found: ',ix,iy,is,id
+	  stop 'error stop wind_convert: cannot convert'
+	end if
+
+!---------------------------------------------------------
+! now convert wind data
+!---------------------------------------------------------
+
+	do ip=1,np
+	  if( bwindxy ) then
+	    u = data(1,ip,ix)
+	    v = data(1,ip,iy)
+	    if( u == flag .or. v == flag ) cycle
+	    call convert_uv_sd(u,v,s,d,bmeteo)
+	    data(1,ip,ix) = s
+	    data(1,ip,iy) = d
+	  else
+	    s = data(1,ip,is)
+	    d = data(1,ip,id)
+	    if( s == flag .or. d == flag ) cycle
+	    call convert_sd_uv(s,d,u,v,bmeteo)
+	    data(1,ip,is) = u
+	    data(1,ip,id) = v
+	  end if
+	end do
+
+!---------------------------------------------------------
+! end of routine
+!---------------------------------------------------------
+
+	end
 
 !*****************************************************************
 !*****************************************************************

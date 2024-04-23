@@ -66,11 +66,11 @@
 	integer ierr
 	integer nfile
 	integer nrec,i,ich,nrecs,iv
-	integer date,time
+	integer date,time,it
 	integer datetime(2)
 	logical bfirst,bskip,debug
 	character*20 dline
-	character*20 format
+	character*20 format,formatit
 	character*80 varline
 	integer,allocatable :: ivars(:)
 	character*80,allocatable :: strings(:)
@@ -86,7 +86,7 @@
 
 	debug = .false.
 	datetime = 0
-	atime0e = 0.
+	atime0e = 0.		!extra information on atime0
 	nrec = 0
 
 !--------------------------------------------------------------
@@ -105,6 +105,7 @@
           stop 'error stop tselab: not a valid time series file'
         end if
 
+	if( bconvsec ) bconvert = .true.
 	if( bconvert ) bout = .true.
 	if( factstring /= ' ' ) bout = .true.
 	if( offstring /= ' ' ) bout = .true.
@@ -181,6 +182,7 @@
 	  open(iout,file='out.txt',form='formatted',status='unknown')
 	  !write(format,'(a,i3,a)') '(f18.2,',nvar,'g14.6)'
 	  write(format,'(a,i3,a)') '(a20,',nvar,'g14.6)'
+	  write(formatit,'(a,i3,a)') '(i20,',nvar,'g14.6)'
 	  if( debug ) write(6,*) 'used format: ',trim(format)
 	end if
 
@@ -225,6 +227,8 @@
 !--------------------------------------------------------------
 
 	close(iunit)
+
+	!call ts_get_time_info(infile,itime)	!is time relative or absolute?
 
 	if( binfo ) return
 
@@ -305,6 +309,12 @@
 	    call dts_format_abs_time(atime_out,dline)
 	    if( bskip ) then
 	      write(6,*) '* skipping record... ',dline
+	    else if( bconvsec ) then
+	      it = nint(atime_out-atime0e)
+	      write(dline,'(i20)') it
+	      dline = adjustl(dline)
+	      write(1,format) dline,data(1:nvar)
+	      !write(1,formatit) it,data(1:nvar)
 	    else
 	      write(1,format) dline,data(1:nvar)
 	    end if

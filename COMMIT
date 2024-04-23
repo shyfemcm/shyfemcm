@@ -1,5 +1,18 @@
 ============================================================
 
+Tue Apr 23 14:57:03 CEST 2024
+
+conversion routines (time and wind) in fem/ts-elab
+
+ bin/average.pl                 |  12 ++--
+ src/tools/shyelab/elabutil.f90 |  38 +++++++++++
+ src/tools/shyelab/femelab1.f90 | 152 ++++++++++++++++++++++++++++++++++++++++-
+ src/tools/shyelab/tselab1.f90  |  16 ++++-
+ src/utils/generic/tsfile.f90   |  57 ++++++++++++++++
+ 5 files changed, 266 insertions(+), 9 deletions(-)
+
+============================================================
+
 Sat Apr 13 16:24:31 CEST 2024
 
 mpi_tripple reviewed

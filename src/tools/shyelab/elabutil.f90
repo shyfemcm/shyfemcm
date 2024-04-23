@@ -87,6 +87,7 @@
 ! 05.12.2022    ggu     -facts and -offset working with TS files
 ! 09.03.2023    ggu     setting -facts, -offset in one subroutine
 ! 10.03.2023    ggu     map renamed to influencemap
+! 18.04.2024    ggu     new option convsec to convert time to seconds
 !
 !************************************************************
 
@@ -137,6 +138,11 @@
 
 	character*80, save :: sdate0		= ' '
 	logical, save :: bconvert		= .false.
+	logical, save :: bconvsec		= .false.
+
+	logical, save :: bconvwindxy		= .false.
+	logical, save :: bconvwindsd		= .false.
+
 	logical, save :: bcheckdt		= .false.
 	logical, save :: bcheckrain		= .false.
 
@@ -461,6 +467,8 @@
           call clo_add_sep('time series options')
           call clo_add_option('convert',.false. &
      &			,'convert time column to ISO string')
+          call clo_add_option('convsec',.false. &
+     &			,'convert ISO time column to seconds')
           call clo_add_option('date0',' ' &
      &			,'reference date for conversion of time column')
 	end if
@@ -487,6 +495,21 @@
 
 !************************************************************
 
+	subroutine elabutil_set_convert_options
+
+	use clo
+
+	if( clo_has_option('convwindxy') ) return
+
+        call clo_add_option('convwindxy',.false. &
+     &			,'convert wind to x/y-components')
+        call clo_add_option('convwindsd',.false. &
+     &			,'convert wind to speed/direction format')
+
+	end subroutine elabutil_set_convert_options
+
+!************************************************************
+
 	subroutine elabutil_set_ts_options
 
 	use clo
@@ -494,6 +517,7 @@
 	if( .not. bshowall .and. .not. btsfile ) return
 
 	call elabutil_set_facts_options
+	!call elabutil_set_convert_options
 
 	end subroutine elabutil_set_ts_options
 
@@ -524,6 +548,7 @@
      &                  //' empty for no change')
 
 	call elabutil_set_facts_options
+	call elabutil_set_convert_options
 
 	end subroutine elabutil_set_fem_options
 
@@ -724,6 +749,7 @@
 
 	if( bshowall .or. btsfile ) then
           call clo_get_option('convert',bconvert)
+          call clo_get_option('convsec',bconvsec)
           call clo_get_option('date0',sdate0)
           call clo_get_option('facts',factstring)
           call clo_get_option('offset',offstring)
@@ -737,6 +763,8 @@
           call clo_get_option('nodei',snode)
           call clo_get_option('coord',scoord)
           call clo_get_option('newstring',newstring)
+          call clo_get_option('convwindxy',bconvwindxy)
+          call clo_get_option('convwindsd',bconvwindsd)
           call clo_get_option('facts',factstring)
           call clo_get_option('offset',offstring)
 	end if
@@ -821,6 +849,15 @@
         !call ap_set_names(' ',infile)
 
 !-------------------------------------------------------------------
+! check command line options
+!-------------------------------------------------------------------
+
+	if( bconvwindxy .and. bconvwindsd ) then
+	  write(6,*) 'cannot give both -bconvwindxy and -bconvwindsd'
+	  stop 'error stop: convert wind'
+	end if
+
+!-------------------------------------------------------------------
 ! set dependent parameters
 !-------------------------------------------------------------------
 
@@ -841,6 +878,7 @@
         boutput = boutput .or. bresample
         boutput = boutput .or. newstring /= ' '
         boutput = boutput .or. sextract /= ' '
+        boutput = boutput .or. bconvwindxy .or. bconvwindsd
 
         !btrans is added later
 	!if( bsumvar ) boutput = .false.

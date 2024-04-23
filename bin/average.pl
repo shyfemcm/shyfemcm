@@ -23,6 +23,7 @@
 # -minmax	computes minimum and maximum
 # -averstd	computes average and standard deviation
 # -format=val	number of significant digits (e.g., 0.01: 45.34, 1: no fract)
+# -verb		be verbose
 #
 #------------------------------------------------------------------
 
@@ -54,6 +55,7 @@ $::minmax = 0 unless $::minmax;
 $::minmaxes = 0 unless $::minmaxes;
 $::averstd = 0 unless $::averstd;
 $::format = 0 unless $::format;
+$::verb = 0 unless $::verb;
 
 my @files = @ARGV;
 my $nfiles = @files;
@@ -63,7 +65,7 @@ my $kernel;
 fullusage() if $::h or $::help;
 usage() unless $nfiles;
 
-print STDERR "total number of files: $nfiles\n" if $nfiles > 1;
+print STDERR "total number of files: $nfiles\n" if $nfiles > 1 and $::verb;
 
 $::date = new date;
 
@@ -75,16 +77,16 @@ my @cols = read_cols(\@new);
 if( $::move or $::gauss ) {
   if( $::move ) {
     $kernel = make_uniform_kernel($::move);
-    print STDERR "computing moving average with window $::move\n";
+    print STDERR "computing moving average with window $::move\n" if $::verb;
   } else {
     $kernel = make_gaussian_kernel($::gauss);
-    print STDERR "computing gaussian average with std $::gauss\n";
+    print STDERR "computing gaussian average with std $::gauss\n" if $::verb;
   }
 }
 
 if( $::minmaxes ) {
     die "*** cannot find min/max without time column\n" if $::noxcol;
-    print STDERR "computing min/max values\n";
+    print STDERR "computing min/max values\n" if $::verb;
     my $time = $cols[0];
     my $values = $cols[1];
     my $smooth = average_timeseries($values,$kernel);
@@ -100,7 +102,7 @@ if( $::minmaxes ) {
     ($a,$b) = make_trend($cols[1]);
     print "trend: $a $b\n";
 } elsif( $::regress ) {
-    print STDERR "computing linear regression\n";
+    print STDERR "computing linear regression\n" if $::verb;
     my $ncols = @cols;
     my $time = convert_date($cols[0]);
     for(my $i=1;$i<$ncols;$i++) {
