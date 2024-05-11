@@ -1,5 +1,24 @@
 ============================================================
 
+Sat May 11 08:30:45 CEST 2024
+
+temporary commit for shypre
+
+ src/shyfem/shypre_noopti.f90          |   89 ++
+ src/shyfem/shypre_subs.f90            | 1460 +++++++++++++++++++++++
+ src/tools/shypre/shypre_noopti.f90    |  182 +++
+ src/tools/shypre/shypre_opti_subs.f90 |  411 +++++++
+ src/tools/shypre/shypre_orig.f90      | 2065 +++++++++++++++++++++++++++++++++
+ 5 files changed, 4207 insertions(+)
+ new file:
+   src/shyfem/shypre_noopti.f90
+   src/shyfem/shypre_subs.f90
+   src/tools/shypre/shypre_noopti.f90
+   src/tools/shypre/shypre_opti_subs.f90
+   src/tools/shypre/shypre_orig.f90
+
+============================================================
+
 Sat May 11 08:29:59 CEST 2024
 
 first (incomplete commit) for shypre
