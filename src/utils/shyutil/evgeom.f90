@@ -97,6 +97,7 @@
 ! 16.02.2019	ggu	changed VERS_7_5_60
 ! 13.03.2019	ggu	changed VERS_7_5_61
 ! 21.05.2019	ggu	changed VERS_7_5_62
+! 10.05.2024	ggu	no check of spherical here, no need for ev_init()
 !
 !***********************************************************
 
@@ -116,7 +117,7 @@
 
 	integer, save, private :: nel_alloc = 0
 	integer, save :: isphe_ev = -1
-	logical, save :: init_ev = .false.
+	logical, save :: binit_ev = .false.
 	logical, save :: verbose_ev = .true.
 
 	logical, save :: bdebug_internal = .false.
@@ -192,7 +193,11 @@
 
 	if( .not. basin_has_basin() ) goto 97
 
-	call check_spheric_ev	!checks and sets isphe_ev and init_ev
+	call ev_init(nel)	!initializes ev array
+
+	binit_ev = .true.
+
+	call check_spheric_ev	!checks and sets isphe_ev and binit_ev
 	call get_coords_ev(isphe)
 
 	iedebug = 77
@@ -355,7 +360,7 @@
 
 	logical binit
 
-	binit = init_ev
+	binit = binit_ev
 
 	end
 
@@ -403,7 +408,7 @@
 
 	logical is_spherical
 
-	is_spherical = isphe_ev .ne. 0
+	is_spherical = isphe_ev .eq. 1
 
 	end
 
@@ -411,103 +416,14 @@
 
 	subroutine check_spheric_ev
 
-! checks if coordinates are lat/lon
+! sets spherical information using info in bas file
 
 	use basin
 	use evgeom
-	use shympi
 
 	implicit none
 
-	logical bverbose,blocaldebug
-	integer k,isphe
-	real xmin,xmax,ymin,ymax
-
-	bverbose = .true.
-	bverbose = .false.
-	blocaldebug = .true.
-	blocaldebug = .false.
-
-	xmin = xgv(1)
-	xmax = xgv(1)
-	ymin = ygv(1)
-	ymax = ygv(1)
-
-	do k=1,nkn
-	  xmin = min(xmin,xgv(k))
-	  xmax = max(xmax,xgv(k))
-	  ymin = min(ymin,ygv(k))
-	  ymax = max(ymax,ygv(k))
-	end do
-
-	isphe = 1
-	if( xmin .lt. -180. .or. xmax .gt. 360. ) isphe = 0
-	if( ymin .lt.  -90. .or. ymax .gt.  90. ) isphe = 0
-
-	if( isphe_ev .eq. -1 ) then	!determine automatically
-	  if( isphe .eq. 1 ) then
-	    if( bverbose ) then
-	      write(6,*) 'Unsure about type of coordinates.'
-	      write(6,*) 'Coodinates seem as lat/lon'
-	      write(6,*) 'but are not flagged as such.'
-	      write(6,*) 'Using lat/lon coordinates.'
-	      write(6,*) 'If this is an error, then please set'
-	      write(6,*) 'parameter isphe to the desired value.'
-	    end if
-	  end if
-	else if( isphe_ev .ne. isphe ) then	!not the same
-	  if( isphe .eq. 0 ) then	!not possible -> coords out of range
-	    write(6,*) 'coodinates are flaged as lat/lon'
-	    write(6,*) 'but are out of range.'
-	    write(6,*) 'Please set parameter isphe = 0'
-	    write(6,*) 'or adjust the grid'
-	    write(6,*) 'xmin,xmax: ',xmin,xmax
-	    write(6,*) 'ymin,ymax: ',ymin,ymax
-	    stop 'error stop check_spheric_ev: not lat/lon coordinates'
-	  end if
-	  isphe = isphe_ev	!take desired value
-	end if
-
-	if( blocaldebug ) then
-	  write(6,*) 'start debug check_spheric_ev'
-	  write(6,*) xmin,xmax,ymin,ymax
-	  write(6,*) isphe_ev,isphe
-	end if
-	
-	!write(6,*) 'isphe before mpi call: ',isphe
-	isphe = shympi_min(isphe)
-	if( isphe < 0 .or. isphe > 1 ) then
-	  write(6,*) 'erroneous value for isphe: ',isphe
-	  stop 'error stop check_spheric_ev: isphe'
-	end if
-
-	if( shympi_is_master() .and. bmpi_debug ) then
-	  write(6,*) 'isphe_mpi: ',my_id,isphe
-	end if
-
-	if( blocaldebug ) then
-	  write(6,*) isphe
-	  write(6,*) 'end debug check_spheric_ev'
-	end if
-
-	isphe_ev = isphe
-	init_ev = .true.
-
-	if( shympi_is_master() .and. verbose_ev ) then
-	  if( isphe == 1 ) then
-	    write(6,*) 'using lat/lon coordinates'
-	  else
-	    write(6,*) 'using cartesian coordinates'
-	  end if
-	end if
-
-	!if( verbose_ev ) then
-	! if( isphe == 1 ) then
-	!  write(6,*) 'using lat/lon coordinates'
-	! else
-	!  write(6,*) 'using cartesian coordinates'
-	! end if
-	!end if
+	isphe_ev = sphebas
 
 	end
 
@@ -1114,7 +1030,7 @@
 	real area_elem
 	integer ie
 
-	if( .not. init_ev ) then
+	if( .not. binit_ev ) then
 	  stop 'error stop area_elem: ev not set up'
 	end if
 
@@ -1135,7 +1051,7 @@
 	real aomega_elem
 	integer ie
 
-	if( .not. init_ev ) then
+	if( .not. binit_ev ) then
 	  stop 'error stop aomega_elem: ev not set up'
 	end if
 
@@ -1156,11 +1072,45 @@
 	real weight_elem
 	integer ie
 
-	if( init_ev ) then
+	if( binit_ev ) then
 	  weight_elem = ev(10,ie)
 	else
 	  weight_elem = 1.
 	end if
+
+	end
+
+!***********************************************************
+
+	function area_node(k)
+
+! returns area of node k - very inefficient... use with care
+
+	use evgeom
+	use basin
+
+	implicit none
+
+	real area_node
+	integer k
+
+	integer ie,ii,kk
+	double precision accum
+
+	if( .not. binit_ev ) then
+	  stop 'error stop area_elem: ev not set up'
+	end if
+
+	accum = 0.
+
+	do ie=1,nel
+	  do ii=1,3
+	    kk = nen3v(ii,ie)
+	    if( kk == k ) accum = accum + ev(10,ie)
+	  end do
+	end do
+
+	area_node = (12./3.) * accum
 
 	end
 

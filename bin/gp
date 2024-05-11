@@ -12,8 +12,9 @@
 #
 #########################################################
 
-version=2.03
+version=2.04
 
+# 2.04	06.05.2024	debug option and ParseTime()
 # 2.03	07.03.2024	adjust paths for helper routines
 # 2.02	03.03.2024	use absolute paths in calling other scripts
 # 2.01	27.01.2024	new option -solid
@@ -62,6 +63,10 @@ gpversion=$( gnuplot --version | sed -e 's/ *patchlevel.*//' \
 			| sed -e 's/gnuplot *//' )
 gpmajor=$( echo $gpversion | sed -e 's/\..*//' )
 #echo $gpversion $gpmajor
+
+debug="YES"
+debug="NO"
+[ $debug = "YES" ] && echo "debug = $debug" >&2
 
 title="Timeseries"
 type="monochrome"
@@ -331,8 +336,15 @@ ShowFiles()
 GetFirstAndLastDataLine()
 {
   file=${afiles[0]}	#we only look at first file
-  first_data_line=$( grep --max-count 1 -E -v '^\s*#' $file )
-  last_data_line=$( tac $file | grep --max-count 1 -E -v '^\s*#' )
+  first_data_line=$( cat $file | grep -v '^\s*$' | grep  -v '^\s*#' | head -1 )
+  last_data_line=$( tac $file | grep -v '^\s*$' | grep  -v '^\s*#' | head -1 )
+  if [ $debug = "YES" ]; then
+    echo "first/last data line:"	>&2
+    echo "  $first_data_line"		>&2
+    echo "  $last_data_line"		>&2
+  fi
+  #first_data_line=$( grep --max-count 1 -E -v '^\s*#' $file )
+  #last_data_line=$( tac $file | grep --max-count 1 -E -v '^\s*#' )
 }
 
 CheckForDate()
@@ -362,7 +374,6 @@ HandleXaxis()
   # this tries to see in what format the x-axis has to be written
   # it sets variable $xformat
 
-  local debug="NO"
   local sec1 sec2 secs hours days months years
 
   [ -n "$xformat" ] && return	#return if already given
@@ -371,7 +382,7 @@ HandleXaxis()
   #first_line=`head -1 $file`
 
   first_line=$first_data_line
-  last_line=`tail -1 $file`
+  last_line=$last_data_line
 
   first_time=`echo $first_line | sed -E 's/^\s+//' | sed -E 's/\s+.*//'`
   last_time=`echo $last_line | sed -E 's/^\s+//' | sed -E 's/\s+.*//'`
@@ -380,14 +391,15 @@ HandleXaxis()
   [ -n "$xhigh" ] && last_time=$xhigh
 
   if [ $debug = "YES" ]; then
-    echo "HandleXaxis:"
-    echo $first_line
-    echo $first_time
-    echo $last_line
-    echo $last_time
-    echo "$xrange"
+    echo "HandleXaxis:"							>&2
+    echo "  first_data_line=$first_data_line"				>&2
+    echo "  last_data_line=$last_data_line"				>&2
+    echo "  first_time=$last_time"					>&2
+    echo "  last_time=$last_time"					>&2
+    echo "  xrange=$xrange"						>&2
   fi
 
+  ParseTime $first_time
   #GetSecs $first_time
 
   sec1=$( GetSecs $first_time )
@@ -395,7 +407,7 @@ HandleXaxis()
   #sec1=$( busybox date -D "%Y-%m-%d::%H:%M:%S" -d $first_time +%s )
   #sec2=$( busybox date -D "%Y-%m-%d::%H:%M:%S" -d $last_time +%s )
   secs=$(( $sec2 - $sec1 ))
-  [ $debug = "YES" ] && echo "time window: $secs seconds"
+  [ $debug = "YES" ] && echo "time window: $secs seconds" >&2
 
   xformat="%Y-%m-%d::%H:%M:%S"	#complete format - not used
 
@@ -438,26 +450,83 @@ HandleXaxis()
     return
   fi
 
-  [ $debug = "YES" ] && echo "automatically determined xformat: $xformat"
+  [ $debug = "YES" ] && echo "automatically determined xformat: $xformat" >&2
 }
 
 GetSecs()
 {
-  local date=$1
+  local string=$1
 
-  date=$( echo $date | sed -e 's/::/ /' )
+  ParseTime $string
 
-  local d=$( echo $date | sed -e 's/::/ /' | sed -e 's/:/ /g' )
-  local hour=$( echo $d | cut -d " " -f 2 )
-  local day=$( echo $d | cut -d " " -f 1 )
+  date=$fulldate
 
-  #echo "GetSecs $1 $date"
+  if [ "$debug" = "YES" ]; then
+    echo "GetSecs:"					>&2
+    echo "  $string $date $hour $day $d"		>&2
+  fi
 
-  [ "$hour" = "" ] && hour=0
-  if [ "$hour" -eq 24 ]; then		# roll to next day
-    date --date="$day +1 day" +%s
+  date --date="$isodate" +%s
+}
+
+ParseTime()
+{
+  local string=$1
+
+  local year month day hour minute second
+  local date time
+
+  if [[ $string =~ "::" ]]; then	# have both date and time
+    date=$( echo $string | sed -E 's/::.*$//' )
+    time=$( echo $string | sed -E 's/^.*:://' )
+  elif [[ $string =~ "-" ]]; then	# has only date
+    date=$string
+  elif [[ $string =~ ":" ]]; then	# has only time
+    time=$string
+    echo "no date in string: $string ... cannot parse"	>&2
+    exit 1
   else
-    date --date="$date" +%s
+    echo "cannot parse: $string"		>&2
+    exit 1
+  fi
+
+  if [ $debug == "YES" ]; then
+    echo "ParseTime:"				>&2
+    echo "  string = $string"			>&2
+    echo "  date = $date"			>&2
+    echo "  time = $time"			>&2
+  fi
+
+  if [ -n "$date" ]; then
+    year=$( echo $date | cut -d- -f1 )
+    month=$( echo $date | cut -d- -f2 )
+    day=$( echo $date | cut -d- -f3 )
+  fi
+    
+  if [ -n "$time" ]; then
+    hour=$( echo $date | cut -d: -f1 )
+    minute=$( echo $date | cut -d: -f2 )
+    second=$( echo $date | cut -d: -f3 )
+  fi
+
+  [ -z "$hour" ] && hour="00"
+  [ -z "$minute" ] && minute="00"
+  [ -z "$second" ] && second="00"
+  
+  onlydate=$year-$month-$day
+
+  if [ "$hour" -eq 24 ]; then		# roll to next day
+    onlydate=$( date --date="$onlydate +1 day" +%Y-%m-%d )
+    hour=00
+  fi
+
+  onlytime=$hour:$minute:$second
+  fulldate=$onlydate::$onlytime
+  isodate=${onlydate}T${onlytime}
+
+  if [ $debug == "YES" ]; then
+    echo "ParseTime 2:"				>&2
+    echo "  fulldate = $fulldate"		>&2
   fi
 }
 
@@ -780,6 +849,7 @@ fi
 if [ "$date" = "YES" ]; then
   HandleXrange		#splits and quotes
   HandleXaxis
+  [ $debug == "YES" ] && echo "xformat: $xformat" >&2
 fi
 
 ######################################################### write header

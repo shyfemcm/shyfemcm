@@ -133,6 +133,7 @@
 ! 21.10.2022	ggu	in init_vertical() bug fix - update sigma_info (GGUBS)
 ! 28.04.2023	ggu	possible nkn=nel bug flagged with GGU_NKN_NEL
 ! 03.03.2024	ggu	bug fix in init_file_uv() - reset np
+! 10.05.2024	ggu	set spherical in bas file
 !
 ! notes :
 !
@@ -1688,6 +1689,9 @@
 	real getpar
 
 	isphe = nint(getpar('isphe'))
+	if( isphe == -1 ) return	!no info given
+
+	call bas_set_spherical(isphe)
 	call set_coords_ev(isphe)
 
 	end

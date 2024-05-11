@@ -45,7 +45,7 @@ while(<>) {
 
   chomp;
 
-  if( /^\s*module\s+(\w+)/ ) {		# definition of module
+  if( /^\s*module\s+(\w+)/ ) {			# definition of module
     $::defined{$1}++;
   } elsif( /^\s*use\s+(\w+)/ ) {		# usage of module
     $::used{$1}++;
@@ -66,9 +66,9 @@ sub print_info
 
   if( scalar %::used ) {
     if( $::info or $::used ) {
-      print "modules used in file $file:\n";
+      print "  modules used in file $file:\n";
       foreach my $m (sort keys %::used) {
-        print "  $m\n";
+        print "    $m\n";
       }
     }
     push(@::used,keys %::used);
@@ -76,9 +76,9 @@ sub print_info
 
   if( scalar %::defined ) {
     if( $::info or $::defined ) {
-      print "modules defined in file $file:\n";
+      print "  modules defined in file $file:\n";
       foreach my $m (sort keys %::defined) {
-        print "  $m\n";
+        print "    $m\n";
       }
     }
     push(@::defined,keys %::defined);
@@ -94,9 +94,9 @@ sub print_info
   }
 
   if( scalar @list and not $::summary and not $::autosufficient ) {
-    print "modules used but not defined in file $file:\n";
+    print "  modules used but not defined in file $file:\n";
     foreach my $m (sort @list) {
-      print "  $m\n";
+      print "    $m\n";
     }
   }
 

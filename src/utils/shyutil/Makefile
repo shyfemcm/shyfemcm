@@ -66,6 +66,7 @@ OBJ  = \
 	pkonst.o \
 	mkonst.o \
 	heat_const.o \
+	evgeom.o \
 
 ALL = $(MOD) $(OBJ)
 
@@ -173,6 +174,7 @@ zip:	cleanall
 
 ../../../lib/mod/basin.mod: basin.o
 ../../../lib/mod/default_names.mod: defnames.o
+../../../lib/mod/evgeom.mod: evgeom.o
 ../../../lib/mod/extfile.mod: io_ext.o
 ../../../lib/mod/fem_util.mod: femfile_util.o
 ../../../lib/mod/flxfile.mod: io_flx.o
@@ -195,6 +197,7 @@ zip:	cleanall
 ../../../lib/mod/sigma.mod: sigma.o
 ../../../lib/mod/simul.mod: simul.o
 ../../../lib/mod/zadapt.mod: zadaptutil.o
+evgeom.o: ../../../lib/mod/basin.mod
 fem_util.o: ../../../lib/mod/basin.mod
 grdutil.o: ../../../lib/mod/basin.mod ../../../lib/mod/grd.mod
 line_util.o: ../../../lib/mod/basin.mod

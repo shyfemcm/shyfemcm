@@ -180,6 +180,7 @@
 ! 11.12.2023    ggu     f90 style format
 ! 11.12.2023    ggu     create subroutines for init/run/finalize
 ! 12.12.2023    ggu     introduce dtmax to make limited run
+! 10.05.2024    ggu     set spherical just after basin read
 !
 !*****************************************************************
 !
@@ -287,6 +288,8 @@
 
 	implicit none
 
+	logical bquiet,bsilent
+
 	call cpu_time(time1)
 	call cpu_time_init
 	call cpu_time_start(1)
@@ -303,7 +306,7 @@
 ! copyright and command line options
 !-----------------------------------------------------------
 
-        call shyfem_init(strfile,bdebug,bdebout,bmpirun)
+        call shyfem_init(strfile,bdebug,bdebout,bmpirun,bquiet,bsilent)
 
 !-----------------------------------------------------------
 ! write  real start time
@@ -316,7 +319,8 @@
 !-----------------------------------------------------------
 
 	call cstinit
-	call cstfile(strfile)			!read STR and basin
+	call cstfile(strfile,bquiet,bsilent)	!read STR and basin
+	call set_spherical			!this has to be done here
 
 	call shympi_init(.true.)
 	call setup_omp_parallel
@@ -343,7 +347,6 @@
 
 	call trace_point('initialize grid')
 	!call levels_init_2d(nkn,nel)	!maybe not needed
-	call set_spherical
 	call set_ev
 	call adjust_spherical
 	call print_spherical
@@ -557,10 +560,12 @@
 	   call check_crc
 	   call set_dry
 
+	   call trace_point('set_timestep')
            call set_timestep(dtmax)		!sets dt and t_act
            call get_timestep(dt)
 	   call get_act_dtime(dtime)
 
+	   call trace_point('do_befor')
 	   call do_befor
 
 	   call copy_uvz		!copies new to old time level
@@ -568,13 +573,16 @@
 	   call copy_depth		!copies layer depth to old
 
 	   call handle_offline(2)	!read from offline file
+	   call trace_point('sp111')
 	   call sp111(2)		!boundary conditions
            call read_wwm		!wwm wave model
 	   
            if(bmpi_debug) call shympi_check_all(1)	!checks arrays
 
+	   call trace_point('hydro')
 	   call hydro			!hydro
 
+	   call trace_point('run_scalar')
 	   call run_scalar
 
            call turb_closure
@@ -594,6 +602,7 @@
 
 	   call handle_offline(1)	!write to offline file
 
+	   call trace_point('do_after')
 	   call do_after
 
 	   call tracer_write
@@ -728,7 +737,7 @@
 
 !*****************************************************************
 
-        subroutine shyfem_init(strfile,bdebug,bdebout,bmpirun)
+        subroutine shyfem_init(strfile,bdebug,bdebout,bmpirun,bquiet,bsilent)
 
         use clo
         use shympi
@@ -844,7 +853,7 @@
 
 	call mod_depth_init(nkn,nel)
 
-	call ev_init(nel)
+	!call ev_init(nel)
 
 	call mod_tvd_init(nel)
 

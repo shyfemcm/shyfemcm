@@ -84,6 +84,7 @@
 ! 16.02.2019	ggu	changed VERS_7_5_60
 ! 13.03.2019	ggu	changed VERS_7_5_61
 ! 21.05.2019	ggu	changed VERS_7_5_62
+! 10.05.2024	ggu	read and process also grd files
 !
 !************************************************************************
 
@@ -222,40 +223,149 @@
 
 !********************************************************************
 
-	subroutine cstfile(strfile)
+	subroutine cstfile(strfile,bquiet,bsilent)
 
 ! reads files (str and bas)
 
-	use basin
-
 	implicit none
 
-	character*80 strfile
+	character*(*) strfile
+	logical bquiet,bsilent
 
-	integer nin,nc
+	integer nstr,nbas
 	character*80 basnam
 
 	integer idefbas,ifileo
+
+!------------------------------------------------------------
+! get STR parameter file name and open it
+!------------------------------------------------------------
 
 	if( strfile == ' ' ) then
 	  write(6,*) 'Usage: shyfem str-file'
 	  stop 'error stop cstfile: internal error (1)'
 	else
-	  nin = ifileo(0,strfile,'form','old')
-	  if( nin < 1 ) then
+	  nstr = ifileo(0,strfile,'form','old')
+	  if( nstr <= 0 ) then
 	    write(6,*) 'error opening STR file: ',trim(strfile)
 	    stop 'error stop cstfile: no such STR file'
 	  end if
 	end if
 
-	call nlsh2d(nin)
-	if( nin .ne. 5 ) close(nin)
+!------------------------------------------------------------
+! read STR parameter file
+!------------------------------------------------------------
+
+	call nlsh2d(nstr)
+	if( nstr .ne. 5 ) close(nstr)
+
+!------------------------------------------------------------
+! get STR parameter file
+!------------------------------------------------------------
 
         call getfnm('basnam',basnam)
-	write(6,*) 'reading basin: ',trim(basnam)
-        nin = idefbas(basnam,'old')
-	call basin_read(nin)
-	close(nin)
+	call handle_basin_read(basnam,bquiet,bsilent)
+
+!------------------------------------------------------------
+! end of routine
+!------------------------------------------------------------
+
+	end
+
+!********************************************************************
+
+	subroutine handle_basin_read(basnam,bquiet,bsilent)
+
+	use basin
+
+	implicit none
+
+	character*(*) basnam
+	logical bquiet,bsilent
+
+	logical breadgrd
+	logical bwrite
+	integer nbas
+	integer idefbas
+	character*80 dir,name,ext
+	character*80 grid_file,basin_file
+	logical filex
+
+	bwrite = ( .not. bsilent )
+
+	if( bwrite ) write(6,*) 'reading basin: ',trim(basnam)
+
+	call parse_file_name(basnam,dir,name,ext)
+
+	grid_file = trim(dir) // trim(name) // '.grd'
+	basin_file = trim(dir) // trim(name) // '.bas'
+
+	if( ext == ' ' ) then			! no extension given
+	  if( filex(basin_file) ) then
+	    breadgrd = .false.
+	  else if( filex(grid_file) ) then
+	    breadgrd = .true.
+	  else
+	    write(6,*) '*** no basin or grid file found for: ',trim(basnam)
+	    write(6,*) 'need either .bas or .grd file'
+	    stop 'error stop handle_basin_read: no bas or grd file'
+	  end if
+	else if( ext == 'bas' ) then
+	  if( .not. filex(basnam) ) then
+	    write(6,*) '*** no such file: ',trim(basnam)
+	    stop 'error stop handle_basin_read: no bas file'
+	  end if
+	  breadgrd = .false.
+	else if( ext == 'grd' ) then
+	  if( .not. filex(basnam) ) then
+	    write(6,*) '*** no such file: ',trim(basnam)
+	    stop 'error stop handle_basin_read: no grd file'
+	  end if
+	  breadgrd = .true.
+	else
+	  write(6,*) '*** unknown extension in basin file found: ',trim(ext)
+	  write(6,*) 'extension must be .grd, .bas, or no extension'
+	  stop 'error stop handle_basin_read: unknown extension'
+	end if
+	
+	if( breadgrd ) then		!read grd and produce bas file
+	  if( bwrite ) write(6,*) 'reading grid file: ',trim(grid_file)
+	  call handle_grid_read(grid_file,bquiet,bsilent)
+	end if
+
+	if( bwrite ) write(6,*) 'preparing to read bas file: ',trim(basin_file)
+        nbas = idefbas(basin_file,'old')
+	call basin_read(nbas)
+	if( bwrite ) write(6,*) 'finished reading bas file: ',trim(basin_file)
+	close(nbas)
+
+	!stop 'programmed stop in handle_basin_read'
+
+	end
+
+!********************************************************************
+
+	subroutine handle_grid_read(grid_file,bquiet,bsilent)
+
+	implicit none
+
+	character*(*) grid_file
+	logical bquiet,bsilent
+
+	logical bauto,binfo
+	logical bopti,bnepart
+	real eps_area
+	character*80 grdpart
+
+	eps_area = 0.
+	bauto = .true.
+	binfo = .false.
+	bopti = .false.
+	bnepart = .false.
+	grdpart = ' '
+
+	call shypre_sub(grid_file,bquiet,bsilent,bauto,binfo &
+     &                          ,bopti,bnepart,eps_area,grdpart)
 
 	end
 

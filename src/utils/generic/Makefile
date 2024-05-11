@@ -112,6 +112,9 @@ main_dummy:
 	@./main_dummy
 	@-rm -f main_dummy main_dummy.f90 main_dummy.o
 
+clo:
+	$(F77) $@.f90
+
 #--------------------------------------------- clean
 
 cleanall: clean cleanlib

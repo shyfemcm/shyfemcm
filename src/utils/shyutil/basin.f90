@@ -75,6 +75,7 @@
 ! 18.05.2020	ggu	new routine basin_info_partition()
 ! 17.04.2021	ggu	some better error handling
 ! 16.06.2022    ggu     bug fix in bas_get_special_coordinates() -> np
+! 10.05.2024    ggu     handle spherical, new routine bas_check_spherical()
 !
 !***********************************************************
 !***********************************************************
@@ -87,7 +88,8 @@
         implicit none
 
 	integer, private, parameter :: ftype = 789233567
-	integer, private, parameter :: nversm = 5
+	!integer, private, parameter :: nversm = 6		!max version
+	integer, private, parameter :: nversm = 5		!max version
 
         integer, private, save :: nkn_basin = 0
         integer, private, save :: nel_basin = 0
@@ -106,6 +108,7 @@
 
         real, save :: dcorbas = 0.
         real, save :: dirnbas = 0.
+        integer, save :: sphebas = -1		!lat/lon indicator
 
         character*80, save :: descrr = ' '
 
@@ -252,7 +255,7 @@
 
 	integer nk,ne
 
-	call basin_get_par(iunit,nk,ne,ngr,mbw)
+	call basin_get_par(iunit,nk,ne,ngr,mbw)	!reads and closes file
 	call basin_init(nk,ne)			!here we set nkn, nel
 	call basin_read_internal(iunit,nkn,nel)
 	bbasinread = .true.
@@ -398,6 +401,7 @@
 
 	read(nb) nkn,nel,ngr,mbw
 	read(nb) dcorbas,dirnbas
+	if( nvers > 5 ) read(nb) sphebas
 	read(nb) descrr
 
 	if(nkn.gt.nknddi.or.nel.gt.nelddi) goto 97
@@ -416,6 +420,8 @@
 	npart_elem = 0
 	area_part_node = 0
 	area_part_elem = 0
+
+	call bas_check_spherical
 
 	if( nvers < 5 ) return
 
@@ -457,6 +463,7 @@
 	write(nb) ftype,nversm
 	write(nb) nkn,nel,ngr,mbw
 	write(nb) dcorbas,dirnbas
+	if( nversm > 5 ) write(nb) sphebas
 	write(nb) descrr
 
 	write(nb)((nen3v(ii,i),ii=1,3),i=1,nel)
@@ -723,6 +730,7 @@
         write(6,*) ' nkn = ',nkn,'  nel = ',nel
         write(6,*) ' mbw = ',mbw,'  ngr = ',ngr
         write(6,*) ' dcor = ',dcorbas,'  dirn = ',dirnbas
+        write(6,*) ' isphe = ',sphebas
         write(6,*) ' nnpart = ',nnpart,'  nepart = ',nepart
 
 	!call basin_info_partition
@@ -741,6 +749,34 @@
 
 	dcor = dcorbas
 	dirn = dirnbas
+
+	end
+
+!*************************************************
+
+	subroutine bas_get_spherical(isphe)
+
+	use basin
+
+	implicit none
+
+	integer isphe
+
+	isphe = sphebas
+
+	end
+
+!*************************************************
+
+	subroutine bas_set_spherical(isphe)
+
+	use basin
+
+	implicit none
+
+	integer isphe
+
+	sphebas = isphe
 
 	end
 
@@ -865,6 +901,8 @@
           end do
         end do
 
+        call bas_check_spherical
+
 	end
 
 !*************************************************
@@ -959,6 +997,8 @@
 	    nen3v(3,ie) = k1
           end do
         end do
+
+        call bas_check_spherical
 
         call estimate_ngr(ngr)
 
@@ -1164,6 +1204,44 @@
 	end do
 
 	end
+
+!*************************************************
+
+        subroutine bas_check_spherical
+
+	use basin
+
+        implicit none
+
+        integer ispherical
+
+        real xmin,xmax,ymin,ymax
+
+	ispherical = 1
+
+        xmin = minval(xgv)
+        ymin = minval(ygv)
+        xmax = maxval(xgv)
+        ymax = maxval(ygv)
+
+        if( xmin .lt. -180. .or. xmax .gt. 360. ) ispherical = 0
+        if( ymin .lt.  -90. .or. ymax .gt.  90. ) ispherical = 0
+
+	if( sphebas == -1 ) sphebas = ispherical	!set sphebas
+	if( sphebas == ispherical ) return		!identical
+
+	if( sphebas == 1 .and. ispherical == 0 ) then
+	  write(6,*) 'sphebas,ispherical: ',sphebas,ispherical
+	  stop 'error stop bas_check_spherical: coordinates are not spherical'
+	else if( sphebas == 0 .and. ispherical == 1 ) then
+	  write(6,*) 'bas_check_spherical: sphebas,ispherical: ' &
+     &				,sphebas,ispherical
+	  write(6,*) 'coordinates are used as cartesian even if very small'
+	else
+	  stop 'error stop bas_check_spherical: internal error'
+	end if
+
+        end
 
 !*************************************************
 

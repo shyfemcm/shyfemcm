@@ -34,7 +34,6 @@ FFLAGS += $(INCLUDE)
 MOD  = \
 
 OBJ  = \
-	evgeom.o \
 	topo_update.o \
 	bnd_admin.o \
 	depth_util.o \
@@ -45,6 +44,9 @@ OBJ  = \
 	find.o \
 	io_off.o \
 	trace_point.o \
+
+OBSOLETE = \
+	evgeom.o \
 
 ALL = $(MOD) $(OBJ)
 
@@ -161,7 +163,6 @@ zip:	cleanall
 # DO NOT DELETE THIS LINE -- make depend depends on it.
 
 ../../../lib/mod/coordinates.mod: coordinates.o
-../../../lib/mod/evgeom.mod: evgeom.o
 ../../../lib/mod/intp_fem_file.mod: intp_fem_file.o
 ../../../lib/mod/mod_offline.mod: io_off.o
 ../../../lib/mod/mod_trace_point.mod: trace_point.o
@@ -175,7 +176,6 @@ coordinates.o: ../../../lib/mod/basin.mod \
 depth_util.o: ../../../lib/mod/basin.mod \
 		../../../lib/mod/mod_depth.mod \
 		../../../lib/mod/shympi.mod 
-evgeom.o: ../../../lib/mod/basin.mod ../../../lib/mod/shympi.mod
 find.o: ../../../lib/mod/basin.mod ../../../lib/mod/evgeom.mod \
 		../../../lib/mod/mod_geom.mod 
 intp_fem_file.o: ../../../lib/mod/shympi.mod

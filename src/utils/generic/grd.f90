@@ -118,6 +118,7 @@
 ! 16.06.2022	ggu	new routine write_grd_file() for simplified writing
 ! 13.12.2022	ggu	new routine write_grd_file_with_depth()
 ! 18.10.2023	ggu	deleted routines dealing with gr3 and msh files
+! 10.05.2024	ggu	handles isphe given in grd file (FEM-SPHER)
 !
 !**********************************************************
 
@@ -133,6 +134,7 @@
 	character*80, save :: title_grd = ' '
 	real, save :: dcor_grd = 0.
 	real, save :: dirn_grd = 0.
+	integer, save :: sphe_grd = -1
 
         integer, save :: nin_grd,iline_grd,ianz_grd
         real, save :: f_grd(81)
@@ -160,7 +162,7 @@
 
 	logical, save :: bcdepth = .true.	!needs complete set of depth
 
-	logical, save :: berror = .true.	!writes error if found
+	logical, save :: bgrderror = .true.	!writes error if found
 	logical, save :: bgrdwrite = .true.	!writes information messages
 
 !==============================================================
@@ -290,7 +292,7 @@
 
 	logical berr
 
-	berror = berr
+	bgrderror = berr
 
 	end subroutine grd_set_error
 
@@ -304,7 +306,7 @@
 
 	logical grd_write_error
 
-	grd_write_error = berror
+	grd_write_error = bgrderror
 
 	end function grd_write_error
 
@@ -1124,15 +1126,17 @@
 ! (FEM-SCALE)	scale in x/y/z for basin	default: 1.,1.,1.
 ! (FEM-LATID)	latitude of basin (degrees)	default: 0.
 ! (FEM-NORTH)	true north of basin (degrees) 	default: 0.
+! (FEM-SPHER)	coordinates are lat/lon 	default: -1 (must be determined)
 !
 ! all entries are optional
 !
-! example (c of fortran comment must be deleted, line starts with 0) :
+! example (! of fortran comment must be deleted, line starts with 0) :
 !
 ! 0 (FEM-TITLE) test basin
 ! 0 (FEM-SCALE) 0.5 0.5 2.
 ! 0 (FEM-LATID) 45.0
 ! 0 (FEM-NORTH) 90.0
+! 0 (FEM-SPHER) 0
 !
 	use grd
 	!use basin
@@ -1143,13 +1147,21 @@
 
 	integer i,j,n
 	integer ifstch,iscanf
-	logical btitle
+	logical, save :: btitle = .false.
+	logical berror
 
-	save btitle
-	data btitle /.false./
+!----------------------------------------------------
+! initialize parameters
+!----------------------------------------------------
+
+	berror = .false.
 
 	i=ifstch(gline)
 	n=len(gline)
+
+!----------------------------------------------------
+! check comments for FEM information
+!----------------------------------------------------
 
 	if( i.gt.0 .and. i+10.lt.n ) then
 	  if( gline(i:i+10) .eq. '(FEM-TITLE)' ) then
@@ -1165,6 +1177,7 @@
 		  write(6,*) 'error reading (FEM-SCALE) :',j
 		  write(6,*) gline
 		  write(6,*) gline(i+11:)
+		  berror = .true.
 		end if
 	  else if( gline(i:i+10) .eq. '(FEM-LATID)' ) then
 		j=iscanf(gline(i+11:),f_grd,2)
@@ -1173,6 +1186,7 @@
 		else
 		  write(6,*) 'error reading (FEM-LATID) :'
 		  write(6,*) gline
+		  berror = .true.
 		end if
 	  else if( gline(i:i+10) .eq. '(FEM-NORTH)' ) then
 		j=iscanf(gline(i+11:),f_grd,2)
@@ -1181,16 +1195,55 @@
 		else
 		  write(6,*) 'error reading (FEM-NORTH) :'
 		  write(6,*) gline
+		  berror = .true.
+		end if
+	  else if( gline(i:i+10) .eq. '(FEM-SPHER)' ) then
+		j=iscanf(gline(i+11:),f_grd,2)
+		if(j.eq.1) then
+		  sphe_grd=f_grd(1)
+		else
+		  write(6,*) 'error reading (FEM-SPHER) :'
+		  write(6,*) gline
+		  berror = .true.
 		end if
 	  end if
 	end if
 
+!----------------------------------------------------
+! check parameters read
+!----------------------------------------------------
+
+	if( dcor_grd < -90. .or. dcor_grd > 90. ) then
+	  write(6,*) 'value for FEM-LATID out of range: ',dcor_grd
+	  berror = .true.
+	else if( dirn_grd < -360. .or. dirn_grd > 360. ) then
+	  write(6,*) 'value for FEM-NORTH out of range: ',dirn_grd
+	  berror = .true.
+	else if( sphe_grd < -1 .or. sphe_grd > 1. ) then
+	  write(6,*) 'value for FEM-SPHER out of range: ',sphe_grd
+	  berror = .true.
+	end if
+	
+!----------------------------------------------------
+! error handling
+!----------------------------------------------------
+
+	if( berror ) then
+	  stop 'error stop fempar: error reading FEM comments'
+	end if
+
+!----------------------------------------------------
 ! use first comment as title
+!----------------------------------------------------
 
 	if( i.gt.0 .and. .not.btitle ) then
 		title_grd=gline(i:)
 		btitle=.true.
 	end if
+
+!----------------------------------------------------
+! end of routine
+!----------------------------------------------------
 
 	end
 

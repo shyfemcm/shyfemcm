@@ -68,7 +68,10 @@ MakeBinDir()
 {
   # in order for this to work we must be in the directory tree of the repo
 
+  local execdir=$( dirname ${BASH_SOURCE[0]} | pwd -P )
   local dir=$execdir
+
+  echo "execdir = $execdir"
 
   while [ -n "$dir" ]
   do
@@ -81,14 +84,18 @@ MakeBinDir()
       dir=$( dirname $dir )
     fi
   done
+
+  bindir="/home/shyfem/bin"		# last resort
 }
 
 #-----------------------------------------------------------
 
-#actdir=$( pwd )
-
+actdir=$( pwd )
+bindir=
 execdir=$( dirname ${BASH_SOURCE[0]} | pwd -P )
+#echo "execdir = $execdir"
 MakeBinDir
+
 shyfemdir=$( echo $bindir | sed -E 's/\/[^\/]*$//' )
 
 path=$( echo $PATH | tr ':' ' ' )

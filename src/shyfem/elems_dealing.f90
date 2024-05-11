@@ -128,6 +128,7 @@
 ! 09.05.2023    lrp     introduce top layer index variable
 ! 05.06.2023    lrp     introduce z-star
 ! 20.03.2024    ggu     bug fix for hlast
+! 10.05.2024    ggu     new routine check_int_ext_params()
 !
 !****************************************************************
 
@@ -1215,6 +1216,49 @@
 
 	total = shympi_sum(total)
 	masscont = total
+
+	!call check_int_ext_params
+
+	end
+
+!***********************************************************
+
+	subroutine check_int_ext_params
+
+
+	use levels
+	use basin, only : nkn,nel,ngr,mbw,ipv
+	use shympi
+	use mod_sort
+	use mod_depth
+	use mod_hydro
+
+        implicit none
+
+	integer k,l,nlev,flev
+	double precision total
+        real volnode
+
+	integer ipint
+	integer index(nkn)
+	integer i,ke
+	integer mode
+
+	mode = 1
+
+	call sort(nkn,ipv,index)
+
+	do i=1,nkn
+	  ke = ipv(index(i))
+	  k = ipint(ke)
+	  nlev = ilhkv(k)
+          flev = jlhkv(k)
+	  write(567,*) i,ke,k,flev,nlev
+	  write(567,*) znv(k),hkv(k)
+	  do l=flev,nlev
+	    write(567,*) l,volnode(l,k,mode)
+	  end do
+	end do
 
 	end
 

@@ -1,5 +1,41 @@
 ============================================================
 
+Sat May 11 08:29:59 CEST 2024
+
+first (incomplete commit) for shypre
+
+ .gitignore                                   |  212 +--
+ bin/fem3d/usemod.pl                          |   14 +-
+ bin/gp                                       |  116 +-
+ bin/shyfind.sh                               |    9 +-
+ bin/shypath.sh                               |   11 +-
+ src/shyfem/Makefile                          |    7 +
+ src/shyfem/constants.f90                     |  136 +-
+ src/shyfem/elems_dealing.f90                 |   44 +
+ src/shyfem/hydrodynamic.f90                  |    5 +
+ src/shyfem/initialize.f90                    |    4 +
+ src/shyfem/shyfem.f90                        |   19 +-
+ src/tools/shybas/shybas.f                    |  106 +-
+ src/tools/shyelab/lgrelab1.f90               |    2 +-
+ src/tools/shyelab/shyelab1.f90               |    2 +-
+ src/tools/shyplot/shyplot.f90                |   11 +-
+ src/tools/shypre/Makefile                    |   35 +-
+ src/tools/shypre/shypre.f90                  | 1854 +-------------------------
+ src/utils/generic/Makefile                   |    3 +
+ src/utils/generic/clo.f90                    |  240 +++-
+ src/utils/generic/grd.f90                    |   67 +-
+ src/utils/shyutil/Makefile                   |    3 +
+ src/utils/shyutil/basin.f90                  |   82 +-
+ src/utils/shyutil/defnames.f90               |   87 ++
+ src/utils/{shyutilmpi => shyutil}/evgeom.f90 |  146 +-
+ src/utils/shyutil/grdutil.f90                |   23 +-
+ src/utils/shyutilmpi/Makefile                |    6 +-
+ 26 files changed, 969 insertions(+), 2275 deletions(-)
+ renamed:
+    src/utils/shyutilmpi/evgeom.f90 -> src/utils/shyutil/evgeom.f90
+
+============================================================
+
 Tue Apr 23 14:57:03 CEST 2024
 
 conversion routines (time and wind) in fem/ts-elab

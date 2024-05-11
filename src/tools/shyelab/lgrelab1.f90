@@ -199,7 +199,7 @@
         call shympi_set_hlv(nlv,hlv)
 
         call ev_set_verbose(.not.bquiet)
-        call ev_init(nel)
+        !call ev_init(nel)
         call set_ev
         call get_coords_ev(isphe)
         bsphe = isphe .eq. 1

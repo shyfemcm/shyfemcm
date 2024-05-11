@@ -87,6 +87,9 @@ endif
 
 #------------------------------------------------------------------------
 
+SHYPRE_OBJ = \
+	shypre_subs.o shypre_noopti.o
+
 LAGRANGE_OBJ = \
       lagrange_data.o lagrange_sedim.o \
       lagrange_flux.o lagrange_util.o \
@@ -145,6 +148,7 @@ OBJ = system_matrix.o tvd.o \
 	$(LAGRANGE_OBJ) \
 	$(ECO_OBJ) \
 	$(MPI_EXTRA_OBJ) \
+	$(SHYPRE_OBJ) \
 	turbulence.o nohydro.o explicit.o hydrodynamic.o \
 	custom_admin.o poisson.o \
       flux.o extra.o boxes.o check.o \
@@ -789,6 +793,9 @@ shyfem.o: ../../lib/mod/basin.mod ../../lib/mod/befor_after.mod \
 		../../lib/mod/shympi.mod \
 		../../lib/mod/shympi_debug.mod \
 		../../lib/mod/subww3.mod ../../lib/mod/tide.mod 
+shypre_noopti.o: ../../lib/mod/basin.mod ../../lib/mod/grd.mod
+shypre_subs.o: ../../lib/mod/basin.mod ../../lib/mod/evgeom.mod \
+		../../lib/mod/mod_sort.mod 
 simple_sedi.o: ../../lib/mod/basin.mod ../../lib/mod/evgeom.mod \
 		../../lib/mod/levels.mod \
 		../../lib/mod/mod_conz.mod \

@@ -220,7 +220,7 @@
 	call shympi_set_hlv(nlv,hlv)
 
 	call ev_set_verbose(.not.bquiet)
-        call ev_init(nel)
+        !call ev_init(nel)
 	call set_ev
 
 	!if( bverb ) write(6,*) 'hlv: ',nlv,hlv

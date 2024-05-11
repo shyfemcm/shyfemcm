@@ -74,6 +74,7 @@ c 16.02.2022    ggu     new call to basboxgrd() to re-create grd file from index
 c 12.10.2022    ggu     new routine code_count called with -detail
 c 12.01.2023    ggu     correct statistics of area also for lat/lon
 c 29.01.2023    ggu     more on correct area computation (eliminated areatr)
+c 10.05.2024    ggu     new routine write_basin_txt() (bbastxt)
 c
 c todo :
 c
@@ -98,8 +99,10 @@ c writes information and manipulates basin
 	implicit none
 
 	integer nc
-	logical bwrite
+	logical bwrite,bbastxt
 	character*80 file
+
+	bbastxt = .false.	! make this a command line option
 
 c-----------------------------------------------------------------
 c read in basin
@@ -122,7 +125,7 @@ c-----------------------------------------------------------------
 	call levels_init_2d(nkn,nel)
 
 	call ev_set_verbose(bwrite)
-	call ev_init(nel)
+	!call ev_init(nel)
 	call set_ev
 
 	call mod_geom_init(nkn,nel,ngr)
@@ -145,6 +148,7 @@ c-----------------------------------------------------------------
 	  call basstat(bnomin,bdetail)
 	  if( barea ) call basstat_area
 	  call bas_stabil
+	  if( bbastxt ) call write_basin_txt
 	end if
 
         call node_test				!basic check
@@ -263,6 +267,7 @@ c info on node number
 
 	use mod_depth
 	use basin
+	use evgeom
 
 	implicit none
 
@@ -272,6 +277,8 @@ c info on node number
 	integer kext,kint
 	integer ipext,ipint
 	logical bloop
+
+	real area_node
 
 	bnode = .false.
 	bloop = .true.
@@ -302,6 +309,7 @@ c look for node and give info
            write(6,*) '(intern : ',kext,' extern : ',ipext(kext),')'
            write(6,*) ' (x,y)  : ',xgv(kint),ygv(kint)
            write(6,*) ' depth  : ',hkv(kint)
+           write(6,*) ' area   : ',area_node(kint)
            write(6,2200)
 
            do ie=1,nel
@@ -1398,7 +1406,7 @@ c compares two basins and writes delta depths to file
 	  stop 'error stop bascomp: nel'
 	end if
 
-	call ev_init(nel)
+	!call ev_init(nel)
 	call set_ev
 
 	hm3v = hm3v - hm3v_aux
@@ -1804,6 +1812,98 @@ c****************************************************************
 	  write(6,*) ia,ic
 	end do
 
+	end
+
+c****************************************************************
+
+	subroutine write_basin_txt
+
+! writes basin in txt form - sorted by external numbers
+
+	use basin
+	use mod_depth
+	use mod_sort
+
+	implicit none
+
+	integer iu,nmax
+	integer ie,ii,k,i,ind,kext,iext
+	integer, allocatable :: index(:)
+	double precision darea_n(nkn)
+	real area_n(nkn)
+	double precision area
+
+	real area_elem
+	integer ipint,ieint
+
+	iu = 567
+	nmax = max(nkn,nel)
+	allocate(index(nmax))
+
+!-------------------------------------------------------
+! compute area of nodes
+!-------------------------------------------------------
+
+	darea_n = 0.
+
+	do ie=1,nel
+	  area = area_elem(ie)
+	  do ii=1,3
+	    k = nen3v(ii,ie)
+	    darea_n(k) = darea_n(k) + area
+	  end do
+	end do
+	    
+	area_n = darea_n / 3.
+
+!-------------------------------------------------------
+! write general info
+!-------------------------------------------------------
+
+	write(iu,*) nkn,nel,ngr,mbw
+
+!-------------------------------------------------------
+! write info on nodes
+!-------------------------------------------------------
+
+	call sort(nkn,ipv,index)
+
+	write(iu,*) 'nodes: ',nkn
+
+	do i=1,nkn
+	  ind = index(i)
+	  kext = ipv(ind)
+	  k = ipint(kext)
+	  write(iu,2300) i,kext,xgv(k),ygv(k),hkv(k),area_n(k)
+	end do
+
+!-------------------------------------------------------
+! write info on elems
+!-------------------------------------------------------
+
+	call sort(nel,ipev,index)
+
+	write(iu,*) 'elems: ',nel
+
+	do i=1,nel
+	  ind = index(i)
+	  iext = ipev(ind)
+	  ie = ieint(iext)
+	  write(iu,2400) i,iext,hm3v(:,ie),area_elem(ie)
+	end do
+
+!-------------------------------------------------------
+! end of routine
+!-------------------------------------------------------
+
+	write(6,*) 'info on basin written to unit ',iu
+
+	return
+ 2300   format(i6,i8,2f18.6,f10.2,e14.6)
+ 2400   format(i6,i8,3f10.2,e14.6)
+ 2200   format(/1x,'element',8x,'nodes',14x,'depth in element'
+     +          ,3x,'  area',4x,'depth of node')
+ 2000   format(1x,i6,2x,3i6,2x,3f8.2,2x,i5,5x,f8.2)
 	end
 
 c****************************************************************

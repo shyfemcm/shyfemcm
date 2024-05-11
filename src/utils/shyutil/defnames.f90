@@ -63,6 +63,7 @@
 ! 03.05.2019	ggu	new routines to get extension and name
 ! 21.05.2019	ggu	changed VERS_7_5_62
 ! 08.04.2024	ggu	new routine make_name_with_number()
+! 10.05.2024	ggu	new routine parse_file_name()
 !
 ! notes :
 !
@@ -416,6 +417,44 @@
 !**************************************************************
 !**************************************************************
 
+	subroutine parse_file_name(file,dir,name,ext)
+
+	implicit none
+
+	character*(*) file	!file name on entry
+	character*(*) dir	!directory on return
+	character*(*) name	!name on return
+	character*(*) ext	!extension on return
+
+	integer idir,iext,istart,iend
+	logical, parameter :: bback = .true.
+
+	idir = index(file,'/',bback)
+	if( idir == 0 ) then
+	  dir = " "
+	  istart = 1
+	else
+	  dir = file(1:idir)
+	  istart = idir + 1
+	end if
+
+	iext = index(file,'.',bback)
+	if( iext == 0 ) then
+	  ext = " "
+	  iend = len_trim(file)
+	else
+	  ext = file(iext+1:)
+	  iend = iext - 1
+	end if
+
+	name = file(istart:iend)
+
+	end
+
+!**************************************************************
+!**************************************************************
+!**************************************************************
+
 	subroutine add_extension(name,ext)
 
 ! adds extension to file name if not already there
@@ -641,6 +680,54 @@
         name = trim(base) // '.' // trim(aux) // '.' // trim(ext)
 
         end
+
+!**************************************************************
+!**************************************************************
+!**************************************************************
+! test routines
+!**************************************************************
+!**************************************************************
+!**************************************************************
+
+        subroutine test_defnames_check(file)
+
+        implicit none
+
+        character*(*) file
+
+        character*80 dir        !directory on return
+        character*80 name       !name on return
+        character*80 ext        !extension on return
+
+        call parse_file_name(file,dir,name,ext)
+
+        write(6,*) '=================='
+        write(6,*) trim(file)
+        write(6,*) trim(dir)
+        write(6,*) trim(name)
+        write(6,*) trim(ext)
+        write(6,*) '=================='
+
+        end
+
+!**************************************************************
+
+	subroutine test_defnames
+
+	implicit none
+
+        call test_defnames_check('/home/georg/test.f90')
+        call test_defnames_check('test.f90')
+        call test_defnames_check('/home/georg/test')
+        call test_defnames_check('/test.f90')
+
+	end
+
+!**************************************************************
+
+!        program main_test_defnames
+!        call defnames
+!        end
 
 !**************************************************************
 

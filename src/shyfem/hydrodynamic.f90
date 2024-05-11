@@ -297,6 +297,7 @@
 	use shympi
 	use shympi_debug
         use mod_zeta_system, only : solver_type
+	use mod_trace_point
 
 	implicit none
 
@@ -327,6 +328,8 @@
 !-----------------------------------------------------------------
 ! set parameter for hydro or non hydro 
 !-----------------------------------------------------------------
+
+	call trace_point('start_of_hydro')
 
 	call nonhydro_get_flag(bnohyd)
         iwvel = nint(getpar('iwvel')) !DWNH
@@ -452,6 +455,7 @@
 ! some checks
 !-----------------------------------------------------------------
 
+	!call trace_point('vol_mass')
 	call vol_mass(1)		!computes and writes total volume
 	call mass_conserve		!check mass balance
 
@@ -460,6 +464,7 @@
 !-----------------------------------------------------------------
 
 	call compute_velocities
+	call trace_point('end_of_hydro')
 
 !-----------------------------------------------------------------
 ! end of routine

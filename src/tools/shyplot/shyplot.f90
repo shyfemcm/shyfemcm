@@ -132,7 +132,7 @@
 
 	call bash_verbose(bsdebug)
 	call ev_set_verbose(.not.bquiet)
-        call ev_init(nel)
+        !call ev_init(nel)
         call set_ev
 
         call mod_geom_init(nkn,nel,ngr)
@@ -1255,9 +1255,12 @@
 	if( bhasbasin .or. bregdata ) then
 	  call bash_verbose(bsdebug)
 	  call ev_set_verbose(.not.bquiet)
-          call ev_init(nel)
+          !call ev_init(nel)
           isphe = nint(getpar('isphe'))
-          call set_coords_ev(isphe)
+          if( isphe /= -1 ) then
+	    call set_coords_ev(isphe)
+	    call bas_set_spherical(isphe)
+	  end if
           call set_ev
           call get_coords_ev(isphe)
           call putpar('isphe',float(isphe))
@@ -1661,7 +1664,7 @@
 
         implicit none
 
-        call ev_init(nel)
+        !call ev_init(nel)
         call mod_geom_init(nkn,nel,ngr)
 
         call mod_depth_init(nkn,nel)
