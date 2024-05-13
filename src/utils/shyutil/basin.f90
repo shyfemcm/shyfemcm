@@ -88,8 +88,8 @@
         implicit none
 
 	integer, private, parameter :: ftype = 789233567
-	!integer, private, parameter :: nversm = 6		!max version
-	integer, private, parameter :: nversm = 5		!max version
+	integer, private, parameter :: nversm = 6		!max version
+	!integer, private, parameter :: nversm = 5		!max version
 
         integer, private, save :: nkn_basin = 0
         integer, private, save :: nel_basin = 0

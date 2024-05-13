@@ -1,5 +1,23 @@
 ============================================================
 
+Mon May 13 18:29:04 CEST 2024
+
+final shypre
+
+ src/shyfem/Makefile              |    5 +-
+ src/shyfem/constants.f90         |    3 +-
+ src/shyfem/shypre_opti.f90       | 1107 ++++++++++++++++++++++++++++++++++++++
+ src/tools/shypre/Makefile        |    8 +-
+ src/tools/shypre/rosen.f90       |    6 +-
+ src/tools/shypre/shypre_opti.f90 | 1107 ++++++++++++++++++++++++++++++++++++++
+ src/utils/shyutil/basin.f90      |    4 +-
+ 7 files changed, 2231 insertions(+), 9 deletions(-)
+ new file:
+   src/shyfem/shypre_opti.f90
+   src/tools/shypre/shypre_opti.f90
+
+============================================================
+
 Sat May 11 08:30:45 CEST 2024
 
 temporary commit for shypre

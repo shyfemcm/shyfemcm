@@ -88,7 +88,7 @@ endif
 #------------------------------------------------------------------------
 
 SHYPRE_OBJ = \
-	shypre_subs.o shypre_noopti.o
+	shypre_subs.o shypre_opti.o
 
 LAGRANGE_OBJ = \
       lagrange_data.o lagrange_sedim.o \
@@ -458,6 +458,7 @@ elems_dealing.o: ../../lib/mod/basin.mod ../../lib/mod/evgeom.mod \
 		../../lib/mod/mod_depth.mod \
 		../../lib/mod/mod_hydro.mod \
 		../../lib/mod/mod_layer_thickness.mod \
+		../../lib/mod/mod_sort.mod \
 		../../lib/mod/shympi.mod 
 explicit.o: ../../lib/mod/basin.mod ../../lib/mod/evgeom.mod \
 		../../lib/mod/levels.mod \
@@ -529,6 +530,7 @@ hydrodynamic.o: ../../lib/mod/basin.mod ../../lib/mod/evgeom.mod \
 		../../lib/mod/mod_nudging.mod \
 		../../lib/mod/mod_roughness.mod \
 		../../lib/mod/mod_system.mod \
+		../../lib/mod/mod_trace_point.mod \
 		../../lib/mod/mod_waves.mod \
 		../../lib/mod/mod_zeta_system.mod \
 		../../lib/mod/pkonst.mod ../../lib/mod/shympi.mod \
@@ -794,6 +796,7 @@ shyfem.o: ../../lib/mod/basin.mod ../../lib/mod/befor_after.mod \
 		../../lib/mod/shympi_debug.mod \
 		../../lib/mod/subww3.mod ../../lib/mod/tide.mod 
 shypre_noopti.o: ../../lib/mod/basin.mod ../../lib/mod/grd.mod
+shypre_opti.o: ../../lib/mod/basin.mod ../../lib/mod/grd.mod
 shypre_subs.o: ../../lib/mod/basin.mod ../../lib/mod/evgeom.mod \
 		../../lib/mod/mod_sort.mod 
 simple_sedi.o: ../../lib/mod/basin.mod ../../lib/mod/evgeom.mod \

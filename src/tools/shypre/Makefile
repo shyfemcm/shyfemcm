@@ -51,8 +51,10 @@ EXES = shypre shypre_orig shypre_noopti
 OBJ_ORIG := rosen.o cuthill_mckee.o
 OBJ_OPTI := \
 		$(FEMDIR)/src/shyfem/shypre_subs.o \
-		shypre_opti_subs.o \
-		rosen.o cuthill_mckee.o
+		$(FEMDIR)/src/shyfem/shypre_opti.o \
+
+OBJ_OLD := 	shypre_opti_subs.o rosen.o cuthill_mckee.o
+
 OBJ_NOOPTI := \
 		$(FEMDIR)/src/shyfem/shypre_subs.o \
 		$(FEMDIR)/src/shyfem/shypre_noopti.o
@@ -126,6 +128,8 @@ depend:
 shypre.o: ../../../lib/mod/clo.mod
 shypre_noopti.o: ../../../lib/mod/clo.mod
 shypre_opti.o: ../../../lib/mod/basin.mod ../../../lib/mod/grd.mod
+shypre_opti_subs.o: ../../../lib/mod/basin.mod \
+		../../../lib/mod/grd.mod 
 shypre_orig.o: ../../../lib/mod/basin.mod ../../../lib/mod/clo.mod \
 		../../../lib/mod/evgeom.mod \
 		../../../lib/mod/grd.mod \

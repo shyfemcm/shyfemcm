@@ -360,7 +360,8 @@
 	eps_area = 0.
 	bauto = .true.
 	binfo = .false.
-	bopti = .false.
+	!bopti = .false.
+	bopti = .true.
 	bnepart = .false.
 	grdpart = ' '
 
