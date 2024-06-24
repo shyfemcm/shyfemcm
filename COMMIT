@@ -1,5 +1,31 @@
 ============================================================
 
+Mon Jun 24 14:24:05 CEST 2024
+
+Makefiles updated
+
+ Makefile                       | 11 ++++++-----
+ bin/fem3d/compare_f90f.sh      | 34 ++++++++++++++++++++++++++++++++++
+ bin/fem3d/f902f.pl             | 29 +++++++++++++++++++++++++++--
+ docs/howto/HOWTO_GIT_REPO.txt  |  6 +++++-
+ src/Makefile                   |  9 ++++++---
+ src/contrib/Makefile           |  2 ++
+ src/external/Makefile          |  5 +++--
+ src/external/gotm/Makefile     |  3 ++-
+ src/external/sparskit/Makefile |  3 ++-
+ src/shyfem/Makefile            | 12 +++++++++---
+ src/tools/Makefile             |  1 +
+ src/utils/Makefile             |  5 +++--
+ src/utils/generic/Makefile     |  3 ++-
+ src/utils/shympi/Makefile      |  3 ++-
+ src/utils/shyutil/Makefile     |  3 ++-
+ src/utils/shyutilmpi/Makefile  |  3 ++-
+ 16 files changed, 108 insertions(+), 24 deletions(-)
+ new file:
+   bin/fem3d/compare_f90f.sh
+
+============================================================
+
 Mon May 13 18:29:04 CEST 2024
 
 final shypre

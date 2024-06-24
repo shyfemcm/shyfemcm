@@ -75,7 +75,8 @@ LIB = $(LIBDIR)/lib$(LIBNAME).a
 
 default: fem
 all:	fem
-fem: lib $(EXES) links
+fem: shyfem
+shyfem: lib $(EXES) links
 #fem: lib
 lib: $(MPI_TARGET) $(LIB) nothing
 

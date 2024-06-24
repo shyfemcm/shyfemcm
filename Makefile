@@ -21,7 +21,7 @@
 #
 #---------------------------------------------------------------
 
-DIR = fem
+DIR = base
 RULES_MAKE_VERSION = 0.0	# default if Rules.make cannot be read
 FEMDIR    = .
 FEMBIN    = $(FEMDIR)/bin
@@ -56,7 +56,7 @@ FEMDIR    = .
 DIRLIB    = $(FEMDIR)/lib
 FEMSRC    = $(FEMDIR)/src
 FEMBIN    = $(FEMDIR)/bin
-TMPDIR    = $(HOME)/fem/tmp
+TMPDIR    = $(HOME)/tmp
 ACTFEMDIR = `pwd`
 
 FEMCHECK  = $(FEMBIN)/check
@@ -114,11 +114,12 @@ FEMNOGRAPH   = $(FEMLIBS) $(FEMEXTRA) $(FEMMESH) $(FEMPROG) $(FEMUTIL)
 # compiling and recursive targets
 #---------------------------------------------------------------
 
-default: fem
+default: shyfem
 
-all: fem doc
+all: shyfem doc
 
-fem: libmod
+fem: shyfem
+shyfem: libmod
 	cd src; make
 
 para_get:

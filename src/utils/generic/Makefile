@@ -88,7 +88,8 @@ LIB = $(LIBDIR)/lib$(LIBNAME).a
 
 default: lib
 all:	lib
-fem: lib
+fem: shyfem
+shyfem: lib
 lib:	$(LIB) nothing
 
 nothing:

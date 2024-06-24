@@ -10,6 +10,8 @@
 
 default: nothing
 
+shyfem: nothing
+
 fem: nothing
 
 regress: nothing

@@ -20,6 +20,7 @@ SUBDIRS = \
 
 default: fem
 
+#fem: shyfem
 fem: nothing
 	@$(BINDIR)/recursivemake $@ $(SUBDIRS)
 

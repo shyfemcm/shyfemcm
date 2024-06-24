@@ -18,6 +18,7 @@ FEMBIN = $(FEMDIR)/bin
 #--------------------	EXES	---------------------
 
 EXES = shyfem
+EXES_target = shyfem
 
 #----------------------	INCLUDE	----------------------
 
@@ -161,10 +162,13 @@ OBSOLETE = \
 
 default: fem
 
-fem: $(EXES) links nothing
+#fem: shyfem
+#shyfem: $(EXES_target) links nothing
+fem: shyfem links nothing
 
-$(EXES): $(MODULES) $(OBJ) $(LIBF) shyfem.o
-	 $(F77) $(FFLAGS) $(INCLUDE) $(LFLAGS) $^ $(LIBL) -o $@
+#$(EXES_target): $(MODULES) $(OBJ) $(LIBF) shyfem.o
+shyfem: $(MODULES) $(OBJ) $(LIBF) shyfem.o
+	 $(F77) $(FFLAGS) $(INCLUDE) $(LFLAGS) $^ $(LIBL) -o shyfem 
 
 links:
 	@$(FEMBIN)/symlink $(FEMBIN) $(EXES)
@@ -197,6 +201,8 @@ cleanall: clean
 #	cp $(EXES) /home/georg/work/shyfem_repo/shyfem-mpi/fem3d
 #	cp $(EXES) /home/georg/work/shyfem_repo/shyfem/bin
 #	cp $(EXES) /home/georg/work/shyfem_repo/shyfem/fem3d
+
+.PHONY: compile links nothing
 
 #------------------------------------------------------------------------
 

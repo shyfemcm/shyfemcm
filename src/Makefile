@@ -9,14 +9,17 @@
 
 FEMDIR = ..
 BINDIR = $(FEMDIR)/bin
-SUBDIRS = contrib external utils shyfem tools
+SUBDIRS = contrib external utils
 
 #------------------------------------------------------------------------
 
-default: fem
+default: shyfem
 
-fem: libmod nothing
+fem: shyfem
+shyfem: libmod nothing
 	@$(BINDIR)/recursivemake $@ $(SUBDIRS)
+	@$(BINDIR)/recursivemake fem shyfem
+	@$(BINDIR)/recursivemake fem tools
 
 test: nothing
 	@$(BINDIR)/recursivemake $@ $(SUBDIRS)

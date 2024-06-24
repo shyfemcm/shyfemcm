@@ -81,4 +81,8 @@ possibilities will be described below.
 	git status		# this will tell you on what branch you are
 	git checkout develop	# this will switch to the branch develop
 
-	In order to switch to a different branch, once you have 
+	In order to switch to a different branch, once you have the model
+	downloaded, run the command:
+
+	git checkout another_branch
+

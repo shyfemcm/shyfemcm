@@ -14,9 +14,10 @@ SUBDIRS = gotm sparskit
 
 #------------------------------------------------------------------------
 
-default: fem
+default: shyfem
 
-fem: nothing
+fem: shyfem
+shyfem: nothing
 	@$(BINDIR)/recursivemake $@ $(SUBDIRS)
 
 test: nothing
