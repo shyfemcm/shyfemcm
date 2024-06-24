@@ -88,6 +88,12 @@ bin/shyparts
 src/utils/shympi/check_shympi_debug
 bin/check_shympi_debug
 
+src/tools/shypre/shypre_noopti
+bin/shypre_noopti
+src/tools/shypre/shypre_orig
+bin/shypre_orig
+
+
 bin/grid
 src/tools/grid/grid
 bin/mesh
