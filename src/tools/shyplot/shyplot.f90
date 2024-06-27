@@ -78,6 +78,7 @@
 ! 22.05.2023	ggu	get_layer_thickness() was missing an argument
 ! 26.07.2023	lrp	introduce zstar in shyplot
 ! 28.09.2023    lrp     bug fix for zstar (forgotten parameter)
+! 27.06.2024    ggu     bug fix calling shympi_init, read basin first
 !
 ! notes :
 !
@@ -1163,8 +1164,6 @@
 	integer getisec
 	real getpar
 
-        !call shympi_init(.false.)
-
         !--------------------------------------------------------------
         ! set command line parameters
         !--------------------------------------------------------------
@@ -1187,8 +1186,15 @@
         call fem_file_get_format_description(iformat,line)
 
         !--------------------------------------------------------------
-        ! set up params and modules
+        ! read basin if given
         !--------------------------------------------------------------
+
+	bhasbasin = basfilename /= ' '
+
+	if( bhasbasin ) then
+          call read_command_line_file(basfilename)
+          call shympi_init(.false.)
+	end if
 
 	!--------------------------------------------------------------
 	! read first record
@@ -1235,12 +1241,10 @@
         ! configure basin
         !--------------------------------------------------------------
 
-	bhasbasin = basfilename /= ' '
-
 	!write(6,*) 'bhasbasin,bregdata: ',bhasbasin,bregdata
 	call mod_hydro_set_regpar(regpar)
 	if( bhasbasin ) then
-          call read_command_line_file(basfilename)
+          !call read_command_line_file(basfilename)	!has already been read
 	else if( bregdata ) then
 	  call bas_insert_regular(regpar)
 	else	!should not be possible
@@ -1426,7 +1430,9 @@
 	  bskip = .false.
 	  if( elabtime_over_time(atime) ) exit
 	  if( .not. elabtime_in_time(atime) ) bskip = .true.
-	  if( ifreq > 0 .and. mod(irec,ifreq) /= 0 ) bskip = .true.
+	  if( ifreq > 0 ) then
+	    if( mod(irec,ifreq) /= 0 ) bskip = .true.
+	  end if
 
 	  if( bskip ) then
 	    if( bverb ) then

@@ -682,7 +682,7 @@
 
 	if( .not. bpopulated ) then
 	  write(6,*) 'strings have not been set up'
-	  write(6,*) 'call populate_strings() needed'
+	  write(6,*) 'need to call populate_strings()'
 	  stop 'error stop check_populate: not populated'
 	end if
 

@@ -67,6 +67,7 @@
 ! 20.06.2022	ggu	maximum dimensions updated
 ! 09.05.2023    lrp     write vertical velocity and density
 ! 02.03.2024    ccf     new entries for sediments
+! 27.06.2024	ggu	better info on variables
 !
 ! notes :
 !
@@ -1042,6 +1043,7 @@
 	integer dimids(1024)
 	double precision avalue
 	character*256 name,aname,atext
+	character*80 description
 	integer retval
 
 	logical, save :: blong = .false.
@@ -1052,8 +1054,10 @@
 	  if( bverb ) write(6,*) ncid,var_id,type,ndims,natts
 	  call nc_handle_err(retval,'get_var_info')
 	  if( ndims .gt. 10 ) stop 'error stop nc_var_info: ndims'
-	  write(6,1010) var_id,natts,ndims,'   ',trim(name)
- 1010     format(3i5,a,a)
+	  call nc_get_var_description(ncid,var_id,description)
+	  write(6,1010) var_id,natts,ndims,'   ' &
+     &			,trim(name),' / ',trim(description)
+ 1010     format(3i6,4a)
 
 	  if( blong ) then
 	    do ia=1,natts
@@ -1091,6 +1095,7 @@
 	call nc_handle_err(retval,'vars_info')
 
 	write(6,*) 'variables: '
+	write(6,*) '   id natts  ndim   name / description'
 	do i=1,nvars
 	  var_id = i
 	  call nc_var_info(ncid,var_id,bverb)
@@ -1120,6 +1125,43 @@
 	  return
 	end if
 	call nc_handle_err(retval,'get_var_id')
+
+	end
+
+!*****************************************************************
+
+	subroutine nc_get_var_description(ncid,var_id,description)
+
+	use netcdf_params
+
+	implicit none
+
+	integer ncid
+	integer var_id
+	character*(*) description
+
+	integer retval
+	double precision avalue
+	integer xtype,length
+	character*256 aname,atext
+
+	description = ' '
+
+	aname = 'standard_name'
+	retval = nf_inq_att(ncid,var_id,aname,xtype,length)
+	if( .not. nc_has_err(retval) ) then
+	  call nc_get_var_attrib(ncid,var_id,aname,atext,avalue)
+	  description = atext
+	  return
+	end if
+
+	aname = 'long_name'
+	retval = nf_inq_att(ncid,var_id,aname,xtype,length)
+	if( .not. nc_has_err(retval) ) then
+	  call nc_get_var_attrib(ncid,var_id,aname,atext,avalue)
+	  description = atext
+	  return
+	end if
 
 	end
 

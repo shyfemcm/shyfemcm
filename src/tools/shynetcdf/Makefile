@@ -115,7 +115,7 @@ LIBFNC  = $(LIBDIR)/lib$(LIBNETCDF).a
 LIBL = $(LIBLNC) $(LIBLUM) $(LIBLMP) $(LIBLSU) $(LIBLUT) $(LIB_NETCDF)
 LIBF = $(LIBFNC) $(LIBFUM) $(LIBFMP) $(LIBFSU) $(LIBFUT)
 
-nc2fem: $(NC2FEM_OBJ)
+nc2fem: $(NC2FEM_OBJ) $(LIBF)
 	$(F77) $(FLAGS) $(NC2FEM_OBJ) $(LIBL) -o $@
 
 ts2nc: ts2nc.o

@@ -1,5 +1,28 @@
 ============================================================
 
+Thu Jun 27 14:22:24 CEST 2024
+
+netcdf updates, shyplot debugged
+
+ src/tools/shynetcdf/Makefile                       |   2 +-
+ src/tools/shynetcdf/{nc2fem.f => nc2fem.f90}       | 336 ++++++++++-----------
+ .../{nc_dim_coords.f => nc_dim_coords.f90}         | 148 ++++-----
+ src/tools/shynetcdf/{nc_domain.f => nc_domain.f90} |   8 +-
+ src/tools/shynetcdf/{nc_tutil.f => nc_tutil.f90}   |  72 ++---
+ src/tools/shynetcdf/{nc_util.f => nc_util.f90}     | 140 ++++-----
+ src/tools/shynetcdf/netcdf.f90                     |  46 ++-
+ src/tools/shyplot/shyplot.f90                      |  20 +-
+ src/utils/shyutil/strings.f90                      |   2 +-
+ 9 files changed, 411 insertions(+), 363 deletions(-)
+ renamed:
+    src/tools/shynetcdf/nc2fem.f -> src/tools/shynetcdf/nc2fem.f90
+    src/tools/shynetcdf/nc_dim_coords.f -> src/tools/shynetcdf/nc_dim_coords.f90
+    src/tools/shynetcdf/nc_domain.f -> src/tools/shynetcdf/nc_domain.f90
+    src/tools/shynetcdf/nc_tutil.f -> src/tools/shynetcdf/nc_tutil.f90
+    src/tools/shynetcdf/nc_util.f -> src/tools/shynetcdf/nc_util.f90
+
+============================================================
+
 Mon Jun 24 14:24:05 CEST 2024
 
 Makefiles updated

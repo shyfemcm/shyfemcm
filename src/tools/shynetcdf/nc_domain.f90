@@ -136,8 +136,8 @@
 !*****************************************************************
 !*****************************************************************
 
-        subroutine check_regular_coords(nx,ny,x,y
-     +			,bregular,regpar)
+        subroutine check_regular_coords(nx,ny,x,y                       &
+     &                  ,bregular,regpar)
 
 ! sets regpar and bregular
 !
@@ -293,8 +293,8 @@
 !*****************************************************************
 !*****************************************************************
 
-	subroutine handle_domain(bverb,dstring
-     +				,bregular,regpar_data,regpar)
+        subroutine handle_domain(bverb,dstring                          &
+     &                          ,bregular,regpar_data,regpar)
 
 ! uses bregular and regpar_data as input
 ! computes regpar which is the regular output domain
