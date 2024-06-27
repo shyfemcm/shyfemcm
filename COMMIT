@@ -1,5 +1,16 @@
 ============================================================
 
+Thu Jun 27 14:52:35 CEST 2024
+
+new documentation for netcdf (nc2fem)
+
+ docs/howto/HOWTO_FEM_FILES.txt | 82 ++++++++++++++++++++++++++++++++++++++++++
+ 1 file changed, 82 insertions(+)
+ new file:
+   docs/howto/HOWTO_FEM_FILES.txt
+
+============================================================
+
 Thu Jun 27 14:22:24 CEST 2024
 
 netcdf updates, shyplot debugged
