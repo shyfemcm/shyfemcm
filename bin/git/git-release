@@ -24,6 +24,7 @@
 #---------------------------------------------------------------------
 
 repo=myfork
+repo_name=georgu/shyfemcm-ismar
 
 #---------------------------------------------------------------------
 # functions
@@ -165,8 +166,9 @@ release_text=$description
 [ "$release_notes" = "true" ] && generate_release_notes
 
 branch=$(git rev-parse --abbrev-ref HEAD)
-repo_full_name=$(git config --get remote.$repo.url \
-		| sed 's/.*:\/\/github.com\///;s/.git$//')
+#repo_full_name=$(git config --get remote.$repo.url \
+#		| sed 's/.*:\/\/github.com\///;s/.git$//')
+repo_full_name="git@github.com:$repo_name"
 #token=$(git config --global github.token)
 token=$gittoken
 

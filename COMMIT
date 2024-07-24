@@ -1,5 +1,17 @@
 ============================================================
 
+Wed Jul 24 11:31:43 CEST 2024
+
+minor
+
+ bin/git/git-release               |  6 ++-
+ docs/howto/SHYFEM_QUICK_START.txt | 94 +++++++++++++++++++++++++++++++++++++++
+ 2 files changed, 98 insertions(+), 2 deletions(-)
+ new file:
+   docs/howto/SHYFEM_QUICK_START.txt
+
+============================================================
+
 Thu Jun 27 21:03:32 CEST 2024
 
 RELEASE_NOTES
