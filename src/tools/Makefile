@@ -24,6 +24,9 @@ default: fem
 fem: nothing
 	@$(BINDIR)/recursivemake $@ $(SUBDIRS)
 
+shyfem: nothing
+	@$(BINDIR)/recursivemake fem $(SUBDIRS)
+
 test: nothing
 	@$(BINDIR)/recursivemake $@ shynetcdf
 

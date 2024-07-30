@@ -24,6 +24,8 @@ depend: nothing
 clean: nothing
 
 cleanall: nothing
+	rm -f *.a
+	cd mod; rm -f *.mod *.f90
 
 save: nothing
 

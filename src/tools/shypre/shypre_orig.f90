@@ -303,7 +303,7 @@
 
 	call ketest(nel,nen3v)
 	if( bdebug ) then
-	call gtest('end read',nelddi,nkn,nel,nen3v)
+	call gtest_0('end read',nelddi,nkn,nel,nen3v)
 	end if
 
         bstop=.false.
@@ -329,7 +329,7 @@
         call uniqn(nel,ipev,iedex,bstop)
 
 	if( bdebug ) then
-	call gtest('end uniqn',nelddi,nkn,nel,nen3v)
+	call gtest_0('end uniqn',nelddi,nkn,nel,nen3v)
 	end if
 
 	if( bwrite ) then
@@ -367,7 +367,7 @@
 
 	call ketest(nel,nen3v)
 	if( bdebug ) then
-	call gtest('end sense',nelddi,nkn,nel,nen3v)
+	call gtest_0('end sense',nelddi,nkn,nel,nen3v)
 	end if
 
         call clockw(nkn,nel,nen3v,ipev,xgv,ygv,bstop)
@@ -394,7 +394,7 @@
 
         call sidei(nkn,nel,nen3v,ng,iknot,ngr1,ngr,bstop)
 	if(bstop) goto 99934
-        call check_sidei(nkn,nel,nen3v,ipv,ng,iknot,ngr1,bstop)
+        call check_sidei_0(nkn,nel,nen3v,ipv,ng,iknot,ngr1,bstop)
 	if(bstop) goto 99935
 	call knscr(nkn,ngr,ngr1,iknot)
 
@@ -410,7 +410,7 @@
 !--------------------------------------------------------
 
 	if( bdebug ) then
-	call gtest('bandwidth',nelddi,nkn,nel,nen3v)
+	call gtest_0('bandwidth',nelddi,nkn,nel,nen3v)
 	end if
 
         if( bwrite ) write(nat,*) ' ...optimizing band width'
@@ -418,7 +418,7 @@
         call bandw(nel,nen3v,mbw)
 
 	if( bdebug ) then
-	call gtest('bandwidth 1',nelddi,nkn,nel,nen3v)
+	call gtest_0('bandwidth 1',nelddi,nkn,nel,nen3v)
 	end if
 	if( bww ) write(nat,*) 'Bandwidth is ',mbw
 
@@ -429,17 +429,17 @@
 	!call debug_out('bandop kphv',nkn,kphv)
 
 	if( bdebug ) then
-	call gtest('bandwidth 2',nelddi,nkn,nel,nen3v)
+	call gtest_0('bandwidth 2',nelddi,nkn,nel,nen3v)
 	end if
 
         if(bopti) then
           call bandex(nkn,nel,nen3v,kphv,ipv,iarnv,xgv,ygv,hkv) !kphv is n-rank
 	  if( bdebug ) then
-	    call gtest('bandwidth 3',nelddi,nkn,nel,nen3v)
+	    call gtest_0('bandwidth 3',nelddi,nkn,nel,nen3v)
 	  end if
           call bandw(nel,nen3v,mbw)
 	  if( bdebug ) then
-	    call gtest('bandwidth 4',nelddi,nkn,nel,nen3v)
+	    call gtest_0('bandwidth 4',nelddi,nkn,nel,nen3v)
 	  end if
 	  if( bww ) write(nat,*) 'Optimized bandwidth is ',mbw
 	end if
@@ -455,7 +455,7 @@
 
 	call ketest(nel,nen3v)
 	if( bdebug ) then
-	call gtest('end bandwidth',nelddi,nkn,nel,nen3v)
+	call gtest_0('end bandwidth',nelddi,nkn,nel,nen3v)
 	end if
 
 	if( bwrite ) write(nat,*) ' ...renumbering elements'
@@ -482,7 +482,7 @@
 
 	call ketest(nel,nen3v)
 	if( bdebug ) then
-	call gtest('write',nelddi,nkn,nel,nen3v)
+	call gtest_0('write',nelddi,nkn,nel,nen3v)
 	end if
 
 !--------------------------------------------------------
@@ -1013,7 +1013,7 @@
 
 !*****************************************************************
 
-        subroutine check_sidei(nkn,nel,nen3v,ipv,ng,iknot,ngr1,bstop)
+        subroutine check_sidei_0(nkn,nel,nen3v,ipv,ng,iknot,ngr1,bstop)
 
 ! set up side index and find grade
 
@@ -1658,7 +1658,7 @@
 
 !**********************************************************
 
-	subroutine gtest(text,nelddi,nkn,nel,nen3v)
+	subroutine gtest_0(text,nelddi,nkn,nel,nen3v)
 
 	implicit none
 
