@@ -1,5 +1,19 @@
 ============================================================
 
+Tue Jul 30 17:33:14 CEST 2024
+
+started tvd
+
+ src/shyfem/hydrodynamic.f90   |  50 ++++-------
+ src/shyfem/lagrange_main.f90  |  29 +++---
+ src/shyfem/openmp_admin.f90   | 202 +++++++++++++++++++++++++++++++++++++++++-
+ src/shyfem/shyfem.f90         |   2 +-
+ src/shyfem/tvd_admin.f90      | 146 +++++++++++++++++++++++++-----
+ src/utils/shyutilmpi/find.f90 |  20 ++++-
+ 6 files changed, 373 insertions(+), 76 deletions(-)
+
+============================================================
+
 Wed Jul 24 11:31:43 CEST 2024
 
 minor

@@ -23,6 +23,8 @@
 !
 !--------------------------------------------------------------------------
 
+! omp administration routines
+!
 ! revision log :
 !
 ! 25.01.2012	ggu	changed VERS_6_1_42
@@ -34,16 +36,50 @@
 ! 12.01.2017	ggu	changed VERS_7_5_21
 ! 16.02.2019	ggu	changed VERS_7_5_60
 ! 21.05.2019	ggu	changed VERS_7_5_62
+! 24.07.2024	ggu	revisited and omp enabled
+
+!***************************************************************
+
+!===============================================================
+	module omp_admin
+!===============================================================
+
+!$      use omp_lib
+
+	logical, save :: bomp_init = .false.
+	integer, save :: nomp_max = 0
+	integer, save :: nomp_use = 0
+
+!===============================================================
+	end module omp_admin
+!===============================================================
+
+	subroutine openmp_init
+
+	use omp_admin
+
+	implicit none
+
+	bomp_init = .true.
+	nomp_max = 1
+!$      nomp_max = omp_get_max_threads()
+	nomp_use = nomp_max
+
+	end
 
 !***************************************************************
 
 	subroutine openmp_get_max_threads(n)
 
+	use omp_admin
+
 	implicit none
 
 	integer n
 
-	n = 1
+	if( .not. bomp_init ) call openmp_init
+
+	n = nomp_max
 
 	end
 
@@ -51,9 +87,19 @@
 
 	subroutine openmp_set_num_threads(n)
 
+	use omp_admin
+
 	implicit none
 
 	integer n
+
+	if( .not. bomp_init ) call openmp_init
+
+	nomp_use = n
+	nomp_use = min(nomp_use,nomp_max)
+	nomp_use = max(nomp_use,1)
+	
+!$	call omp_set_num_threads(nomp_use)
 
 	end
 
@@ -61,11 +107,15 @@
 
 	subroutine openmp_get_num_threads(n)
 
+	use omp_admin
+
 	implicit none
 
 	integer n
 
-	n = 1
+	if( .not. bomp_init ) call openmp_init
+
+	n = nomp_use
 
 	end
 
@@ -73,11 +123,16 @@
 
 	subroutine openmp_get_thread_num(it)
 
+	use omp_admin
+
 	implicit none
 
 	integer it
 
+	if( .not. bomp_init ) call openmp_init
+
 	it = 0
+!$	it = omp_get_thread_num ()
 
 	end
 
@@ -85,11 +140,16 @@
 
         function openmp_is_master()
 
+	use omp_admin
+
         implicit none
     
         logical openmp_is_master
 
+	if( .not. bomp_init ) call openmp_init
+
         openmp_is_master = .true.
+!$	openmp_is_master = ( omp_get_thread_num() == 0 )
 
         end
 
@@ -97,11 +157,16 @@
 
 	subroutine openmp_parallel_code(text)
 
+	use omp_admin
+
 	implicit none
 
 	character*(*) text
 
+	if( .not. bomp_init ) call openmp_init
+
 	text = 'serial'
+	if ( nomp_max > 1 ) text = 'omp'
 
 	end
 
@@ -109,11 +174,17 @@
 
 	function openmp_is_parallel()
 
+! true if omp is available
+
+	use omp_admin
+
 	implicit none
 
 	logical openmp_is_parallel
 
-	openmp_is_parallel = .false.
+	if( .not. bomp_init ) call openmp_init
+
+	openmp_is_parallel = ( nomp_max > 1 )
 
 	end
 
@@ -123,11 +194,16 @@
 
 ! true if in parallel region
 
+	use omp_admin
+
         implicit none
 
         logical openmp_in_parallel
 
+	if( .not. bomp_init ) call openmp_init
+
         openmp_in_parallel = .false.
+!$	openmp_in_parallel = omp_in_parallel()
 
         end
 
@@ -181,6 +257,8 @@
 
         subroutine omp_compute_chunk(imax,nchunk)
 
+	use omp_admin
+
         implicit none
 
         integer imax,nchunk
@@ -200,6 +278,124 @@
         iend = i
 
         end
+
+!***************************************************************
+
+        subroutine omp_set_minmax(nuse,nmax,ichunk,istart,iend)
+
+	use omp_admin
+
+        implicit none
+
+        integer nuse,nmax,ichunk,istart,iend
+	integer nchunk
+
+	if( .not. bomp_init ) call openmp_init
+
+	if( nuse <= 0 ) nuse = nomp_use
+	nchunk = nmax / nuse
+	istart = 1 + (ichunk-1)*nchunk
+	iend = ichunk*nchunk
+	if( ichunk == nuse .and. iend /= nmax ) iend = nmax
+
+	end
+
+!***************************************************************
+!***************************************************************
+!***************************************************************
+! test routines
+!***************************************************************
+!***************************************************************
+!***************************************************************
+
+	subroutine multi_omp_shell(nwant,nloop)
+
+	implicit none
+	integer nwant,nloop
+	integer nres,it,i,nl,nuse
+	integer nchunk,ie,is,ntot,nt,nr
+	integer count,dcount
+	double precision rres,rr
+
+	nuse = nwant
+	if( nuse == 0 ) call openmp_get_max_threads(nuse)
+	ntot = 0
+	rres = 0
+	call openmp_set_num_threads(nuse)
+
+	call get_clock_count(count)
+
+!! !$OMP PARALLEL 
+!! !$OMP SINGLE
+!! !$OMP TASK PRIVATE(i,it,nres) SHARED(nl,nloop,nuse)    DEFAULT(NONE)
+!$OMP PARALLEL DO PRIVATE(i,it,is,ie,nt,nr,rr) & 
+!$OMP & SHARED(nloop,nl,nuse,nchunk) DEFAULT(NONE) &
+!$OMP & REDUCTION(+:rres,ntot)
+	do i=1,nuse
+          call omp_set_minmax(nuse,nloop,i,is,ie)
+	  call multi_omp(is,ie,nt,rr)
+	  !write(6,*) i,is,ie,nt,rr
+	  ntot = ntot + nt 
+	  rres = rres + rr 
+	end do
+!$OMP END PARALLEL DO
+!! !$OMP END TASK
+!! !$OMP END SINGLE
+!! !$OMP TASKWAIT
+!! !$OMP END PARALLEL      
+
+	write(6,*) 'final: ',ntot,rres
+
+        call get_clock_count_diff(count,dcount)
+	write(6,*) 'time of execution: ',nuse,dcount
+
+	end
+
+!***************************************************************
+
+	subroutine multi_omp(is,ie,ntot,rres)
+	implicit none
+	integer is,ie,ntot,i
+	double precision rres
+	ntot = 0
+	rres = 0
+	do i=is,ie
+	  rres = rres + 2*i
+	  ntot = ntot + 1
+	end do
+	end
+
+!***************************************************************
+
+	subroutine test_omp_admin
+	use omp_admin
+	implicit none
+	integer nmax,nuse
+	integer nloop,nres,it,i
+	write(6,*) 'testing omp admin routines'
+	call openmp_get_max_threads(nmax)
+	call openmp_set_num_threads(nmax/2)
+	call openmp_get_num_threads(nuse)
+	write(6,*) 'nmax = ',nmax
+	write(6,*) 'nuse = ',nuse
+
+	nloop = 100000000
+	call srand(4637)
+
+	call multi_omp_shell(1,nloop)
+	call multi_omp_shell(3,nloop)
+	call multi_omp_shell(nmax,nloop)
+	call multi_omp_shell(10,nloop)
+	call multi_omp_shell(20,nloop)
+	call multi_omp_shell(0,nloop)
+
+	end
+
+!***************************************************************
+
+!	program main_omp_admin
+!	call test_omp_admin
+!	end
 
 !***************************************************************
 

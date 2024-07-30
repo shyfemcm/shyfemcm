@@ -85,6 +85,7 @@
 ! finds element for point (xp,yp) starting from ieold
 !
 ! uses data structure ev and ieltv
+! honors material boundary
 
 	use mod_geom
 	use evgeom
@@ -103,6 +104,7 @@
 
 	logical in_element
 
+	bdebug = ieold == 73
 	bdebug = .false.
 	lmax = 10
 
@@ -159,6 +161,7 @@
 	  if( loop .gt. lmax ) ie = 0
 	end do
 
+	if( bdebug ) write(6,*) 'ggu_xi final',ie
 	ielem = 0
 
 	end
@@ -168,17 +171,25 @@
 	subroutine find_elem_from_old(ieold,xp,yp,ielem)
 
 ! finds element for point (xp,yp) starting from ieold
+!
+! finds elements also if behind material barrier
 
 	use basin, only : nkn,nel,ngr,mbw
 
 	implicit none
 
+	logical bdebug
 	integer ieold
 	real xp,yp
 	integer ielem	!element number on return
 
 	logical in_element
-	integer iem,iep
+	integer iem,iep,iloop
+
+	bdebug = ieold == 73
+	bdebug = .false.
+
+	if( bdebug ) write(6,*) 'starting find_elem_from_old'
 
 !-------------------------------------------------------------
 ! check if old element is given -> if not test all elements
@@ -202,13 +213,17 @@
 ! start from old element going upwards and downwards
 !-------------------------------------------------------------
 
+	iloop = 0
 	iem = ieold-1
 	if( iem .lt. 1 ) iem = nel		!BUG_27.01.2011
 	iep = ieold+1
 	if( iep .gt. nel ) iep = 1		!BUG_27.01.2011
 
 	do while( iem .ne. ieold .and. iep .ne. ieold )
+	  iloop = iloop + 1
+	  if( bdebug ) write(6,*) 'looking for elem ',iem,iep,iloop
 	  if( in_element(iem,xp,yp) ) then
+	    if( bdebug ) write(6,*) 'iem found: ',iem
 	    ielem = iem
 	    return
 	  end if
@@ -216,6 +231,7 @@
 	  if( iem .lt. 1 ) iem = nel
 
 	  if( in_element(iep,xp,yp) ) then
+	    if( bdebug ) write(6,*) 'iep found: ',iep
 	    ielem = iep
 	    return
 	  end if
@@ -226,6 +242,8 @@
 !-------------------------------------------------------------
 ! no element found
 !-------------------------------------------------------------
+
+	if( bdebug ) write(6,*) 'no element found for ',ieold
 
 	ielem = 0
 

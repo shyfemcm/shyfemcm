@@ -117,6 +117,7 @@
 
 ! initializes horizontal tvd scheme
 
+	use basin
 	use mod_tvd
 	use shympi
 
@@ -130,6 +131,7 @@
 	icall = 1
 
 	itvd_type = itvd
+	if( itvd_type > 0 ) call mod_tvd_init(nel)
 
 	if( itvd_type .eq. 2 ) then
           if( shympi_is_parallel() ) then
@@ -138,6 +140,7 @@
           end if
 	  call tvd_upwind_init_shell
 	end if
+	stop
 
 	if( itvd .eq. 0 ) then
 	  write(6,*) 'no horizontal TVD scheme used'
@@ -148,9 +151,52 @@
 	end
 
 !*****************************************************************
+
         subroutine tvd_upwind_init_shell
 
-! initializes position of upwind node (shell) - original version
+! initializes position of upwind node (shell) - final version
+
+	use mod_tvd
+	use basin
+
+        implicit none
+
+	logical bsphe,binit
+	integer isphe
+        integer ie,nthreads
+	integer it1,idt
+
+        write(6,*) 'setting up tvd upwind information...'
+
+	call get_coords_ev(isphe)
+	bsphe = isphe .eq. 1
+
+	call openmp_get_num_threads(nthreads)
+
+	call get_clock_count(it1)
+
+!$OMP PARALLEL DO PRIVATE(ie) SHARED(nel,bsphe)    DEFAULT(NONE)
+
+          do ie=1,nel
+            call tvd_upwind_init(bsphe,ie)
+	  end do
+
+!$OMP END PARALLEL DO
+
+	call is_init_ev(binit)
+
+	call get_clock_count_diff(it1,idt)
+	write(6,*) 'clock count: ',idt,nthreads
+	write(6,*) 'binit,nel: ',binit,nel
+        write(6,*) '...tvd upwind setup done (itvd=2)'
+
+	end
+
+!*****************************************************************
+
+        subroutine tvd_upwind_init_shell_1
+
+! initializes position of upwind node (shell) - omp not working
 
 	use mod_tvd
 	use basin
@@ -168,6 +214,8 @@
 
 	call get_coords_ev(isphe)
 	bsphe = isphe .eq. 1
+
+	call openmp_get_num_threads(nthreads)
 
 	call get_clock_count(it1)
 
@@ -206,7 +254,7 @@
 
 !*****************************************************************
 
-        subroutine tvd_upwind_init_shell0
+        subroutine tvd_upwind_init_shell_0
 
 ! initializes position of upwind node (shell) - new simplified version
 
@@ -217,7 +265,7 @@
 
 	logical bsphe
 	integer isphe
-        integer ie,ies,ieend,nchunk,nthreads,nt
+        integer ie,ies,ieend,nchunk,nthreads,nmax
 	integer it1,idt
 
 	integer omp_get_num_threads,OMP_GET_MAX_THREADS
@@ -227,19 +275,16 @@
 	call get_coords_ev(isphe)
 	bsphe = isphe .eq. 1
 
+	call openmp_get_max_threads(nmax)
+	call openmp_get_num_threads(nthreads)
+	write(6,*) 'nthreads,nmax = ',nthreads,nmax
+
 	call get_clock_count(it1)
 
-!$      nt = omp_get_max_threads()
-!$      nthreads = omp_get_num_threads()
-!$	nchunk = nel/(10*nt)
-!$	write(6,*) 'max threads = ',nt,nthreads,nchunk
+!$	nchunk = nel/(10*nmax)
+!$	write(6,*) 'max threads = ',nmax,nthreads,nchunk
 
 !$OMP PARALLEL SHARED(nel,bsphe,nchunk) PRIVATE(ie)
-
-	!call omp_compute_chunk(nel,nchunk)
-!$      !nthreads = omp_get_num_threads()
-!$	!write(6,*) 'using chunk = ',nchunk,nel,nthreads
-
 !$OMP DO SCHEDULE(DYNAMIC,nchunk)
 
 	do ie=1,nel
@@ -254,6 +299,8 @@
 
 	end
 
+!*****************************************************************
+!*****************************************************************
 !*****************************************************************
 
         subroutine tvd_upwind_init(bsphe,ie)
@@ -271,7 +318,9 @@
 	integer ie
 
 	logical bdebug
-        integer ii,j,k
+        integer ii,j,k,in
+	integer, save :: itot = 0
+	integer, save :: itot2 = 0
         integer ienew,ienew2
 	real x,y
 	real r
@@ -279,15 +328,18 @@
         double precision xc,yc,xd,yd,xu,yu
         double precision dlat0,dlon0                    !center of projection
 
+	logical in_element
 	integer ieext
 
 	bdebug = .false.
-
-        !do ie=1,nel
+	bdebug = ie == 73
+	bdebug = .true.
 
           if ( bsphe ) call ev_make_center(ie,dlon0,dlat0)
 
           do ii=1,3
+
+	    !if( bdebug ) write(6,*) 'looking for elem in tvd: ',ie,ii
 
             k = nen3v(ii,ie)
             xc = xgv(k)
@@ -306,13 +358,38 @@
 	    x = xu
 	    y = yu
 
-            !call find_elem_from_old(ie,x,y,ienew)
+            call find_elem_from_old(ie,x,y,ienew)
 	    !ienew2 = ienew
             call find_close_elem(ie,x,y,ienew2)
-	    ienew = ienew2
+	    !ienew = ienew2
 
 	    if( ienew /= ienew2 ) then
-	      write(6,*) 'different elements: ',ienew,ienew2
+	      itot = itot + 1
+	      if( bdebug ) then
+	        write(6,*) 'different elements 1: ',ie,ienew,ienew2,itot
+	        write(678,*) 'different elements 1: ',ie,ienew,ienew2,itot
+		write(678,*) ieext(ie),ieext(ienew),ieext(ienew2)
+		write(678,*) x,y
+	      end if
+	      if( ienew*ienew2 > 0 ) then	!really different
+		itot2 = itot2 + 1
+		if( bdebug ) then
+		  write(6,*) 'really different 1',ie,ienew,ienew2,itot2
+		  write(6,*) ieext(ie),ieext(ienew),ieext(ienew2)
+		  write(6,*) x,y
+		end if
+		in = 0
+		if( in_element(ienew,x,y) ) in = in + 1
+		if( in_element(ienew2,x,y) ) in = in + 1
+		if( in /= 2 ) then
+		  write(6,*) '*** point only in one element'
+		  write(6,*) 'really different 1',ie,ienew,ienew2,itot2
+		  write(6,*) ieext(ie),ieext(ienew),ieext(ienew2)
+		  write(6,*) x,y
+		  stop 'error'
+		end if
+		!stop
+	      end if
 	    end if
 
             tvdupx(j,ii,ie) = x
@@ -331,13 +408,38 @@
 	    x = xu
 	    y = yu
 
-	    !call find_elem_from_old(ie,x,y,ienew)
+	    call find_elem_from_old(ie,x,y,ienew)
 	    !ienew2 = ienew
             call find_close_elem(ie,x,y,ienew2)
-	    ienew = ienew2
+	    !ienew = ienew2
 
 	    if( ienew /= ienew2 ) then
-	      write(6,*) 'different elements: ',ienew,ienew2
+	      itot = itot + 1
+	      if( bdebug ) then
+	        write(6,*) 'different elements 2: ',ie,ienew,ienew2,itot
+	        write(678,*) 'different elements 2: ',ie,ienew,ienew2,itot
+		write(678,*) ieext(ie),ieext(ienew),ieext(ienew2)
+		write(678,*) x,y
+	      end if
+	      if( ienew*ienew2 > 0 ) then	!really different
+		itot2 = itot2 + 1
+		if( bdebug ) then
+		  write(6,*) 'really different 2',ie,ienew,ienew2,itot2
+		  write(6,*) ieext(ie),ieext(ienew),ieext(ienew2)
+		  write(6,*) x,y
+		end if
+		in = 0
+		if( in_element(ienew,x,y) ) in = in + 1
+		if( in_element(ienew2,x,y) ) in = in + 1
+		if( in /= 2 ) then
+		  write(6,*) '*** point only in one element'
+		  write(6,*) 'really different 2',ie,ienew,ienew2,itot2
+		  write(6,*) ieext(ie),ieext(ienew),ieext(ienew2)
+		  write(6,*) x,y
+		  stop 'error'
+		end if
+		!stop
+	      end if
 	    end if
 
             tvdupx(j,ii,ie) = x
@@ -349,8 +451,8 @@
             ietvdup(ii,ii,ie) = 0
 
           end do
-        !end do
 
+	  !if( bdebug ) stop
         end
 
 !*****************************************************************
