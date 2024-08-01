@@ -91,7 +91,7 @@
 	! arrays for nc routines
 
 	integer, save :: iwrite_nc = 0
-	integer, save, allocatable :: var_ids(:)
+	!integer, save, allocatable :: var_ids(:)
 	real, save, allocatable :: var3d(:)
 	real, save, allocatable :: value2d(:,:)
 	real, save, allocatable :: value3d(:,:,:)
@@ -382,7 +382,7 @@
      &                          ,nlvddi,svalue)
 	  else if( outformat == 'nc' ) then
 	    ncid = idout
-	    var_id = var_ids(iv)
+	    call nc_output_get_var_ids(iv,var_id)
 	    call nc_output_record(ncid,var_id,np,svalue)
 	  else if( outformat == 'off' ) then
 	    ! nothing to be done

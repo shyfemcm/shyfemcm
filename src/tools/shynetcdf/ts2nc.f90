@@ -73,6 +73,7 @@
 	real umin,umax
 	real vmin,vmax
 
+	logical, save :: bugrid = .false.
         integer ncid
         integer dimids_2d(2)
         integer dimids_1d(1)
@@ -121,7 +122,7 @@
 	lat(1) = 45.31333
 
         call nc_open_ts(ncid,nodes,date0,time0)
-	call nc_global(ncid,descrp)
+	call nc_global(ncid,descrp,bugrid)
 
 	std = 'sea_surface_height_correction_due_to_air_pressure' // &
      &		'_and_wind_at_high_frequency'

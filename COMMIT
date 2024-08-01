@@ -1,5 +1,26 @@
 ============================================================
 
+Thu Aug  1 18:24:31 CEST 2024
+
+update netcdf, projection in shyelab
+
+ src/tools/shyelab/elabutil.f90               |   6 +-
+ src/tools/shyelab/lgrelab1.f90               |   2 +-
+ src/tools/shyelab/shyelab1.f90               |   1 +
+ src/tools/shyelab/shyelab_output.f90         |   4 +-
+ src/tools/shyelab/shyelab_proj.f90           |  74 +++++--
+ src/tools/shyelab/{shyproj.f => shyproj.f90} |  28 +--
+ src/tools/shynetcdf/elab_nc.f90              |  23 +-
+ src/tools/shynetcdf/netcdf.f90               | 311 ++++++++++++++++++++++++++-
+ src/tools/shynetcdf/ts2nc.f90                |   3 +-
+ src/utils/generic/projection.f90             |  68 +++++-
+ src/utils/shyutil/basin.f90                  |  25 ++-
+ 11 files changed, 490 insertions(+), 55 deletions(-)
+ renamed:
+    src/tools/shyelab/shyproj.f -> src/tools/shyelab/shyproj.f90
+
+============================================================
+
 Wed Jul 24 11:31:43 CEST 2024
 
 minor

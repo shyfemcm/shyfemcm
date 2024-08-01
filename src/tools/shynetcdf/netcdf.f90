@@ -68,11 +68,15 @@
 ! 09.05.2023    lrp     write vertical velocity and density
 ! 02.03.2024    ccf     new entries for sediments
 ! 27.06.2024	ggu	better info on variables
+! 31.07.2024	ggu	integrated changes for ugrid, new nc_open_ugrid()
 !
 ! notes :
 !
 ! information on unstructured grids:
 ! https://publicwiki.deltares.nl/display/NETCDF/Unstructured+grids
+!
+! ugrid conventions:
+! https://ugrid-conventions.github.io/ugrid-conventions/
 !
 ! for non dimensional vertical coordinates (sigma etc) see:
 ! http://cf-pcmdi.llnl.gov/documents/cf-conventions/1.1/cf-conventions.html
@@ -81,11 +85,15 @@
 ! information on f77 interface description:
 ! http://www.unidata.ucar.edu/software/netcdf/docs/netcdf-f77/
 !
-! CF compliance checker:
-! http://puma.nerc.ac.uk/cgi-bin/cf-checker.pl
-! http://titania.badc.rl.ac.uk/cgi-bin/cf-checker.pl
+! this file implements CF 1.6 compliance
 !
-! this file implements CF 1.4 compliance
+! compliance checker:
+!	CF:	https://cfchecker.ncas.ac.uk/
+!	ugrid:	https://github.com/pp-mo/ugrid-checks
+!
+! other CF compliance checker:
+! 	http://puma.nerc.ac.uk/cgi-bin/cf-checker.pl
+! 	http://titania.badc.rl.ac.uk/cgi-bin/cf-checker.pl
 !
 ! still to be implemented:
 !	sigma/hybrid coordinates
@@ -560,6 +568,272 @@
 
 !	retval = nf_def_var(ncid, 'time', NF_INT, 1, rec_dimid
 !     +				,rec_varid)
+
+        retval = nf_def_var(ncid, 'time', NF_DOUBLE, 1, rec_dimid       &
+     &                          ,rec_varid)
+	call nc_handle_err(retval,'open_fem')
+	varid = rec_varid
+
+	what = 'units'
+	call nc_convert_date(date0,time0,date)
+	text = 'seconds since '//trim(date)
+	call nc_define_attr(ncid,what,text,varid)
+
+	what = 'standard_name'
+	text = 'time'
+	call nc_define_attr(ncid,what,text,varid)
+
+	what = 'calendar'
+	text = 'standard'
+	call nc_define_attr(ncid,what,text,varid)
+
+	what = 'axis'
+	text = 'T'
+	call nc_define_attr(ncid,what,text,varid)
+
+!-----------------------------------------
+! define dimensions to remember
+!-----------------------------------------
+
+	dimids_2d(1) = node_dimid
+	dimids_2d(2) = rec_dimid
+
+	dimids_3d(1) = lvl_dimid
+	dimids_3d(2) = node_dimid
+	dimids_3d(3) = rec_dimid
+
+	coord_varid(1) = lon_varid
+	coord_varid(2) = lat_varid
+	coord_varid(3) = lvl_varid
+	coord_varid(4) = dep_varid
+	coord_varid(5) = eix_varid
+	coord_varid(6) = top_varid
+
+!-----------------------------------------
+! end of routine
+!-----------------------------------------
+
+	end
+
+!******************************************************************
+
+	subroutine nc_open_ugrid(ncid,nkn,nel,nlv,date0,time0,iztype)
+
+! opens nc file for writing fem grid with ugrid standard
+
+	use netcdf_params
+
+	implicit none
+
+	integer ncid		!identifier (return)
+	integer nkn,nel,nlv	!size of arrays
+	integer date0,time0	!date and time of time 0
+	integer iztype		!type of vertical coordinates
+
+	integer lmax
+	integer lat_varid,lon_varid,lvl_varid,dep_varid
+	integer eix_varid,top_varid
+	integer varid
+	integer lvl_dimid,node_dimid,elem_dimid,vertex_dimid,rec_dimid
+	integer ltext
+	integer ivalue
+	integer retval
+	integer eix_dimid(2)
+	integer top_dimid(0)
+
+	character*80 file_name
+	character*80 text
+	character*80 what
+	character*80 date
+
+	integer nc_ichanm
+
+!-----------------------------------------
+! initialize parameters
+!-----------------------------------------
+
+	file_name = 'netcdf.nc'
+	file_name = 'out.nc'
+
+!-----------------------------------------
+! Create the file.
+!-----------------------------------------
+
+	retval = nf_create(FILE_NAME, nf_clobber, ncid)
+	call nc_handle_err(retval,'open_fem')
+
+!-----------------------------------------
+! Define the dimensions. The record dimension is defined to have
+! unlimited length - it can grow as needed. In this example it is
+! the time dimension.
+!-----------------------------------------
+
+	lmax = max(1,nlv)	!be sure to have at least one layer
+
+	retval = nf_def_dim(ncid, 'nMesh2_node', nkn, node_dimid)
+	call nc_handle_err(retval,'open_fem')
+	retval = nf_def_dim(ncid, 'nMesh2_face', nel, elem_dimid)
+	call nc_handle_err(retval,'open_fem')
+	retval = nf_def_dim(ncid, 'Three', 3, vertex_dimid)
+	call nc_handle_err(retval,'open_fem')
+	retval = nf_def_dim(ncid, 'level', lmax, lvl_dimid)
+	call nc_handle_err(retval,'open_fem')
+	retval = nf_def_dim(ncid, 'time', NF_UNLIMITED, rec_dimid)
+	call nc_handle_err(retval,'open_fem')
+
+	eix_dimid(1) = vertex_dimid
+	eix_dimid(2) = elem_dimid
+
+!-----------------------------------------
+! Define the Topology
+!-----------------------------------------
+
+        retval = nf_def_var(ncid, 'Mesh2', NF_INT, 0, top_dimid &
+     &                          ,top_varid)
+	call nc_handle_err(retval,'open_fem')
+	varid = top_varid
+
+	what = 'cf_role'
+	text = 'mesh_topology'
+	call nc_define_attr(ncid,what,text,varid)
+
+	what = 'long_name'
+	text = 'topology data of 2D unstructured mesh'
+	call nc_define_attr(ncid,what,text,varid)
+
+	what = 'topology_dimension'
+	ivalue = 2
+	call nc_define_attr_int(ncid,what,ivalue,varid)
+
+	what  = 'node_coordinates'
+	text = 'Mesh2_node_x Mesh2_node_y'
+	call nc_define_attr(ncid,what,text,varid)
+
+	what  = 'face_node_connectivity'
+	text = 'Mesh2_face_nodes'
+	call nc_define_attr(ncid,what,text,varid)
+
+!---------------------
+
+        retval = nf_def_var(ncid, 'Mesh2_face_nodes', NF_INT, 2, eix_dimid &
+     &                          ,eix_varid)
+	call nc_handle_err(retval,'open_fem')
+	varid = eix_varid
+
+	what = 'cf_role'
+	text = 'face_node_connectivity'
+	call nc_define_attr(ncid,what,text,varid)
+
+	what = 'long_name'
+	text = 'Maps every triangular face to its three corner nodes'
+	call nc_define_attr(ncid,what,text,varid)
+
+	what = 'start_index'
+	ivalue = 1
+	call nc_define_attr_int(ncid,what,ivalue,varid)
+
+	what = 'units'
+	text = '1'
+	call nc_define_attr(ncid,what,text,varid)
+
+!-----------------------------------------
+! Define the coordinate variables
+!-----------------------------------------
+
+        retval = nf_def_var(ncid, 'Mesh2_node_x', NF_REAL, 1, node_dimid   &
+     &                          ,lon_varid)
+	call nc_handle_err(retval,'open_fem')
+	varid = lon_varid
+
+	what = 'standard_name'
+	text = 'longitude'
+	call nc_define_attr(ncid,what,text,varid)
+
+	what = 'long_name'
+	text = 'Longitude of 2D mesh nodes'
+	call nc_define_attr(ncid,what,text,varid)
+
+	what = 'units'
+	text = 'degrees_east'
+	call nc_define_attr(ncid,what,text,varid)
+
+!---------------------
+
+        retval = nf_def_var(ncid, 'Mesh2_node_y', NF_REAL, 1, node_dimid   &
+     &                          ,lat_varid)
+	call nc_handle_err(retval,'open_fem')
+	varid = lat_varid
+
+	what = 'standard_name'
+	text = 'latitude'
+	call nc_define_attr(ncid,what,text,varid)
+
+	what = 'long_name'
+	text = 'Latitude of 2D mesh nodes'
+	call nc_define_attr(ncid,what,text,varid)
+
+	what = 'units'
+	text = 'degrees_north'
+	call nc_define_attr(ncid,what,text,varid)
+
+!-----------------------------------------
+! Define vertical structure (layer thickness and node total depth)
+!-----------------------------------------
+
+!---------------------
+! for non dimensional vertical coordinates (sigma etc) see:
+! http://cf-pcmdi.llnl.gov/documents/cf-conventions/1.1/cf-conventions.html
+! in appendic D.6 - D.9
+!---------------------
+
+        retval = nf_def_var(ncid, 'level', NF_REAL, 1, lvl_dimid        &
+     &                          ,lvl_varid)
+	call nc_handle_err(retval,'open_fem')
+	varid = lvl_varid
+
+	what = 'units'
+	text = 'm'
+	call nc_define_attr(ncid,what,text,varid)
+
+	what = 'standard_name'
+	text = 'depth'
+	call make_vertical_coordinate(iztype,what,text)
+	call nc_define_attr(ncid,what,text,varid)
+
+	what = 'description'
+	text = 'bottom of vertical layers'
+	call nc_define_attr(ncid,what,text,varid)
+
+	what = 'axis'
+	text = 'Z'
+	call nc_define_attr(ncid,what,text,varid)
+
+	what = 'positive'
+	text = 'down'
+	call nc_define_attr(ncid,what,text,varid)
+
+!---------------------
+
+        retval = nf_def_var(ncid, 'total_depth', NF_REAL, 1, node_dimid &
+     &                          ,dep_varid)
+	call nc_handle_err(retval,'open_fem')
+	varid = dep_varid
+
+	what = 'units'
+	text = 'm'
+	call nc_define_attr(ncid,what,text,varid)
+
+	what = 'standard_name'
+	text = 'sea_floor_depth_below_sea_surface'
+	call nc_define_attr(ncid,what,text,varid)
+
+	what = 'description'
+	text = 'total depth at nodes'
+	call nc_define_attr(ncid,what,text,varid)
+
+!-----------------------------------------
+! Define time
+!-----------------------------------------
 
         retval = nf_def_var(ncid, 'time', NF_DOUBLE, 1, rec_dimid       &
      &                          ,rec_varid)
@@ -1744,6 +2018,29 @@
 
 !*****************************************************************
 
+	subroutine nc_define_attr_int(ncid,what,value,var_id)
+
+	use netcdf_params
+
+	implicit none
+
+	integer ncid
+	character*(*) what
+	integer value
+	integer var_id
+
+	integer ldef
+	integer retval
+
+        ldef = 1
+        retval = nf_put_att_int(ncid, var_id, what, NF_INT, ldef     &
+     &                          ,value)
+	call nc_handle_err(retval,'define_attr_int')
+
+	end
+
+!*****************************************************************
+
 	subroutine nc_define_range(ncid,rmin,rmax,flag,var_id)
 
 	use netcdf_params
@@ -2311,7 +2608,7 @@
 
 !*****************************************************************
 
-	subroutine nc_global(ncid,title)
+	subroutine nc_global(ncid,title,bugrid)
 
 ! writes global conventions
 
@@ -2321,6 +2618,7 @@
 
 	integer ncid
 	character*(*) title
+	logical bugrid
 
 	integer ltext,retval,varid
 	character*80 text
@@ -2332,7 +2630,8 @@
 	varid = NF_GLOBAL
 
 	what = 'Conventions'
-	text = 'CF-1.4'
+	text = 'CF-1.6'
+	if( bugrid ) text = 'CF-1.6, UGRID-1.0'
 	call nc_define_attr(ncid,what,text,varid)
 
 	what = 'title'

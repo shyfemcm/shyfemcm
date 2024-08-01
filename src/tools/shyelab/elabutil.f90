@@ -402,9 +402,9 @@
         call clo_add_option('proj projection',' ' &
      &                          ,'projection of coordinates')
         call clo_add_com('    projection is string consisting of '// &
-     &                          'mode,proj,params')
-        call clo_add_com('    mode: +1: cart to geo,  -1: geo to cart')
-        call clo_add_com('    proj: 1:GB, 2:UTM, 3:CPP')
+     &                          'proj,params')
+        call clo_add_com('    proj is one of: GB UTM EC UTM-nonstd LCC')
+        call clo_add_com('    for params see help of shyproj routine')
 
 	end subroutine elabutil_set_out_options
 
