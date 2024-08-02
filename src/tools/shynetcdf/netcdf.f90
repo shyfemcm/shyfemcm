@@ -69,6 +69,7 @@
 ! 02.03.2024    ccf     new entries for sediments
 ! 27.06.2024	ggu	better info on variables
 ! 31.07.2024	ggu	integrated changes for ugrid, new nc_open_ugrid()
+! 02.08.2024	ggu	eliminated cf_role for CF compliance
 !
 ! notes :
 !
@@ -695,7 +696,7 @@
 
 	what = 'cf_role'
 	text = 'mesh_topology'
-	call nc_define_attr(ncid,what,text,varid)
+	!call nc_define_attr(ncid,what,text,varid)
 
 	what = 'long_name'
 	text = 'topology data of 2D unstructured mesh'
@@ -722,7 +723,7 @@
 
 	what = 'cf_role'
 	text = 'face_node_connectivity'
-	call nc_define_attr(ncid,what,text,varid)
+	!call nc_define_attr(ncid,what,text,varid)
 
 	what = 'long_name'
 	text = 'Maps every triangular face to its three corner nodes'
