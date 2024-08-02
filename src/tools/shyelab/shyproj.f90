@@ -36,6 +36,7 @@
 ! 16.02.2019	ggu	changed VERS_7_5_60
 ! 21.05.2020    ggu     better handle copyright notice
 ! 12.02.2022    ggu     allow for incomplete depth
+! 01.08.2024    ggu     help also for UTM-nonstd
 !
 !---------------------------------------------------------------
 ! parameters for projection
@@ -84,22 +85,25 @@
         call clo_add_sep('projection options')
 
         call clo_add_option('proj proj',' ','type of projection to use')
-        call clo_add_option('param list',' '
-     +				,'parameters for projection')
+        call clo_add_option('param list',' ' &
+     &				,'parameters for projection')
 
         call clo_add_sep('additional information')
         call clo_add_com('  proj can be one of the following:')
-        call clo_add_com('    GB     Gauss Boaga')
-        call clo_add_com('    UTM    UTM')
-        call clo_add_com('    EC     equidistant cylindrical')
-        call clo_add_com('    LCC    Lambert conformal conic')
+        call clo_add_com('    GB          Gauss Boaga')
+        call clo_add_com('    UTM         UTM')
+        call clo_add_com('    EC          equidistant cylindrical')
+        call clo_add_com('    UTM-nonstd  UTM non standard')
+        call clo_add_com('    LCC         Lambert conformal conic')
         call clo_add_com('  list gives the parameters needed')
-        call clo_add_com('    GB     fuse[,x-shift,y-shift]')
-        call clo_add_com('    UTM    sector'//
-     +		'[,false-easting,false-northing[,scale-factor]]')
-        call clo_add_com('    EC     central-lat,lon-orig[,lat-orig]')
-        call clo_add_com('    LCC    lon0,lat0,lat1,lat2'//
-     +		'[,false-easting,false-northing]')
+        call clo_add_com('    GB          fuse[,x-shift,y-shift]')
+        call clo_add_com('    UTM         sector'// &
+     &		'[,false-easting,false-northing[,scale-factor]]')
+        call clo_add_com('    EC          central-lat,lon-orig[,lat-orig]')
+        call clo_add_com('    UTM-nonstd  central-lon'// &
+     &		'[,false-easting,false-northing[,scale-factor]]')
+        call clo_add_com('    LCC         lon0,lat0,lat1,lat2'// &
+     &		'[,false-easting,false-northing]')
 
         call clo_parse_options
 

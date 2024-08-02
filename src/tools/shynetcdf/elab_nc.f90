@@ -86,6 +86,7 @@
 	integer nvar			!total number of variables to be written
 	integer ivars(nvar)		!variable id of SHYFEM
 	logical b2d			!should write 2d fields
+	logical bugrid			!write unstructured mesh in ugrid format
 
 	logical bhydro
 	integer date0,time0
@@ -97,6 +98,7 @@
 
         ncnlv = nlv
 	if ( b2d ) ncnlv = 1
+	bugrid = .false.
 
 	if( breg ) then
 	  allocate(value2d(nxreg,nyreg))
@@ -110,10 +112,12 @@
      &				,ncflag,date0,time0,iztype)
 	else
 	  allocate(var3d(ncnlv*nkn))
-	  call nc_open_fem(ncid,nkn,nel,ncnlv,date0,time0,iztype)
+	  bugrid = .true.
+	  !call nc_open_fem(ncid,nkn,nel,ncnlv,date0,time0,iztype)
+	  call nc_open_ugrid(ncid,nkn,nel,ncnlv,date0,time0,iztype)
 	end if
 
-	call nc_global(ncid,title)
+	call nc_global(ncid,title,bugrid)
 
 	bhydro = ivars(1) == 1		!this is a hydro file
 	allocate(var_ids(nvar))
@@ -304,6 +308,21 @@
 	fmreg = fm
 	xlon = x
 	ylat = y
+
+	end
+
+!********************************************************************
+
+	subroutine nc_output_get_var_ids(iv,var_id)
+
+	use netcdf_out
+
+	implicit none
+
+	integer :: iv
+	integer :: var_id
+
+	var_id = var_ids(iv)
 
 	end
 

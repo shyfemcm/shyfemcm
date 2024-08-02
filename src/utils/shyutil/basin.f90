@@ -76,6 +76,7 @@
 ! 17.04.2021	ggu	some better error handling
 ! 16.06.2022    ggu     bug fix in bas_get_special_coordinates() -> np
 ! 10.05.2024    ggu     handle spherical, new routine bas_check_spherical()
+! 01.08.2024    ggu     more output for bas_info()
 !
 !***********************************************************
 !***********************************************************
@@ -721,8 +722,12 @@
 	implicit none
 
 	integer nnpart,nepart
+	real xmin,ymin,xmax,ymax
 
 	call basin_get_part_info(nnpart,nepart)
+	call bas_check_spherical
+
+	call bas_get_minmax(xmin,ymin,xmax,ymax)
 
 	if( descrr /= ' ' ) then
           write(6,*) trim(descrr)
@@ -731,7 +736,9 @@
         write(6,*) ' mbw = ',mbw,'  ngr = ',ngr
         write(6,*) ' dcor = ',dcorbas,'  dirn = ',dirnbas
         write(6,*) ' isphe = ',sphebas
-        write(6,*) ' nnpart = ',nnpart,'  nepart = ',nepart
+        !write(6,*) ' nnpart = ',nnpart,'  nepart = ',nepart
+        write(6,*) ' xmin/max = ',xmin,xmax
+        write(6,*) ' ymin/max = ',ymin,ymax
 
 	!call basin_info_partition
 
@@ -777,6 +784,22 @@
 	integer isphe
 
 	sphebas = isphe
+
+	end
+
+!*************************************************
+
+	function bas_is_spherical()
+
+	use basin
+
+	implicit none
+
+	logical bas_is_spherical
+
+	if( sphebas < 0 ) call bas_check_spherical
+
+	bas_is_spherical = ( sphebas > 0 )
 
 	end
 

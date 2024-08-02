@@ -63,7 +63,7 @@ FEMCHECK  = $(FEMBIN)/check
 
 REGRESSDIR = femregress
 
-SUBDIRS   = src
+SUBDIRS   = src lib
 FEMLIBS   = femcheck post hcbs
 FEMGRID   = grid
 FEMMESH   = mesh

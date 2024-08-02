@@ -223,6 +223,7 @@
         !call ev_init(nel)
 	call set_ev
 
+	if( .not. bquiet ) call bas_info
 	!if( bverb ) write(6,*) 'hlv: ',nlv,hlv
 
 	!--------------------------------------------------------------
