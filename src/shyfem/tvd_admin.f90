@@ -136,10 +136,13 @@
 	if( itvd_type .eq. 2 ) then
           if( shympi_is_parallel() ) then
             write(6,*) 'cannot yet handle itvd==2'
+	    call tvd_handle
             stop 'error stop tvd_init: cannot run with mpi'
+	  else
+	    call tvd_upwind_init_shell
           end if
-	  call tvd_upwind_init_shell
 	end if
+
 	stop
 
 	if( itvd .eq. 0 ) then
@@ -331,9 +334,9 @@
 	logical in_element
 	integer ieext
 
-	bdebug = .false.
 	bdebug = ie == 73
 	bdebug = .true.
+	bdebug = .false.
 
           if ( bsphe ) call ev_make_center(ie,dlon0,dlat0)
 
@@ -359,8 +362,8 @@
 	    y = yu
 
             call find_elem_from_old(ie,x,y,ienew)
-	    !ienew2 = ienew
-            call find_close_elem(ie,x,y,ienew2)
+	    ienew2 = ienew
+            !call find_close_elem(ie,x,y,ienew2)
 	    !ienew = ienew2
 
 	    if( ienew /= ienew2 ) then
@@ -395,6 +398,7 @@
             tvdupx(j,ii,ie) = x
             tvdupy(j,ii,ie) = y
             ietvdup(j,ii,ie) = ienew
+            ieetvdup(j,ii,ie) = ipev(ienew)
 
             j = mod(ii+1,3) + 1
             k = nen3v(j,ie)
@@ -409,8 +413,8 @@
 	    y = yu
 
 	    call find_elem_from_old(ie,x,y,ienew)
-	    !ienew2 = ienew
-            call find_close_elem(ie,x,y,ienew2)
+	    ienew2 = ienew
+            !call find_close_elem(ie,x,y,ienew2)
 	    !ienew = ienew2
 
 	    if( ienew /= ienew2 ) then
@@ -445,10 +449,12 @@
             tvdupx(j,ii,ie) = x
             tvdupy(j,ii,ie) = y
             ietvdup(j,ii,ie) = ienew
+            ieetvdup(j,ii,ie) = ipev(ienew)
 
             tvdupx(ii,ii,ie) = 0.
             tvdupy(ii,ii,ie) = 0.
             ietvdup(ii,ii,ie) = 0
+            ieetvdup(ii,ii,ie) = 0
 
           end do
 

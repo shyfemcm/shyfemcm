@@ -1,5 +1,19 @@
 ============================================================
 
+Sun Aug  4 20:37:42 CEST 2024
+
+started tvd mpi
+
+ src/shyfem/tvd.f90           |   3 +
+ src/shyfem/tvd_admin.f90     |  18 ++--
+ src/utils/shympi/Makefile    |   1 +
+ src/utils/shympi/mpi_tvd.f90 | 215 +++++++++++++++++++++++++++++++++++++++++++
+ 4 files changed, 231 insertions(+), 6 deletions(-)
+ new file:
+   src/utils/shympi/mpi_tvd.f90
+
+============================================================
+
 Fri Aug  2 10:16:15 CEST 2024
 
 cf_role eliminated

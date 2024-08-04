@@ -44,6 +44,7 @@
         real, allocatable, save :: tvdupx(:,:,:)
         real, allocatable, save :: tvdupy(:,:,:)
         integer, allocatable, save :: ietvdup(:,:,:)
+        integer, allocatable, save :: ieetvdup(:,:,:)	!external elem number
 
 !==================================================================
 	contains
@@ -59,6 +60,7 @@
           deallocate(tvdupx)
           deallocate(tvdupy)
           deallocate(ietvdup)
+          deallocate(ieetvdup)
         end if
 
         nel_tvd = nel
@@ -68,6 +70,7 @@
         allocate(tvdupx(3,3,nel))
         allocate(tvdupy(3,3,nel))
         allocate(ietvdup(3,3,nel))
+        allocate(ieetvdup(3,3,nel))
 
         end subroutine mod_tvd_init
 
