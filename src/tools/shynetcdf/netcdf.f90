@@ -2719,11 +2719,15 @@
 	  read(iunit,'(a)',iostat=ios) string
 	  if( ios /= 0 ) exit
 	  string =  adjustl(string)
+	  if( string == ' ' ) cycle		! empty line
 	  i = index(string,':')
-	  if( i == 0 ) goto 99
+	  if( i == 0 ) goto 99			! no ":" found
 	  key = string(1:i-1)
+	  key = trim(key)
 	  text = string(i+1:)
-	  text =  adjustl(text)
+	  text =  adjustl(text)	
+	  text = trim(text)
+	  if( text == ' ' ) cycle		! no text given
 	  !write(6,*) 'string: ',trim(string)
 	  !write(6,*) 'key:    ',trim(key)
 	  !write(6,*) 'text:   ',trim(text)
