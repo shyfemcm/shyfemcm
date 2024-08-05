@@ -70,6 +70,8 @@
 ! 27.06.2024	ggu	better info on variables
 ! 31.07.2024	ggu	integrated changes for ugrid, new nc_open_ugrid()
 ! 02.08.2024	ggu	eliminated cf_role for CF compliance
+! 05.08.2024	ggu	add error message for xtype==12 formats
+! 05.08.2024	ggu	new routine nc_user_defined_global()
 !
 ! notes :
 !
@@ -1326,7 +1328,7 @@
 	blong = bverb
 
 	  retval = nf_inq_var(ncid,var_id,name,type,ndims,dimids,natts)
-	  if( bverb ) write(6,*) ncid,var_id,type,ndims,natts
+	  if( bverb ) write(6,*) ncid,var_id,type,ndims,natts,trim(name)
 	  call nc_handle_err(retval,'get_var_info')
 	  if( ndims .gt. 10 ) stop 'error stop nc_var_info: ndims'
 	  call nc_get_var_description(ncid,var_id,description)
@@ -1689,6 +1691,15 @@
 
 	retval = nf_inq_att(ncid,var_id,aname,xtype,len)
 	if( nc_has_err(retval) ) return	!no such attribute name
+
+	if( xtype .eq. 12 ) then
+	  write(6,*) 'this is a netcdf-4 which contains string values'
+	  write(6,*) 'this file cannot be read by the present routines'
+	  write(6,*) 'please convert this file to netcdf-3 with ncks:'
+	  write(6,*) '   ncks -3 nc4-file.nc nc3-file.nc'
+	  write(6,*) 'you might have to install the nco package'
+	  stop 'error stop nc_get_var_attrib: string format unsupported'
+	end if
 
 	if( xtype .eq. NF_CHAR ) then
 	  allocate(character(len=len) :: saux)		!NEMUNAS_FIX_NEW
@@ -2609,7 +2620,7 @@
 
 !*****************************************************************
 
-	subroutine nc_global(ncid,title,bugrid)
+	subroutine nc_global(ncid,title,bugrid,sncglobal)
 
 ! writes global conventions
 
@@ -2620,6 +2631,7 @@
 	integer ncid
 	character*(*) title
 	logical bugrid
+	character*(*) sncglobal
 
 	integer ltext,retval,varid
 	character*80 text
@@ -2666,6 +2678,65 @@
 	text = 'Data restriction: for academic research use only'
 	call nc_define_attr(ncid,what,text,varid)
 
+	call nc_user_defined_global(ncid,sncglobal)
+
+	end
+
+!*****************************************************************
+
+	subroutine nc_user_defined_global(ncid,sncglobal)
+
+! user defined global comments
+
+	use netcdf_params
+
+	implicit none
+
+	integer ncid
+	character*(*) sncglobal
+
+	integer iunit,ios,i,varid
+	character*80 myfile
+	character*256 string
+	character*256 key,text
+
+	iunit = 3
+	myfile = sncglobal
+	if( myfile == ' ' ) return
+
+	varid = NF_GLOBAL
+
+	write(6,*) 'ncglobal file: ',trim(myfile)
+
+	open(iunit,file=myfile,form='formatted',status='old',iostat=ios)
+
+	if( ios /= 0 ) then
+	  write(6,*) 'no such file: ',trim(myfile)
+	  stop 'error stop nc_user_defined_global: no such file'
+	end if
+
+	do
+	  read(iunit,'(a)',iostat=ios) string
+	  if( ios /= 0 ) exit
+	  string =  adjustl(string)
+	  i = index(string,':')
+	  if( i == 0 ) goto 99
+	  key = string(1:i-1)
+	  text = string(i+1:)
+	  text =  adjustl(text)
+	  !write(6,*) 'string: ',trim(string)
+	  !write(6,*) 'key:    ',trim(key)
+	  !write(6,*) 'text:   ',trim(text)
+	  call nc_define_attr(ncid,key,text,varid)
+	end do
+
+	close(iunit)
+
+	return
+   99	continue
+	write(6,*) 'cannot parse string: ',trim(string)
+	write(6,*) 'expecting key: text'
+	stop 'error stop nc_user_defined_global: cannot parse'
 	end
 
 !*****************************************************************

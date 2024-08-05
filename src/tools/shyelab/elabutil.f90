@@ -88,6 +88,7 @@
 ! 09.03.2023    ggu     setting -facts, -offset in one subroutine
 ! 10.03.2023    ggu     map renamed to influencemap
 ! 18.04.2024    ggu     new option convsec to convert time to seconds
+! 05.08.2024    ggu     new option ncglobal
 !
 !************************************************************
 
@@ -194,6 +195,8 @@
         character*80, save :: snode		= ' '
         character*80, save :: scoord		= ' '
         character*80, save :: sextract		= ' '
+
+        character*80, save :: sncglobal		= ' '
 
 	integer, save :: istep			= 0
 	integer, save :: avermode		= 0
@@ -405,6 +408,13 @@
      &                          'proj,params')
         call clo_add_com('    proj is one of: GB UTM EC UTM-nonstd LCC')
         call clo_add_com('    for params see help of shyproj routine')
+
+        call clo_add_sep('options for netcdf files')
+
+        call clo_add_option('ncglobal file',' ' &
+     &		,'file containing extra global options for netcdf files')
+
+        call clo_add_com('    file contains lines with "key: text" information')
 
 	end subroutine elabutil_set_out_options
 
@@ -730,6 +740,7 @@
         call clo_get_option('out',bout)
         call clo_get_option('outformat',outformat)
         call clo_get_option('catmode',catmode)
+        call clo_get_option('ncglobal',sncglobal)
 
         call clo_get_option('split',bsplit)
 	if( bshowall .or. bflxfile .or. bextfile ) then
