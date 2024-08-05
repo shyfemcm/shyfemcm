@@ -37,6 +37,7 @@
 ! 16.05.2019	ggu	new aux variable to write nc_records (rncaux)
 ! 16.05.2019	ggu	also hydro output fixed
 ! 29.01.2020	ggu	always write variables as 3d
+! 05.08.2024	ggu	new variable sncglobal
 !
 !************************************************************
 
@@ -72,7 +73,7 @@
         end module netcdf_out
 !===============================================================
 
-	subroutine nc_output_init(ncid,title,nvar,ivars,b2d)
+	subroutine nc_output_init(ncid,title,nvar,ivars,b2d,sncglobal)
 
 	use basin
 	use levels
@@ -86,6 +87,8 @@
 	integer nvar			!total number of variables to be written
 	integer ivars(nvar)		!variable id of SHYFEM
 	logical b2d			!should write 2d fields
+	character*(*) sncglobal		!file name of extra global values
+
 	logical bugrid			!write unstructured mesh in ugrid format
 
 	logical bhydro
@@ -117,7 +120,7 @@
 	  call nc_open_ugrid(ncid,nkn,nel,ncnlv,date0,time0,iztype)
 	end if
 
-	call nc_global(ncid,title,bugrid)
+	call nc_global(ncid,title,bugrid,sncglobal)
 
 	bhydro = ivars(1) == 1		!this is a hydro file
 	allocate(var_ids(nvar))

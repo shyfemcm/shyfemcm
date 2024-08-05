@@ -1,5 +1,17 @@
 ============================================================
 
+Mon Aug  5 14:54:48 CEST 2024
+
+new option ncglobal, error when reading nc-4 files
+
+ src/tools/shyelab/elabutil.f90       | 11 ++++++
+ src/tools/shyelab/shyelab_output.f90 |  2 +-
+ src/tools/shynetcdf/elab_nc.f90      |  7 +++-
+ src/tools/shynetcdf/netcdf.f90       | 75 +++++++++++++++++++++++++++++++++++-
+ 4 files changed, 90 insertions(+), 5 deletions(-)
+
+============================================================
+
 Fri Aug  2 10:16:15 CEST 2024
 
 cf_role eliminated

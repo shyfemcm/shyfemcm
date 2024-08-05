@@ -209,7 +209,7 @@
 	    call shy_get_title(id,title)
 	    call nc_set_quiet(bquiet)
 	    call nc_output_set_vars(breg,nxreg,nyreg,hcoord,fmreg,xlon,ylat)
-	    call nc_output_init(ncid,title,nvar,ivars,b2d)
+	    call nc_output_init(ncid,title,nvar,ivars,b2d,sncglobal)
 	    idout = ncid
 	  else if( outformat == 'off' ) then
 	    file = 'out.off'
