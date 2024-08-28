@@ -80,6 +80,7 @@
 ! 12.03.2024    ggu     double routines for shympi_g2l_array_fix_ird/2d_d
 ! 13.03.2024    ggu     bmpi_skip introduced
 ! 05.04.2024    ggu     shympi_check_3d_elem_r(), nghost_max_global
+! 28.08.2024    ggu     new variable bmpi_debug_txt
 !
 !******************************************************************
 
@@ -97,7 +98,8 @@
 	public
 
 	logical, save :: bmpi = .false.
-	logical, save :: bmpi_debug = .false.
+	logical, save :: bmpi_debug = .false.		!writes debug messages
+	logical, save :: bmpi_debug_txt = .false.	!writes mpi_debug_*.txt
 	logical, save :: bmpi_master = .false.
 	logical, save :: bmpi_support = .true.
 	logical, save :: bmpi_unit = .false.		!write debug to my_unit
@@ -600,9 +602,15 @@
 	  write(cunit,'(i10)') my_id
 	  cunit = adjustl(cunit)
 	  file = 'mpi_debug_' // trim(cunit) // '.txt'
-	  call shympi_get_new_unit(my_unit)
-	  open(unit=my_unit,file=file,status='unknown')
-	  write(my_unit,*) 'shympi initialized: ',my_id,n_threads,my_unit
+	  if( bmpi_debug_txt ) then
+	    call shympi_get_new_unit(my_unit)
+	    open(unit=my_unit,file=file,status='unknown')
+	    write(my_unit,*) '=========================================='
+	    write(my_unit,*) 'this is a debug file for domain ',my_id
+	    write(my_unit,*) 'set bmpi_debug_txt=.false. to avoid this output'
+	    write(my_unit,*) '=========================================='
+	    write(my_unit,*) 'shympi initialized: ',my_id,n_threads,my_unit
+	  end if
 	else if( bmpi_debug ) then
 	  write(6,*) 'shympi initialized: ',my_id,n_threads
 	  write(6,*) 'shympi is not running in mpi mode'
@@ -665,7 +673,7 @@
 
 ! these are global arrays
 
-	integer nk,ne
+	integer nk,ne		!global nkn, nel
 	integer nen3v(3,ne)
 	integer ipv(nk)
 	integer ipev(ne)

@@ -71,6 +71,7 @@
 ! 22.09.2020    ggu     correct warnings for PGI compiler
 ! 03.06.2022    ggu     documentation, adapted for mpi (only itvd==1 is working)
 ! 09.05.2023    lrp     introduce top layer index variable
+! 28.08.2024    ggu     use find_unique_element() to find element
 !
 !*****************************************************************
 !
@@ -126,6 +127,7 @@
 	integer itvd
 
 	integer, save :: icall = 0
+	logical, save :: bdebug = .false.
 
 	if( icall .ne. 0 ) return
 	icall = 1
@@ -135,15 +137,21 @@
 
 	if( itvd_type .eq. 2 ) then
           if( shympi_is_parallel() ) then
-            write(6,*) 'cannot yet handle itvd==2'
 	    call tvd_handle
-            stop 'error stop tvd_init: cannot run with mpi'
 	  else
 	    call tvd_upwind_init_shell
           end if
 	end if
 
-	stop
+	if( itvd_type .eq. 2 ) then
+	  if( bdebug ) call write_tvd_debug(nel)
+          if( shympi_is_parallel() ) then
+            write(6,*) 'cannot yet handle itvd==2'
+            stop 'error stop tvd_init: cannot run with mpi'
+	  end if
+	end if
+
+	if( bdebug ) stop
 
 	if( itvd .eq. 0 ) then
 	  write(6,*) 'no horizontal TVD scheme used'
@@ -361,10 +369,8 @@
 	    x = xu
 	    y = yu
 
-            call find_elem_from_old(ie,x,y,ienew)
+	    call find_unique_element(x,y,ienew)
 	    ienew2 = ienew
-            !call find_close_elem(ie,x,y,ienew2)
-	    !ienew = ienew2
 
 	    if( ienew /= ienew2 ) then
 	      itot = itot + 1
@@ -412,10 +418,8 @@
 	    x = xu
 	    y = yu
 
-	    call find_elem_from_old(ie,x,y,ienew)
+	    call find_unique_element(x,y,ienew)
 	    ienew2 = ienew
-            !call find_close_elem(ie,x,y,ienew2)
-	    !ienew = ienew2
 
 	    if( ienew /= ienew2 ) then
 	      itot = itot + 1
@@ -988,6 +992,65 @@
         smartdelta=int((float((a+b)-abs(a-b)))/(float((a+b)+abs(a-b))))
 
 	end function smartdelta
+
+!*****************************************************************
+
+	subroutine write_debug_grid(nelems,ielems,x,y)
+
+	use basin
+
+	implicit none
+
+	integer nelems
+	integer ielems(nelems)
+	real x,y
+
+	integer, save :: ncount = 0
+	integer i
+	integer ie_ext,ie_int,k,ii,node,iu
+	integer ies(3)
+	real xe,ye
+	character*80 string,file
+
+	integer ieint
+
+	ncount = ncount + 1
+
+	write(string,'(i4)') ncount
+	do i=1,4
+	  if( string(i:i) == ' ' ) string(i:i) = '0'
+	end do
+	file='debug_grid_'//trim(string)//'.grd'
+
+	write(6,*) 'writing grid ',trim(file)
+
+	iu = 1
+	open(iu,file=file,status='unknown',form='formatted')
+
+	node = 0
+
+	do i=1,nelems
+	  ie_ext = ielems(i)
+	  ie_int = ieint(ie_ext)
+	  ie_int = ie_ext
+	  if( ie_int == 0 ) stop 'error stop write_debug_grid: no internal'
+	  do ii=1,3
+	    node = node + 1
+	    ies(ii) = node
+	    k = nen3v(ii,ie_int)
+	    xe = xgv(k)
+	    ye = ygv(k)
+	    write(iu,'(i1,2i8,2f16.6)') 1,node,0,xe,ye
+	  end do
+	  write(iu,'(i1,6i8)') 2,i,0,3,ies(:)
+	end do
+
+	node = node + 1
+	write(iu,'(i1,2i8,2f16.6)') 1,node,4,x,y
+
+	close(iu)
+
+	end
 
 !*****************************************************************
 

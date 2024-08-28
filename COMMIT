@@ -1,5 +1,18 @@
 ============================================================
 
+Wed Aug 28 14:21:32 CEST 2024
+
+first part of tvd finished
+
+ Rules.make                    |  15 ++--
+ src/shyfem/tvd_admin.f90      |  81 ++++++++++++++++--
+ src/utils/shympi/mpi_node.f90 |  18 ++--
+ src/utils/shympi/mpi_tvd.f90  | 187 +++++++++++++++++++++++++++++++++++-------
+ src/utils/shyutilmpi/find.f90 |  79 ++++++++++++++++++
+ 5 files changed, 330 insertions(+), 50 deletions(-)
+
+============================================================
+
 Mon Aug  5 14:54:48 CEST 2024
 
 new option ncglobal, error when reading nc-4 files
