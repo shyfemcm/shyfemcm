@@ -1,5 +1,16 @@
 ============================================================
 
+Thu Sep  5 11:48:37 CEST 2024
+
+more on tvd mpi
+
+ src/shyfem/tvd.f90           |  18 ++++---
+ src/shyfem/tvd_admin.f90     |  87 ++++++-------------------------
+ src/utils/shympi/mpi_tvd.f90 | 119 ++++++++++++++++++++++++++++++++++++++++---
+ 3 files changed, 138 insertions(+), 86 deletions(-)
+
+============================================================
+
 Wed Aug 28 14:21:32 CEST 2024
 
 first part of tvd finished

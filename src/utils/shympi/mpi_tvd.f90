@@ -29,6 +29,7 @@
 !
 ! 02.08.2024	ggu	started mpi tvd
 ! 28.08.2024	ggu	first part finding elements finished
+! 03.09.2024	ggu	more on mpi-tvd
 !
 !******************************************************************
 
@@ -61,7 +62,7 @@
 
 	logical bsphe,bdebug,bfound
 	integer isphe
-	integer ie,ii,j,i,ie_new
+	integer ie,ii,j,i,ie_new,ix
 	integer my_ia,ia,id,inlist,nfound,nchanged
 	integer ie_ext,iee_ext,iee_old
 	integer ilist,maxlist,maxnlist
@@ -75,6 +76,8 @@
 	real, allocatable :: newlist(:,:)
 	real, allocatable :: rlists(:,:,:)
 	real, allocatable :: newlists(:,:,:)
+	integer, allocatable :: count(:)
+	integer, allocatable :: index(:)
 
 !----------------------------------------------------------
 ! starting collection of tvd information
@@ -87,8 +90,11 @@
 
 	write(6,*) 'looking for elements ',isphe,nel,my_id
 
+	my_ia = my_id + 1
+
         do ie=1,nel
           call tvd_upwind_init(bsphe,ie)
+	  iatvdup(:,:,ie) = my_ia
         end do
 
 	write(6,*) 'tvd_upwind_init finished ',my_id
@@ -96,7 +102,6 @@
 	ilist = 0
 	allocate(raux(nlist,nel*6))
 	raux = 0.
-	my_ia = my_id + 1
 
 !----------------------------------------------------------
 ! setting up initial list with all information of this domain
@@ -115,8 +120,8 @@
 	      if( ietvdup(j,ii,ie) >= 0 ) then	!we have to check all
 		bfound = .true.
 		ilist = ilist + 1
-		raux(1,ilist) = tvdupx(j,ii,ie)
-		raux(2,ilist) = tvdupy(j,ii,ie)
+		raux(1,ilist) = xtvdup(j,ii,ie)
+		raux(2,ilist) = ytvdup(j,ii,ie)
 		raux(3,ilist) = my_ia		!needed in this domain
 		raux(4,ilist) = j
 		raux(5,ilist) = ii
@@ -246,8 +251,10 @@
 	      ii = nint(newlists(5,i,ia))
 	      ie = nint(newlists(6,i,ia))
 	      iee_old = ieetvdup(j,ii,ie)
-	      if( iee_ext > iee_old ) then
+	      if( iee_ext > iee_old ) then	!always take highest index
 	        ieetvdup(j,ii,ie) = iee_ext
+	        ietvdup(j,ii,ie) = ie
+	        iatvdup(j,ii,ie) = ia_found
 	      end if
 	     end if
 	    end if
@@ -258,10 +265,94 @@
 	write(6,*) 'all new information elaborated ',my_id
 
 !----------------------------------------------------------
+! prepare data exchange
+!----------------------------------------------------------
+
+	deallocate(raux)
+	allocate(raux(nlist,9*nel))
+	raux = 0.
+
+	ilist = 0
+	do ie=1,nel
+	  do ii=1,3
+	    do j=1,3
+	        if( ii == j ) cycle
+	        ia = iatvdup(j,ii,ie)		!area where point found
+		if( ia == my_ia ) cycle
+		ilist = ilist + 1
+		raux(1,ilist) = xtvdup(j,ii,ie)
+		raux(2,ilist) = ytvdup(j,ii,ie)
+		raux(3,ilist) = my_ia		!needed in this domain
+		raux(4,ilist) = j
+		raux(5,ilist) = ii
+		raux(6,ilist) = ie		!internal local element
+		raux(7,ilist) = ipev(ie)	!external local element
+	        raux(8,ilist) = iatvdup(j,ii,ie)	!area where point found
+	        raux(9,ilist) = ietvdup(j,ii,ie)	!internal remote element
+	        raux(10,ilist) = ieetvdup(j,ii,ie)!external remote element
+	    end do
+	  end do
+	end do
+	  
+	!------------------------------------------------
+	! prepare count and index
+	!------------------------------------------------
+
+	allocate(count(n_threads))
+	allocate(index(n_threads))
+	count = 0
+
+	do i=1,ilist
+	  ia = nint(raux(8,ilist))
+	  count(ia) = count(ia) + 1
+	end do
+	if( count(my_ia) /= 0 ) stop 'error stop tvd_handle: internal (5)'
+
+	ix = 0
+	do ia=1,n_threads
+	  index(ia) = ix
+	  ix = ix + count(ia)
+	end do
+	if( ix /= ilist ) stop 'error stop tvd_handle: internal (6)'
+
+	maxlist = shympi_max(ilist)
+
+	write(iudb,*) my_ia,ilist,maxlist
+	write(iudb,*) count
+	write(iudb,*) index
+
+	write(6,*) 'new array sizes: ',ilist,maxlist,my_id
+
+	deallocate(rlist)
+	deallocate(rlists)
+	allocate(rlist(nlist,maxlist))
+	allocate(rlists(nlist,maxlist,n_threads))
+
+	!------------------------------------------------
+	! sort raux and copy to rlist
+	!------------------------------------------------
+
+	rlist = 0.
+
+	do i=1,ilist
+	  ia = nint(raux(8,i))
+	  ix = index(ia) + 1
+	  rlist(:,ix) = raux(:,i)
+	  index(ia) = ix
+	end do
+
+	call shympi_gather(nlist,rlist,rlists)
+
+	write(6,*) 'all new information collected ',my_id
+
+	call shympi_barrier
+
+
+!----------------------------------------------------------
 ! write out debug information
 !----------------------------------------------------------
 
-	!call write_tvd_debug(nel)
+	call write_tvd_debug(nel)
 
 !----------------------------------------------------------
 ! all info exchanged
@@ -295,6 +386,8 @@
 	integer ie,n,j,ii,iu,ie_ext
 	integer, allocatable :: iedebug(:,:)
 	integer, allocatable :: ieout(:,:)
+	integer, allocatable :: iadebug(:,:)
+	integer, allocatable :: iaout(:,:)
 	character*80 file
 
 	iu = 583
@@ -307,8 +400,12 @@
 
 	allocate(iedebug(9,nel))
 	allocate(ieout(9,nel_global))
+	allocate(iadebug(9,nel))
+	allocate(iaout(9,nel_global))
 	iedebug = 0
+	iadebug = 0
 	ieout = 0
+	iaout = 0
 
 	do ie=1,nel
 	  n = 0
@@ -318,9 +415,15 @@
 	      iedebug(n,ie) = ieetvdup(j,ii,ie)
 	    end do
 	  end do
+	  iadebug(:,ie) = reshape(ieetvdup(:,:,ie),(/9/))
+	  if( any( iedebug(:,ie) /= iadebug(:,ie) ) ) then
+	    stop 'error stop write_tvd_debug: reshape not working'
+	  end if
+	  iadebug(:,ie) = reshape(iatvdup(:,:,ie),(/9/))
 	end do
 
 	call shympi_l2g_array(9,iedebug,ieout)
+	call shympi_l2g_array(9,iadebug,iaout)
 
 	write(6,*) 'finished collecting tvd debug information...',my_id
 
@@ -330,7 +433,9 @@
 	write(iu,*) 'debug information'
 	do ie=1,nel_global
 	  ie_ext = ip_ext_elem(ie)
-	  write(iu,'(2i8,9i7)') ie,ie_ext,ieout(:,ie)
+	  write(iu,'(2i8)') ie,ie_ext
+	  write(iu,'(9i7)') ieout(:,ie)
+	  !write(iu,'(9i7)') iaout(:,ie)
 	end do
 	close(iu)
 	write(6,*) 'tvd debug information written to file ',trim(file)

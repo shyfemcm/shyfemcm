@@ -72,6 +72,7 @@
 ! 03.06.2022    ggu     documentation, adapted for mpi (only itvd==1 is working)
 ! 09.05.2023    lrp     introduce top layer index variable
 ! 28.08.2024    ggu     use find_unique_element() to find element
+! 03.09.2024    ggu     more on mpi-tvd
 !
 !*****************************************************************
 !
@@ -127,7 +128,8 @@
 	integer itvd
 
 	integer, save :: icall = 0
-	logical, save :: bdebug = .false.
+	!logical, save :: bdebug = .false.
+	logical, save :: bdebug = .true.
 
 	if( icall .ne. 0 ) return
 	icall = 1
@@ -346,6 +348,12 @@
 	bdebug = .true.
 	bdebug = .false.
 
+          xtvdup(:,:,ie) = 0.
+          ytvdup(:,:,ie) = 0.
+          ietvdup(:,:,ie) = 0
+          ieetvdup(:,:,ie) = 0
+          iatvdup(:,:,ie) = 0
+
           if ( bsphe ) call ev_make_center(ie,dlon0,dlat0)
 
           do ii=1,3
@@ -370,39 +378,9 @@
 	    y = yu
 
 	    call find_unique_element(x,y,ienew)
-	    ienew2 = ienew
 
-	    if( ienew /= ienew2 ) then
-	      itot = itot + 1
-	      if( bdebug ) then
-	        write(6,*) 'different elements 1: ',ie,ienew,ienew2,itot
-	        write(678,*) 'different elements 1: ',ie,ienew,ienew2,itot
-		write(678,*) ieext(ie),ieext(ienew),ieext(ienew2)
-		write(678,*) x,y
-	      end if
-	      if( ienew*ienew2 > 0 ) then	!really different
-		itot2 = itot2 + 1
-		if( bdebug ) then
-		  write(6,*) 'really different 1',ie,ienew,ienew2,itot2
-		  write(6,*) ieext(ie),ieext(ienew),ieext(ienew2)
-		  write(6,*) x,y
-		end if
-		in = 0
-		if( in_element(ienew,x,y) ) in = in + 1
-		if( in_element(ienew2,x,y) ) in = in + 1
-		if( in /= 2 ) then
-		  write(6,*) '*** point only in one element'
-		  write(6,*) 'really different 1',ie,ienew,ienew2,itot2
-		  write(6,*) ieext(ie),ieext(ienew),ieext(ienew2)
-		  write(6,*) x,y
-		  stop 'error'
-		end if
-		!stop
-	      end if
-	    end if
-
-            tvdupx(j,ii,ie) = x
-            tvdupy(j,ii,ie) = y
+            xtvdup(j,ii,ie) = x
+            ytvdup(j,ii,ie) = y
             ietvdup(j,ii,ie) = ienew
             ieetvdup(j,ii,ie) = ipev(ienew)
 
@@ -419,46 +397,11 @@
 	    y = yu
 
 	    call find_unique_element(x,y,ienew)
-	    ienew2 = ienew
 
-	    if( ienew /= ienew2 ) then
-	      itot = itot + 1
-	      if( bdebug ) then
-	        write(6,*) 'different elements 2: ',ie,ienew,ienew2,itot
-	        write(678,*) 'different elements 2: ',ie,ienew,ienew2,itot
-		write(678,*) ieext(ie),ieext(ienew),ieext(ienew2)
-		write(678,*) x,y
-	      end if
-	      if( ienew*ienew2 > 0 ) then	!really different
-		itot2 = itot2 + 1
-		if( bdebug ) then
-		  write(6,*) 'really different 2',ie,ienew,ienew2,itot2
-		  write(6,*) ieext(ie),ieext(ienew),ieext(ienew2)
-		  write(6,*) x,y
-		end if
-		in = 0
-		if( in_element(ienew,x,y) ) in = in + 1
-		if( in_element(ienew2,x,y) ) in = in + 1
-		if( in /= 2 ) then
-		  write(6,*) '*** point only in one element'
-		  write(6,*) 'really different 2',ie,ienew,ienew2,itot2
-		  write(6,*) ieext(ie),ieext(ienew),ieext(ienew2)
-		  write(6,*) x,y
-		  stop 'error'
-		end if
-		!stop
-	      end if
-	    end if
-
-            tvdupx(j,ii,ie) = x
-            tvdupy(j,ii,ie) = y
+            xtvdup(j,ii,ie) = x
+            ytvdup(j,ii,ie) = y
             ietvdup(j,ii,ie) = ienew
             ieetvdup(j,ii,ie) = ipev(ienew)
-
-            tvdupx(ii,ii,ie) = 0.
-            tvdupy(ii,ii,ie) = 0.
-            ietvdup(ii,ii,ie) = 0
-            ieetvdup(ii,ii,ie) = 0
 
           end do
 
@@ -621,8 +564,8 @@
         real xu,yu
         real c(3)
 
-        xu = tvdupx(id,ic,ie)
-        yu = tvdupy(id,ic,ie)
+        xu = xtvdup(id,ic,ie)
+        yu = ytvdup(id,ic,ie)
         ienew = ietvdup(id,ic,ie)
 
         if( ienew .le. 0 ) return
