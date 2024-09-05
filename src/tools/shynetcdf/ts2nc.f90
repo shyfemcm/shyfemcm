@@ -43,6 +43,7 @@
 !  22.10.2015	ggu	changed VERS_7_3_7
 !  03.04.2018	ggu	changed VERS_7_5_43
 !  16.02.2019	ggu	changed VERS_7_5_60
+!  05.09.2024	ggu	added sncglobal in call to nc_global()
 ! 
 ! ***************************************************************
 
@@ -94,6 +95,7 @@
 
 	character*80 units
 	character*160 std
+	character*80, save :: sncglobal = ' '	!not yet supported
 
 ! 	integer rdous,rfous
 	integer iapini,ideffi
@@ -122,7 +124,7 @@
 	lat(1) = 45.31333
 
         call nc_open_ts(ncid,nodes,date0,time0)
-	call nc_global(ncid,descrp,bugrid)
+	call nc_global(ncid,descrp,bugrid,sncglobal)
 
 	std = 'sea_surface_height_correction_due_to_air_pressure' // &
      &		'_and_wind_at_high_frequency'

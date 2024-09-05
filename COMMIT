@@ -1,5 +1,18 @@
 ============================================================
 
+Thu Sep  5 14:24:47 CEST 2024
+
+compiler errors with intel fixed
+
+ src/tools/shyelab/lgrelab1.f90        |  2 +-
+ src/tools/shyelab/shyelab_output.f90  |  2 +-
+ src/tools/shynetcdf/elab_nc.f90       |  2 +-
+ src/tools/shynetcdf/elab_nc_dummy.f90 | 11 +++++++++++
+ src/tools/shynetcdf/ts2nc.f90         |  4 +++-
+ 5 files changed, 17 insertions(+), 4 deletions(-)
+
+============================================================
+
 Mon Aug  5 14:54:48 CEST 2024
 
 new option ncglobal, error when reading nc-4 files

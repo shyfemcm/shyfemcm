@@ -125,6 +125,17 @@
 
 !********************************************************************
 
+        subroutine nc_output_get_var_id(iv,var_id)
+
+        implicit none
+
+        integer :: iv
+        integer :: var_id
+
+        end
+
+!********************************************************************
+
 
         subroutine nc_set_quiet(bquiet)
 

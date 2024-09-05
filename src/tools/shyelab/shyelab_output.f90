@@ -382,7 +382,7 @@
      &                          ,nlvddi,svalue)
 	  else if( outformat == 'nc' ) then
 	    ncid = idout
-	    call nc_output_get_var_ids(iv,var_id)
+	    call nc_output_get_var_id(iv,var_id)
 	    call nc_output_record(ncid,var_id,np,svalue)
 	  else if( outformat == 'off' ) then
 	    ! nothing to be done
