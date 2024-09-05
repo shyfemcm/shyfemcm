@@ -68,7 +68,7 @@
 	double precision time
 	character*30 new
 
-	call make_name(pre,it,new)
+	call make_nc_name(pre,it,new)
 
 	write(6,*) 'writing file: ',new
 
@@ -114,7 +114,7 @@
 	double precision time
 	character*30 new
 
-	call make_name(pre,it,new)
+	call make_nc_name(pre,it,new)
 
 	write(6,*) 'writing file: ',new
 
@@ -301,7 +301,7 @@
 
 !*****************************************************************
 
-	subroutine make_name(pre,it,new)
+	subroutine make_nc_name(pre,it,new)
 
 	implicit none
 

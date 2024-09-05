@@ -1550,7 +1550,7 @@
 	dy = regpar(6)
 	flag = regpar(7)
 
-	call make_name(iv,nrec,name)
+	call make_grdfem_name(iv,nrec,name)
 	open(101,file=name,status='unknown',form='formatted')
 
 	ip = 0
@@ -1573,7 +1573,7 @@
 
 !*****************************************************************
 
-	subroutine make_name(iv,nrec,name)
+	subroutine make_grdfem_name(iv,nrec,name)
 
 	implicit none
 
