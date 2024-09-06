@@ -104,6 +104,7 @@
 ! 08.07.2022	ggu	avoid divide by zero when computing dice
 ! 06.12.2022	ggu	rfact for rain introduced
 ! 02.04.2023    ggu     only master writes to iuinfo
+! 06.09.2024    lrp     nuopc-compliant
 !
 ! notes :
 !
@@ -807,7 +808,7 @@
             tx(k) = fice * wfact * wx(k)
             ty(k) = fice * wfact * wy(k)
             txy = sqrt( tx(k)**2 + ty(k)**2 )
-            wspeed = sqrt(txy/cd)
+            wspeed = sqrt(txy/(cd*wfact*roluft))
             wxymax = max(wxymax,wspeed)
             wx(k) = tx(k) / (cd*wspeed)
             wy(k) = ty(k) / (cd*wspeed)
