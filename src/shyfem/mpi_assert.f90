@@ -48,6 +48,7 @@
 
 	subroutine shympi_assert_coriolis
 
+	use mod_internal
 	use shympi
 
 	implicit none
@@ -65,6 +66,8 @@
 	    stop 'error stop shympi_assert_coriolis: isphe'
 	  end if
 	end if
+
+	call shympi_check_2d_elem(fcorv,'fcorv')
 
 	end
 
@@ -87,8 +90,8 @@
 
 	call shympi_assert_all
 	call shympi_check_all_static
-	call shympi_check_all_dynamic
 	call shympi_check_all_scalar
+	call shympi_check_all_dynamic
 
 	if( bdebug ) then
 	  write(6,*) 'arrays ok at iwhat = ',iwhat
@@ -189,15 +192,15 @@
 	  write(6,*) bunique,id_elem(:,iei),my_id
 	end if
 
-	call shympi_check_3d_elem(utlnv,'utlnv')
-	call shympi_check_3d_elem(vtlnv,'vtlnv')
+	call shympi_check_3d_elem(hdeov,'hdeov')
+	call shympi_check_3d_node(hdkov,'hdkov')
+	call shympi_check_3d_elem(hdenv,'hdenv')
+	call shympi_check_3d_node(hdknv,'hdknv')
+
 	call shympi_check_3d_elem(utlov,'utlov')
 	call shympi_check_3d_elem(vtlov,'vtlov')
-
-	call shympi_check_3d_elem(hdeov,'hdeov')
-	call shympi_check_3d_elem(hdenv,'hdenv')
-	call shympi_check_3d_node(hdkov,'hdkov')
-	call shympi_check_3d_node(hdknv,'hdknv')
+	call shympi_check_3d_elem(utlnv,'utlnv')
+	call shympi_check_3d_elem(vtlnv,'vtlnv')
 
 	end
 
