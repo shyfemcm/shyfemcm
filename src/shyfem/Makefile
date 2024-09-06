@@ -167,7 +167,7 @@ default: fem
 fem: shyfem links nothing
 
 #$(EXES_target): $(MODULES) $(OBJ) $(LIBF) shyfem.o
-shyfem: $(MODULES) $(OBJ) $(LIBF) shyfem.o
+shyfem: $(MODULES) $(OBJ) $(LIBF) shyfem.o shyfem_subs.o
 	 $(F77) $(FFLAGS) $(INCLUDE) $(LFLAGS) $^ $(LIBL) -o shyfem 
 
 links:
