@@ -80,6 +80,7 @@
 ! 12.03.2024    ggu     double routines for shympi_g2l_array_fix_ird/2d_d
 ! 13.03.2024    ggu     bmpi_skip introduced
 ! 05.04.2024    ggu     shympi_check_3d_elem_r(), nghost_max_global
+! 06.09.2024    lrp     nuopc-compliant
 !
 !******************************************************************
 
@@ -477,7 +478,7 @@
         contains
 !==================================================================
 
-	subroutine shympi_init(b_want_mpi)
+	subroutine shympi_init(b_want_mpi, b_want_mpi_init)
 
 ! this is the first call to shympi
 !
@@ -493,8 +494,9 @@
 	use levels
 
 	logical b_want_mpi
+	logical, optional :: b_want_mpi_init
 
-	logical bstop
+	logical bstop,binit
 	integer ierr,size
 	character*10 cunit
 	character*80 file
@@ -502,8 +504,13 @@
 	!-----------------------------------------------------
 	! initializing
 	!-----------------------------------------------------
+	if (present(b_want_mpi_init)) then	!in some case you let other initialize the MPI for SHYFEM
+	  binit = b_want_mpi_init		!an intialization flag is passed from the interface
+	else
+	  binit = .true.			!the default value is true: always initialize MPI
+	endif
 
-	call shympi_init_internal(my_id,n_threads)
+	call shympi_init_internal(my_id,n_threads,binit)
 
         if( .not. basin_has_read_basin() ) then
           write(6,*) 'grd file has been read: ',nkn,nel,ngr

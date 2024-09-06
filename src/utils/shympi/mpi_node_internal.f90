@@ -49,6 +49,7 @@
 ! 13.04.2023	ggu	introduced bnode, belem (distinguish calls to node/elem)
 ! 27.03.2024	ggu	introduced aux array to make dims equal in gather
 ! 05.04.2024	ggu	changes in shympi_exchange_internal_r()
+! 06.09.2024    lrp     nuopc-compliant
 !
 !******************************************************************
 
@@ -106,13 +107,14 @@
 
 !******************************************************************
 
-	subroutine shympi_init_internal(my_id,n_threads)
+	subroutine shympi_init_internal(my_id,n_threads,binit)
 
 	use shympi_aux
 
 	implicit none
 
 	integer my_id,n_threads
+	logical :: binit
 
 	integer ierr,iberr
 	integer required,provided
@@ -121,7 +123,8 @@
 	required = MPI_THREAD_SERIALIZED
 
         !call MPI_INIT( ierr )
-        call MPI_INIT_THREAD( required, provided, ierr )
+	ierr = 0
+        if( binit ) call MPI_INIT_THREAD( required, provided, ierr )
 	!write(6,*) 'thread safety: ',required, provided
 	!write(6,*) 'initializing MPI: ',ierr
 

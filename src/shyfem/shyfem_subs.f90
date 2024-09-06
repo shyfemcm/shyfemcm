@@ -269,14 +269,14 @@
 	subroutine shyfem_main
 	use mod_shyfem
 	implicit none
-	call shyfem_initialize
+	call shyfem_initialize(.true.)
 	call shyfem_run(zero)
 	call shyfem_finalize
 	end subroutine shyfem_main
 
 !*****************************************************************
 
-	subroutine shyfem_initialize
+	subroutine shyfem_initialize(mpi_init)
 
 !-----------------------------------------------------------
 ! start of program
@@ -286,6 +286,7 @@
 
 	implicit none
 
+	logical, intent(in) :: mpi_init
 	logical bquiet,bsilent
 
 	call cpu_time(time1)
