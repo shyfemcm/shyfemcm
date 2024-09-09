@@ -783,7 +783,7 @@
         else if( outformat == 'nc' ) then
           ncid = idout
 	  do i=1,nvar
-	    call nc_output_get_var_ids(i,var_id)
+	    call nc_output_get_var_id(i,var_id)
             call nc_output_record(ncid,var_id,np,density(:,:,i))
 	  end do
         else if( outformat == 'off' ) then

@@ -403,11 +403,14 @@
 	call hydro_transports_final	!final transports (also barotropic)
 
 	call shympi_barrier
+	!we should really never exchange these arrays !FIXME
 	!write(6,*) 'utlnv has been computed...'
 	!call shympi_print_elem(159344,utlnv)
 	!call shympi_barrier
 	call shympi_exchange_3d_elem(utlnv)
-	call shympi_exchange_3d_elem(utlnv)
+	call shympi_exchange_3d_elem(vtlnv)
+	call shympi_exchange_2d_elem(unv)
+	call shympi_exchange_2d_elem(vnv)
 	!write(6,*) 'utlnv has been exchanged...'
 	!call shympi_print_elem(159344,utlnv)
 	!call shympi_barrier

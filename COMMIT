@@ -1,5 +1,31 @@
 ============================================================
 
+Thu Sep  5 16:02:23 CEST 2024
+
+still compiler errors with intel (fixed)
+
+ src/shyfem/check.f90                  | 4 ++--
+ src/tools/shyelab/femelab1.f90        | 4 ++--
+ src/tools/shyelab/femelab2.f90        | 4 ++--
+ src/tools/shynetcdf/elab_nc_dummy.f90 | 7 +++----
+ src/tools/shynetcdf/nc_util.f90       | 6 +++---
+ 5 files changed, 12 insertions(+), 13 deletions(-)
+
+============================================================
+
+Thu Sep  5 14:24:47 CEST 2024
+
+compiler errors with intel fixed
+
+ src/tools/shyelab/lgrelab1.f90        |  2 +-
+ src/tools/shyelab/shyelab_output.f90  |  2 +-
+ src/tools/shynetcdf/elab_nc.f90       |  2 +-
+ src/tools/shynetcdf/elab_nc_dummy.f90 | 11 +++++++++++
+ src/tools/shynetcdf/ts2nc.f90         |  4 +++-
+ 5 files changed, 17 insertions(+), 4 deletions(-)
+
+============================================================
+
 Thu Sep  5 11:48:37 CEST 2024
 
 more on tvd mpi

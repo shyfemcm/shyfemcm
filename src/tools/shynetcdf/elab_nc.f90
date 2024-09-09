@@ -316,7 +316,7 @@
 
 !********************************************************************
 
-	subroutine nc_output_get_var_ids(iv,var_id)
+	subroutine nc_output_get_var_id(iv,var_id)
 
 	use netcdf_out
 

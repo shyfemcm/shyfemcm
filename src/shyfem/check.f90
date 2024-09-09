@@ -1395,7 +1395,7 @@
                 iu = iubase + ie_ext
 		iumax = max(iu,iumax)
                 iue(nie) = iu
-                call make_name('e',ie_ext,name)
+                call make_name_with_number('e',ie_ext,'aux',name)
                 open(iu,file=name,status='unknown',form='formatted')
               end if
             end do
@@ -1410,7 +1410,7 @@
                 iks(nik) = ik_int
                 iu = iumax + ik_ext
                 iuk(nik) = iu
-                call make_name('n',ik_ext,name)
+                call make_name_with_number('n',ik_ext,'aux',name)
                 open(iu,file=name,status='unknown',form='formatted')
               end if
             end do
