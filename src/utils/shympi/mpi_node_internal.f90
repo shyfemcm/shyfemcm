@@ -169,6 +169,8 @@
 
         integer ierr,ierr_code
 
+	call MPI_BARRIER( MPI_COMM_WORLD, ierr)
+	call MPI_FINALIZE(ierr_code)
 	call MPI_ABORT(MPI_COMM_WORLD,ierr_code,ierr)
 
         end subroutine shympi_abort_internal

@@ -245,6 +245,9 @@ shyelab_util.o: ../../../lib/mod/basin.mod \
 		../../../lib/mod/mod_depth.mod 
 shyfile.o: ../../../lib/mod/clo.mod ../../../lib/mod/elabutil.mod \
 		../../../lib/mod/shyfile.mod 
+shyproj.o: ../../../lib/mod/basin.mod ../../../lib/mod/clo.mod \
+		../../../lib/mod/grd.mod \
+		../../../lib/mod/projection.mod 
 tselab1.o: ../../../lib/mod/clo.mod ../../../lib/mod/elabtime.mod \
 		../../../lib/mod/elabutil.mod \
 		../../../lib/mod/shyfem_strings.mod 

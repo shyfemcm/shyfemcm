@@ -268,6 +268,7 @@ cleanall: clean
 ../../lib/mod/mod_ts.mod: ts.o
 ../../lib/mod/mod_tvd.mod: tvd.o
 ../../lib/mod/mod_waves.mod: waves.o
+../../lib/mod/omp_admin.mod: openmp_admin.o
 ../../lib/mod/poisson.mod: poisson.o
 ../../lib/mod/semi_implicit.mod: iostr.o
 ../../lib/mod/shyice_model.mod: ice.o
@@ -674,6 +675,7 @@ mpi_assert.o: ../../lib/mod/basin.mod ../../lib/mod/evgeom.mod \
 		../../lib/mod/mod_hydro_baro.mod \
 		../../lib/mod/mod_hydro_print.mod \
 		../../lib/mod/mod_hydro_vel.mod \
+		../../lib/mod/mod_internal.mod \
 		../../lib/mod/mod_layer_thickness.mod \
 		../../lib/mod/mod_ts.mod ../../lib/mod/shympi.mod 
 mud_admin.o: ../../lib/mod/basin.mod ../../lib/mod/levels.mod \
@@ -909,7 +911,8 @@ tvd_admin.o: ../../lib/mod/basin.mod ../../lib/mod/evgeom.mod \
 		../../lib/mod/mod_hydro_print.mod \
 		../../lib/mod/mod_hydro_vel.mod \
 		../../lib/mod/mod_layer_thickness.mod \
-		../../lib/mod/mod_tvd.mod ../../lib/mod/shympi.mod 
+		../../lib/mod/mod_tvd.mod ../../lib/mod/shympi.mod \
+		../../lib/mod/shympi_tvd.mod 
 water_ren_time.o: ../../lib/mod/basin.mod \
 		../../lib/mod/custom_dates.mod \
 		../../lib/mod/evgeom.mod ../../lib/mod/levels.mod \
