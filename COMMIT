@@ -1,5 +1,14 @@
 ============================================================
 
+Tue Sep 10 10:52:27 CEST 2024
+
+bug fix for shyplot
+
+ src/tools/shyplot/shyplot.f90 | 5 ++++-
+ 1 file changed, 4 insertions(+), 1 deletion(-)
+
+============================================================
+
 Thu Sep  5 16:02:23 CEST 2024
 
 still compiler errors with intel (fixed)
