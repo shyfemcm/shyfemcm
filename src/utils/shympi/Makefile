@@ -227,8 +227,7 @@ mpi_tripple.o: ../../../lib/mod/basin.mod \
 		../../../lib/mod/levels.mod \
 		../../../lib/mod/mod_geom.mod \
 		../../../lib/mod/shympi.mod 
-mpi_tvd.o: ../../../lib/mod/basin.mod ../../../lib/mod/mod_tvd.mod \
-		../../../lib/mod/shympi.mod 
+mpi_tvd.o: ../../../lib/mod/basin.mod ../../../lib/mod/shympi.mod
 shyparts_basutil.o: ../../../lib/mod/basin.mod \
 		../../../lib/mod/grd.mod \
 		../../../lib/mod/mod_depth.mod \
