@@ -244,6 +244,7 @@
 	double precision, save, private :: da_out(4) = 0
 	double precision, save, private :: da_met(4) = 0
 
+	integer, save :: iheat = 0
 	integer, save :: iwtype,itdrag
 	integer, save :: irtype
 	integer, save :: ihtype
@@ -1518,6 +1519,7 @@
 ! pressure is returned in [mb]
 
 	use mod_meteo
+	use meteo_forcing_module, only: iheat
 
 	implicit none
 
@@ -1536,15 +1538,17 @@
 	uw = metws(k)
 	cc = metcc(k)
 
-	cc = max(0.,cc)
-	cc = min(1.,cc)
-	rh = max(0.,rh)
-	rh = min(100.,rh)
+	if (iheat .ne. 7) then				  !skip, if we read fluxes
+	  cc = max(0.,cc)
+	  cc = min(1.,cc)
+	  rh = max(0.,rh)
+	  rh = min(100.,rh)
 
-	p = ppv(k)
-	p = 0.01 * p					  !Pascal to mb
+	  p = ppv(k)
+	  p = 0.01 * p					  !Pascal to mb
 
-	call rh2wb(ta,p,rh,twb)
+	  call rh2wb(ta,p,rh,twb)
+	endif
 
 	end subroutine meteo_get_heat_values
 
@@ -1703,6 +1707,20 @@
 	logical bice
 
 	bice = iff_has_file(idice)
+
+	end
+
+!*********************************************************************
+
+	subroutine set_iheat(iheat_local)
+
+        use meteo_forcing_module
+
+        implicit none
+
+	integer iheat_local
+
+	iheat = iheat_local
 
 	end
 

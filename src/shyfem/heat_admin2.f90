@@ -95,6 +95,7 @@
 ! 09.07.2022	ggu	kspecial for special output
 ! 05.09.2022	ggu	debug output and use ustar in ice computation
 ! 09.05.2023    lrp     introduce top layer index variable
+! 06.09.2024    lrp     nuopc-compliant
 !
 ! notes :
 !
@@ -298,6 +299,8 @@
 	  iwtyp  = nint(getpar('iwtyp'))+1
 	  hdecay = getpar('hdecay')
 	  botabs = getpar('botabs')
+
+	  call set_iheat(iheat)
 
 	  call shyice_init
 	  call shyice_is_active(bice)		!ice model is active
