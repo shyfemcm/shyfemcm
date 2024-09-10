@@ -149,6 +149,7 @@
 	  if( bdebug ) call write_tvd_debug(nel)
           if( shympi_is_parallel() ) then
             write(6,*) 'cannot yet handle itvd==2'
+	    call exit(77)
             stop 'error stop tvd_init: cannot run with mpi'
 	  end if
 	end if

@@ -62,11 +62,12 @@
 
 	logical bsphe,bdebug,bfound
 	integer isphe
-	integer ie,ii,j,i,ie_new,ix
+	integer ie,ii,j,i,ie_new,ix,n
 	integer my_ia,ia,id,inlist,nfound,nchanged
 	integer ie_ext,iee_ext,iee_old
 	integer ilist,maxlist,maxnlist
 	integer ia_found,ia_needed,ie_local,iu,iudb
+	integer n_tvd_r,n_tvd_s
 	integer, save :: nlist = 10
 	real x,y
 	real xmin,ymin,xmax,ymax
@@ -78,6 +79,10 @@
 	real, allocatable :: newlists(:,:,:)
 	integer, allocatable :: count(:)
 	integer, allocatable :: index(:)
+	integer, allocatable :: n_tvd_receive(:)
+	integer, allocatable :: n_tvd_send(:)
+	integer, allocatable :: tvd_receive(:,:)
+	integer, allocatable :: tvd_send(:,:)
 
 !----------------------------------------------------------
 ! starting collection of tvd information
@@ -135,7 +140,7 @@
 	call shympi_barrier
 
 !----------------------------------------------------------
-! find biggest list information
+! find biggest list information and exchange
 !----------------------------------------------------------
 
 	write(6,*) 'exchanging list information ',my_id
@@ -149,15 +154,6 @@
 	rlist = 0.
 
 	rlist(:,1:ilist) = raux(:,1:ilist)
-
-	deallocate(raux)
-	allocate(raux(nlist,maxlist*n_threads))
-	raux = 0.
-
-!----------------------------------------------------------
-! exchange list information between domains
-!----------------------------------------------------------
-
 	call shympi_gather(nlist,rlist,rlists)
 
 	write(6,*) 'all information collected ',my_id
@@ -168,7 +164,6 @@
 ! look for missing information needed in other domains
 !----------------------------------------------------------
 
-	inlist = 0
 	if( 10 > nlist ) goto 98
 
 	call bas_get_minmax(xmin,ymin,xmax,ymax)
@@ -176,6 +171,11 @@
 	iu = 330 + my_ia
 
 	nfound = 0
+
+	deallocate(raux)
+	allocate(raux(nlist,maxlist*n_threads))
+	raux = 0.
+	inlist = 0
 
 	do ia=1,n_threads
 	  if( ia == my_ia ) cycle
@@ -195,7 +195,7 @@
 	      nfound = nfound + 1
 	      iee_ext = ipev(ie)
 	      rlists(8,i,ia) = my_ia		!found for this domain
-	      rlists(9,i,ia) = ie		!found in this element
+	      rlists(9,i,ia) = ie		!internal element number
 	      rlists(10,i,ia) = iee_ext		!external element number
 	      inlist = inlist + 1
 	      raux(:,inlist) = rlists(:,i,ia)
@@ -262,7 +262,7 @@
 	end do
 
 	call shympi_barrier
-	write(6,*) 'all new information elaborated ',my_id
+	write(6,*) 'all new information elaborated ',nchanged,my_id
 
 !----------------------------------------------------------
 ! prepare data exchange
@@ -303,7 +303,7 @@
 	count = 0
 
 	do i=1,ilist
-	  ia = nint(raux(8,ilist))
+	  ia = nint(raux(8,i))
 	  count(ia) = count(ia) + 1
 	end do
 	if( count(my_ia) /= 0 ) stop 'error stop tvd_handle: internal (5)'
@@ -330,7 +330,14 @@
 
 	!------------------------------------------------
 	! sort raux and copy to rlist
+	! after this in rlist are the same entries as in raux, but sorted by ia
 	!------------------------------------------------
+
+	write(iudb,*) 'not sorted list: ',my_ia,ilist,maxlist
+	write(iudb,*) '    i    ia     j    ii    ie   iee   iaf    ie   iee'
+	do i=1,ilist
+	  write(iudb,'(10i6)') i,nint(raux(3:10,i))
+	end do
 
 	rlist = 0.
 
@@ -341,7 +348,104 @@
 	  index(ia) = ix
 	end do
 
+	write(iudb,*) 'sorted list: ',my_ia,ilist,maxlist
+	write(iudb,*) '    i    ia     j    ii    ie   iee   iaf    ie   iee'
+	do i=1,ilist
+	  write(iudb,'(10i6)') i,nint(rlist(3:10,i))
+	end do
+
 	call shympi_gather(nlist,rlist,rlists)
+
+	!------------------------------------------------
+	! some checks
+	!------------------------------------------------
+
+	do ia=1,n_threads
+	  do i=1,maxlist
+	    ie = nint(rlists(9,i,ia))
+	    if( ie == 0 ) exit			!end of list
+	    ia_needed = nint(rlists(3,i,ia))
+	    if( ia_needed /= ia ) then
+	      write(6,*) 'ia and ia_needed are different'
+	      write(6,*) ia,ia_needed
+	      stop 'error stop tvd_handle: ia/=ia_needed'
+	    end if
+	  end do
+	end do
+
+	!------------------------------------------------
+	! compute number of points to receive or send
+	!------------------------------------------------
+
+	allocate(n_tvd_receive(n_threads))
+	allocate(n_tvd_send(n_threads))
+
+	n_tvd_receive = 0
+	n_tvd_send = 0
+
+	do ia=1,n_threads
+	  if( ia == my_ia ) cycle
+	  do i=1,maxlist
+	    ie = nint(rlists(9,i,ia))
+	    if( ie == 0 ) exit			!end of list
+	    ia_found = nint(rlists(8,i,ia))	!found in this domain
+	    if( ia_found == my_ia ) then
+	      n_tvd_send(ia) = n_tvd_send(ia) + 1
+	    else
+	      n_tvd_receive(ia) = n_tvd_receive(ia) + 1
+	    end if
+	  end do
+	end do
+
+	!if( any(n_tvd_receive/=count) ) then
+	!  write(6,*) 'ia: ',my_ia
+	!  write(6,*) 'receive: ',n_tvd_receive
+	!  write(6,*) 'send: ',n_tvd_send
+	!  write(6,*) 'count: ',count
+	!  stop 'error stop tvd_handle: internal (9)'
+	!end if
+
+	n_tvd_r = maxval(n_tvd_receive)
+	n_tvd_s = maxval(n_tvd_send)
+	write(iudb,*) 'send/receive index start'
+	write(iudb,*) n_tvd_r,n_tvd_s
+	write(6,*) 'ggguuu: ',my_ia,n_tvd_r,n_tvd_s
+
+	allocate(tvd_receive(n_tvd_r,n_threads))
+	allocate(tvd_send(n_tvd_s,n_threads))
+	n_tvd_receive = 0
+	n_tvd_send = 0
+
+	do ia=1,n_threads
+	  do i=1,maxlist
+	    ie = nint(rlists(9,i,ia))
+	    if( ie == 0 ) exit			!end of list
+	    ia_found = nint(rlists(8,i,ia))	!found in this domain
+	    if( ia == my_ia ) then
+	      n = n_tvd_receive(ia) + 1
+	      tvd_receive(n,ia) = i
+	      n_tvd_receive(ia) = n
+	    else
+	      n = n_tvd_send(ia) + 1
+	      tvd_send(n,ia) = i
+	      n_tvd_send(ia) = n
+	    end if
+	  end do
+	end do
+
+	write(iudb,*) 'send/receive index'
+	write(iudb,*) 'receive: ',n_tvd_r
+	do ia=1,n_threads
+	  n = n_tvd_receive(ia)
+	  write(iudb,*) ia,n
+	  write(iudb,*) tvd_receive(1:n,ia)
+	end do
+	write(iudb,*) 'send: ',n_tvd_s
+	do ia=1,n_threads
+	  n = n_tvd_send(ia)
+	  write(iudb,*) ia,n
+	  write(iudb,*) tvd_send(1:n,ia)
+	end do
 
 	write(6,*) 'all new information collected ',my_id
 
