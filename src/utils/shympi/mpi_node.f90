@@ -81,6 +81,7 @@
 ! 13.03.2024    ggu     bmpi_skip introduced
 ! 05.04.2024    ggu     shympi_check_3d_elem_r(), nghost_max_global
 ! 06.09.2024    lrp     nuopc-compliant
+! 06.09.2024    ggu     better debug info for shympi_check_array()
 !
 !******************************************************************
 
@@ -1460,7 +1461,7 @@
 	integer a1(n),a2(n)
 	character*(*) text
 
-	integer i,icount,ih,il,id
+	integer i,icount,ih,il,ih_ext
 	integer, parameter :: imax = 10
 	integer maxdif
 
@@ -1483,11 +1484,9 @@
 	    if( a1(i) /= a2(i) ) then
 	      ih = 1 + (i-1)/nl
 	      il = 1 + mod(i-1,nl)
+	      ih_ext = make_external_number(belem,ih)
 	      icount = icount + 1
-	      id = -1
-	      if( .not. belem ) id = id_node(i)
-	      !write(6,1000) my_id,i,ip_ext(ih),ih,il,a1(i),a2(i)
-	      write(6,1000) my_id,i,id,ih,il,a1(i),a2(i)
+	      write(6,1000) my_id,i,ih_ext,ih,il,a1(i),a2(i)
 	    end if
 	    if( imax > 0 .and. icount >= imax ) exit
 	  end do
@@ -1509,7 +1508,7 @@
 	real a1(n),a2(n)
 	character*(*) text
 
-	integer i,icount,ih,il
+	integer i,icount,ih,il,ih_ext
 	integer, parameter :: imax = 10
 	real maxdif
 
@@ -1532,9 +1531,9 @@
 	    if( a1(i) /= a2(i) ) then
 	      ih = 1 + (i-1)/nl
 	      il = 1 + mod(i-1,nl)
+	      ih_ext = make_external_number(belem,ih)
 	      icount = icount + 1
-	      !write(6,1000) my_id,i,ieext(ih),ih,il,a1(i),a2(i)
-	      write(6,1000) my_id,i,0,ih,il,a1(i),a2(i)
+	      write(6,1000) my_id,i,ih_ext,ih,il,a1(i),a2(i)
 	    end if
 	    if( imax > 0 .and. icount >= imax ) exit
 	  end do
@@ -1555,7 +1554,7 @@
 	double precision a1(n),a2(n)
 	character*(*) text
 
-	integer i,icount,ih,il
+	integer i,icount,ih,il,ih_ext
 	integer, parameter :: imax = 10
 	double precision maxdif
 
@@ -1576,9 +1575,10 @@
 	    if( a1(i) /= a2(i) ) then
 	      ih = 1 + (i-1)/nl
 	      il = 1 + mod(i-1,nl)
+	      ih_ext = make_external_number(belem,ih)
 	      icount = icount + 1
 	      !write(6,*) my_id,i,a1(i),a2(i)
-	      write(6,1000) my_id,i,0,ih,il,a1(i),a2(i)
+	      write(6,1000) my_id,i,ih_ext,ih,il,a1(i),a2(i)
 	    end if
 	    if( imax > 0 .and. icount >= imax ) exit
 	  end do
@@ -1612,6 +1612,25 @@
 	end
 
 !******************************************************************
+	
+	function make_external_number(belem,iint)
+
+	use basin
+
+	integer make_external_number
+	logical belem
+	integer iint
+
+	make_external_number = 0
+
+	if( belem ) then
+	  if( iint <= nel ) make_external_number = ipev(iint)
+	else
+	  if( iint <= nkn ) make_external_number = ipv(iint)
+	end if
+
+	end
+
 !******************************************************************
 !******************************************************************
 

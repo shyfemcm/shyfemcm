@@ -1,5 +1,23 @@
 ============================================================
 
+Tue Sep 10 16:59:49 CEST 2024
+
+mass balance for mpi adjusted
+
+ src/shyfem/check.f90 | 21 +++++++++++++++------
+ 1 file changed, 15 insertions(+), 6 deletions(-)
+
+============================================================
+
+Tue Sep 10 10:52:27 CEST 2024
+
+bug fix for shyplot
+
+ src/tools/shyplot/shyplot.f90 | 5 ++++-
+ 1 file changed, 4 insertions(+), 1 deletion(-)
+
+============================================================
+
 Thu Sep  5 16:02:23 CEST 2024
 
 still compiler errors with intel (fixed)

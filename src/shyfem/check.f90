@@ -111,6 +111,7 @@
 ! 02.04.2023	ggu	only master writes to iuinfo
 ! 15.03.2024	ggu	new routine debug_write_var()
 ! 10.09.2024    lrp     relax check_values
+! 10.09.2024	ggu&lrp	bug fix: do not compute mass balance on domain boundary
 !
 !*************************************************************
 
@@ -694,7 +695,7 @@
 	implicit none
 
 	logical berror,bdebug
-	integer ie,l,ii,k,lmin,lmax,mode,ks,kss
+	integer ie,l,ii,k,lmin,lmax,mode,ks,kss,ie_mpi
 	integer levdbg
 	real am,az,azt,dt,azpar,ampar
 	real areafv,b,c
@@ -747,7 +748,8 @@
 ! compute horizontal divergence
 !----------------------------------------------------------------
 
-        do ie=1,nel
+        do ie_mpi=1,nel
+          ie = ip_sort_elem(ie_mpi)
           areafv = 4. * ev(10,ie)               !area of triangle / 3
 	  lmin = jlhv(ie)
           lmax = ilhv(ie)
@@ -788,7 +790,7 @@
 	end if
 
 	vtotmax = 0.
-	do k=1,nkn
+	do k=1,nkn_inner
 	  lmin = jlhkv(k)
           lmax = ilhkv(k)
 	  abot = 0.
@@ -816,7 +818,7 @@
 	berror = .false.
 	vrmax = 0.
 	vmax = 0.
-	do k=1,nkn
+	do k=1,nkn_inner
 	  if( is_zeta_boundary(k) ) cycle
 	  if( is_external_boundary(k) ) cycle
 	  bdebug = k .eq. kss
@@ -868,7 +870,9 @@
 	    va(1,k) = 0.
 	end do
 
-        do ie=1,nel
+        do ie_mpi=1,nel
+          ie = ip_sort_elem(ie_mpi)
+
           areafv = 4. * ev(10,ie)               !area of triangle / 3
 
 	  ubar = 0.
@@ -893,7 +897,7 @@
 
 	vrmax = 0.
 	vmax = 0.
-	do k=1,nkn
+	do k=1,nkn_inner
 	 !if( is_inner(k) ) then
 	 if( .not. is_external_boundary(k) ) then
            lmax = ilhkv(k)
@@ -919,6 +923,11 @@
 
 	vbmax = vmax		!absolute error for water column
 	vrbmax = vrmax		!relative error for water column
+
+	vlmax = shympi_max(vlmax)
+	vbmax = shympi_max(vbmax)
+	vrbmax = shympi_max(vrbmax)
+	vrlmax = shympi_max(vrlmax)
 
 !----------------------------------------------------------------
 ! write diagnostic output
