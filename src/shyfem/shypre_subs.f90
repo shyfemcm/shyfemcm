@@ -69,6 +69,7 @@
 ! 13.07.2020    ggu     honor noopti flag, stack poisoning eliminated
 ! 06.05.2023    ggu     some enhancements and better error handeling
 ! 22.05.2023    ggu     locate is defined in module
+! 12.09.2024    ggu     flush bas file before closing (intel bug)
 !
 ! notes :
 !
@@ -280,6 +281,7 @@
 
 	if( bwrite ) write(6,*) ' ...writing file '
 	call basin_write(nbout)
+	flush(nbout)
 	close(nbout)
 
 	if( bww ) call bas_info
