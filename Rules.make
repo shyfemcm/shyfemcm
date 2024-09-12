@@ -902,7 +902,7 @@ FINTEL_ERSEM = $(DEFINES)
 
 FINTEL_GENERAL = -fpp
 ifdef MODDIR
-  FINTEL_GENERAL = -fpp -module $(MODDIR)
+  FINTEL_GENERAL = -fpp -module $(MODDIR) -diag-disable=10448
 endif
 
 FINTEL_PROFILE = 
