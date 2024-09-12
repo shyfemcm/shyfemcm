@@ -289,7 +289,7 @@
         iy=idum
       endif
       j=1+(97*iy)/m
-      if(j.gt.97.or.j.lt.1) stop 'error stop ran2: internal error'
+      if(j.gt.97.or.j.lt.1) stop 'error stop randomtb: internal error'
       iy=ir(j)
       randomtb=iy*rm
       idum=mod(ia*idum+ic,m)

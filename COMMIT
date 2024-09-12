@@ -1,5 +1,18 @@
 ============================================================
 
+Thu Sep 12 13:39:24 CEST 2024
+
+unique names for WRF conflicts
+
+ Makefile                          |  3 +-
+ src/shyfem/custom_admin.f90       | 13 ++++----
+ src/shyfem/lagrange_dif.f90       | 27 ++++++++--------
+ src/utils/generic/color_utils.f90 |  2 +-
+ src/utils/generic/random_gen.f90  | 66 +++++++++++++++++++--------------------
+ 5 files changed, 57 insertions(+), 54 deletions(-)
+
+============================================================
+
 Thu Sep 12 10:46:19 CEST 2024
 
 flush bas file before closing
