@@ -90,6 +90,8 @@
 	integer, allocatable :: tvd_send(:,:)
 	integer, allocatable :: tvd_index(:,:)
 	integer, allocatable :: matrix(:,:)
+	integer, allocatable :: n_tvd_receive_from(:)
+	integer, allocatable :: n_tvd_send_to(:)
 
 !----------------------------------------------------------
 ! starting collection of tvd information
@@ -412,6 +414,8 @@
 	allocate(tvd_index(n_tvd,n_threads))
 	allocate(n_tvd_index(n_threads))
 	allocate(matrix(n_threads,n_threads))
+	allocate(n_tvd_send_to(n_threads))
+	allocate(n_tvd_receive_from(n_threads))
 	n_tvd_receive = 0
 	n_tvd_send = 0
 	n_tvd_index = 0
@@ -419,6 +423,8 @@
 	tvd_send = 0
 	tvd_index = 0
 	matrix = 0
+	n_tvd_send_to = 0
+	n_tvd_receive_from = 0
 
 	do ia=1,n_threads
 	  do i=1,maxlist
@@ -428,6 +434,8 @@
 	    if( ia /= ia_needed ) stop 'error stop: ia/=ia_needed'
 	    ia_found = nint(rlists(8,i,ia))	!found in this domain
 	    if( ia_found == ia_needed ) cycle
+	    if( ia_found < 1 .or. ia_found > n_threads ) stop 'error stop: 6'
+	    if( ia_needed < 1 .or. ia_needed > n_threads ) stop 'error stop: 7'
 	    if( ia_found == my_ia ) then
 	      n = n_tvd_send(ia) + 1
 	      if( n > n_tvd_s ) stop 'error stop: n > n_tvd_s'
@@ -438,8 +446,8 @@
 	      tvd_index(n,ia) = i
 	      n_tvd_index(ia) = n
 	      matrix(ia_found,ia_needed) = matrix(ia_found,ia_needed) + 1
+	      n_tvd_send_to(ia_needed) =  n_tvd_send_to(ia_needed) + 1
 	    else if( ia_needed == my_ia ) then
-	      if( ia_needed /= my_ia ) stop 'error stop: ia_needed /= my_ia'
 	      n = n_tvd_receive(ia) + 1
 	      if( n > n_tvd_r ) stop 'error stop: n > n_tvd_r'
 	      tvd_receive(n,ia) = i
@@ -449,6 +457,7 @@
 	      tvd_index(n,ia) = i
 	      n_tvd_index(ia) = n
 	      matrix(ia_found,ia_needed) = matrix(ia_found,ia_needed) + 1
+	      n_tvd_receive_from(ia_found) =  n_tvd_receive_from(ia_found) + 1
 	    end if
 	  end do
 	end do
@@ -503,6 +512,13 @@
 	    if( n == 0 ) cycle
 	    write(iudb,'(i5,a,i5,a,i5)') iaf,' -> ',ian,' : ',n
 	  end do
+	end do
+	write(iudb,*) '====================================='
+	do ia=1,n_threads
+	  write(iudb,*) 'receive from: ',ia,n_tvd_receive_from(ia)
+	end do
+	do ia=1,n_threads
+	  write(iudb,*) 'send to: ',ia,n_tvd_send_to(ia)
 	end do
 	write(iudb,*) '====================================='
 
