@@ -15,6 +15,8 @@
 FEMDIR=${SHYFEMDIR:=$HOME/shyfem}
 export FEMDIR
 
+bindir=$FEMDIR/bin/revision
+
 tmpfile=tmp.tmp
 after=0
 befor=30000000
@@ -84,7 +86,7 @@ do
   faux=$(echo $file | sed '/\/tmp\//'d)
   [ -z "$faux" ] && continue
 
-  getheader.pl $file | revisionlog.pl \
+  getheader.pl $file | $bindir/revisionlog.pl \
 		$options -file $file -after $after -befor $befor
 done
 

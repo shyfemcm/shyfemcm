@@ -1,5 +1,20 @@
 ============================================================
 
+Thu Sep 12 17:47:07 CEST 2024
+
+release notes
+
+ RELEASE_NOTES                         | 7 +++++++
+ bin/git/git-tag                       | 8 +++++---
+ bin/git/git_info/git_info_general.txt | 2 +-
+ bin/revision/revision_last.sh         | 6 ++++--
+ bin/revision/revisionlog.pl           | 2 +-
+ bin/revision/revisionlog.sh           | 4 +++-
+ bin/revision/revisionlog_adjust.pl    | 2 +-
+ 7 files changed, 22 insertions(+), 9 deletions(-)
+
+============================================================
+
 Thu Sep 12 17:30:14 CEST 2024
 
 starting release for nuopc framework

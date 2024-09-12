@@ -134,7 +134,7 @@ git pull
 git-commit
 
 git-tag
-git push origin develop --tags
+git push --tags
 git-release or better git-release -full_release
 
 git-pack (or gittar tag; mail_shyfem.sh file; tag can also be commit)

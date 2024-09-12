@@ -1,4 +1,11 @@
 
+12.09.2024	VERS_8_0_7	NUOPC-start edition
+
+	relatively stable release
+	nuopc framework for atmospheric coupling started
+	intel compiler bugs resolved
+	mpi fully working (except tvd)
+
 27.06.2024	VERS_8_0_6	Bucharest edition
 
 	new shypre inside shyfem
