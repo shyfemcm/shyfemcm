@@ -1,5 +1,14 @@
 ============================================================
 
+Thu Sep 12 10:46:19 CEST 2024
+
+flush bas file before closing
+
+ src/shyfem/shypre_subs.f90 | 2 ++
+ 1 file changed, 2 insertions(+)
+
+============================================================
+
 Tue Sep 10 16:59:49 CEST 2024
 
 mass balance for mpi adjusted
