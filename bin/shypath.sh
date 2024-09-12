@@ -136,6 +136,7 @@ if [ $set_path = "YES" ]; then
   echo "new PATH: $path"
   export PATH=$path
   export SHYFEMDIR=$shyfemdir
+  echo "SHYFEMDIR: $SHYFEMDIR"
 fi
 
 #cd $actdir

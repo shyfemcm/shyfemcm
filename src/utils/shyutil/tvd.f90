@@ -76,6 +76,8 @@
         allocate(ieetvdup(3,3,nel))
         allocate(iatvdup(3,3,nel))
 
+	write(6,*) 'mod_tvd_init successfully called ',nel
+
         end subroutine mod_tvd_init
 
 !==================================================================

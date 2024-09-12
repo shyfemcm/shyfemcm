@@ -41,58 +41,16 @@
 	logical, parameter :: btripple = .true. !handles tripple points
 
 	integer, parameter :: nexch = 8
-	integer, save :: nmax_tripple = 0
+	integer, save :: nmax_tvd = 0
 	integer, save :: itrtot = -1
 	integer, save, allocatable :: ielist(:,:)
-	real, save, allocatable :: buffer_tripple_in(:,:)
-	real, save, allocatable :: buffer_tripple_out(:,:)
+	real, save, allocatable :: buffer_tvd_in(:,:)
+	real, save, allocatable :: buffer_tvd_out(:,:)
+	real, save, allocatable :: n_index_tvd(:)
+	real, save, allocatable :: index_tvd(:,:)
 	integer, save, allocatable :: ietrp(:,:)
 
-        integer, private, save :: nel_tvd_mpi = 0
-
         integer, save :: itvd_type = 0
-
-        real, allocatable, save :: xtvdmpiup(:,:,:)        !x-coordinate
-        real, allocatable, save :: ytvdmpiup(:,:,:)        !y-coordinate
-        integer, allocatable, save :: ietvdmpiup(:,:,:)    !internal elem number
-        integer, allocatable, save :: ieetvdmpiup(:,:,:)   !external elem number
-        integer, allocatable, save :: iatvdmpiup(:,:,:)    !domain of element
-
-!==================================================================
-        contains
-!==================================================================
-
-        subroutine mod_tvd_mpi_init(nel)
-
-        integer nel
-
-        if( nel == nel_tvd_mpi ) return
-
-        if( nel_tvd_mpi > 0 ) then
-          deallocate(xtvdmpiup)
-          deallocate(ytvdmpiup)
-          deallocate(ietvdmpiup)
-          deallocate(ieetvdmpiup)
-          deallocate(iatvdmpiup)
-        end if
-
-        nel_tvd_mpi = nel
-
-        if( nel == 0 ) return
-
-        allocate(xtvdmpiup(3,3,nel))
-        allocate(ytvdmpiup(3,3,nel))
-        allocate(ietvdmpiup(3,3,nel))
-        allocate(ieetvdmpiup(3,3,nel))
-        allocate(iatvdmpiup(3,3,nel))
-
-	xtvdmpiup = 0.
-	ytvdmpiup = 0.
-	ietvdmpiup = 0
-	ieetvdmpiup = 0
-	iatvdmpiup = -1
-
-        end subroutine mod_tvd_mpi_init
 
 !==================================================================
         end module shympi_tvd
@@ -103,17 +61,17 @@
 	use basin
 	use shympi
 	use shympi_tvd
-	!use mod_tvd
+	use mod_tvd
 
 	implicit none
 
 	logical bdebug,bfound
-	integer ie,ii,j,i,ie_new,ix,n
+	integer ie,ii,j,i,ie_new,ix,n,ind,iaf,ian
 	integer my_ia,ia,id,inlist,nfound,nchanged
-	integer ie_ext,iee_ext,iee_old
+	integer ie_ext,iee_ext,iee_old,ie_int
 	integer ilist,maxlist,maxnlist
 	integer ia_found,ia_needed,ie_local,iu,iudb
-	integer n_tvd_r,n_tvd_s
+	integer n_tvd_r,n_tvd_s,n_tvd
 	integer, save :: nlist = 10
 	real x,y
 	real xmin,ymin,xmax,ymax
@@ -127,8 +85,11 @@
 	integer, allocatable :: index(:)
 	integer, allocatable :: n_tvd_receive(:)
 	integer, allocatable :: n_tvd_send(:)
+	integer, allocatable :: n_tvd_index(:)
 	integer, allocatable :: tvd_receive(:,:)
 	integer, allocatable :: tvd_send(:,:)
+	integer, allocatable :: tvd_index(:,:)
+	integer, allocatable :: matrix(:,:)
 
 !----------------------------------------------------------
 ! starting collection of tvd information
@@ -156,11 +117,11 @@
 	    do j=1,3
 	      bfound = .false.
 	      if( ii == j ) cycle
-	      if( ietvdmpiup(j,ii,ie) >= 0 ) then	!we have to check all
+	      if( ietvdup(j,ii,ie) >= 0 ) then	!we have to check all
 		bfound = .true.
 		ilist = ilist + 1
-		raux(1,ilist) = xtvdmpiup(j,ii,ie)
-		raux(2,ilist) = ytvdmpiup(j,ii,ie)
+		raux(1,ilist) = xtvdup(j,ii,ie)
+		raux(2,ilist) = ytvdup(j,ii,ie)
 		raux(3,ilist) = my_ia		!needed in this domain
 		raux(4,ilist) = j
 		raux(5,ilist) = ii
@@ -277,6 +238,7 @@
 	    ia_found = nint(newlists(8,i,ia))	!found in this domain
 	    ia_needed = nint(newlists(3,i,ia))	!needed in this domain
 	    ie_ext = nint(newlists(7,i,ia))	!in this element needed
+	    ie_int = nint(newlists(9,i,ia))	!in this element found
 	    iee_ext = nint(newlists(10,i,ia))	!in this element found
 	    if( ia_found /= ia_needed ) then
 	     if( my_ia == ia_needed ) then
@@ -284,11 +246,14 @@
 	      j = nint(newlists(4,i,ia))
 	      ii = nint(newlists(5,i,ia))
 	      ie = nint(newlists(6,i,ia))
-	      iee_old = ieetvdmpiup(j,ii,ie)
+	      iee_old = ieetvdup(j,ii,ie)
+		call tvd_assert('j',j>=0.and.j<=3)
+		call tvd_assert('ii',ii>=0.and.ii<=3)
+		call tvd_assert('ie',ie>=0.and.ie<=nel)
 	      if( iee_ext > iee_old ) then	!always take highest index
-	        ieetvdmpiup(j,ii,ie) = iee_ext
-	        ietvdmpiup(j,ii,ie) = ie
-	        iatvdmpiup(j,ii,ie) = ia_found
+	        ieetvdup(j,ii,ie) = iee_ext
+	        ietvdup(j,ii,ie) = ie_int
+	        iatvdup(j,ii,ie) = ia_found
 	      end if
 	     end if
 	    end if
@@ -311,19 +276,19 @@
 	  do ii=1,3
 	    do j=1,3
 	        if( ii == j ) cycle
-	        ia = iatvdmpiup(j,ii,ie)		!area where point found
+	        ia = iatvdup(j,ii,ie)		!area where point found
 		if( ia == my_ia ) cycle
 		ilist = ilist + 1
-		raux(1,ilist) = xtvdmpiup(j,ii,ie)
-		raux(2,ilist) = ytvdmpiup(j,ii,ie)
+		raux(1,ilist) = xtvdup(j,ii,ie)
+		raux(2,ilist) = ytvdup(j,ii,ie)
 		raux(3,ilist) = my_ia		!needed in this domain
 		raux(4,ilist) = j
 		raux(5,ilist) = ii
 		raux(6,ilist) = ie		!internal local element
 		raux(7,ilist) = ipev(ie)	!external local element
-	        raux(8,ilist) = iatvdmpiup(j,ii,ie)	!area where point found
-	        raux(9,ilist) = ietvdmpiup(j,ii,ie)	!internal remote element
-	        raux(10,ilist) = ieetvdmpiup(j,ii,ie)!external remote element
+	        raux(8,ilist) = iatvdup(j,ii,ie)	!area where point found
+	        raux(9,ilist) = ietvdup(j,ii,ie)	!internal remote element
+	        raux(10,ilist) = ieetvdup(j,ii,ie)!external remote element
 	    end do
 	  end do
 	end do
@@ -352,10 +317,9 @@
 	maxlist = shympi_max(ilist)
 
 	write(6,*) 'new array sizes: ',ilist,maxlist,my_id
-	write(iudb,*) 'new array sizes: ',ilist,maxlist,my_id
-	write(iudb,*) count
-	write(iudb,*) index
-
+	write(iudb,*) 'new array sizes: ',ilist,maxlist,my_ia
+	write(iudb,*) 'count: ',count
+	write(iudb,*) 'index: ',index
 
 	deallocate(rlist)
 	deallocate(rlists)
@@ -369,9 +333,9 @@
 
 	if( ilist > 0 ) then
 	write(iudb,*) 'not sorted list: ',my_ia,ilist,maxlist
-	write(iudb,*) '    i    ia     j    ii    ie   iee   iaf    ie   iee'
+	call write_array_header(iudb)
 	do i=1,ilist
-	  write(iudb,'(10i6)') i,nint(raux(3:10,i))
+	  call write_array_debug(iudb,nlist,i,raux(:,i))
 	end do
 	end if
 
@@ -386,9 +350,9 @@
 
 	if( ilist > 0 ) then
 	write(iudb,*) 'sorted list: ',my_ia,ilist,maxlist
-	write(iudb,*) '    i    ia     j    ii    ie   iee   iaf    ie   iee'
+	call write_array_header(iudb)
 	do i=1,ilist
-	  write(iudb,'(10i6)') i,nint(rlist(3:10,i))
+	  call write_array_debug(iudb,nlist,i,rlist(:,i))
 	end do
 	end if
 
@@ -422,11 +386,12 @@
 	n_tvd_send = 0
 
 	do ia=1,n_threads
-	  if( ia == my_ia ) cycle
+	  !if( ia == my_ia ) cycle
 	  do i=1,maxlist
 	    ie = nint(rlists(9,i,ia))
 	    if( ie == 0 ) exit			!end of list
 	    ia_found = nint(rlists(8,i,ia))	!found in this domain
+	    if( ia_found == ia ) cycle
 	    if( ia_found == my_ia ) then
 	      n_tvd_send(ia) = n_tvd_send(ia) + 1
 	    else
@@ -435,56 +400,111 @@
 	  end do
 	end do
 
-	!if( any(n_tvd_receive/=count) ) then
-	!  write(6,*) 'ia: ',my_ia
-	!  write(6,*) 'receive: ',n_tvd_receive
-	!  write(6,*) 'send: ',n_tvd_send
-	!  write(6,*) 'count: ',count
-	!  stop 'error stop tvd_handle: internal (9)'
-	!end if
-
 	n_tvd_r = maxval(n_tvd_receive)
 	n_tvd_s = maxval(n_tvd_send)
-	write(iudb,*) 'send/receive index start'
-	write(iudb,*) n_tvd_r,n_tvd_s
-	write(6,*) 'ggguuu: ',my_ia,n_tvd_r,n_tvd_s
+	n_tvd = max(n_tvd_r,n_tvd_s)
+	write(6,*) 'n_tvd_r/s: ',n_tvd_r,n_tvd_s,n_tvd,my_ia
+	write(6,*) 'n_tvd_receive: ',n_tvd_receive,my_ia
+	write(6,*) 'n_tvd_send: ',n_tvd_send,my_ia
 
 	allocate(tvd_receive(n_tvd_r,n_threads))
 	allocate(tvd_send(n_tvd_s,n_threads))
+	allocate(tvd_index(n_tvd,n_threads))
+	allocate(n_tvd_index(n_threads))
+	allocate(matrix(n_threads,n_threads))
 	n_tvd_receive = 0
 	n_tvd_send = 0
+	n_tvd_index = 0
 	tvd_receive = 0
 	tvd_send = 0
+	tvd_index = 0
+	matrix = 0
 
 	do ia=1,n_threads
 	  do i=1,maxlist
 	    ie = nint(rlists(9,i,ia))
 	    if( ie == 0 ) exit			!end of list
+	    ia_needed = nint(rlists(3,i,ia))	!needed in this domain
+	    if( ia /= ia_needed ) stop 'error stop: ia/=ia_needed'
 	    ia_found = nint(rlists(8,i,ia))	!found in this domain
-	    if( ia == my_ia ) then
-	      n = n_tvd_receive(ia) + 1
-	      tvd_receive(n,ia) = i
-	      n_tvd_receive(ia) = n
-	    else
+	    if( ia_found == ia_needed ) cycle
+	    if( ia_found == my_ia ) then
 	      n = n_tvd_send(ia) + 1
+	      if( n > n_tvd_s ) stop 'error stop: n > n_tvd_s'
 	      tvd_send(n,ia) = i
 	      n_tvd_send(ia) = n
+	      n = n_tvd_index(ia) + 1
+	      if( n > n_tvd ) stop 'error stop: n > n_tvd'
+	      tvd_index(n,ia) = i
+	      n_tvd_index(ia) = n
+	      matrix(ia_found,ia_needed) = matrix(ia_found,ia_needed) + 1
+	    else if( ia_needed == my_ia ) then
+	      if( ia_needed /= my_ia ) stop 'error stop: ia_needed /= my_ia'
+	      n = n_tvd_receive(ia) + 1
+	      if( n > n_tvd_r ) stop 'error stop: n > n_tvd_r'
+	      tvd_receive(n,ia) = i
+	      n_tvd_receive(ia) = n
+	      n = n_tvd_index(ia) + 1
+	      if( n > n_tvd ) stop 'error stop: n > n_tvd'
+	      tvd_index(n,ia) = i
+	      n_tvd_index(ia) = n
+	      matrix(ia_found,ia_needed) = matrix(ia_found,ia_needed) + 1
 	    end if
 	  end do
 	end do
 
-	write(iudb,*) 'receive: ',n_tvd_r
+	write(iudb,*) '====================================='
+	write(iudb,*) 'send/receive index start ',my_ia
+	write(iudb,*) n_tvd_r,n_tvd_s,n_tvd
+
+	write(iudb,*) 'receive max: ',n_tvd_r
+	write(iudb,*) 'receive dim: ',n_tvd_receive
 	do ia=1,n_threads
 	  n = n_tvd_receive(ia)
-	  write(iudb,*) ia,n
-	  if( n > 0 ) write(iudb,*) tvd_receive(1:n,ia)
+	  if( n == 0 ) cycle
+	  write(iudb,*) 'receiving from... n = ',n
+	  call write_array_header(iudb)
+	  do i=1,n
+	    ind = tvd_receive(i,ia)
+	    call write_array_debug(iudb,nlist,i,rlists(:,ind,ia))
+	  end do
 	end do
-	write(iudb,*) 'send: ',n_tvd_s
+	write(iudb,*) 'send max: ',n_tvd_s
+	write(iudb,*) 'send dim: ',n_tvd_send
 	do ia=1,n_threads
 	  n = n_tvd_send(ia)
-	  write(iudb,*) ia,n
-	  if( n > 0 ) write(iudb,*) tvd_send(1:n,ia)
+	  if( n == 0 ) cycle
+	  write(iudb,*) 'sending to... n = ',n
+	  call write_array_header(iudb)
+	  do i=1,n
+	    ind = tvd_send(i,ia)
+	    call write_array_debug(iudb,nlist,i,rlists(:,ind,ia))
+	  end do
 	end do
+	do ia=1,n_threads
+	  n = n_tvd_index(ia)
+	  if( ia == my_ia ) then
+	    if(any(tvd_receive(1:n,ia)/=tvd_index(1:n,ia))) then
+		write(6,*) 'receive,index: ',n_tvd_index(ia),n_tvd_receive(ia)
+		stop 'error stop: receive'
+	    end if
+	  else
+	    if(any(tvd_send(1:n,ia)/=tvd_index(1:n,ia))) then
+		write(6,*)'send,index: ', n_tvd_index(ia),n_tvd_send(ia)
+		stop 'error stop: send'
+	    end if
+	  end if
+	end do
+	write(iudb,*) '====================================='
+	write(iudb,*) 'in domain ',my_ia
+	do iaf=1,n_threads
+	  do ian=1,n_threads
+	    n = matrix(iaf,ian)
+	    if( n == 0 ) cycle
+	    write(iudb,'(i5,a,i5,a,i5)') iaf,' -> ',ian,' : ',n
+	  end do
+	end do
+	write(iudb,*) '====================================='
 
 	write(6,*) 'all new information collected ',my_id
 
@@ -494,7 +514,7 @@
 ! write out debug information
 !----------------------------------------------------------
 
-	call write_tvd_debug(nel)
+	!call write_tvd_debug(nel)
 
 !----------------------------------------------------------
 ! all info exchanged
@@ -520,9 +540,9 @@
 
 	subroutine write_tvd_debug(nel)
 
-	!use mod_tvd
 	use shympi
 	use shympi_tvd
+	use mod_tvd
 
 	implicit none
 
@@ -557,14 +577,14 @@
 	  do ii=1,3
 	    do j=1,3
 	      n = n + 1
-	      iedebug(n,ie) = ieetvdmpiup(j,ii,ie)
+	      iedebug(n,ie) = ieetvdup(j,ii,ie)
 	    end do
 	  end do
-	  iadebug(:,ie) = reshape(ieetvdmpiup(:,:,ie),(/9/))
+	  iadebug(:,ie) = reshape(ieetvdup(:,:,ie),(/9/))
 	  if( any( iedebug(:,ie) /= iadebug(:,ie) ) ) then
 	    stop 'error stop write_tvd_debug: reshape not working'
 	  end if
-	  iadebug(:,ie) = reshape(iatvdmpiup(:,:,ie),(/9/))
+	  iadebug(:,ie) = reshape(iatvdup(:,:,ie),(/9/))
 	end do
 
 	call shympi_l2g_array(9,iedebug,ieout)
@@ -587,8 +607,50 @@
 
 	end if
 
+	write(6,*) 'finished tvd debug...',my_id
 	call shympi_barrier
 	flush(6)
+
+	end
+
+!******************************************************************
+
+	subroutine tvd_assert(text,bassert)
+
+	implicit none
+
+	character*(*) text
+	logical bassert
+
+	if( bassert ) return
+
+	write(6,*) 'assertion violated: ',trim(text)
+	stop 'error stop tvd_assert'
+
+	end
+
+!******************************************************************
+
+	subroutine write_array_debug(iudb,nlist,i,array)
+
+	implicit none
+
+	integer iudb,nlist,i
+	real array(nlist)
+
+	write(iudb,'(10i6)') i,nint(array(3:nlist))
+
+	end
+
+!******************************************************************
+
+	subroutine write_array_header(iudb)
+
+	implicit none
+
+	integer iudb
+
+	write(iudb,*) '    i   ian     j    ii    ie   iee   iaf   ief  ieef'
 
 	end
 

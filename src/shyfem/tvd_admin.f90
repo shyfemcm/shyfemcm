@@ -135,6 +135,7 @@
 	icall = 1
 
 	itvd_type = itvd
+	write(6,*) 'tvd type: ',itvd_type
 	if( itvd_type > 0 ) call mod_tvd_init(nel)
 
 	if( itvd_type .eq. 2 ) then
@@ -149,6 +150,7 @@
 	if( itvd_type .eq. 2 ) then
 	  if( bdebug ) call write_tvd_debug(nel)
           if( shympi_is_parallel() ) then
+	    call shympi_barrier
             write(6,*) 'cannot yet handle itvd==2'
 	    call error_stop
 	    !call exit(0)
@@ -322,6 +324,7 @@
         subroutine tvd_upwind_init_mpi
 
 	use basin
+	use mod_tvd
 	use shympi
 	use shympi_tvd
 
@@ -334,116 +337,16 @@
 	call get_coords_ev(isphe)
 	bsphe = isphe .eq. 1
 
-	call mod_tvd_mpi_init(nel)
+	!call mod_tvd_mpi_init(nel)
 
 	do ie=1,nel
-          call tvd_upwind_init_elem_xy(bsphe,ie,xtvdmpiup,ytvdmpiup)
-          call tvd_upwind_init_elem_ie(ie,xtvdmpiup,ytvdmpiup &
-     &			,ietvdmpiup,ieetvdmpiup)
-	  iatvdmpiup(:,:,ie) = my_id + 1
+          call tvd_upwind_init_elem(bsphe,ie)
+	  iatvdup(:,:,ie) = my_id + 1
 	end do
 
-	end
-
-!*****************************************************************
-
-        subroutine tvd_upwind_init_elem_ie(ie,xtvd,ytvd &
-     &			,ietvd,ieetvd)
-
-	use basin
-
-	implicit none
-
-	integer ie
-	real xtvd(3,3,nel)
-	real ytvd(3,3,nel)
-	integer ietvd(3,3,nel)
-	integer ieetvd(3,3,nel)
-
-	integer ii,j,ienew
-	real x,y
-
-	do ii=1,3
-	  do j=1,3
-	    if( ii == j ) cycle
-	    x = xtvd(j,ii,ie)
-	    y = ytvd(j,ii,ie)
-	    call find_unique_element(x,y,ienew)
-	    if( ienew > 0 ) then
-              ietvd(j,ii,ie) = ienew
-              ieetvd(j,ii,ie) = ipev(ienew)
-	    end if
-	  end do
-	end do
+	write(6,*) 'tvd_upwind_init_mpi successfully called',nel,my_id
 
 	end
-
-!*****************************************************************
-
-        subroutine tvd_upwind_init_elem_xy(bsphe,ie,xtvd,ytvd)
-
-	use basin
-
-	implicit none
-
-	logical bsphe
-	integer ie
-	real xtvd(3,3,nel)
-	real ytvd(3,3,nel)
-
-        integer ii,j,k,in
-	real x,y
-	!real r
-
-        double precision xc,yc,xd,yd,xu,yu
-        double precision dlat0,dlon0                    !center of projection
-
-	xtvd = 0.
-	ytvd = 0.
-
-          if ( bsphe ) call ev_make_center(ie,dlon0,dlat0)
-
-          do ii=1,3
-
-
-            k = nen3v(ii,ie)
-            xc = xgv(k)
-            yc = ygv(k)
-	    if ( bsphe ) call ev_g2c(xc,yc,xc,yc,dlon0,dlat0)
-
-            j = mod(ii,3) + 1
-            k = nen3v(j,ie)
-            xd = xgv(k)
-            yd = ygv(k)
-	    if ( bsphe ) call ev_g2c(xd,yd,xd,yd,dlon0,dlat0)
-
-            xu = 2*xc - xd
-            yu = 2*yc - yd
-	    if ( bsphe ) call ev_c2g(xu,yu,xu,yu,dlon0,dlat0)
-	    x = xu
-	    y = yu
-
-            xtvd(j,ii,ie) = x
-            ytvd(j,ii,ie) = y
-
-            j = mod(ii+1,3) + 1
-            k = nen3v(j,ie)
-            xd = xgv(k)
-            yd = ygv(k)
-	    if ( bsphe ) call ev_g2c(xd,yd,xd,yd,dlon0,dlat0)
-
-            xu = 2*xc - xd
-	    yu = 2*yc - yd
-	    if ( bsphe ) call ev_c2g(xu,yu,xu,yu,dlon0,dlat0)
-	    x = xu
-	    y = yu
-
-            xtvd(j,ii,ie) = x
-            ytvd(j,ii,ie) = y
-
-          end do
-
-        end
 
 !*****************************************************************
 !*****************************************************************

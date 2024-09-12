@@ -67,6 +67,7 @@ OBJ  = \
 	mkonst.o \
 	heat_const.o \
 	evgeom.o \
+	tvd.o \
 
 ALL = $(MOD) $(OBJ)
 
