@@ -674,6 +674,7 @@ mpi_assert.o: ../../lib/mod/basin.mod ../../lib/mod/evgeom.mod \
 		../../lib/mod/mod_hydro_baro.mod \
 		../../lib/mod/mod_hydro_print.mod \
 		../../lib/mod/mod_hydro_vel.mod \
+		../../lib/mod/mod_internal.mod \
 		../../lib/mod/mod_layer_thickness.mod \
 		../../lib/mod/mod_ts.mod ../../lib/mod/shympi.mod 
 mud_admin.o: ../../lib/mod/basin.mod ../../lib/mod/levels.mod \

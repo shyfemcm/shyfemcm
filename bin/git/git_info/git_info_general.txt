@@ -126,7 +126,7 @@ iterate:
 	git add -u
 
 make rules_diff; maybe make rules_new
-vi fem3d/subver.f	-> change version (better do during git-tag)
+vi src/utils/shyutil/version.f90 -> change version (better do during git-tag)
 make check_var
 make dist
 git add -u
