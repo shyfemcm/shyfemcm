@@ -117,6 +117,7 @@
 
 ! initializes horizontal tvd scheme
 
+	use basin
 	use mod_tvd
 	use shympi
 
