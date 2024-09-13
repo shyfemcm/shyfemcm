@@ -28,13 +28,12 @@
 ! contents :
 !
 ! function grand(idum)
-! function ran(idum)
 !
-! function ran0(idum)		!shuffling random results
-! function ran1(idum)		!best random number generator
-! function ran2(idum)		!good enough random number generator
-! function ran3(idum)		!different method (Knuth)
-! function ran4(idum)		!using des
+! function shyran0(idum)	!shuffling random results
+! function shyran1(idum)	!best random number generator
+! function shyran2(idum)	!good enough random number generator
+! function shyran3(idum)	!different method (Knuth)
+! function shyran4(idum)	!using shydes
 !
 ! revision log :
 !
@@ -46,12 +45,13 @@
 ! 30.03.2012	ggu	changed VERS_6_1_51
 ! 14.02.2019	ggu	changed VERS_7_5_56
 ! 16.02.2019	ggu	changed VERS_7_5_60
+! 11.09.2024    lrp     rename function ran1 to shyran1 (compatibility with wrf)
 !
 !******************************************************
 
 	function grand(idum)
 
-	grand = ran2(idum)
+	grand = shyran2(idum)
 
 	end
 
@@ -70,21 +70,21 @@
 	  if( init .ne. 0 ) idum = abs(init)
 	end if
 
-	ggrand = ran2(idum)
+	ggrand = shyran2(idum)
 
 	end
 
 !******************************************************
 
-	function ran00(idum)
+	function shyran00(idum)
 
-	ran00 = ran1(idum)
+	shyran00 = shyran1(idum)
 
 	end
 
 !******************************************************
 
-      function ran0(idum)
+      function shyran0(idum)
       dimension v(97)
       save y,v
       data iff /0/
@@ -101,16 +101,16 @@
         y=ran(iseed)
       endif
       j=1+int(97.*y)
-      if(j.gt.97.or.j.lt.1) stop 'error stop ran0: internal error'
+      if(j.gt.97.or.j.lt.1) stop 'error stop shyran0: internal error'
       y=v(j)
-      ran0=y
+      shyran0=y
       v(j)=ran(iseed)
       return
       end
 
 !******************************************************
 
-      function ran1(idum)
+      function shyran1(idum)
       dimension r(97)
       parameter (m1=259200,ia1=7141,ic1=54773,rm1=3.8580247e-6)
       parameter (m2=134456,ia2=8121,ic2=28411,rm2=7.4373773e-6)
@@ -135,15 +135,15 @@
       ix2=mod(ia2*ix2+ic2,m2)
       ix3=mod(ia3*ix3+ic3,m3)
       j=1+(97*ix3)/m3
-      if(j.gt.97.or.j.lt.1) stop 'error stop ran1: internal error'
-      ran1=r(j)
+      if(j.gt.97.or.j.lt.1) stop 'error stop shyran1: internal error'
+      shyran1=r(j)
       r(j)=(float(ix1)+float(ix2)*rm2)*rm1
       return
       end
 
 !******************************************************
 
-      function ran2(idum)
+      function shyran2(idum)
       parameter (m=714025,ia=1366,ic=150889,rm=1.4005112e-6)
       dimension ir(97)
       save iy,ir
@@ -159,9 +159,9 @@
         iy=idum
       endif
       j=1+(97*iy)/m
-      if(j.gt.97.or.j.lt.1) stop 'error stop ran2: internal error'
+      if(j.gt.97.or.j.lt.1) stop 'error stop shyran2: internal error'
       iy=ir(j)
-      ran2=iy*rm
+      shyran2=iy*rm
       idum=mod(ia*idum+ic,m)
       ir(j)=idum
       return
@@ -169,7 +169,7 @@
 
 !******************************************************
 
-      function ran3(idum)
+      function shyran3(idum)
 !         implicit real*4(m)
 !         parameter (mbig=4000000.,mseed=1618033.,mz=0.,fac=2.5e-7)
       parameter (mbig=1000000000,mseed=161803398,mz=0,fac=1.e-9)
@@ -205,13 +205,13 @@
       mj=ma(inext)-ma(inextp)
       if(mj.lt.mz)mj=mj+mbig
       ma(inext)=mj
-      ran3=mj*fac
+      shyran3=mj*fac
       return
       end
 
 !******************************************************
 
-      function ran4(idum)
+      function shyran4(idum)
       parameter (im=11979,ia=430,ic=2531,nacc=24)
       dimension inp(64),jot(64),key(64),pow(65)
       data iff/0/
@@ -238,10 +238,10 @@
 12    continue
       inp(1)=isav
       jot = 0
-      call des(inp,key,newkey,0,jot)
-      ran4=0.0
+      call shydes(inp,key,newkey,0,jot)
+      shyran4=0.0
       do 13 j=1,nacc
-        if(jot(j).ne.0)ran4=ran4+pow(j)
+        if(jot(j).ne.0)shyran4=shyran4+pow(j)
 13    continue
       return
       end
@@ -252,13 +252,13 @@
 !******************************************************
 !******************************************************
 
-	subroutine des(inp,key,newkey,i,jot)
+	subroutine shydes(inp,key,newkey,i,jot)
         integer inp(1),jot(1),key(1)
 	end
 
 !******************************************************
 
-	subroutine rndtest(n,ndim,icount)
+	subroutine shyrndtest(n,ndim,icount)
 
 ! tests random routine
 
@@ -284,13 +284,13 @@
 	  icount(j) = icount(j) + 1
 	end do
 
-	call rndprnt(n,ndim,icount)
+	call shyrndprnt(n,ndim,icount)
 
 	end
 
 !******************************************************
 
-	subroutine rndprnt(n,ndim,icount)
+	subroutine shyrndprnt(n,ndim,icount)
 
 ! prints result of random test
 
@@ -315,7 +315,7 @@
 
 !******************************************************
 
-	subroutine rnddrv(n,k)
+	subroutine shyrnddrv(n,k)
 
 ! driver for random test
 !
@@ -339,14 +339,14 @@
 
 	do l=1,k
 	  write(6,*) 'Iteration : ',l,' of ',k
-	  call rndtest(n,ndim,icount)
+	  call shyrndtest(n,ndim,icount)
 	  do i=1,ndim
 	    itot(i) = itot(i) + icount(i)
 	  end do
 	end do
 
 	write(6,*) 'Final result : '
-	call rndprnt(n*k,ndim,itot)
+	call shyrndprnt(n*k,ndim,itot)
 
 	end
 
@@ -355,7 +355,7 @@
 ! uncomment next lines to run test on random number generator
 !
 !	program test
-!	call rnddrv(1000000,10)
+!	call shyrnddrv(1000000,10)
 !	end
 !
 !******************************************************

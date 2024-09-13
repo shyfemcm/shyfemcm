@@ -12,37 +12,33 @@
 #
 #--------------------------------------------------------------------
 
-srcdir=fem3d
-srcdir=src/utils/shyutil
-version=version.f90
-
 git-automerge.pl COMMIT > COMMIT.tmp
 git-automerge.pl VERSION > VERSION.tmp
-git-automerge.pl $srcdir/$version > $srcdir/$version.tmp
+git-automerge.pl fem3d/subver.f > fem3d/subver.f.tmp
 
-echo "the following files have been merged:"
+echo "following files have been merged:"
 
 echo "    COMMIT         -> COMMIT.tmp"
 echo "    VERSION        -> VERSION.tmp"
-echo "    $srcdir/$version -> $srcdir/$version.tmp"
+echo "    fem3d/subver.f -> fem3d/subver.f.tmp"
 
 if [ "$1" = "-write" ]; then
   mv -f COMMIT.tmp COMMIT
   mv -f VERSION.tmp VERSION
-  mv -f $srcdir/$version.tmp $srcdir/$version
+  mv -f fem3d/subver.f.tmp fem3d/subver.f
   echo "files have been written"
 elif [ "$1" = "-diff" ]; then
   echo "------------- diffing COMMIT -----------------"
   diff COMMIT.tmp COMMIT
   echo "------------- diffing VERSION ----------------"
   diff VERSION.tmp VERSION
-  echo "---------- diffing $srcdir/$version-----------"
-  diff $srcdir/$version.tmp $srcdir/$version
+  echo "---------- diffing fem3d/subver.f ------------"
+  diff fem3d/subver.f.tmp fem3d/subver.f
   echo "----------------------------------------------"
 elif [ "$1" = "-tkdiff" ]; then
   tkdiff COMMIT.tmp COMMIT
   tkdiff VERSION.tmp VERSION
-  tkdiff $srcdir/$version.tmp $srcdir/$version
+  tkdiff fem3d/subver.f.tmp fem3d/subver.f
 else
   echo "in order to write changes use option -write"
 fi

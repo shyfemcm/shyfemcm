@@ -13,7 +13,6 @@
 #-----------------------------------------------------------
 
 my $file = $ARGV[0];
-my $version = "src/utils/shyutil/version.f90";
 
 $debug = 0;
 
@@ -93,10 +92,10 @@ sub print_sep
   } elsif( $file eq "COMMIT" ) {
     die "*** can handle only one block\n" if( $block > 1 );
     print "\n$sep\n\n";
-  } elsif( $file eq "$version" ) {
+  } elsif( $file eq "fem3d/subver.f" ) {
     @second = ();	#we only need the first occurrence, no seperator
   } else {
-    die "*** git-automerge.pl: (sep) cannot handle file: $file\n";
+    die "*** cannot handle file: $file\n";
   }
 }
 
@@ -110,10 +109,10 @@ sub get_time
     $date =~ s/^.*commit_//;
   } elsif( $file eq "COMMIT" ) {
     ;
-  } elsif( $file eq "$version" ) {
+  } elsif( $file eq "fem3d/subver.f" ) {
     $date =~ s/^.*(\d{4}-\d{2}-\d{2}).\s*$/$1/;
   } else {
-    die "*** git-automerge.pl: (time) cannot handle file: $file\n";
+    die "*** cannot handle file: $file\n";
   }
 
   print STDERR "date found: $date\n" if $debug;

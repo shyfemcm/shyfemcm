@@ -79,6 +79,7 @@
 ! 26.07.2023	lrp	introduce zstar in shyplot
 ! 28.09.2023    lrp     bug fix for zstar (forgotten parameter)
 ! 27.06.2024    ggu     bug fix calling shympi_init, read basin first
+! 10.09.2024    ggu     bug fix avoiding divide by zero in mod(irec,ifreq) /= 0
 !
 ! notes :
 !
@@ -961,7 +962,9 @@
 	 bcycle = .false.
 	 if( elabtime_over_time(atime) ) exit
 	 if( .not. elabtime_in_time(atime) ) bcycle = .true.
-	 if( ifreq > 0 .and. mod(irec,ifreq) /= 0 ) bcycle = .true.
+	 if( ifreq > 0 ) then
+	   if( mod(irec,ifreq) /= 0 ) bcycle = .true.
+	 end if
 
 	 if( bcycle ) then
 	   if( bverb ) call shy_write_time2(irec,atime,0)

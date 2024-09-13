@@ -45,12 +45,11 @@ useX11 = true
 
 #---------------------------------------------------------------
 
-#$(info before: SHYFEMDIR = $(SHYFEMDIR) )
 ifeq ($(SHYFEMDIR),"")
         SHYFEMDIR := $(HOME)/shyfem
 endif
 export SHYFEMDIR
-$(info using SHYFEMDIR = $(SHYFEMDIR) )
+#$(info in Makefile of base dir: SHYFEMDIR = $(SHYFEMDIR))
 
 #---------------------------------------------------------------
 

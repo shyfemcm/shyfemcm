@@ -46,6 +46,7 @@
 ! 25.10.2018	ggu	changed VERS_7_5_51
 ! 16.02.2019	ggu	changed VERS_7_5_60
 ! 13.03.2019	ggu	changed VERS_7_5_61
+! 11.09.2024    lrp     rename gasdev to shygasdev (compatibility with wrf) 
 !
 !************************************************************
 !
@@ -725,44 +726,44 @@
         real*8 dx,dy
         real a,b,cf
         real nmb 
-        real gasdev
+        real shygasdev
         integer idum
         data idum/387/
         save idum
         cf=sqrt(2*k*ttime) 
 	cf=sqrt(6*k*ttime)  !new formula 3d
         
-        dx=cf*gasdev(idum)
-        dy=cf*gasdev(idum)
+        dx=cf*shygasdev(idum)
+        dy=cf*shygasdev(idum)
 
         end
 
 !*********************************************************************
 
-        FUNCTION gasdev(idum)
+        FUNCTION shygasdev(idum)
+
+! Returns a normally distributed deviate with zero mean and unit variance
+! using shyran1(idum) as the source of uniform deviates.
 
         INTEGER idum
-        REAL gasdev
-! Returns a normally distributed deviate with zero mean and unit variance, using
-! ran1(idum)
-! as the source of uniform deviates.
+        REAL shygasdev
         INTEGER iset
-        REAL fac,gset,rsq,v1,v2,ran1
+        REAL fac,gset,rsq,v1,v2,shyran1
         SAVE iset,gset
         DATA iset/0/
 
         if (idum.lt.0) iset=0
         if (iset.eq.0) then
-1        v1=2.*ran1(idum)-1.
-         v2=2.*ran1(idum)-1.
+1        v1=2.*shyran1(idum)-1.
+         v2=2.*shyran1(idum)-1.
          rsq=v1**2+v2**2
          if(rsq.ge.1..or.rsq.eq.0.)goto 1
          fac=sqrt(-2.*log(rsq)/rsq)
          gset=v1*fac
-         gasdev=v2*fac
+         shygasdev=v2*fac
          iset=1
         else
-         gasdev=gset
+         shygasdev=gset
          iset=0
         endif
         return

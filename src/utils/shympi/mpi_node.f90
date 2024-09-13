@@ -600,10 +600,10 @@
 	!-----------------------------------------------------
 
 	if( bmpi ) then
-	  write(cunit,'(i10)') my_id
-	  cunit = adjustl(cunit)
-	  file = 'mpi_debug_' // trim(cunit) // '.txt'
 	  if( bmpi_debug_txt ) then
+	    write(cunit,'(i10)') my_id
+	    cunit = adjustl(cunit)
+	    file = 'mpi_debug_' // trim(cunit) // '.txt'
 	    call shympi_get_new_unit(my_unit)
 	    open(unit=my_unit,file=file,status='unknown')
 	    write(my_unit,*) '=========================================='
@@ -612,6 +612,7 @@
 	    write(my_unit,*) '=========================================='
 	    write(my_unit,*) 'shympi initialized: ',my_id,n_threads,my_unit
 	  end if
+	  write(6,*) 'shympi initialized: ',my_id,n_threads,my_unit
 	else if( bmpi_debug ) then
 	  write(6,*) 'shympi initialized: ',my_id,n_threads
 	  write(6,*) 'shympi is not running in mpi mode'

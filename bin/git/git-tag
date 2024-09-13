@@ -15,6 +15,8 @@
 version_file="VERSION"
 commit_file="COMMIT"
 
+bindir=$SHYFEMDIR/bin/revision
+
 #########################################################
 
 ok()
@@ -166,10 +168,10 @@ echo
 echo "Checking revision log ..."
 echo 
 
-files=`find . -name "*.[cfFh]"`
-revisionlog.sh -after $comparedate $files > $tmpfile
+files=`find . -name "*.[cfFh] *.f90"`
+$bindir/revisionlog.sh -after $comparedate $files > $tmpfile
 if [ -f $version_file ]; then
-  revisionlog_adjust.pl $tmpfile $version_file > $tmpfile2
+  $bindir/revisionlog_adjust.pl $tmpfile $version_file > $tmpfile2
 fi
 cat $tmpfile2
 
