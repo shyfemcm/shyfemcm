@@ -1,5 +1,21 @@
 ============================================================
 
+Fri Sep 13 11:42:14 CEST 2024
+
+changes from branch mpi integrated
+
+ src/shyfem/Makefile                    |  3 +-
+ src/utils/shympi/mpi_node.f90          | 25 ++++++---
+ src/utils/shympi/mpi_node_internal.f90 |  2 +
+ src/utils/shyutil/Makefile             |  2 +
+ src/{shyfem => utils/shyutil}/tvd.f90  |  0
+ src/utils/shyutilmpi/find.f90          | 99 +++++++++++++++++++++++++++++++++-
+ 6 files changed, 120 insertions(+), 11 deletions(-)
+ renamed:
+    src/shyfem/tvd.f90 -> src/utils/shyutil/tvd.f90
+
+============================================================
+
 Thu Sep 12 17:48:32 CEST 2024
 
 New version 8_0_7

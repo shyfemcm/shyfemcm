@@ -69,6 +69,7 @@
 ! 16.02.2019	ggu	changed VERS_7_5_60
 ! 13.03.2019	ggu	changed VERS_7_5_61
 ! 18.10.2019	ggu	cleaned contents
+! 28.08.2024	ggu	new routines find_unique_element(), find_elements()
 !
 ! notes :
 !
@@ -85,6 +86,7 @@
 ! finds element for point (xp,yp) starting from ieold
 !
 ! uses data structure ev and ieltv
+! honors material boundary
 
 	use mod_geom
 	use evgeom
@@ -103,6 +105,7 @@
 
 	logical in_element
 
+	bdebug = ieold == 73
 	bdebug = .false.
 	lmax = 10
 
@@ -159,6 +162,7 @@
 	  if( loop .gt. lmax ) ie = 0
 	end do
 
+	if( bdebug ) write(6,*) 'ggu_xi final',ie
 	ielem = 0
 
 	end
@@ -168,17 +172,25 @@
 	subroutine find_elem_from_old(ieold,xp,yp,ielem)
 
 ! finds element for point (xp,yp) starting from ieold
+!
+! finds elements also if behind material barrier
 
 	use basin, only : nkn,nel,ngr,mbw
 
 	implicit none
 
+	logical bdebug
 	integer ieold
 	real xp,yp
 	integer ielem	!element number on return
 
 	logical in_element
-	integer iem,iep
+	integer iem,iep,iloop
+
+	bdebug = ieold == 73
+	bdebug = .false.
+
+	if( bdebug ) write(6,*) 'starting find_elem_from_old'
 
 !-------------------------------------------------------------
 ! check if old element is given -> if not test all elements
@@ -202,13 +214,17 @@
 ! start from old element going upwards and downwards
 !-------------------------------------------------------------
 
+	iloop = 0
 	iem = ieold-1
 	if( iem .lt. 1 ) iem = nel		!BUG_27.01.2011
 	iep = ieold+1
 	if( iep .gt. nel ) iep = 1		!BUG_27.01.2011
 
 	do while( iem .ne. ieold .and. iep .ne. ieold )
+	  iloop = iloop + 1
+	  if( bdebug ) write(6,*) 'looking for elem ',iem,iep,iloop
 	  if( in_element(iem,xp,yp) ) then
+	    if( bdebug ) write(6,*) 'iem found: ',iem
 	    ielem = iem
 	    return
 	  end if
@@ -216,6 +232,7 @@
 	  if( iem .lt. 1 ) iem = nel
 
 	  if( in_element(iep,xp,yp) ) then
+	    if( bdebug ) write(6,*) 'iep found: ',iep
 	    ielem = iep
 	    return
 	  end if
@@ -226,6 +243,8 @@
 !-------------------------------------------------------------
 ! no element found
 !-------------------------------------------------------------
+
+	if( bdebug ) write(6,*) 'no element found for ',ieold
 
 	ielem = 0
 
@@ -260,6 +279,84 @@
 	end do
 
 	ielem = 0
+
+	end
+
+!******************************************************
+
+	subroutine find_unique_element(xp,yp,ielem)
+
+! finds element for point (xp,yp)
+! if there are more than one element it uses the one 
+! with the highest external number
+
+	use basin, only : nkn,nel,ngr,mbw,ipev
+
+	implicit none
+
+	real xp,yp
+	integer ielem	!element number on return
+
+	integer n
+	integer, parameter :: ndim = 20
+	integer ielems(ndim)
+	integer i,imax,nmax,next
+
+	ielem = 0
+
+	n = ndim
+	call find_elements(xp,yp,n,ielems)
+
+	if( n == 0 ) return
+	if( n == 1 ) then
+	  ielem = ielems(1)
+	  return
+	end if
+
+	nmax = 0
+	imax = 0
+
+	do i=1,n
+	  next = ipev(ielems(i))
+	  if( next <= 0 ) stop 'error stop find_unique_element: internal (1)'
+	  if( next > nmax ) then
+	    nmax = next
+	    imax = i
+	  end if
+	end do
+
+	if( imax == 0 ) stop 'error stop find_unique_element: internal (2)'
+	ielem = ielems(imax)
+
+	end
+
+!******************************************************
+
+	subroutine find_elements(xp,yp,n,ielems)
+
+! finds all element for point (xp,yp)
+
+	use basin, only : nkn,nel,ngr,mbw
+
+	implicit none
+
+	real xp,yp
+	integer n		!dim enter, elems found on return
+	integer ielems(n)	!element numbers on return
+
+	integer ie,ndim
+	logical in_element
+
+	ndim = n
+	n = 0
+
+	do ie=1,nel
+	  if( in_element(ie,xp,yp) ) then
+	    n = n + 1
+	    if( n > ndim ) stop 'error stop find_elements: dimension'
+	    ielems(n) = ie
+	  end if
+	end do
 
 	end
 
