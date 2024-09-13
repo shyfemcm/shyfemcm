@@ -1,5 +1,21 @@
 ============================================================
 
+Fri Sep 13 16:35:28 CEST 2024
+
+changed implementation for OMP
+
+ bin/git/git_info/git_info_merge.txt |  22 ++++
+ src/shyfem/hydrodynamic.f90         |  50 ++++-----
+ src/shyfem/lagrange_main.f90        |  29 ++----
+ src/shyfem/openmp_admin.f90         | 202 +++++++++++++++++++++++++++++++++++-
+ src/shyfem/shyfem.f90               |   2 +-
+ src/shyfem/tvd_admin.f90            |   2 +
+ 6 files changed, 254 insertions(+), 53 deletions(-)
+ new file:
+   bin/git/git_info/git_info_merge.txt
+
+============================================================
+
 Fri Sep 13 11:42:14 CEST 2024
 
 changes from branch mpi integrated

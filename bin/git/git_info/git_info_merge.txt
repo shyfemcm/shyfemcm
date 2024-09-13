@@ -1,0 +1,22 @@
+
+#------------------------------------------------------------------------
+#
+#    Copyright (C) 1985-2020  Georg Umgiesser
+#
+#    This file is part of SHYFEM.
+#
+#------------------------------------------------------------------------
+
+
+# merge unconditionally
+
+git switch DestinationBranch
+git pull
+git merge SourceBranch
+
+# only merge some files
+
+git switch DestinationBranch
+git pull
+git checkout --merge SourceBranch file1 file2
+

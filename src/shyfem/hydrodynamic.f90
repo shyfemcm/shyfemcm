@@ -277,6 +277,7 @@
 ! 02.05.2023    ggu     fix mpi bug for nlv==1
 ! 09.05.2023    lrp     introduce top layer index variable
 ! 08.06.2023    ggu     new zeta_debug(), cleaned, call to compute_dry_elements
+! 25.07.2024    ggu     new implementation of OMP for hydro
 !
 !******************************************************************
 
@@ -762,11 +763,14 @@
 	integer ie
 	integer ies,iend
 	integer ith
-	integer count0,dcount,chunk,nt
+	integer chunk,nt
 	integer ibaroc
 	integer ilin,itlin
 	integer num_threads,myid,el_do,rest_do,init_do,end_do
 	integer nchunk,nthreads
+	!integer count0,dcount
+	integer count,dcount
+	integer, save :: acount = 0
 	logical bcolin,baroc
 	real az,am,af,at,av,azpar,ampar
 	real rlin,radv
@@ -822,46 +826,30 @@
 ! loop over elements
 !-------------------------------------------------------------
 
-!$OMP PARALLEL 
-!$OMP SINGLE
+	call get_clock_count(count)
 
-        call omp_compute_chunk(nel,nchunk)
+!$OMP PARALLEL DO FIRSTPRIVATE(bcolin,baroc,az,am,af,at,radv       &
+!$OMP &            ,vismol,rrho0,dt) PRIVATE(ie,rmsdif)  &
+!$OMP &     SHARED(nel,nchunk)   DEFAULT(NONE)
 
-	do ie=1,nel,nchunk
-
-!$OMP TASK FIRSTPRIVATE(ie,bcolin,baroc,az,am,af,at,radv       &
-!$OMP & 	   ,vismol,rrho0,dt) PRIVATE(ies,iend,rmsdif,rmsmax)  &
-!$OMP &     SHARED(nel,nchunk)	 DEFAULT(NONE)
-	 
-	  rmsmax = 0.
- 	  iend = ie+nchunk-1
- 	  if(iend .gt. nel) iend = nel
-
- 	  do ies=ie,iend
-	    call hydro_intern(ies,bcolin,baroc,az,am,af,at,radv &
+ 	  do ie=1,nel
+	    call hydro_intern(ie,bcolin,baroc,az,am,af,at,radv &
      &			,vismol,rrho0,dt,rmsdif)
-	    rmsmax = max(rmsmax,rmsdif)
+	    if( rmsdif > 1.D-10 ) then
+	      write(6,*) 'rmsdif: ',rmsdif
+	      stop 'error stop hydro_transports: rms too high'
+	    end if
 	  end do
 
-	  if( rmsmax > 1.D-10 ) then
-	    write(6,*) 'rmsmax: ',rmsmax
-	    stop 'error stop hydro_transports: rms too high'
-	  end if
-
-!$OMP END TASK
-
-	end do
-
-!$OMP END SINGLE
-!$OMP TASKWAIT	
-!$OMP END PARALLEL      
+!$OMP END PARALLEL DO
 
 !-------------------------------------------------------------
 ! end of loop over elements
 !-------------------------------------------------------------
 
-!cc	call get_clock_count_diff(count0,dcount)
-!cc	write(6,*) 'count: ',dcount
+	call get_clock_count_diff(count,dcount)
+	acount = acount + dcount
+	!write(653,*) dcount,acount
 
 !-------------------------------------------------------------
 ! end of routine
