@@ -47,6 +47,7 @@
         integer, allocatable, save :: ietvdup(:,:,:)	!internal element number
         integer, allocatable, save :: ieetvdup(:,:,:)	!external elem number
         integer, allocatable, save :: iatvdup(:,:,:)	!domain of element
+        integer, allocatable, save :: ltvdup(:,:,:)	!lmax of element
 
 !==================================================================
 	contains
@@ -64,6 +65,7 @@
           deallocate(ietvdup)
           deallocate(ieetvdup)
           deallocate(iatvdup)
+          deallocate(ltvdup)
         end if
 
         nel_tvd = nel
@@ -75,6 +77,7 @@
         allocate(ietvdup(3,3,nel))
         allocate(ieetvdup(3,3,nel))
         allocate(iatvdup(3,3,nel))
+        allocate(ltvdup(3,3,nel))
 
 	write(6,*) 'mod_tvd_init successfully called ',nel
 

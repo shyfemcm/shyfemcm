@@ -158,7 +158,7 @@
 	  end if
 	end if
 
-	if( bdebug ) stop
+	if( bdebug ) stop 'debug stop: tvd'
 
 	if( itvd .eq. 0 ) then
 	  write(6,*) 'no horizontal TVD scheme used'
