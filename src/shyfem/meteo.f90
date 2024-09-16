@@ -43,6 +43,7 @@
 
 
         integer, private, save  :: nkn_meteo = 0
+	integer, save           :: icall_nuopc = 0 !coupled mode: flag first shyfem timestep in larger coupled time-step
 
         real, allocatable, save :: wxv(:)	! wind velocity in x [m/s]
         real, allocatable, save :: wyv(:)	! wind velocity in y [m/s]

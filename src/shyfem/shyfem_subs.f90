@@ -321,7 +321,7 @@
 	call cstfile(strfile,bquiet,bsilent)	!read STR and basin
 	call set_spherical			!this has to be done here
 
-	call shympi_init(.true.)
+	call shympi_init(.true., mpi_init)
 	call setup_omp_parallel
 
 	call cpu_time(time3)
@@ -547,8 +547,11 @@
 
 	double precision dtmax		!run to this time
 
-	dtmax = dtend
-	if( dtstep > 0. ) dtmax = dtime + dtstep
+	dtmax = dtend			!stand-alone mode
+	if( dtstep > 0. ) then
+	  dtmax = dtime + dtstep	!nuopc mode
+	  icall_nuopc = 1		!need to know if it is first shyfem timestep of the larger coupled timestep
+	end if
 
 	call trace_point('starting shyfem_run')
 
@@ -626,6 +629,8 @@
 	   bfirst = .false.
 
 	   call test_zeta_write
+
+	   icall_nuopc = 0		!the next timsteps icall_nuopc is false
 
 	end do
 

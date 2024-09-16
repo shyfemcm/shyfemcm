@@ -228,6 +228,7 @@
 ! 15.02.2022	ggu	new parameter iage
 ! 15.02.2022	ggu	new parameters for limiting_scalar
 ! 20.07.2023    lrp     new parameter nzadapt
+! 13.09.2024    lrp     new parameter iatm
 !
 !************************************************************************
 
@@ -246,6 +247,7 @@
 	call nlsinh_georg
 	call nlsinh_unused
 	call nlsinh_waves
+        call nlsinh_atm
 	call nlsinh_nonhydro
 	call nlsinh_connect
 
@@ -1730,6 +1732,48 @@
 
         call addpar('idtwav',0.)
         call addpar('itmwav',-1.)
+
+!
+! DOCS  END
+!
+
+        end
+
+!************************************************************************
+
+! This subroutine defines the simulation wave parameter
+
+        subroutine nlsinh_atm
+
+! $atm section
+
+! DOCS  START   P_atm
+!
+! Parameters in section |$atm| activate the ocean-atmosphere coupling.
+
+        implicit none
+
+        call sctpar('atm')           !sets default section
+        call sctfnm('atm')
+
+! |iatm|        Ocean-atmosphere coupling (default 0):
+!               \begin{description}
+!               \item[0] No coupling with the atmosphere.
+!               \item[1] SHYFEM runs coupled with an atmospheric model within the ESMF framwork.
+!                        For now the atmospheric model available is WRF.
+!                        You should have a look the the specific section to see how to run
+!                        a coupled SHYFEM-WRF simulation.
+!               \end{description}
+
+        call addpar('iatm',0.)        !0=SHYFEM standalone, 1=coupled with atmospheric model
+
+! |idtatm|      Time step (only in seconds for now) for writing the atmospheric
+!               fields computed by the atmosphere component and
+!               remapped onto the SHYFEM grid, to a vtk file. This is useful
+!               especially for debugging. For operational runs it is
+!               better not to specify it (no atmospheric fields are printed).
+
+        call addpar('idtatm',2592000.)!time step for output
 
 !
 ! DOCS  END
