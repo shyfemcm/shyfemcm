@@ -450,11 +450,12 @@
         contains
 !==================================================================
 
-	subroutine shympi_init(b_want_mpi)
+	subroutine shympi_init(b_want_mpi, b_want_mpi_init)
 
 	use basin
 
 	logical b_want_mpi
+        logical, optional :: b_want_mpi_init
 
 	logical bstop
 	integer ierr,size

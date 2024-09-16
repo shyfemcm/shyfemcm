@@ -117,6 +117,7 @@
 
 ! initializes horizontal tvd scheme
 
+	use basin
 	use mod_tvd
 	use shympi
 
@@ -130,6 +131,8 @@
 	icall = 1
 
 	itvd_type = itvd
+	write(6,*) 'tvd type: ',itvd_type
+	if( itvd_type > 0 ) call mod_tvd_init(nel)
 
 	if( itvd_type .eq. 2 ) then
           if( shympi_is_parallel() ) then

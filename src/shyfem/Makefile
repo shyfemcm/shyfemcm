@@ -117,7 +117,7 @@ SEDIMENT_OBJ = \
 MPI_EXTRA_OBJ = \
       mpi_assert.o lnkmpi.o
 
-OBJ = system_matrix.o tvd.o \
+OBJ = system_matrix.o \
       hydro_admin.o openmp_admin.o \
       turbulence_util.o sinking.o nudging.o internal.o \
       ts.o hydro_vel.o restart.o gotm_aux.o diff_aux.o \
@@ -266,7 +266,6 @@ cleanall: clean
 ../../lib/mod/mod_system_interface.mod: system_matrix.o
 ../../lib/mod/mod_test_zeta.mod: test_zeta.o
 ../../lib/mod/mod_ts.mod: ts.o
-../../lib/mod/mod_tvd.mod: tvd.o
 ../../lib/mod/mod_waves.mod: waves.o
 ../../lib/mod/poisson.mod: poisson.o
 ../../lib/mod/semi_implicit.mod: iostr.o
@@ -674,6 +673,7 @@ mpi_assert.o: ../../lib/mod/basin.mod ../../lib/mod/evgeom.mod \
 		../../lib/mod/mod_hydro_baro.mod \
 		../../lib/mod/mod_hydro_print.mod \
 		../../lib/mod/mod_hydro_vel.mod \
+		../../lib/mod/mod_internal.mod \
 		../../lib/mod/mod_layer_thickness.mod \
 		../../lib/mod/mod_ts.mod ../../lib/mod/shympi.mod 
 mud_admin.o: ../../lib/mod/basin.mod ../../lib/mod/levels.mod \

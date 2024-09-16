@@ -184,7 +184,7 @@ zip:	cleanall
 	-zip $(DIR) $(SAVEFILES)
 
 depend:
-	@-$(MAKEDEPEND) -moddir=$(MODDIR) *.f *.f90
+	@-$(MAKEDEPEND) -moddir=$(MODDIR) *.f90
 
 #--------------------------------------------- rules
 

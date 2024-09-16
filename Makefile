@@ -49,7 +49,7 @@ ifeq ($(SHYFEMDIR),"")
         SHYFEMDIR := $(HOME)/shyfem
 endif
 export SHYFEMDIR
-$(info in Makefile of base dir: SHYFEMDIR = $(SHYFEMDIR))
+#$(info in Makefile of base dir: SHYFEMDIR = $(SHYFEMDIR))
 
 #---------------------------------------------------------------
 

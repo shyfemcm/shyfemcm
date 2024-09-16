@@ -67,6 +67,7 @@ OBJ  = \
 	mkonst.o \
 	heat_const.o \
 	evgeom.o \
+	tvd.o \
 
 ALL = $(MOD) $(OBJ)
 
@@ -190,6 +191,7 @@ zip:	cleanall
 ../../../lib/mod/mod_depth.mod: depth.o
 ../../../lib/mod/mod_geom.mod: geom.o
 ../../../lib/mod/mod_geom_dynamic.mod: geom_dynamic.o
+../../../lib/mod/mod_tvd.mod: tvd.o
 ../../../lib/mod/pkonst.mod: pkonst.o
 ../../../lib/mod/regular.mod: regular.o
 ../../../lib/mod/shyfem_strings.mod: strings.o

@@ -181,6 +181,7 @@
 ! 11.12.2023    ggu     create subroutines for init/run/finalize
 ! 12.12.2023    ggu     introduce dtmax to make limited run
 ! 10.05.2024    ggu     set spherical just after basin read
+! 06.09.2024    lrp     nuopc-compliant
 !
 !*****************************************************************
 

@@ -8,7 +8,7 @@
 #
 #------------------------------------------------------------------------
 
-use lib ("$ENV{SHYFEMDIR}/fembin","$ENV{HOME}/shyfem/fembin");
+use lib ("$ENV{SHYFEMDIR}/bin/revision","$ENV{HOME}/shyfem/fembin");
 
 require "revision_getdate.pl";
 
