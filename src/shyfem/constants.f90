@@ -331,6 +331,7 @@
 	if( breadgrd ) then		!read grd and produce bas file
 	  if( bwrite ) write(6,*) 'reading grid file: ',trim(grid_file)
 	  call handle_grid_read(grid_file,bquiet,bsilent)
+	  call sleep(1)
 	end if
 
 	if( bwrite ) write(6,*) 'preparing to read bas file: ',trim(basin_file)
