@@ -34,7 +34,8 @@ LIBSHYUTIL      = shyutil
 LIBSHYMPI       = shympi
 LIBSHYUTILMPI   = shyutilmpi
 LIBSPARSKIT     = sparskit
-
+LIBNUOPC        = nuopc
+ 
 LIBLUT  = -L$(LIBDIR) -l$(LIBUTIL)
 LIBFUT  = $(LIBDIR)/lib$(LIBUTIL).a
 
@@ -49,6 +50,8 @@ LIBFUM  = $(LIBDIR)/lib$(LIBSHYUTILMPI).a
 
 LIBLSP  = -L$(LIBDIR) -l$(LIBSPARSKIT)
 LIBFSP  = $(LIBDIR)/lib$(LIBSPARSKIT).a
+
+LIBFNU  = $(LIBDIR)/lib$(LIBNUOPC).a
 
 LIBF = $(LIBFUM) $(LIBFMP) $(LIBFSU) $(LIBFUT) $(LIBFSP)
 LIBL = $(LIBLUM) $(LIBLMP) $(LIBLSU) $(LIBLUT) $(LIBLGOTM) $(LIBG_METIS)
@@ -181,6 +184,18 @@ nothing:
 
 #------------------------------------------------------------------------
 
+.PRECIOUS: %.o
+
+libnuopc: $(LIBFNU)
+
+$(LIBFNU): shyfem_subs.o $(OBJ)
+	@echo "creating static library with shyfem and nuopc cap layer"
+	ar rvs $(LIBFNU) $?
+
+nuopc: libnuopc
+
+#------------------------------------------------------------------------
+
 %.o: %.f 
 	$(F77) $(FFLAGS) $(INCLUDE) -c $< 
 
@@ -195,6 +210,7 @@ clean:
 cleanall: clean
 	-rm -f $(MODDIR)/*.mod
 	-rm -f $(LIBDIR)/libshy.a 
+	-rm -f $(LIBDIR)/lib$(LIBNUOPC).a
 
 #update:
 #	cp $(EXES) /home/georg/work/shyfem_repo/shyfem-mpi/bin
