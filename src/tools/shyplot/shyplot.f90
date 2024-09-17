@@ -80,6 +80,7 @@
 ! 28.09.2023    lrp     bug fix for zstar (forgotten parameter)
 ! 27.06.2024    ggu     bug fix calling shympi_init, read basin first
 ! 10.09.2024    ggu     bug fix avoiding divide by zero in mod(irec,ifreq) /= 0
+! 16.09.2024    ggu     same as above also for lgr plotting
 !
 ! notes :
 !
@@ -281,7 +282,8 @@
 
         call init_nls_fnm
         call read_str_files(-1)
-        call read_str_files(ivar3)
+        !call read_str_files(ivar3)
+        call read_str_files(80)
 
         btraj  = nint(getpar('lgrtrj')) == 1
         lgmean  = nint(getpar('lgmean'))
@@ -642,7 +644,9 @@
           bskip = .false.
           if( elabtime_over_time(atime) ) exit
           if( .not. elabtime_in_time(atime) ) bskip = .true.
-          if( ifreq > 0 .and. mod(irec,ifreq) /= 0 ) bskip = .true.
+          if( ifreq > 0 ) then
+            if( mod(irec,ifreq) /= 0 ) bskip = .true.
+	  end if
           if( n_act == 0 ) bskip = .true.
 
           if( bskip ) then

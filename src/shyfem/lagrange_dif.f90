@@ -47,6 +47,7 @@
 ! 16.02.2019	ggu	changed VERS_7_5_60
 ! 13.03.2019	ggu	changed VERS_7_5_61
 ! 11.09.2024    lrp     rename gasdev to shygasdev (compatibility with wrf) 
+! 16.09.2024    ggu     for bhdiff use abs(ie) in call to xy2xi()
 !
 !************************************************************
 !
@@ -118,7 +119,7 @@
 	  call lag_diff_hor(id,time,lb,iel,x,y)
 	  xx = x
 	  yy = y
-	  call xy2xi(iel,xx,yy,xi)
+	  call xy2xi(abs(iel),xx,yy,xi)
 	end if
 
 !---------------------------------------------------------------

@@ -68,6 +68,7 @@ OBJ  = \
 	heat_const.o \
 	evgeom.o \
 	tvd.o \
+	find.o \
 
 ALL = $(MOD) $(OBJ)
 
@@ -141,8 +142,8 @@ depend:
 	@-$(MAKEDEPEND) -moddir=$(MODDIR) *.f90
 
 check:
-	~/shyfem/fem3d/bin/compile.sh -single *.f90
-	~/shyfem/fem3d/bin/usemod.pl *.f90
+	$(FEMBIN)/fem3d/compile.sh -single *.f90
+	$(FEMBIN)/fem3d/usemod.pl *.f90
 
 list:
 	pwd; ls

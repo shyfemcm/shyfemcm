@@ -185,6 +185,11 @@
 
 	double precision xx,yy
 
+	if( ie < 1 ) then
+	  write(6,*) 'ie = ',ie
+	  stop 'error stop xi_init_particle: ie <= 0'
+	end if
+
 	xx = x
 	yy = y
 	call xy2xi(ie,xx,yy,xi)

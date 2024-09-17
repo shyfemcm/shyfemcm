@@ -1304,7 +1304,7 @@
 
 ! |rwhpar|	A horizontal diffusion can be defined for the lagrangian model.
 !		Its value can be specified in |rwhpar| and the units are 
-!		[m**2/s]. If |rwhpar| < 0 the diffusion parameter depends on
+!		[m**2/s]. If |rwhpar<0| the diffusion parameter depends on
 !		the local diffusivity (see |idhtyp|) (Default 0)
 
 	call addpar('rwhpar',0.)	!diffusion for lagrangian model
@@ -1338,9 +1338,9 @@
 
 ! |ipvert|	Set the vertical distribution of particles:
 !		\begin{description}
-!		\item[0] releases one particles only in surface layer
-!		\item[$>$0] release n particles regularly
-!		\item[$<$0] release n particles randomly
+!		\item[0] releases particles only in surface layer
+!		\item[$>$ 0] release n particles regularly
+!		\item[$<$ 0] release n particles randomly
 !		\end{description}
 
         call addpar('ipvert',0.)

@@ -1151,6 +1151,7 @@
 	call strings_add_new('general index',75)
 	call strings_add_new('general type',76)
 	call strings_add_new('general distance',77)
+	call strings_add_new('lagrangian',80)
 	call strings_add_new('lagrangian (general)',80)
 	call strings_add_new('lagrangian age',81)
 	call strings_add_new('lagrangian depth',82)
