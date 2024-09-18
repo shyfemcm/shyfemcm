@@ -27,6 +27,32 @@ ifeq ($(SOLVER),PETSC)
   INCLUDE += -I$(PETSC_DIR)/include
 endif
 
+ifeq ($(NUOPC),true)
+  ifeq ($(FORTRAN_COMPILER),GNU_GFORTRAN)
+    ifeq ($(PARALLEL_MPI),NONE)
+      DIRLIB_ESMF= Linux.gfortran.64.mpiuni.default
+    else
+      DIRLIB_ESMF= Linux.gfortran.64.openmpi.default
+    endif
+  else ifeq ($(FORTRAN_COMPILER),INTEL)
+    ifeq ($(PARALLEL_MPI),NONE)
+      DIRLIB_ESMF= Linux.intel.64.mpiuni.default
+    else
+      DIRLIB_ESMF= Linux.intel.64.intelmpi.default
+    endif
+  endif
+  ESMF_MKFILE    = $(ESMFDIR)/lib/lib0/$(DIRLIB_ESMF)/esmf.mk
+  ifneq ("$(wildcard $(ESMF_MKFILE))","")
+    include $(ESMF_MKFILE)
+  else
+    $(error cannot find esmf mk file $(ESMF_MKFILE))
+  endif
+  ifneq ($(ESMF_VERSION_MAJOR),8)
+    $(error your installed esmf version $(ESMF_VERSION_MAJOR) is not tested with shyfem ...)
+  endif
+  INCLUDE += -I$(ESMFDIR)/mod/modO/$(DIRLIB_ESMF)
+endif
+
 #--------------------	LIBS	-----------------------
 
 LIBUTIL         = util
