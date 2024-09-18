@@ -17,7 +17,7 @@ sim=mm_lgr_01
 CleanFiles $sim.hydro.shy 
 
 Run $sim
-freq=16
+freq=8
 
 CheckFiles $sim.hydro.shy
 PlotMapVel apn_vel

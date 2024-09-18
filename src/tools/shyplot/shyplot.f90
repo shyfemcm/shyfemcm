@@ -81,6 +81,7 @@
 ! 27.06.2024    ggu     bug fix calling shympi_init, read basin first
 ! 10.09.2024    ggu     bug fix avoiding divide by zero in mod(irec,ifreq) /= 0
 ! 16.09.2024    ggu     same as above also for lgr plotting
+! 18.09.2024    ggu     new parameters bcolplot, lgrcol, lgrtyp, plot age
 !
 ! notes :
 !
@@ -233,6 +234,7 @@
         integer                         :: iwhat
         integer                         :: ierr
 	integer				:: lgmean
+	integer				:: lgrtyp
         logical				:: btraj = .false.
         logical				:: blgmean = .false.
 
@@ -248,7 +250,7 @@
         real rmin,rmax,flag
         integer nt
 	character*80 line
-        logical bhasbasin
+        logical bhasbasin,bcolplot
 	integer isphe
         real getpar
         double precision dgetpar
@@ -287,6 +289,7 @@
 
         btraj  = nint(getpar('lgrtrj')) == 1
         lgmean  = nint(getpar('lgmean'))
+        lgrtyp  = nint(getpar('lgrtyp'))	!type of plot
         blgmean = lgmean > 0
 
 	!--------------------------------------------------------------
@@ -443,6 +446,8 @@
                idstore(nn_old+1:n_init) = idn(1:n_new)
             end if
           end if
+
+	  !write(6,*) 'gguu lagr: ',n_init,n_new,ttn(200)
 
 	  !----------------------------------------------------------------
 	  ! skip lgr data block --> exites particles
@@ -613,6 +618,10 @@
           end if
 
           !----------------------------------------------------------------
+          ! the following work only if bcompress==.false.
+          !----------------------------------------------------------------
+
+          !----------------------------------------------------------------
           ! set vertical level to plot with option layer in shyplot
           !----------------------------------------------------------------
 
@@ -625,12 +634,32 @@
             aplot = 0
             np = 0.
             do i = 1,n
+	      if( ida(i) /= i ) stop 'error stop shyplot: id/=i'
               l = lba(i)
               if ( l == layer ) then
                 aplot(i) = 1
                 np = np + 1
               end if
             end do
+          end if
+
+          !----------------------------------------------------------------
+          ! set ra to time passed after insert
+          !----------------------------------------------------------------
+
+          if ( lgrtyp == 0 ) then
+	    bcolplot = .false.
+          else if ( lgrtyp == 1 ) then
+            aplot = 1
+            do i = 1,n_act
+	      if( ida(i) /= i ) stop 'error stop shyplot: id/=i'
+              ra(i) = dtime - ttstore(i)
+            end do
+	    bcolplot = .true.
+	    !write(6,*) 'gguu time passed: ',aplot(200),dtime,ttstore(200)
+	  else
+	    write(6,*) 'lgrtyp = ',lgrtyp
+	    stop 'error stop shyplot: lgrtyp not allowed'
           end if
 
 	  !----------------------------------------------------------------
@@ -675,7 +704,7 @@
             call plo_traj(n,nt,irec,lgmean,xall,yall,rall,aplot, &
      &              n_typ,xmll,ymll,rmll,mplot,'trajectories')
           else
-            call plo_part(n,xa,ya,ra,aplot,'particles')
+            call plo_part(n,xa,ya,ra,aplot,bcolplot,'particles')
           end if
 
 
@@ -1645,7 +1674,7 @@
 
         implicit none
 
-        integer icolor
+        integer icolor,icoltab,lgrcol
         real getpar
 	logical has_color_table
 
@@ -1654,17 +1683,18 @@
 
 	if( has_color_table() ) call putpar('icolor',8.)
 
+        lgrcol  = getpar('lgrcol')		!default color for lgr bodies
         icolor = nint(getpar('icolor'))
-        call set_color_table( icolor )
-        call set_default_color_table( icolor )
+	icoltab = icolor
+        call set_color_table( icoltab )
+        call set_default_color_table( icoltab )
+	call set_default_color( lgrcol )
 
 	if( bverb ) call write_color_table
 
         end
 
 !***************************************************************
-
-!*****************************************************************
 
         subroutine allocate_2d_arrays
 

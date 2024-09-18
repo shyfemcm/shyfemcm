@@ -220,12 +220,13 @@ $end
 $color lagrangian
 	legcol = 'Particles'
 	ndccol = -1  faccol = 1.
-	icolor = 0
+	icolor = 1
 	colmin = 0.2  colmax = 0.9
-	valmin = 1   valmax = 500
-	niso = 50  nisomx = 50  nctick = 5
-$end
+	valmin = 10   valmax = 200000
+	niso = 50  nisomx = 50  nctick = 3
+	lgrcol = 0.    lgrtyp = 1
 	ipllog = 1
+$end
 
 $color 
 	legcol = 'unknown'

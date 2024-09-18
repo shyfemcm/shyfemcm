@@ -71,6 +71,7 @@ OBJ  = \
 	color_utils.o \
 	flood.o \
 	queue.o \
+	reallocate.o \
 
 OBSOLETE = \
 	expand.o \
@@ -146,12 +147,12 @@ depend:
 	@-$(MAKEDEPEND) -moddir=$(MODDIR) *.f90 
 
 check:
-	~/shyfem/fem3d/bin/compile.sh -single *.f90
-	~/shyfem/fem3d/bin/compile.sh *.f90
-	~/shyfem/fem3d/bin/usemod.pl *.f90
+	$(FEMBIN)/fem3d/compile.sh -single *.f90
+	$(FEMBIN)/fem3d/compile.sh *.f90
+	$(FEMBIN)/fem3d/usemod.pl *.f90
 
 check_utils:
-	@~/shyfem/fem3d/bin/check_utils.sh $(ALL)
+	@$(FEMBIN)/fem3d/check_utils.sh
 
 list:
 	pwd; ls

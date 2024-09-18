@@ -54,6 +54,7 @@
 !  18.12.2018	ggu	changed VERS_7_5_52
 !  21.05.2019	ggu	changed VERS_7_5_62
 !  20.09.2022	ggu	in colauto() use absolute value in case val is constant
+!  18.09.2024	ggu	new parameter rfaccol
 ! 
 ! **********************************************************
 ! 
@@ -110,7 +111,8 @@
 
         character*80, save :: colfil = ' '
 
-	integer, save :: icol_def = 1	 !default color table (gray values)
+	integer, save :: icoltab_def = 1 !default color table (gray values)
+	real, save :: color_def = 0. !default color 
 
 !==========================================================
 	end module color
@@ -346,7 +348,7 @@
 	integer icolor
 	real colmin,colmax,dval
 	real amin,amax
-        real fact,val,fdec,eps
+        real fact,rfact,val,fdec,eps
         integer ndec,idec,ipllog
 	real rfiso,ddval
 
@@ -507,6 +509,9 @@
 
           ndec = getpar('ndccol')
           fact = getpar('faccol')
+          rfact = getpar('rfaccol')
+	  if( fact == 1. .and. rfact /= 1. ) fact = 1. / rfact
+	  
           val = fact * dval
           fdec = log10(val)
           if( fdec .lt. 0. ) then

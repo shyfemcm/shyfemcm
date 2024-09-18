@@ -15,7 +15,7 @@ $title
 $end
      
 $para
-        itanf = '2009-01-01'    itend = '2009-01-02'
+        itanf = '2009-01-01'    itend = '2009-01-03'
         idt = '30s'  
         idtout = '3h'
         idtext = '300s'
@@ -32,7 +32,7 @@ $end
 
 $lagrg
 	ilagr = 1   nbdymax = 100000
-	idtlgr = 3600     idtl = 0
+	idtlgr = 3600     idtl = 86400
 	nbdy = 1000
 $end
 

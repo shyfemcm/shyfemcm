@@ -485,7 +485,7 @@
 !*******************************************************************
 !*******************************************************************
 
-	subroutine lgr_insert_particle(i,id,z,ie,lb,ty,c,tin)
+	subroutine lgr_insert_particle_to_be_deleted(i,id,z,ie,lb,ty,c,tin)
 
 	use mod_lagrange
 
@@ -689,7 +689,7 @@
 
 ! outputs particles to file
 !
-! if body has exited the element number is negativ (last element)
+! if body has exited the element its number is negativ (last element)
 ! once it has been written to output with negative ie, it is set to 0
 
 ! mcg : 15/10/2015 write in v.5  hl = effective absolute depth 

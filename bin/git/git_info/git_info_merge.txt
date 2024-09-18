@@ -20,3 +20,9 @@ git switch DestinationBranch
 git pull
 git checkout --merge SourceBranch file1 file2
 
+# new branch and push to remote
+
+git br -av					# see all branches
+git push --set-upstream origin new_branch       # pushes new branch to origin
+git push --set-upstream myfork new_branch       # pushes new branch to myfork
+

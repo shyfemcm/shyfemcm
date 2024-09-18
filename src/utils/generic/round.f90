@@ -95,6 +95,7 @@
 ! 13.03.2019	ggu	changed VERS_7_5_61
 ! 21.05.2019	ggu	changed VERS_7_5_62
 ! 13.02.2020	ggu	rounding routines in this extra file copied
+! 18.09.2024	ggu	changes in logvals() to honor nticks
 !
 !*************************************************************
 
@@ -494,7 +495,7 @@
 
 !************************************************************
 
-        subroutine logvals(amin,amax,idiv,ntk,rval,aval)
+        subroutine logvals(amin,amax,idiv,ntk,ntks,rval,aval)
 
 ! computes log scale values
 
@@ -503,17 +504,18 @@
         real amin,amax          !min/max of scale
         integer idiv            !division of log scale (see below) [1-3]
         integer ntk             !dimension of aval (in), values in aval (out)
+	integer ntks		!desired ticks (0 for automatic)
         real rval(ntk)          !relative x values (return)
         real aval(ntk)          !log scale values (return)
 
         real a1,a2,aa1,aa2,val
-        real a,aaux,fact,r
+        real a,aaux,fact,r,rmin,rmax,x
         real aamin,aamax
         integer ia1,ia2,i
         integer ndim,ip
 
-        real eps
-        parameter (eps=0.1)
+	logical, parameter :: bdebug = .false.
+        real, parameter :: eps=0.1
 
 ! idiv must be in [1-3]
 ! idiv = 1      1 10 100
@@ -524,6 +526,7 @@
         if( amin .le. 0. .or. amin .ge. amax ) goto 97
 
         ndim = ntk
+	if( ntks == 1 ) ntks = 2
 
         a1 = alog10(amin)
         a2 = alog10(amax)
@@ -547,15 +550,17 @@
         aamin = 10.**ia1
         aamax = 10.**ia2
 
+	if( bdebug ) then
         write(6,*) 'log general: ',idiv,ndim,ia2-ia1+1
         write(6,*) 'log min: ',amin,a1,aa1,ia1
         write(6,*) 'log max: ',amax,a2,aa2,ia2
         write(6,*) 'log aa: ',aamin,aamax
+	end if
 
         ip = 0
         a = aamin
         do while( a <= aamax )
-          write(6,*) ip,a
+          if( bdebug ) write(6,*) ip,a
           do i=1,idiv
             fact = i
             if( i .eq. 3 ) fact = 5
@@ -573,9 +578,32 @@
         end do
         ntk = ip
 
+	if( bdebug ) then
         write(6,*) 'log scale: ',ntk
         write(6,*) (aval(i),i=1,ntk)
         write(6,*) (rval(i),i=1,ntk)
+	end if
+
+	if( ntks <= 0 ) return
+
+	rmin = rval(1)
+	rmax = rval(ntk)
+
+	do i=1,ntks
+	  r = rmin + (i-1)*(rmax-rmin)/(ntks-1)
+	  x = a1 + r*(a2-a1)
+	  a = 10**x
+	  aval(i) = a
+	  rval(i) = r
+	end do
+
+	ntk = ntks
+
+	if( bdebug ) then
+        write(6,*) 'new log scale: ',ntk
+        write(6,*) (aval(i),i=1,ntk)
+        write(6,*) (rval(i),i=1,ntk)
+	end if
 
         return
    97   continue
