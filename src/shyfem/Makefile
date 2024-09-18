@@ -41,8 +41,11 @@ ifeq ($(NUOPC),true)
       DIRLIB_ESMF= Linux.intel.64.intelmpi.default
     endif
   endif
-  ESMF_MKFILE    = $(ESMFDIR)/lib/lib0/$(DIRLIB_ESMF)/esmf.mk
+  ESMF_MKFILE = $(ESMFDIR)/lib/libO/$(DIRLIB_ESMF)/esmf.mk
+  NUOPCMOD    = ocean_shyfem
+  NUOPCOBJ    = nuopc_shyfem_cap.o
   ifneq ("$(wildcard $(ESMF_MKFILE))","")
+    $(find esmf mk file $(ESMF_MKFILE))
     include $(ESMF_MKFILE)
   else
     $(error cannot find esmf mk file $(ESMF_MKFILE))
@@ -210,23 +213,44 @@ nothing:
 
 #------------------------------------------------------------------------
 
-.PRECIOUS: %.o
+%.o: %.f
+	$(F77) $(FFLAGS) $(INCLUDE) -c $<
 
-libnuopc: $(LIBFNU)
-
-$(LIBFNU): shyfem_subs.o $(OBJ)
-	@echo "creating static library with shyfem and nuopc cap layer"
-	ar rvs $(LIBFNU) $?
-
-nuopc: libnuopc
+%.o: %.f90
+	$(F77) $(FFLAGS) $(INCLUDE) -c $<
 
 #------------------------------------------------------------------------
 
-%.o: %.f 
-	$(F77) $(FFLAGS) $(INCLUDE) -c $< 
+nuopc_info:
+	@echo "esmf version         : $(ESMF_VERSION_STRING)"
+	@echo "esmf compiler        : $(ESMF_F90COMPILER)"
+	@echo "esmf linker          : $(ESMF_F90LINKER)"
+	@echo "esmf compile options : $(ESMF_F90COMPILEOPTS)"
+	@echo "esmf link options    : $(ESMF_F90LINKOPTS)"
 
-%.o: %.f90 
-	$(F77) $(FFLAGS) $(INCLUDE) -c $< 
+nuopc_clean:
+	-rm -f *.mk
+
+nuopc_shyfem.mk:
+	@echo "creating nuopc makefile fragment"
+	@echo "# ESMF self-describing build dependency makefile fragment for SHYFEM model" > $@
+	@echo >> $@
+	@echo "SHYFEM_DEP_FRONT     = "$(NUOPCMOD)                      >> $@
+	@echo "SHYFEM_DEP_INCPATH   = `pwd`/"$(DIRLIB)/mod              >> $@
+	@echo "SHYFEM_DEP_CMPL_OBJS = `pwd`/"$(NUOPCOBJ)                >> $@
+	@echo "SHYFEM_DEP_LINK_OBJS = `pwd`/"$(LIBFNUOPC)               >> $@
+	@echo "SHYFEM_DEP_SHRD_PATH = `pwd`/"$(DIRLIB) $(METISDIR)/lib  >> $@
+	@echo "SHYFEM_DEP_SHRD_LIBS = "$(LIBGOTM) $(LIBFEM) $(LIBMETIS) >> $@
+
+libnuopc: $(LIBFNU)
+
+$(LIBFNU): $(NUOPCOBJ) shyfem_subs.o $(OBJ)
+	@echo "creating static library with shyfem and nuopc cap layer"
+	ar rvs $(LIBFNU) $?
+
+nuopc: nuopc_info nuopc_clean nuopc_shyfem.mk libnuopc
+
+#------------------------------------------------------------------------
 
 clean:
 	-rm -f *.o
