@@ -109,8 +109,8 @@ C_COMPILER = GNU_GCC
 PARALLEL_OMP = false
 #PARALLEL_OMP = true
 
-PARALLEL_MPI = NONE
-#PARALLEL_MPI = NODE
+#PARALLEL_MPI = NONE
+PARALLEL_MPI = NODE
 #PARALLEL_MPI = ELEM
 
 ##############################################
@@ -138,10 +138,11 @@ PARALLEL_MPI = NONE
 #
 ##############################################
 
-PARTS = NONE
-#PARTS = METIS
+#PARTS = NONE
+PARTS = METIS
 #PARTS = PARMETIS
-METISDIR = 
+#METISDIR = 
+METISDIR = /home/georg/lib/metis
 #METISDIR = /usr/local
 #METISDIR = $(HOME)/lib/metis
 #METISDIR = $(LD_LIBRARY_PATH)
@@ -257,8 +258,8 @@ GPU=NONE
 #
 ##############################################
 
-NETCDF = false
-#NETCDF = true
+#NETCDF = false
+NETCDF = true
 #NETCDFDIR =
 
 ##############################################

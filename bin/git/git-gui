@@ -31,18 +31,28 @@ gui="YES"			#use gui for diffing
 showdate="NO"			#use gui for diffing
 tool=""
 if [ "$1" = "-h" -o "$1" = "-help" ]; then
-  echo "Usage: git-gui [-h|-help] [-nogui|-showdate|-tool tool]"
+  echo "Usage: git-gui [-h|-help] [-nogui|-showdate|-tool tool] [branch]"
   exit 0
 elif [ "$1" = "-nogui" ]; then
   gui="NO"
+  shift
 elif [ "$1" = "-showdate" ]; then
   showdate="YES"
+  shift
 elif [ "$1" = "-tool" ]; then
   tool="-tool $2"
+  shift
+  shift
 fi
+branch=$1
 
 #files=$( git s|grep modified:|sed -e 's/\s*modified:\s*//'|sed -e 's/#//' )
-files=$( git s --short | grep -E '^.M' | sed -E 's/^.M\s*//' )
+if [ -z "$branch" ]; then
+  files=$( git s --short | grep -E '^.M' | sed -E 's/^.M\s*//' )
+else
+  echo "diffing with branch $branch"
+  files=$( git-diff -quiet $branch )
+fi
 
 if [ $showdate = "YES" ]; then
   ShowDate
@@ -90,7 +100,7 @@ do
     file=${array[$choice]}
     echo "diffing $file"
     if [ $gui = "YES" ]; then
-      git-diff $tool $file
+      git-diff $tool $branch $file
     else
       git diff $file | less
     fi

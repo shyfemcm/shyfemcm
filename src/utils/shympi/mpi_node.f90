@@ -80,9 +80,9 @@
 ! 12.03.2024    ggu     double routines for shympi_g2l_array_fix_ird/2d_d
 ! 13.03.2024    ggu     bmpi_skip introduced
 ! 05.04.2024    ggu     shympi_check_3d_elem_r(), nghost_max_global
-! 06.09.2024    lrp     nuopc-compliant
 ! 28.08.2024    ggu     new variable bmpi_debug_txt
 ! 06.09.2024    ggu     better debug info for shympi_check_array()
+! 06.09.2024    lrp     nuopc-compliant
 !
 !******************************************************************
 
@@ -507,10 +507,15 @@
 	!-----------------------------------------------------
 	! initializing
 	!-----------------------------------------------------
-	if (present(b_want_mpi_init)) then	!in some case you let other initialize the MPI for SHYFEM
-	  binit = b_want_mpi_init		!an intialization flag is passed from the interface
+
+	!in some cases you let other initialize MPI for SHYFEM
+	!an intialization flag is passed from the interface
+	!the default value is true: always initialize MPI
+
+	if (present(b_want_mpi_init)) then
+	  binit = b_want_mpi_init
 	else
-	  binit = .true.			!the default value is true: always initialize MPI
+	  binit = .true.
 	endif
 
 	call shympi_init_internal(my_id,n_threads,binit)

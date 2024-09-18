@@ -183,6 +183,11 @@
 ! 10.05.2024    ggu     set spherical just after basin read
 ! 06.09.2024    lrp     nuopc-compliant
 !
+! notes :
+!
+! all routines have been shifted to shyfem_subs.f90
+! this is the main routine driver for running shyfem
+!
 !*****************************************************************
 
 	program shyfem
