@@ -63,6 +63,7 @@ LIBSHYUTIL      = shyutil
 LIBSHYMPI       = shympi
 LIBSHYUTILMPI   = shyutilmpi
 LIBSPARSKIT     = sparskit
+
 LIBNUOPC        = nuopc
  
 LIBLUT  = -L$(LIBDIR) -l$(LIBUTIL)
@@ -89,8 +90,9 @@ LIBL += $(LIBLGOTM) $(LIBG_METIS) $(LIBG_PETSC) $(LIBLSP)
 #--------------------	GOTM	-----------------------
 
 ifeq ($(GOTM),true)
-  LIBLGOTM      = -L $(LIBDIR) -lgotm
-  LIBFGOTM      = $(LIBDIR)/libgotm.a
+  LIBGOTM       = gotm
+  LIBLGOTM      = -L $(LIBDIR) -l$(LIBGTOM)
+  LIBFGOTM      = $(LIBDIR)/lib$(LIBGOTM).a
 endif
 
 #---------------------	SOLVER	-----------------------
@@ -115,7 +117,8 @@ ifeq ($(SOLVER),PETSC)
 endif
 
 ifeq ($(PARTS),METIS)
-  LIBG_METIS = -L$(METISDIR)/lib -lmetis
+  LIBMETIS   = metis
+  LIBG_METIS = -L$(METISDIR)/lib -l$(LIBMETIS)
 endif
 
 #------------------------------------------------------------------------
@@ -236,11 +239,11 @@ nuopc_shyfem.mk:
 	@echo "# ESMF self-describing build dependency makefile fragment for SHYFEM model" > $@
 	@echo >> $@
 	@echo "SHYFEM_DEP_FRONT     = "$(NUOPCMOD)                      >> $@
-	@echo "SHYFEM_DEP_INCPATH   = `pwd`/"$(DIRLIB)/mod              >> $@
+	@echo "SHYFEM_DEP_INCPATH   = `pwd`/"$(LIBDIR)/mod              >> $@
 	@echo "SHYFEM_DEP_CMPL_OBJS = `pwd`/"$(NUOPCOBJ)                >> $@
-	@echo "SHYFEM_DEP_LINK_OBJS = `pwd`/"$(LIBFNUOPC)               >> $@
-	@echo "SHYFEM_DEP_SHRD_PATH = `pwd`/"$(DIRLIB) $(METISDIR)/lib  >> $@
-	@echo "SHYFEM_DEP_SHRD_LIBS = "$(LIBGOTM) $(LIBFEM) $(LIBMETIS) >> $@
+	@echo "SHYFEM_DEP_LINK_OBJS = `pwd`/"$(LIBFNU)                  >> $@
+	@echo "SHYFEM_DEP_SHRD_PATH = `pwd`/"$(LIBDIR) $(METISDIR)/lib  >> $@
+	@echo "SHYFEM_DEP_SHRD_LIBS = "$(LIBSHYUTILMPI) $(LIBSHYMPI) $(LIBSHYUTIL) $(LIBUTIL) $(LIBSPARSKIT) $(LIBGOTM) $(LIBMETIS) >> $@
 
 libnuopc: $(LIBFNU)
 
