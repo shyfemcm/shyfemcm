@@ -311,9 +311,14 @@
 	  batm = iatm > 0			!have ocean-atmosphere coupling
 	  call qflux_compute(bqflux)		!have qflux file
 
-	  if( .not. bqflux .and. .not. batm) icall = -1
-	  if( .not. bheat .and. .not. bice) icall = -1
-	  if( icall < 0 ) return		!consistency check: exit if no files, no atm-oce coupling, no heat fluxes, no ice model 
+	  if( .not. bqflux .and. .not. batm ) icall = -1
+	  if( .not. bheat .and. .not. bice ) icall = -1
+
+	  !---------------------------------------------------------
+	  ! exit if no files, no atm-oce coupling, no heat fluxes, no ice model 
+	  !---------------------------------------------------------
+
+	  if( icall < 0 ) return
 
 !$OMP CRITICAL
 	  write(6,*) 'qflux3d routines are active'

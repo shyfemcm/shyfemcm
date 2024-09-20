@@ -320,7 +320,11 @@
 	integer nodes(1)
 	logical batm
 
-	batm = iatm == 1 .and. icall_nuopc == 1	!if first ocean timestep of coupled atm-oce timestep
+!------------------------------------------------------------------
+! batm is true if first ocean timestep of coupled atm-oce timestep
+!------------------------------------------------------------------
+
+	batm = iatm == 1 .and. icall_nuopc == 1
 
 	if( icall .lt. 0 ) return
 
@@ -655,7 +659,7 @@
 
 	  if ( iatm == 1 ) then			!no file but coupling atm-oce
             if( iwtype .ne. 0 .and. iwtype .ne. 2 ) then
-              write(6,*) 'atmosphere-ocean coupling but the wind type is not available'
+              write(6,*) 'atmosphere-ocean coupling but no wind type'
               write(6,*) 'set iwtype = 0 or iwtype = 2'
 	      stop 'error stop meteo_set_wind_data: iwtype'
             end if
