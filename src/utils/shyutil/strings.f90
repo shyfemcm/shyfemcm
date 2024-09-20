@@ -62,6 +62,7 @@
 ! 17.04.2020	ggu	new routine strings_meteo_convention()
 ! 18.05.2020	ggu	do not attach direction to file name
 ! 22.04.2021	ggu	new routines checking and populating strings
+! 20.09.2024	ggu	new variable skin temperature (14)
 !
 ! contents :
 !
@@ -1114,6 +1115,7 @@
 	call strings_add_new('salinity',11)
 	call strings_add_new('temperature',12)
 	call strings_add_new('density',13)
+	call strings_add_new('skin temperature',14)
 	call strings_add_new('oxygen',15)
 	call strings_add_new('discharge',16)
 	call strings_add_new('rms velocity',18)
@@ -1213,6 +1215,7 @@
 	call strings_set_short(11,'salt')
 	call strings_set_short(12,'temp')
 	call strings_set_short(13,'rho')
+	call strings_set_short(14,'tskin')
 	call strings_set_short(15,'oxy')
 	call strings_set_short(16,'disch')
 	call strings_set_short(18,'rms')

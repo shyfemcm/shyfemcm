@@ -128,6 +128,10 @@
 	logical, save :: bdebug_nc = .false.
 	logical, save :: bquiet_nc = .false.
 
+	logical, save :: b_use_cf_role = .false.
+	character*80, save :: cf_convention = 'CF-1.6'
+	character*80, save :: ugrid_convention = 'UGRID-1.0'
+
 	INTERFACE
 	subroutine nc_handle_err(errcode,string)
 	integer errcode
@@ -698,7 +702,7 @@
 
 	what = 'cf_role'
 	text = 'mesh_topology'
-	!call nc_define_attr(ncid,what,text,varid)
+	if( b_use_cf_role ) call nc_define_attr(ncid,what,text,varid)
 
 	what = 'long_name'
 	text = 'topology data of 2D unstructured mesh'
@@ -725,7 +729,7 @@
 
 	what = 'cf_role'
 	text = 'face_node_connectivity'
-	!call nc_define_attr(ncid,what,text,varid)
+	if( b_use_cf_role ) call nc_define_attr(ncid,what,text,varid)
 
 	what = 'long_name'
 	text = 'Maps every triangular face to its three corner nodes'
@@ -2643,8 +2647,8 @@
 	varid = NF_GLOBAL
 
 	what = 'Conventions'
-	text = 'CF-1.6'
-	if( bugrid ) text = 'CF-1.6, UGRID-1.0'
+	text = cf_convention
+	if( bugrid ) text = trim(cf_convention)//','//trim(ugrid_convention)
 	call nc_define_attr(ncid,what,text,varid)
 
 	what = 'title'
