@@ -70,7 +70,7 @@ links:
 	@$(FEMBIN)/symlink $(FEMBIN) $(EXES)
 
 shyparts: $(ALL) $(LIBF) shyparts.o
-	$(LINKER) $(LFLAGS) $(ALL) $@.o $(LIBL) -o $@
+	$(LINKER) $(FFLAGS) $(ALL) $@.o $(LIBL) -o $@
 
 #--------------------------------------------- clean
 
