@@ -91,7 +91,7 @@ LIBL += $(LIBLGOTM) $(LIBG_METIS) $(LIBG_PETSC) $(LIBLSP)
 
 ifeq ($(GOTM),true)
   LIBGOTM       = gotm
-  LIBLGOTM      = -L $(LIBDIR) -l$(LIBGTOM)
+  LIBLGOTM      = -L $(LIBDIR) -l$(LIBGOTM)
   LIBFGOTM      = $(LIBDIR)/lib$(LIBGOTM).a
 endif
 
