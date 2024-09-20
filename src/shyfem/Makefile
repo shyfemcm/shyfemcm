@@ -63,7 +63,6 @@ LIBSHYUTIL      = shyutil
 LIBSHYMPI       = shympi
 LIBSHYUTILMPI   = shyutilmpi
 LIBSPARSKIT     = sparskit
-
 LIBNUOPC        = nuopc
  
 LIBLUT  = -L$(LIBDIR) -l$(LIBUTIL)
@@ -81,17 +80,14 @@ LIBFUM  = $(LIBDIR)/lib$(LIBSHYUTILMPI).a
 LIBLSP  = -L$(LIBDIR) -l$(LIBSPARSKIT)
 LIBFSP  = $(LIBDIR)/lib$(LIBSPARSKIT).a
 
+LIBLNU  = -L$(LIBDIR) -l$(LIBNUOPC)
 LIBFNU  = $(LIBDIR)/lib$(LIBNUOPC).a
-
-LIBF = $(LIBFUM) $(LIBFMP) $(LIBFSU) $(LIBFUT) $(LIBFSP)
-LIBL = $(LIBLUM) $(LIBLMP) $(LIBLSU) $(LIBLUT) $(LIBLGOTM) $(LIBG_METIS)
-LIBL += $(LIBLGOTM) $(LIBG_METIS) $(LIBG_PETSC) $(LIBLSP)
 
 #--------------------	GOTM	-----------------------
 
 ifeq ($(GOTM),true)
   LIBGOTM       = gotm
-  LIBLGOTM      = -L $(LIBDIR) -l$(LIBGTOM)
+  LIBLGOTM      = -L $(LIBDIR) -l$(LIBGOTM)
   LIBFGOTM      = $(LIBDIR)/lib$(LIBGOTM).a
 endif
 
@@ -116,10 +112,23 @@ ifeq ($(SOLVER),PETSC)
 	mod_petsc_system.o simsys_petsc.o
 endif
 
+#---------------------	METIS	-----------------------
+
 ifeq ($(PARTS),METIS)
   LIBMETIS   = metis
   LIBG_METIS = -L$(METISDIR)/lib -l$(LIBMETIS)
 endif
+
+#---------------------	all libs	-----------------------
+
+LIBF = $(LIBFUM) $(LIBFMP) $(LIBFSU) $(LIBFUT) $(LIBFSP)
+LIBL = $(LIBLUM) $(LIBLMP) $(LIBLSU) $(LIBLUT) $(LIBLGOTM) $(LIBG_METIS)
+LIBL += $(LIBLGOTM) $(LIBG_METIS) $(LIBG_PETSC) $(LIBLSP)
+
+#$(info ------------------------------ )
+#$(info LIBL = $(LIBL) )
+#$(info LIBLGOTM = $(LIBLGOTM) )
+#$(info ------------------------------ )
 
 #------------------------------------------------------------------------
 
@@ -188,6 +197,7 @@ OBJ = system_matrix.o \
 	turbulence.o nohydro.o explicit.o hydrodynamic.o \
 	custom_admin.o poisson.o \
       flux.o extra.o boxes.o check.o \
+      shyfem_subs.o \
 
 OBSOLETE = \
 	bnd_aux.o bnd_dynamic.o tsfile.o bnd_admin.o \
@@ -202,7 +212,7 @@ default: fem
 fem: shyfem links nothing
 
 #$(EXES_target): $(MODULES) $(OBJ) $(LIBF) shyfem.o
-shyfem: $(MODULES) $(OBJ) $(LIBF) shyfem.o shyfem_subs.o
+shyfem: $(MODULES) $(OBJ) $(LIBF) shyfem.o
 	 $(F77) $(FFLAGS) $(INCLUDE) $(LFLAGS) $^ $(LIBL) -o shyfem 
 
 links:
@@ -247,7 +257,7 @@ nuopc_shyfem.mk:
 
 libnuopc: $(LIBFNU)
 
-$(LIBFNU): $(NUOPCOBJ) shyfem_subs.o $(OBJ)
+$(LIBFNU): $(NUOPCOBJ) $(OBJ)
 	@echo "creating static library with shyfem and nuopc cap layer"
 	ar rvs $(LIBFNU) $?
 
