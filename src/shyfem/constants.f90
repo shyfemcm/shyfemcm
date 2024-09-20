@@ -85,6 +85,7 @@
 ! 13.03.2019	ggu	changed VERS_7_5_61
 ! 21.05.2019	ggu	changed VERS_7_5_62
 ! 10.05.2024	ggu	read and process also grd files
+! 17.09.2024	lrp&ggu	call sleep(1) after writing basin
 !
 !************************************************************************
 
@@ -331,6 +332,7 @@
 	if( breadgrd ) then		!read grd and produce bas file
 	  if( bwrite ) write(6,*) 'reading grid file: ',trim(grid_file)
 	  call handle_grid_read(grid_file,bquiet,bsilent)
+	  call sleep(1)
 	end if
 
 	if( bwrite ) write(6,*) 'preparing to read bas file: ',trim(basin_file)

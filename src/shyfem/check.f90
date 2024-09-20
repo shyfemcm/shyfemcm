@@ -111,6 +111,7 @@
 ! 02.04.2023	ggu	only master writes to iuinfo
 ! 15.03.2024	ggu	new routine debug_write_var()
 ! 10.09.2024	ggu&lrp	bug fix: do not compute mass balance on domain boundary
+! 10.09.2024    lrp     relax check_values
 !
 !*************************************************************
 
@@ -251,7 +252,7 @@
         levdbg = nint(getpar('levdbg'))
 
         if( levdbg .ge. 5 ) call check_fem
-        if( levdbg .ge. 2 ) call check_values
+        if( levdbg .ge. 3 ) call check_values
 
 	!call mimafem('panic')
 

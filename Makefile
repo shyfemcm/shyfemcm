@@ -119,6 +119,9 @@ default: shyfem
 
 all: shyfem doc
 
+nuopc: fem
+	@$(FEMBIN)/recursivemake $@ $(FEMSRC)/shyfem
+
 fem: shyfem
 shyfem: libmod
 	cd src; make

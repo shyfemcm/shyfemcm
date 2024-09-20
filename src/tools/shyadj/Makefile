@@ -64,7 +64,7 @@ links:
 	@$(FEMBIN)/symlink $(FEMBIN) $(EXES)
 
 shyadj: $(ALL) $(LIBF) shyadj.o
-	$(LINKER) $(LFLAGS) $(ALL) $@.o $(LIBL) -o $@
+	$(LINKER) $(FFLAGS) $(ALL) $@.o $(LIBL) -o $@
 
 #--------------------------------------------- clean
 

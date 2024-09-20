@@ -95,6 +95,8 @@
 ! 09.07.2022	ggu	kspecial for special output
 ! 05.09.2022	ggu	debug output and use ustar in ice computation
 ! 09.05.2023    lrp     introduce top layer index variable
+! 06.09.2024    lrp     nuopc-compliant
+! 13.09.2024    lrp     iatm and coupling with atmospheric model
 !
 ! notes :
 !
@@ -177,6 +179,7 @@
         use basin, only : xgv,ygv  
         use mod_hydro_print  
 	use heat_const
+	use meteo_forcing_module, only : iatm
 
 	implicit none
 
@@ -263,6 +266,7 @@
 	logical, save :: bwind = .false.
 	logical, save :: bice = .false.
 	logical, save :: bheat = .false.
+	logical, save :: batm = .false.
 	logical, save :: bqflux = .false.
 
 !---------------------------------------------------------
@@ -299,13 +303,21 @@
 	  hdecay = getpar('hdecay')
 	  botabs = getpar('botabs')
 
+	  call set_iheat(iheat)
+
 	  call shyice_init
 	  call shyice_is_active(bice)		!ice model is active
 	  bheat = iheat > 0			!we have to compute heat fluxes
+	  batm = iatm > 0			!have ocean-atmosphere coupling
 	  call qflux_compute(bqflux)		!have qflux file
 
-	  if( .not. bqflux ) icall = -1
+	  if( .not. bqflux .and. .not. batm ) icall = -1
 	  if( .not. bheat .and. .not. bice ) icall = -1
+
+	  !---------------------------------------------------------
+	  ! exit if no files, no atm-oce coupling, no heat fluxes, no ice model 
+	  !---------------------------------------------------------
+
 	  if( icall < 0 ) return
 
 !$OMP CRITICAL
@@ -584,6 +596,7 @@
 !	  ---------------------------------------------------------
 !	  evap is in [kg/(m**2 s)] -> convert it to [m/s]
 !	  evap is normally positive -> we are loosing mass
+!	  if batm is true -> evapv is diagnostic (already in rain)
 !	  ---------------------------------------------------------
 
 	  evap = evap / rhow			!evaporation in m/s

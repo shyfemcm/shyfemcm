@@ -31,6 +31,7 @@
 ! 16.02.2019	ggu	changed VERS_7_5_60
 ! 21.05.2019	ggu	changed VERS_7_5_62
 ! 03.06.2022	ggu	specific humidity added
+! 06.09.2024	lrp	new parameter icall_nuopc
 
 !**************************************************************************
 
@@ -41,8 +42,8 @@
 ! metrain and evapv are in [m/s]
 ! metrain is read from file in [mm/day] and converted to [m/s]
 
-
         integer, private, save  :: nkn_meteo = 0
+	integer, save           :: icall_nuopc = 0 !coupled mode: flag first ts
 
         real, allocatable, save :: wxv(:)	! wind velocity in x [m/s]
         real, allocatable, save :: wyv(:)	! wind velocity in y [m/s]

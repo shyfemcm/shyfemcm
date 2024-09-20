@@ -162,6 +162,7 @@
 ! 06.11.2019	ggu	femtime eliminated
 ! 16.02.2020	ggu	femtime finally eliminated
 ! 18.03.2020	ggu	admrst() substituted with rst_write_restart()
+! 13.09.2024    lrp     iatm and coupling with atmospheric model
 !
 !************************************************************
 
@@ -439,6 +440,8 @@
                 else if(section.eq.'sedtr')then         !sediment
                         call readsed
                 else if(section.eq.'waves')then         !wave
+                        call nrdins(section)
+                else if(section.eq.'atm')then           !atmosphere
                         call nrdins(section)
                 else if(section.eq.'mudsec')then        !fluid mud
                         call readmud			!ARON

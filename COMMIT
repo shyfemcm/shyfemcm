@@ -1,5 +1,31 @@
 ============================================================
 
+Fri Sep 20 16:49:46 CEST 2024
+
+New version 8_0_8
+
+
+============================================================
+
+Fri Sep 20 16:48:28 CEST 2024
+
+NUOPC final framework
+
+ LOG                           |  23 +++++++++++++++++++++++
+ RELEASE_NOTES                 |   5 +++++
+ Rules.make                    |  34 ----------------------------------
+ bin/check/test_compile.sh     |   5 +++++
+ bin/getheader.pl              |   5 ++++-
+ bin/revision/revision_last.sh |   4 +++-
+ bin/revision/revisionlog.pl   |   2 +-
+ docs/final/shyfem.pdf         | Bin 334915 -> 334915 bytes
+ src/shyfem/Makefile           |  11 +++++++++--
+ src/utils/shyutil/version.f90 |  11 ++++++-----
+ var/rules/Rules.dist          |   2 +-
+ 11 files changed, 57 insertions(+), 45 deletions(-)
+
+============================================================
+
 Fri Sep 13 16:35:28 CEST 2024
 
 changed implementation for OMP

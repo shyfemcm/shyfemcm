@@ -1,4 +1,9 @@
 
+20.09.2024	VERS_8_0_8	NUOPC final framework edition
+
+	all nuopc patches from Luca integrated
+	bug fix for intel when reading grd file (too fast)
+
 12.09.2024	VERS_8_0_7	NUOPC-start edition
 
 	relatively stable release
