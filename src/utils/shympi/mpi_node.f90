@@ -1710,7 +1710,7 @@
 	aux = 0.
 	aux(1:ni) = val(1:ni)
 
-	call shympi_allgather_r_internal(no,no,val,vals)
+	call shympi_allgather_r_internal(no,no,aux,vals)
 
 	end subroutine shympi_gather_array_2d_r
 
