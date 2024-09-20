@@ -1,4 +1,27 @@
 
+20.09.2024
+
+! ./src/shyfem/iostr.f90:
+! 13.09.2024    lrp     iatm and coupling with atmospheric model
+!
+! ./src/shyfem/heat_admin2.f90:
+! 13.09.2024    lrp     iatm and coupling with atmospheric model
+!
+! ./src/shyfem/constants.f90:
+! 17.09.2024	lrp&ggu	call sleep(1) after writing basin
+!
+! ./src/shyfem/def_para.f90:
+! 13.09.2024    lrp     new parameter iatm
+!
+! ./src/shyfem/shypre_subs.f90:
+! 12.09.2024    ggu     flush bas file before closing (intel bug)
+!
+! ./src/shyfem/meteo_forcing.f90:
+! 13.09.2024    lrp     iatm and coupling with atmospheric model
+!
+! ./src/utils/shyutil/version.f90:
+! 12.09.2024	ggu	version 8.0.7   NUOPC-start edition
+
 25.09.2023
 
 c ./fem3d/subuti.f:

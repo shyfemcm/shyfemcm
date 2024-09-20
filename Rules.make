@@ -340,40 +340,6 @@ FLUID_MUD = false
 #FLUID_MUD = true
 
 ##############################################
-# ESMF-NUOPC
-##############################################
-#
-# The model can be coupled with other earth
-# components, e.g. atmospheric, hydrological
-# or land models. This is realized thanks to
-# the ESMF integrated system which must be
-# already compiled and installed on your
-# machine. If NUOPC is true, the code can be
-# compiled as a library with with entry points
-# that are coded in a "cap layer",
-# see ESMF-NUOPC jargon. The cap layer
-# contains subroutines to initialize, run and
-# finalize SHYFEM. The cap layer is called by
-# the coupler, that lunches the SHYFEM from
-# "outside".
-#
-# Please specify if NUOPC is active and the
-# base directory where ESMF library has been
-# installed.
-#
-# The call:
-# >> make nuopc
-# generates the NUOPC-compliant SHYFEM library
-# and produce a Makefile fragment call
-# "src/shyfem/nuop_shyfem.mk" which exchanges
-# useful variables to compile the coupler.
-#
-##############################################
-
-NUOPC = false
-ESMFDIR = /path/to/esmf-8.6.0
-
-##############################################
 # end of user defined parameters and flags
 ##############################################
 

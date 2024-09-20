@@ -262,6 +262,11 @@ SetCompiler()
 # start routine
 #--------------------------------------------------------------------
 
+if [ ! -f VERSION ]; then
+  echo "must be in base directory to run this script... aborting"
+  exit 1
+fi
+
 regress="NO"
 [ "$1" = "-regress" ] && regress="YES"
 dry_run="NO"

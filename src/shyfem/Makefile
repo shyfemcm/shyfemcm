@@ -335,7 +335,7 @@ cleanall: clean
 ../../lib/mod/mod_sediment.mod: sedim_admin.o
 ../../lib/mod/mod_sediment_para.mod: sedim_admin.o
 ../../lib/mod/mod_sedtrans05.mod: sedim_util.o
-../../lib/mod/mod_shyfem.mod: shyfem.o
+../../lib/mod/mod_shyfem.mod: shyfem_subs.o
 ../../lib/mod/mod_sinking.mod: sinking.o
 ../../lib/mod/mod_subset.mod: subset.o
 ../../lib/mod/mod_system.mod: system_matrix.o
@@ -346,6 +346,8 @@ cleanall: clean
 ../../lib/mod/mod_test_zeta.mod: test_zeta.o
 ../../lib/mod/mod_ts.mod: ts.o
 ../../lib/mod/mod_waves.mod: waves.o
+../../lib/mod/ocean_shyfem.mod: nuopc_shyfem_cap.o
+../../lib/mod/omp_admin.mod: openmp_admin.o
 ../../lib/mod/poisson.mod: poisson.o
 ../../lib/mod/semi_implicit.mod: iostr.o
 ../../lib/mod/shyice_model.mod: ice.o
@@ -585,6 +587,7 @@ gotm_aux.o: ../../lib/mod/basin.mod ../../lib/mod/levels.mod \
 heat_admin2.o: ../../lib/mod/basin.mod \
 		../../lib/mod/heat_const.mod \
 		../../lib/mod/levels.mod \
+		../../lib/mod/meteo_forcing_module.mod \
 		../../lib/mod/mod_debug.mod \
 		../../lib/mod/mod_hydro_print.mod \
 		../../lib/mod/mod_meteo.mod \
@@ -781,6 +784,9 @@ nudge.o: ../../lib/mod/basin.mod ../../lib/mod/intp_fem_file.mod \
 		../../lib/mod/mod_layer_thickness.mod \
 		../../lib/mod/mod_nudging.mod \
 		../../lib/mod/shympi.mod 
+nuopc_shyfem_cap.o: ../../lib/mod/esmf.mod \
+		../../lib/mod/mod_shyfem.mod \
+		../../lib/mod/nuopc.mod 
 offline_data.o: ../../lib/mod/basin.mod ../../lib/mod/levels.mod \
 		../../lib/mod/mod_diff_visc_fric.mod \
 		../../lib/mod/mod_hydro.mod \
@@ -833,7 +839,8 @@ sedim_admin.o: ../../lib/mod/basin.mod ../../lib/mod/evgeom.mod \
 		../../lib/mod/mod_sedtrans05.mod \
 		../../lib/mod/mod_ts.mod \
 		../../lib/mod/mod_waves.mod ../../lib/mod/para.mod 
-shyfem.o: ../../lib/mod/basin.mod ../../lib/mod/befor_after.mod \
+shyfem_subs.o: ../../lib/mod/basin.mod \
+		../../lib/mod/befor_after.mod \
 		../../lib/mod/clo.mod \
 		../../lib/mod/coordinates.mod \
 		../../lib/mod/evgeom.mod \
