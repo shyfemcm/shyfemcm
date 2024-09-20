@@ -168,7 +168,8 @@ echo
 echo "Checking revision log ..."
 echo 
 
-files=`find . -name "*.[cfFh] *.f90"`
+#files=`find . -name "*.[cfFh] *.f90"`
+files=`find . -name "*.f90"`
 $bindir/revisionlog.sh -after $comparedate $files > $tmpfile
 if [ -f $version_file ]; then
   $bindir/revisionlog_adjust.pl $tmpfile $version_file > $tmpfile2
