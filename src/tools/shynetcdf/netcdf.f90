@@ -128,8 +128,12 @@
 	logical, save :: bdebug_nc = .false.
 	logical, save :: bquiet_nc = .false.
 
-	logical, save :: b_use_cf_role = .false.
-	character*80, save :: cf_convention = 'CF-1.6'
+! if b_use_cf_role == .true. then cf_convention must be CF-1.4
+! CF-1.6 does not understand cf_role (-> error)
+! CF-1.11 should resolve this problem, but there is no CF checker yet
+
+	logical, save :: b_use_cf_role = .true.
+	character*80, save :: cf_convention = 'CF-1.4'
 	character*80, save :: ugrid_convention = 'UGRID-1.0'
 
 	INTERFACE
