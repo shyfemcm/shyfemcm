@@ -241,8 +241,6 @@
 	integer, save :: idwind,idheat,idrain,idice
 
 	integer, save :: ndbgfreq = 0			!debug output
-	double precision, save :: itmmet = -1		!minimum meteo output
-	double precision, save :: idtmet = 0		!dt of meteo output
 	double precision, save, private :: da_out(4) = 0
 	double precision, save, private :: da_met(4) = 0
 
@@ -585,7 +583,6 @@
 	if( da_met(4) < 0 ) return
 
 	if( da_met(4) == 0 ) then
-	  !call set_output_frequency_d(itmmet,idtmet,da_met)
 	  call init_output_d('itmmet','idtmet',da_met)
 	  if( .not. has_output_d(da_met) ) da_met(4) = -1	!no output
 	  if( da_met(4) < 0 ) return
@@ -627,14 +624,12 @@
 	  call shy_write_scalar_record2d(id,dtime,21,wyv)
 	  call shy_write_scalar_record2d(id,dtime,28,metws)
 	  call shy_write_scalar_record2d(id,dtime,20,ppv)
-	call shympi_barrier
 	end if
 	if( bheat ) then
           call shy_write_scalar_record2d(id,dtime,22,metrad)
           call shy_write_scalar_record2d(id,dtime,23,mettair)
           call shy_write_scalar_record2d(id,dtime,24,methum)
           call shy_write_scalar_record2d(id,dtime,25,metcc)
-	call shympi_barrier
 	end if
 	if( brain ) then
 	  allocate(maux(nkn))
@@ -652,6 +647,8 @@
 	  write(6,*) 'number of variables written differs from nvar'
 	  stop 'error stop output_meteo_data: nvar /= nvar_act'
 	end if
+
+	call shy_sync(id)
 
 	end subroutine output_meteo_data
 

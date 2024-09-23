@@ -720,15 +720,16 @@
 	icmax = 0
 	imap = 0
 
-	!write(6,*) 'initializing color table from file...'
-
 	call getfnm('coltab',cname)
-	if( cname == ' ' ) return
 	call getfnm('colfil',cfile)
-	if( cfile == ' ' ) return
 
-	write(6,*) 'initializing color table from file: ' &
-     &		,trim(cfile),'  ',trim(cname)
+	!write(6,*) 'colfil = ',trim(cfile)
+	!write(6,*) 'coltab = ',trim(cname)
+
+	if( cname == ' ' .or. cfile == ' ' ) return
+
+	write(6,*) 'initializing color table ',trim(cname) &
+     &		,' from file ',trim(cfile)
 
 	call read_colormap(cfile,cname,imap,coldim,coltab,berr)
 	if( berr ) then
