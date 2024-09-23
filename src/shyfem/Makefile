@@ -180,7 +180,7 @@ OBJ = system_matrix.o \
       arrays.o closing.o diffusion_admin.o bcvel.o \
       floodfill.o topological_admin.o coo_matrix.o nudge.o \
       turbine.o initialize.o \
-      bnd_routines.o concentration_omp.o histogram.o \
+      bnd_routines.o concentration_omp.o \
       concentration.o baroclinic.o def_para.o \
       f_vol.o mkdistance.o conz_admin.o \
       water_ren_time.o atoxi.o toxical.o \

@@ -2352,6 +2352,8 @@
 
 ! writes histogram info about stability index
 
+	use mod_histo
+
         implicit none
 
         integer it
@@ -2359,22 +2361,13 @@
         integer ilhkv(nkn)
         real cwrite(nlvddi,nkn)
 
-        integer ndim
-        parameter(ndim=11)
-
-        integer nbin
-        real aux
         integer k,l,lmax
 
-        integer ic(ndim+1)
-        real bins(ndim)
-        save bins
-        data bins /1.,2.,5.,10.,15.,20.,30.,40.,50.,75.,100./
+        integer, parameter :: nbin = 11
+        integer ic(nbin+1)
+        real, save :: bins(nbin) = (/1.,2.,5.,10.,15.,20.,30.,40.,50.,75.,100./)
 
-        aux = 0.
-        nbin = ndim
-
-        call histo_init(nbin,aux,aux,bins)
+        call histo_init(nbin,bins)
 
         do k=1,nkn
           lmax = ilhkv(k)

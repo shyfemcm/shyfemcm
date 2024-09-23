@@ -445,7 +445,21 @@
 
 ! |itmoff|	Start time for writing to file OFF,
 !		the file containing data for offline runs.
+
 	call addpar('itmoff',-1.)
+
+! |idtmet|, |itmmet|	Time step and start time for writing meteo
+!			variables read from file. 
+! |imetout|		This parameters indicates what meteo parameters
+!			should be output. For wind set it to 1, for heat 10,
+!			for rain 100, and for ice 1000. 
+!			Combinations are possible, e.g., 11 writes wind 
+!			and heat data, and 1111 writes all available data
+!			to the file. (Default 0)
+
+	call addpar('idtmet',0.)
+	call addpar('itmmet',-1.)
+	call addpar('imetout',0.)
 
 !c------------------------------------------------------------------------
 
@@ -1163,15 +1177,20 @@
 ! computed scalars (temperature, salinity, generic concentration) to file.
 !
 ! |idtcon|, |itmcon|	Time step and start time for writing to file
-!			conz.shy (concentration) and ts.shy (temperature and
-!			salinity).
-! |irho|	Flag if the density is also written together with T/S.
-!		A value different from 0 writes the density to file.
-!		(Default 0)
+!			|.conz.shy| (concentration) and
+!			|.ts.shy| (temperature and salinity).
+! |irho|		Flag to indicate if the density is also written 
+!			together with T/S. A value different from 0 
+!			writes the density to file. (Default 0)
+! |iskin|		Flag to indicate if the skin temperature is written
+!			to file |.tskin.shy|.
+!			A value different from 0 writes the 
+!			skin temperature to file. (Default 0)
 
 	call addpar('idtcon',0.)	!time step for output
 	call addpar('itmcon',-1.)	!minimum time for output
-	call addpar('irho',0.)		!write rho ?
+	call addpar('irho',0.)		!write rho
+	call addpar('iskin',0.)		!write skin temperature
 
 ! DOCS	END
 

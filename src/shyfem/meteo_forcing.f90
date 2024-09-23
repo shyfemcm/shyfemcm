@@ -106,6 +106,7 @@
 ! 02.04.2023    ggu     only master writes to iuinfo
 ! 06.09.2024    lrp     nuopc-compliant
 ! 13.09.2024    lrp     iatm and coupling with atmospheric model
+! 22.09.2024    ggu     read meteo output times and from str file
 !
 ! notes :
 !
@@ -563,25 +564,55 @@
 
 	subroutine output_meteo_data
 
+	use basin
 	use mod_meteo
+	use shympi
 
 	integer			:: id
 	integer			:: nvar_act
+	integer, save		:: imetout
 	double precision 	:: dtime
-	integer, parameter	:: nvar = 1
+	integer, save		:: nvar = 0
 	logical, save 		:: b2d = .true.
+	logical, save		:: bwind,bheat,brain,bice
+        real, parameter		:: zconv = 86400. / 1000. !convert m/s to mm/day
+	real, allocatable	:: maux(:)
 
 	logical has_output_d,next_output_d
+	integer bit10_extract_value
+	real getpar
 
 	if( da_met(4) < 0 ) return
 
 	if( da_met(4) == 0 ) then
-	  call set_output_frequency_d(itmmet,idtmet,da_met)
+	  !call set_output_frequency_d(itmmet,idtmet,da_met)
+	  call init_output_d('itmmet','idtmet',da_met)
 	  if( .not. has_output_d(da_met) ) da_met(4) = -1	!no output
+	  if( da_met(4) < 0 ) return
+
+	  imetout = getpar('imetout')	!what type of meteo output
+	  bwind = ( bit10_extract_value(imetout,1) > 0 )
+	  bheat = ( bit10_extract_value(imetout,2) > 0 )
+	  brain = ( bit10_extract_value(imetout,3) > 0 )
+	  bice  = ( bit10_extract_value(imetout,4) > 0 )
+	  bwind = bwind .and. iff_has_file(idwind)
+	  bheat = bheat .and. iff_has_file(idheat)
+	  brain = brain .and. iff_has_file(idrain)
+	  bice  = bice  .and. iff_has_file(idice)
+
+	  nvar = 0
+	  if( bwind ) nvar = nvar + 4
+	  if( bheat ) nvar = nvar + 4
+	  if( brain ) nvar = nvar + 1
+	  if( bice  ) nvar = nvar + 1
+	  if( nvar == 0 ) da_met(4) = -1
 	  if( da_met(4) < 0 ) return
 
           call shyfem_init_scalar_file('meteo',nvar,b2d,id)
           da_met(4) = id
+
+	  write(6,*) 'meteo output: ',imetout,nvar,bwind,bheat,brain,bice,my_id
+
 	end if
 
         if( .not. next_output_d(da_met) ) return
@@ -590,8 +621,30 @@
         id = nint(da_met(4))
 
 	call shy_reset_nvar_act(id)
-        call shy_write_scalar_record2d(id,dtime,85,metice)
-	!call shy_write_scalar_record2d(id,dtime,28,metws)
+
+	if( bwind ) then
+	  call shy_write_scalar_record2d(id,dtime,21,wxv)
+	  call shy_write_scalar_record2d(id,dtime,21,wyv)
+	  call shy_write_scalar_record2d(id,dtime,28,metws)
+	  call shy_write_scalar_record2d(id,dtime,20,ppv)
+	call shympi_barrier
+	end if
+	if( bheat ) then
+          call shy_write_scalar_record2d(id,dtime,22,metrad)
+          call shy_write_scalar_record2d(id,dtime,23,mettair)
+          call shy_write_scalar_record2d(id,dtime,24,methum)
+          call shy_write_scalar_record2d(id,dtime,25,metcc)
+	call shympi_barrier
+	end if
+	if( brain ) then
+	  allocate(maux(nkn))
+	  maux = metrain * zconv
+          call shy_write_scalar_record2d(id,dtime,26,maux)
+	end if
+	if( bice ) then
+          call shy_write_scalar_record2d(id,dtime,85,metice)
+	end if
+
 	call shy_get_nvar_act(id,nvar_act)
 
 	if( nvar /= nvar_act ) then
@@ -1356,9 +1409,9 @@
         if( bnoheat ) then              !no heat
 	  !nothing to be done
         else
-	  call meteo_convert_temperature(n,mettair)
-	  call meteo_convert_cloudcover(n,metcc)
-	  call meteo_convert_vapor(ihtype,n,metaux,mettair,ppv,methum)
+	  call meteo_convert_temperature(n,mettair)	!kelvin -> C
+	  call meteo_convert_cloudcover(n,metcc)	!% -> [0-1]
+	  call meteo_convert_vapor(ihtype,n,metaux,mettair,ppv,methum) !rhum
 
 	  !if( ihtype == 1 ) methum = metaux	!done in meteo_convert_vapor()
 	  !if( ihtype == 2 ) metwbt = metaux
@@ -1445,7 +1498,7 @@
 	  val = aux(i)
 	  ta = tav(i)
 	  pp = pav(i)/100.			!pressure in mbar
-	  if( mode .eq. 1 ) then		!val is humidity
+	  if( mode .eq. 1 ) then		!val is relative humidity
 	      rh = val
 	  else if( mode .eq. 2 ) then		!val is wet bulb
 	    call wb2rh(ta,pp,val,rh)

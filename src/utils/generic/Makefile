@@ -72,6 +72,7 @@ OBJ  = \
 	flood.o \
 	queue.o \
 	reallocate.o \
+	histogram.o \
 
 OBSOLETE = \
 	expand.o \
