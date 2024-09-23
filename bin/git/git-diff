@@ -21,6 +21,7 @@ file="NO"
 prog=""
 nowhite="NO"
 zip="NO"
+quiet="NO"
 tool=""
 
 tools="tkdiff xxdiff kdiff3 vimdiff"
@@ -39,6 +40,7 @@ FullHelp()
   Help
 
   echo "  git-diff                  diff stats between actual and last commit"
+  echo "  git-diff branch           diff stats between this and given branch"
   echo "  git-diff tag              diff stats between actual and tag"
   echo "  git-diff tag1 tag2        diff stats between tag1 and tag2"
   echo "  git-diff file             difference of file to last commit"
@@ -51,6 +53,7 @@ FullHelp()
   echo "    -zip                   zip all changed files to changed.zip"
   echo "    -tool tool             use routine tool for comparing"
   echo "    -nogui                 use diff instead of graphical tool"
+  echo "    -quiet                 only print file names"
   echo "  tag can be origin to see diff between fetch and pull"
   echo "  tag can be HEAD-# to see diff between last # tag (HEAD-0 is actual)"
   echo "  possible tools for comparing: $tools"
@@ -99,9 +102,6 @@ GetTagFromHead()
 
 #-------------------------------------------------
 
-branch=`git branch | grep '*' | sed -e 's/^\* //'`
-echo "We are on branch: $branch"
-
 while [ -n "$1" ]
 do
    case $1 in
@@ -112,14 +112,18 @@ do
 	-zip)		zip="YES";;
         -tool)          tool=$2; shift;;
         -nogui)         tool=diff;;
+        -quiet)         quiet="YES";;
         --*)            options="$options $1";;
         *)              HandleFiles $1;;
   esac
   shift
 done
 
+branch=`git branch | grep '*' | sed -e 's/^\* //'`
+[ $quiet = "NO" ] && echo "We are on branch: $branch"
+
 SetDiffTool
-echo "difftool used: $tool"
+[ $quiet = "NO" ] && echo "difftool used: $tool"
 
 if [ -z "$files" ]; then
   Help
@@ -131,8 +135,12 @@ else
   options="$options --stat"
 fi
 
-echo "what:$what  tool:$tool  options:$options  files: $files"
+[ $quiet = "NO" ] && echo "what:$what  tool:$tool  options:$options  files: $files"
 
+if [ $quiet = "YES" ]; then
+  :
+fi
+  
 #-------------------------------------------------
 
 if [ $file = "YES" ]; then		# we do compare one file, not only tags
@@ -146,7 +154,11 @@ elif [ $zip = "YES" ]; then
   zip changed.zip $zipfiles
   echo "files have been zipped to changed.zip"
 else
-  git $what $options $files
+  if [ $quiet = "NO" ]; then
+    git $what $options $files
+  else # this pops the last line and the stats of differences
+    git $what $options $files | head -n -1 | sed -e 's/|.*//'
+  fi
 fi
 
 #-------------------------------------------------

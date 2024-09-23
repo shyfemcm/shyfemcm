@@ -218,7 +218,7 @@ $color residence time
 $end
 
 $color lagrangian
-	legcol = 'Particles'
+	legcol = 'Age of Particles [s]'
 	ndccol = -1  faccol = 1.
 	icolor = 1
 	colmin = 0.2  colmax = 0.9

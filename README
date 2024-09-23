@@ -136,6 +136,7 @@ make help	gives help on available make targets
 make fem	compiles everything
 make doc	makes documentation in femdoc (manual)
 make all	compiles (shyfem) and makes documents (doc)
+make nuopc      compiles a shyfem nuopc-compliant library for coupled applications
 make clean	deletes objetc and executable files in all subdirectories
 make cleanall	as clean, but cleans also libraries
 

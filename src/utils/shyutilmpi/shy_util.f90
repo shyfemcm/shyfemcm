@@ -69,6 +69,7 @@
 ! 28.04.2023    ggu     update function calls for belem
 ! 07.06.2023    ggu     array simpar introduced
 ! 20.07.2023    lrp     new paramter nzadapt
+! 22.09.2024    ggu     bug fix in shy_check_nvar() - use also dtime0
 !
 ! contents :
 !
@@ -823,7 +824,7 @@
 	integer ftype
 	integer ivar,n,m,lmax,ivar_first
 	integer nkn,nel,npr,nlv
-	double precision dtime
+	double precision dtime,dtime0
 	character*80 string
 
 	if( id <= 0 ) return
@@ -847,21 +848,22 @@
 	  call shy_skip_record(id,dtime,ivar,n,m,lmax,ierr)
 	  if( ierr /= 0 ) exit
 	  nrec = nrec + 1
-	  if( ivar == ivar_first ) exit
-	  if( ivar_first == -999 ) ivar_first = ivar
+	  if( ivar == ivar_first .and. dtime /= dtime0 ) exit	!new time record
+	  if( ivar_first == -999 ) then
+	    dtime0 = dtime
+	    ivar_first = ivar
+	  end if
 	  if( ivar < 0 ) cycle
 	  irec = irec + 1
 	end do
 
-	!write(6,*) 'ffffffff ',irec,nrec,ierr,ivar_first
+	dtime0 = dtime
 	if( ierr /= 0 ) then
 	  call shy_back_one(id,ierr)	!this skips over EOF
-	  !write(6,*) 'back1',ierr
 	  if( ierr /= 0 ) goto 97
 	end if
 
 	call shy_back_records(id,nrec,ierr)
-	!write(6,*) 'back2',ierr
 	if( ierr /= 0 ) goto 97
 	if( irec == nvar ) return
 

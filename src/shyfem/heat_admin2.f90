@@ -95,6 +95,9 @@
 ! 09.07.2022	ggu	kspecial for special output
 ! 05.09.2022	ggu	debug output and use ustar in ice computation
 ! 09.05.2023    lrp     introduce top layer index variable
+! 06.09.2024    lrp     nuopc-compliant
+! 13.09.2024    lrp     iatm and coupling with atmospheric model
+! 21.09.2024    ggu     new handle_skin() for handling skin temperature output
 !
 ! notes :
 !
@@ -177,6 +180,7 @@
         use basin, only : xgv,ygv  
         use mod_hydro_print  
 	use heat_const
+	use meteo_forcing_module, only : iatm
 
 	implicit none
 
@@ -263,6 +267,7 @@
 	logical, save :: bwind = .false.
 	logical, save :: bice = .false.
 	logical, save :: bheat = .false.
+	logical, save :: batm = .false.
 	logical, save :: bqflux = .false.
 
 !---------------------------------------------------------
@@ -299,13 +304,21 @@
 	  hdecay = getpar('hdecay')
 	  botabs = getpar('botabs')
 
+	  call set_iheat(iheat)
+
 	  call shyice_init
 	  call shyice_is_active(bice)		!ice model is active
 	  bheat = iheat > 0			!we have to compute heat fluxes
+	  batm = iatm > 0			!have ocean-atmosphere coupling
 	  call qflux_compute(bqflux)		!have qflux file
 
-	  if( .not. bqflux ) icall = -1
+	  if( .not. bqflux .and. .not. batm ) icall = -1
 	  if( .not. bheat .and. .not. bice ) icall = -1
+
+	  !---------------------------------------------------------
+	  ! exit if no files, no atm-oce coupling, no heat fluxes, no ice model 
+	  !---------------------------------------------------------
+
 	  if( icall < 0 ) return
 
 !$OMP CRITICAL
@@ -584,6 +597,7 @@
 !	  ---------------------------------------------------------
 !	  evap is in [kg/(m**2 s)] -> convert it to [m/s]
 !	  evap is normally positive -> we are loosing mass
+!	  if batm is true -> evapv is diagnostic (already in rain)
 !	  ---------------------------------------------------------
 
 	  evap = evap / rhow			!evaporation in m/s
@@ -605,8 +619,10 @@
 	end if
 
 !---------------------------------------------------------
-! special output
+! skin temperature and special output
 !---------------------------------------------------------
+
+	call handle_skin(dtime,tws)
 
 	call shyice_write_output
 
@@ -732,6 +748,49 @@
    98	continue
 	write(6,*) k,l,qs,qsbottom,qrad,albedo,tm,tnew
 	stop 'error stop check_heat2: Nan found'
+	end
+
+!*****************************************************************************
+
+	subroutine handle_skin(dtime,tws)
+
+! handles output of skin temperature
+
+	use basin
+
+	implicit none
+
+	double precision dtime
+	real tws(nkn)
+
+	integer, parameter :: nvar = 1
+	logical, parameter :: b2d = .true.
+	double precision, save :: da_out(4)
+	integer, save :: icall = 0
+	integer id,iskin
+
+	logical has_output_d,next_output_d
+	real getpar
+
+	if( icall < 0 ) return
+
+	if( icall == 0 ) then
+	  icall = -1
+	  iskin = nint(getpar('iskin'))
+	  if( iskin == 0 ) return			!no skin output wanted
+          call init_output_d('itmcon','idtcon',da_out)
+          if( .not. has_output_d(da_out) ) return	!has no skin output
+          call shyfem_init_scalar_file('tskin',nvar,b2d,id)
+          da_out(4) = id
+	  icall = 1
+	end if
+
+        if( next_output_d(da_out) ) then
+          id = nint(da_out(4))
+          call shy_write_scalar_record(id,dtime,14,1,tws)
+          call shy_sync(id)
+        end if
+
 	end
 
 !*****************************************************************************

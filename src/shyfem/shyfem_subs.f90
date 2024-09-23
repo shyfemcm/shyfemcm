@@ -183,16 +183,18 @@
 ! 10.05.2024    ggu     set spherical just after basin read
 ! 06.09.2024    lrp     nuopc-compliant
 !
+!*****************************************************************
+!
 ! notes :
 !
-! all routines have been shifted to shyfem_subs.f90
-! this is the main routine driver for running shyfem
+! MPI calls
 !
-!*****************************************************************
+! call shympi_init(bmpirun)
+!   call shympi_alloc_global(nkn,nel,nen3v,ipv,ipev)
+! call shympi_setup			!sets up partitioning of basin
+!
+!----------------------------------------------------------------
 
-	program shyfem
-	call shyfem_main
-	end program
 
 !================================================================
 	module mod_shyfem
@@ -267,14 +269,14 @@
 	subroutine shyfem_main
 	use mod_shyfem
 	implicit none
-	call shyfem_initialize
+	call shyfem_initialize(.true.)
 	call shyfem_run(zero)
 	call shyfem_finalize
 	end subroutine shyfem_main
 
 !*****************************************************************
 
-	subroutine shyfem_initialize
+	subroutine shyfem_initialize(mpi_init)
 
 !-----------------------------------------------------------
 ! start of program
@@ -284,6 +286,7 @@
 
 	implicit none
 
+	logical, intent(in) :: mpi_init
 	logical bquiet,bsilent
 
 	call cpu_time(time1)
@@ -318,7 +321,7 @@
 	call cstfile(strfile,bquiet,bsilent)	!read STR and basin
 	call set_spherical			!this has to be done here
 
-	call shympi_init(.true.)
+	call shympi_init(.true., mpi_init)
 	call setup_omp_parallel
 
 	call cpu_time(time3)
@@ -544,8 +547,11 @@
 
 	double precision dtmax		!run to this time
 
-	dtmax = dtend
-	if( dtstep > 0. ) dtmax = dtime + dtstep
+	dtmax = dtend			!stand-alone mode
+	if( dtstep > 0. ) then
+	  dtmax = dtime + dtstep	!nuopc mode
+	  icall_nuopc = 1		!need to know if it is first shyfem timestep of the larger coupled timestep
+	end if
 
 	call trace_point('starting shyfem_run')
 
@@ -623,6 +629,8 @@
 	   bfirst = .false.
 
 	   call test_zeta_write
+
+	   icall_nuopc = 0		!the next timsteps icall_nuopc is false
 
 	end do
 
@@ -851,7 +859,7 @@
 
 	!call ev_init(nel)
 
-	!call mod_tvd_init(nel)
+	call mod_tvd_init(nel)
 
 	write(6,*) '2D arrays allocated: ',nkn,nel,ngr
 
@@ -997,3 +1005,855 @@
 	end
 
 !*****************************************************************
+!*****************************************************************
+!*****************************************************************
+
+	subroutine handle_debug_output(dtime)
+
+! the output should be checked with check_debug
+
+	use mod_debug
+	use shympi_debug
+	use shympi
+
+	implicit none
+
+	double precision dtime
+
+	logical bdebug,blast
+	integer id,ios
+	integer, save :: iunit = 0
+	integer, save :: icall = 0
+	double precision, save :: da_out(4) = 0.
+	character*80 file
+
+	logical has_output_d, next_output_d
+
+	if( icall < 0 ) return
+
+	call shympi_barrier
+
+        if( icall == 0 ) then
+	  write(6,*) 'setting up handle_debug_output',my_id
+          if( shympi_is_master() ) then
+            call init_output_d('itmdbg','idtdbg',da_out)
+	    call assure_initial_output_d(da_out)
+            if( has_output_d(da_out) ) then
+	      call shy_make_output_name('.dbg',file)
+	      iunit = 200
+              call find_unit(iunit)
+              if( iunit == 0 ) goto 98
+              open(iunit,file=file,status='unknown',form='unformatted'  &
+     &                          ,iostat=ios)
+              if( ios /= 0 ) goto 99
+	      call set_debug_unit(iunit)
+	      call shympi_write_debug_unit(iunit)
+              !call info_output_d('debug_output',da_out)
+              icall = 1
+	    else
+              icall = -1
+            end if
+	  end if
+	  call shympi_bcast(icall)
+	  call shympi_bcast(da_out)
+	  !write(6,*) 'after broadcast: ',icall,da_out
+	  !write(6,*) 'finished setting up handle_debug_output',my_id
+        end if
+
+        if( next_output_d(da_out) ) then
+	  call shympi_debug_output(dtime)
+	  !call debug_output(dtime)		!serial
+	end if
+
+	call is_time_last(blast)
+	if( blast .and. shympi_is_master() ) then
+	  if( iunit > 0 ) then
+	    flush(iunit)
+	    close(iunit)
+	    iunit = 0
+	  end if
+	end if
+
+	call shympi_barrier
+
+	return
+   98	continue
+        stop 'error stop handle_debug_output: cannot get unit number'
+   99	continue
+        stop 'error stop handle_debug_output: cannot open file'
+	end
+
+!*****************************************************************
+
+	subroutine shympi_debug_output(dtime)
+
+	use shympi
+	use shympi_debug
+	use mod_depth
+	use mod_ts
+	use mod_hydro_baro
+	use mod_hydro_vel
+	use mod_hydro_print
+	use mod_hydro
+	use mod_internal
+	use mod_conz
+	use levels
+	use basin
+	use mod_layer_thickness
+	use mod_diff_visc_fric
+	use mod_bound_dynamic
+	use tide
+
+	implicit none
+
+	double precision dtime,dtime1
+	real, allocatable :: aux3d(:,:)
+
+	integer, save :: icall = 0
+
+	if( shympi_is_master() ) then
+	  write(6,*) 'shympi_debug_output: writing records'
+	end if
+
+	call shympi_write_debug_init		!can be called more than once
+
+	if( icall == 0 ) then
+	  dtime1 = -1.
+	  call shympi_write_debug_time(dtime1)
+	  call shympi_write_debug_node('ipv',ipv)
+	  call shympi_write_debug_elem('ipev',ipev)
+	  call shympi_write_debug_node('xgv',xgv)
+	  call shympi_write_debug_node('ygv',ygv)
+	  call shympi_write_debug_elem('fcorv',fcorv)
+	  call shympi_write_debug_elem(3,'hm3v',hm3v)
+	  call shympi_write_debug_special
+	  call shympi_write_debug_final
+	end if
+
+	icall = icall + 1
+	call shympi_write_debug_time(dtime)
+
+	!call shympi_write_debug_node('rqv',rqv)
+	!call shympi_write_debug_node('rqpsv',rqpsv)
+	!call shympi_write_debug_node('rqdsv',rqdsv)
+	!call shympi_write_debug_node('mfluxv',mfluxv)
+
+	call shympi_write_debug_node('zeqv',zeqv)
+	call shympi_write_debug_node('znv',znv)
+	call shympi_write_debug_node('zov',zov)
+	call shympi_write_debug_elem(3,'zenv',zenv)
+	call shympi_write_debug_elem('unv',unv)
+	call shympi_write_debug_elem('vnv',vnv)
+	call shympi_write_debug_elem('utlnv',utlnv)
+	call shympi_write_debug_elem('vtlnv',vtlnv)
+	call shympi_write_debug_node('hdknv',hdknv)
+	call shympi_write_debug_elem('hdenv',hdenv)
+	call shympi_write_debug_node('saltv',saltv)
+	call shympi_write_debug_node('tempv',tempv)
+	call shympi_write_debug_node('rhov',rhov)
+	call shympi_write_debug_node('wlnv',wlnv)
+	call shympi_write_debug_elem('fxv',fxv)
+	call shympi_write_debug_elem('fyv',fyv)
+	if( allocated(cnv) ) then
+	  call shympi_write_debug_node('cnv',cnv)
+	end if
+
+	!call shympi_write_debug_elem(3,'zeov',zeov)
+	!call shympi_write_debug_elem('hdeov',hdeov)
+	!call shympi_write_debug_elem('utlov',utlov)
+	!call shympi_write_debug_elem('vtlov',vtlov)
+	!call shympi_write_debug_node('momentxv',momentxv)
+	!call shympi_write_debug_node('momentyv',momentyv)
+
+	allocate(aux3d(nlvdi,nkn))
+	aux3d(:,:) = visv(1:nlvdi,:)
+	call shympi_write_debug_node('visv',aux3d)
+	aux3d(:,:) = difv(1:nlvdi,:)
+	call shympi_write_debug_node('difv',aux3d)
+
+	call shympi_write_debug_node('uprv',uprv)
+	call shympi_write_debug_node('vprv',vprv)
+
+	call shympi_write_debug_final
+
+	end
+
+!*****************************************************************
+
+	subroutine shympi_write_debug_special
+
+! writes specialy constructed  arrays to check correctness of exchange
+
+	use basin
+	use levels
+	use shympi
+	use shympi_debug
+
+	implicit none
+
+	integer k,ie,l,lmax,id
+	integer, parameter :: ifact = 100000
+
+	integer, allocatable :: ian(:,:)
+	integer, allocatable :: iae(:,:)
+	real, allocatable :: ran(:,:)
+	real, allocatable :: rae(:,:)
+
+	integer ipext,ieext
+
+	allocate(ian(nlvdi,nkn),ran(nlvdi,nkn))
+	allocate(iae(nlvdi,nel),rae(nlvdi,nel))
+	ian = 0
+	iae = 0
+	ran = 0.
+	rae = 0.
+
+	do k=1,nkn
+	  lmax = ilhkv(k)
+	  do l=1,lmax
+	    id = ifact*ipext(k) + l
+	    ian(l,k) = id
+	    ran(l,k) = id
+	  end do
+	end do
+
+	do ie=1,nel
+	  lmax = ilhv(ie)
+	  do l=1,lmax
+	    id = ifact*ieext(ie) + l
+	    iae(l,ie) = id
+	    rae(l,ie) = id
+	  end do
+	end do
+
+	call shympi_write_debug_node('ian',ian)
+	call shympi_write_debug_elem('iae',iae)
+	call shympi_write_debug_node('ran',ran)
+	call shympi_write_debug_elem('rae',rae)
+
+	end
+
+!*****************************************************************
+
+	subroutine debug_output_old1(dtime)
+
+	use mod_debug
+	use mod_meteo
+	use mod_waves
+	use mod_internal
+	use mod_depth
+	use mod_layer_thickness
+	use mod_ts
+	use mod_roughness
+	use mod_diff_visc_fric
+	use mod_hydro_vel
+	use mod_hydro
+	use mod_geom_dynamic
+	use mod_area
+	use mod_bound_geom
+	use mod_bound_dynamic
+	use levels
+	use basin
+
+	implicit none
+
+	double precision dtime
+
+	write(6,*) 'debug_output: writing records'
+
+	call write_debug_time(dtime)
+
+	call write_debug_record(ilhkv,'ilhkv')
+	call write_debug_record(ilhv,'ilhv')
+	call write_debug_record(iwegv,'iwegv')
+
+	call write_debug_record(hm3v,'hm3v')
+	call write_debug_record(xgv,'xgv')
+	call write_debug_record(ygv,'ygv')
+
+	!call write_debug_record(zeov,'zeov')
+	call write_debug_record(zenv,'zenv')
+	!call write_debug_record(zov,'zov')
+	call write_debug_record(znv,'znv')
+
+	!call write_debug_record(utlov,'utlov')
+	!call write_debug_record(vtlov,'vtlov')
+	call write_debug_record(utlnv,'utlnv')
+	call write_debug_record(vtlnv,'vtlnv')
+
+        call write_debug_record(saltv,'saltv')
+        call write_debug_record(tempv,'tempv')
+	call write_debug_record(visv,'visv')
+	call write_debug_record(difv,'difv')
+	!call write_debug_record(wlov,'wlov')
+	call write_debug_record(wlnv,'wlnv')
+
+	call write_debug_record(z0bk,'z0bk')
+	call write_debug_record(tauxnv,'tauxnv')
+	call write_debug_record(tauynv,'tauynv')
+
+	!call write_debug_record(hdeov,'hdeov')
+        !call write_debug_record(hdkov,'hdkov')
+        call write_debug_record(hdenv,'hdenv')
+        call write_debug_record(hdknv,'hdknv')
+
+        call write_debug_record(hdknv,'shearf2')
+        call write_debug_record(hdknv,'buoyf2')
+
+        !call write_debug_record(fxv,'fxv')
+        !call write_debug_record(fyv,'fyv')
+        call write_debug_record(wavefx,'wavefx')
+        call write_debug_record(wavefy,'wavefy')
+        !call write_debug_record(rfricv,'rfricv')
+
+        !call write_debug_record(momentxv,'momentxv')
+        !call write_debug_record(momentyv,'momentyv')
+
+        !call write_debug_record(mfluxv,'mfluxv')
+        call write_debug_record(rhov,'rhov')
+        call write_debug_record(areakv,'areakv')
+
+	call write_debug_final
+
+	end
+
+!*****************************************************************
+
+	subroutine debug_output_old(dtime)
+
+	use mod_meteo
+	use mod_waves
+	use mod_internal
+	use mod_depth
+	use mod_layer_thickness
+	use mod_ts
+	use mod_roughness
+	use mod_diff_visc_fric
+	use mod_hydro_vel
+	use mod_hydro
+	use levels
+	use basin
+
+	implicit none
+
+	double precision dtime
+
+	write(66) dtime
+
+	call debug_output_record(3*nel,3,hm3v,'hm3v')
+	call debug_output_record(nkn,1,xgv,'xgv')
+	call debug_output_record(nkn,1,ygv,'ygv')
+
+	call debug_output_record(3*nel,3,zeov,'zeov')
+	call debug_output_record(3*nel,3,zenv,'zenv')
+	call debug_output_record(nkn,1,zov,'zov')
+	call debug_output_record(nkn,1,znv,'znv')
+
+	call debug_output_record(nlvdi*nel,nlvdi,utlov,'utlov')
+	call debug_output_record(nlvdi*nel,nlvdi,vtlov,'vtlov')
+	call debug_output_record(nlvdi*nel,nlvdi,utlnv,'utlnv')
+	call debug_output_record(nlvdi*nel,nlvdi,vtlnv,'vtlnv')
+
+        call debug_output_record(nlvdi*nkn,nlvdi,saltv,'saltv')
+        call debug_output_record(nlvdi*nkn,nlvdi,tempv,'tempv')
+	call debug_output_record((nlvdi+1)*nkn,nlvdi+1,visv,'visv')
+	call debug_output_record((nlvdi+1)*nkn,nlvdi+1,wlov,'wlov')
+	call debug_output_record((nlvdi+1)*nkn,nlvdi+1,wlnv,'wlnv')
+
+	call debug_output_record(nkn,1,z0bk,'z0bk')
+	call debug_output_record(nkn,1,tauxnv,'tauxnv')
+	call debug_output_record(nkn,1,tauynv,'tauynv')
+
+	call debug_output_record(nlvdi*nel,nlvdi,hdeov,'hdeov')
+        call debug_output_record(nlvdi*nel,nlvdi,hdenv,'hdenv')
+        call debug_output_record(nlvdi*nkn,nlvdi,hdkov,'hdkov')
+        call debug_output_record(nlvdi*nkn,nlvdi,hdknv,'hdknv')
+
+        call debug_output_record(nlvdi*nkn,nlvdi,hdknv,'shearf2')
+        call debug_output_record(nlvdi*nkn,nlvdi,hdknv,'buoyf2')
+
+        call debug_output_record(nlvdi*nel,nlvdi,fxv,'fxv')
+        call debug_output_record(nlvdi*nel,nlvdi,fyv,'fyv')
+        call debug_output_record(nlvdi*nel,nlvdi,wavefx,'wavefx')
+        call debug_output_record(nlvdi*nel,nlvdi,wavefy,'wavefy')
+        call debug_output_record(nel,1,rfricv,'rfricv')
+
+        call debug_output_record(nlvdi*nkn,nlvdi,momentxv,'momentxv')
+        call debug_output_record(nlvdi*nkn,nlvdi,momentyv,'momentyv')
+        !call debug_output_record((nlvdi+1)*nkn,nlvdi+1,vts,'vts')
+
+	write(66) 0,0
+
+	end
+
+!*****************************************************************
+
+	subroutine debug_output_record(ntot,nfirst,val,text)
+	implicit none
+	integer ntot,nfirst
+	real val(ntot)
+	character*(*) text
+	character*80 text1
+	text1=text
+	write(66) ntot,nfirst
+	write(66) text1
+	write(66) val
+	end
+
+!*****************************************************************
+!*****************************************************************
+!*****************************************************************
+
+	subroutine check_layer_depth
+
+	use mod_depth
+	use mod_layer_thickness
+	use levels
+	use basin, only : nkn,nel,ngr,mbw
+
+	implicit none
+
+	integer k,l,lmax,kmin,lmin
+	integer iunit
+	real htot,hmin
+
+	iunit = 6
+	iunit = 167
+
+	htot = maxval(hev)
+
+	hmin = htot
+	kmin = 0
+	lmin = 0
+	do k=1,nkn
+	  lmax = ilhkv(k)
+	  do l=1,lmax
+	    if( hdknv(l,k) < hmin ) then
+	      hmin = hdknv(l,k)
+	      kmin = k
+	      lmin = l
+	    end if
+	  end do
+	end do
+
+	write(iunit,*) 'hdknv: ',htot,hmin,kmin,lmin
+
+	end
+
+!*****************************************************************
+
+	subroutine check_max_depth
+
+	use mod_depth
+	use mod_layer_thickness
+	use levels
+	use basin, only : nkn,nel,ngr,mbw
+
+	implicit none
+
+	integer k,l,lmax,ie
+	real hmax
+
+	hmax = 0.
+	do ie=1,nel
+	  hmax = max(hmax,hev(ie))
+	end do
+	write(6,*) 'hmax (hev) = ',hmax
+
+	hmax = 0.
+	do k=1,nkn
+	  lmax = ilhkv(k)
+	  do l=1,lmax
+	    hmax = max(hmax,hdknv(l,k))
+	  end do
+	end do
+	write(6,*) 'hmax (hdknv) = ',hmax
+
+	end
+
+!*****************************************************************
+
+	subroutine check_special
+
+	use mod_ts
+	use levels
+	use basin, only : nkn,nel,ngr,mbw
+
+	implicit none
+
+	integer k,l,lmax
+	double precision dtime
+
+	call get_act_dtime(dtime)
+
+	do k=1,nkn
+	  lmax = ilhkv(k)
+	  do l=1,lmax
+	    if( saltv(l,k) .gt. 40. ) then
+		write(66,*) dtime,l,k,saltv(l,k)
+	    end if
+	  end do
+	end do
+
+	end
+
+!*****************************************************************
+
+	subroutine check_point(text)
+
+	use basin
+	use mod_hydro
+	use mod_bndo
+
+	implicit none
+
+	character*(*) text
+
+	integer k
+
+	return
+
+	write(6,*) '========= start of check_point ========='
+	write(6,*) text
+	call mod_bndo_info
+	call check_ilevels
+	write(6,*) 'znv: ',size(znv),minval(znv),maxval(znv)
+	write(6,*) 'zov: ',size(zov),minval(zov),maxval(zov)
+	write(6,*) '========= end of check_point ========='
+
+	end
+
+!*****************************************************************
+
+        subroutine test_forcing(dtime,dtend)
+
+        implicit none
+
+        double precision dtime,dtend
+
+        real dt
+
+	do while( dtime .lt. dtend )
+
+           call set_timestep(dtend)		!sets dt and t_act
+           call get_timestep(dt)
+	   call get_act_dtime(dtime)
+
+	   call sp111(2)		!boundary conditions
+	   
+	   call print_time			!output to terminal
+
+        end do
+
+        stop 'end of testing forcing'
+
+        end
+
+!*****************************************************************
+
+	subroutine mpi_debug(dtime)
+
+! writes debug information for ipv, ipev, etc.. to file
+
+	use basin
+	use shympi
+
+        implicit none
+
+        double precision dtime
+
+	integer nn,ne,i
+	integer, allocatable :: ipglob(:)
+	integer, allocatable :: ieglob(:)
+	real, allocatable :: rpglob(:)
+	real, allocatable :: reglob(:)
+	real, allocatable :: rp(:)
+	real, allocatable :: re(:)
+	integer, save :: icall = 0
+
+	integer ipint
+
+	icall = 1			!do not run the debug routine
+	if( icall > 0 ) return
+
+	icall = icall + 1
+
+	nn = nkn_global
+	ne = nel_global
+	allocate(ipglob(nn),ieglob(ne))
+	allocate(rpglob(nn),reglob(ne))
+	allocate(rp(nkn),re(nel))
+
+	rp = ipv
+	re = ipev
+	write(6,*) nkn_domains
+	write(6,*) nel_domains
+	flush(6)
+	write(6,*) 'exchanging ipv',my_id,size(ipv)
+	call shympi_l2g_array(ipv,ipglob)
+	call shympi_l2g_array(ipev,ieglob)
+	call shympi_l2g_array(rp,rpglob)
+	call shympi_l2g_array(re,reglob)
+
+	if( .not. shympi_is_master() ) return
+
+	write(77,*) 'mpi_debug:'
+	write(77,*) dtime
+	write(77,*) nn
+	write(77,*) ipglob
+	write(77,*) ne
+	write(77,*) ieglob
+
+	write(78,*) 'mpi_debug:'
+	write(78,*) dtime
+
+	write(78,*) 'node: ',nn
+	do i=1,nn,333
+	write(78,*) i,ipglob(i)
+	end do
+
+	write(78,*) 'elem: ',ne
+	do i=1,ne,333
+	write(78,*) i,ieglob(i)
+	end do
+
+	write(78,*) 'rnode: ',nn
+	do i=1,nn,333
+	write(78,*) i,rpglob(i)
+	end do
+
+	write(78,*) 'relem: ',ne
+	do i=1,ne,333
+	write(78,*) i,reglob(i)
+	end do
+
+        end
+
+!*****************************************************************
+
+	subroutine test_vertical(itime)
+
+! test routine for problems in vertical velocities
+
+	use basin
+	use levels
+	use mod_hydro_vel
+	use mod_bound_dynamic
+	use shympi
+
+	implicit none
+
+	integer itime
+
+	integer kext,kint,iu,lmax
+	integer ipint
+
+	kext = 2249
+	kint = ipint(kext)
+	if( kint <= 0 ) return
+
+	iu = 667 + my_id
+	lmax = ilhkv(kint)
+	write(iu,*) itime,lmax,kint
+	write(iu,*) '    ',wlnv(0:lmax,kint)
+	if( allocated(mfluxv) ) then
+	write(iu,*) '    ',mfluxv(1:lmax,kint)
+	end if
+	flush(iu)
+
+	end
+
+!*****************************************************************
+
+	subroutine test_zeta_debug(dtime)
+
+! test routine for problems in zeta init
+
+	use basin
+	use mod_hydro
+	use shympi
+
+	implicit none
+
+	double precision dtime
+	integer kext,kint,iu
+	integer ipint
+
+	kext = 1318
+	iu = 880 + my_id
+
+	kint = ipint(kext)
+	if( kint <= 0 ) return
+
+	write(iu,*) 'test_zeta_debug: ',kext,kint,znv(kint)
+
+	end
+
+!*****************************************************************
+
+	subroutine test_scalar_debug(text,ip,dtime,scal)
+
+! test routine for problems in temp
+
+	use basin
+	use levels
+	use mod_hydro
+	use mod_ts
+	use mod_diff_visc_fric
+	use shympi
+
+	implicit none
+
+	character*(*) text
+	integer ip
+	double precision dtime
+	real scal(nlvdi,nkn)
+
+	integer k,l
+	integer iu,nkng,nlvg,ifreq
+
+	real, allocatable :: rauxg(:,:)
+
+	if( dtime <= 3600. ) return
+	if( dtime > 3700. ) return
+
+	allocate(rauxg(nlv_global,nkn_global))
+
+	call shympi_l2g_array(scal,rauxg)
+	
+	iu = 456
+	nkng = nkn_global
+	nlvg = nlv_global
+	ifreq = nkng/100
+	ifreq = nkng/30
+
+	write(iu,*) dtime,ip
+
+	do k=1,nkng,ifreq
+	  !do l=1,nlvg,3
+	  do l=1,1
+	    write(iu,*) trim(text),ip,k,l,rauxg(l,k)
+	  end do
+	end do
+
+	end
+
+!*****************************************************************
+
+        subroutine print_debug_var
+
+        use mod_offline
+        use basin
+        use levels
+        use shympi
+        use mod_hydro_print
+        use mod_hydro_vel
+        use mod_hydro
+        use mod_diff_visc_fric
+        use mod_ts
+
+        implicit none
+
+        integer nelg,nkng
+        integer ie_int,ie_ext
+        integer ik_int,ik_ext
+        integer i,ie,ik,iu,lmax,it
+        double precision dtime
+        character*80 name
+
+        integer, parameter :: nmax = 20         ! max nuber of vars written
+        integer, parameter :: iubase = 400      ! base for unit numbers
+
+        integer, save, allocatable :: ies(:)
+        integer, save, allocatable :: iks(:)
+        integer, save, allocatable :: iue(:)
+        integer, save, allocatable :: iuk(:)
+        integer, save :: nie = 0
+        integer, save :: nik = 0
+        integer, save :: icall_local = 0
+
+        integer ieint, ipint
+        integer ieext, ipext
+        logical is_time_for_offline
+
+        nelg = nel_global
+        nkng = nkn_global
+
+        call get_act_dtime(dtime)
+        it = nint(dtime)
+
+        if( icall_local == 0 ) then
+
+          allocate(ies(nmax+1))
+          allocate(iks(nmax+1))
+          allocate(iue(nmax+1))
+          allocate(iuk(nmax+1))
+          iu = iubase
+
+          do ie=1,nelg,nelg/nmax
+            ie_ext = ip_ext_elem(ie)
+            ie_int = ieint(ie_ext)
+            if( ie_int > 0 .and. shympi_is_unique_elem(ie_int) ) then
+              nie = nie + 1
+              if( nie > nmax+1 ) stop 'error stop off_print_debug_var: nie>nmax'
+              ies(nie) = ie_int
+              iu = iu + 1
+              iue(nie) = iu
+              call make_name_with_number('elem',ie_ext,'aux',name)
+              open(iu,file=name,status='unknown',form='formatted')
+            end if
+          end do
+
+          do ik=1,nkng,nkng/nmax
+            ik_ext = ip_ext_node(ik)
+            ik_int = ipint(ik_ext)
+            if( ik_int > 0 .and. shympi_is_unique_node(ik_int) ) then
+              nik = nik + 1
+              if( nik > nmax+1 ) stop 'error stop off_print_debug_var: nik>nmax'
+              iks(nik) = ik_int
+              iu = iu + 1
+              iuk(nik) = iu
+              call make_name_with_number('node',ik_ext,'aux',name)
+              open(iu,file=name,status='unknown',form='formatted')
+            end if
+          end do
+
+          icall_local = 1
+        end if
+
+        write(6,*)  'running print_debug_var: ',it
+
+        do i=1,nie
+          ie = ies(i)
+          ie_ext = ieext(ie)
+          iu = iue(i)
+          lmax = ilhv(ie)
+          write(iu,*) 'time ',it,dtime
+          write(iu,*) 'ie, lmax ',ie_ext,lmax
+          write(iu,*) 'zenv ',zenv(:,ie)
+          write(iu,*) 'utlnv ',utlnv(1:lmax,ie)
+          write(iu,*) 'vtlnv ',vtlnv(1:lmax,ie)
+	  flush(iu)
+        end do
+        do i=1,nik
+          ik = iks(i)
+          ik_ext = ipext(ik)
+          iu = iuk(i)
+          lmax = ilhkv(ik)
+          write(iu,*) 'time ',it,dtime
+          write(iu,*) 'ie, lmax ',ik_ext,lmax
+          write(iu,*) 'znv ',znv(ik)
+          write(iu,*) 'wlnv ',wlnv(1:lmax,ik)
+          write(iu,*) 'saltv ',saltv(1:lmax,ik)
+          write(iu,*) 'tempv ',tempv(1:lmax,ik)
+          write(iu,*) 'visv ',visv(1:lmax,ik)
+          write(iu,*) 'difv ',difv(1:lmax,ik)
+	  flush(iu)
+        end do
+
+	call shympi_barrier
+
+        end
+
+!*****************************************************************
+

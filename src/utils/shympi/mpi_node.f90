@@ -82,6 +82,7 @@
 ! 05.04.2024    ggu     shympi_check_3d_elem_r(), nghost_max_global
 ! 28.08.2024    ggu     new variable bmpi_debug_txt
 ! 06.09.2024    ggu     better debug info for shympi_check_array()
+! 06.09.2024    lrp     nuopc-compliant
 !
 !******************************************************************
 
@@ -480,7 +481,7 @@
         contains
 !==================================================================
 
-	subroutine shympi_init(b_want_mpi)
+	subroutine shympi_init(b_want_mpi, b_want_mpi_init)
 
 ! this is the first call to shympi
 !
@@ -496,8 +497,9 @@
 	use levels
 
 	logical b_want_mpi
+	logical, optional :: b_want_mpi_init
 
-	logical bstop
+	logical bstop,binit
 	integer ierr,size
 	character*10 cunit
 	character*80 file
@@ -506,7 +508,17 @@
 	! initializing
 	!-----------------------------------------------------
 
-	call shympi_init_internal(my_id,n_threads)
+	!in some cases you let other initialize MPI for SHYFEM
+	!an intialization flag is passed from the interface
+	!the default value is true: always initialize MPI
+
+	if (present(b_want_mpi_init)) then
+	  binit = b_want_mpi_init
+	else
+	  binit = .true.
+	endif
+
+	call shympi_init_internal(my_id,n_threads,binit)
 
         if( .not. basin_has_read_basin() ) then
           write(6,*) 'grd file has been read: ',nkn,nel,ngr
@@ -1698,7 +1710,7 @@
 	aux = 0.
 	aux(1:ni) = val(1:ni)
 
-	call shympi_allgather_r_internal(no,no,val,vals)
+	call shympi_allgather_r_internal(no,no,aux,vals)
 
 	end subroutine shympi_gather_array_2d_r
 

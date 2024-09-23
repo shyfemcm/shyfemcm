@@ -1,5 +1,139 @@
 ============================================================
 
+Fri Sep 20 16:49:46 CEST 2024
+
+New version 8_0_8
+
+
+============================================================
+
+Fri Sep 20 16:48:28 CEST 2024
+
+NUOPC final framework
+
+ LOG                           |  23 +++++++++++++++++++++++
+ RELEASE_NOTES                 |   5 +++++
+ Rules.make                    |  34 ----------------------------------
+ bin/check/test_compile.sh     |   5 +++++
+ bin/getheader.pl              |   5 ++++-
+ bin/revision/revision_last.sh |   4 +++-
+ bin/revision/revisionlog.pl   |   2 +-
+ docs/final/shyfem.pdf         | Bin 334915 -> 334915 bytes
+ src/shyfem/Makefile           |  11 +++++++++--
+ src/utils/shyutil/version.f90 |  11 ++++++-----
+ var/rules/Rules.dist          |   2 +-
+ 11 files changed, 57 insertions(+), 45 deletions(-)
+
+============================================================
+
+Fri Sep 13 16:35:28 CEST 2024
+
+changed implementation for OMP
+
+ bin/git/git_info/git_info_merge.txt |  22 ++++
+ src/shyfem/hydrodynamic.f90         |  50 ++++-----
+ src/shyfem/lagrange_main.f90        |  29 ++----
+ src/shyfem/openmp_admin.f90         | 202 +++++++++++++++++++++++++++++++++++-
+ src/shyfem/shyfem.f90               |   2 +-
+ src/shyfem/tvd_admin.f90            |   2 +
+ 6 files changed, 254 insertions(+), 53 deletions(-)
+ new file:
+   bin/git/git_info/git_info_merge.txt
+
+============================================================
+
+Fri Sep 13 11:42:14 CEST 2024
+
+changes from branch mpi integrated
+
+ src/shyfem/Makefile                    |  3 +-
+ src/utils/shympi/mpi_node.f90          | 25 ++++++---
+ src/utils/shympi/mpi_node_internal.f90 |  2 +
+ src/utils/shyutil/Makefile             |  2 +
+ src/{shyfem => utils/shyutil}/tvd.f90  |  0
+ src/utils/shyutilmpi/find.f90          | 99 +++++++++++++++++++++++++++++++++-
+ 6 files changed, 120 insertions(+), 11 deletions(-)
+ renamed:
+    src/shyfem/tvd.f90 -> src/utils/shyutil/tvd.f90
+
+============================================================
+
+Thu Sep 12 17:48:32 CEST 2024
+
+New version 8_0_7
+
+
+============================================================
+
+Thu Sep 12 17:47:07 CEST 2024
+
+release notes
+
+ RELEASE_NOTES                         | 7 +++++++
+ bin/git/git-tag                       | 8 +++++---
+ bin/git/git_info/git_info_general.txt | 2 +-
+ bin/revision/revision_last.sh         | 6 ++++--
+ bin/revision/revisionlog.pl           | 2 +-
+ bin/revision/revisionlog.sh           | 4 +++-
+ bin/revision/revisionlog_adjust.pl    | 2 +-
+ 7 files changed, 22 insertions(+), 9 deletions(-)
+
+============================================================
+
+Thu Sep 12 17:30:14 CEST 2024
+
+starting release for nuopc framework
+
+ bin/git/git_info/git_info_general.txt |   2 +-
+ docs/final/shyfem.pdf                 | Bin 334911 -> 334915 bytes
+ src/shyfem/Makefile                   |   1 +
+ src/tools/shyelab/Makefile            |   3 +++
+ src/tools/shynetcdf/Makefile          |   2 +-
+ src/utils/shyutil/version.f90         |   7 ++++---
+ 6 files changed, 10 insertions(+), 5 deletions(-)
+
+============================================================
+
+Thu Sep 12 13:39:24 CEST 2024
+
+unique names for WRF conflicts
+
+ Makefile                          |  3 +-
+ src/shyfem/custom_admin.f90       | 13 ++++----
+ src/shyfem/lagrange_dif.f90       | 27 ++++++++--------
+ src/utils/generic/color_utils.f90 |  2 +-
+ src/utils/generic/random_gen.f90  | 66 +++++++++++++++++++--------------------
+ 5 files changed, 57 insertions(+), 54 deletions(-)
+
+============================================================
+
+Thu Sep 12 10:46:19 CEST 2024
+
+flush bas file before closing
+
+ src/shyfem/shypre_subs.f90 | 2 ++
+ 1 file changed, 2 insertions(+)
+
+============================================================
+
+Tue Sep 10 16:59:49 CEST 2024
+
+mass balance for mpi adjusted
+
+ src/shyfem/check.f90 | 21 +++++++++++++++------
+ 1 file changed, 15 insertions(+), 6 deletions(-)
+
+============================================================
+
+Tue Sep 10 10:52:27 CEST 2024
+
+bug fix for shyplot
+
+ src/tools/shyplot/shyplot.f90 | 5 ++++-
+ 1 file changed, 4 insertions(+), 1 deletion(-)
+
+============================================================
+
 Thu Sep  5 16:02:23 CEST 2024
 
 still compiler errors with intel (fixed)

@@ -41,12 +41,12 @@ OBJ  = \
 	shy_util1.o \
 	intp_fem_file.o \
 	coordinates.o \
-	find.o \
 	io_off.o \
 	trace_point.o \
 
 OBSOLETE = \
 	evgeom.o \
+	find.o \
 
 ALL = $(MOD) $(OBJ)
 

@@ -14,6 +14,26 @@
 #
 #--------------------------------------------------------------
 
+$::maxlines = 0 unless $::maxlines;
+$::short = 0 unless $::short;
+$::all = 0 unless $::all;
+$::help = 0 unless $::help;
+$::h = 0 unless $::h;
+
+my $maxdef = 30;
+
+if( $::help or $::h ) {
+  print STDERR "git-tag [-maxlines #] [-short|-all]\n";
+  print STDERR "  maxlines defaults to $maxdef lines\n";
+  exit 0;
+} elsif( $::maxlines ) {
+  # nothing, already set
+} elsif( not $::all ) {
+  $::maxlines = $maxdef;
+}
+
+#--------------------------------------------------------------
+
 @tags = `git show-ref --tags`;
 
 foreach $line (@tags) {
@@ -47,6 +67,12 @@ foreach $com (@coms) {
     push(@lines,$line);
   }
   #print "$line\n";
+}
+
+my $max = $::maxlines;
+if( $max > 0 ) {
+  my @new = splice(@lines,0,$max);
+  @lines = @new;
 }
 
 foreach my $line (reverse @lines) {

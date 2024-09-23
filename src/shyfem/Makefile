@@ -27,6 +27,35 @@ ifeq ($(SOLVER),PETSC)
   INCLUDE += -I$(PETSC_DIR)/include
 endif
 
+ifeq ($(NUOPC),true)
+  ifeq ($(FORTRAN_COMPILER),GNU_GFORTRAN)
+    ifeq ($(PARALLEL_MPI),NONE)
+      DIRLIB_ESMF= Linux.gfortran.64.mpiuni.default
+    else
+      DIRLIB_ESMF= Linux.gfortran.64.openmpi.default
+    endif
+  else ifeq ($(FORTRAN_COMPILER),INTEL)
+    ifeq ($(PARALLEL_MPI),NONE)
+      DIRLIB_ESMF= Linux.intel.64.mpiuni.default
+    else
+      DIRLIB_ESMF= Linux.intel.64.intelmpi.default
+    endif
+  endif
+  ESMF_MKFILE = $(ESMFDIR)/lib/libO/$(DIRLIB_ESMF)/esmf.mk
+  NUOPCMOD    = ocean_shyfem
+  NUOPCOBJ    = nuopc_shyfem_cap.o
+  ifneq ("$(wildcard $(ESMF_MKFILE))","")
+    $(find esmf mk file $(ESMF_MKFILE))
+    include $(ESMF_MKFILE)
+  else
+    $(error cannot find esmf mk file $(ESMF_MKFILE))
+  endif
+  ifneq ($(ESMF_VERSION_MAJOR),8)
+    $(error your installed esmf version $(ESMF_VERSION_MAJOR) is not tested with shyfem ...)
+  endif
+  INCLUDE += -I$(ESMFDIR)/mod/modO/$(DIRLIB_ESMF)
+endif
+
 #--------------------	LIBS	-----------------------
 
 LIBUTIL         = util
@@ -34,7 +63,8 @@ LIBSHYUTIL      = shyutil
 LIBSHYMPI       = shympi
 LIBSHYUTILMPI   = shyutilmpi
 LIBSPARSKIT     = sparskit
-
+LIBNUOPC        = nuopc
+ 
 LIBLUT  = -L$(LIBDIR) -l$(LIBUTIL)
 LIBFUT  = $(LIBDIR)/lib$(LIBUTIL).a
 
@@ -50,15 +80,15 @@ LIBFUM  = $(LIBDIR)/lib$(LIBSHYUTILMPI).a
 LIBLSP  = -L$(LIBDIR) -l$(LIBSPARSKIT)
 LIBFSP  = $(LIBDIR)/lib$(LIBSPARSKIT).a
 
-LIBF = $(LIBFUM) $(LIBFMP) $(LIBFSU) $(LIBFUT) $(LIBFSP)
-LIBL = $(LIBLUM) $(LIBLMP) $(LIBLSU) $(LIBLUT) $(LIBLGOTM) $(LIBG_METIS)
-LIBL += $(LIBLGOTM) $(LIBG_METIS) $(LIBG_PETSC) $(LIBLSP)
+LIBLNU  = -L$(LIBDIR) -l$(LIBNUOPC)
+LIBFNU  = $(LIBDIR)/lib$(LIBNUOPC).a
 
 #--------------------	GOTM	-----------------------
 
 ifeq ($(GOTM),true)
-  LIBLGOTM      = -L $(LIBDIR) -lgotm
-  LIBFGOTM      = $(LIBDIR)/libgotm.a
+  LIBGOTM       = gotm
+  LIBLGOTM      = -L $(LIBDIR) -l$(LIBGOTM)
+  LIBFGOTM      = $(LIBDIR)/lib$(LIBGOTM).a
 endif
 
 #---------------------	SOLVER	-----------------------
@@ -82,9 +112,23 @@ ifeq ($(SOLVER),PETSC)
 	mod_petsc_system.o simsys_petsc.o
 endif
 
+#---------------------	METIS	-----------------------
+
 ifeq ($(PARTS),METIS)
-  LIBG_METIS = -L$(METISDIR)/lib -lmetis
+  LIBMETIS   = metis
+  LIBG_METIS = -L$(METISDIR)/lib -l$(LIBMETIS)
 endif
+
+#---------------------	all libs	-----------------------
+
+LIBF = $(LIBFUM) $(LIBFMP) $(LIBFSU) $(LIBFUT) $(LIBFSP)
+LIBL = $(LIBLUM) $(LIBLMP) $(LIBLSU) $(LIBLUT) $(LIBLGOTM) $(LIBG_METIS)
+LIBL += $(LIBLGOTM) $(LIBG_METIS) $(LIBG_PETSC) $(LIBLSP)
+
+#$(info ------------------------------ )
+#$(info LIBL = $(LIBL) )
+#$(info LIBLGOTM = $(LIBLGOTM) )
+#$(info ------------------------------ )
 
 #------------------------------------------------------------------------
 
@@ -136,7 +180,7 @@ OBJ = system_matrix.o \
       arrays.o closing.o diffusion_admin.o bcvel.o \
       floodfill.o topological_admin.o coo_matrix.o nudge.o \
       turbine.o initialize.o \
-      bnd_routines.o concentration_omp.o histogram.o \
+      bnd_routines.o concentration_omp.o \
       concentration.o baroclinic.o def_para.o \
       f_vol.o mkdistance.o conz_admin.o \
       water_ren_time.o atoxi.o toxical.o \
@@ -153,6 +197,7 @@ OBJ = system_matrix.o \
 	turbulence.o nohydro.o explicit.o hydrodynamic.o \
 	custom_admin.o poisson.o \
       flux.o extra.o boxes.o check.o \
+      shyfem_subs.o \
 
 OBSOLETE = \
 	bnd_aux.o bnd_dynamic.o tsfile.o bnd_admin.o \
@@ -181,11 +226,44 @@ nothing:
 
 #------------------------------------------------------------------------
 
-%.o: %.f 
-	$(F77) $(FFLAGS) $(INCLUDE) -c $< 
+%.o: %.f
+	$(F77) $(FFLAGS) $(INCLUDE) -c $<
 
-%.o: %.f90 
-	$(F77) $(FFLAGS) $(INCLUDE) -c $< 
+%.o: %.f90
+	$(F77) $(FFLAGS) $(INCLUDE) -c $<
+
+#------------------------------------------------------------------------
+
+nuopc_info:
+	@echo "esmf version         : $(ESMF_VERSION_STRING)"
+	@echo "esmf compiler        : $(ESMF_F90COMPILER)"
+	@echo "esmf linker          : $(ESMF_F90LINKER)"
+	@echo "esmf compile options : $(ESMF_F90COMPILEOPTS)"
+	@echo "esmf link options    : $(ESMF_F90LINKOPTS)"
+
+nuopc_clean:
+	-rm -f *.mk
+
+nuopc_shyfem.mk:
+	@echo "creating nuopc makefile fragment"
+	@echo "# ESMF self-describing build dependency makefile fragment for SHYFEM model" > $@
+	@echo >> $@
+	@echo "SHYFEM_DEP_FRONT     = "$(NUOPCMOD)                      >> $@
+	@echo "SHYFEM_DEP_INCPATH   = `pwd`/"$(LIBDIR)/mod              >> $@
+	@echo "SHYFEM_DEP_CMPL_OBJS = `pwd`/"$(NUOPCOBJ)                >> $@
+	@echo "SHYFEM_DEP_LINK_OBJS = `pwd`/"$(LIBFNU)                  >> $@
+	@echo "SHYFEM_DEP_SHRD_PATH = `pwd`/"$(LIBDIR) $(METISDIR)/lib  >> $@
+	@echo "SHYFEM_DEP_SHRD_LIBS = "$(LIBSHYUTILMPI) $(LIBSHYMPI) $(LIBSHYUTIL) $(LIBUTIL) $(LIBSPARSKIT) $(LIBGOTM) $(LIBMETIS) >> $@
+
+libnuopc: $(LIBFNU)
+
+$(LIBFNU): $(NUOPCOBJ) $(OBJ)
+	@echo "creating static library with shyfem and nuopc cap layer"
+	ar rvs $(LIBFNU) $?
+
+nuopc: nuopc_info nuopc_clean nuopc_shyfem.mk libnuopc
+
+#------------------------------------------------------------------------
 
 clean:
 	-rm -f *.o
@@ -195,6 +273,7 @@ clean:
 cleanall: clean
 	-rm -f $(MODDIR)/*.mod
 	-rm -f $(LIBDIR)/libshy.a 
+	-rm -f $(LIBDIR)/lib$(LIBNUOPC).a
 
 #update:
 #	cp $(EXES) /home/georg/work/shyfem_repo/shyfem-mpi/bin
@@ -256,7 +335,7 @@ cleanall: clean
 ../../lib/mod/mod_sediment.mod: sedim_admin.o
 ../../lib/mod/mod_sediment_para.mod: sedim_admin.o
 ../../lib/mod/mod_sedtrans05.mod: sedim_util.o
-../../lib/mod/mod_shyfem.mod: shyfem.o
+../../lib/mod/mod_shyfem.mod: shyfem_subs.o
 ../../lib/mod/mod_sinking.mod: sinking.o
 ../../lib/mod/mod_subset.mod: subset.o
 ../../lib/mod/mod_system.mod: system_matrix.o
@@ -267,6 +346,7 @@ cleanall: clean
 ../../lib/mod/mod_test_zeta.mod: test_zeta.o
 ../../lib/mod/mod_ts.mod: ts.o
 ../../lib/mod/mod_waves.mod: waves.o
+../../lib/mod/ocean_shyfem.mod: nuopc_shyfem_cap.o
 ../../lib/mod/omp_admin.mod: openmp_admin.o
 ../../lib/mod/poisson.mod: poisson.o
 ../../lib/mod/semi_implicit.mod: iostr.o
@@ -507,6 +587,7 @@ gotm_aux.o: ../../lib/mod/basin.mod ../../lib/mod/levels.mod \
 heat_admin2.o: ../../lib/mod/basin.mod \
 		../../lib/mod/heat_const.mod \
 		../../lib/mod/levels.mod \
+		../../lib/mod/meteo_forcing_module.mod \
 		../../lib/mod/mod_debug.mod \
 		../../lib/mod/mod_hydro_print.mod \
 		../../lib/mod/mod_meteo.mod \
@@ -703,6 +784,9 @@ nudge.o: ../../lib/mod/basin.mod ../../lib/mod/intp_fem_file.mod \
 		../../lib/mod/mod_layer_thickness.mod \
 		../../lib/mod/mod_nudging.mod \
 		../../lib/mod/shympi.mod 
+nuopc_shyfem_cap.o: ../../lib/mod/esmf.mod \
+		../../lib/mod/mod_shyfem.mod \
+		../../lib/mod/nuopc.mod 
 offline_data.o: ../../lib/mod/basin.mod ../../lib/mod/levels.mod \
 		../../lib/mod/mod_diff_visc_fric.mod \
 		../../lib/mod/mod_hydro.mod \
@@ -755,7 +839,8 @@ sedim_admin.o: ../../lib/mod/basin.mod ../../lib/mod/evgeom.mod \
 		../../lib/mod/mod_sedtrans05.mod \
 		../../lib/mod/mod_ts.mod \
 		../../lib/mod/mod_waves.mod ../../lib/mod/para.mod 
-shyfem.o: ../../lib/mod/basin.mod ../../lib/mod/befor_after.mod \
+shyfem_subs.o: ../../lib/mod/basin.mod \
+		../../lib/mod/befor_after.mod \
 		../../lib/mod/clo.mod \
 		../../lib/mod/coordinates.mod \
 		../../lib/mod/evgeom.mod \

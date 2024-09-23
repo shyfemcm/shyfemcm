@@ -228,6 +228,7 @@
 ! 15.02.2022	ggu	new parameter iage
 ! 15.02.2022	ggu	new parameters for limiting_scalar
 ! 20.07.2023    lrp     new parameter nzadapt
+! 13.09.2024    lrp     new parameter iatm
 !
 !************************************************************************
 
@@ -246,6 +247,7 @@
 	call nlsinh_georg
 	call nlsinh_unused
 	call nlsinh_waves
+        call nlsinh_atm
 	call nlsinh_nonhydro
 	call nlsinh_connect
 
@@ -443,7 +445,21 @@
 
 ! |itmoff|	Start time for writing to file OFF,
 !		the file containing data for offline runs.
+
 	call addpar('itmoff',-1.)
+
+! |idtmet|, |itmmet|	Time step and start time for writing meteo
+!			variables read from file. 
+! |imetout|		This parameters indicates what meteo parameters
+!			should be output. For wind set it to 1, for heat 10,
+!			for rain 100, and for ice 1000. 
+!			Combinations are possible, e.g., 11 writes wind 
+!			and heat data, and 1111 writes all available data
+!			to the file. (Default 0)
+
+	call addpar('idtmet',0.)
+	call addpar('itmmet',-1.)
+	call addpar('imetout',0.)
 
 !c------------------------------------------------------------------------
 
@@ -1161,15 +1177,20 @@
 ! computed scalars (temperature, salinity, generic concentration) to file.
 !
 ! |idtcon|, |itmcon|	Time step and start time for writing to file
-!			conz.shy (concentration) and ts.shy (temperature and
-!			salinity).
-! |irho|	Flag if the density is also written together with T/S.
-!		A value different from 0 writes the density to file.
-!		(Default 0)
+!			|.conz.shy| (concentration) and
+!			|.ts.shy| (temperature and salinity).
+! |irho|		Flag to indicate if the density is also written 
+!			together with T/S. A value different from 0 
+!			writes the density to file. (Default 0)
+! |iskin|		Flag to indicate if the skin temperature is written
+!			to file |.tskin.shy|.
+!			A value different from 0 writes the 
+!			skin temperature to file. (Default 0)
 
 	call addpar('idtcon',0.)	!time step for output
 	call addpar('itmcon',-1.)	!minimum time for output
-	call addpar('irho',0.)		!write rho ?
+	call addpar('irho',0.)		!write rho
+	call addpar('iskin',0.)		!write skin temperature
 
 ! DOCS	END
 
@@ -1304,7 +1325,7 @@
 
 ! |rwhpar|	A horizontal diffusion can be defined for the lagrangian model.
 !		Its value can be specified in |rwhpar| and the units are 
-!		[m**2/s]. If |rwhpar| < 0 the diffusion parameter depends on
+!		[m**2/s]. If |rwhpar<0| the diffusion parameter depends on
 !		the local diffusivity (see |idhtyp|) (Default 0)
 
 	call addpar('rwhpar',0.)	!diffusion for lagrangian model
@@ -1338,9 +1359,9 @@
 
 ! |ipvert|	Set the vertical distribution of particles:
 !		\begin{description}
-!		\item[0] releases one particles only in surface layer
-!		\item[$>$0] release n particles regularly
-!		\item[$<$0] release n particles randomly
+!		\item[0] releases particles only in surface layer
+!		\item[$>$ 0] release n particles regularly
+!		\item[$<$ 0] release n particles randomly
 !		\end{description}
 
         call addpar('ipvert',0.)
@@ -1730,6 +1751,48 @@
 
         call addpar('idtwav',0.)
         call addpar('itmwav',-1.)
+
+!
+! DOCS  END
+!
+
+        end
+
+!************************************************************************
+
+! This subroutine defines the ocean-atmosphere coupling
+
+        subroutine nlsinh_atm
+
+! $atm section
+
+! DOCS  START   P_atm
+!
+! Parameters in section |$atm| activate the ocean-atmosphere coupling.
+
+        implicit none
+
+        call sctpar('atm')           !sets default section
+        call sctfnm('atm')
+
+! |iatm|        Ocean-atmosphere coupling (default 0):
+!               \begin{description}
+!               \item[0] No coupling with the atmosphere.
+!               \item[1] SHYFEM runs coupled with an atmospheric model within the ESMF framwork.
+!                        For now the atmospheric model available is WRF.
+!                        You should have a look the the specific section to see how to run
+!                        a coupled SHYFEM-WRF simulation.
+!               \end{description}
+
+        call addpar('iatm',0.)        !0=SHYFEM standalone, 1=coupled with atmospheric model
+
+! |idtatm|      Time step (only in seconds for now) for writing the atmospheric
+!               fields computed by the atmosphere component and
+!               remapped onto the SHYFEM grid, to a vtk file. This is useful
+!               especially for debugging. For operational runs it is
+!               better not to specify it (no atmospheric fields are printed).
+
+        call addpar('idtatm',2592000.)!time step for output
 
 !
 ! DOCS  END

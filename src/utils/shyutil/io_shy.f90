@@ -63,6 +63,7 @@
 ! 15.10.2021    ggu     some checks for vertical dim in shy_write_record()
 ! 28.04.2023    ggu     update function calls for belem
 ! 07.06.2023    ggu     new version 13 - simpar introduced
+! 22.09.2024    ggu     increase nvar_act earlier (bug)
 !
 !**************************************************************
 !**************************************************************
@@ -868,8 +869,6 @@
 
 	end function shy_is_lgr_file_by_unit
 
-
-
 !************************************************************
 !************************************************************
 !************************************************************
@@ -1552,6 +1551,8 @@
 	real, allocatable :: rlin(:)
 
 	ierr = 0
+	pentry(id)%nvar_act = pentry(id)%nvar_act + 1
+
 	if( .not. pentry(id)%is_opened ) return
 
 	iunit = pentry(id)%iunit
@@ -1579,15 +1580,9 @@
 	else if( m == 1 ) then
 	  nlin = nlvddi*n
 	  allocate(rlin(nlin))
-	  !write(601,*) 'before vals2linear...'
-	  !write(601,*) id,ivar,n
-	  !write(601,*) lmax,nlvddi
 	  if( lmax /= nlvddi ) goto 99
           call vals2linear(lmax,n,m,il,c,rlin,nlin)
 	  write(iunit,iostat=ierr) ( rlin(i),i=1,nlin )
-!	  write(iunit,iostat=ierr) (( c(l,i)
-!     +			,l=1,il(i) )
-!     +			,i=1,n )
 	else
 	  write(6,*) lmax,m
 	  stop 'error stop shy_write_record: m and lmax > 1'
@@ -1595,8 +1590,6 @@
      &			,l=1,il(1+(i-1)/m) ) &
      &			,i=1,n*m )
 	end if
-
-	pentry(id)%nvar_act = pentry(id)%nvar_act + 1
 
 	if( b3d ) deallocate(il)
 

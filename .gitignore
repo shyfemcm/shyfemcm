@@ -89,6 +89,8 @@ src/tools/shyelab/tselab
 bin/tselab
 src/tools/shyelab/shyproj
 bin/shyproj
+src/tools/shyelab/shystrings
+bin/shystrings
 src/tools/shyparts/shyparts
 bin/shyparts
 src/utils/shympi/check_shympi_debug

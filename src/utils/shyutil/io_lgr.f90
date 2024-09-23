@@ -159,7 +159,7 @@
         real, allocatable 		:: hl(:)
         real, allocatable 		:: c(:,:)
 
-	write(6,*) 'allocating lgr data structure: ',nn,nc
+	!write(6,*) 'allocating lgr data structure: ',nn,nc
 
         if( allocated(id) ) then
           deallocate(id)
@@ -235,9 +235,9 @@
 	  read(iu) id,ty,tt,s,ie
           read(iu) x,y,z,lb,hl
           read(iu) (c(ii), ii=1,nc)
-	  idb(i) = id
-	  tyb(i) = ty
-	  ttb(i) = tt
+	  idb(i) = id			!id
+	  tyb(i) = ty			!type
+	  ttb(i) = tt			!time of insert
 	  sb(i)  = s
 	  ieb(i) = ie
 	  xb(i)  = x

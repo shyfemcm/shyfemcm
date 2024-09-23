@@ -98,6 +98,7 @@
 ! 13.03.2019	ggu	changed VERS_7_5_61
 ! 21.05.2019	ggu	changed VERS_7_5_62
 ! 10.05.2024	ggu	no check of spherical here, no need for ev_init()
+! 17.09.2024	ggu	better error check in xy2xi()
 !
 !***********************************************************
 
@@ -530,6 +531,8 @@
 
 ! given x/y returns internal coordinates xi
 
+	use basin
+
 	implicit none
 
 	integer ie
@@ -537,7 +540,16 @@
 	double precision xi(3)
 
 	integer ii
+	integer ierr
 	double precision a(3),b(3),c(3)
+	real xp,yp
+
+	logical in_element
+
+	if( ie < 1 .or. ie > nel ) then
+	  write(6,*) 'element number is out of range: ',ie,nel
+	  stop 'error stop xy2xi: ie<=0'
+	end if
 
 	call xi_abc(ie,a,b,c)
 
@@ -545,13 +557,23 @@
 	  xi(ii) = a(ii) + b(ii)*x + c(ii)*y
 	end do
 
-	call adjust_xi(xi)
+	call adjust_xi(xi,ierr)
+
+	if( ierr /= 0 ) then
+	  write(6,*) 'xy2xi: ',ie,x,y,ierr
+	  xp = x
+	  yp = y
+	  if( .not. in_element(ie,xp,yp) ) then
+	    write(6,*) 'point is not in element...'
+	  end if
+	  stop 'error stop xy2xi: wrong xi'
+	end if
 
 	end
 	
 !***********************************************************
 
-	subroutine adjust_xi(xi)
+	subroutine adjust_xi(xi,ierr)
 
 ! adjusts internal coodinates xi
 
@@ -560,6 +582,7 @@
 	implicit none
 
 	double precision xi(3)
+	integer ierr
 
 	logical bdebug
 	integer ii,it,is
@@ -572,6 +595,7 @@
 	xiso = 0.
 	is = 0
 	it = 0
+	ierr = 0
 
 	do ii=1,3
 	  xiorig(ii) = xi(ii)
@@ -588,7 +612,9 @@
 	if( it == 3 .or. abs(xiso-1.) > 1.e-8 ) then
 	  write(6,*) 'xi is wrong... cannot adjust'
 	  write(6,*) xiorig
-	  stop 'error stop adjust_xi'
+	  ierr = 1
+	  return
+	  !stop 'error stop adjust_xi'
 	end if
 
 	xiadj = (xisum-1.)/(3-it)
@@ -624,7 +650,9 @@
 	if( abs(xiso-1.) > 1.e-8 ) then
 	  write(6,*) 'xi is still wrong... cannot adjust'
 	  write(6,*) xiorig
-	  stop 'error stop adjust_xi'
+	  ierr = 3
+	  return
+	  !stop 'error stop adjust_xi'
 	end if
 
 	!write(6,*) 'xi_adjust start...'
