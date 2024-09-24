@@ -1674,7 +1674,8 @@
 
         implicit none
 
-        integer icolor,icoltab,lgrcol
+        integer icolor,icoltab
+	real lgrcol
         real getpar
 	logical has_color_table
 
