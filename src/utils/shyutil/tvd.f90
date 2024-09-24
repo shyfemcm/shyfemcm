@@ -29,6 +29,7 @@
 ! 16.02.2019	ggu	changed VERS_7_5_60
 ! 21.05.2019	ggu	changed VERS_7_5_62
 ! 03.09.2024	ggu	new data structures
+! 23.09.2024	ggu	new array itvdup()
 
 !**************************************************************************
 
@@ -48,6 +49,7 @@
         integer, allocatable, save :: ieetvdup(:,:,:)	!external elem number
         integer, allocatable, save :: iatvdup(:,:,:)	!domain of element
         integer, allocatable, save :: ltvdup(:,:,:)	!lmax of element
+        integer, allocatable, save :: itvdup(:,:,:)	!index into array
 
 !==================================================================
 	contains
@@ -66,6 +68,7 @@
           deallocate(ieetvdup)
           deallocate(iatvdup)
           deallocate(ltvdup)
+          deallocate(itvdup)
         end if
 
         nel_tvd = nel
@@ -78,6 +81,7 @@
         allocate(ieetvdup(3,3,nel))
         allocate(iatvdup(3,3,nel))
         allocate(ltvdup(3,3,nel))
+        allocate(itvdup(3,3,nel))
 
 	write(6,*) 'mod_tvd_init successfully called ',nel
 

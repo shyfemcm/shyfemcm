@@ -99,6 +99,7 @@
 ! 21.05.2019	ggu	changed VERS_7_5_62
 ! 10.05.2024	ggu	no check of spherical here, no need for ev_init()
 ! 17.09.2024	ggu	better error check in xy2xi()
+! 24.09.2024	ggu	new routine femintp_xi()
 !
 !***********************************************************
 
@@ -1401,6 +1402,42 @@
           c = ev(6+ii,ie)
           w = a + b*xp + c*yp
           zh = zh + z(ii) * w
+        end do
+
+        zp = zh
+
+        end
+
+!***********************************************************
+
+        subroutine femintp_xi(ie,z,xp,yp,zp)
+
+! interpolation in element (using xi coordinates)
+!
+! interpolates in element ie from nodal values z to point xp,yp
+! result is in zp
+!
+! needs array ev
+
+        use evgeom
+
+        integer ie      !element
+        real z(3)       !values on nodes
+        real xp,yp      !coordinates of point
+        real zp         !interpolated value (return)
+
+        integer ii
+        double precision zh
+        double precision x,y
+        double precision xi(3)
+
+	x = xp
+	y = yp
+	call  xy2xi(ie,x,y,xi)
+
+        zh=0.
+        do ii=1,3
+	  zh = zh + z(ii) * xi(ii)
         end do
 
         zp = zh

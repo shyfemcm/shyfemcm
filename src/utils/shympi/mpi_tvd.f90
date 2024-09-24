@@ -68,6 +68,16 @@
 	integer, parameter :: nlist = 13
 	integer, parameter :: nlist_type = 1
 
+	integer, save :: n_tvd_receive_total,n_tvd_send_total
+	real, save, allocatable :: values_tvd_local(:,:)
+	real, save, allocatable :: values_tvd_remote(:,:)
+	integer, save :: n_my_array_list,n_my_receive_list,n_my_send_list
+	integer, save, allocatable :: my_receive_list(:),my_send_list(:)
+	real, save, allocatable :: my_array_receive_list(:,:)
+	real, save, allocatable :: my_array_send_list(:,:)
+	real, save, allocatable :: my_array_list(:,:)
+	double precision, save, allocatable :: my_xi_list(:,:)
+
 !==================================================================
         contains
 !==================================================================
@@ -139,10 +149,6 @@
 	integer :: n_tvd_all
 	real, allocatable :: tvd_all(:,:)
 	integer :: na,nr,ns
-	integer :: n_my_array_list,n_my_receive_list,n_my_send_list
-	integer, allocatable :: my_receive_list(:),my_send_list(:)
-	real, allocatable :: my_array_list(:,:)
-	double precision, allocatable :: my_xi_list(:,:)
 	double precision xi(3),xd,yd
 
 !----------------------------------------------------------
@@ -539,6 +545,8 @@
 	end if
 	allocate(my_receive_list(n_my_receive_list))
 	allocate(my_send_list(n_my_send_list))
+	allocate(my_array_receive_list(nlist,n_my_receive_list))
+	allocate(my_array_send_list(nlist,n_my_send_list))
 	allocate(my_array_list(nlist,n_my_array_list))
 	my_receive_list = 0
 	my_send_list = 0
@@ -559,12 +567,14 @@
 	      na = na + 1
 	      my_array_list(:,na) = rlists(:,i,ia)
 	      nr = nr + 1
-	      my_receive_list(nr) = na
+	      my_receive_list(nr) = nr
+	      my_array_receive_list(:,nr) = rlists(:,i,ia)
 	    else if( ia_found == my_ia ) then
 	      na = na + 1
 	      my_array_list(:,na) = rlists(:,i,ia)
 	      ns = ns + 1
-	      my_send_list(ns) = na
+	      my_send_list(ns) = ns
+	      my_array_send_list(:,ns) = rlists(:,i,ia)
 	    end if
 	  end do
 	end do
@@ -573,14 +583,14 @@
 	if( nr /= n_my_receive_list ) stop 'error stop: nr/=n_my_receive_list'
 	if( ns /= n_my_send_list ) stop 'error stop: nr/=n_my_send_list'
 
-	allocate(my_xi_list(3,n_my_receive_list))
+	allocate(my_xi_list(3,n_my_send_list))
 	my_xi_list = 0.
 
-	do i=1,n_my_receive_list
-	  na = my_receive_list(i)
+	do i=1,n_my_send_list
+	  na = my_send_list(i)
 	  xd = my_array_list(ind_x,na)
 	  yd = my_array_list(ind_y,na)
-	  ie = my_array_list(ind_ie_this,na)
+	  ie = my_array_list(ind_ie_remote,na)
 	  call xy2xi(ie,xd,yd,xi)
 	  my_xi_list(:,i) = xi(:)
 	end do
@@ -610,8 +620,10 @@
 	write(iudb,*) 'send/receive index start ',my_ia
 	write(iudb,*) n_tvd_r,n_tvd_s,n_tvd
 
+	n_tvd_receive_total = sum( n_tvd_receive )
 	write(iudb,*) 'receive max: ',n_tvd_r
 	write(iudb,*) 'receive dim: ',n_tvd_receive
+	write(iudb,*) 'receive tot: ',n_tvd_receive_total
 	do ia=1,n_threads
 	  n = n_tvd_receive(ia)
 	  if( n == 0 ) cycle
@@ -622,8 +634,10 @@
 	    call write_array_debug(iudb,i,rlists(:,ind,ia))
 	  end do
 	end do
+	n_tvd_send_total = sum( n_tvd_send )
 	write(iudb,*) 'send max: ',n_tvd_s
 	write(iudb,*) 'send dim: ',n_tvd_send
+	write(iudb,*) 'send tot: ',n_tvd_send_total
 	do ia=1,n_threads
 	  n = n_tvd_send(ia)
 	  if( n == 0 ) cycle
@@ -699,6 +713,114 @@
     9	format(i5,a,i5,a,i10)
 	end
 
+!******************************************************************
+!******************************************************************
+!******************************************************************
+
+	subroutine allocate_tvd_arrays(nvals)
+
+	use shympi
+	use shympi_tvd
+
+	implicit none
+
+	integer nvals
+	integer lmax
+
+	if( allocated(values_tvd_local) ) return
+
+	lmax = nlv_global
+
+	allocate( values_tvd_local(lmax,n_tvd_receive_total) )
+	allocate( values_tvd_remote(lmax,n_tvd_send_total) )
+
+	end
+
+!******************************************************************
+
+	subroutine tvd_prepare_remote(values)
+
+	use basin
+	use levels
+	use shympi
+	use shympi_tvd
+
+	implicit none
+
+	real values(nlvdi,nkn)
+
+	integer i,na,ie,ii,k,l,lmax,ia
+	integer my_ia
+	double precision c,cacum
+	double precision xi(3)
+
+	my_ia = my_id + 1
+
+	do i=1,n_my_send_list
+	  na = my_send_list(i)
+	  if( i /= na ) stop 'error stop tvd_prepare_remote: internal (0)'
+	  ia = nint(my_array_send_list(ind_ia_found,na))
+	  if( ia /= my_ia ) stop 'error stop tvd_prepare_remote: internal (1)'
+	  ie = nint(my_array_send_list(ind_ie_remote,na))
+	  if( ie > nel ) stop 'error stop tvd_prepare_remote: internal (2)'
+	  !write(6,*) 'ggguuu: ',i,na,ia,my_ia
+	  lmax = ilhv(ie)
+	  xi(:) = my_xi_list(:,na)
+	  do l=1,lmax
+	    cacum = 0.
+	    do ii=1,3
+	      k = nen3v(ii,ie)
+	      c = values(l,k)
+	      cacum = cacum + c * xi(ii)
+	    end do
+	    write(6,*) 'ggguuu: ',l,na,my_ia,cacum
+	    values_tvd_remote(l,na) = cacum
+	  end do
+	end do
+
+	end
+
+!******************************************************************
+
+	subroutine tvd_exchange
+
+	use shympi
+	use shympi_tvd
+
+	implicit none
+
+
+	end
+
+!******************************************************************
+
+	subroutine tvd_mpi_prepare(values)
+
+	use basin
+	use levels
+	use shympi
+	use shympi_tvd
+
+	implicit none
+
+	real values(nlvdi,nkn)
+
+	integer, save :: nvals = 1
+
+	if( .not. bmpi ) return
+
+	call allocate_tvd_arrays(nvals)
+
+	call tvd_prepare_remote(values)
+
+	call tvd_exchange
+
+	end
+
+!******************************************************************
+
+!******************************************************************
+!******************************************************************
 !******************************************************************
 
 	subroutine write_tvd_debug(nel)

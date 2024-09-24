@@ -130,6 +130,8 @@
 	integer, save :: icall = 0
 	!logical, save :: bdebug = .false.
 	logical, save :: bdebug = .true.
+	!logical, save :: bstop = .true.
+	logical, save :: bstop = .false.
 
 	if( icall .ne. 0 ) return
 	icall = 1
@@ -150,15 +152,17 @@
 	if( itvd_type .eq. 2 ) then
 	  if( bdebug ) call write_tvd_debug(nel)
           if( shympi_is_parallel() ) then
-	    call shympi_barrier
-            write(6,*) 'cannot yet handle itvd==2'
-	    call error_stop
-	    !call exit(0)
-            stop 'error stop tvd_init: cannot run with mpi'
+	    if( bstop ) then
+	      call shympi_barrier
+              write(6,*) 'cannot yet handle itvd==2'
+	      call error_stop
+	      !call exit(0)
+              stop 'error stop tvd_init: cannot run with mpi'
+	    end if
 	  end if
 	end if
 
-	if( bdebug ) stop 'debug stop: tvd'
+	if( bstop ) stop 'debug stop: tvd'
 
 	if( itvd .eq. 0 ) then
 	  write(6,*) 'no horizontal TVD scheme used'
