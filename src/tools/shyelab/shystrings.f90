@@ -43,7 +43,7 @@
         logical :: berror,bwrite
         logical :: bquiet,bsilent,bverbose
 	integer :: is,ioff,ivar,id,idlast,iwrite
-	real    :: f(10)
+	real    :: f
 	character*10 :: short
 	character*28 :: full,header
 
@@ -95,7 +95,7 @@
 	if( is_integer(string) ) then
 	  ioff = 1
 	  is = istof(string,f,ioff)
-	  ivar = nint(f(1))
+	  ivar = nint(f)
 	  if( bverbose ) write(6,*) 'looking for variable ',ivar
 	  id = strings_get_id_by_ivar(ivar)
 	  if( id <= 0 ) then
