@@ -459,6 +459,7 @@
         subroutine tvd_grad_3d(cc,gx,gy,aux,nlvddi)
 
 ! computes gradients for scalar cc (average gradient information)
+! this is for itvd == 1 only
 !
 ! output is gx,gy
 
@@ -532,6 +533,7 @@
         subroutine tvd_grad_2d(cc,gx,gy,aux)
 
 ! computes gradients for scalar cc (only 2D - used in sedi3d)
+! this is for itvd == 1 only
 
 	use evgeom
 	use basin
@@ -638,15 +640,15 @@
 
 	implicit none
 
-	integer ie,l
-	integer itot,isum
-	double precision dt
-	double precision cl(0:nlvdi+1,3)		!bug fix
-	real cv(nlvdi,nkn)
-        real gxv(nlvdi,nkn)
-        real gyv(nlvdi,nkn)
-	double precision f(3)
-	double precision fl(3)
+	integer, intent(in) :: ie,l
+	integer, intent(in) :: itot,isum
+	double precision, intent(in) :: dt
+	double precision, intent(in) :: cl(0:nlvdi+1,3)		!bug fix
+	real, intent(in) :: cv(nlvdi,nkn)
+        real, intent(in) :: gxv(nlvdi,nkn)
+        real, intent(in) :: gyv(nlvdi,nkn)
+	double precision, intent(in) :: f(3)
+	double precision, intent(out) :: fl(3)
 
 	real eps
 	parameter (eps=1.e-8)

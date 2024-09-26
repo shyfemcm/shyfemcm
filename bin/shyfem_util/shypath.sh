@@ -12,7 +12,7 @@
 #
 #-----------------------------------------------------------
 
-all="git fem3d grd"
+all="git fem3d grd shyfem_util"
 
 has_dot="NO"
 set_path="NO"

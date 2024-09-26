@@ -19,6 +19,8 @@
 #
 #--------------------------------------------------------
 
+femubin=bin/shyfem_util
+
 #--------------------------------------------------------
 # functions ---------------------------------------------
 #--------------------------------------------------------
@@ -32,6 +34,8 @@ ChangeDotFiles()
     touch $HOME/.bashrc
     ChangeDot .bashrc
   fi
+
+  return	#only change bashrc
 
   if [ -f $HOME/.bash_profile ]; then
     ChangeDot .bash_profile
@@ -50,12 +54,13 @@ ChangeDot()
   if [ -L $afile ]; then	# change file, not link
     afile=`readlink -f $afile`
   fi
+  date=`date "+%Y%m%d"`
   save=$afile.$date.$$
 
   #echo "$afile -> $save"; return
 
   mv -f $afile $save
-  $femdir/fembin/shyfem_install.pl $option $femdir $save > tmp.tmp
+  $femdir/bin/shyfem_util/shyfem_install.pl $option $femdir $save > tmp.tmp
   [ $? != 0 ] && exit 1
   mv -f tmp.tmp $afile
 
@@ -99,8 +104,8 @@ CreateSymlink()
 
 CheckVersion()
 {
-  if [ -x ./fembin/shyfem_version.sh ]; then
-    version=`./fembin/shyfem_version.sh $dir`
+  if [ -x ./$femubin/shyfem_version.sh ]; then
+    version=`./$femubin/shyfem_version.sh $dir`
   fi
   if [ -z "$version" -o "$version" = "unknown" ]; then
     echo "cannot get version for $dir ... aborting" 1>&2
@@ -122,6 +127,7 @@ export SHYFEMDIR=.
 
 CheckVersion
 
+echo ""
 echo "========================================================="
 if [ "$reset" = "YES" ]; then
   echo "Uninstalling the SHYFEM model"
@@ -131,12 +137,13 @@ fi
 echo "      running shyfem_install_soft.sh $option"
 echo "      using directory: $femdir"
 echo "========================================================="
+echo ""
 
 #--------------------------------------------------------
 # run installation --------------------------------------
 #--------------------------------------------------------
 
-CreateSymlink shyfem
+#CreateSymlink shyfem
 ChangeDotFiles
 
 #--------------------------------------------------------

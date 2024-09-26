@@ -151,7 +151,7 @@
 	real,dimension(0:nlvddi,nkn),intent(in) :: difv,wsinkv
         !double precision,dimension(nlvddi,nkn),intent(out) :: cn
         
-	logical :: btvdv,btvd
+	logical :: btvdv,btvd2
 	integer :: ie,k,ilevel,ibase,ii,l,n,i,j,x,ies,iend,kl,kend,ntot
 	integer :: myid,numthreads,j_init,j_end,knod,k_end,jel
 	integer,allocatable,dimension(:) :: subset_l
@@ -218,8 +218,8 @@
 	  stop 'error stop conz3d: vertical tvd scheme'
 	end if
 
-	btvd = itvd == 2
-	if( btvd ) then
+	btvd2 = itvd == 2
+	if( btvd2 ) then
 	  call tvd_mpi_prepare(cn1)
 	end if
 
@@ -652,7 +652,7 @@
 	end if
 
 ! 	----------------------------------------------------------------
-! 	horizontal TVD scheme start
+! 	horizontal TVD scheme start - compute fluxes fl, otherwise leave as is
 ! 	----------------------------------------------------------------
 
         if( btvd ) then

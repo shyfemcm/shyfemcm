@@ -40,7 +40,7 @@
 
 	implicit none
 
-	logical, parameter :: btvd = .true. !handles tripple points
+	logical, parameter :: bmpitvd = .true. !handles tvd
 
 	integer, save :: nmax_tvd = 0
 	real, save, allocatable :: buffer_tvd_in(:,:)
@@ -77,6 +77,10 @@
 	real, save, allocatable :: my_array_send_list(:,:)
 	real, save, allocatable :: my_array_list(:,:)
 	double precision, save, allocatable :: my_xi_list(:,:)
+	real, save, allocatable :: tvd_buffer_in(:)
+	real, save, allocatable :: tvd_buffer_out(:)
+
+	integer, save :: iu_debug = 0
 
 !==================================================================
         contains
@@ -127,6 +131,7 @@
 	integer ilist,maxlist,maxnlist
 	integer ia_found,ia_needed,ie_local,iu,iudb
 	integer n_tvd_r,n_tvd_s,n_tvd
+	integer lmax
 	real x,y
 	real xmin,ymin,xmax,ymax
 
@@ -154,6 +159,8 @@
 !----------------------------------------------------------
 ! starting collection of tvd information
 !----------------------------------------------------------
+
+	if( .not. bmpitvd ) return		!do not handle mpi tvd
 
 	write(6,*) 'configuring tvd with mpi ',my_id
 
@@ -296,9 +303,9 @@
 	    if( ie == 0 ) exit			!end of list
 	    ia_found = nint(newlists(ind_ia_found,i,ia))!found in this domain
 	    ia_needed = nint(newlists(ind_ia_needed,i,ia))!needed in this domain
-	    ie_ext = nint(newlists(ind_iee_this,i,ia))	!in this element needed
 	    ie_int = nint(newlists(ind_ie_remote,i,ia))	!in this element found
 	    iee_ext = nint(newlists(ind_iee_remote,i,ia))!in this element found
+	    lmax = nint(newlists(ind_lmax_remote,i,ia))!lmax of remote
 	    if( ia_found /= ia_needed ) then
 	     if( my_ia == ia_needed ) then
 	      nchanged = nchanged + 1
@@ -313,6 +320,7 @@
 	        ieetvdup(j,ii,ie) = iee_ext
 	        ietvdup(j,ii,ie) = ie_int
 	        iatvdup(j,ii,ie) = ia_found
+	        ltvdup(j,ii,ie) = lmax
 	      end if
 	     end if
 	    end if
@@ -350,8 +358,8 @@
 	        raux(ind_ia_found,ilist) = iatvdup(j,ii,ie)!area where found
 	        raux(ind_ie_remote,ilist) = ietvdup(j,ii,ie)!internal remote
 	        raux(ind_iee_remote,ilist) = ieetvdup(j,ii,ie)!external remote
-	        raux(ind_lmax_this,ilist) = ilhv(ie) 	!external remote
-	        raux(ind_lmax_remote,ilist) = ltvdup(j,ii,ie)!external remote
+	        raux(ind_lmax_this,ilist) = ilhv(ie) 	!lmax local
+	        raux(ind_lmax_remote,ilist) = ltvdup(j,ii,ie)!lmax remote
 	    end do
 	  end do
 	end do
@@ -567,13 +575,13 @@
 	      na = na + 1
 	      my_array_list(:,na) = rlists(:,i,ia)
 	      nr = nr + 1
-	      my_receive_list(nr) = nr
+	      my_receive_list(nr) = na
 	      my_array_receive_list(:,nr) = rlists(:,i,ia)
 	    else if( ia_found == my_ia ) then
 	      na = na + 1
 	      my_array_list(:,na) = rlists(:,i,ia)
 	      ns = ns + 1
-	      my_send_list(ns) = ns
+	      my_send_list(ns) = na
 	      my_array_send_list(:,ns) = rlists(:,i,ia)
 	    end if
 	  end do
@@ -593,6 +601,15 @@
 	  ie = my_array_list(ind_ie_remote,na)
 	  call xy2xi(ie,xd,yd,xi)
 	  my_xi_list(:,i) = xi(:)
+	end do
+
+	itvdup(:,:,:) = 0
+	do i=1,n_my_receive_list
+	  na = my_receive_list(i)
+	  j = my_array_list(ind_j_this,na)
+	  ii = my_array_list(ind_ii_this,na)
+	  ie = my_array_list(ind_ie_this,na)
+	  itvdup(j,ii,ie) = i
 	end do
 
 	write(iudb,*) '====================================='
@@ -733,6 +750,8 @@
 
 	allocate( values_tvd_local(lmax,n_tvd_receive_total) )
 	allocate( values_tvd_remote(lmax,n_tvd_send_total) )
+	allocate( tvd_buffer_in(lmax) )
+	allocate( tvd_buffer_out(lmax) )
 
 	end
 
@@ -749,7 +768,8 @@
 
 	real values(nlvdi,nkn)
 
-	integer i,na,ie,ii,k,l,lmax,ia
+	integer i,na,ie,ii,k,l,ia
+	integer lmax,lmax_remote,lmax_this
 	integer my_ia
 	double precision c,cacum
 	double precision xi(3)
@@ -758,14 +778,20 @@
 
 	do i=1,n_my_send_list
 	  na = my_send_list(i)
-	  if( i /= na ) stop 'error stop tvd_prepare_remote: internal (0)'
-	  ia = nint(my_array_send_list(ind_ia_found,na))
+	  ia = nint(my_array_list(ind_ia_found,na))
+	  ie = nint(my_array_list(ind_ie_remote,na))
+	  !if( i /= na ) stop 'error stop tvd_prepare_remote: internal (0)'
 	  if( ia /= my_ia ) stop 'error stop tvd_prepare_remote: internal (1)'
-	  ie = nint(my_array_send_list(ind_ie_remote,na))
 	  if( ie > nel ) stop 'error stop tvd_prepare_remote: internal (2)'
 	  !write(6,*) 'ggguuu: ',i,na,ia,my_ia
 	  lmax = ilhv(ie)
-	  xi(:) = my_xi_list(:,na)
+	  lmax_remote = nint(my_array_list(ind_lmax_remote,na))
+	  lmax_this = nint(my_array_list(ind_lmax_this,na))
+	  if( lmax /= lmax_remote ) then
+	    write(6,*) 'lmax,lmax_remote,lamx_this: ',lmax,lmax_remote,lmax_this
+	    stop 'error stop tvd_prepare_remote: internal (3)'
+	  end if
+	  xi(:) = my_xi_list(:,i)
 	  do l=1,lmax
 	    cacum = 0.
 	    do ii=1,3
@@ -773,8 +799,8 @@
 	      c = values(l,k)
 	      cacum = cacum + c * xi(ii)
 	    end do
-	    write(6,*) 'ggguuu: ',l,na,my_ia,cacum
-	    values_tvd_remote(l,na) = cacum
+	    !write(6,*) 'ggguuu: ',l,na,my_ia,cacum
+	    values_tvd_remote(l,i) = cacum
 	  end do
 	end do
 
@@ -789,9 +815,122 @@
 
 	implicit none
 
+	integer i,na,n,nin,nout
+	integer my_ia
+	integer id_from,id_to
+	integer lmax,lmax_remote
+
+	my_ia = my_id + 1
+	nin = 0
+	nout = 0
+
+	do i=1,n_my_array_list
+	  na = i
+	  id_from = nint(my_array_list(ind_ia_found,na)) - 1
+	  id_to = nint(my_array_list(ind_ia_needed,na)) - 1
+	  lmax = nint(my_array_list(ind_lmax_remote,na))
+
+	  if( id_from == my_id ) nout = nout + 1
+	  n = lmax
+          tvd_buffer_in(1:n) = values_tvd_remote(1:n,na)
+          tvd_buffer_out = 0.
+          call shympi_receive(id_from,id_to,n,tvd_buffer_in,tvd_buffer_out)
+	  if( id_to /= my_id ) cycle
+	  nin = nin + 1
+          values_tvd_local(1:n,nin) = tvd_buffer_out(1:n)
+	end do
+
+	if( nin /= n_my_receive_list .or. nout /= n_my_send_list ) then
+	  write(6,*) my_id,my_ia
+	  write(6,*) nin,n_my_receive_list
+	  write(6,*) nout,n_my_send_list
+	  stop 'error stop tvd_exchange: internal (1)'
+	end if
 
 	end
 
+!******************************************************************
+
+	subroutine tvd_exchange_debug
+
+	use shympi
+	use shympi_tvd
+
+	implicit none
+
+	integer i,na,n,iee
+	integer nin,nout
+	integer my_ia,iaf
+	integer iudb
+	integer id_from,id_to
+	integer lmax,lmax_remote
+	real val,val0
+
+	my_ia = my_id + 1
+	nin = 0
+	nout = 0
+	iudb = 340 + my_ia
+
+	write(iudb,*) '----------------------- starting exchange ',my_id
+
+	do i=1,n_my_array_list
+	  na = i
+	  id_from = nint(my_array_list(ind_ia_found,na)) - 1
+	  id_to = nint(my_array_list(ind_ia_needed,na)) - 1
+	  lmax = nint(my_array_list(ind_lmax_remote,na))
+	  iee = nint(my_array_list(ind_iee_remote,na))
+	  iaf = nint(my_array_list(ind_ia_found,na))
+	  val = iaf*iee
+
+	  if( id_from == my_id ) nout = nout + 1
+	  n = lmax
+          tvd_buffer_in(1:n) = val
+          tvd_buffer_out = 0.
+	  write(iudb,*) 'exchanging ',id_from,id_to,my_id,iaf,val
+          call shympi_receive(id_from,id_to,n,tvd_buffer_in,tvd_buffer_out)
+	  if( id_to /= my_id ) cycle
+	  nin = nin + 1
+          values_tvd_local(1:n,nin) = tvd_buffer_out(1:n)
+	end do
+
+	if( nin /= n_my_receive_list .or. nout /= n_my_send_list ) then
+	  write(6,*) my_id,my_ia
+	  write(6,*) nin,n_my_receive_list
+	  write(6,*) nout,n_my_send_list
+	  stop 'error stop tvd_exchange_debug: internal (1)'
+	end if
+
+	write(iudb,*) 'finished exchange: ',nin,nout
+	write(iudb,*) 'debug exchange: ',nin,n_my_receive_list
+	do i=1,n_my_receive_list
+	  na = my_receive_list(i)
+	  id_from = nint(my_array_list(ind_ia_found,na)) - 1
+	  id_to = nint(my_array_list(ind_ia_needed,na)) - 1
+	  lmax = nint(my_array_list(ind_lmax_remote,na))
+	  iee = nint(my_array_list(ind_iee_remote,na))
+	  iaf = nint(my_array_list(ind_ia_found,na))
+	  val = values_tvd_local(1,i)
+	  val0 = iaf*iee
+	  write(iudb,*) id_from,id_to,val,val0,my_id
+	end do
+
+	end
+
+!******************************************************************
+
+	subroutine tvd_write_contribution(values)
+
+	use basin
+	use levels
+	use shympi
+	use shympi_tvd
+
+	implicit none
+
+	real values(nlvdi,nkn)
+
+	end
+	
 !******************************************************************
 
 	subroutine tvd_mpi_prepare(values)
@@ -808,16 +947,57 @@
 	integer, save :: nvals = 1
 
 	if( .not. bmpi ) return
+	if( .not. bmpitvd ) return		!do not handle mpi tvd
 
 	call allocate_tvd_arrays(nvals)
 
 	call tvd_prepare_remote(values)
 
-	call tvd_exchange
+	!call tvd_exchange
+	call tvd_exchange_debug
 
 	end
 
 !******************************************************************
+!******************************************************************
+!******************************************************************
+
+	subroutine tvd_debug_initialize(dtime)
+
+	use shympi
+	use shympi_tvd
+
+	implicit none
+
+	double precision dtime
+
+	if( shympi_is_master() .and. iu_debug > 0 ) then
+	  write(iu_debug,*) 'time = ',dtime
+	end if
+
+	end
+
+!******************************************************************
+
+	subroutine tvd_debug_accum(ie,l,conu)
+
+	use shympi
+	use shympi_tvd
+
+	implicit none
+
+	integer ie,l
+	real conu(3)
+
+	real conu_global
+
+	end
+
+!******************************************************************
+
+	subroutine tvd_debug_finalize
+
+	end
 
 !******************************************************************
 !******************************************************************
