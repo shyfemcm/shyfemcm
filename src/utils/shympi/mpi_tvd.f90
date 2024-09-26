@@ -81,6 +81,7 @@
 	real, save, allocatable :: tvd_buffer_out(:)
 
 	integer, save :: iu_debug = 0
+	real, save, allocatable :: tvd_debug_aux(:,:,:)
 
 !==================================================================
         contains
@@ -964,14 +965,26 @@
 
 	subroutine tvd_debug_initialize(dtime)
 
+	use basin
+	use levels
 	use shympi
 	use shympi_tvd
 
 	implicit none
 
 	double precision dtime
+	integer, save :: icall = 0
 
-	if( shympi_is_master() .and. iu_debug > 0 ) then
+	if( iu_debug <= 0 ) return
+
+	if( icall == 0 ) then
+	  allocate( tvd_debug_aux(nlvdi,3,nel) )
+	  icall = 1
+	end if
+
+	tvd_debug_aux = 0.
+
+	if( shympi_is_master() ) then
 	  write(iu_debug,*) 'time = ',dtime
 	end if
 
@@ -989,13 +1002,43 @@
 	integer ie,l
 	real conu(3)
 
-	real conu_global
+	if( iu_debug <= 0 ) return
+
+	tvd_debug_aux(l,:,ie) = conu(:)
 
 	end
 
 !******************************************************************
 
 	subroutine tvd_debug_finalize
+
+	use basin
+	use levels
+	use shympi
+	use shympi_tvd
+
+	implicit none
+
+	integer l,lmax,ie
+	real, allocatable :: aux(:,:),auxg(:,:)
+
+	if( iu_debug <= 0 ) return
+
+	allocate(aux(3,nel))
+	allocate(auxg(3,nel_global))
+
+	lmax = nlv_global
+
+	do l=1,lmax,lmax/2
+	  auxg = 0.
+	  aux = 0.
+	  if( l <= nlv ) aux(:,:) = tvd_debug_aux(l,:,:)
+	  call shympi_l2g_array(3,aux,auxg)
+	  write(iu_debug,*) 'level = ',l
+	  write(iu_debug,*) ie,(auxg(:,ie),ie=1,nel_global)
+	end do
+
+	flush(iu_debug)
 
 	end
 
