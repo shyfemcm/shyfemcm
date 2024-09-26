@@ -329,18 +329,12 @@ update_copyright:
 install: install_soft
 
 install_soft: checkv
-	$(FEMBIN)/shyfem_install_soft.sh
+	$(FEMBIN)/shyfem_util/shyfem_install_soft.sh
 
-install_hard: checkv
-	$(FEMBIN)/shyfem_install_hard.sh
-
-uninstall: install_hard_reset install_soft_reset
+uninstall: install_soft_reset
 
 install_soft_reset: checkv
-	$(FEMBIN)/shyfem_install_soft.sh -reset
-
-install_hard_reset: checkv
-	$(FEMBIN)/shyfem_install_hard.sh -reset
+	$(FEMBIN)/shyfem_util/shyfem_install_soft.sh -reset
 
 #--------------------------------------------------------
 # private and admin commands
