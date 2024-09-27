@@ -53,21 +53,20 @@
 
 	integer, parameter :: ind_x = 1
 	integer, parameter :: ind_y = 2
-	integer, parameter :: ind_ia_needed = 3
+	integer, parameter :: ind_ia_this = 3
 	integer, parameter :: ind_j_this = 4
 	integer, parameter :: ind_ii_this = 5
-	integer, parameter :: ind_ie_this = 6
-	integer, parameter :: ind_iee_this = 7
-	integer, parameter :: ind_ia_found = 8
-	integer, parameter :: ind_ie_remote = 9
-	integer, parameter :: ind_iee_remote = 10
-
-	integer, parameter :: ind_k_this = 11
-	integer, parameter :: ind_lmax_this = 12
-	integer, parameter :: ind_lmax_remote = 13
+	integer, parameter :: ind_k_this = 6
+	integer, parameter :: ind_ie_this = 7
+	integer, parameter :: ind_iee_this = 8
+	integer, parameter :: ind_lmax_this = 9
+	integer, parameter :: ind_ia_found = 10
+	integer, parameter :: ind_ie_found = 11
+	integer, parameter :: ind_iee_found = 12
+	integer, parameter :: ind_lmax_found = 13
 
 	integer, parameter :: nlist = 13
-	integer, parameter :: nlist_type = 1
+	integer, parameter :: nlist_type = 2
 
 	integer, save :: n_tvd_receive_total,n_tvd_send_total
 	real, save, allocatable :: values_tvd_local(:,:)
@@ -81,7 +80,9 @@
 	real, save, allocatable :: tvd_buffer_in(:)
 	real, save, allocatable :: tvd_buffer_out(:)
 
-	integer, save :: iu_debug = 500
+	logical, save :: btvddebug = .true.	!writes tvd_debug.txt
+	integer, save :: iu_debug = 500		!writes fort.500 if > 0
+	integer, save :: ifreq_debug = 50	!frequency of debug in fort.500
 	real, save, allocatable :: tvd_debug_aux(:,:,:)
 
 !==================================================================
@@ -131,7 +132,7 @@
 	integer my_ia,ia,id,inlist,nfound,nchanged
 	integer ie_ext,iee_ext,iee_old,ie_int,iee
 	integer ilist,maxlist,maxnlist
-	integer ia_found,ia_needed,ie_local,iu,iudb
+	integer ia_found,ia_needed,ie_local,iudb
 	integer n_tvd_r,n_tvd_s,n_tvd
 	integer lmax
 	real x,y
@@ -167,7 +168,6 @@
 	write(6,*) 'configuring tvd with mpi ',my_id
 
 	my_ia = my_id + 1
-	iu = 330 + my_ia
 	iudb = 340 + my_ia
 
 	ilist = 0
@@ -190,7 +190,7 @@
 		call jii2k(j,ii,k)
 		raux(ind_x,ilist) = xtvdup(j,ii,ie)
 		raux(ind_y,ilist) = ytvdup(j,ii,ie)
-		raux(ind_ia_needed,ilist) = my_ia	!needed in this domain
+		raux(ind_ia_this,ilist) = my_ia	!needed in this domain
 		raux(ind_j_this,ilist) = j
 		raux(ind_ii_this,ilist) = ii
 		raux(ind_k_this,ilist) = k
@@ -244,7 +244,7 @@
 	  if( ia == my_ia ) cycle
 	  do i=1,maxlist
 	    ie_local = nint(rlists(ind_ie_this,i,ia))
-	    ia_needed = nint(rlists(ind_ia_needed,i,ia))
+	    ia_needed = nint(rlists(ind_ia_this,i,ia))
 	    ie_ext = nint(rlists(ind_iee_this,i,ia))
 	    ie = 0
 	    iee_ext = 0
@@ -258,9 +258,9 @@
 	      nfound = nfound + 1
 	      iee_ext = ipev(ie)
 	      rlists(ind_ia_found,i,ia) = my_ia		!found for this domain
-	      rlists(ind_ie_remote,i,ia) = ie		!internal element number
-	      rlists(ind_iee_remote,i,ia) = iee_ext	!external element number
-	      rlists(ind_lmax_remote,i,ia) = ilhv(ie)	!lmax
+	      rlists(ind_ie_found,i,ia) = ie		!internal element number
+	      rlists(ind_iee_found,i,ia) = iee_ext	!external element number
+	      rlists(ind_lmax_found,i,ia) = ilhv(ie)	!lmax
 	      inlist = inlist + 1
 	      raux(:,inlist) = rlists(:,i,ia)
 	    end if
@@ -301,13 +301,13 @@
 	do ia=1,n_threads
 	  if( ia == my_ia ) cycle
 	  do i=1,maxnlist
-	    ie = nint(newlists(ind_ie_remote,i,ia))
+	    ie = nint(newlists(ind_ie_found,i,ia))
 	    if( ie == 0 ) exit			!end of list
 	    ia_found = nint(newlists(ind_ia_found,i,ia))!found in this domain
-	    ia_needed = nint(newlists(ind_ia_needed,i,ia))!needed in this domain
-	    ie_int = nint(newlists(ind_ie_remote,i,ia))	!in this element found
-	    iee_ext = nint(newlists(ind_iee_remote,i,ia))!in this element found
-	    lmax = nint(newlists(ind_lmax_remote,i,ia))!lmax of remote
+	    ia_needed = nint(newlists(ind_ia_this,i,ia))!needed in this domain
+	    ie_int = nint(newlists(ind_ie_found,i,ia))	!in this element found
+	    iee_ext = nint(newlists(ind_iee_found,i,ia))!in this element found
+	    lmax = nint(newlists(ind_lmax_found,i,ia))!lmax of remote
 	    if( ia_found /= ia_needed ) then
 	     if( my_ia == ia_needed ) then
 	      nchanged = nchanged + 1
@@ -351,17 +351,17 @@
 		call jii2k(j,ii,k)
 		raux(ind_x,ilist) = xtvdup(j,ii,ie)
 		raux(ind_y,ilist) = ytvdup(j,ii,ie)
-		raux(ind_ia_needed,ilist) = my_ia	!needed in this domain
+		raux(ind_ia_this,ilist) = my_ia	!needed in this domain
 		raux(ind_j_this,ilist) = j
 		raux(ind_ii_this,ilist) = ii
 		raux(ind_k_this,ilist) = k
 		raux(ind_ie_this,ilist) = ie		!internal local element
 		raux(ind_iee_this,ilist) = ipev(ie)	!external local element
 	        raux(ind_ia_found,ilist) = iatvdup(j,ii,ie)!area where found
-	        raux(ind_ie_remote,ilist) = ietvdup(j,ii,ie)!internal remote
-	        raux(ind_iee_remote,ilist) = ieetvdup(j,ii,ie)!external remote
+	        raux(ind_ie_found,ilist) = ietvdup(j,ii,ie)!internal remote
+	        raux(ind_iee_found,ilist) = ieetvdup(j,ii,ie)!external remote
 	        raux(ind_lmax_this,ilist) = ilhv(ie) 	!lmax local
-	        raux(ind_lmax_remote,ilist) = ltvdup(j,ii,ie)!lmax remote
+	        raux(ind_lmax_found,ilist) = ltvdup(j,ii,ie)!lmax remote
 	    end do
 	  end do
 	end do
@@ -437,9 +437,9 @@
 
 	do ia=1,n_threads
 	  do i=1,maxlist
-	    ie = nint(rlists(ind_iee_remote,i,ia))
+	    ie = nint(rlists(ind_iee_found,i,ia))
 	    if( ie == 0 ) exit			!end of list
-	    ia_needed = nint(rlists(ind_ia_needed,i,ia))
+	    ia_needed = nint(rlists(ind_ia_this,i,ia))
 	    if( ia_needed /= ia ) then
 	      write(6,*) 'ia and ia_needed are different'
 	      write(6,*) ia,ia_needed
@@ -461,7 +461,7 @@
 	do ia=1,n_threads
 	  !if( ia == my_ia ) cycle
 	  do i=1,maxlist
-	    ie = nint(rlists(ind_iee_remote,i,ia))
+	    ie = nint(rlists(ind_iee_found,i,ia))
 	    if( ie == 0 ) exit			!end of list
 	    ia_found = nint(rlists(ind_ia_found,i,ia))	!found in this domain
 	    if( ia_found == ia ) cycle
@@ -507,7 +507,7 @@
 	  do i=1,maxlist
 	    ie = nint(rlists(ind_ie_this,i,ia))
 	    if( ie == 0 ) exit			!end of list
-	    ia_needed = nint(rlists(ind_ia_needed,i,ia))!needed in this domain
+	    ia_needed = nint(rlists(ind_ia_this,i,ia))!needed in this domain
 	    if( ia /= ia_needed ) stop 'error stop: ia/=ia_needed'
 	    ia_found = nint(rlists(ind_ia_found,i,ia))	!found in this domain
 	    if( ia_found == ia_needed ) cycle
@@ -567,9 +567,9 @@
 	na = 0
 	do ia=1,n_threads
 	  do i=1,maxlist
-	    ie = nint(rlists(ind_ie_remote,i,ia))
+	    ie = nint(rlists(ind_ie_found,i,ia))
 	    if( ie == 0 ) exit			!end of list
-	    ia_needed = nint(rlists(ind_ia_needed,i,ia))!needed in this domain
+	    ia_needed = nint(rlists(ind_ia_this,i,ia))!needed in this domain
 	    if( ia /= ia_needed ) stop 'error stop: ia/=ia_needed'
 	    ia_found = nint(rlists(ind_ia_found,i,ia))	!found in this domain
 	    if( ia_found == ia_needed ) cycle
@@ -604,8 +604,8 @@
 	  na = my_send_list(i)
 	  xd = my_array_list(ind_x,na)
 	  yd = my_array_list(ind_y,na)
-	  ie = my_array_list(ind_ie_remote,na)
-	  iee = my_array_list(ind_iee_remote,na)
+	  ie = my_array_list(ind_ie_found,na)
+	  iee = my_array_list(ind_iee_found,na)
 	  call xy2xi(ie,xd,yd,xi)
 	  my_xi_list(:,i) = xi(:)
 	  write(iudb,*) iee,xd,yd
@@ -720,20 +720,13 @@
 ! write out debug information
 !----------------------------------------------------------
 
-	!call write_tvd_debug(nel)
-
 !----------------------------------------------------------
 ! all info exchanged
 !----------------------------------------------------------
 
-	!call test_tvd_convert
-
-	call flush(iu)
 	call flush(iudb)
 	call shympi_barrier
 	call flush(6)
-
-	!stop
 
 	return
     9	format(i5,a,i5,a,i10)
@@ -789,8 +782,8 @@
 	do i=1,n_my_send_list
 	  na = my_send_list(i)
 	  ia = nint(my_array_list(ind_ia_found,na))
-	  ie = nint(my_array_list(ind_ie_remote,na))
-	  iee = nint(my_array_list(ind_iee_remote,na))
+	  ie = nint(my_array_list(ind_ie_found,na))
+	  iee = nint(my_array_list(ind_iee_found,na))
 	  !ie = nint(my_array_list(ind_ie_this,na))
 	  !iee = nint(my_array_list(ind_iee_this,na))
 	  bdebug = iee == 3423
@@ -800,7 +793,7 @@
 	  if( ie > nel ) stop 'error stop tvd_prepare_remote: internal (2)'
 	  !write(6,*) 'ggguuu: ',i,na,ia,my_ia
 	  lmax = ilhv(ie)
-	  lmax_remote = nint(my_array_list(ind_lmax_remote,na))
+	  lmax_remote = nint(my_array_list(ind_lmax_found,na))
 	  lmax_this = nint(my_array_list(ind_lmax_this,na))
 	  if( lmax /= lmax_remote ) then
 	    write(6,*) 'lmax,lmax_remote,lamx_this: ',lmax,lmax_remote,lmax_this
@@ -838,10 +831,13 @@
 
 	implicit none
 
+	logical bdebug
 	integer i,na,n,nin,nout,iudb
 	integer my_ia
 	integer id_from,id_to
 	integer lmax,lmax_remote
+
+	bdebug = .false.
 
 	my_ia = my_id + 1
 	iudb = 350 + my_ia
@@ -851,21 +847,25 @@
 	do i=1,n_my_array_list
 	  na = i
 	  id_from = nint(my_array_list(ind_ia_found,na)) - 1
-	  id_to = nint(my_array_list(ind_ia_needed,na)) - 1
-	  lmax = nint(my_array_list(ind_lmax_remote,na))
+	  id_to = nint(my_array_list(ind_ia_this,na)) - 1
+	  lmax = nint(my_array_list(ind_lmax_found,na))
 
 	  if( id_from == my_id ) nout = nout + 1
 	  n = lmax
           tvd_buffer_in(1:n) = values_tvd_remote(1:n,nout)
 	  if( id_from /= my_id ) tvd_buffer_in(:) = -1
-	  write(iudb,*) 'exchanging: ',my_ia,id_from+1,id_to+1,n &
+	  if( bdebug ) then
+	    write(iudb,*) 'exchanging: ',my_ia,id_from+1,id_to+1,n &
      &			,values_tvd_remote(1,nout)
+	  end if
           tvd_buffer_out = 0.
           call shympi_receive(id_from,id_to,n,tvd_buffer_in,tvd_buffer_out)
 	  if( id_to /= my_id ) cycle
 	  nin = nin + 1
           values_tvd_local(1:n,nin) = tvd_buffer_out(1:n)
-	  write(iudb,*) 'exchanged: ',my_ia,nin,values_tvd_local(1,nin)
+	  if( bdebug ) then
+	    write(iudb,*) 'exchanged: ',my_ia,nin,values_tvd_local(1,nin)
+	  end if
 	end do
 
 	if( nin /= n_my_receive_list .or. nout /= n_my_send_list ) then
@@ -904,9 +904,9 @@
 	do i=1,n_my_array_list
 	  na = i
 	  id_from = nint(my_array_list(ind_ia_found,na)) - 1
-	  id_to = nint(my_array_list(ind_ia_needed,na)) - 1
-	  lmax = nint(my_array_list(ind_lmax_remote,na))
-	  iee = nint(my_array_list(ind_iee_remote,na))
+	  id_to = nint(my_array_list(ind_ia_this,na)) - 1
+	  lmax = nint(my_array_list(ind_lmax_found,na))
+	  iee = nint(my_array_list(ind_iee_found,na))
 	  iaf = nint(my_array_list(ind_ia_found,na))
 	  val = iaf*iee
 
@@ -933,9 +933,9 @@
 	do i=1,n_my_receive_list
 	  na = my_receive_list(i)
 	  id_from = nint(my_array_list(ind_ia_found,na)) - 1
-	  id_to = nint(my_array_list(ind_ia_needed,na)) - 1
-	  lmax = nint(my_array_list(ind_lmax_remote,na))
-	  iee = nint(my_array_list(ind_iee_remote,na))
+	  id_to = nint(my_array_list(ind_ia_this,na)) - 1
+	  lmax = nint(my_array_list(ind_lmax_found,na))
+	  iee = nint(my_array_list(ind_iee_found,na))
 	  iaf = nint(my_array_list(ind_ia_found,na))
 	  val = values_tvd_local(1,i)
 	  val0 = iaf*iee
@@ -1016,15 +1016,17 @@
 
 	if( icall == 0 ) then
 	  allocate( tvd_debug_aux(nlvdi,3,nel) )
-	  icall = 1
 	end if
 
 	tvd_debug_aux = 0.
 
 	if( shympi_is_master() ) then
-	  write(iu_debug,*) 'written by tvd_debug_initialize'
+	  if( icall == 0 ) write(iu_debug,*) 'written by tvd_debug_initialize'
 	  write(iu_debug,*) 'time = ',dtime,isact,'  ',trim(what)
+	  flush(iu_debug)
 	end if
+
+	icall = icall + 1
 
 	end
 
@@ -1057,10 +1059,20 @@
 
 	implicit none
 
+	logical bout
 	integer l,lmax,ie,ie_ext
 	real, allocatable :: aux(:,:),auxg(:,:)
+	integer, save :: icall = 0
+	integer, save :: nrec = 0
 
 	if( iu_debug <= 0 ) return
+
+	bout = .true.		!if false checks how may records are written
+	icall = icall + 1
+	if( ifreq_debug < 0 ) return
+	if( ifreq_debug > 0 ) then
+	  if( mod(icall,ifreq_debug) /= 0 ) return
+	end if
 
 	allocate(aux(3,nel))
 	allocate(auxg(3,nel_global))
@@ -1073,10 +1085,11 @@
 	  if( l <= nlv ) aux(:,:) = tvd_debug_aux(l,:,:)
 	  call shympi_l2g_array(3,aux,auxg)
 	  if( shympi_is_master() ) then
-	    write(iu_debug,*) 'level = ',l,nel_global
+	    nrec = nrec + 1
+	    write(iu_debug,*) 'level = ',l,nel_global,nrec
 	    do ie=1,nel_global
 	      ie_ext = ip_ext_elem(ie)
-	      write(iu_debug,*) ie,ie_ext,auxg(:,ie)
+	      if( bout ) write(iu_debug,*) ie,ie_ext,auxg(:,ie)
 	    end do
 	  end if
 	end do
@@ -1105,6 +1118,8 @@
 	integer, allocatable :: iadebug(:,:)
 	integer, allocatable :: iaout(:,:)
 	character*80 file
+
+	if( .not. btvddebug ) return
 
 	iu = 583
 	file='tvd_debug.txt'
@@ -1146,11 +1161,10 @@
 	if( shympi_is_master() ) then
 
 	open(iu,file=file,status='unknown',form='formatted')
-	write(iu,*) 'debug information'
+	write(iu,*) 'debug information written by write_tvd_debug'
 	do ie=1,nel_global
 	  ie_ext = ip_ext_elem(ie)
-	  write(iu,'(2i8)') ie,ie_ext
-	  write(iu,'(9i7)') ieout(:,ie)
+	  write(iu,'(11i7)') ie,ie_ext,ieout(:,ie)
 	  !write(iu,'(9i7)') iaout(:,ie)
 	end do
 	close(iu)
@@ -1194,7 +1208,7 @@
 	if( nlist_type == 1 ) then
 	  write(iudb,'(10i6)') i,nint(array(3:10))
 	else if( nlist_type == 2 ) then
-	  write(iudb,'(10i6)') i,nint(array(3:nlist))
+	  write(iudb,'(i4,11i6)') i,nint(array(3:nlist))
 	end if
 
 	end
@@ -1212,7 +1226,8 @@
 	if( nlist_type == 1 ) then
 	  write(iudb,*) '    i   ian     j    ii    ie   iee   iaf   ief  ieef'
 	else if( nlist_type == 2 ) then
-	  write(iudb,*) '    i   ian     j    ii    ie   iee   iaf   ief  ieef'
+	  write(iudb,*) '  i   ian     j    ii     k    ie   iee  lmax' &
+     &		//	'   iaf   ief  ieef lmaxf'
 	end if
 
 	end
