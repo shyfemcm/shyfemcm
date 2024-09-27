@@ -269,6 +269,7 @@
 ! 03.05.2022	ggu	exchanging twice around bndo_setbc() -> improve
 ! 09.05.2023    lrp     introduce top layer index variable
 ! 31.05.2023    ggu     in conzstab, use ie_mpi, run over nkn_unique (bug fix)
+! 27.09.2024    ggu     btvddebug introduced
 !
 !*********************************************************************
 
@@ -606,7 +607,7 @@
 	real, allocatable :: gradxv(:,:)	!gradient in x for tvd
 	real, allocatable :: gradyv(:,:)	!gradient in y for tvd
 
-	logical btvd,btvd1,bdebggu
+	logical btvd,btvd1,btvd2,btvddebug
 	integer isact
 	integer istot
 	integer itvd
@@ -621,7 +622,7 @@
 	real azpar,adpar,aapar
 	real ssurface
 	real wsinkl				!local sinking
-	double precision dtime
+	double precision dtime,dtime_act
 	character*20 aline
 ! function
 	real getpar
@@ -646,6 +647,9 @@
 	levdbg = nint(getpar('levdbg'))
 	btvd = itvd .gt. 0
 	btvd1 = itvd .eq. 1
+	btvd2 = itvd .eq. 2
+	btvddebug = .true.
+	btvddebug = btvddebug .and. btvd2
 
 	allocate(saux(nlvddi,nkn))
 	allocate(sbflux(nlvddi,nkn),sbconz(nlvddi,nkn))
@@ -724,6 +728,7 @@
 	do isact=1,istot
 
 	  dtstep = -((istot-isact)*dt)/istot
+	  dtime_act = dtime + dtstep		!why is dtstep negative?
 
 	  call make_scal_flux(what,isact,rcv,cnv,sbflux,sbconz,ssurface)
 	  !call check_scal_flux(what,cnv,sbconz)
@@ -737,9 +742,10 @@
 	  end if
 
 	  if( btvd1 ) call tvd_grad_3d(cnv,gradxv,gradyv,saux,nlvddi)
+	  if( btvddebug ) call tvd_debug_initialize(dtime_act,what,isact)
 
-          call conz3d_omp(       &
           !call conz3d_orig( &
+          call conz3d_omp(       &
      &           cnv &
      &          ,saux &
      &          ,dt &
@@ -762,6 +768,7 @@
           call bndo_setbc(what,nlvddi,cnv,rcv,uprv,vprv)
           call shympi_exchange_3d_node(cnv)
 
+	  if( btvddebug ) call tvd_debug_finalize
 	end do
 
         !if( shympi_is_parallel() .and. istot > 1 ) then
@@ -901,7 +908,7 @@
         real azpar,adpar,aapar			!$$azpar
 	integer istot,isact
 ! local
-	logical bdebug,bdebug1,btvdv,bdebggu
+	logical bdebug,bdebug1,btvdv
 	integer k,ie,ii,l,iii,ll,ibase,ntot,ie_mpi
 	integer lstart
 	integer ilevel,jlevel

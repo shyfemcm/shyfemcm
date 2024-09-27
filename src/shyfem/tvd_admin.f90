@@ -73,6 +73,7 @@
 ! 09.05.2023    lrp     introduce top layer index variable
 ! 28.08.2024    ggu     use find_unique_element() to find element
 ! 03.09.2024    ggu     more on mpi-tvd
+! 26.09.2024    ggu     mark old tvd code with TVD_OLD, btvddebug introduced
 !
 !*****************************************************************
 !
@@ -367,8 +368,8 @@
 
         implicit none
 
-	logical bsphe
-	integer ie
+	logical, intent(in) :: bsphe
+	integer, intent(in) :: ie
 
 	logical bdebug
         integer ii,j,k,in
@@ -418,6 +419,7 @@
 	    y = yu
 
 	    call find_unique_element(x,y,ienew)
+	    !call find_close_elem(ie,x,y,ienew)		!TVD_OLD
 
             xtvdup(j,ii,ie) = x
             ytvdup(j,ii,ie) = y
@@ -437,6 +439,7 @@
 	    y = yu
 
 	    call find_unique_element(x,y,ienew)
+	    !call find_close_elem(ie,x,y,ienew)		!TVD_OLD
 
             xtvdup(j,ii,ie) = x
             ytvdup(j,ii,ie) = y
@@ -596,19 +599,34 @@
 
         implicit none
 
-        integer ie,l
-	integer ic,id
-        real cu
-        real cv(nlvdi,nkn)
+        integer, intent(in) :: ie,l
+	integer, intent(in) :: ic,id
+        real, intent(inout) :: cu
+        real, intent(in) :: cv(nlvdi,nkn)
 
+	logical bdebug
         integer ienew
-        integer ii,k
+        integer ii,k,ipoint,ia
         real xu,yu
         real c(3)
+	real cu2
+	double precision xd,yd,xi(3)
+	real, parameter :: eps = 1.e-5
+
+	bdebug = ipev(ie) == 2247 .and. l == 1
+	bdebug = .false.
 
         xu = xtvdup(id,ic,ie)
         yu = ytvdup(id,ic,ie)
         ienew = ietvdup(id,ic,ie)
+	ipoint = itvdup(id,ic,ie)
+	ia = iatvdup(id,ic,ie)
+
+	if( ipoint > 0 ) then
+	  call tvd_get_upwind(l,ipoint,cu)
+	  if( bdebug ) write(6,*) 'upwind1: ',ipev(ie),ipev(ienew),ipoint,cu
+	  return
+	end if
 
         if( ienew .le. 0 ) return
 	if( ilhv(ienew) .lt. l ) return		!TVD for 3D
@@ -618,7 +636,17 @@
           c(ii) = cv(l,k)
         end do
 
-        call femintp(ienew,c,xu,yu,cu)
+        !call femintp(ienew,c,xu,yu,cu)		!TVD_OLD
+        call femintp_xi(ienew,c,xu,yu,cu)
+
+	if( bdebug ) then
+	  xd = xu
+	  yd = yu
+	  call xy2xi(ienew,xd,yd,xi)
+	  write(6,*) 'upwind2: ',ipev(ie),ipev(ienew),ipoint,cu
+	  !write(6,*) ipev(ienew),xd,yd,cu
+	  !write(6,*) xi
+	end if
 
         end
 
@@ -653,7 +681,7 @@
 	real eps
 	parameter (eps=1.e-8)
 
-        logical btvd2
+        logical btvd2,btvddebug
         logical bdebug
 	integer ii,k
         integer ic,kc,id,kd,ip,iop
@@ -667,10 +695,13 @@
         real alfa,dis,aj
         real vel
         real gdx,gdy
+	real conu_aux(3)
 
 	integer smartdelta
 
 	btvd2 = itvd_type .eq. 2
+	btvddebug = .true.
+	btvddebug = btvddebug .and. btvd2
 	bdebug = .true.
 	bdebug = .false.
 
@@ -679,9 +710,8 @@
 	  write(6,*) 'tvd: ',btvd2,itvd_type
 	end if
 
-	  do ii=1,3
-	    fl(ii) = 0.
-	  end do
+	fl = 0.
+	conu_aux = 0.
 
 	  if( itot .lt. 1 .or. itot .gt. 2 ) return
 
@@ -737,6 +767,7 @@
                   conu = cond
                   !conu = 2.*conc - cond		!use internal gradient
                   call tvd_get_upwind_c(ie,l,ic,id,conu,cv)
+		  conu_aux(ii) = conu
                   grad = cond - conu
                 else
                   gcx = gxv(l,kc)
@@ -761,6 +792,8 @@
                 fl(id) = fl(id) + term
               end if
             end do
+
+	if( btvddebug ) call tvd_debug_accum(ie,l,conu_aux)
 
 	if( bdebug ) then
 	  write(6,*) 'tvd: --------------'

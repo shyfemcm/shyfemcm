@@ -31,6 +31,7 @@
 ! 28.08.2024	ggu	first part finding elements finished
 ! 03.09.2024	ggu	more on mpi-tvd
 ! 10.09.2024	ggu	data structures localized
+! 27.09.2024	ggu	first running version... still to be cleaned
 !
 !******************************************************************
 
@@ -80,7 +81,7 @@
 	real, save, allocatable :: tvd_buffer_in(:)
 	real, save, allocatable :: tvd_buffer_out(:)
 
-	integer, save :: iu_debug = 0
+	integer, save :: iu_debug = 500
 	real, save, allocatable :: tvd_debug_aux(:,:,:)
 
 !==================================================================
@@ -128,7 +129,7 @@
 	logical bdebug,bfound
 	integer ie,ii,j,i,ie_new,ix,n,ind,iaf,ian,k
 	integer my_ia,ia,id,inlist,nfound,nchanged
-	integer ie_ext,iee_ext,iee_old,ie_int
+	integer ie_ext,iee_ext,iee_old,ie_int,iee
 	integer ilist,maxlist,maxnlist
 	integer ia_found,ia_needed,ie_local,iu,iudb
 	integer n_tvd_r,n_tvd_s,n_tvd
@@ -349,7 +350,7 @@
 		ilist = ilist + 1
 		call jii2k(j,ii,k)
 		raux(ind_x,ilist) = xtvdup(j,ii,ie)
-		raux(ind_x,ilist) = ytvdup(j,ii,ie)
+		raux(ind_y,ilist) = ytvdup(j,ii,ie)
 		raux(ind_ia_needed,ilist) = my_ia	!needed in this domain
 		raux(ind_j_this,ilist) = j
 		raux(ind_ii_this,ilist) = ii
@@ -595,13 +596,20 @@
 	allocate(my_xi_list(3,n_my_send_list))
 	my_xi_list = 0.
 
+	write(iudb,*) '====================================='
+	write(iudb,*) 'sending xi list'
+	write(iudb,*) '====================================='
+
 	do i=1,n_my_send_list
 	  na = my_send_list(i)
 	  xd = my_array_list(ind_x,na)
 	  yd = my_array_list(ind_y,na)
 	  ie = my_array_list(ind_ie_remote,na)
+	  iee = my_array_list(ind_iee_remote,na)
 	  call xy2xi(ie,xd,yd,xi)
 	  my_xi_list(:,i) = xi(:)
+	  write(iudb,*) iee,xd,yd
+	  write(iudb,*) xi
 	end do
 
 	itvdup(:,:,:) = 0
@@ -769,7 +777,8 @@
 
 	real values(nlvdi,nkn)
 
-	integer i,na,ie,ii,k,l,ia
+	logical bdebug
+	integer i,na,ie,ii,k,l,ia,iee
 	integer lmax,lmax_remote,lmax_this
 	integer my_ia
 	double precision c,cacum
@@ -781,6 +790,11 @@
 	  na = my_send_list(i)
 	  ia = nint(my_array_list(ind_ia_found,na))
 	  ie = nint(my_array_list(ind_ie_remote,na))
+	  iee = nint(my_array_list(ind_iee_remote,na))
+	  !ie = nint(my_array_list(ind_ie_this,na))
+	  !iee = nint(my_array_list(ind_iee_this,na))
+	  bdebug = iee == 3423
+	bdebug = .false.
 	  !if( i /= na ) stop 'error stop tvd_prepare_remote: internal (0)'
 	  if( ia /= my_ia ) stop 'error stop tvd_prepare_remote: internal (1)'
 	  if( ie > nel ) stop 'error stop tvd_prepare_remote: internal (2)'
@@ -793,6 +807,10 @@
 	    stop 'error stop tvd_prepare_remote: internal (3)'
 	  end if
 	  xi(:) = my_xi_list(:,i)
+	  if( bdebug ) then
+	    write(6,*) 'xi,value: '
+	    write(6,*) xi
+	  end if
 	  do l=1,lmax
 	    cacum = 0.
 	    do ii=1,3
@@ -803,6 +821,10 @@
 	    !write(6,*) 'ggguuu: ',l,na,my_ia,cacum
 	    values_tvd_remote(l,i) = cacum
 	  end do
+	  if( bdebug ) then
+	    cacum = values_tvd_remote(1,i)
+	    write(6,*) cacum,real(cacum)
+	  end if
 	end do
 
 	end
@@ -816,12 +838,13 @@
 
 	implicit none
 
-	integer i,na,n,nin,nout
+	integer i,na,n,nin,nout,iudb
 	integer my_ia
 	integer id_from,id_to
 	integer lmax,lmax_remote
 
 	my_ia = my_id + 1
+	iudb = 350 + my_ia
 	nin = 0
 	nout = 0
 
@@ -833,12 +856,16 @@
 
 	  if( id_from == my_id ) nout = nout + 1
 	  n = lmax
-          tvd_buffer_in(1:n) = values_tvd_remote(1:n,na)
+          tvd_buffer_in(1:n) = values_tvd_remote(1:n,nout)
+	  if( id_from /= my_id ) tvd_buffer_in(:) = -1
+	  write(iudb,*) 'exchanging: ',my_ia,id_from+1,id_to+1,n &
+     &			,values_tvd_remote(1,nout)
           tvd_buffer_out = 0.
           call shympi_receive(id_from,id_to,n,tvd_buffer_in,tvd_buffer_out)
 	  if( id_to /= my_id ) cycle
 	  nin = nin + 1
           values_tvd_local(1:n,nin) = tvd_buffer_out(1:n)
+	  write(iudb,*) 'exchanged: ',my_ia,nin,values_tvd_local(1,nin)
 	end do
 
 	if( nin /= n_my_receive_list .or. nout /= n_my_send_list ) then
@@ -919,7 +946,7 @@
 
 !******************************************************************
 
-	subroutine tvd_write_contribution(values)
+	subroutine tvd_get_upwind(l,ipoint,cu)
 
 	use basin
 	use levels
@@ -928,7 +955,10 @@
 
 	implicit none
 
-	real values(nlvdi,nkn)
+	integer l,ipoint
+	real cu
+
+        cu = values_tvd_local(l,ipoint)
 
 	end
 	
@@ -954,16 +984,21 @@
 
 	call tvd_prepare_remote(values)
 
-	!call tvd_exchange
-	call tvd_exchange_debug
+	call tvd_exchange
+	!call tvd_exchange_debug
 
 	end
 
 !******************************************************************
 !******************************************************************
 !******************************************************************
+! debug routines
+! set btvddebug = .true. in concentration.f90 and tvd_admin.f90
+!******************************************************************
+!******************************************************************
+!******************************************************************
 
-	subroutine tvd_debug_initialize(dtime)
+	subroutine tvd_debug_initialize(dtime,what,isact)
 
 	use basin
 	use levels
@@ -973,6 +1008,8 @@
 	implicit none
 
 	double precision dtime
+	character*(*) what
+	integer isact
 	integer, save :: icall = 0
 
 	if( iu_debug <= 0 ) return
@@ -985,7 +1022,8 @@
 	tvd_debug_aux = 0.
 
 	if( shympi_is_master() ) then
-	  write(iu_debug,*) 'time = ',dtime
+	  write(iu_debug,*) 'written by tvd_debug_initialize'
+	  write(iu_debug,*) 'time = ',dtime,isact,'  ',trim(what)
 	end if
 
 	end
@@ -1019,7 +1057,7 @@
 
 	implicit none
 
-	integer l,lmax,ie
+	integer l,lmax,ie,ie_ext
 	real, allocatable :: aux(:,:),auxg(:,:)
 
 	if( iu_debug <= 0 ) return
@@ -1034,11 +1072,16 @@
 	  aux = 0.
 	  if( l <= nlv ) aux(:,:) = tvd_debug_aux(l,:,:)
 	  call shympi_l2g_array(3,aux,auxg)
-	  write(iu_debug,*) 'level = ',l
-	  write(iu_debug,*) ie,(auxg(:,ie),ie=1,nel_global)
+	  if( shympi_is_master() ) then
+	    write(iu_debug,*) 'level = ',l,nel_global
+	    do ie=1,nel_global
+	      ie_ext = ip_ext_elem(ie)
+	      write(iu_debug,*) ie,ie_ext,auxg(:,ie)
+	    end do
+	  end if
 	end do
 
-	flush(iu_debug)
+	if( shympi_is_master() ) flush(iu_debug)
 
 	end
 
