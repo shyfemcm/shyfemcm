@@ -72,8 +72,6 @@
 	integer, save :: n_my_array_list,n_my_receive_list,n_my_send_list
 	integer, save, allocatable :: my_receive_list(:)
 	integer, save, allocatable :: my_send_list(:)
-	real, save, allocatable :: my_array_receive_list(:,:)
-	real, save, allocatable :: my_array_send_list(:,:)
 	real, save, allocatable :: my_array_list(:,:)
 	double precision, save, allocatable :: my_xi_list(:,:)
 	real, save, allocatable :: values_tvd_local(:,:)
@@ -390,14 +388,14 @@
 	  ia = nint(raux(ind_ia_found,i))
 	  count(ia) = count(ia) + 1
 	end do
-	if( count(my_ia) /= 0 ) stop 'error stop tvd_handle: internal (5)'
+	call tvd_assert('count(my_ia) /= 0',count(my_ia) == 0)
 
 	ix = 0
 	do ia=1,n_threads
 	  index(ia) = ix
 	  ix = ix + count(ia)
 	end do
-	if( ix /= ilist ) stop 'error stop tvd_handle: internal (6)'
+	call tvd_assert('ix /= ilist',ix == ilist)
 
 	maxlist = shympi_max(ilist)
 
@@ -445,7 +443,7 @@
 	call shympi_gather(nlist,rlist,rlists)
 
 !------------------------------------------------
-! compute number of points to receive or send
+! compute total number of points to receive or send
 !------------------------------------------------
 
 	allocate(n_tvd_receive(n_threads))
@@ -471,6 +469,10 @@
 	n_tvd_r = maxval(n_tvd_receive)
 	n_tvd_s = maxval(n_tvd_send)
 	n_tvd = max(n_tvd_r,n_tvd_s)
+
+!------------------------------------------------
+! set up receive and send list index
+!------------------------------------------------
 
 	allocate(tvd_receive(n_tvd_r,n_threads))
 	allocate(tvd_send(n_tvd_s,n_threads))
@@ -498,13 +500,10 @@
 	do ia=1,n_threads
 	  do i=1,maxlist
 	    ie = nint(rlists(ind_ie_this,i,ia))
-	    if( ie == 0 ) exit			!end of list
-	    ia_needed = nint(rlists(ind_ia_this,i,ia))!needed in this domain
-	    if( ia /= ia_needed ) stop 'error stop: ia/=ia_needed'
+	    if( ie == 0 ) exit				!end of list
+	    ia_needed = nint(rlists(ind_ia_this,i,ia))  !needed in this domain
 	    ia_found = nint(rlists(ind_ia_found,i,ia))	!found in this domain
 	    if( ia_found == ia_needed ) cycle
-	    if( ia_found < 1 .or. ia_found > n_threads ) stop 'error stop: 6'
-	    if( ia_needed < 1 .or. ia_needed > n_threads ) stop 'error stop: 7'
 	    if( ia_found == my_ia ) then
 	      n = n_tvd_send(ia) + 1
 	      if( n > n_tvd_s ) stop 'error stop: n > n_tvd_s'
@@ -545,14 +544,17 @@
 	n_tvd_receive_total = sum( n_tvd_receive )
 	n_tvd_send_total = sum( n_tvd_send )
 
-	if( n_my_receive_list + n_my_send_list /= n_my_array_list ) then
-	  stop 'error stop: n_receive + n_send /= n_all'
-	end if
+	call tvd_assert('list sizes' &
+     &		,n_my_receive_list + n_my_send_list == n_my_array_list)
+
+!------------------------------------------------
+! finally set up receive, send, and array list
+! my_receive_list and my_send_list are indices into my_array_list
+! in my_array_list all points that have to be exchanged are contained
+!------------------------------------------------
 
 	allocate(my_receive_list(n_my_receive_list))
 	allocate(my_send_list(n_my_send_list))
-	allocate(my_array_receive_list(nlist,n_my_receive_list))
-	allocate(my_array_send_list(nlist,n_my_send_list))
 	allocate(my_array_list(nlist,n_my_array_list))
 	my_receive_list = 0
 	my_send_list = 0
@@ -564,9 +566,8 @@
 	do ia=1,n_threads
 	  do i=1,maxlist
 	    ie = nint(rlists(ind_ie_found,i,ia))
-	    if( ie == 0 ) exit			!end of list
-	    ia_needed = nint(rlists(ind_ia_this,i,ia))!needed in this domain
-	    if( ia /= ia_needed ) stop 'error stop: ia/=ia_needed'
+	    if( ie == 0 ) exit				!end of list
+	    ia_needed = nint(rlists(ind_ia_this,i,ia))	!needed in this domain
 	    ia_found = nint(rlists(ind_ia_found,i,ia))	!found in this domain
 	    if( ia_found == ia_needed ) cycle
 	    if( ia_needed == my_ia ) then
@@ -574,20 +575,18 @@
 	      my_array_list(:,na) = rlists(:,i,ia)
 	      nr = nr + 1
 	      my_receive_list(nr) = na
-	      my_array_receive_list(:,nr) = rlists(:,i,ia)
 	    else if( ia_found == my_ia ) then
 	      na = na + 1
 	      my_array_list(:,na) = rlists(:,i,ia)
 	      ns = ns + 1
 	      my_send_list(ns) = na
-	      my_array_send_list(:,ns) = rlists(:,i,ia)
 	    end if
 	  end do
 	end do
 
-	if( na /= n_my_array_list ) stop 'error stop: na/=n_my_array_list'
-	if( nr /= n_my_receive_list ) stop 'error stop: nr/=n_my_receive_list'
-	if( ns /= n_my_send_list ) stop 'error stop: nr/=n_my_send_list'
+	call tvd_assert('na /= n_my_array_list',na == n_my_array_list)
+	call tvd_assert('nr /= n_my_receive_list',nr == n_my_receive_list)
+	call tvd_assert('ns /= n_my_send_list',ns == n_my_send_list)
 
 !------------------------------------------------
 ! setting up xi values and itvdup array
@@ -611,8 +610,6 @@
 	  call xy2xi(ie,xd,yd,xi)
 	  my_xi_list(:,i) = xi(:)
 	  if( bdebug ) write(iudb,'(i6,2e14.6,3e14.6)') iee,xd,yd,xi
-	  !write(iudb,*) iee,xd,yd
-	  !write(iudb,*) xi
 	end do
 
 	itvdup(:,:,:) = 0
@@ -750,6 +747,11 @@
 !		call tvd_assert('ii',ii>=0.and.ii<=3)
 !		call tvd_assert('ie',ie>=0.and.ie<=nel)
 	    !if( ia_needed /= ia ) then
+	    !ia_needed = nint(rlists(ind_ia_this,i,ia))  !needed in this domain
+	    !if( ia /= ia_needed ) stop 'error stop: ia/=ia_needed'
+	    !ia_found = nint(rlists(ind_ia_found,i,ia))	!found in this domain
+	    !if( ia_found == ia_needed ) cycle
+	    !if( ia_found < 1 .or. ia_found > n_threads ) stop 'error stop: 6'
 
 	end
 
