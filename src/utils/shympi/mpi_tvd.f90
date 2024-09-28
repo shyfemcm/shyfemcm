@@ -69,14 +69,15 @@
 	integer, parameter :: nlist_type = 2
 
 	integer, save :: n_tvd_receive_total,n_tvd_send_total
-	real, save, allocatable :: values_tvd_local(:,:)
-	real, save, allocatable :: values_tvd_remote(:,:)
 	integer, save :: n_my_array_list,n_my_receive_list,n_my_send_list
-	integer, save, allocatable :: my_receive_list(:),my_send_list(:)
+	integer, save, allocatable :: my_receive_list(:)
+	integer, save, allocatable :: my_send_list(:)
 	real, save, allocatable :: my_array_receive_list(:,:)
 	real, save, allocatable :: my_array_send_list(:,:)
 	real, save, allocatable :: my_array_list(:,:)
 	double precision, save, allocatable :: my_xi_list(:,:)
+	real, save, allocatable :: values_tvd_local(:,:)
+	real, save, allocatable :: values_tvd_remote(:,:)
 	real, save, allocatable :: tvd_buffer_in(:)
 	real, save, allocatable :: tvd_buffer_out(:)
 
@@ -167,6 +168,7 @@
 
 	write(6,*) 'configuring tvd with mpi ',my_id
 
+	bdebug = .true.
 	my_ia = my_id + 1
 	iudb = 340 + my_ia
 
@@ -182,22 +184,18 @@
 	  ie_ext = ipev(ie)
 	  do ii=1,3
 	    do j=1,3
-	      bfound = .false.
 	      if( ii == j ) cycle
-	      if( ietvdup(j,ii,ie) >= 0 ) then	!we have to check all
-		bfound = .true.
-		ilist = ilist + 1
-		call jii2k(j,ii,k)
-		raux(ind_x,ilist) = xtvdup(j,ii,ie)
-		raux(ind_y,ilist) = ytvdup(j,ii,ie)
-		raux(ind_ia_this,ilist) = my_ia	!needed in this domain
-		raux(ind_j_this,ilist) = j
-		raux(ind_ii_this,ilist) = ii
-		raux(ind_k_this,ilist) = k
-		raux(ind_ie_this,ilist) = ie		!internal local element
-		raux(ind_iee_this,ilist) = ipev(ie)	!external local element
-		raux(ind_lmax_this,ilist) = ilhv(ie)	!lmax
-	      end if
+	      ilist = ilist + 1
+	      call jii2k(j,ii,k)
+	      raux(ind_x,ilist) = xtvdup(j,ii,ie)
+	      raux(ind_y,ilist) = ytvdup(j,ii,ie)
+	      raux(ind_ia_this,ilist) = my_ia		!needed in this domain
+	      raux(ind_j_this,ilist) = j
+	      raux(ind_ii_this,ilist) = ii
+	      raux(ind_k_this,ilist) = k
+	      raux(ind_ie_this,ilist) = ie		!internal local element
+	      raux(ind_iee_this,ilist) = ipev(ie)	!external local element
+	      raux(ind_lmax_this,ilist) = ilhv(ie)	!lmax
 	    end do
 	  end do
 	end do
@@ -213,8 +211,10 @@
 	maxlist = shympi_max(ilist)
 
 	write(6,*) 'array sizes: ',ilist,maxlist,my_id
-	write(iudb,*) 'debug output from tvd_mpi_handle for area ',my_ia
-	write(iudb,*) 'array sizes: ',ilist,maxlist,my_ia
+	if( bdebug ) then
+	  write(iudb,*) 'debug output from tvd_mpi_handle for area ',my_ia
+	  write(iudb,*) 'array sizes: ',ilist,maxlist,my_ia
+	end if
 
 	allocate(rlist(nlist,maxlist))
 	allocate(rlists(nlist,maxlist,n_threads))
@@ -223,9 +223,12 @@
 	rlist(:,1:ilist) = raux(:,1:ilist)
 	call shympi_gather(nlist,rlist,rlists)
 
-	write(6,*) 'all information collected ',my_id
+	!------------------------------------------------
+	! in rlist/rlists is information on all upwind points
+	!------------------------------------------------
 
 	call shympi_barrier
+	write(6,*) 'all information collected ',my_id
 
 !----------------------------------------------------------
 ! look for missing information needed in other domains
@@ -248,13 +251,13 @@
 	    ie_ext = nint(rlists(ind_iee_this,i,ia))
 	    ie = 0
 	    iee_ext = 0
-	    if( ie_local == 0 ) exit		!end of list
+	    if( ie_local == 0 ) exit			!end of list
 	    x = rlists(ind_x,i,ia)
 	    y = rlists(ind_y,i,ia)
 	    if( x < xmin .or. x > xmax ) cycle
 	    if( y < ymin .or. y > ymax ) cycle
 	    call find_unique_element(x,y,ie)
-	    if( ie > 0 ) then			!element found
+	    if( ie > 0 ) then				!element found
 	      nfound = nfound + 1
 	      iee_ext = ipev(ie)
 	      rlists(ind_ia_found,i,ia) = my_ia		!found for this domain
@@ -267,20 +270,21 @@
 	  end do
 	end do
 
+	!------------------------------------------------
+	! in raux are points found in this domain needed in other domains
+	!------------------------------------------------
+
 	call shympi_barrier
-	call flush(6)
 
 !----------------------------------------------------------
-! in raux are points found in this domain needed in other domains
+! exchange information between domains
 !----------------------------------------------------------
 
 	maxnlist = shympi_max(inlist)
 
-	write(6,*) 'new list info ',inlist,maxnlist,my_id
-	write(iudb,*) 'new list info ',inlist,maxnlist,my_ia
+	if( bdebug ) write(iudb,*) 'new list info ',inlist,maxnlist,my_ia
 	
 	call shympi_barrier
-	call flush(6)
 
 	allocate(newlist(nlist,maxnlist))
 	allocate(newlists(nlist,maxnlist,n_threads))
@@ -290,11 +294,16 @@
 
 	call shympi_gather(nlist,newlist,newlists)
 
-!----------------------------------------------------------
-! exchanging info of found points
-!----------------------------------------------------------
+	!------------------------------------------------
+	! in newlist/newlists are all points that need exchange
+	!------------------------------------------------
 
+	call shympi_barrier
 	write(6,*) 'all new information collected ',my_id
+
+!----------------------------------------------------------
+! finding unique element across domains
+!----------------------------------------------------------
 
 	nchanged = 0
 
@@ -302,12 +311,12 @@
 	  if( ia == my_ia ) cycle
 	  do i=1,maxnlist
 	    ie = nint(newlists(ind_ie_found,i,ia))
-	    if( ie == 0 ) exit			!end of list
-	    ia_found = nint(newlists(ind_ia_found,i,ia))!found in this domain
-	    ia_needed = nint(newlists(ind_ia_this,i,ia))!needed in this domain
-	    ie_int = nint(newlists(ind_ie_found,i,ia))	!in this element found
-	    iee_ext = nint(newlists(ind_iee_found,i,ia))!in this element found
-	    lmax = nint(newlists(ind_lmax_found,i,ia))!lmax of remote
+	    if( ie == 0 ) exit				 !end of list
+	    ia_found = nint(newlists(ind_ia_found,i,ia)) !found in this domain
+	    ia_needed = nint(newlists(ind_ia_this,i,ia)) !needed in this domain
+	    ie_int = nint(newlists(ind_ie_found,i,ia))	 !in this element found
+	    iee_ext = nint(newlists(ind_iee_found,i,ia)) !in this element found
+	    lmax = nint(newlists(ind_lmax_found,i,ia))   !lmax of remote
 	    if( ia_found /= ia_needed ) then
 	     if( my_ia == ia_needed ) then
 	      nchanged = nchanged + 1
@@ -315,10 +324,7 @@
 	      ii = nint(newlists(ind_ii_this,i,ia))
 	      ie = nint(newlists(ind_ie_this,i,ia))
 	      iee_old = ieetvdup(j,ii,ie)
-		call tvd_assert('j',j>=0.and.j<=3)
-		call tvd_assert('ii',ii>=0.and.ii<=3)
-		call tvd_assert('ie',ie>=0.and.ie<=nel)
-	      if( iee_ext > iee_old ) then	!always take highest index
+	      if( iee_ext > iee_old ) then		 !always take highest
 	        ieetvdup(j,ii,ie) = iee_ext
 	        ietvdup(j,ii,ie) = ie_int
 	        iatvdup(j,ii,ie) = ia_found
@@ -367,8 +373,14 @@
 	end do
 	  
 	!------------------------------------------------
-	! prepare count and index
+	! in raux is all available information
 	!------------------------------------------------
+
+	call shympi_barrier
+
+!------------------------------------------------
+! prepare count and index for sorting
+!------------------------------------------------
 
 	allocate(count(n_threads))
 	allocate(index(n_threads))
@@ -389,27 +401,28 @@
 
 	maxlist = shympi_max(ilist)
 
-	write(6,*) 'new array sizes: ',ilist,maxlist,my_id
-	write(iudb,*) 'new array sizes: ',ilist,maxlist,my_ia
-	write(iudb,*) 'count: ',count
-	write(iudb,*) 'index: ',index
+	if( bdebug ) then
+	  write(iudb,*) 'new array sizes: ',ilist,maxlist,my_ia
+	  write(iudb,*) 'count: ',count
+	  write(iudb,*) 'index: ',index
+	end if
 
 	deallocate(rlist)
 	deallocate(rlists)
 	allocate(rlist(nlist,maxlist))
 	allocate(rlists(nlist,maxlist,n_threads))
 
-	!------------------------------------------------
-	! sort raux and copy to rlist
-	! after this in rlist are the same entries as in raux, but sorted by ia
-	!------------------------------------------------
+!------------------------------------------------
+! sort raux and copy to rlist
+! after this in rlist are the same entries as in raux, but sorted by ia
+!------------------------------------------------
 
-	if( ilist > 0 ) then
-	write(iudb,*) 'not sorted list: ',my_ia,ilist,maxlist
-	call write_array_header(iudb)
-	do i=1,ilist
-	  call write_array_debug(iudb,i,raux(:,i))
-	end do
+	if( bdebug .and. ilist > 0 ) then
+	  write(iudb,*) 'not sorted list: ',my_ia,ilist,maxlist
+	  call write_array_header(iudb)
+	  do i=1,ilist
+	    call write_array_debug(iudb,i,raux(:,i))
+	  end do
 	end if
 
 	rlist = 0.
@@ -421,36 +434,19 @@
 	  index(ia) = ix
 	end do
 
-	if( ilist > 0 ) then
-	write(iudb,*) 'sorted list: ',my_ia,ilist,maxlist
-	call write_array_header(iudb)
-	do i=1,ilist
-	  call write_array_debug(iudb,i,rlist(:,i))
-	end do
+	if( bdebug .and. ilist > 0 ) then
+	  write(iudb,*) 'sorted list: ',my_ia,ilist,maxlist
+	  call write_array_header(iudb)
+	  do i=1,ilist
+	    call write_array_debug(iudb,i,rlist(:,i))
+	  end do
 	end if
 
 	call shympi_gather(nlist,rlist,rlists)
 
-	!------------------------------------------------
-	! some checks
-	!------------------------------------------------
-
-	do ia=1,n_threads
-	  do i=1,maxlist
-	    ie = nint(rlists(ind_iee_found,i,ia))
-	    if( ie == 0 ) exit			!end of list
-	    ia_needed = nint(rlists(ind_ia_this,i,ia))
-	    if( ia_needed /= ia ) then
-	      write(6,*) 'ia and ia_needed are different'
-	      write(6,*) ia,ia_needed
-	      stop 'error stop tvd_handle: ia/=ia_needed'
-	    end if
-	  end do
-	end do
-
-	!------------------------------------------------
-	! compute number of points to receive or send
-	!------------------------------------------------
+!------------------------------------------------
+! compute number of points to receive or send
+!------------------------------------------------
 
 	allocate(n_tvd_receive(n_threads))
 	allocate(n_tvd_send(n_threads))
@@ -459,10 +455,9 @@
 	n_tvd_send = 0
 
 	do ia=1,n_threads
-	  !if( ia == my_ia ) cycle
 	  do i=1,maxlist
 	    ie = nint(rlists(ind_iee_found,i,ia))
-	    if( ie == 0 ) exit			!end of list
+	    if( ie == 0 ) exit				!end of list
 	    ia_found = nint(rlists(ind_ia_found,i,ia))	!found in this domain
 	    if( ia_found == ia ) cycle
 	    if( ia_found == my_ia ) then
@@ -476,9 +471,6 @@
 	n_tvd_r = maxval(n_tvd_receive)
 	n_tvd_s = maxval(n_tvd_send)
 	n_tvd = max(n_tvd_r,n_tvd_s)
-	write(6,*) 'n_tvd_r/s: ',n_tvd_r,n_tvd_s,n_tvd,my_ia
-	write(6,*) 'n_tvd_receive: ',n_tvd_receive,my_ia
-	write(6,*) 'n_tvd_send: ',n_tvd_send,my_ia
 
 	allocate(tvd_receive(n_tvd_r,n_threads))
 	allocate(tvd_send(n_tvd_s,n_threads))
@@ -550,9 +542,13 @@
 	  end do
 	end do
 
+	n_tvd_receive_total = sum( n_tvd_receive )
+	n_tvd_send_total = sum( n_tvd_send )
+
 	if( n_my_receive_list + n_my_send_list /= n_my_array_list ) then
 	  stop 'error stop: n_receive + n_send /= n_all'
 	end if
+
 	allocate(my_receive_list(n_my_receive_list))
 	allocate(my_send_list(n_my_send_list))
 	allocate(my_array_receive_list(nlist,n_my_receive_list))
@@ -593,12 +589,18 @@
 	if( nr /= n_my_receive_list ) stop 'error stop: nr/=n_my_receive_list'
 	if( ns /= n_my_send_list ) stop 'error stop: nr/=n_my_send_list'
 
+!------------------------------------------------
+! setting up xi values and itvdup array
+!------------------------------------------------
+
 	allocate(my_xi_list(3,n_my_send_list))
 	my_xi_list = 0.
 
-	write(iudb,*) '====================================='
-	write(iudb,*) 'sending xi list'
-	write(iudb,*) '====================================='
+	if( bdebug ) then
+	  write(iudb,*) '====================================='
+	  write(iudb,*) 'sending xi list'
+	  write(iudb,*) '====================================='
+	end if
 
 	do i=1,n_my_send_list
 	  na = my_send_list(i)
@@ -608,8 +610,9 @@
 	  iee = my_array_list(ind_iee_found,na)
 	  call xy2xi(ie,xd,yd,xi)
 	  my_xi_list(:,i) = xi(:)
-	  write(iudb,*) iee,xd,yd
-	  write(iudb,*) xi
+	  if( bdebug ) write(iudb,'(i6,2e14.6,3e14.6)') iee,xd,yd,xi
+	  !write(iudb,*) iee,xd,yd
+	  !write(iudb,*) xi
 	end do
 
 	itvdup(:,:,:) = 0
@@ -620,6 +623,16 @@
 	  ie = my_array_list(ind_ie_this,na)
 	  itvdup(j,ii,ie) = i
 	end do
+
+	call shympi_barrier
+	write(6,*) 'all new information collected ',my_id
+	flush(6)
+
+!------------------------------------------------
+! beyond here only debug output
+!------------------------------------------------
+
+	if( .not. bdebug ) return
 
 	write(iudb,*) '====================================='
 	write(iudb,*) 'my list:'
@@ -646,7 +659,6 @@
 	write(iudb,*) 'send/receive index start ',my_ia
 	write(iudb,*) n_tvd_r,n_tvd_s,n_tvd
 
-	n_tvd_receive_total = sum( n_tvd_receive )
 	write(iudb,*) 'receive max: ',n_tvd_r
 	write(iudb,*) 'receive dim: ',n_tvd_receive
 	write(iudb,*) 'receive tot: ',n_tvd_receive_total
@@ -660,7 +672,6 @@
 	    call write_array_debug(iudb,i,rlists(:,ind,ia))
 	  end do
 	end do
-	n_tvd_send_total = sum( n_tvd_send )
 	write(iudb,*) 'send max: ',n_tvd_s
 	write(iudb,*) 'send dim: ',n_tvd_send
 	write(iudb,*) 'send tot: ',n_tvd_send_total
@@ -712,24 +723,34 @@
 	end do
 	write(iudb,*) '====================================='
 
-	write(6,*) 'all new information collected ',my_id
-
 	call shympi_barrier
-
-!----------------------------------------------------------
-! write out debug information
-!----------------------------------------------------------
 
 !----------------------------------------------------------
 ! all info exchanged
 !----------------------------------------------------------
 
-	call flush(iudb)
 	call shympi_barrier
-	call flush(6)
+	call flush(iudb)
+
+!----------------------------------------------------------
+! end of routine
+!----------------------------------------------------------
 
 	return
     9	format(i5,a,i5,a,i10)
+	end
+
+!******************************************************************
+!******************************************************************
+!******************************************************************
+
+	subroutine assert_list_coherence
+
+!		call tvd_assert('j',j>=0.and.j<=3)
+!		call tvd_assert('ii',ii>=0.and.ii<=3)
+!		call tvd_assert('ie',ie>=0.and.ie<=nel)
+	    !if( ia_needed /= ia ) then
+
 	end
 
 !******************************************************************
