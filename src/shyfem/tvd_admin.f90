@@ -131,39 +131,29 @@
 	integer, save :: icall = 0
 	!logical, save :: bdebug = .false.
 	logical, save :: bdebug = .true.
-	!logical, save :: bstop = .true.
-	logical, save :: bstop = .false.
+	logical :: btvd2
 
 	if( icall .ne. 0 ) return
 	icall = 1
 
 	itvd_type = itvd
+	btvd2 = itvd == 2
 	write(6,*) 'tvd type: ',itvd_type
-	if( itvd_type > 0 ) call mod_tvd_init(nel)
 
-	if( itvd_type .eq. 2 ) then
+	if( btvd2 ) call mod_tvd_init(nel)
+
+	if( btvd2 ) then
           if( shympi_is_parallel() ) then
 	    call tvd_upwind_init_mpi
-	    call tvd_mpi_handle
+	    call tvd_mpi_init
 	  else
 	    call tvd_upwind_init_shell
           end if
 	end if
 
-	if( itvd_type .eq. 2 ) then
-	  if( bdebug ) call write_tvd_debug(nel)
-          if( shympi_is_parallel() ) then
-	    if( bstop ) then
-	      call shympi_barrier
-              write(6,*) 'cannot yet handle itvd==2'
-	      call error_stop
-	      !call exit(0)
-              stop 'error stop tvd_init: cannot run with mpi'
-	    end if
-	  end if
+	if( btvd2 ) then
+	  if( bdebug ) call write_tvd_debug(nel) !only if btvddebug==.true.
 	end if
-
-	if( bstop ) stop 'debug stop: tvd'
 
 	if( itvd .eq. 0 ) then
 	  write(6,*) 'no horizontal TVD scheme used'
@@ -341,8 +331,6 @@
 
 	call get_coords_ev(isphe)
 	bsphe = isphe .eq. 1
-
-	!call mod_tvd_mpi_init(nel)
 
 	do ie=1,nel
           call tvd_upwind_init_elem(bsphe,ie)

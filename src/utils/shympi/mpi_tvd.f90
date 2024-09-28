@@ -32,8 +32,12 @@
 ! 03.09.2024	ggu	more on mpi-tvd
 ! 10.09.2024	ggu	data structures localized
 ! 27.09.2024	ggu	first running version... still to be cleaned
+
 !
-!******************************************************************
+! notes :
+!
+! tvd_mpi_init		initializes the mpi tvd variables
+! tvd_mpi_prepare	prepares mpi variables for every call to scalar advect.
 
 !==================================================================
         module shympi_tvd
@@ -79,7 +83,16 @@
 	real, save, allocatable :: tvd_buffer_in(:)
 	real, save, allocatable :: tvd_buffer_out(:)
 
+! btvddebug regulates writing of fort.34* and tvd_debug.txt files
+! btvdassert regulates assesing vital relationships between variables
+! iu_debug writes debug output to fort.500
+! btvddebug should also be set in files concentration.f90 and tvd_admin.f90
+! however, setting iu_debug = 0 disables the debugging writes
+!
+! for production runs set logical variables to .false. and iu_debug to 0
+
 	logical, save :: btvddebug = .true.	!writes tvd_debug.txt
+	logical, save :: btvdassert = .true.	!asserts important values
 	integer, save :: iu_debug = 500		!writes fort.500 if > 0
 	integer, save :: ifreq_debug = 50	!frequency of debug in fort.500
 	real, save, allocatable :: tvd_debug_aux(:,:,:)
@@ -116,7 +129,7 @@
         end module shympi_tvd
 !==================================================================
 
-	subroutine tvd_mpi_handle
+	subroutine tvd_mpi_init
 
 	use basin
 	use levels
@@ -162,11 +175,12 @@
 ! starting collection of tvd information
 !----------------------------------------------------------
 
+	if( .not. bmpi ) return
 	if( .not. bmpitvd ) return		!do not handle mpi tvd
 
 	write(6,*) 'configuring tvd with mpi ',my_id
 
-	bdebug = .true.
+	bdebug = btvddebug
 	my_ia = my_id + 1
 	iudb = 340 + my_ia
 
@@ -374,6 +388,7 @@
 	! in raux is all available information
 	!------------------------------------------------
 
+	call assert_list_coherence(ilist,raux,.true.)
 	call shympi_barrier
 
 !------------------------------------------------
@@ -439,6 +454,8 @@
 	    call write_array_debug(iudb,i,rlist(:,i))
 	  end do
 	end if
+
+	call assert_list_coherence(ilist,rlist,.true.)
 
 	call shympi_gather(nlist,rlist,rlists)
 
@@ -625,6 +642,8 @@
 	write(6,*) 'all new information collected ',my_id
 	flush(6)
 
+	call assert_list_coherence(n_my_array_list,my_array_list,.true.)
+
 !------------------------------------------------
 ! beyond here only debug output
 !------------------------------------------------
@@ -741,17 +760,43 @@
 !******************************************************************
 !******************************************************************
 
-	subroutine assert_list_coherence
+	subroutine assert_list_coherence(nmax,list,bconsolidated)
 
-!		call tvd_assert('j',j>=0.and.j<=3)
-!		call tvd_assert('ii',ii>=0.and.ii<=3)
-!		call tvd_assert('ie',ie>=0.and.ie<=nel)
-	    !if( ia_needed /= ia ) then
-	    !ia_needed = nint(rlists(ind_ia_this,i,ia))  !needed in this domain
-	    !if( ia /= ia_needed ) stop 'error stop: ia/=ia_needed'
-	    !ia_found = nint(rlists(ind_ia_found,i,ia))	!found in this domain
-	    !if( ia_found == ia_needed ) cycle
-	    !if( ia_found < 1 .or. ia_found > n_threads ) stop 'error stop: 6'
+	use basin
+	use shympi
+	use shympi_tvd
+
+	implicit none
+
+	integer nmax
+	real list(nlist,nmax)
+	logical bconsolidated
+
+	integer i,j,ii,ie,my_ia
+	integer ia_found,ia_needed
+
+	!return
+
+	my_ia = my_id + 1
+
+	do i=1,nmax
+	  ie = nint(list(ind_ie_this,i))
+	  ia_found = nint(list(ind_ia_found,i))
+	  ia_needed = nint(list(ind_ia_this,i))
+	  if( .not. bconsolidated .and. ie == 0 ) cycle		!end of data
+	  j = nint(list(ind_j_this,i))
+	  ii = nint(list(ind_ii_this,i))
+	  call tvd_assert('j out of bounds',j>=0.and.j<=3)
+	  call tvd_assert('ii out of bounds',ii>=0.and.ii<=3)
+	  call tvd_assert('ie<=0 ',ie>0.)
+	  if( ia_needed == my_ia ) then
+	    call tvd_assert('ie out of bounds',ie<=nel)
+	  end if
+	  call tvd_assert('ia_found out of bounds' &
+     &			,ia_found >= 1 .or. ia_found <= n_threads)
+	  call tvd_assert('ia_needed out of bounds' &
+     &			,ia_needed >= 1 .or. ia_needed <= n_threads)
+	end do
 
 	end
 
@@ -793,13 +838,14 @@
 
 	real values(nlvdi,nkn)
 
-	logical bdebug
+	logical bassert
 	integer i,na,ie,ii,k,l,ia,iee
 	integer lmax,lmax_remote,lmax_this
 	integer my_ia
 	double precision c,cacum
 	double precision xi(3)
 
+	bassert = btvdassert
 	my_ia = my_id + 1
 
 	do i=1,n_my_send_list
@@ -807,26 +853,15 @@
 	  ia = nint(my_array_list(ind_ia_found,na))
 	  ie = nint(my_array_list(ind_ie_found,na))
 	  iee = nint(my_array_list(ind_iee_found,na))
-	  !ie = nint(my_array_list(ind_ie_this,na))
-	  !iee = nint(my_array_list(ind_iee_this,na))
-	  bdebug = iee == 3423
-	bdebug = .false.
-	  !if( i /= na ) stop 'error stop tvd_prepare_remote: internal (0)'
-	  if( ia /= my_ia ) stop 'error stop tvd_prepare_remote: internal (1)'
-	  if( ie > nel ) stop 'error stop tvd_prepare_remote: internal (2)'
-	  !write(6,*) 'ggguuu: ',i,na,ia,my_ia
 	  lmax = ilhv(ie)
 	  lmax_remote = nint(my_array_list(ind_lmax_found,na))
 	  lmax_this = nint(my_array_list(ind_lmax_this,na))
-	  if( lmax /= lmax_remote ) then
-	    write(6,*) 'lmax,lmax_remote,lamx_this: ',lmax,lmax_remote,lmax_this
-	    stop 'error stop tvd_prepare_remote: internal (3)'
+	  if( bassert ) then
+	    call tvd_assert('tvd_prepare_remote: (1)',ia==my_ia)
+	    call tvd_assert('tvd_prepare_remote: (2)',ie<=nel)
+	    call tvd_assert('tvd_prepare_remote: (3)',lmax==lmax_remote)
 	  end if
 	  xi(:) = my_xi_list(:,i)
-	  if( bdebug ) then
-	    write(6,*) 'xi,value: '
-	    write(6,*) xi
-	  end if
 	  do l=1,lmax
 	    cacum = 0.
 	    do ii=1,3
@@ -834,13 +869,8 @@
 	      c = values(l,k)
 	      cacum = cacum + c * xi(ii)
 	    end do
-	    !write(6,*) 'ggguuu: ',l,na,my_ia,cacum
 	    values_tvd_remote(l,i) = cacum
 	  end do
-	  if( bdebug ) then
-	    cacum = values_tvd_remote(1,i)
-	    write(6,*) cacum,real(cacum)
-	  end if
 	end do
 
 	end
@@ -860,7 +890,7 @@
 	integer id_from,id_to
 	integer lmax,lmax_remote
 
-	bdebug = .false.
+	bdebug = .false.	!leave this at .false.
 
 	my_ia = my_id + 1
 	iudb = 350 + my_ia
@@ -903,6 +933,8 @@
 !******************************************************************
 
 	subroutine tvd_exchange_debug
+
+! not generally usefull - only use in real debugging situations
 
 	use shympi
 	use shympi_tvd
@@ -953,6 +985,7 @@
 
 	write(iudb,*) 'finished exchange: ',nin,nout
 	write(iudb,*) 'debug exchange: ',nin,n_my_receive_list
+
 	do i=1,n_my_receive_list
 	  na = my_receive_list(i)
 	  id_from = nint(my_array_list(ind_ia_found,na)) - 1
@@ -989,6 +1022,8 @@
 
 	subroutine tvd_mpi_prepare(values)
 
+! this routine must be called before transport and diffusion of scalars
+
 	use basin
 	use levels
 	use shympi
@@ -1008,6 +1043,7 @@
 	call tvd_prepare_remote(values)
 
 	call tvd_exchange
+
 	!call tvd_exchange_debug
 
 	end
@@ -1255,6 +1291,12 @@
 
 	end
 
+!******************************************************************
+!******************************************************************
+!******************************************************************
+! test routines
+!******************************************************************
+!******************************************************************
 !******************************************************************
 
 	subroutine test_tvd_convert

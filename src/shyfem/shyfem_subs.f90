@@ -859,7 +859,7 @@
 
 	!call ev_init(nel)
 
-	call mod_tvd_init(nel)
+	!call mod_tvd_init(nel)
 
 	write(6,*) '2D arrays allocated: ',nkn,nel,ngr
 
