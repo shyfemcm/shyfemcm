@@ -38,6 +38,13 @@
 !
 ! tvd_mpi_init		initializes the mpi tvd variables
 ! tvd_mpi_prepare	prepares mpi variables for every call to scalar advect.
+!
+! still to do :
+!
+! use as lmax maximum of the two domains
+! prepare upwind c for more than one variable
+! group exchanges between equal domains
+! use quadtree to find elements
 
 !==================================================================
         module shympi_tvd
@@ -91,11 +98,14 @@
 !
 ! for production runs set logical variables to .false. and iu_debug to 0
 
+	logical, save :: bdebout = .false.	!allows for writing to fort.500
 	logical, save :: btvddebug = .true.	!writes tvd_debug.txt
 	logical, save :: btvdassert = .true.	!asserts important values
 	integer, save :: iu_debug = 500		!writes fort.500 if > 0
-	integer, save :: ifreq_debug = 50	!frequency of debug in fort.500
+	integer, save :: iuunf_debug = 501	!writes fort.500 if > 0
+	integer, save :: ifreq_debug = 1	!frequency of debug in fort.500
 	real, save, allocatable :: tvd_debug_aux(:,:,:)
+	logical, save, allocatable :: blevel(:)
 
 !==================================================================
         contains
@@ -145,7 +155,7 @@
 	integer ie_ext,iee_ext,iee_old,ie_int,iee
 	integer ilist,maxlist,maxnlist
 	integer ia_found,ia_needed,ie_local,iudb
-	integer n_tvd_r,n_tvd_s,n_tvd
+	integer n_tvd_r,n_tvd_s,n_tvd_a,n_tvd
 	integer lmax
 	real x,y
 	real xmin,ymin,xmax,ymax
@@ -159,6 +169,7 @@
 	integer, allocatable :: index(:)
 	integer, allocatable :: n_tvd_receive(:)
 	integer, allocatable :: n_tvd_send(:)
+	integer, allocatable :: n_tvd_all(:)
 	integer, allocatable :: n_tvd_index(:)
 	integer, allocatable :: tvd_receive(:,:)
 	integer, allocatable :: tvd_send(:,:)
@@ -166,8 +177,7 @@
 	integer, allocatable :: matrix(:,:)
 	integer, allocatable :: n_tvd_receive_from(:)
 	integer, allocatable :: n_tvd_send_to(:)
-	integer :: n_tvd_all
-	real, allocatable :: tvd_all(:,:)
+	integer :: n_tvd_tot
 	integer :: na,nr,ns
 	double precision xi(3),xd,yd
 
@@ -465,9 +475,11 @@
 
 	allocate(n_tvd_receive(n_threads))
 	allocate(n_tvd_send(n_threads))
+	allocate(n_tvd_all(n_threads))
 
 	n_tvd_receive = 0
 	n_tvd_send = 0
+	n_tvd_all = 0
 
 	do ia=1,n_threads
 	  do i=1,maxlist
@@ -480,12 +492,16 @@
 	    else
 	      n_tvd_receive(ia) = n_tvd_receive(ia) + 1
 	    end if
+	    n_tvd_all(ia) = n_tvd_all(ia) + 1
 	  end do
 	end do
 
 	n_tvd_r = maxval(n_tvd_receive)
 	n_tvd_s = maxval(n_tvd_send)
+	n_tvd_a = maxval(n_tvd_all)
 	n_tvd = max(n_tvd_r,n_tvd_s)
+
+	write(6,*) 'dims: ',n_tvd_r,n_tvd_s,n_tvd_a,n_tvd,my_ia
 
 !------------------------------------------------
 ! set up receive and send list index
@@ -494,7 +510,6 @@
 	allocate(tvd_receive(n_tvd_r,n_threads))
 	allocate(tvd_send(n_tvd_s,n_threads))
 	allocate(tvd_index(n_tvd,n_threads))
-	allocate(tvd_all(nlist,n_tvd*n_threads))
 	allocate(n_tvd_index(n_threads))
 	allocate(matrix(n_threads,n_threads))
 	allocate(n_tvd_send_to(n_threads))
@@ -505,11 +520,10 @@
 	tvd_receive = 0
 	tvd_send = 0
 	tvd_index = 0
-	tvd_all = 0.
 	matrix = 0
 	n_tvd_send_to = 0
 	n_tvd_receive_from = 0
-	n_tvd_all = 0
+	n_tvd_tot = 0
 	n_my_array_list = 0
 	n_my_receive_list = 0
 	n_my_send_list = 0
@@ -552,8 +566,7 @@
 	    end if
 	    matrix(ia_found,ia_needed) = matrix(ia_found,ia_needed) + 1
 	    if( ia_needed /= ia_found ) then
-	      n_tvd_all = n_tvd_all + 1
-	      tvd_all(:,n_tvd_all) = rlists(:,i,ia)
+	      n_tvd_tot = n_tvd_tot + 1
 	    end if
 	  end do
 	end do
@@ -639,7 +652,7 @@
 	end do
 
 	call shympi_barrier
-	write(6,*) 'all new information collected ',my_id
+	write(6,*) 'finished configuring tvd with mpi ',my_id
 	flush(6)
 
 	call assert_list_coherence(n_my_array_list,my_array_list,.true.)
@@ -862,6 +875,7 @@
 	    call tvd_assert('tvd_prepare_remote: (3)',lmax==lmax_remote)
 	  end if
 	  xi(:) = my_xi_list(:,i)
+	  values_tvd_remote(:,i) = -999.	!force error
 	  do l=1,lmax
 	    cacum = 0.
 	    do ii=1,3
@@ -903,19 +917,26 @@
 	  id_to = nint(my_array_list(ind_ia_this,na)) - 1
 	  lmax = nint(my_array_list(ind_lmax_found,na))
 
-	  if( id_from == my_id ) nout = nout + 1
 	  n = lmax
-          tvd_buffer_in(1:n) = values_tvd_remote(1:n,nout)
-	  if( id_from /= my_id ) tvd_buffer_in(:) = -1
+	  if( id_from == my_id ) then
+	    nout = nout + 1
+            tvd_buffer_in(1:n) = values_tvd_remote(1:n,nout)
+	  else
+	    tvd_buffer_in(:) = -1
+	  end if
+          tvd_buffer_out = 0.
+
 	  if( bdebug ) then
 	    write(iudb,*) 'exchanging: ',my_ia,id_from+1,id_to+1,n &
      &			,values_tvd_remote(1,nout)
 	  end if
-          tvd_buffer_out = 0.
+
           call shympi_receive(id_from,id_to,n,tvd_buffer_in,tvd_buffer_out)
+
 	  if( id_to /= my_id ) cycle
 	  nin = nin + 1
           values_tvd_local(1:n,nin) = tvd_buffer_out(1:n)
+
 	  if( bdebug ) then
 	    write(iudb,*) 'exchanged: ',my_ia,nin,values_tvd_local(1,nin)
 	  end if
@@ -1069,23 +1090,55 @@
 	double precision dtime
 	character*(*) what
 	integer isact
+	integer l,lmax,lmax_form,lmax_unf
+	integer itime
 	integer, save :: icall = 0
+	character*80 what_aux
 
 	if( iu_debug <= 0 ) return
 
 	if( icall == 0 ) then
 	  allocate( tvd_debug_aux(nlvdi,3,nel) )
+	  allocate( blevel(nlv_global) )
+	end if
+	tvd_debug_aux = 0.
+
+	icall = icall + 1
+
+	if( ifreq_debug < 0 ) then
+	  bdebout = .false.
+	else if( ifreq_debug > 0 ) then
+	  bdebout = .false.
+	  if( mod(icall,ifreq_debug) == 0 ) bdebout = .true.
+	else
+	  bdebout = .true.
 	end if
 
-	tvd_debug_aux = 0.
+	!bdebout = .false.
+	!if( dtime == 1200 .and. what == 'temp' ) bdebout = .true.
+
+	lmax_unf = 0
+	lmax_form = 0
+	if( bdebout ) then	!we write the output
+	  lmax_unf = nlv_global
+	  lmax = 0
+	  blevel = .false.
+	  do l=1,lmax_unf,lmax_unf/2
+	    blevel(l) = .true.
+	    lmax = lmax + 1
+	  end do
+	  lmax_form = lmax
+	end if
 
 	if( shympi_is_master() ) then
 	  if( icall == 0 ) write(iu_debug,*) 'written by tvd_debug_initialize'
-	  write(iu_debug,*) 'time = ',dtime,isact,'  ',trim(what)
+	  write(iu_debug,*) 'time = ',dtime,isact,lmax_form,'  ',trim(what)
 	  flush(iu_debug)
+	  what_aux(1:80) = what
+	  itime = nint(dtime)
+	  write(iuunf_debug) dtime,isact,lmax_unf,what_aux
+	  flush(iuunf_debug)
 	end if
-
-	icall = icall + 1
 
 	end
 
@@ -1123,37 +1176,49 @@
 	real, allocatable :: aux(:,:),auxg(:,:)
 	integer, save :: icall = 0
 	integer, save :: nrec = 0
+	integer, save :: nrec_form = 0
+	integer, save :: nrec_unf = 0
 
 	if( iu_debug <= 0 ) return
 
+	bout = .false.		!if false checks how may records are written
 	bout = .true.		!if false checks how may records are written
 	icall = icall + 1
-	if( ifreq_debug < 0 ) return
-	if( ifreq_debug > 0 ) then
-	  if( mod(icall,ifreq_debug) /= 0 ) return
-	end if
+
+	if( .not. bdebout ) return
 
 	allocate(aux(3,nel))
 	allocate(auxg(3,nel_global))
 
 	lmax = nlv_global
 
-	do l=1,lmax,lmax/2
+	do l=1,lmax
 	  auxg = 0.
 	  aux = 0.
 	  if( l <= nlv ) aux(:,:) = tvd_debug_aux(l,:,:)
 	  call shympi_l2g_array(3,aux,auxg)
 	  if( shympi_is_master() ) then
-	    nrec = nrec + 1
-	    write(iu_debug,*) 'level = ',l,nel_global,nrec
+	    nrec_unf = nrec_unf + 1
+	    if( blevel(l) ) then
+	      nrec_form = nrec_form + 1
+	      write(iu_debug,*) 'level = ',l,nel_global,nrec_form,icall
+	    end if
+	    write(iuunf_debug) l,nel_global,nrec_unf,icall
+	    if( .not. bout ) cycle
 	    do ie=1,nel_global
 	      ie_ext = ip_ext_elem(ie)
-	      if( bout ) write(iu_debug,*) ie,ie_ext,auxg(:,ie)
+	      if( blevel(l) ) then
+	        write(iu_debug,*) ie,ie_ext,auxg(:,ie)
+	      end if
+	      write(iuunf_debug) ie,ie_ext,auxg(:,ie)
 	    end do
 	  end if
 	end do
 
-	if( shympi_is_master() ) flush(iu_debug)
+	if( shympi_is_master() ) then
+	  flush(iu_debug)
+	  flush(iuunf_debug)
+	end if
 
 	end
 

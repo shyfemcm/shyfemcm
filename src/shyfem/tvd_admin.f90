@@ -29,7 +29,7 @@
 !
 ! contents :
 !
-! subroutine tvd_init(itvd)				initializes tvd scheme
+! subroutine tvd_init					initializes tvd scheme
 ! subroutine tvd_grad_3d(cc,gx,gy,aux,nlvdi,nlv)	computes gradients 3D
 ! subroutine tvd_grad_2d(cc,gx,gy,aux)			computes gradients 2D
 ! subroutine tvd_get_upwind_c(ie,l,ic,id,cu,cv)		c of upwind node
@@ -74,6 +74,7 @@
 ! 28.08.2024    ggu     use find_unique_element() to find element
 ! 03.09.2024    ggu     more on mpi-tvd
 ! 26.09.2024    ggu     mark old tvd code with TVD_OLD, btvddebug introduced
+! 29.09.2024    ggu     use ltvdup to decide if remote data exists
 !
 !*****************************************************************
 !
@@ -116,7 +117,7 @@
 !*****************************************************************
 !*****************************************************************
 
-        subroutine tvd_init(itvd)
+        subroutine tvd_init
 
 ! initializes horizontal tvd scheme
 
@@ -127,14 +128,17 @@
         implicit none
 
 	integer itvd
-
 	integer, save :: icall = 0
 	!logical, save :: bdebug = .false.
 	logical, save :: bdebug = .true.
 	logical :: btvd2
 
+	real getpar
+
 	if( icall .ne. 0 ) return
 	icall = 1
+
+	itvd = nint(getpar('itvd'))
 
 	itvd_type = itvd
 	btvd2 = itvd == 2
@@ -178,6 +182,10 @@
 	integer isphe
         integer ie,nthreads
 	integer it1,idt
+	integer, save :: ifreq = 1
+	logical, save :: bwrite = .false.
+	real proc
+	!integer, save :: ifreq = new/1000
 
         write(6,*) 'setting up tvd upwind information...'
 
@@ -192,6 +200,10 @@
 
           do ie=1,nel
             call tvd_upwind_init_elem(bsphe,ie)
+	    if( bwrite .and. mod(ie,ifreq) == 0 ) then
+	      proc = 100.*float(ie)/nel
+	      write(6,'(2i10,f8.2)') ie,nel,proc
+	    end if
 	  end do
 
 !$OMP END PARALLEL DO
@@ -353,6 +365,7 @@
 
 	use mod_tvd
 	use basin
+	use levels
 
         implicit none
 
@@ -382,6 +395,7 @@
           ietvdup(:,:,ie) = 0
           ieetvdup(:,:,ie) = 0
           iatvdup(:,:,ie) = 0
+          ltvdup(:,:,ie) = 0
 
           if ( bsphe ) call ev_make_center(ie,dlon0,dlat0)
 
@@ -411,8 +425,11 @@
 
             xtvdup(j,ii,ie) = x
             ytvdup(j,ii,ie) = y
-            ietvdup(j,ii,ie) = ienew
-            ieetvdup(j,ii,ie) = ipev(ienew)
+            if( ienew > 0 ) then
+              ietvdup(j,ii,ie) = ienew
+	      ieetvdup(j,ii,ie) = ipev(ienew)
+	      ltvdup(j,ii,ie) = ilhv(ienew)
+	    end if
 
             j = mod(ii+1,3) + 1
             k = nen3v(j,ie)
@@ -431,8 +448,11 @@
 
             xtvdup(j,ii,ie) = x
             ytvdup(j,ii,ie) = y
-            ietvdup(j,ii,ie) = ienew
-            ieetvdup(j,ii,ie) = ipev(ienew)
+            if( ienew > 0 ) then
+              ietvdup(j,ii,ie) = ienew
+	      ieetvdup(j,ii,ie) = ipev(ienew)
+	      ltvdup(j,ii,ie) = ilhv(ienew)
+	    end if
 
           end do
 
@@ -594,7 +614,7 @@
 
 	logical bdebug
         integer ienew
-        integer ii,k,ipoint,ia
+        integer ii,k,ipoint,lremote
         real xu,yu
         real c(3)
 	real cu2
@@ -604,25 +624,29 @@
 	bdebug = ipev(ie) == 2247 .and. l == 1
 	bdebug = .false.
 
-        xu = xtvdup(id,ic,ie)
-        yu = ytvdup(id,ic,ie)
-        ienew = ietvdup(id,ic,ie)
 	ipoint = itvdup(id,ic,ie)
-	ia = iatvdup(id,ic,ie)
+	lremote = ltvdup(id,ic,ie)
 
-	if( ipoint > 0 ) then
+	if( ipoint > 0 ) then			!value computed in other doamin
+	  if( lremote .lt. l ) return		!no such level on remote
 	  call tvd_get_upwind(l,ipoint,cu)
 	  if( bdebug ) write(6,*) 'upwind1: ',ipev(ie),ipev(ienew),ipoint,cu
 	  return
 	end if
 
+        ienew = ietvdup(id,ic,ie)
+
         if( ienew .le. 0 ) return
-	if( ilhv(ienew) .lt. l ) return		!TVD for 3D
+	if( lremote /= ilhv(ienew) ) stop 'error stop tvd_get_upwind_c: lremote'
+	if( lremote .lt. l ) return		!no such level in ienew element
 
         do ii=1,3
           k = nen3v(ii,ienew)
           c(ii) = cv(l,k)
         end do
+
+        xu = xtvdup(id,ic,ie)
+        yu = ytvdup(id,ic,ie)
 
         !call femintp(ienew,c,xu,yu,cu)		!TVD_OLD
         call femintp_xi(ienew,c,xu,yu,cu)
@@ -632,8 +656,6 @@
 	  yd = yu
 	  call xy2xi(ienew,xd,yd,xi)
 	  write(6,*) 'upwind2: ',ipev(ie),ipev(ienew),ipoint,cu
-	  !write(6,*) ipev(ienew),xd,yd,cu
-	  !write(6,*) xi
 	end if
 
         end

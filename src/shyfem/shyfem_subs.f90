@@ -182,6 +182,7 @@
 ! 12.12.2023    ggu     introduce dtmax to make limited run
 ! 10.05.2024    ggu     set spherical just after basin read
 ! 06.09.2024    lrp     nuopc-compliant
+! 29.09.2024    ggu     call tvd_init before time loop
 !
 !*****************************************************************
 !
@@ -468,8 +469,9 @@
 	call close_init
         call shdist(rdistv)
 	call tracer_init
-        call qhdist(qdistv) !DWNH
 	call bfm_init
+	call tvd_init
+        call qhdist(qdistv) !DWNH
 	call renewal_time
         call lagrange
 	call tidepar_init
@@ -949,7 +951,7 @@
 	iconz = nint(getpar("iconz"))
 	itvd = nint(getpar("itvd"))
 	
-	call tvd_init(itvd)
+	call tvd_init
 	
 	if(itemp .gt. 0) nscal = nscal +1
 	if(isalt .gt. 0) nscal = nscal +1
