@@ -85,24 +85,28 @@
 	integer, save, allocatable :: my_send_list(:)
 	real, save, allocatable :: my_array_list(:,:)
 	double precision, save, allocatable :: my_xi_list(:,:)
+	real, save, allocatable :: values_tvd_aux(:,:)
 	real, save, allocatable :: values_tvd_local(:,:)
 	real, save, allocatable :: values_tvd_remote(:,:)
 	real, save, allocatable :: tvd_buffer_in(:)
 	real, save, allocatable :: tvd_buffer_out(:)
+	real, save, allocatable :: tvd_mbuffer_in(:)
+	real, save, allocatable :: tvd_mbuffer_out(:)
 
-! btvddebug regulates writing of fort.34* and tvd_debug.txt files
+! btvddebug regulates writing of all debug files:
+!	fort.34*, fort.50[01], tvd_debug.txt
 ! btvdassert regulates assesing vital relationships between variables
 ! iu_debug writes debug output to fort.500
-! btvddebug should also be set in files concentration.f90 and tvd_admin.f90
-! however, setting iu_debug = 0 disables the debugging writes
+! iuunf_debug writes debug output to fort.501
+! btvddebug could also be set in files concentration.f90 and tvd_admin.f90
 !
-! for production runs set logical variables to .false. and iu_debug to 0
+! for production runs set btvddebug and btvdassert to .false.
 
+	logical, save :: btvddebug = .false.	!writes tvd_debug.txt
+	logical, save :: btvdassert = .false.	!asserts important values
 	logical, save :: bdebout = .false.	!allows for writing to fort.500
-	logical, save :: btvddebug = .true.	!writes tvd_debug.txt
-	logical, save :: btvdassert = .true.	!asserts important values
 	integer, save :: iu_debug = 500		!writes fort.500 if > 0
-	integer, save :: iuunf_debug = 501	!writes fort.500 if > 0
+	integer, save :: iuunf_debug = 501	!writes fort.501 if > 0
 	integer, save :: ifreq_debug = 1	!frequency of debug in fort.500
 	real, save, allocatable :: tvd_debug_aux(:,:,:)
 	logical, save, allocatable :: blevel(:)
@@ -788,7 +792,7 @@
 	integer i,j,ii,ie,my_ia
 	integer ia_found,ia_needed
 
-	!return
+	if( .not. btvdassert ) return
 
 	my_ia = my_id + 1
 
@@ -831,10 +835,13 @@
 
 	lmax = nlv_global
 
+	allocate( values_tvd_aux(lmax,n_tvd_receive_total) )
 	allocate( values_tvd_local(lmax,n_tvd_receive_total) )
 	allocate( values_tvd_remote(lmax,n_tvd_send_total) )
 	allocate( tvd_buffer_in(lmax) )
 	allocate( tvd_buffer_out(lmax) )
+	allocate( tvd_mbuffer_in(lmax*n_my_array_list) )
+	allocate( tvd_mbuffer_out(lmax*n_my_array_list) )
 
 	end
 
@@ -851,14 +858,12 @@
 
 	real values(nlvdi,nkn)
 
-	logical bassert
 	integer i,na,ie,ii,k,l,ia,iee
 	integer lmax,lmax_remote,lmax_this
 	integer my_ia
 	double precision c,cacum
 	double precision xi(3)
 
-	bassert = btvdassert
 	my_ia = my_id + 1
 
 	do i=1,n_my_send_list
@@ -869,7 +874,7 @@
 	  lmax = ilhv(ie)
 	  lmax_remote = nint(my_array_list(ind_lmax_found,na))
 	  lmax_this = nint(my_array_list(ind_lmax_this,na))
-	  if( bassert ) then
+	  if( btvdassert ) then
 	    call tvd_assert('tvd_prepare_remote: (1)',ia==my_ia)
 	    call tvd_assert('tvd_prepare_remote: (2)',ie<=nel)
 	    call tvd_assert('tvd_prepare_remote: (3)',lmax==lmax_remote)
@@ -911,6 +916,8 @@
 	nin = 0
 	nout = 0
 
+	values_tvd_local = 0.
+
 	do i=1,n_my_array_list
 	  na = i
 	  id_from = nint(my_array_list(ind_ia_found,na)) - 1
@@ -918,13 +925,11 @@
 	  lmax = nint(my_array_list(ind_lmax_found,na))
 
 	  n = lmax
+
 	  if( id_from == my_id ) then
 	    nout = nout + 1
             tvd_buffer_in(1:n) = values_tvd_remote(1:n,nout)
-	  else
-	    tvd_buffer_in(:) = -1
 	  end if
-          tvd_buffer_out = 0.
 
 	  if( bdebug ) then
 	    write(iudb,*) 'exchanging: ',my_ia,id_from+1,id_to+1,n &
@@ -948,6 +953,67 @@
 	  write(6,*) nout,n_my_send_list
 	  stop 'error stop tvd_exchange: internal (1)'
 	end if
+
+	end
+
+!******************************************************************
+
+	subroutine tvd_exchange_multi
+
+! exchanges multi values
+
+	use shympi
+	use shympi_tvd
+
+	implicit none
+
+	logical bdebug
+	integer i,na,n,nin,nout,iudb,nbuf,ib,id_to_old,nfill,ip
+	integer my_ia
+	integer id_from,id_to
+	integer lmax,lmax_remote
+
+	bdebug = .false.	!leave this at .false.
+
+	my_ia = my_id + 1
+	iudb = 350 + my_ia
+	nin = 0
+	nout = 0
+	nbuf = 0
+	nfill = 0
+	id_to_old = -1
+
+	values_tvd_aux = 0.
+
+	do i=1,n_my_array_list
+	  na = i
+	  id_from = nint(my_array_list(ind_ia_found,na)) - 1
+	  id_to = nint(my_array_list(ind_ia_this,na)) - 1
+	  lmax = nint(my_array_list(ind_lmax_found,na))
+	  n = lmax
+
+	  if( id_from == my_id ) then
+	    nout = nout + 1
+	    if( id_to == id_to_old ) cycle
+	    nbuf = nbuf + 1
+	    nfill = nbuf * n
+	    ip = nfill - n + 1
+              tvd_mbuffer_in(ip:nfill) = values_tvd_remote(1:n,nout)
+	  end if
+
+          call shympi_receive(id_from,id_to &
+     &			,nfill,tvd_mbuffer_in,tvd_mbuffer_out)
+
+	  if( id_to /= my_id ) cycle
+
+	  do ib=1,nbuf
+	    nin = nin + 1
+	    nfill = nin * n
+	    ip = nfill - n + 1
+            values_tvd_aux(1:n,nin) = tvd_mbuffer_out(ip:nfill)
+	  end do
+	  nbuf = 0
+	end do
 
 	end
 
@@ -1095,6 +1161,7 @@
 	integer, save :: icall = 0
 	character*80 what_aux
 
+	if( .not. btvddebug ) return
 	if( iu_debug <= 0 ) return
 
 	if( icall == 0 ) then
@@ -1154,6 +1221,7 @@
 	integer ie,l
 	real conu(3)
 
+	if( .not. btvddebug ) return
 	if( iu_debug <= 0 ) return
 
 	tvd_debug_aux(l,:,ie) = conu(:)
@@ -1179,6 +1247,7 @@
 	integer, save :: nrec_form = 0
 	integer, save :: nrec_unf = 0
 
+	if( .not. btvddebug ) return
 	if( iu_debug <= 0 ) return
 
 	bout = .false.		!if false checks how may records are written
