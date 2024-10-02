@@ -71,6 +71,7 @@ OBJ  = \
 	color_utils.o \
 	flood.o \
 	queue.o \
+	stack.o \
 	reallocate.o \
 	histogram.o \
 
@@ -196,7 +197,9 @@ zip:	cleanall
 ../../../lib/mod/mod_connect.mod: connections.o
 ../../../lib/mod/mod_debug.mod: chk_NaN.o
 ../../../lib/mod/mod_flood.mod: flood.o
+../../../lib/mod/mod_histo.mod: histogram.o
 ../../../lib/mod/mod_random.mod: random.o
+../../../lib/mod/mod_reallocate.mod: reallocate.o
 ../../../lib/mod/mod_sort.mod: subsort.o
 ../../../lib/mod/nls.mod: nls.o
 ../../../lib/mod/para.mod: para.o
@@ -204,6 +207,7 @@ zip:	cleanall
 ../../../lib/mod/queue.mod: queue.o
 ../../../lib/mod/scan_string.mod: convert.o
 ../../../lib/mod/shyelab_unit.mod: unitutils.o
+../../../lib/mod/stack.mod: stack.o
 dates.o: ../../../lib/mod/iso8601.mod
 flood.o: ../../../lib/mod/mod_connect.mod \
 		../../../lib/mod/queue.mod 
