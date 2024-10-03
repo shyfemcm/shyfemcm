@@ -1,5 +1,19 @@
 ============================================================
 
+Thu Oct  3 12:21:11 CEST 2024
+
+netcdf output for meteo variables
+
+ src/tools/shyelab/shyelab1.f90        |   5 +-
+ src/tools/shyelab/shyelab_output.f90  |   8 +-
+ src/tools/shynetcdf/elab_nc.f90       |  72 ++++++++++++++---
+ src/tools/shynetcdf/elab_nc_dummy.f90 |   3 +-
+ src/tools/shynetcdf/netcdf.f90        | 140 ++++++++++++++++++++++++----------
+ src/utils/shyutil/strings.f90         |  52 ++++++++++++-
+ 6 files changed, 221 insertions(+), 59 deletions(-)
+
+============================================================
+
 Fri Sep 20 16:49:46 CEST 2024
 
 New version 8_0_8

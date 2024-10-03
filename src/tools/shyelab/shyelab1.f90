@@ -491,7 +491,7 @@
      &						,1,1,cv2)
 	  else if( bsumvar .or. binfluencemap .or. bvorticity ) then
 	    ! only write at end of loop over variables
-	  else
+	  else		! this handles normal (3D) output
 	    call shyelab_record_output(id,idout,dtime,ivar,iv &
      &						,belem,n,m &
      &						,lmax,nlvdi,cv3)
@@ -539,7 +539,8 @@
            call write_nodes(atime,ftype,nndim,nvar,ivars,cv3all)
 	 end if
  
-	 ! bsumvar is also handled in here
+	 ! this handles hydro files - bsumvar is also handled in here
+
 	 call shyelab_post_output(id,idout,dtime,nvar,n,m,nndim &
      &                                  ,lmax,nlvdi,cv3all)
 

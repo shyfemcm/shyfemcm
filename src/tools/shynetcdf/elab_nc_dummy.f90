@@ -55,7 +55,7 @@
 
 !********************************************************************
 
-	subroutine nc_output_record(ncid,var_id,np,cv3)
+	subroutine nc_output_record(ncid,var_id,var_dim,np,cv3)
 
 	use basin
 	use levels
@@ -64,6 +64,7 @@
 
 	integer ncid
 	integer var_id
+	integer var_dim
 	integer np
 	real cv3(nlvdi,np)
 

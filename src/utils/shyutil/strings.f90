@@ -64,6 +64,7 @@
 ! 22.04.2021	ggu	new routines checking and populating strings
 ! 20.09.2024	ggu	new variable skin temperature (14)
 ! 21.09.2024	ggu	cleaned, some new helper routines
+! 03.10.2024	ggu	new has_direction_ivar() and is_2d()
 !
 ! contents :
 !
@@ -1002,7 +1003,7 @@
 
 	function has_direction(name)
 
-! check if directional variable
+! check name if directional variable
 
 	use shyfem_strings
 
@@ -1012,15 +1013,58 @@
 	character*(*) name
 
 	integer ivar
+	logical has_direction_ivar
 
 	call strings_get_ivar(name,ivar)
 
-	has_direction = (       &
-      &			  ivar == 2          &		!velocity &
+	has_direction = has_direction_ivar(ivar)
+
+	end
+
+!****************************************************************
+
+	function has_direction_ivar(ivar)
+
+! check ivar if directional variable
+
+	use shyfem_strings
+
+	implicit none
+
+	logical has_direction_ivar
+	integer ivar
+
+	has_direction_ivar = (          &
+      &			  ivar == 2     &		!velocity &
       &		     .or. ivar == 3     &		!transport &
       &		     .or. ivar == 21    &		!wind &
       &		     .or. ivar == 42    &		!wind stress &
-      &			)
+      &			     )
+
+	end
+
+!****************************************************************
+
+	function is_2d(ivar)
+
+! checks if variable is 2d variable
+
+	use shyfem_strings
+
+	implicit none
+
+	logical is_2d
+	integer ivar
+
+	is_2d = .false.
+
+	if( ivar == 1 ) then				!water level
+	  is_2d = .true.
+	else if( ivar >= 20 .and. ivar <= 29 ) then	!meteo
+	  is_2d = .true.
+	else if( ivar >= 85 .and. ivar <= 86 ) then	!ice
+	  is_2d = .true.
+	end if
 
 	end
 
