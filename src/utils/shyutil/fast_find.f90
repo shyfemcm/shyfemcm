@@ -28,6 +28,7 @@
 ! revision log :
 !
 ! 01.10.2024	ggu	fast_find started
+! 03.10.2024	ggu	fast_find debugged
 
 !**************************************************************************
 
@@ -37,12 +38,13 @@
 
         implicit none
 
+        logical, private, save :: bdebug = .false.
+
         integer, private, save :: nsize = 0
         integer, private, save :: idmax = 0
         integer, private, save :: nbx,nby
         real, private, save :: box_size = 0
 	real, private, save :: xbmin,ybmin,xbmax,ybmax
-	real, private, save :: dbx,dby
 
 	integer, save, allocatable :: n_elem_list(:)
 	integer, save, allocatable :: elem_list(:,:)
@@ -59,30 +61,36 @@
 
 !******************************************************************
 
-	subroutine fast_find_initialize(n)
+	subroutine fast_find_initialize(nin)
 
 ! sets up data structure
 
 	use basin
 	use stack
 
-	integer n
+	integer, intent(in) :: nin
 
 	integer nx,ny
 	integer ix,iy
 	integer ixmin,iymin,ixmax,iymax
 	integer id
 	integer ie,ii,k
-	integer ne,nemax,netot,neaver
+	integer ns,ne,nemax,netot,neaver,nezero
 	real x(3),y(3)
 	real xmin,ymin,xmax,ymax
 	real xemin,yemin,xemax,yemax
 	real dx,dy
+	real dbx,dby
 	real, parameter :: eps = 0.01
 
 !	------------------------------------------------
 !	find box sizes and limits
 !	------------------------------------------------
+
+	if( bdebug ) write(6,*) 'starting seting up fast_find routine'
+
+	nsize = nin
+	if( nin <= 0 ) nsize = 10		!default
 
 	call bas_get_minmax(xmin,ymin,xmax,ymax)
 
@@ -96,29 +104,39 @@
 	dby = dy
 
 	if( dx > dy ) then
-	  box_size = (xbmax-xbmin)/n
-	  nbx = n
-	  nby = (ybmax-ybmin) / box_size
+	  box_size = (xbmax-xbmin)/nsize
+	  nbx = nsize
+	  nby = 1 + (ybmax-ybmin) / box_size
+	  ybmax = ybmin + nby*box_size
 	else
-	  box_size = (ybmax-ybmin)/n
-	  nby = n
-	  nbx = (xbmax-xbmin) / box_size
+	  box_size = (ybmax-ybmin)/nsize
+	  nby = nsize
+	  nbx = 1 + (xbmax-xbmin) / box_size
+	  xbmax = xbmin + nbx*box_size
 	end if
 
-	write(6,*) 'box: ',n,nbx,nby,box_size
+	if( bdebug ) then
+	  write(6,*) 'box: ',nsize,nbx,nby
+	  write(6,*) 'box size: ',dx,dy,box_size
+	  write(6,*) 'minmax: ',xbmin,xbmax,ybmin,ybmax
+	end if
+
+	call write_boxes
 
 !	------------------------------------------------
 !	initialize stack for all boxes
 !	------------------------------------------------
 
 	id = 0
-	do iy=1,ny
-	  do ix=1,nx
+	do iy=1,nby
+	  do ix=1,nbx
 	    id = id + 1
 	    call stack_init(id)
 	  end do
 	end do
 	idmax = id
+
+	if( bdebug ) write(6,*) 'idmax: ',idmax
 
 !	------------------------------------------------
 !	insert elements
@@ -136,10 +154,10 @@
           yemin = min(y(1),y(2),y(3))
           xemax = max(x(1),x(2),x(3))
           yemax = max(y(1),y(2),y(3))
-	  ixmin = 1 + (xemin-xbmin)/dbx
-	  ixmax = 1 + (xemax-xbmin)/dbx
-	  iymin = 1 + (yemin-ybmin)/dby
-	  iymax = 1 + (yemax-ybmin)/dby
+	  ixmin = 1 + (xemin-xbmin)/box_size
+	  ixmax = 1 + (xemax-xbmin)/box_size
+	  iymin = 1 + (yemin-ybmin)/box_size
+	  iymax = 1 + (yemax-ybmin)/box_size
 
 	  do iy=iymin,iymax
 	    do ix=ixmin,ixmax
@@ -161,24 +179,29 @@
 	nemax = 0
 	netot = 0
 	neaver = 0
+	nezero = 0
 	do id=1,idmax
 	  ne = stack_fill(id)
 	  nemax = max(nemax,ne)
 	  netot = netot + ne
+	  if( ne == 0 ) nezero = nezero + 1
+	  !write(6,*) id,ne
 	end do
 	neaver = netot / idmax
 
-	write(6,*) 'stack ne: ',idmax,nemax,netot,neaver
+	if( bdebug ) then
+	  write(6,'(a,6i8)') 'stack ne: ',idmax,nemax,netot,neaver,nezero,nel
+	end if
 
 	allocate(n_elem_list(idmax))
 	allocate(elem_list(nemax,idmax))
 
 	do id=1,idmax
-	  call stack_get_entries(id,n,elem_list(:,id))
-	  n_elem_list(id) = n
+	  call stack_get_entries(id,ns,elem_list(:,id))
+	  n_elem_list(id) = ns
 	  ne = stack_fill(id)
-	  if( ne /= n ) then
-	    write(6,*) 'n,ne: ',n,ne
+	  if( ne /= ns ) then
+	    write(6,*) 'n,ne: ',ns,ne
 	    stop 'error stop fast_find_initialize: internal error (w)'
 	  end if
 	end do
@@ -186,6 +209,8 @@
 	do id=1,idmax
 	  call stack_delete(id)
 	end do
+
+	if( bdebug ) write(6,*) 'finished seting up fast_find routine'
 
 !	------------------------------------------------
 !	end of routine
@@ -201,6 +226,7 @@
 
 	use basin
 
+	nsize = 0
 	idmax = 0
 	deallocate(n_elem_list)
 	deallocate(elem_list)
@@ -224,8 +250,8 @@
 
 	logical in_element
 
-	ix = 1 + (x-xbmin)/dbx
-	iy = 1 + (y-ybmin)/dby
+	ix = 1 + (x-xbmin)/box_size
+	iy = 1 + (y-ybmin)/box_size
 	id = (iy-1)*nbx + ix
 
 	if( id < 1 .or. id > idmax ) then
@@ -263,6 +289,51 @@
 	end
 
 !******************************************************************
+
+	subroutine write_boxes
+
+	implicit none
+
+	integer n,l,ix,iy
+	real x,y,x1,x2,y1,y2
+
+	n = 0
+	l = 0
+
+	!write(6,*) 'grid ',nbx,nby
+
+	do ix=0,nbx
+	  x = xbmin + ix*box_size
+	  !write(6,*) ix,x
+	  n = n + 1
+	  y1 = ybmin
+	  write(78,1000) 1,n,0,x,y1
+	  n = n + 1
+	  y2 = ybmax
+	  write(78,1000) 1,n,0,x,y2
+	  l = l + 1
+	  write(78,2000) 3,l,0,2,n-1,n
+	end do
+
+	write(78,*)
+
+	do iy=0,nby
+	  y = ybmin + iy*box_size
+	  !write(6,*) iy,y
+	  n = n + 1
+	  x1 = xbmin
+	  write(78,1000) 1,n,0,x1,y
+	  n = n + 1
+	  x2 = xbmax
+	  write(78,1000) 1,n,0,x2,y
+	  l = l + 1
+	  write(78,2000) 3,l,0,2,n-1,n
+	end do
+
+	return
+ 1000	format(i1,2i8,2e16.8)
+ 2000	format(i1,5i8)
+	end
 
 !==================================================================
         end module mod_fast_find

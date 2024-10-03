@@ -51,6 +51,7 @@
 ! 14.02.2022	ggu	no ike, some extra comments
 ! 16.02.2022	ggu	new option -boxgrd implemented (bboxgrd, index_file)
 ! 12.10.2022	ggu	new option -detail (bdetail)
+! 03.10.2024	ggu	new option -fastfind to test fast_find routines
 !
 !************************************************************
 
@@ -85,6 +86,7 @@
 	logical, save :: barea
 	logical, save :: binvert
 	logical, save :: bcustom
+	logical, save :: bfastfind
 
 	real, save :: hsigma
 	real, save :: dreg
@@ -198,7 +200,6 @@
         call clo_add_option('boxgrd index',' ','creates grd from index')
         call clo_add_option('custom',.false. &
      &				,'run custom routine defined by user')
-
         call clo_add_sep('bathymetry interpolation:')
 
         call clo_add_option('bfile bathy',' ' &
@@ -221,12 +222,16 @@
         call clo_add_option('asmooth alpha',0,'alpha for smoothing')
         call clo_add_option('iter n',0,'iterations for smoothing')
 
-        !call clo_add_sep('additional options')
         call clo_add_sep(' ')
-        call clo_add_sep(' interpolation mode: (default=1) ')
-        call clo_add_sep('   1 exponential')
-        call clo_add_sep('   2 uniform on squares')
-        call clo_add_sep('   3 exponential with autocorrelation')
+        call clo_add_sep('interpolation mode: (default=1) ')
+        call clo_add_com('   1 exponential')
+        call clo_add_com('   2 uniform on squares')
+        call clo_add_com('   3 exponential with autocorrelation')
+
+	call clo_hide_next_options
+        call clo_add_sep(' ')
+        call clo_add_option('fastfind',.false. &
+     &				,'run fastfind testing routines')
 
 	end subroutine basutil_set_options
 
@@ -262,6 +267,7 @@
         call clo_get_option('box',bbox)
         call clo_get_option('boxgrd',index_file)
         call clo_get_option('custom',bcustom)
+        call clo_get_option('fastfind',bfastfind)
 
         call clo_get_option('hsigma',hsigma)
 

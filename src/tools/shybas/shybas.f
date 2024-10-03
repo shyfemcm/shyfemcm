@@ -75,6 +75,7 @@ c 12.10.2022    ggu     new routine code_count called with -detail
 c 12.01.2023    ggu     correct statistics of area also for lat/lon
 c 29.01.2023    ggu     more on correct area computation (eliminated areatr)
 c 10.05.2024    ggu     new routine write_basin_txt() (bbastxt)
+c 03.10.2024    ggu     new call to test_fast_find()
 c
 c todo :
 c
@@ -171,6 +172,7 @@ c-----------------------------------------------------------------
 	if( bboxgrd ) call basboxgrd		!creates grd from index
 
 	if( bcustom ) call bas_custom
+	if( bfastfind ) call test_fast_find
 
 c-----------------------------------------------------------------
 c loop for interactive information on nodes and elems

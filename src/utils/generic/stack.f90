@@ -33,6 +33,7 @@
 ! 05.12.2017	ggu	changed VERS_7_5_39
 ! 14.02.2019	ggu	changed VERS_7_5_56
 ! 01.10.2024	ggu	new stack_get_entries() introduced
+! 03.10.2024	ggu	bug fix for stack_get_entries()
 
 !===============================================================
 	module stack
@@ -313,7 +314,7 @@
 	if( n > nsize ) call stack_error(id,size_error)
 	allocate(dvalues(n))
 	call stack_get_entries_d(id,n,dvalues)
-	values = nint(dvalues)
+	values(1:n) = nint(dvalues(1:n))
 	end subroutine stack_get_entries_i
 
 	subroutine stack_get_entries_r(id,n,values)
@@ -327,7 +328,7 @@
 	if( n > nsize ) call stack_error(id,size_error)
 	allocate(dvalues(n))
 	call stack_get_entries_d(id,n,dvalues)
-	values = real(dvalues)
+	values(1:n) = real(dvalues(1:n))
 	end subroutine stack_get_entries_r
 
 	subroutine stack_get_entries_d(id,n,values)
