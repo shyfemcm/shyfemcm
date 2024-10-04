@@ -23,11 +23,12 @@
 !
 !--------------------------------------------------------------------------
 
-! test routines for fast find routines
+! test routines for fast_find and quad_tree routines
 
 ! revision log :
 !
 ! 01.10.2024	ggu	written from scratch
+! 04.10.2024	ggu	also adapted to quad_tree routines
 
 !**************************************************************************
 
@@ -35,41 +36,52 @@
 
 	use basin
 	use mod_fast_find
+	use mod_quad_tree
 
 	implicit none
 
-	integer nsize
+	logical bnormal
+	integer nsize,iemax
 	integer nrun,i
-	integer ief,ien
+	integer ief,ien,ieq
 	integer nw,perc
 	real xmin,ymin,xmax,ymax
 	real x,y
 	real rx,ry
 
+	bnormal = .false.
+	!bnormal = .true.
+	iemax = 100
 	nsize = 10
 	nrun = 10000
 	nw = 1000 / 100
 
 	call fast_find_initialize(nsize)
+	call quad_tree_initialize(iemax)
 
 	call bas_get_minmax(xmin,ymin,xmax,ymax)
 
 	do i=1,nrun
+	  !write(6,*) 'testing point ',i
 	  call random_number(rx)
 	  call random_number(ry)
 	  x = xmin + (xmax-xmin)*rx
 	  y = ymin + (ymax-ymin)*ry
 	  call fast_find_search(x,y,ief)
-          call find_unique_element(x,y,ien)
+	  ieq = ief
+	  call quad_tree_search(x,y,ieq)
+	  ien = ief
+          if( bnormal ) call find_unique_element(x,y,ien)
 	  perc = 100*i/nrun
-	  if( mod(i,nw) == 0 ) write(6,*) perc,x,y,ief,ien
-	  if( ief /= ien ) then
-	    write(6,*) i,x,y,ief,ien
+	  if( mod(i,nw) == 0 ) write(6,*) perc,x,y,ien
+	  if( ief /= ien .or. ieq /= ien ) then
+	    write(6,*) i,x,y,ief,ien,ieq
 	    stop 'error stop'
 	  end if
 	end do
 
 	call fast_find_finalize
+	call quad_tree_finalize
 
 	end
 
@@ -79,6 +91,7 @@
 
 	use basin
 	use mod_fast_find
+	use mod_quad_tree
 
 	implicit none
 
@@ -152,6 +165,8 @@
 	real, allocatable :: xv(:),yv(:)
 
 	nrun = 1000000
+	nrun = 100000
+	nrun = 10000
 	nw = 1000 / 100
 
 	write(6,*) 'running test_fast_find_optimize: ',nrun
@@ -192,13 +207,92 @@
 
 !**************************************************************************
 
+	subroutine test_quad_tree_optimize
+
+	use basin
+	use mod_fast_find
+	use mod_quad_tree
+
+	implicit none
+
+	integer n,nsize,iemax
+	integer nrun,i
+	integer ief,ien
+	integer nw,perc
+	real time1,time2
+	real xmin,ymin,xmax,ymax
+	real x,y
+	real rx,ry
+	real, allocatable :: xv(:),yv(:)
+
+	nrun = 100000
+	nw = 1000 / 100
+
+	write(6,*) 'running test_quad_tree_optimize: ',nrun
+
+	allocate(xv(nrun))
+	allocate(yv(nrun))
+
+	call bas_get_minmax(xmin,ymin,xmax,ymax)
+
+	do i=1,nrun
+	  call random_number(rx)
+	  call random_number(ry)
+	  x = xmin + (xmax-xmin)*rx
+	  y = ymin + (ymax-ymin)*ry
+	  xv(i) = x
+	  yv(i) = y
+	end do
+
+	do n=50,10,-1
+
+	iemax = n
+	call quad_tree_initialize(iemax)
+
+	call cpu_time(time1)
+	do i=1,nrun
+	  call quad_tree_search(xv(i),yv(i),ief)
+	  perc = 100*i/nrun
+	end do
+	call cpu_time(time2)
+	write(6,*) 'optimize: ',n,time2-time1
+	write(67,*) n,time2-time1
+
+	call quad_tree_finalize
+
+	end do
+
+	end
+
+!**************************************************************************
+
+	subroutine test_quad_tree
+
+	use mod_quad_tree
+
+	implicit none
+
+	write(6,*) 'starting quad_tree_test'
+	call quad_tree_initialize
+	call quad_tree_plot
+	call quad_tree_finalize
+	write(6,*) 'finished quad_tree_test'
+
+	end
+
+!**************************************************************************
+
 	subroutine test_fast_find
 
 	implicit none
 
-	!call test_fast_find_correctness
+	call test_fast_find_correctness
+	call test_quad_tree
+	call test_quad_tree_optimize
+	!call test_fast_find_optimize
+
 	!call test_fast_find_speed
-	call test_fast_find_optimize
+	!call test_fast_find_optimize
 
 	end
 

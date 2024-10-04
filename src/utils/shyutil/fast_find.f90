@@ -29,6 +29,7 @@
 !
 ! 01.10.2024	ggu	fast_find started
 ! 03.10.2024	ggu	fast_find debugged
+! 03.10.2024	ggu	small bug fixes
 
 !**************************************************************************
 
@@ -39,6 +40,7 @@
         implicit none
 
         logical, private, save :: bdebug = .false.
+        logical, private, save :: bplot = .false.
 
         integer, private, save :: nsize = 0
         integer, private, save :: idmax = 0
@@ -73,7 +75,7 @@
 	integer nx,ny
 	integer ix,iy
 	integer ixmin,iymin,ixmax,iymax
-	integer id
+	integer id,idback
 	integer ie,ii,k
 	integer ns,ne,nemax,netot,neaver,nezero
 	real x(3),y(3)
@@ -86,6 +88,8 @@
 !	------------------------------------------------
 !	find box sizes and limits
 !	------------------------------------------------
+
+	if( idmax /= 0 ) call fast_find_finalize
 
 	if( bdebug ) write(6,*) 'starting seting up fast_find routine'
 
@@ -121,7 +125,7 @@
 	  write(6,*) 'minmax: ',xbmin,xbmax,ybmin,ybmax
 	end if
 
-	call write_boxes
+	if( bplot ) call fast_find_plot
 
 !	------------------------------------------------
 !	initialize stack for all boxes
@@ -131,7 +135,12 @@
 	do iy=1,nby
 	  do ix=1,nbx
 	    id = id + 1
-	    call stack_init(id)
+	    call stack_init(idback)
+	    if( id /= idback ) then
+	      !this happens because we assumed that no other routine
+	      !has already called stack ... make it more general
+	      stop 'error stop fast_find_initialize: id/=idback'
+	    end if
 	  end do
 	end do
 	idmax = id
@@ -226,6 +235,8 @@
 
 	use basin
 
+	if( idmax == 0 ) return
+
 	nsize = 0
 	idmax = 0
 	deallocate(n_elem_list)
@@ -246,9 +257,12 @@
 
 	integer ix,iy,id
 	integer ifound,n,iee,i,ie_ext
-	integer ie_found(100)
+	integer, parameter :: iedim = 100
+	integer ie_found(iedim)
 
 	logical in_element
+
+	if( idmax == 0 ) stop 'fast_find_search: fast_find not initialized'
 
 	ix = 1 + (x-xbmin)/box_size
 	iy = 1 + (y-ybmin)/box_size
@@ -266,6 +280,7 @@
 	  iee = elem_list(i,id)
 	  if( in_element(iee,x,y) ) then
 	    ifound = ifound + 1
+	    if( ifound > iedim) stop 'error stop fast_find_search: iedim'
 	    ie_found(ifound) = iee
 	  end if
 	end do
@@ -290,7 +305,7 @@
 
 !******************************************************************
 
-	subroutine write_boxes
+	subroutine fast_find_plot
 
 	implicit none
 

@@ -34,6 +34,7 @@
 ! 14.02.2019	ggu	changed VERS_7_5_56
 ! 01.10.2024	ggu	new stack_get_entries() introduced
 ! 03.10.2024	ggu	bug fix for stack_get_entries()
+! 04.10.2024	ggu	bug fix for stack_peek()
 
 !===============================================================
 	module stack
@@ -293,6 +294,7 @@
 	integer id
 	double precision value
 	stack_peek_d = .false.
+	value = 0.
 	if( pentry(id)%top == 0 ) return
 	if( pentry(id)%type /= value_type ) then
 	  call stack_error(id,type_error)
