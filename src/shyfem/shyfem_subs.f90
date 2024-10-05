@@ -236,6 +236,7 @@
 	use mod_test_zeta
 	use befor_after
 	use mod_trace_point
+	use mod_quad_tree
 #ifdef W3_SHYFEM
 	use subww3
 #endif
@@ -468,6 +469,7 @@
 	call tidefini
 	call close_init
         call shdist(rdistv)
+	call quad_tree_initialize
 	call tracer_init
 	call bfm_init
 	call tvd_init

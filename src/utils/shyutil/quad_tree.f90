@@ -30,6 +30,7 @@
 ! 01.10.2024	ggu	quad_tree started
 ! 03.10.2024	ggu	quad_tree debugged
 ! 04.10.2024	ggu	quad_tree finished
+! 05.10.2024	ggu	final changes
 
 !**************************************************************************
 
@@ -43,6 +44,7 @@
 
         logical, save :: bdebug = .false.
         logical, save :: bverbose = .false.
+        logical, save :: bplot = .false.
 
         type :: entry
 	  integer :: nfill
@@ -59,8 +61,9 @@
 
 	type(entry), save, allocatable :: pentry(:)
 
-        integer, save :: idmax = 1000	!initial dimension of boxes
-        integer, save :: iemax = 0	!maximum elements in one box
+        logical, save :: binit = .false.	!is initialized?
+        integer, save :: idmax = 1000		!initial dimension of boxes
+        integer, save :: iemax = 0		!maximum elements in one box
 
         integer, save :: id_divide = 0
         integer, save :: idlast = 0
@@ -69,6 +72,10 @@
 	real, save, allocatable :: yemin(:)
 	real, save, allocatable :: xemax(:)
 	real, save, allocatable :: yemax(:)
+
+	!----------------------------------------------------------
+	! following are the public calls for quad_tree routines
+	!----------------------------------------------------------
 
 	public :: quad_tree_initialize	!call quad_tree_initialize[(iem)]
 	public :: quad_tree_finalize	!call quad_tree_finalize
@@ -93,6 +100,7 @@
 	integer id
 	integer ie,ii,k
 	integer nfill
+	integer iemax_proposed
 	real xmin,ymin,xmax,ymax
 	real x(3),y(3)
 
@@ -102,9 +110,20 @@
 
 	if( bverbose ) write(6,*) 'starting seting up quad_tree routine'
  
-	iemax = 0
-	if( present(iem) ) iemax = iem
-	if( iemax < ngr ) iemax = 2*ngr
+!	------------------------------------------------
+!	determine iemax and if we have to re-initialize
+!	------------------------------------------------
+
+	iemax_proposed = 0
+	if( present(iem) ) iemax_proposed = iem
+	if( iemax_proposed < ngr ) iemax_proposed = 2*ngr
+
+	if( binit ) then
+	  if( iemax_proposed == iemax ) return		!already done
+	  call quad_tree_finalize
+	end if
+
+	iemax = iemax_proposed
 
 !	------------------------------------------------
 !	initialize element boxes
@@ -155,6 +174,14 @@
 	
 	if( bdebug ) write(6,*) 'iemax,idmax,idlast: ',iemax,idmax,idlast
 	if( bverbose ) write(6,*) 'finished seting up quad_tree routine'
+
+	binit = .true.
+
+!	------------------------------------------------
+!	if wanted plot boxes
+!	------------------------------------------------
+
+	if( bplot ) call_quad_tree_plot
 
 !	------------------------------------------------
 !	end of routine
@@ -299,6 +326,10 @@
 
 	logical in_element
 
+	if( .not. binit ) then
+	  stop 'error stop quad_tree_search: not initialized'
+	end if
+
 	id = 1			!istart from root
 	iloop = 0
 	ie = 0
@@ -378,6 +409,8 @@
 
 	integer id,nfill
 
+	if( .not. binit ) return
+
 	call stack_delete(id_divide)
 
 	do id=1,idlast
@@ -389,6 +422,8 @@
 
 	deallocate(xemin,xemax,yemin,yemax)
 
+	binit = .false.
+
 	end
 
 !******************************************************************
@@ -399,6 +434,10 @@
 
 	integer id,iu,nfill,n,nl
 	real xmin,ymin,xmax,ymax
+
+	if( .not. binit ) then
+	  stop 'error stop quad_tree_plot: not initialized'
+	end if
 
 	iu = 67
 	open(iu,file='quad_tree.grd',status='unknown',form='formatted')

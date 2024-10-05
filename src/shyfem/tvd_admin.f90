@@ -75,6 +75,7 @@
 ! 03.09.2024    ggu     more on mpi-tvd
 ! 26.09.2024    ggu     mark old tvd code with TVD_OLD, btvddebug introduced
 ! 29.09.2024    ggu     use ltvdup to decide if remote data exists
+! 05.10.2024    ggu     introduced quad_tree_search()
 !
 !*****************************************************************
 !
@@ -366,6 +367,7 @@
 	use mod_tvd
 	use basin
 	use levels
+	use mod_quad_tree
 
         implicit none
 
@@ -376,7 +378,7 @@
         integer ii,j,k,in
 	integer, save :: itot = 0
 	integer, save :: itot2 = 0
-        integer ienew,ienew2
+        integer ienew,ienew2,ieq
 	real x,y
 	real r
 
@@ -420,7 +422,10 @@
 	    x = xu
 	    y = yu
 
-	    call find_unique_element(x,y,ienew)
+	    call quad_tree_search(x,y,ieq)
+	    ienew = ieq
+	    !call find_unique_element(x,y,ienew)
+	    if( ienew /= ieq ) stop 'error stop tvd_upwind_init_elem: ie/=ieq'
 	    !call find_close_elem(ie,x,y,ienew)		!TVD_OLD
 
             xtvdup(j,ii,ie) = x
@@ -443,7 +448,10 @@
 	    x = xu
 	    y = yu
 
-	    call find_unique_element(x,y,ienew)
+	    call quad_tree_search(x,y,ieq)
+	    ienew = ieq
+	    !call find_unique_element(x,y,ienew)
+	    if( ienew /= ieq ) stop 'error stop tvd_upwind_init_elem: ie/=ieq'
 	    !call find_close_elem(ie,x,y,ienew)		!TVD_OLD
 
             xtvdup(j,ii,ie) = x

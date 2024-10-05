@@ -32,7 +32,7 @@
 ! 03.09.2024	ggu	more on mpi-tvd
 ! 10.09.2024	ggu	data structures localized
 ! 27.09.2024	ggu	first running version... still to be cleaned
-
+! 05.10.2024	ggu	introduced quad_tree_search() - feature complete
 !
 ! notes :
 !
@@ -150,13 +150,14 @@
 	use shympi
 	use shympi_tvd
 	use mod_tvd
+	use mod_quad_tree
 
 	implicit none
 
 	logical bdebug,bfound
 	integer ie,ii,j,i,ie_new,ix,n,ind,iaf,ian,k
 	integer my_ia,ia,id,inlist,nfound,nchanged
-	integer ie_ext,iee_ext,iee_old,ie_int,iee
+	integer ie_ext,iee_ext,iee_old,ie_int,iee,ieq
 	integer ilist,maxlist,maxnlist
 	integer ia_found,ia_needed,ie_local,iudb
 	integer n_tvd_r,n_tvd_s,n_tvd_a,n_tvd
@@ -282,7 +283,10 @@
 	    y = rlists(ind_y,i,ia)
 	    if( x < xmin .or. x > xmax ) cycle
 	    if( y < ymin .or. y > ymax ) cycle
-	    call find_unique_element(x,y,ie)
+	    call quad_tree_search(x,y,ieq)
+	    ie = ieq
+	    !call find_unique_element(x,y,ie)
+	    if( ie /= ieq ) stop 'error stop tvd_mpi_init: ie/=ieq'
 	    if( ie > 0 ) then				!element found
 	      nfound = nfound + 1
 	      iee_ext = ipev(ie)
