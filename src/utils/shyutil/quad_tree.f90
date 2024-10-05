@@ -181,7 +181,7 @@
 !	if wanted plot boxes
 !	------------------------------------------------
 
-	if( bplot ) call_quad_tree_plot
+	if( bplot ) call quad_tree_plot
 
 !	------------------------------------------------
 !	end of routine
