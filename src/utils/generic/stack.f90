@@ -71,8 +71,8 @@
 	public :: stack_pop		!logical stack_pop(id,value)
 	public :: stack_peek		!logical stack_peek(id,value)
 	public :: stack_get_entries	!call stack_get_entries(id,n,values)
-	public :: stack_is_empty	!logical stack_is_empty(id)
 	public :: stack_fill		!integer stack_fill(id)
+	public :: stack_is_empty	!logical stack_is_empty(id)
 	public :: stack_info		!call stack_info(id)
 
         INTERFACE stack_push
@@ -346,17 +346,17 @@
 
 !--------------------
 
-	logical function stack_is_empty(id)
-	integer id
-	stack_is_empty = ( pentry(id)%top == 0 )
-	end function stack_is_empty
-
-!--------------------
-
 	integer function stack_fill(id)
 	integer id
 	stack_fill = pentry(id)%top
 	end function stack_fill
+
+!--------------------
+
+	logical function stack_is_empty(id)
+	integer id
+	stack_is_empty = ( pentry(id)%top == 0 )
+	end function stack_is_empty
 
 !--------------------
 
