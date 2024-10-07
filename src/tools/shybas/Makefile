@@ -118,6 +118,9 @@ depend:
 ../../../lib/mod/basutil.mod: basutil.o
 basutil.o: ../../../lib/mod/basin.mod ../../../lib/mod/clo.mod \
 		../../../lib/mod/mod_depth.mod 
+basutil_fastfind.o: ../../../lib/mod/basin.mod \
+		../../../lib/mod/mod_fast_find.mod \
+		../../../lib/mod/mod_quad_tree.mod 
 msh.o: ../../../lib/mod/grd.mod \
 		../../../lib/mod/mod_geom_dynamic.mod 
 

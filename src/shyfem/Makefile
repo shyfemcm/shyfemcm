@@ -297,7 +297,6 @@ cleanall: clean
 ../../lib/mod/connectivity.mod: lagrange_connect.o
 ../../lib/mod/extra.mod: extra.o
 ../../lib/mod/flux.mod: flux.o
-../../lib/mod/histo.mod: histogram.o
 ../../lib/mod/ice_global.mod: icemodel.o
 ../../lib/mod/ice_params.mod: icemodel.o
 ../../lib/mod/ice_variables.mod: icemodel.o
@@ -463,6 +462,7 @@ concentration.o: ../../lib/mod/basin.mod ../../lib/mod/evgeom.mod \
 		../../lib/mod/mod_depth.mod \
 		../../lib/mod/mod_diff_aux.mod \
 		../../lib/mod/mod_geom.mod \
+		../../lib/mod/mod_histo.mod \
 		../../lib/mod/mod_hydro.mod \
 		../../lib/mod/mod_hydro_print.mod \
 		../../lib/mod/mod_hydro_vel.mod \
@@ -874,6 +874,7 @@ shyfem_subs.o: ../../lib/mod/basin.mod \
 		../../lib/mod/mod_nohyd.mod \
 		../../lib/mod/mod_nudging.mod \
 		../../lib/mod/mod_offline.mod \
+		../../lib/mod/mod_quad_tree.mod \
 		../../lib/mod/mod_roughness.mod \
 		../../lib/mod/mod_sediment.mod \
 		../../lib/mod/mod_sinking.mod \
@@ -995,6 +996,7 @@ tvd_admin.o: ../../lib/mod/basin.mod ../../lib/mod/evgeom.mod \
 		../../lib/mod/mod_hydro_print.mod \
 		../../lib/mod/mod_hydro_vel.mod \
 		../../lib/mod/mod_layer_thickness.mod \
+		../../lib/mod/mod_quad_tree.mod \
 		../../lib/mod/mod_tvd.mod ../../lib/mod/shympi.mod \
 		../../lib/mod/shympi_tvd.mod 
 water_ren_time.o: ../../lib/mod/basin.mod \

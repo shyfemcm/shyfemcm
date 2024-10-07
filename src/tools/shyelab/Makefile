@@ -252,6 +252,8 @@ shyfile.o: ../../../lib/mod/clo.mod ../../../lib/mod/elabutil.mod \
 shyproj.o: ../../../lib/mod/basin.mod ../../../lib/mod/clo.mod \
 		../../../lib/mod/grd.mod \
 		../../../lib/mod/projection.mod 
+shystrings.o: ../../../lib/mod/clo.mod \
+		../../../lib/mod/shyfem_strings.mod 
 tselab1.o: ../../../lib/mod/clo.mod ../../../lib/mod/elabtime.mod \
 		../../../lib/mod/elabutil.mod \
 		../../../lib/mod/shyfem_strings.mod 

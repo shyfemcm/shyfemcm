@@ -186,7 +186,7 @@
 	integer, save :: ifreq = 1
 	logical, save :: bwrite = .false.
 	real proc
-	!integer, save :: ifreq = new/1000
+	!integer, save :: ifreq = nel/1000
 
         write(6,*) 'setting up tvd upwind information...'
 
@@ -197,7 +197,7 @@
 
 	call get_clock_count(it1)
 
-!$OMP PARALLEL DO PRIVATE(ie) SHARED(nel,bsphe)    DEFAULT(NONE)
+!$OMP PARALLEL DO PRIVATE(ie,proc) SHARED(nel,bsphe,bwrite,ifreq) DEFAULT(NONE)
 
           do ie=1,nel
             call tvd_upwind_init_elem(bsphe,ie)

@@ -177,8 +177,6 @@ coordinates.o: ../../../lib/mod/basin.mod \
 depth_util.o: ../../../lib/mod/basin.mod \
 		../../../lib/mod/mod_depth.mod \
 		../../../lib/mod/shympi.mod 
-find.o: ../../../lib/mod/basin.mod ../../../lib/mod/evgeom.mod \
-		../../../lib/mod/mod_geom.mod 
 intp_fem_file.o: ../../../lib/mod/shympi.mod
 io_off.o: ../../../lib/mod/basin.mod \
 		../../../lib/mod/mod_trace_point.mod \

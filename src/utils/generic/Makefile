@@ -193,6 +193,7 @@ zip:	cleanall
 ../../../lib/mod/femtime.mod: time_util.o
 ../../../lib/mod/grd.mod: grd.o
 ../../../lib/mod/iso8601.mod: iso8601.o
+../../../lib/mod/list.mod: list.o
 ../../../lib/mod/mod_color.mod: color.o
 ../../../lib/mod/mod_connect.mod: connections.o
 ../../../lib/mod/mod_debug.mod: chk_NaN.o

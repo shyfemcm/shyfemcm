@@ -136,6 +136,17 @@
 
 !********************************************************************
 
+        subroutine nc_output_get_var_dim(iv,var_dim)
+
+        implicit none
+
+        integer :: iv
+        integer :: var_dim
+
+        end
+
+!********************************************************************
+
 
         subroutine nc_set_quiet(bquiet)
 

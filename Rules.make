@@ -890,6 +890,9 @@ endif
 #
 #############################################
 
+INTEL_VERSION = IFORT
+#INTEL_VERSION = IFX
+
 # ERSEM FLAGS -------------------------------------
 
 REAL_4B = real\(4\)
@@ -972,6 +975,12 @@ ifeq ($(FORTRAN_COMPILER),INTEL)
   ifneq ($(PARALLEL_MPI),NONE)
     FINTEL      = mpiifort
   endif
+  ifeq ($(INTEL_VERSION),IFX)
+    FINTEL	= ifx
+    ifneq ($(PARALLEL_MPI),NONE)
+      FINTEL      = mpiifort -fc=ifx
+    endif
+  endif
   F77		= $(FINTEL)
   F95     	= $(F77)
   LINKER	= $(F77)
@@ -1006,6 +1015,9 @@ endif
 
 ifeq ($(C_COMPILER),INTEL)
   CC     = icc
+  ifeq ($(INTEL_VERSION),IFX)
+    CC	= icx
+  endif
   CFLAGS = -O -g -traceback -check-uninit
   CFLAGS = -O -g -traceback
   LCFLAGS = -O 
