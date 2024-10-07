@@ -60,6 +60,7 @@ OBJ  = \
 	mpi_ghost.o \
 	mpi_time.o \
 	mpi_tripple.o \
+	mpi_tvd.o \
 
 ALL = $(MOD) $(OBJ) $(METIS_OBJ)
 
@@ -207,6 +208,7 @@ zip:	cleanall
 ../../../lib/mod/shympi_debug.mod: mpi_debug.o
 ../../../lib/mod/shympi_time.mod: mpi_time.o
 ../../../lib/mod/shympi_tripple.mod: mpi_tripple.o
+../../../lib/mod/shympi_tvd.mod: mpi_tvd.o
 check_shympi_debug.o: ../../../lib/mod/clo.mod
 mpi_basin.o: ../../../lib/mod/basin.mod \
 		../../../lib/mod/shympi.mod 
@@ -225,6 +227,7 @@ mpi_tripple.o: ../../../lib/mod/basin.mod \
 		../../../lib/mod/levels.mod \
 		../../../lib/mod/mod_geom.mod \
 		../../../lib/mod/shympi.mod 
+mpi_tvd.o: ../../../lib/mod/basin.mod ../../../lib/mod/shympi.mod
 shyparts_basutil.o: ../../../lib/mod/basin.mod \
 		../../../lib/mod/grd.mod \
 		../../../lib/mod/mod_depth.mod \

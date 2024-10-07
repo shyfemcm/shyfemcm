@@ -142,6 +142,8 @@
 	integer,save :: n_ghost_max_global = 0
 	integer,save :: n_buffer = 0
 
+! total number of nodes/elems in domains
+
 	integer,save,pointer :: n_domains(:)
 	integer,save,target,allocatable :: nkn_domains(:)	!local total
 	integer,save,target,allocatable :: nel_domains(:)
@@ -151,11 +153,22 @@
 	integer,save,allocatable :: nel_cum_domains(:)
 	integer,save,allocatable :: nlv_domains(:)
 
+! arrays for ghost nodes/elems
+
 	integer,save,allocatable :: ghost_areas(:,:)
 	integer,save,allocatable :: ghost_nodes_in(:,:)
 	integer,save,allocatable :: ghost_nodes_out(:,:)
 	integer,save,allocatable :: ghost_elems_in(:,:)
 	integer,save,allocatable :: ghost_elems_out(:,:)
+
+! id of nodes and elems
+! the id of a node is unique
+! a node only belongs to one domain (partitioning on nodes)
+! an element can belong to more than one domain (maximum 3)
+! the dimension of id_elem is id_elem(0:3,nel)
+! id_elem(0,ie) is the the number of domains the element ie belongs to
+! id_elem(1:3,ie) are the domains the element ie belongs to
+! in id_elem(1,ie) is the principal domain
 
 	integer,save,allocatable :: id_node(:)		!domain (id) of node
 	integer,save,allocatable :: id_elem(:,:)	!domain (id) of elem
@@ -178,6 +191,8 @@
 
 	integer,save,target,allocatable :: ip_int_nodes(:,:) !global int nums
 	integer,save,target,allocatable :: ip_int_elems(:,:)
+
+! nen3v and hlv index of global domain
 
 	integer,save,allocatable :: nen3v_global(:,:)	!global element index
 	real,save,allocatable :: hlv_global(:)		!global layer depths

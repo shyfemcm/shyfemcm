@@ -58,6 +58,7 @@
 ! 16.02.2019	ggu	changed VERS_7_5_60
 ! 13.03.2019	ggu	changed VERS_7_5_61
 ! 09.05.2023    lrp     introduce top layer index variable
+! 24.09.2024    ggu     introduced tvd mpi (bmpi)
 !
 !**************************************************************
 
@@ -150,7 +151,7 @@
 	real,dimension(0:nlvddi,nkn),intent(in) :: difv,wsinkv
         !double precision,dimension(nlvddi,nkn),intent(out) :: cn
         
-	logical :: btvdv
+	logical :: btvdv,btvd2
 	integer :: ie,k,ilevel,ibase,ii,l,n,i,j,x,ies,iend,kl,kend,ntot
 	integer :: myid,numthreads,j_init,j_end,knod,k_end,jel
 	integer,allocatable,dimension(:) :: subset_l
@@ -216,6 +217,9 @@
 	  write(6,*) 'itvdv = 0 (no vertical TVD) in the STR file.'
 	  stop 'error stop conz3d: vertical tvd scheme'
 	end if
+
+	btvd2 = itvd == 2
+	if( btvd2 ) call tvd_mpi_run(cn1)
 
         cn=0.
 	co=cn1
@@ -646,7 +650,7 @@
 	end if
 
 ! 	----------------------------------------------------------------
-! 	horizontal TVD scheme start
+! 	horizontal TVD scheme start - compute fluxes fl, otherwise leave as is
 ! 	----------------------------------------------------------------
 
         if( btvd ) then

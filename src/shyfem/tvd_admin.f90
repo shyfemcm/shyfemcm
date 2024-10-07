@@ -29,7 +29,7 @@
 !
 ! contents :
 !
-! subroutine tvd_init(itvd)				initializes tvd scheme
+! subroutine tvd_init					initializes tvd scheme
 ! subroutine tvd_grad_3d(cc,gx,gy,aux,nlvdi,nlv)	computes gradients 3D
 ! subroutine tvd_grad_2d(cc,gx,gy,aux)			computes gradients 2D
 ! subroutine tvd_get_upwind_c(ie,l,ic,id,cu,cv)		c of upwind node
@@ -71,6 +71,11 @@
 ! 22.09.2020    ggu     correct warnings for PGI compiler
 ! 03.06.2022    ggu     documentation, adapted for mpi (only itvd==1 is working)
 ! 09.05.2023    lrp     introduce top layer index variable
+! 28.08.2024    ggu     use find_unique_element() to find element
+! 03.09.2024    ggu     more on mpi-tvd
+! 26.09.2024    ggu     mark old tvd code with TVD_OLD, btvddebug introduced
+! 29.09.2024    ggu     use ltvdup to decide if remote data exists
+! 05.10.2024    ggu     introduced quad_tree_search()
 !
 !*****************************************************************
 !
@@ -113,7 +118,7 @@
 !*****************************************************************
 !*****************************************************************
 
-        subroutine tvd_init(itvd)
+        subroutine tvd_init
 
 ! initializes horizontal tvd scheme
 
@@ -124,22 +129,35 @@
         implicit none
 
 	integer itvd
-
 	integer, save :: icall = 0
+	!logical, save :: bdebug = .false.
+	logical, save :: bdebug = .true.
+	logical :: btvd2
+
+	real getpar
 
 	if( icall .ne. 0 ) return
 	icall = 1
 
-	itvd_type = itvd
-	write(6,*) 'tvd type: ',itvd_type
-	if( itvd_type > 0 ) call mod_tvd_init(nel)
+	itvd = nint(getpar('itvd'))
 
-	if( itvd_type .eq. 2 ) then
+	itvd_type = itvd
+	btvd2 = itvd == 2
+	write(6,*) 'tvd type: ',itvd_type
+
+	if( btvd2 ) call mod_tvd_init(nel)
+
+	if( btvd2 ) then
           if( shympi_is_parallel() ) then
-            write(6,*) 'cannot yet handle itvd==2'
-            stop 'error stop tvd_init: cannot run with mpi'
+	    call tvd_upwind_init_mpi
+	    call tvd_mpi_init
+	  else
+	    call tvd_upwind_init_shell
           end if
-	  call tvd_upwind_init_shell
+	end if
+
+	if( btvd2 ) then
+	  if( bdebug ) call write_tvd_debug(nel) !only if btvddebug==.true.
 	end if
 
 	if( itvd .eq. 0 ) then
@@ -151,9 +169,60 @@
 	end
 
 !*****************************************************************
+
         subroutine tvd_upwind_init_shell
 
-! initializes position of upwind node (shell) - original version
+! initializes position of upwind node (shell) - final version
+
+	use mod_tvd
+	use basin
+
+        implicit none
+
+	logical bsphe,binit
+	integer isphe
+        integer ie,nthreads
+	integer it1,idt
+	integer, save :: ifreq = 1
+	logical, save :: bwrite = .false.
+	real proc
+	!integer, save :: ifreq = new/1000
+
+        write(6,*) 'setting up tvd upwind information...'
+
+	call get_coords_ev(isphe)
+	bsphe = isphe .eq. 1
+
+	call openmp_get_num_threads(nthreads)
+
+	call get_clock_count(it1)
+
+!$OMP PARALLEL DO PRIVATE(ie) SHARED(nel,bsphe)    DEFAULT(NONE)
+
+          do ie=1,nel
+            call tvd_upwind_init_elem(bsphe,ie)
+	    if( bwrite .and. mod(ie,ifreq) == 0 ) then
+	      proc = 100.*float(ie)/nel
+	      write(6,'(2i10,f8.2)') ie,nel,proc
+	    end if
+	  end do
+
+!$OMP END PARALLEL DO
+
+	call is_init_ev(binit)
+
+	call get_clock_count_diff(it1,idt)
+	write(6,*) 'clock count: ',idt,nthreads
+	write(6,*) 'binit,nel: ',binit,nel
+        write(6,*) '...tvd upwind setup done (itvd=2)'
+
+	end
+
+!*****************************************************************
+
+        subroutine tvd_upwind_init_shell_1
+
+! initializes position of upwind node (shell) - omp not working
 
 	use mod_tvd
 	use basin
@@ -171,6 +240,8 @@
 
 	call get_coords_ev(isphe)
 	bsphe = isphe .eq. 1
+
+	call openmp_get_num_threads(nthreads)
 
 	call get_clock_count(it1)
 
@@ -190,7 +261,7 @@
 	  call omp_compute_minmax(nchunk,nel,ie,ieend)
 
           do ies=ie,ieend
-            call tvd_upwind_init(bsphe,ie)
+            call tvd_upwind_init_elem(bsphe,ie)
 	  end do
 
 !$OMP END TASK
@@ -209,7 +280,7 @@
 
 !*****************************************************************
 
-        subroutine tvd_upwind_init_shell0
+        subroutine tvd_upwind_init_shell_0
 
 ! initializes position of upwind node (shell) - new simplified version
 
@@ -220,7 +291,7 @@
 
 	logical bsphe
 	integer isphe
-        integer ie,ies,ieend,nchunk,nthreads,nt
+        integer ie,ies,ieend,nchunk,nthreads,nmax
 	integer it1,idt
 
 	integer omp_get_num_threads,OMP_GET_MAX_THREADS
@@ -230,23 +301,20 @@
 	call get_coords_ev(isphe)
 	bsphe = isphe .eq. 1
 
+	call openmp_get_max_threads(nmax)
+	call openmp_get_num_threads(nthreads)
+	write(6,*) 'nthreads,nmax = ',nthreads,nmax
+
 	call get_clock_count(it1)
 
-!$      nt = omp_get_max_threads()
-!$      nthreads = omp_get_num_threads()
-!$	nchunk = nel/(10*nt)
-!$	write(6,*) 'max threads = ',nt,nthreads,nchunk
+!$	nchunk = nel/(10*nmax)
+!$	write(6,*) 'max threads = ',nmax,nthreads,nchunk
 
 !$OMP PARALLEL SHARED(nel,bsphe,nchunk) PRIVATE(ie)
-
-	!call omp_compute_chunk(nel,nchunk)
-!$      !nthreads = omp_get_num_threads()
-!$	!write(6,*) 'using chunk = ',nchunk,nel,nthreads
-
 !$OMP DO SCHEDULE(DYNAMIC,nchunk)
 
 	do ie=1,nel
-          call tvd_upwind_init(bsphe,ie)
+          call tvd_upwind_init_elem(bsphe,ie)
         end do
 
 !$OMP END PARALLEL      
@@ -258,8 +326,39 @@
 	end
 
 !*****************************************************************
+!*****************************************************************
+!*****************************************************************
 
-        subroutine tvd_upwind_init(bsphe,ie)
+        subroutine tvd_upwind_init_mpi
+
+	use basin
+	use mod_tvd
+	use shympi
+	use shympi_tvd
+
+	implicit none
+
+	logical bsphe
+	integer isphe
+	integer ie
+
+	call get_coords_ev(isphe)
+	bsphe = isphe .eq. 1
+
+	do ie=1,nel
+          call tvd_upwind_init_elem(bsphe,ie)
+	  iatvdup(:,:,ie) = my_id + 1
+	end do
+
+	write(6,*) 'tvd_upwind_init_mpi successfully called',nel,my_id
+
+	end
+
+!*****************************************************************
+!*****************************************************************
+!*****************************************************************
+
+        subroutine tvd_upwind_init_elem(bsphe,ie)
 
 ! initializes position of upwind node for one element
 !
@@ -267,30 +366,44 @@
 
 	use mod_tvd
 	use basin
+	use levels
+	use mod_quad_tree
 
         implicit none
 
-	logical bsphe
-	integer ie
+	logical, intent(in) :: bsphe
+	integer, intent(in) :: ie
 
 	logical bdebug
-        integer ii,j,k
-        integer ienew,ienew2
+        integer ii,j,k,in
+	integer, save :: itot = 0
+	integer, save :: itot2 = 0
+        integer ienew,ienew2,ieq
 	real x,y
 	real r
 
         double precision xc,yc,xd,yd,xu,yu
         double precision dlat0,dlon0                    !center of projection
 
+	logical in_element
 	integer ieext
 
+	bdebug = ie == 73
+	bdebug = .true.
 	bdebug = .false.
 
-        !do ie=1,nel
+          xtvdup(:,:,ie) = 0.
+          ytvdup(:,:,ie) = 0.
+          ietvdup(:,:,ie) = 0
+          ieetvdup(:,:,ie) = 0
+          iatvdup(:,:,ie) = 0
+          ltvdup(:,:,ie) = 0
 
           if ( bsphe ) call ev_make_center(ie,dlon0,dlat0)
 
           do ii=1,3
+
+	    !if( bdebug ) write(6,*) 'looking for elem in tvd: ',ie,ii
 
             k = nen3v(ii,ie)
             xc = xgv(k)
@@ -309,18 +422,19 @@
 	    x = xu
 	    y = yu
 
-            !call find_elem_from_old(ie,x,y,ienew)
-	    !ienew2 = ienew
-            call find_close_elem(ie,x,y,ienew2)
-	    ienew = ienew2
+	    call quad_tree_search(x,y,ieq)
+	    ienew = ieq
+	    !call find_unique_element(x,y,ienew)
+	    if( ienew /= ieq ) stop 'error stop tvd_upwind_init_elem: ie/=ieq'
+	    !call find_close_elem(ie,x,y,ienew)		!TVD_OLD
 
-	    if( ienew /= ienew2 ) then
-	      write(6,*) 'different elements: ',ienew,ienew2
+            xtvdup(j,ii,ie) = x
+            ytvdup(j,ii,ie) = y
+            if( ienew > 0 ) then
+              ietvdup(j,ii,ie) = ienew
+	      ieetvdup(j,ii,ie) = ipev(ienew)
+	      ltvdup(j,ii,ie) = ilhv(ienew)
 	    end if
-
-            tvdupx(j,ii,ie) = x
-            tvdupy(j,ii,ie) = y
-            ietvdup(j,ii,ie) = ienew
 
             j = mod(ii+1,3) + 1
             k = nen3v(j,ie)
@@ -334,26 +448,23 @@
 	    x = xu
 	    y = yu
 
-	    !call find_elem_from_old(ie,x,y,ienew)
-	    !ienew2 = ienew
-            call find_close_elem(ie,x,y,ienew2)
-	    ienew = ienew2
+	    call quad_tree_search(x,y,ieq)
+	    ienew = ieq
+	    !call find_unique_element(x,y,ienew)
+	    if( ienew /= ieq ) stop 'error stop tvd_upwind_init_elem: ie/=ieq'
+	    !call find_close_elem(ie,x,y,ienew)		!TVD_OLD
 
-	    if( ienew /= ienew2 ) then
-	      write(6,*) 'different elements: ',ienew,ienew2
+            xtvdup(j,ii,ie) = x
+            ytvdup(j,ii,ie) = y
+            if( ienew > 0 ) then
+              ietvdup(j,ii,ie) = ienew
+	      ieetvdup(j,ii,ie) = ipev(ienew)
+	      ltvdup(j,ii,ie) = ilhv(ienew)
 	    end if
 
-            tvdupx(j,ii,ie) = x
-            tvdupy(j,ii,ie) = y
-            ietvdup(j,ii,ie) = ienew
-
-            tvdupx(ii,ii,ie) = 0.
-            tvdupy(ii,ii,ie) = 0.
-            ietvdup(ii,ii,ie) = 0
-
           end do
-        !end do
 
+	  !if( bdebug ) stop
         end
 
 !*****************************************************************
@@ -367,6 +478,7 @@
         subroutine tvd_grad_3d(cc,gx,gy,aux,nlvddi)
 
 ! computes gradients for scalar cc (average gradient information)
+! this is for itvd == 1 only
 !
 ! output is gx,gy
 
@@ -440,6 +552,7 @@
         subroutine tvd_grad_2d(cc,gx,gy,aux)
 
 ! computes gradients for scalar cc (only 2D - used in sedi3d)
+! this is for itvd == 1 only
 
 	use evgeom
 	use basin
@@ -502,29 +615,56 @@
 
         implicit none
 
-        integer ie,l
-	integer ic,id
-        real cu
-        real cv(nlvdi,nkn)
+        integer, intent(in) :: ie,l
+	integer, intent(in) :: ic,id
+        real, intent(inout) :: cu
+        real, intent(in) :: cv(nlvdi,nkn)
 
+	logical bdebug
         integer ienew
-        integer ii,k
+        integer ii,k,ipoint,lremote
         real xu,yu
         real c(3)
+	real cu2
+	double precision xd,yd,xi(3)
+	real, parameter :: eps = 1.e-5
 
-        xu = tvdupx(id,ic,ie)
-        yu = tvdupy(id,ic,ie)
+	bdebug = ipev(ie) == 2247 .and. l == 1
+	bdebug = .false.
+
+	ipoint = itvdup(id,ic,ie)
+	lremote = ltvdup(id,ic,ie)
+
+	if( ipoint > 0 ) then			!value computed in other doamin
+	  if( lremote .lt. l ) return		!no such level on remote
+	  call tvd_get_upwind(l,ipoint,cu)
+	  if( bdebug ) write(6,*) 'upwind1: ',ipev(ie),ipev(ienew),ipoint,cu
+	  return
+	end if
+
         ienew = ietvdup(id,ic,ie)
 
         if( ienew .le. 0 ) return
-	if( ilhv(ienew) .lt. l ) return		!TVD for 3D
+	if( lremote /= ilhv(ienew) ) stop 'error stop tvd_get_upwind_c: lremote'
+	if( lremote .lt. l ) return		!no such level in ienew element
 
         do ii=1,3
           k = nen3v(ii,ienew)
           c(ii) = cv(l,k)
         end do
 
-        call femintp(ienew,c,xu,yu,cu)
+        xu = xtvdup(id,ic,ie)
+        yu = ytvdup(id,ic,ie)
+
+        !call femintp(ienew,c,xu,yu,cu)		!TVD_OLD
+        call femintp_xi(ienew,c,xu,yu,cu)
+
+	if( bdebug ) then
+	  xd = xu
+	  yd = yu
+	  call xy2xi(ienew,xd,yd,xi)
+	  write(6,*) 'upwind2: ',ipev(ie),ipev(ienew),ipoint,cu
+	end if
 
         end
 
@@ -546,20 +686,20 @@
 
 	implicit none
 
-	integer ie,l
-	integer itot,isum
-	double precision dt
-	double precision cl(0:nlvdi+1,3)		!bug fix
-	real cv(nlvdi,nkn)
-        real gxv(nlvdi,nkn)
-        real gyv(nlvdi,nkn)
-	double precision f(3)
-	double precision fl(3)
+	integer, intent(in) :: ie,l
+	integer, intent(in) :: itot,isum
+	double precision, intent(in) :: dt
+	double precision, intent(in) :: cl(0:nlvdi+1,3)		!bug fix
+	real, intent(in) :: cv(nlvdi,nkn)
+        real, intent(in) :: gxv(nlvdi,nkn)
+        real, intent(in) :: gyv(nlvdi,nkn)
+	double precision, intent(in) :: f(3)
+	double precision, intent(out) :: fl(3)
 
 	real eps
 	parameter (eps=1.e-8)
 
-        logical btvd2
+        logical btvd2,btvddebug
         logical bdebug
 	integer ii,k
         integer ic,kc,id,kd,ip,iop
@@ -573,10 +713,13 @@
         real alfa,dis,aj
         real vel
         real gdx,gdy
+	real conu_aux(3)
 
 	integer smartdelta
 
 	btvd2 = itvd_type .eq. 2
+	btvddebug = .true.
+	btvddebug = btvddebug .and. btvd2
 	bdebug = .true.
 	bdebug = .false.
 
@@ -585,9 +728,8 @@
 	  write(6,*) 'tvd: ',btvd2,itvd_type
 	end if
 
-	  do ii=1,3
-	    fl(ii) = 0.
-	  end do
+	fl = 0.
+	conu_aux = 0.
 
 	  if( itot .lt. 1 .or. itot .gt. 2 ) return
 
@@ -643,6 +785,7 @@
                   conu = cond
                   !conu = 2.*conc - cond		!use internal gradient
                   call tvd_get_upwind_c(ie,l,ic,id,conu,cv)
+		  conu_aux(ii) = conu
                   grad = cond - conu
                 else
                   gcx = gxv(l,kc)
@@ -667,6 +810,8 @@
                 fl(id) = fl(id) + term
               end if
             end do
+
+	if( btvddebug ) call tvd_debug_accum(ie,l,conu_aux)
 
 	if( bdebug ) then
 	  write(6,*) 'tvd: --------------'
@@ -883,6 +1028,65 @@
         smartdelta=int((float((a+b)-abs(a-b)))/(float((a+b)+abs(a-b))))
 
 	end function smartdelta
+
+!*****************************************************************
+
+	subroutine write_debug_grid(nelems,ielems,x,y)
+
+	use basin
+
+	implicit none
+
+	integer nelems
+	integer ielems(nelems)
+	real x,y
+
+	integer, save :: ncount = 0
+	integer i
+	integer ie_ext,ie_int,k,ii,node,iu
+	integer ies(3)
+	real xe,ye
+	character*80 string,file
+
+	integer ieint
+
+	ncount = ncount + 1
+
+	write(string,'(i4)') ncount
+	do i=1,4
+	  if( string(i:i) == ' ' ) string(i:i) = '0'
+	end do
+	file='debug_grid_'//trim(string)//'.grd'
+
+	write(6,*) 'writing grid ',trim(file)
+
+	iu = 1
+	open(iu,file=file,status='unknown',form='formatted')
+
+	node = 0
+
+	do i=1,nelems
+	  ie_ext = ielems(i)
+	  ie_int = ieint(ie_ext)
+	  ie_int = ie_ext
+	  if( ie_int == 0 ) stop 'error stop write_debug_grid: no internal'
+	  do ii=1,3
+	    node = node + 1
+	    ies(ii) = node
+	    k = nen3v(ii,ie_int)
+	    xe = xgv(k)
+	    ye = ygv(k)
+	    write(iu,'(i1,2i8,2f16.6)') 1,node,0,xe,ye
+	  end do
+	  write(iu,'(i1,6i8)') 2,i,0,3,ies(:)
+	end do
+
+	node = node + 1
+	write(iu,'(i1,2i8,2f16.6)') 1,node,4,x,y
+
+	close(iu)
+
+	end
 
 !*****************************************************************
 

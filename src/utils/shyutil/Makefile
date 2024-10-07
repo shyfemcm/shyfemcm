@@ -69,6 +69,8 @@ OBJ  = \
 	evgeom.o \
 	tvd.o \
 	find.o \
+	fast_find.o \
+	quad_tree.o \
 
 ALL = $(MOD) $(OBJ)
 

@@ -65,6 +65,7 @@ OBJ := \
 	basutil_interp.o \
 	basutil_hsigma.o \
 	basutil_part.o \
+	basutil_fastfind.o \
 
 #----------------------------------------------------------------------------
 

@@ -995,7 +995,8 @@ tvd_admin.o: ../../lib/mod/basin.mod ../../lib/mod/evgeom.mod \
 		../../lib/mod/mod_hydro_print.mod \
 		../../lib/mod/mod_hydro_vel.mod \
 		../../lib/mod/mod_layer_thickness.mod \
-		../../lib/mod/mod_tvd.mod ../../lib/mod/shympi.mod 
+		../../lib/mod/mod_tvd.mod ../../lib/mod/shympi.mod \
+		../../lib/mod/shympi_tvd.mod 
 water_ren_time.o: ../../lib/mod/basin.mod \
 		../../lib/mod/custom_dates.mod \
 		../../lib/mod/evgeom.mod ../../lib/mod/levels.mod \
