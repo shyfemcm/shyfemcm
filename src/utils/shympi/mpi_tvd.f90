@@ -33,6 +33,7 @@
 ! 10.09.2024	ggu	data structures localized
 ! 27.09.2024	ggu	first running version... still to be cleaned
 ! 05.10.2024	ggu	introduced quad_tree_search() - feature complete
+! 07.10.2024	ggu	tvd mpi finished
 !
 ! notes :
 !
@@ -41,10 +42,7 @@
 !
 ! still to do :
 !
-! use as lmax maximum of the two domains
 ! prepare upwind c for more than one variable
-! group exchanges between equal domains
-! use quadtree to find elements
 
 !==================================================================
         module shympi_tvd
@@ -93,6 +91,9 @@
 	real, save, allocatable :: tvd_mbuffer_in(:)
 	real, save, allocatable :: tvd_mbuffer_out(:)
 
+	integer, save :: nblocks_multi
+	integer, save, allocatable :: exchange_multi_blocks(:,:)
+
 ! btvddebug regulates writing of all debug files:
 !	fort.34*, fort.50[01], tvd_debug.txt
 ! btvdassert regulates assesing vital relationships between variables
@@ -102,8 +103,9 @@
 !
 ! for production runs set btvddebug and btvdassert to .false.
 
-	logical, save :: btvddebug = .false.	!writes tvd_debug.txt
+	logical, save :: btvddebug = .true.	!writes tvd_debug.txt
 	logical, save :: btvdassert = .false.	!asserts important values
+	logical, save :: bcheck_multi = .true.	!checks multi exchange
 	logical, save :: bdebout = .false.	!allows for writing to fort.500
 	integer, save :: iu_debug = 500		!writes fort.500 if > 0
 	integer, save :: iuunf_debug = 501	!writes fort.501 if > 0
@@ -884,7 +886,8 @@
 	    call tvd_assert('tvd_prepare_remote: (3)',lmax==lmax_remote)
 	  end if
 	  xi(:) = my_xi_list(:,i)
-	  values_tvd_remote(:,i) = -999.	!force error
+	  !values_tvd_remote(:,i) = -999.	!force error
+	  values_tvd_remote(:,i) = 0.		!do not force error
 	  do l=1,lmax
 	    cacum = 0.
 	    do ii=1,3
@@ -900,7 +903,7 @@
 
 !******************************************************************
 
-	subroutine tvd_exchange
+	subroutine tvd_exchange_single
 
 	use shympi
 	use shympi_tvd
@@ -920,13 +923,14 @@
 	nin = 0
 	nout = 0
 
-	values_tvd_local = 0.
+	lmax = nlv_global
+	values_tvd_aux = 0.
 
 	do i=1,n_my_array_list
 	  na = i
 	  id_from = nint(my_array_list(ind_ia_found,na)) - 1
 	  id_to = nint(my_array_list(ind_ia_this,na)) - 1
-	  lmax = nint(my_array_list(ind_lmax_found,na))
+	  !lmax = nint(my_array_list(ind_lmax_found,na))
 
 	  n = lmax
 
@@ -944,10 +948,10 @@
 
 	  if( id_to /= my_id ) cycle
 	  nin = nin + 1
-          values_tvd_local(1:n,nin) = tvd_buffer_out(1:n)
+          values_tvd_aux(1:n,nin) = tvd_buffer_out(1:n)
 
 	  if( bdebug ) then
-	    write(iudb,*) 'exchanged: ',my_ia,nin,values_tvd_local(1,nin)
+	    write(iudb,*) 'exchanged: ',my_ia,nin,values_tvd_aux(1,nin)
 	  end if
 	end do
 
@@ -956,6 +960,100 @@
 	  write(6,*) nin,n_my_receive_list
 	  write(6,*) nout,n_my_send_list
 	  stop 'error stop tvd_exchange: internal (1)'
+	end if
+
+	end
+
+!******************************************************************
+
+	subroutine tvd_exchange_prepare_multi
+
+! prepares exchanges multi values
+
+	use shympi
+	use shympi_tvd
+
+	implicit none
+
+	logical bnew
+	integer iblock
+	integer id_from,id_to
+	integer id_from_old,id_to_old
+	integer i,na
+	integer my_ia,iudb
+	integer ntot
+	integer lmax,lmax_found,lmax_this
+	integer, save :: icall = 0
+
+	if( icall > 0 ) return
+	icall = icall + 1
+
+	my_ia = my_id + 1
+	iudb = 340 + my_ia
+
+	iblock = 0
+	id_from_old = -1
+	id_to_old = -1
+
+	do i=1,n_my_array_list
+	  na = i
+	  id_from = nint(my_array_list(ind_ia_found,na)) - 1
+	  id_to = nint(my_array_list(ind_ia_this,na)) - 1
+	  bnew = .false.
+	  if( id_from /= id_from_old ) bnew = .true.
+	  if( id_to /= id_to_old ) bnew = .true.
+	  if( bnew ) iblock = iblock + 1
+	  id_from_old = id_from
+	  id_to_old = id_to
+	end do
+
+	nblocks_multi = iblock
+	allocate(exchange_multi_blocks(6,nblocks_multi))
+	exchange_multi_blocks = 0
+
+	iblock = 0
+	id_from_old = -1
+	id_to_old = -1
+
+	do i=1,n_my_array_list
+	  na = i
+	  id_from = nint(my_array_list(ind_ia_found,na)) - 1
+	  id_to = nint(my_array_list(ind_ia_this,na)) - 1
+	  lmax_found = nint(my_array_list(ind_lmax_found,na))
+	  lmax_this = nint(my_array_list(ind_lmax_this,na))
+	  bnew = .false.
+	  if( id_from /= id_from_old ) bnew = .true.
+	  if( id_to /= id_to_old ) bnew = .true.
+	  if( bnew ) then
+	    iblock = iblock + 1
+	    exchange_multi_blocks(1,iblock) = id_from
+	    exchange_multi_blocks(2,iblock) = id_to
+	    exchange_multi_blocks(3,iblock) = i
+	  end if
+	  exchange_multi_blocks(4,iblock) = i
+	  exchange_multi_blocks(5,iblock) = exchange_multi_blocks(5,iblock) + 1
+	  lmax = exchange_multi_blocks(6,iblock)
+	  lmax = max(lmax,lmax_found,lmax_this)
+	  exchange_multi_blocks(6,iblock) = lmax
+	  id_from_old = id_from
+	  id_to_old = id_to
+	end do
+
+	write(iudb,*) '-----------------------------'
+	write(iudb,*) 'exchange blocks ',my_ia
+	write(iudb,*) '-----------------------------'
+
+	ntot = 0
+	do iblock=1,nblocks_multi
+	  write(iudb,'(7i8)') iblock,exchange_multi_blocks(:,iblock)
+	  ntot = ntot + exchange_multi_blocks(5,iblock)
+	end do
+
+	!write(6,*) 'total values to be exchanged: ',ntot,n_my_array_list,my_id
+	write(iudb,*) 'total values to be exchanged: ',ntot,n_my_array_list
+
+	if( ntot /= n_my_array_list ) then
+	  stop 'error stop tvd_exchange_prepare_multi: ntot (internal error)'
 	end if
 
 	end
@@ -971,11 +1069,13 @@
 
 	implicit none
 
-	logical bdebug
+	logical bdebug,bexchange
 	integer i,na,n,nin,nout,iudb,nbuf,ib,id_to_old,nfill,ip
 	integer my_ia
 	integer id_from,id_to
-	integer lmax,lmax_remote
+	integer ia,ia_min,ia_max,ia_tot,iblock
+	integer lmax,lmax_remote,l
+	integer ipmin,ipmax
 
 	bdebug = .false.	!leave this at .false.
 
@@ -985,39 +1085,54 @@
 	nout = 0
 	nbuf = 0
 	nfill = 0
-	id_to_old = -1
 
-	values_tvd_aux = 0.
+	lmax = nlv_global
+	values_tvd_local = 0.
 
-	do i=1,n_my_array_list
-	  na = i
-	  id_from = nint(my_array_list(ind_ia_found,na)) - 1
-	  id_to = nint(my_array_list(ind_ia_this,na)) - 1
-	  lmax = nint(my_array_list(ind_lmax_found,na))
-	  n = lmax
-
-	  if( id_from == my_id ) then
-	    nout = nout + 1
-	    if( id_to == id_to_old ) cycle
+	do iblock=1,nblocks_multi
+	  id_from = exchange_multi_blocks(1,iblock)
+	  id_to   = exchange_multi_blocks(2,iblock)
+	  ia_min  = exchange_multi_blocks(3,iblock)
+	  ia_max  = exchange_multi_blocks(4,iblock)
+	  ia_tot  = exchange_multi_blocks(5,iblock)
+	  lmax    = exchange_multi_blocks(6,iblock)
+	  nbuf = 0
+	  do ia=ia_min,ia_max
 	    nbuf = nbuf + 1
-	    nfill = nbuf * n
-	    ip = nfill - n + 1
-              tvd_mbuffer_in(ip:nfill) = values_tvd_remote(1:n,nout)
-	  end if
+	    if( id_from == my_id ) then
+	      nout = nout + 1
+	      ipmax = nbuf * lmax
+	      ipmin = ipmax - lmax + 1
+              tvd_mbuffer_in(ipmin:ipmax) = values_tvd_remote(1:lmax,nout)
+	    end if
+	  end do
 
+	  nfill = nbuf * lmax
           call shympi_receive(id_from,id_to &
      &			,nfill,tvd_mbuffer_in,tvd_mbuffer_out)
 
 	  if( id_to /= my_id ) cycle
 
+	  nbuf = nfill / lmax
 	  do ib=1,nbuf
 	    nin = nin + 1
-	    nfill = nin * n
-	    ip = nfill - n + 1
-            values_tvd_aux(1:n,nin) = tvd_mbuffer_out(ip:nfill)
+	    ipmax = ib * lmax
+	    ipmin = ipmax - lmax + 1
+            values_tvd_local(1:lmax,nin) = tvd_mbuffer_out(ipmin:ipmax)
 	  end do
-	  nbuf = 0
 	end do
+
+	if( .not. bcheck_multi ) return
+
+	if( any(values_tvd_local /= values_tvd_aux ) ) then
+	  write(6,*) 'nin: ',nin,n_tvd_receive_total,lmax
+	  do i=1,nin
+	    do l=1,n
+	      write(6,*) i,l,values_tvd_aux(l,i),values_tvd_local(l,i),my_id
+	    end do
+	  end do
+	  stop 'error stop tvd_exchange_multi: exchanged values differ in multi'
+	end if
 
 	end
 
@@ -1133,7 +1248,10 @@
 
 	call tvd_prepare_remote(values)
 
-	call tvd_exchange
+	if( bcheck_multi ) call tvd_exchange_single
+
+	call tvd_exchange_prepare_multi		!this is done only once
+	call tvd_exchange_multi
 
 	!call tvd_exchange_debug
 
