@@ -52,14 +52,6 @@
 
 	logical, parameter :: bmpitvd = .true. !handles tvd
 
-	integer, save :: nmax_tvd = 0
-	real, save, allocatable :: buffer_tvd_in(:,:)
-	real, save, allocatable :: buffer_tvd_out(:,:)
-	real, save, allocatable :: n_index_tvd(:)
-	real, save, allocatable :: index_tvd(:,:)
-
-        integer, save :: itvd_type = 0
-
 	integer, parameter :: ind_x = 1
 	integer, parameter :: ind_y = 2
 	integer, parameter :: ind_ia_this = 3
@@ -103,9 +95,9 @@
 !
 ! for production runs set btvddebug and btvdassert to .false.
 
-	logical, save :: btvddebug = .true.	!writes tvd_debug.txt
+	logical, save :: btvddebug = .false.	!writes tvd_debug.txt
 	logical, save :: btvdassert = .false.	!asserts important values
-	logical, save :: bcheck_multi = .true.	!checks multi exchange
+	logical, save :: bcheck_multi = .false.	!checks multi exchange
 	logical, save :: bdebout = .false.	!allows for writing to fort.500
 	integer, save :: iu_debug = 500		!writes fort.500 if > 0
 	integer, save :: iuunf_debug = 501	!writes fort.501 if > 0
@@ -146,6 +138,8 @@
 !==================================================================
 
 	subroutine tvd_mpi_init
+
+! this sets up all data structures needed for tvd mpi
 
 	use basin
 	use levels
@@ -783,51 +777,13 @@
 !******************************************************************
 !******************************************************************
 
-	subroutine assert_list_coherence(nmax,list,bconsolidated)
-
-	use basin
-	use shympi
-	use shympi_tvd
-
-	implicit none
-
-	integer nmax
-	real list(nlist,nmax)
-	logical bconsolidated
-
-	integer i,j,ii,ie,my_ia
-	integer ia_found,ia_needed
-
-	if( .not. btvdassert ) return
-
-	my_ia = my_id + 1
-
-	do i=1,nmax
-	  ie = nint(list(ind_ie_this,i))
-	  ia_found = nint(list(ind_ia_found,i))
-	  ia_needed = nint(list(ind_ia_this,i))
-	  if( .not. bconsolidated .and. ie == 0 ) cycle		!end of data
-	  j = nint(list(ind_j_this,i))
-	  ii = nint(list(ind_ii_this,i))
-	  call tvd_assert('j out of bounds',j>=0.and.j<=3)
-	  call tvd_assert('ii out of bounds',ii>=0.and.ii<=3)
-	  call tvd_assert('ie<=0 ',ie>0.)
-	  if( ia_needed == my_ia ) then
-	    call tvd_assert('ie out of bounds',ie<=nel)
-	  end if
-	  call tvd_assert('ia_found out of bounds' &
-     &			,ia_found >= 1 .or. ia_found <= n_threads)
-	  call tvd_assert('ia_needed out of bounds' &
-     &			,ia_needed >= 1 .or. ia_needed <= n_threads)
-	end do
-
-	end
-
 !******************************************************************
 !******************************************************************
 !******************************************************************
 
 	subroutine allocate_tvd_arrays(nvals)
+
+! allocates global arrays
 
 	use shympi
 	use shympi_tvd
@@ -853,7 +809,43 @@
 
 !******************************************************************
 
+	subroutine tvd_mpi_run(values)
+
+! this routine must be called before transport and diffusion of scalars
+! handles preparation of remote values and exchange
+
+	use basin
+	use levels
+	use shympi
+	use shympi_tvd
+
+	implicit none
+
+	real values(nlvdi,nkn)
+
+	integer, save :: nvals = 1		!needed later for multi-var
+
+	if( .not. bmpi ) return
+	if( .not. bmpitvd ) return		!do not handle mpi tvd
+
+	call allocate_tvd_arrays(nvals)		!executed only first time
+
+	call tvd_prepare_remote(values)		!prepare remote values
+
+	if( bcheck_multi ) call tvd_exchange_single
+
+	call tvd_exchange_prepare_multi		!executed only first time
+	call tvd_exchange_multi			!exchange values between domains
+
+	!call tvd_exchange_debug
+
+	end
+
+!******************************************************************
+
 	subroutine tvd_prepare_remote(values)
+
+! prepares remote values to be exchanged later
 
 	use basin
 	use levels
@@ -886,8 +878,7 @@
 	    call tvd_assert('tvd_prepare_remote: (3)',lmax==lmax_remote)
 	  end if
 	  xi(:) = my_xi_list(:,i)
-	  !values_tvd_remote(:,i) = -999.	!force error
-	  values_tvd_remote(:,i) = 0.		!do not force error
+	  values_tvd_remote(:,i) = 0.
 	  do l=1,lmax
 	    cacum = 0.
 	    do ii=1,3
@@ -904,6 +895,8 @@
 !******************************************************************
 
 	subroutine tvd_exchange_single
+
+! exchanges upwind values - one by one - should be used only for bedug
 
 	use shympi
 	use shympi_tvd
@@ -930,7 +923,6 @@
 	  na = i
 	  id_from = nint(my_array_list(ind_ia_found,na)) - 1
 	  id_to = nint(my_array_list(ind_ia_this,na)) - 1
-	  !lmax = nint(my_array_list(ind_lmax_found,na))
 
 	  n = lmax
 
@@ -966,103 +958,9 @@
 
 !******************************************************************
 
-	subroutine tvd_exchange_prepare_multi
-
-! prepares exchanges multi values
-
-	use shympi
-	use shympi_tvd
-
-	implicit none
-
-	logical bnew
-	integer iblock
-	integer id_from,id_to
-	integer id_from_old,id_to_old
-	integer i,na
-	integer my_ia,iudb
-	integer ntot
-	integer lmax,lmax_found,lmax_this
-	integer, save :: icall = 0
-
-	if( icall > 0 ) return
-	icall = icall + 1
-
-	my_ia = my_id + 1
-	iudb = 340 + my_ia
-
-	iblock = 0
-	id_from_old = -1
-	id_to_old = -1
-
-	do i=1,n_my_array_list
-	  na = i
-	  id_from = nint(my_array_list(ind_ia_found,na)) - 1
-	  id_to = nint(my_array_list(ind_ia_this,na)) - 1
-	  bnew = .false.
-	  if( id_from /= id_from_old ) bnew = .true.
-	  if( id_to /= id_to_old ) bnew = .true.
-	  if( bnew ) iblock = iblock + 1
-	  id_from_old = id_from
-	  id_to_old = id_to
-	end do
-
-	nblocks_multi = iblock
-	allocate(exchange_multi_blocks(6,nblocks_multi))
-	exchange_multi_blocks = 0
-
-	iblock = 0
-	id_from_old = -1
-	id_to_old = -1
-
-	do i=1,n_my_array_list
-	  na = i
-	  id_from = nint(my_array_list(ind_ia_found,na)) - 1
-	  id_to = nint(my_array_list(ind_ia_this,na)) - 1
-	  lmax_found = nint(my_array_list(ind_lmax_found,na))
-	  lmax_this = nint(my_array_list(ind_lmax_this,na))
-	  bnew = .false.
-	  if( id_from /= id_from_old ) bnew = .true.
-	  if( id_to /= id_to_old ) bnew = .true.
-	  if( bnew ) then
-	    iblock = iblock + 1
-	    exchange_multi_blocks(1,iblock) = id_from
-	    exchange_multi_blocks(2,iblock) = id_to
-	    exchange_multi_blocks(3,iblock) = i
-	  end if
-	  exchange_multi_blocks(4,iblock) = i
-	  exchange_multi_blocks(5,iblock) = exchange_multi_blocks(5,iblock) + 1
-	  lmax = exchange_multi_blocks(6,iblock)
-	  lmax = max(lmax,lmax_found,lmax_this)
-	  exchange_multi_blocks(6,iblock) = lmax
-	  id_from_old = id_from
-	  id_to_old = id_to
-	end do
-
-	write(iudb,*) '-----------------------------'
-	write(iudb,*) 'exchange blocks ',my_ia
-	write(iudb,*) '-----------------------------'
-
-	ntot = 0
-	do iblock=1,nblocks_multi
-	  write(iudb,'(7i8)') iblock,exchange_multi_blocks(:,iblock)
-	  ntot = ntot + exchange_multi_blocks(5,iblock)
-	end do
-
-	!write(6,*) 'total values to be exchanged: ',ntot,n_my_array_list,my_id
-	write(iudb,*) 'total values to be exchanged: ',ntot,n_my_array_list
-
-	if( ntot /= n_my_array_list ) then
-	  stop 'error stop tvd_exchange_prepare_multi: ntot (internal error)'
-	end if
-
-	end
-
-!******************************************************************
-
 	subroutine tvd_exchange_multi
 
-! exchanges multi values
+! exchanges upwind values - multi block exchange - more efficient than single
 
 	use shympi
 	use shympi_tvd
@@ -1138,6 +1036,172 @@
 
 !******************************************************************
 
+	subroutine tvd_exchange_prepare_multi
+
+! prepares data structures to exchange multi values
+
+	use shympi
+	use shympi_tvd
+
+	implicit none
+
+	logical bnew
+	integer iblock
+	integer id_from,id_to
+	integer id_from_old,id_to_old
+	integer i,na
+	integer my_ia,iudb
+	integer ntot
+	integer lmax,lmax_found,lmax_this
+	integer, save :: icall = 0
+
+	if( icall > 0 ) return
+	icall = icall + 1
+
+	my_ia = my_id + 1
+	iudb = 340 + my_ia
+
+	iblock = 0
+	id_from_old = -1
+	id_to_old = -1
+
+	do i=1,n_my_array_list
+	  na = i
+	  id_from = nint(my_array_list(ind_ia_found,na)) - 1
+	  id_to = nint(my_array_list(ind_ia_this,na)) - 1
+	  bnew = .false.
+	  if( id_from /= id_from_old ) bnew = .true.
+	  if( id_to /= id_to_old ) bnew = .true.
+	  if( bnew ) iblock = iblock + 1
+	  id_from_old = id_from
+	  id_to_old = id_to
+	end do
+
+	nblocks_multi = iblock
+	allocate(exchange_multi_blocks(6,nblocks_multi))
+	exchange_multi_blocks = 0
+
+	iblock = 0
+	id_from_old = -1
+	id_to_old = -1
+
+	do i=1,n_my_array_list
+	  na = i
+	  id_from = nint(my_array_list(ind_ia_found,na)) - 1
+	  id_to = nint(my_array_list(ind_ia_this,na)) - 1
+	  lmax_found = nint(my_array_list(ind_lmax_found,na))
+	  lmax_this = nint(my_array_list(ind_lmax_this,na))
+	  bnew = .false.
+	  if( id_from /= id_from_old ) bnew = .true.
+	  if( id_to /= id_to_old ) bnew = .true.
+	  if( bnew ) then
+	    iblock = iblock + 1
+	    exchange_multi_blocks(1,iblock) = id_from
+	    exchange_multi_blocks(2,iblock) = id_to
+	    exchange_multi_blocks(3,iblock) = i
+	  end if
+	  exchange_multi_blocks(4,iblock) = i
+	  exchange_multi_blocks(5,iblock) = exchange_multi_blocks(5,iblock) + 1
+	  lmax = exchange_multi_blocks(6,iblock)
+	  lmax = max(lmax,lmax_found,lmax_this)
+	  exchange_multi_blocks(6,iblock) = lmax
+	  id_from_old = id_from
+	  id_to_old = id_to
+	end do
+
+	ntot = 0
+	do iblock=1,nblocks_multi
+	  ntot = ntot + exchange_multi_blocks(5,iblock)
+	end do
+	if( ntot /= n_my_array_list ) then
+	  stop 'error stop tvd_exchange_prepare_multi: ntot (internal error)'
+	end if
+
+	if( .not. btvddebug ) return
+
+	write(iudb,*) '-----------------------------'
+	write(iudb,*) 'exchange blocks ',my_ia
+	write(iudb,*) '-----------------------------'
+
+	do iblock=1,nblocks_multi
+	  write(iudb,'(7i8)') iblock,exchange_multi_blocks(:,iblock)
+	end do
+
+	!write(6,*) 'total values to be exchanged: ',ntot,n_my_array_list,my_id
+	write(iudb,*) 'total values to be exchanged: ',ntot,n_my_array_list
+
+	end
+
+!******************************************************************
+
+	subroutine tvd_get_upwind(l,ipoint,cu)
+
+! gets upwind value stored in array
+
+	use basin
+	use levels
+	use shympi
+	use shympi_tvd
+
+	implicit none
+
+	integer l,ipoint
+	real cu
+
+        cu = values_tvd_local(l,ipoint)
+
+	end
+	
+!******************************************************************
+!******************************************************************
+!******************************************************************
+! from here check and debug routines
+!******************************************************************
+!******************************************************************
+!******************************************************************
+
+	subroutine assert_list_coherence(nmax,list,bconsolidated)
+
+	use basin
+	use shympi
+	use shympi_tvd
+
+	implicit none
+
+	integer nmax
+	real list(nlist,nmax)
+	logical bconsolidated
+
+	integer i,j,ii,ie,my_ia
+	integer ia_found,ia_needed
+
+	if( .not. btvdassert ) return
+
+	my_ia = my_id + 1
+
+	do i=1,nmax
+	  ie = nint(list(ind_ie_this,i))
+	  ia_found = nint(list(ind_ia_found,i))
+	  ia_needed = nint(list(ind_ia_this,i))
+	  if( .not. bconsolidated .and. ie == 0 ) cycle		!end of data
+	  j = nint(list(ind_j_this,i))
+	  ii = nint(list(ind_ii_this,i))
+	  call tvd_assert('j out of bounds',j>=0.and.j<=3)
+	  call tvd_assert('ii out of bounds',ii>=0.and.ii<=3)
+	  call tvd_assert('ie<=0 ',ie>0.)
+	  if( ia_needed == my_ia ) then
+	    call tvd_assert('ie out of bounds',ie<=nel)
+	  end if
+	  call tvd_assert('ia_found out of bounds' &
+     &			,ia_found >= 1 .or. ia_found <= n_threads)
+	  call tvd_assert('ia_needed out of bounds' &
+     &			,ia_needed >= 1 .or. ia_needed <= n_threads)
+	end do
+
+	end
+
+!******************************************************************
+
 	subroutine tvd_exchange_debug
 
 ! not generally usefull - only use in real debugging situations
@@ -1203,57 +1267,6 @@
 	  val0 = iaf*iee
 	  write(iudb,*) id_from,id_to,val,val0,my_id
 	end do
-
-	end
-
-!******************************************************************
-
-	subroutine tvd_get_upwind(l,ipoint,cu)
-
-	use basin
-	use levels
-	use shympi
-	use shympi_tvd
-
-	implicit none
-
-	integer l,ipoint
-	real cu
-
-        cu = values_tvd_local(l,ipoint)
-
-	end
-	
-!******************************************************************
-
-	subroutine tvd_mpi_prepare(values)
-
-! this routine must be called before transport and diffusion of scalars
-
-	use basin
-	use levels
-	use shympi
-	use shympi_tvd
-
-	implicit none
-
-	real values(nlvdi,nkn)
-
-	integer, save :: nvals = 1
-
-	if( .not. bmpi ) return
-	if( .not. bmpitvd ) return		!do not handle mpi tvd
-
-	call allocate_tvd_arrays(nvals)
-
-	call tvd_prepare_remote(values)
-
-	if( bcheck_multi ) call tvd_exchange_single
-
-	call tvd_exchange_prepare_multi		!this is done only once
-	call tvd_exchange_multi
-
-	!call tvd_exchange_debug
 
 	end
 
@@ -1575,10 +1588,8 @@
 	end
 
 !******************************************************************
-
-	!program main_test_tvd
-	!call test_tvd_convert
-	!end
-
+!	program main_test_tvd
+!	call test_tvd_convert
+!	end
 !******************************************************************
 

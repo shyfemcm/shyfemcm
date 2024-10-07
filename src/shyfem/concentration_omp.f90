@@ -219,9 +219,7 @@
 	end if
 
 	btvd2 = itvd == 2
-	if( btvd2 ) then
-	  call tvd_mpi_prepare(cn1)
-	end if
+	if( btvd2 ) call tvd_mpi_run(cn1)
 
         cn=0.
 	co=cn1
