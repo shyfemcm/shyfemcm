@@ -61,6 +61,7 @@ OBJ  = \
 	mpi_time.o \
 	mpi_tripple.o \
 	mpi_tvd.o \
+	mpi_check.o \
 
 ALL = $(MOD) $(OBJ) $(METIS_OBJ)
 
