@@ -55,6 +55,9 @@ LIBF    += $(LIBDIR)/lib$(LIBUTIL).a
 
 LIBL    += $(LIB_NETCDF)
 
+#$(info FFLAGS = $(FFLAGS) )
+#$(info LFLAGS = $(LFLAGS) )
+
 #---------------------------------------------
 
 EXES = shyelab extelab flxelab lgrelab tselab femelab shyproj shyfile \
@@ -64,7 +67,7 @@ MAKEDEPEND = $(FEMBIN)/mkdp.pl
 
 #----------------------------------------------------------------------------
 
-LFLAGS:= $(LIB_NETCDF) $(LIB_MPI)
+LFLAGS	+= $(LIB_NETCDF) $(LIB_MPI)
 
 #----------------------------------------------------------------------------
 
@@ -150,14 +153,19 @@ depend:
 
 #----------------------------------------------------------------------------
 
-%.o:%.f
-	${F77} $(FFLAGS) $(INCLUDE) -c $< -o $@
+.SUFFIXES: .F .f90
 
-%.o:%.f90
-	${F77} $(FFLAGS) $(INCLUDE) -c $< -o $@
+.c.o:
+	$(CC) -c $(CFLAGS) $<
 
-%.o:%.c
-	${CC} $(CFLAGS) $(INCLUDE) -c $< -o $@
+.f.o:
+	$(F77) -c $(FFLAGS) $<
+
+.f90.o:
+	${F77} -c $(FFLAGS) $<
+
+.F.o:
+	$(F77) -c -cpp $(FFLAGS) $<
 
 #----------------------------------------------------------------------------
 

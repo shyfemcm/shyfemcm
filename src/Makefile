@@ -17,9 +17,7 @@ default: shyfem
 
 fem: shyfem
 shyfem: libmod nothing
-	@$(BINDIR)/recursivemake $@ $(SUBDIRS)
-	@$(BINDIR)/recursivemake fem shyfem
-	@$(BINDIR)/recursivemake fem tools
+	@$(BINDIR)/recursivemake fem $(SUBDIRS)
 
 test: nothing
 	@$(BINDIR)/recursivemake $@ $(SUBDIRS)

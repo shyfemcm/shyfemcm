@@ -75,6 +75,9 @@ C_COMPILER = GNU_GCC
 #C_COMPILER = IBM
 #C_COMPILER = PGI
 
+INTEL_VERSION = IFORT
+#INTEL_VERSION = IFX
+
 ##############################################
 # Parallel compilation
 ##############################################
@@ -889,9 +892,6 @@ endif
 #	export KMP_STACKSIZE=32M
 #
 #############################################
-
-INTEL_VERSION = IFORT
-#INTEL_VERSION = IFX
 
 # ERSEM FLAGS -------------------------------------
 
