@@ -23,14 +23,14 @@
 %
 %------------------------------------------------------------------------
 
-SHYFEM has been coupled to the WAVEWATCH III (WW3) wave model.
-The SHYFEM model was coupled to WW3 based on a so called ``hard coupling'', e.g.
+SHYFEM has been coupled to the WAVEWATCH III (WW3) wave model.  The SHYFEM
+model was coupled to WW3 based on a so called ``hard coupling'', e.g.,
 binding the models directly without any so called coupling library such as
 (ESMF, OASIS, PGMCL or others). The benefit is on the hand, minimal memory
-usage, very limited code changes in both models. Top-level approach using the
-coupled model framework based on having a routine for initialization,
-computation and finalization, that allows a neat inclusion of WW3 in any kind
-of flow model.
+usage, very limited code changes in both models. Top-level approach using
+the coupled model framework based on having a routine for initialization,
+computation and finalization, that allows a neat inclusion of WW3 in
+any kind of flow model.
 
 \paragraph{Installation and compilation}
 %The coupled model is disributed within the SHYFEM distribution and the WW3 code
@@ -39,16 +39,19 @@ of flow model.
 
 In order to compile the coupled SHYFEM-WW3 model, the variable |WW3| in the 
 file |Rules.make| should be set as |WW3 = true| and |WW3DIR| should
-point to the folder containing the |WW3| code (e.g., WW3DIR = \$(HOME)/bin/WW3). 
-|SHYFEM| should be compiled for running in parallel by setting 
-|PARALLEL_MPI = NODE|.
+point to the folder containing the |WW3| code 
+(e.g., WW3DIR = \$(HOME)/bin/WW3). 
+Please note that |SHYFEM| should be compiled for running in parallel 
+by setting in |Rules.make|
+the variable |PARALLEL_MPI = NODE|.
 
 Moreover, WW3 also needs additional libraries:
 \begin{itemize}
 \item |netcdf| compiled with the same compiler.  You must set |NETCDF = true|
 and specify the variable |NETCDFDIR| to indicate the directory where the 
 libraries and its include files can be found.
-\item |METIS| and |PARMETIS| compiled with the same compiler. You must set
+\item |METIS| and |PARMETIS| compiled with the same compiler. 
+In this case you must set
 |PARTS = PARMETIS| and set the variables |METISDIR| and |PARMETISDIR|
 to indicate the directory where the libraries and its include files can be
 found.
@@ -83,12 +86,12 @@ git clone --branch ww3\_shyfem https://github.com/erdc/WW3/tree/ww3\_shyfem;
 \item move to the WW3 directory;
 \item set the NetCDF path: with |export WWATCH3_NETCDF=NC4| and \\
 |export NETCDF_CONFIG=/netcdf-dir/nc-config|;
-\item setup the model using |./model/bin/w3_setup /home/model/bin/WW3/model -c| \\
+\item setup the model by |./model/bin/w3_setup /home/model/bin/WW3/model -c| \\
 | <cmplr> -s <swtch>| with |cmplr| the compiler |comp| and |link| files (e.g., shyfem
 for files comp.shyfem and link.shyfem) and |swtch| the switch file (e.g., shyfem 
 for a switch file located in ./model/bin having name switch\_shyfem).
-\item compile |WW3| with |w3_automake|, or for a few programs with
-|./model/bin/w3_automake| \\ |ww3_grid ww3_shel ww3_ounf| with name 
+\item compile |WW3| with |w3_automake|, or for a few programs you have to use
+the command |./model/bin/w3_automake| \\ |ww3_grid ww3_shel ww3_ounf|.
 \item the compiled programms are located in |./model/exe/ww3_grid|
 \end{enumerate}
 
@@ -190,10 +193,11 @@ shybas -msh grid.bas (it creates a bas.msh file).
 \end{enumerate}
 
 Before running the model, the setup |ww3_grid| tool (found in the
-stand alone |WW3/build/bin| directory) needs to be run and the output, 
+stand alone directory |WW3/build/bin|) needs to be run and the output, 
 which is named per default ``mod\_def.ww3'' needs to be renamed 
-with the extension defined in parameter |MODEL(1)\%NAME = 'med'|
-in |ww3_multi.nml| (e.g., mod\_def.med in the above mentioned case). 
+with the extension defined in the file named |ww3_multi.nml| 
+as parameter |MODEL(1)\%NAME = 'med'|
+(e.g., mod\_def.med in the above mentioned case). 
 The |ww3_grid| tool must be run every time the namelist or grid files 
 are modified. 
 

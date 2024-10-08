@@ -1,4 +1,92 @@
 
+08.10.2024
+
+! ./src/shyfem/heat_admin2.f90:
+! 21.09.2024    ggu     new handle_skin() for handling skin temperature output
+!
+! ./src/shyfem/shyfem_subs.f90:
+! 29.09.2024    ggu     call tvd_init before time loop
+!
+! ./src/shyfem/tvd_admin.f90:
+! 26.09.2024    ggu     mark old tvd code with TVD_OLD, btvddebug introduced
+! 29.09.2024    ggu     use ltvdup to decide if remote data exists
+! 05.10.2024    ggu     introduced quad_tree_search()
+!
+! ./src/shyfem/concentration_omp.f90:
+! 24.09.2024    ggu     introduced tvd mpi (bmpi)
+!
+! ./src/shyfem/meteo_forcing.f90:
+! 22.09.2024    ggu     read meteo output times and from str file
+!
+! ./src/shyfem/concentration.f90:
+! 27.09.2024    ggu     btvddebug introduced
+!
+! ./src/tools/shyelab/shyelab_output.f90:
+! 03.10.2024    ggu     added var_dim
+!
+! ./src/tools/shyelab/shystrings.f90:
+! 21.09.2024	ggu	written from scratch
+!
+! ./src/tools/shynetcdf/netcdf.f90:
+! 03.10.2024	ggu	introduced directional variable
+! 03.10.2024	ggu	new variables added
+!
+! ./src/tools/shynetcdf/elab_nc.f90:
+! 03.10.2024	ggu	introduced dim and dir
+!
+! ./src/tools/shybas/basutil_fastfind.f90:
+! 01.10.2024	ggu	written from scratch
+! 04.10.2024	ggu	also adapted to quad_tree routines
+!
+! ./src/tools/shybas/basutil.f90:
+! 03.10.2024	ggu	new option -fastfind to test fast_find routines
+!
+! ./src/utils/shympi/mpi_tvd.f90:
+! 27.09.2024	ggu	first running version... still to be cleaned
+! 05.10.2024	ggu	introduced quad_tree_search() - feature complete
+! 07.10.2024	ggu	tvd mpi finished
+!
+! ./src/utils/generic/list.f90:
+! 05.10.2024	ggu	file copied from stack
+! ./src/utils/generic/stack.f90:
+! 01.10.2024	ggu	new stack_get_entries() introduced
+! 03.10.2024	ggu	bug fix for stack_get_entries()
+! 04.10.2024	ggu	bug fix for stack_peek()
+! ./src/utils/generic/histogram.f90:
+! 22.09.2024	ggu	revisited - allocate arrays
+!
+! ./src/utils/generic/convert.f90:
+! 21.09.2024	ggu	new routines is_whitespace() and is_integer()
+!
+! ./src/utils/shyutilmpi/shy_util.f90:
+! 22.09.2024    ggu     bug fix in shy_check_nvar() - use also dtime0
+!
+! ./src/utils/shyutil/strings.f90:
+! 20.09.2024	ggu	new variable skin temperature (14)
+! 21.09.2024	ggu	cleaned, some new helper routines
+! 03.10.2024	ggu	new has_direction_ivar() and is_2d()
+!
+! ./src/utils/shyutil/fast_find.f90:
+! 01.10.2024	ggu	fast_find started
+! 03.10.2024	ggu	fast_find debugged
+! 03.10.2024	ggu	small bug fixes
+! ./src/utils/shyutil/tvd.f90:
+! 23.09.2024	ggu	new array itvdup()
+! ./src/utils/shyutil/quad_tree.f90:
+! 01.10.2024	ggu	quad_tree started
+! 03.10.2024	ggu	quad_tree debugged
+! 04.10.2024	ggu	quad_tree finished
+! 05.10.2024	ggu	final changes
+! ./src/utils/shyutil/io_shy.f90:
+! 22.09.2024    ggu     increase nvar_act earlier (bug)
+!
+! ./src/utils/shyutil/evgeom.f90:
+! 24.09.2024	ggu	new routine femintp_xi()
+!
+! ./src/utils/shyutil/version.f90:
+! 20.09.2024	ggu	version 8.0.8   NUOPC final framework edition
+
+
 20.09.2024
 
 ! ./src/shyfem/iostr.f90:
