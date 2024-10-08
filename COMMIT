@@ -1,5 +1,19 @@
 ============================================================
 
+Tue Oct  8 11:54:18 CEST 2024
+
+last changes for new version
+
+ LOG                           |  88 ++++++++++++++++++++++++++++++++++++++++++
+ RELEASE_NOTES                 |  11 ++++++
+ docs/femdoc.pl                |   2 +
+ docs/final/shyfem.pdf         | Bin 334806 -> 334823 bytes
+ docs/waves_ww3.tex            |  36 +++++++++--------
+ src/utils/shyutil/version.f90 |  11 +++---
+ 6 files changed, 127 insertions(+), 21 deletions(-)
+
+============================================================
+
 Thu Oct  3 12:21:11 CEST 2024
 
 netcdf output for meteo variables

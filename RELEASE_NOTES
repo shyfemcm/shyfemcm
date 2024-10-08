@@ -1,4 +1,15 @@
 
+08.10.2024	VERS_8_0_9	TVD MPI edition
+
+	shyfem feature complete for MPI (exceptions still hold)
+	tvd scheme running with mpi
+	output of meteo files
+	new variables for netcdf output
+	revised basic data structures stack, queue, list
+	new code for finding element (quad_tree)
+	handle dimension and direction in strings
+	code for comuting and writing skin temperature
+
 20.09.2024	VERS_8_0_8	NUOPC final framework edition
 
 	all nuopc patches from Luca integrated
