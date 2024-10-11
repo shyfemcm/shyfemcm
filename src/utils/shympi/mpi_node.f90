@@ -638,6 +638,11 @@
 	    write(my_unit,*) 'set bmpi_debug_txt=.false. to avoid this output'
 	    write(my_unit,*) '=========================================='
 	    write(my_unit,*) 'shympi initialized: ',my_id,n_threads,my_unit
+	  else
+	    if( shympi_is_master() ) then
+	      write(6,*) 'no mpi_debug_*.txt file opened: ',my_unit
+	      write(6,*) 'set bmpi_debug_txt=.true. to write this file'
+	    end if
 	  end if
 	  write(6,*) 'shympi initialized: ',my_id,n_threads,my_unit
 	else if( bmpi_debug ) then
@@ -2301,6 +2306,7 @@
 	  call shympi_copy_2d_r(val_domain,nous,val_out &
      &				,nel_domains,ne_max,ip_int_elems)
 	else
+	  write(6,*) nous,nkn_global,nel_global
 	  stop 'error stop shympi_l2g_array_2d_r: (1)'
 	end if
 

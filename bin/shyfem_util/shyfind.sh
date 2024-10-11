@@ -5,6 +5,7 @@
 #-----------------------------------------------
 
 base="$HOME/shyfemcm"
+base="$SHYFEMDIR"
 
 alldir=$( find $base/src -type d )
 

@@ -67,7 +67,7 @@ ALL = $(MOD) $(OBJ) $(METIS_OBJ)
 
 SPECIAL =       Makefile
 
-EXES = check_shympi_debug
+EXES = check_shympi_debug check_shympi_check
 
 MAKEDEPEND = $(FEMBIN)/mkdp.pl
 
@@ -108,6 +108,9 @@ links:
 	@$(FEMBIN)/symlink $(FEMBIN) $(EXES)
 
 check_shympi_debug: $(LIBF) check_shympi_debug.o
+	$(F77) $(FFLAGS) $(INCLUDE) $(LFLAGS) $@.o $(LIBL) -o $@
+
+check_shympi_check: $(LIBF) check_shympi_check.o
 	$(F77) $(FFLAGS) $(INCLUDE) $(LFLAGS) $@.o $(LIBL) -o $@
 
 #--------------------------------------------- test compile
