@@ -39,6 +39,7 @@
 ! 13.03.2019	ggu	changed VERS_7_5_61
 ! 21.05.2019	ggu	changed VERS_7_5_62
 ! 28.04.2023	ggu	avoid using floating for **2
+! 13.10.2024	ggu	bug fix for INTEL_BUG
 !
 !********************************************************************
 ! DOCS  START   S_tide
@@ -152,9 +153,8 @@
 
         implicit none
 
-        integer			:: k
-        integer 		:: iks,ikend,nchunk,nthreads
-        
+        integer 		:: k,iks,ikend,nchunk,nthreads
+
 !--------------------------------------------------------
 !------ compute tidal potential? ------------------------
 !--------------------------------------------------------
@@ -216,13 +216,18 @@
 
         real, allocatable        :: latf(:)
         real  			 :: llat,llon
-	real	  		 :: fact,arg
+	double precision	 :: fact,arg 			!INTEL_BUG
         real, parameter          :: d2r=4.0*atan(1.0)/180.0
         real, parameter          :: twopi=8.d0*atan(1.d0)
 	integer			 :: i,ld1
-        real                     :: eqtide  !Equilibrium tide [m]
+        double precision         :: eqtide  !Equilibrium tide [m] !INTEL_BUG
         real			 :: loadb   !loading tide factor 
 					    ! [0.054,0.047,= ltidec*depth]
+
+!-----------------------------------------------
+!       Set up constants and parameters
+!-----------------------------------------------
+
 	allocate(latf(0:2))
 
         llon  = xgeov(k)
@@ -234,7 +239,10 @@
         latf(1) = sin(2.*llat)         !diurnal
         latf(0) = 1.5*latf(2) - 1.     !long-period
 
+!-----------------------------------------------
 !       Compute equilibrium tide
+!-----------------------------------------------
+
         eqtide = 0.
         do i = 1,ntd
           ld1  = const_ar(i)%dood(1)
@@ -244,11 +252,21 @@
           eqtide = eqtide + fact*cos(arg)
         end do
 
+!-----------------------------------------------
 !       Compute loading tide
+!-----------------------------------------------
+
         loadb = ltidec * (hkv(k) + zov(k))
 
+!-----------------------------------------------
 !	Compute earth + loading
+!-----------------------------------------------
+
         zeqv(k) = eqtide + loadb*zov(k)
+
+!-----------------------------------------------
+!       End of routine
+!-----------------------------------------------
 
         end subroutine equilibrium_tide
 

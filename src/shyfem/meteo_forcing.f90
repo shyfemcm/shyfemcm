@@ -107,6 +107,7 @@
 ! 06.09.2024    lrp     nuopc-compliant
 ! 13.09.2024    lrp     iatm and coupling with atmospheric model
 ! 22.09.2024    ggu     read meteo output times and from str file
+! 13.10.2024    ggu     deal with INTEL_BUG
 !
 ! notes :
 !
@@ -836,6 +837,9 @@
 
 	subroutine meteo_convert_wind_data(id,n,wx,wy,cdv,tx,ty,ws,pp,cice)
 
+	use basin
+	use shympi
+
 	integer id
 	integer n
 	real wx(n),wy(n)
@@ -849,7 +853,10 @@
 	integer k
 	real cd,wxymax,txy,wspeed,wdir,fact,fice,aice,ach
 	real pmin,pmax
+	real wparam,wxy
 	character*80 string
+	double precision dwxy
+	double precision dtime
 
 	bnowind = iwtype == 0
 	bstress = iwtype == 2
@@ -858,6 +865,8 @@
 	ach = dragco       !Charnock parameter (ireib=5)
 	wxymax = 0.
 	aice = amice       !ice cover for momentum: 1: use  0: do not use
+	
+	call get_act_dtime(dtime)
 	
 !	---------------------------------------------------------
 !	convert wind
@@ -893,7 +902,9 @@
 	    end do
 	  else				!data is wind velocity [m/s]
             do k=1,n
-              wspeed = sqrt( wx(k)**2 + wy(k)**2 )
+	      dwxy = dble(wx(k))**2 + dble(wy(k))**2
+	      !wxy = wx(k)**2 + wy(k)**2
+              wspeed = sqrt( dwxy )		!INTEL_BUG
 	      ws(k) = wspeed
 	    end do
 	  end if
@@ -908,8 +919,9 @@
       &          .or. itdrag == 2 .or. itdrag == 5 )) then
 		call get_drag(itdrag,wspeed,cd,ach)
 	    end if
-            tx(k) = fice * wfact * cd * wspeed * wx(k)
-            ty(k) = fice * wfact * cd * wspeed * wy(k)
+	    wparam = fice * wfact * cd * wspeed
+            tx(k) = wparam * wx(k)
+            ty(k) = wparam * wy(k)
           end do
         end if
 

@@ -83,6 +83,7 @@
 ! 28.08.2024    ggu     new variable bmpi_debug_txt
 ! 06.09.2024    ggu     better debug info for shympi_check_array()
 ! 06.09.2024    lrp     nuopc-compliant
+! 13.10.2024    ggu     new parameter bextra_exchange to deal with INTEL_BUG
 !
 !******************************************************************
 
@@ -108,6 +109,7 @@
 	logical, save :: bmpi_allgather = .true.	!do allgather
 	logical, save :: bmpi_skip = .false.		!skip if not bmpi
 	logical, save :: bmpi_ldebug = .false.		!local debug
+	logical, save :: bextra_exchange = .true.	!deal with INTEL_BUG
 
 	logical, parameter :: blocal_shympi_debug = .false. !write debug
 

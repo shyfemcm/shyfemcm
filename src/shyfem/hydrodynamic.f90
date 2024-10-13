@@ -777,6 +777,7 @@
 	real vismol,rrho0
 	real dt
 
+	double precision dtime
 	double precision rmsdif,rmsmax
 	double precision tempo
 	double precision openmp_get_wtime
@@ -825,6 +826,8 @@
 !-------------------------------------------------------------
 ! loop over elements
 !-------------------------------------------------------------
+
+	call get_act_dtime(dtime)
 
 	call get_clock_count(count)
 
@@ -955,6 +958,7 @@
 	double precision rvecp(6*nlvdi)		!ASYM (3 systems to solve)
 	double precision solv(6*nlvdi)		!ASYM (3 systems to solve)
 	double precision ppx,ppy
+	double precision ppx_aux,ppy_aux
 !-----------------------------------------
 ! function
 	integer locssp
@@ -962,11 +966,14 @@
         real epseps
         parameter (epseps = 1.e-6)
 
+	double precision dtime
+
 !-------------------------------------------------------------
 ! initialization and baroclinic terms
 !-------------------------------------------------------------
 
 	bnewpenta = .true.
+
 	bdebug=.false.
 	debug=.false.
         barea0 = .false.     ! baroclinic only with ia = 0 (HACK - do not use)
@@ -975,6 +982,8 @@
 	if( barea0 ) then               !$$BAROC_AREA $$BAROC_AREA0
 	  if( iarv(ie) .ne. 0 ) bbaroc = .false.
         end if
+
+	call get_act_dtime(dtime)
 
 !-------------------------------------------------------------
 ! dimensions of vertical system
@@ -1232,12 +1241,15 @@
 !	ppy corresponds to -F^y_l in the documentation
 !	------------------------------------------------------
 
-	ppx = ppx + aat*uui - bbt*uuip - cct*uuim - gammat*vvi  &
+	ppx_aux = aat*uui - bbt*uuip - cct*uuim - gammat*vvi  &
      &			+ gravx + (hhi/rowass)*presx + xexpl  &
      &  		+ wavex
-	ppy = ppy + aat*vvi - bbt*vvip - cct*vvim + gammat*uui  &
+	ppy_aux = aat*vvi - bbt*vvip - cct*vvim + gammat*uui  &
      &			+ gravy + (hhi/rowass)*presy + yexpl  &
      &  		+ wavey
+
+	ppx = ppx + ppx_aux
+	ppy = ppy + ppy_aux
 
 !	------------------------------------------------------
 !	set up matrix A

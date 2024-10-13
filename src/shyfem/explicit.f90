@@ -110,6 +110,7 @@
 ! 24.05.2023    ggu     momentum_viscous_stability(): must run over nel_unique
 ! 05.06.2023    lrp     introduce z-star
 ! 13.04.2024    ggu     use tripple_point_set_values, also in hydro_stability
+! 13.10.2024    ggu     bug fix for INTEL_BUG
 !
 ! notes :
 !
@@ -127,8 +128,9 @@
         
 	integer ie,l
         
-        logical bbarcl
+        logical bbarcl,blin
         integer ilin,itlin,ibarcl
+	double precision dtime
 	real rlin
         real getpar
 	logical bnohyd
@@ -142,8 +144,12 @@
         itlin = nint(getpar('itlin'))
         ibarcl = nint(getpar('ibarcl'))
         bbarcl = ibarcl .gt. 0 .and. ibarcl .ne. 3
+	blin = ilin /= 0
 	call nonhydro_get_flag(bnohyd)
+	call get_act_dtime(dtime)
 	
+	!write(6,*) 'in explicit: ',blin,bbarcl,bnohyd
+
 !-------------------------------------------
 ! initialization
 !-------------------------------------------
@@ -167,7 +173,7 @@
 ! advective (non-linear) terms
 !-------------------------------------------
 
-        if( ilin .eq. 0 ) then
+        if( .not. blin ) then
           if( itlin .eq. 0 ) then
 	    call set_advective(rlin)
 	  else if( itlin .eq. 1 ) then
@@ -182,8 +188,6 @@
 ! baroclinic contribution
 !-------------------------------------------
 
-        !if( bbarcl ) call set_barocl
-        !if( bbarcl ) call set_barocl_new
 	if( bbarcl ) call set_barocl_new_interface
 
 !-------------------------------------------
@@ -238,7 +242,6 @@
         if( ahpar .le. 0 ) return
 
         amax = 0.
-        bdebug = .false.
 
         do ie=1,nel
 
@@ -402,6 +405,7 @@
 	real dt
 	real a,ai,afact
 	real rdist!,rcomp,ruseterm
+	double precision dtime
 	logical bnoslip,bdebug
 	real, parameter :: axymax = 1.e+2
 
@@ -412,6 +416,7 @@
 	real getpar
 
 	call get_timestep(dt)
+	call get_act_dtime(dtime)
 
         ahpar = getpar('ahpar')
 	if( ahpar .le. 0 ) return
@@ -425,11 +430,7 @@
         noslip = nint(getpar('noslip'))
 	bnoslip = noslip .ne. 0
 
-	bdebug = .false.
-
 	do ie=1,nel_unique
-
-	  !bdebug = ( ie == ies )
 
           !rcomp = rcomputev(ie)           !use terms (custom elements)
           !ruseterm = min(rcomp,rdist)     !use terms (both)
@@ -453,7 +454,7 @@
 	    end if
 
 	    do l=1,lmax
-	      !if( l > lmaxi ) exit
+	      if( l > lmaxi ) exit		!INTEL_BUG
 
 	      u  = utlov(l,ie)
 	      v  = vtlov(l,ie)
@@ -529,13 +530,9 @@
 	bnoslip = noslip .ne. 0
 
 	amax = 0.
-	bdebug = .false.
 
 	do ie=1,nel_unique
 	!do ie=1,nel
-
-	  bdebug = ie == ies
-	  bdebug = .false.
 
           rdist = rdistv(ie)              !use terms (distance from OB)
           !rcomp = rcomputev(ie)           !use terms (custom elements)
@@ -1259,9 +1256,8 @@
 	integer llup(3),lldown(3)
 !---------- DEB SIG
 
-	logical bdebug,bdebugggu
+	logical bdebug
 	logical bsigma,bzadapt,badapt,bmoveinterface,bsigadjust
-	integer iudbg,iedbg
         integer k,l,ie,ii,lmax,lmin,nsigma,ie_mpi
 	real hsigma,hdep,htot
         double precision hlayer,hint,hhk,hh,hhup,htint
@@ -1283,10 +1279,6 @@
 	bsigadjust = .true.		!interpolate on horizontal surfaces
 
 	call get_act_dtime(dtime)
-	bdebug = .false.
-	bdebugggu = .false.
-	!bdebugggu = ( dtime == 11100. )
-	if( bdebugggu) write(610,*) 'time: ',dtime
 
 	call get_sigma(nsigma,hsigma)
 	bsigma = nsigma .gt. 0
@@ -1317,15 +1309,9 @@
 	  end do
 	end if
 	 
-	iudbg = 430 + my_id
-	iedbg = 1888
-	iedbg = 0
-
         do ie_mpi=1,nel
 	  ie = ip_sort_elem(ie_mpi)
           call get_zadapt_info(ie,nadapt,hadapt)
-	  !bdebugggu = ( dtime == 11100. .and. ie == 932 )
-	  !bdebug = ( iedbg > 0 .and. ieext(ie) == iedbg )
           rdist = rdistv(ie)              !use terms (distance from OB)
           rcomp = rcomputev(ie)           !use terms (custom elements)
           ruseterm = min(rcomp,rdist)     !use terms (both)
@@ -1520,17 +1506,6 @@
 
             presbcx = presbcx + hint * ( brint - dzdx * psigma )
 	    presbcy = presbcy + hint * ( crint - dzdy * psigma )
-
-	    if( bdebug ) then
-	      write(iudbg,*) 'end terms'
-	      write(iudbg,*) ieext(ie),ie,l,ii
-	      write(iudbg,*) ruseterm,raux,hlayer
-	      write(iudbg,*) presbcx,presbcy
-	      write(iudbg,*) hint,psigma
-	      write(iudbg,*) brint,dzdx
-	      write(iudbg,*) crint,dzdy
-	      flush(iudbg)
-	    end if
 
             xbcl =  ruseterm * raux * hlayer * presbcx
             ybcl =  ruseterm * raux * hlayer * presbcy

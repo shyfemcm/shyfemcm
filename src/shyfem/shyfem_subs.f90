@@ -183,6 +183,7 @@
 ! 10.05.2024    ggu     set spherical just after basin read
 ! 06.09.2024    lrp     nuopc-compliant
 ! 29.09.2024    ggu     call tvd_init before time loop
+! 13.10.2024    ggu     more debug output for *.dbg files, reordered
 !
 !*****************************************************************
 !
@@ -516,7 +517,7 @@
 	!call custom(it)		!call for initialization
 
 	!write(6,*) 'starting time loop'
-        call shympi_comment('starting time loop...')
+        !call shympi_comment('starting time loop...')
 
 	call print_time
 
@@ -1107,6 +1108,7 @@
 	use mod_diff_visc_fric
 	use mod_bound_dynamic
 	use tide
+	use mod_meteo
 
 	implicit none
 
@@ -1137,27 +1139,31 @@
 	icall = icall + 1
 	call shympi_write_debug_time(dtime)
 
-	!call shympi_write_debug_node('rqv',rqv)
-	!call shympi_write_debug_node('rqpsv',rqpsv)
-	!call shympi_write_debug_node('rqdsv',rqdsv)
-	!call shympi_write_debug_node('mfluxv',mfluxv)
+	call shympi_write_debug_node('mfluxv',mfluxv)
+	call shympi_write_debug_node('rqv',rqv)
+	call shympi_write_debug_node('rqpsv',rqpsv)
+	call shympi_write_debug_node('rqdsv',rqdsv)
+	call shympi_write_debug_node('tauxnv',tauxnv)
+	call shympi_write_debug_node('tauynv',tauynv)
+	call shympi_write_debug_node('wxv',wxv)
+	call shympi_write_debug_node('wyv',wyv)
 
+	call shympi_write_debug_elem('fxv',fxv)
+	call shympi_write_debug_elem('fyv',fyv)
 	call shympi_write_debug_node('zeqv',zeqv)
 	call shympi_write_debug_node('znv',znv)
 	call shympi_write_debug_node('zov',zov)
 	call shympi_write_debug_elem(3,'zenv',zenv)
-	call shympi_write_debug_elem('unv',unv)
-	call shympi_write_debug_elem('vnv',vnv)
 	call shympi_write_debug_elem('utlnv',utlnv)
 	call shympi_write_debug_elem('vtlnv',vtlnv)
+	call shympi_write_debug_elem('unv',unv)
+	call shympi_write_debug_elem('vnv',vnv)
+	call shympi_write_debug_node('wlnv',wlnv)
 	call shympi_write_debug_node('hdknv',hdknv)
 	call shympi_write_debug_elem('hdenv',hdenv)
 	call shympi_write_debug_node('saltv',saltv)
 	call shympi_write_debug_node('tempv',tempv)
 	call shympi_write_debug_node('rhov',rhov)
-	call shympi_write_debug_node('wlnv',wlnv)
-	call shympi_write_debug_elem('fxv',fxv)
-	call shympi_write_debug_elem('fyv',fyv)
 	if( allocated(cnv) ) then
 	  call shympi_write_debug_node('cnv',cnv)
 	end if
