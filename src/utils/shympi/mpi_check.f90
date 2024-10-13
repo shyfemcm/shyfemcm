@@ -71,13 +71,22 @@
 	public :: mpi_check_elem	!call mpi_check_elem(what,is,array)
 
         INTERFACE mpi_check_node
-        MODULE PROCEDURE   mpi_check_node_2d &
-     &                   , mpi_check_node_3d
+        MODULE PROCEDURE   mpi_check_node_2d &	!mpi_check_node(what,is,array)
+     &                   , mpi_check_node_3d &	!mpi_check_node(what,is,array)
+     &                   , mpi_check_node_2d_nois & !mpi_check_node(what,array)
+     &                   , mpi_check_node_3d_nois   !mpi_check_node(what,array)
         END INTERFACE
 
         INTERFACE mpi_check_elem
-        MODULE PROCEDURE   mpi_check_elem_2d &
-     &                   , mpi_check_elem_3d
+        MODULE PROCEDURE   mpi_check_elem_2d &	!mpi_check_elem(what,is,array)
+     &                   , mpi_check_elem_3d &	!mpi_check_elem(what,is,array)
+     &                   , mpi_check_elem_2d_nois & !mpi_check_elem(what,array)
+     &                   , mpi_check_elem_3d_nois   !mpi_check_elem(what,array)
+        END INTERFACE
+
+        INTERFACE mpi_check_all
+        MODULE PROCEDURE   mpi_check_all_2d &
+     &                   , mpi_check_all_3d 
         END INTERFACE
 
 !==================================================================
@@ -181,8 +190,8 @@
 	!---------------------------------------------------------
 
 	if( shympi_is_master() ) then
-	  write(iu_debug,'(a,f14.2,3i8,l2,2a)') &
-     &				'mpi_check: ',dtime &
+	  write(6,'(a,f14.2,3i8,l2,2a)') &
+     &				'write mpi_check: ',dtime &
      &				,isact,nsize_global,lmax_form &
      &				,belem,'  ',trim(what)
 	  if( bform ) then
@@ -338,7 +347,7 @@
 
 !******************************************************************
 
-	subroutine mpi_check_all(dtime,what,isact,belem,array,bdim)
+	subroutine mpi_check_all_3d(dtime,what,isact,belem,array)
 
 	use basin
 	use levels
@@ -350,17 +359,43 @@
 	character*(*) what
 	integer isact
 	logical belem
-	real array(nlvdi,nsize_check)
-	!real array(:,:)
-	logical, optional :: bdim
+	!real array(nlvdi,nsize_check)
+	real array(:,:)
 
-	logical bbb
+	logical, save :: b2d = .false.
 
-	bbb = .false.
-	if( present(bdim) ) bbb = bdim
-
-	call mpi_check_initialize(dtime,what,isact,belem,bbb)
+	call mpi_check_initialize(dtime,what,isact,belem,b2d)
 	call mpi_check_set(array)
+	call mpi_check_finalize
+
+	end
+
+!******************************************************************
+
+	subroutine mpi_check_all_2d(dtime,what,isact,belem,array)
+
+	use basin
+	use levels
+	use shympi
+
+	implicit none
+
+	double precision dtime
+	character*(*) what
+	integer isact
+	logical belem
+	!real array(nlvdi,nsize_check)
+	real array(:)
+
+	logical, save :: b2d = .true.
+	integer nsize
+	real, allocatable :: array3d(:,:)
+
+	nsize = size(array,1)
+	allocate(array3d(1,nsize))
+
+	call mpi_check_initialize(dtime,what,isact,belem,b2d)
+	call mpi_check_set(array3d)
 	call mpi_check_finalize
 
 	end
@@ -378,12 +413,20 @@
 	real array(:,:)
 
 	logical, save :: belem = .true.
-	logical, save :: b2d = .false.
 	double precision dtime
 
 	call get_act_dtime(dtime)
-	call mpi_check_all(dtime,what,isact,belem,array,b2d)
+	call mpi_check_all_3d(dtime,what,isact,belem,array)
 
+	end
+
+!******************************************************************
+
+	subroutine mpi_check_elem_3d_nois(what,array)
+	implicit none
+	character*(*) what
+	real array(:,:)
+	call mpi_check_elem_3d(what,0,array)
 	end
 
 !******************************************************************
@@ -397,12 +440,20 @@
 	real array(:,:)
 
 	logical, save :: belem = .false.
-	logical, save :: b2d = .false.
 	double precision dtime
 
 	call get_act_dtime(dtime)
-	call mpi_check_all(dtime,what,isact,belem,array,b2d)
+	call mpi_check_all_3d(dtime,what,isact,belem,array)
 
+	end
+
+!******************************************************************
+
+	subroutine mpi_check_node_3d_nois(what,array)
+	implicit none
+	character*(*) what
+	real array(:,:)
+	call mpi_check_node_3d(what,0,array)
 	end
 
 !******************************************************************
@@ -416,12 +467,20 @@
 	real array(:)
 
 	logical, save :: belem = .true.
-	logical, save :: b2d = .true.
 	double precision dtime
 
 	call get_act_dtime(dtime)
-	call mpi_check_all(dtime,what,isact,belem,array,b2d)
+	call mpi_check_all_2d(dtime,what,isact,belem,array)
 
+	end
+
+!******************************************************************
+
+	subroutine mpi_check_elem_2d_nois(what,array)
+	implicit none
+	character*(*) what
+	real array(:)
+	call mpi_check_elem_2d(what,0,array)
 	end
 
 !******************************************************************
@@ -435,12 +494,20 @@
 	real array(:)
 
 	logical, save :: belem = .false.
-	logical, save :: b2d = .true.
 	double precision dtime
 
 	call get_act_dtime(dtime)
-	call mpi_check_all(dtime,what,isact,belem,array,b2d)
+	call mpi_check_all_2d(dtime,what,isact,belem,array)
 
+	end
+
+!******************************************************************
+
+	subroutine mpi_check_node_2d_nois(what,array)
+	implicit none
+	character*(*) what
+	real array(:)
+	call mpi_check_node_2d(what,0,array)
 	end
 
 !==================================================================

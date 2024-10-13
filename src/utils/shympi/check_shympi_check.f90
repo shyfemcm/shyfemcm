@@ -1,7 +1,26 @@
 
+!============================================================
+	module mod_check_shympi_check
+!============================================================
+
+	logical, save :: bsilent = .false.
+	logical, save :: bquiet = .false.
+	logical, save :: bverbose = .false.
+	logical, save :: bnodiff = .false.
+	logical, save :: bstop = .false.
+
+	logical, save :: bminmax = .true.
+	logical, save :: bwrite = .false.
+	logical, save :: bover = .false.
+	real, save :: rthresh = 0.
+
+!============================================================
+	contains
+!============================================================
+
 !*************************************************************
 
-	program check_shympi_check
+	subroutine check_shympi_check_sub
 
 ! simplified version of check_shympi_debug
 
@@ -62,6 +81,7 @@
 	    if( what /= what2 ) goto 99
 	  end if
 	  write(6,*) dtime,isact,nsize,lmax,trim(what)
+	  if( .not. btwo ) call write_data_header
 	  do l=1,lmax
 	    call read_level_header(iu,ll,nsize,nrec,icall)
 	    if( l /= ll ) stop 'error stop check500: l/=ll'
@@ -72,16 +92,17 @@
 	      if( nrec /= nrec2 ) goto 98
 	      if( icall /= icall2 ) goto 98
 	    end if
-	    if( .not. btwo ) write(6,*) l,ll,nsize,nrec,icall
 	    allocate(ies(2,nsize),vals(nsize))
 	    call read_data(iu,nsize,ies,vals)
 	    if( btwo ) then
 	      allocate(ies2(2,nsize),vals2(nsize))
 	      call read_data(iu2,nsize,ies2,vals2)
+	      call compare_files(l,nsize,ies,vals,ies2,vals2)
+	      deallocate(ies2,vals2)
+	    else
+	      call write_data(l,nsize,nrec,icall,ies,vals)
 	    end if
-	    if( btwo ) call compare_files(l,nsize,ies,vals,ies2,vals2)
 	    deallocate(ies,vals)
-	    if( btwo ) deallocate(ies2,vals2)
 	  end do
 	end do
 
@@ -130,19 +151,30 @@
 	  stop 'error stop: error in ies'
 	end if
 
+	if( all( vals == vals2 ) ) return
+
+	write(6,*) ' ierror       l       i   i_int   i_ext' // &
+     &			'              val1              val2'
+
 	do i=1,nsize
 	  if( vals(i) /= vals2(i) ) then
 	    ierror = ierror + 1
 	    if( ierror > ierror_max ) cycle
-	    write(6,*) ierror,i,l,ies(:,i)
-	    write(6,*) vals(i),vals2(i)
+	    write(6,1000) ierror,l,i,ies(:,i),vals(i),vals2(i)
+	    !write(6,*) ierror,l,i,ies(:,i)
+	    !write(6,*) vals(i),vals2(i)
 	  end if
 	end do
 	if( ierror > 0 ) then
-	  write(6,*) ierror,' errors found, max shown ',ierror_max
+	  if( ierror > ierror_max ) then
+	    write(6,*) '*** errors found: ',ierror,' max shown ',ierror_max
+	  else
+	    write(6,*) '*** errors found: ',ierror
+	  end if
 	  stop 'error stop: error in vals'
 	end if
 
+ 1000	format(5i8,2e18.8)
 	end
 
 !*************************************************************
@@ -182,27 +214,6 @@
 
 !*************************************************************
 
-        subroutine check_shympi_check_init
-
-        use clo
-
-        implicit none
-
-        logical baux
-        character*80 version
-
-        version = '2.0'
-
-        call clo_init('check_shympi_check','dbg-file(s)',trim(version))
-
-        call clo_add_info('checks files fort.501')
-
-        call clo_parse_options
-
-	end
-
-!*************************************************************
-
 	subroutine read_data(iu,nsize,ies,vals)
 
         implicit none
@@ -221,6 +232,131 @@
 	  ies(1,i) = i
 	end do
 
+	end
+
+!*************************************************************
+
+	subroutine write_data_header
+
+	if( bover ) then
+	  write(6,*) '      l       i   i_int   i_ext' // &
+     &			'            rmin            rmax' // &
+     &			'   nover'
+	else
+	  write(6,*) '      l       i   i_int   i_ext' // &
+     &			'            rmin            rmax'
+	end if
+
+	end
+
+!*************************************************************
+
+	subroutine write_data(l,nsize,nrec,icall,ies,vals)
+
+	implicit none
+
+	integer l,nsize
+	integer nrec,icall
+	integer ies(2,nsize)
+	real vals(nsize)
+
+	integer i,nover,iover
+	real rmin,rmax,r
+
+	rmin = vals(1)
+	rmax = vals(1)
+	nover = 0
+	do i=1,nsize
+	  rmin = min(rmin,vals(i))
+	  rmax = max(rmax,vals(i))
+	  r = vals(i)
+	  if( abs(r) > rthresh ) then
+	    nover = nover + 1
+	  end if
+	end do
+
+	if( bminmax ) then
+	  if( bover ) then
+	    write(6,1000) l,nsize,nrec,icall,rmin,rmax,nover
+	  else
+	    write(6,1000) l,nsize,nrec,icall,rmin,rmax
+	  end if
+	else
+	  write(6,*) l,nsize,nrec,icall
+	end if
+
+	if( .not. bwrite .or. nover == 0 ) return
+
+	write(6,*) '  iover       l       i   i_int   i_ext' // &
+     &			'             val'
+
+	iover = 0
+	do i=1,nsize
+	  r = vals(i)
+	  if( abs(r) > rthresh ) then
+	    iover = iover + 1
+	    write(6,1100) iover,l,i,ies(:,i),r
+	  end if
+	end do
+
+	return
+ 1000	format(4i8,2e16.8,i8)
+ 1100	format(5i8,2e16.8,i8,e18.8)
+	end
+
+!*************************************************************
+
+        subroutine check_shympi_check_init
+
+        use clo
+
+        implicit none
+
+        logical baux
+        character*80 version
+
+        version = '2.0'
+
+        call clo_init('check_shympi_check','dbg-file(s)',trim(version))
+
+        call clo_add_info('checks files fort.501')
+
+        call clo_add_sep('general options:')
+        call clo_add_option('silent',.false.,'be silent')
+        call clo_add_option('quiet',.false.,'be quiet')
+        call clo_add_option('nodiff',.false.,'do not show differences')
+        call clo_add_option('verbose',.false.,'be verbose')
+        call clo_add_option('nostop',.false.,'do not stop at error')
+        call clo_add_option('write',.false.,'writes values over threshold')
+        call clo_add_option('rthresh',0.,'threshold for writing values')
+
+        call clo_parse_options
+
+        call clo_get_option('silent',bsilent)
+        call clo_get_option('quiet',bquiet)
+        call clo_get_option('nodiff',bnodiff)
+        call clo_get_option('verbose',bverbose)
+        call clo_get_option('nostop',baux)
+        call clo_get_option('write',bwrite)
+        call clo_get_option('rthresh',rthresh)
+
+        if( baux ) bstop = .false.
+        if( bsilent ) bquiet = .true.
+        if( bquiet ) bverbose = .false.
+
+	if( rthresh > 0. ) bover = .true.
+
+	end
+
+!*************************************************************
+
+!============================================================
+	end module mod_check_shympi_check
+!============================================================
+
+	program check_shympi_check
+	use mod_check_shympi_check
+	call check_shympi_check_sub
 	end
 
 !*************************************************************
