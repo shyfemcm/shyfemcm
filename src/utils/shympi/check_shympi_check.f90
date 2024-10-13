@@ -77,7 +77,7 @@
 	    if( nsize /= nsize2 ) goto 99
 	    if( lmax /= lmax2 ) goto 99
 	    if( lmax /= lmax2 ) goto 99
-	    if( belem /= belem2 ) goto 99
+	    if( belem .neqv. belem2 ) goto 99
 	    if( what /= what2 ) goto 99
 	  end if
 	  write(6,*) dtime,isact,nsize,lmax,trim(what)

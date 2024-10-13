@@ -1102,7 +1102,6 @@
 	      dvoltot = dvoltot + dvol
 	    end do
 	    if( dvoltot .le. 0. ) goto 99
-	    rvols = vols / voltot
 	    drvols = dvols / dvoltot		!INTEL_BUG
 
             flux = rflux(kindex)
