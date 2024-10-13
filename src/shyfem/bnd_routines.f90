@@ -190,6 +190,8 @@
 ! 01.04.2023	ggu	handle new boundary type 5
 ! 09.05.2023    lrp     introduce top layer index variable
 ! 18.12.2023    ggu     new routine get_discharge_3d()
+! 10.10.2024    ggu     introduced dfluxnode to avoid INTEL_BUG compiler bug
+! 13.10.2024    ggu     introduced drvols to avoid INTEL_BUG compiler bug
 !
 !***************************************************************
 
@@ -230,7 +232,6 @@
 	integer levflx
 	integer nbc
 	integer id,intpol,nvar,ierr
-	integer iudbg
 	double precision dtime0,dtime,ddtime
 	real rw,zconst,aux,rval
 	real dt
@@ -470,10 +471,6 @@
 	ivar = 1
 	lmax = 1
 
-	iudbg = 789
-	iudbg = 0
-	if(iudbg>0) write(iudbg,*) dtime,nbc
-
 	do ibc=1,nbc
 
           call get_bnd_ipar(ibc,'ibtyp',ibtyp)
@@ -490,20 +487,12 @@
 	  rmu = 0.
 	  rmv = 0.
 
-	  bdebug = (id == 5 .and. ibc == 1 )
-	  bdebug = .false.
-	  if( bdebug ) then
-	    write(6,*) 'qqqq: ',my_id,ibc,id,ibtyp,nk
-	  end if
-	  if( bdebug ) write(6,*) 'interpolating zeta...',ibc,my_id
-
 	  call iff_read_and_interpolate(id,dtime)
 	  call iff_time_interpolate(id,dtime,ivar,nk,lmax,rwv2)
 	  call adjust_bound(id,ibc,dtime,nk,rwv2)
 	  rmin = minval(rwv2)
 	  rmax = maxval(rwv2)
 	  !write(6,*) 'boundary values min/max: ',ibc,my_id,rmin,rmax
-	  if( bdebug ) write(6,*) 'end interp. zeta...',ibc,my_id
 
 	  if( abs(ibtyp) == 1 ) call setbnds(ibc,rwv2(1))	!for closure
 
@@ -575,7 +564,6 @@
 	       stop 'error stop sp111: Unknown boundary type'
 	     end if
 
-	     if(iudbg>0) write(iudbg,*) ibc,i,id,ibtyp,rw
 	  end do
 
 	end do
@@ -1043,18 +1031,22 @@
 	use levels
 	use basin, only : nkn,nel,ngr,mbw
 	use shympi
+	!use mod_meteo
 
 	implicit none
 
 	logical debug,bdebug
-	integer i,k,l,lmin,lmax,nk,ibc,mode,iu,kindex
+	integer i,k,l,lmin,lmax,nk,ibc,mode,iu,kindex,ksext
 	integer ibtyp,levmax,levmin
 	integer nbc
 	double precision dtime
+	double precision dfluxnode,drval,dvol,dvoltot
+	double precision dvols(nlv),drvols(nlv)
 	real flux,vol,voltot,fluxtot,fluxnode,rval
-	real vols(nlv)
+	real vols(nlv),rvols(nlv)
 
 	integer nkbnds,kbnds,nbnds,kbndind
+	integer ipext,ipint
 	real volnode		!function to compute volume of node
 
 !------------------------------------------------------------------
@@ -1063,13 +1055,13 @@
 
 	mode = -1		!old time step
 	mode = +1		!old time step
-	debug = .true.
-	debug = .false.
+
+	ksext = 39140		!goro debug
+	ksext = 861		!vistula debug
+	ksext = 0
 
 	iu = 0
 	call get_act_dtime(dtime)
-	debug = ( iu > 0 .and. dtime >= 86400. )
-	if( debug ) write(iu,*) 'computing mass flux at time: ',dtime
 
 	mfluxv = 0.
 
@@ -1088,15 +1080,10 @@
 
 	  if( ibtyp .lt. 2 .or. ibtyp .gt. 3 ) nk = 0		!skip
 
-	  if(debug) then
-	    write(iu,*) 'computing mass flux: ',ibc,ibtyp,nk,levmax
-	  end if
-
 	  do i=1,nk
             k = kbnds(ibc,i)
 	    kindex = kbndind(ibc,i)
 	    if( k <= 0 ) cycle
-	    bdebug = ( debug .and. k == 3239 ) 
 	    lmax = ilhkv(k)
 	    if( levmax .gt. 0 ) lmax = min(lmax,levmax)
 	    if( levmax .lt. 0 ) lmax = min(lmax,lmax+1+levmax)
@@ -1105,26 +1092,26 @@
 	    if( levmin .lt. 0 ) lmin = max(lmin,lmax+1+levmin)
 
 	    if( lmin .gt. lmax ) goto 98
+	    if( lmin < 1 ) goto 98
+	    if( lmax > nlv ) goto 98
 
-	    voltot = 0.
+	    dvoltot = 0.
 	    do l=lmin,lmax
-	      vol = volnode(l,k,mode)
-	      vols(l) = vol
-	      voltot = voltot + vol
+	      dvol = volnode(l,k,mode)
+	      dvols(l) = dvol
+	      dvoltot = dvoltot + dvol
 	    end do
+	    if( dvoltot .le. 0. ) goto 99
+	    rvols = vols / voltot
+	    drvols = dvols / dvoltot		!INTEL_BUG
 
-	    if( voltot .le. 0. ) goto 99
+            flux = rflux(kindex)
+            do l=lmin,lmax
+              rval = flux * drvols(l)
+              mfluxv(l,k) = mfluxv(l,k) + rval
+            end do
 
-	    !flux = rqpsv(k)
-	    flux = rflux(kindex)
-	    if(bdebug) write(iu,*) '   ',k,lmin,lmax,flux,voltot
-	    do l=lmin,lmax
-	      rval = flux * vols(l) / voltot
-	      !mfluxv(l,k) = rval
-	      mfluxv(l,k) = mfluxv(l,k) + rval
-	    end do
 	  end do
-
 	end do
 
 !------------------------------------------------------------------
@@ -1138,8 +1125,9 @@
 	  !mfluxv(lmax,k) = gwf		!here distributed ground water flow
 	end do
 
-	call shympi_exchange_3d_node(mfluxv)
-	call shympi_exchange_2d_node(rqdsv)
+	if( bextra_exchange ) then
+	  call shympi_exchange_3d_node(mfluxv)
+	end if
 
 !------------------------------------------------------------------
 ! compute total flux for check and integrate flux into rqv
@@ -1147,21 +1135,16 @@
 
 	fluxtot = 0.
 	do k=1,nkn
-	  fluxnode = 0.
+	  dfluxnode = 0.
 	  lmax = ilhkv(k)
 	  lmin = jlhkv(k)
 	  do l=lmin,lmax
 	    flux = mfluxv(l,k)
-	    !if( debug .and. flux .gt. 0. ) write(6,*) '  flux: ',k,l,flux
-	    fluxnode = fluxnode + flux
+	    dfluxnode = dfluxnode + flux
 	  end do
-	  rqv(k) = fluxnode
-	  fluxtot = fluxtot + fluxnode
+	  rqv(k) = real(dfluxnode)		!INTEL_BUG
+	  fluxtot = fluxtot + dfluxnode
 	end do
-
-	!call shympi_exchange_2d_node(rqv)
-	
-	if( debug ) write(iu,*) '  total flux: ',fluxtot
 
 !------------------------------------------------------------------
 ! end of routine
@@ -1169,7 +1152,7 @@
 
 	return
    98	continue
-	write(6,*) 'lmin > lmax'
+	write(6,*) 'lmin,lmax out of bounds'
    99	continue
 	write(6,*) 'ibc = ',ibc
 	write(6,*) 'i = ',i
@@ -1179,6 +1162,7 @@
 	write(6,*) 'levmax = ',levmax
 	write(6,*) 'lmin = ',lmin
 	write(6,*) 'lmax = ',lmax
+	write(6,*) 'nlv = ',nlv
 	stop 'error stop set_mass_flux: voltot = 0'
 	end
 

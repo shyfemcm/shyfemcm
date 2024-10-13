@@ -175,6 +175,13 @@
 	double precision,dimension(:,:),allocatable :: clow
 	double precision,dimension(:,:),allocatable :: chigh
 
+	! here debug code ------------------------
+	logical, save :: bdebug = .false.
+	double precision dtime
+	integer iudb,ks,lmax
+	integer ipint,ipext
+	! here debug code ------------------------
+
         if(nlv.ne.nlev) stop 'error stop conz3d_omp: nlv/=nlev'
 	
 !----------------------------------------------------------------
@@ -311,10 +318,22 @@
 !!!$OMP END TASKGROUP
 !$OMP TASKWAIT       
 
-	!cn1 = 0.
-	!cn1 = cn
-	cn1 = real(cn)
+	cn1 = real(cn)		!here happens INTEL_BUG
 	
+	if (bdebug ) then
+	  iudb = 990 + my_id
+	  ks = 2314
+	  k = ipint(ks)
+	  call get_act_dtime(dtime)
+	  if( k > 0 .and. dtime == 1500. ) then
+	    lmax = ilhkv(k)
+	    write(iudb,*) 'after: ',dtime,ipext(k)
+	    do l=1,lmax
+	      write(iudb,*) l,cn(l,k),cn1(l,k)
+	    end do
+	  end if
+	end if
+
 	DEALLOCATE(cn)
 	DEALLOCATE(co)
 	DEALLOCATE(cdiag)
@@ -774,6 +793,10 @@
 	double precision, parameter :: r_tiny = tiny(1.)
       
 ! ----------------------------------------------------------------
+!  debug code
+! ----------------------------------------------------------------
+
+! ----------------------------------------------------------------
 !  handle boundary (flux) conditions
 ! ----------------------------------------------------------------
 
@@ -808,7 +831,7 @@
             else					!erosion
               cn(l,k) = cn(l,k) + dt*loading
             end if
- 
+
 	  end do
 
 ! ----------------------------------------------------------------
