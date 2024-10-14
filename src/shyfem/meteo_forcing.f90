@@ -516,8 +516,10 @@
 	call output_debug_data
 	call output_meteo_data
 
-	call shympi_exchange_2d_node(tauxnv)
-	call shympi_exchange_2d_node(tauynv)
+	if( bextra_exchange ) then
+	  call shympi_exchange_2d_node(tauxnv)
+	  call shympi_exchange_2d_node(tauynv)
+	end if
 
 !------------------------------------------------------------------
 ! end of routine

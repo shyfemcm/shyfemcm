@@ -9,14 +9,16 @@
 
 code for implementing mpi support
 
-these routines proved module shympi
+these routines provide module shympi
 these routines need modules basin abd levels
 
 #------------------------------------------------------------------------
 
 problems with INTEL compiler:
 
-major changes:
+#------------------------------------------------------------------------
+major changes for INTEL compiler: (search for bextra_exchange)
+#------------------------------------------------------------------------
 
 hydrodynamic.f90
 	exchange utlnv, vtlnv after call to hydro_transports_final()
@@ -30,6 +32,10 @@ turbulence.f90
 
 meteo_forcing.f90
 	exchange tauxnv, tauynv
+
+#------------------------------------------------------------------------
+# next changes are needed
+#------------------------------------------------------------------------
 
 mpi_node_internal.f90
 	lots of changes in shympi_exchange_internal_r()
