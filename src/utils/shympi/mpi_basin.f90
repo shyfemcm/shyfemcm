@@ -822,7 +822,7 @@
 !	create new basin and copy
 !	----------------------------------
 
-	call basin_init(n_lk,n_le)
+	call basin_init(n_lk,n_le)  !here we re-allocate basin data structures
 
 	nen3v = nen3v_aux
 	ipev = ipev_aux

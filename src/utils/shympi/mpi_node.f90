@@ -87,7 +87,7 @@
 !
 !******************************************************************
 
-! for partioning on nodes the following is true (at least 2 domaina)
+! for partioning on nodes the following is true (at least 2 domains)
 !
 ! nkn_global > nkn_local >  nkn_unique == nkn_inner
 ! nel_global > nel_local >= nel_unique >= nel_inner
@@ -109,7 +109,7 @@
 	logical, save :: bmpi_allgather = .true.	!do allgather
 	logical, save :: bmpi_skip = .false.		!skip if not bmpi
 	logical, save :: bmpi_ldebug = .false.		!local debug
-	logical, save :: bextra_exchange = .true.	!deal with INTEL_BUG
+	logical, save :: bextra_exchange = .false.	!deal with INTEL_BUG
 
 	logical, parameter :: blocal_shympi_debug = .false. !write debug
 
@@ -137,13 +137,6 @@
 	integer,save :: ne_max = 0		!max of nel of all domains
 	integer,save :: nn_max = 0		!max of nkn/nel of all domains
 
-	integer,save :: n_ghost_areas = 0
-	integer,save :: n_ghost_nodes_max = 0
-	integer,save :: n_ghost_elems_max = 0
-	integer,save :: n_ghost_max = 0
-	integer,save :: n_ghost_max_global = 0
-	integer,save :: n_buffer = 0
-
 ! total number of nodes/elems in domains
 
 	integer,save,pointer :: n_domains(:)
@@ -154,6 +147,15 @@
 	integer,save,allocatable :: nkn_cum_domains(:)		!cumulative
 	integer,save,allocatable :: nel_cum_domains(:)
 	integer,save,allocatable :: nlv_domains(:)
+
+! information on ghost areas (nodes and elements)
+
+	integer,save :: n_ghost_areas = 0
+	integer,save :: n_ghost_nodes_max = 0
+	integer,save :: n_ghost_elems_max = 0
+	integer,save :: n_ghost_max = 0
+	integer,save :: n_ghost_max_global = 0
+	integer,save :: n_buffer = 0
 
 ! arrays for ghost nodes/elems
 
@@ -168,15 +170,17 @@
 ! a node only belongs to one domain (partitioning on nodes)
 ! an element can belong to more than one domain (maximum 3)
 ! the dimension of id_elem is id_elem(0:3,nel)
-! id_elem(0,ie) is the the number of domains the element ie belongs to
+! id_elem(0,ie) is the the total number of domains the element ie belongs to
 ! id_elem(1:3,ie) are the domains the element ie belongs to
 ! in id_elem(1,ie) is the principal domain
 
 	integer,save,allocatable :: id_node(:)		!domain (id) of node
 	integer,save,allocatable :: id_elem(:,:)	!domain (id) of elem
 
-	integer,save,allocatable :: ip_sort_node(:)	!sorted external nodes
-	integer,save,allocatable :: ip_sort_elem(:)	!sorted external elems
+	! sorted node/elem numbering as in total domain
+
+	integer,save,allocatable :: ip_sort_node(:)	!sorted internal nodes
+	integer,save,allocatable :: ip_sort_elem(:)	!sorted internal elems
 
 	! next are global arrays for external node/elem numbers
 
@@ -186,6 +190,7 @@
 
 	! next are pointers from local to global internal node/elem numbers
 
+	integer,pointer :: ip_int(:) !pointer to  internal nums
 	integer,save,target,allocatable :: ip_int_node(:) !global internal nums
 	integer,save,target,allocatable :: ip_int_elem(:)
 
@@ -194,10 +199,12 @@
 	integer,save,target,allocatable :: ip_int_nodes(:,:) !global int nums
 	integer,save,target,allocatable :: ip_int_elems(:,:)
 
-! nen3v and hlv index of global domain
+	! nen3v and hlv index of global domain
 
 	integer,save,allocatable :: nen3v_global(:,:)	!global element index
 	real,save,allocatable :: hlv_global(:)		!global layer depths
+
+	! communication structures
 
         type communication_info
           integer, public :: numberID

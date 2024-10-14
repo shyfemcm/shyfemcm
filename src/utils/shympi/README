@@ -10,7 +10,17 @@
 code for implementing mpi support
 
 these routines provide module shympi
-these routines need modules basin abd levels
+these routines need modules basin and levels
+
+features still not working with mpi:
+	- lagrangian model
+	- tilting
+	- barrier closing
+	- parameteric wave simulations
+
+features that have to be checked
+	- residence time
+	- sediment simulations
 
 #------------------------------------------------------------------------
 
@@ -32,6 +42,9 @@ turbulence.f90
 
 meteo_forcing.f90
 	exchange tauxnv, tauynv
+
+bnd_routines.f90
+	exchange mfluxv
 
 #------------------------------------------------------------------------
 # next changes are needed
