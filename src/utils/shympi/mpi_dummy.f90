@@ -83,6 +83,7 @@
 	logical, save :: bmpi_support = .false.
         logical, save :: bmpi_unit = .false.            !write debug to my_unit
         logical, save :: bmpi_allgather = .true.        !do allgather
+        logical, save :: bextra_exchange = .false.
 
 	logical, parameter :: blocal_shympi_debug = .false. !write debug
 
