@@ -89,6 +89,11 @@
      &                   , mpi_check_all_3d 
         END INTERFACE
 
+        INTERFACE mpi_check_dim
+        MODULE PROCEDURE   mpi_check_dim_2d &
+     &                   , mpi_check_dim_3d 
+        END INTERFACE
+
 !==================================================================
         contains
 !==================================================================
@@ -415,6 +420,7 @@
 	logical, save :: belem = .true.
 	double precision dtime
 
+	call mpi_check_dim(what,array,belem)
 	call get_act_dtime(dtime)
 	call mpi_check_all_3d(dtime,what,isact,belem,array)
 
@@ -442,6 +448,7 @@
 	logical, save :: belem = .false.
 	double precision dtime
 
+	call mpi_check_dim(what,array,belem)
 	call get_act_dtime(dtime)
 	call mpi_check_all_3d(dtime,what,isact,belem,array)
 
@@ -469,6 +476,7 @@
 	logical, save :: belem = .true.
 	double precision dtime
 
+	call mpi_check_dim(what,array,belem)
 	call get_act_dtime(dtime)
 	call mpi_check_all_2d(dtime,what,isact,belem,array)
 
@@ -496,6 +504,7 @@
 	logical, save :: belem = .false.
 	double precision dtime
 
+	call mpi_check_dim(what,array,belem)
 	call get_act_dtime(dtime)
 	call mpi_check_all_2d(dtime,what,isact,belem,array)
 
@@ -508,6 +517,46 @@
 	character*(*) what
 	real array(:)
 	call mpi_check_node_2d(what,0,array)
+	end
+
+!******************************************************************
+
+	subroutine mpi_check_dim_2d(what,array,belem)
+	use basin
+	implicit none
+	character*(*) what
+	real array(:)
+	logical belem
+	integer nsize
+	nsize = size(array)
+	if( belem ) then
+	  if( nsize == nel ) return
+	else
+	  if( nsize == nkn ) return
+	end if
+	write(6,*) what
+	write(6,*) belem,nsize,nel,nkn
+	stop 'error stop mpi_check_dim_2d: array is of wrong size'
+	end
+
+!******************************************************************
+
+	subroutine mpi_check_dim_3d(what,array,belem)
+	use basin
+	implicit none
+	character*(*) what
+	real array(:,:)
+	logical belem
+	integer nsize
+	nsize = size(array,2)
+	if( belem ) then
+	  if( nsize == nel ) return
+	else
+	  if( nsize == nkn ) return
+	end if
+	write(6,*) what
+	write(6,*) belem,nsize,nel,nkn
+	stop 'error stop mpi_check_dim_3d: array is of wrong size'
 	end
 
 !==================================================================
