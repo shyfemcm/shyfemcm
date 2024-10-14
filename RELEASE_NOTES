@@ -1,4 +1,11 @@
 
+14.10.2024	VERS_8_0_10	INTEL_BUG edition
+
+	all mpi regression tests now run also with intel compiler
+	used workaround to cope with intel compiler bugs
+	regression tests run bit-to-bit compatible
+	other regression tests might need other adjustments
+
 08.10.2024	VERS_8_0_9	TVD MPI edition
 
 	shyfem feature complete for MPI (exceptions still hold)
@@ -8,7 +15,7 @@
 	revised basic data structures stack, queue, list
 	new code for finding element (quad_tree)
 	handle dimension and direction in strings
-	code for comuting and writing skin temperature
+	code for computing and writing skin temperature
 
 20.09.2024	VERS_8_0_8	NUOPC final framework edition
 
@@ -62,7 +69,7 @@
 		flux sections for MPI
 		boxes for MPI finished
 		petsc works for some configurations
-	OBC: condense_valid_coordinates() and recollocate_nodes()
+	OBC: condense_valid_coordinates() and re-collocate_nodes()
 	tracer_init_file also working for 2d arrays
 	sediments: bug fixes, divide by 0
 	bug fix in init_vertical() - update sigma_info
@@ -227,7 +234,7 @@
 
 	minor release
 	femtime eliminated (in some files)
-	dynamaic implicit setting adapted (setimp)
+	dynamic implicit setting adapted (setimp)
 
 31.10.2019	VERS_7_5_65
 
@@ -239,7 +246,7 @@
 	better syncronization of time step
 	condensation of string variables
 	nc2fem checks for negative dx,dy
-	bottome stress computation can choose if including dry elements
+	bottom stress computation can choose if including dry elements
 
 19.07.2019	VERS_7_5_64
 
@@ -268,7 +275,7 @@
 13.03.2019	VERS_7_5_61
 
 	new routines for tidal potential
-	added customization for plottinf basin
+	added customization for plotinf basin
 	clean arrays for para array read
 	bug fix for WRT computation
 	new friction ireib=10 (quadratic/linear)
@@ -329,7 +336,7 @@
 	checks for zero layer case
 	bug fix for syncronization of last time step
 	custom reset in WRT computation
-	waves debuged (GGUZ0)
+	waves debugged (GGUZ0)
 
 18.01.2019	VERS_7_5_55
 
@@ -337,12 +344,12 @@
 	This can lead to inconsistencies with existing applications,
 	but it really should not. 
 	Please try this version and report back any problems.
-	This version will be slightly slower than the previsous one.
+	This version will be slightly slower than the previous one.
 	This is only because of the extra testing code inserted.
 	In the future this testing code will be removed again.
 	However, I need EVERYBODY to test this new code!!!
 
-	solver routines have been ajourned with copyright note
+	solver routines have been adjourned with copyright note
 	penta solver has been implemented
 
 27.12.2018	VERS_7_5_54
@@ -470,7 +477,7 @@
 17.11.2017 	VERS_7_5_37
 
 	more on output routines
-	fluxes now also write sediement variables
+	fluxes now also write sediment variables
 	better time parsing
 	nc2fem upgraded
 
@@ -598,7 +605,7 @@
 
 09.09.2016	VERS_7_5_17
 
-	inprovements in post processing routines
+	improvements in post processing routines
 	bug fix in newfix.f
 	new heat formulation in meteo routines (iheat==8)
 	bug fix in subvintp.f: handel situation with dh == 0
@@ -642,7 +649,7 @@
 30.05.2016	VERS_7_5_11
 
 	code cleaning
-	output routines and section plot revisted
+	output routines and section plot revisited
 	check STR file for not unique sections
 	possible bug fix in set_last_layer() for ilytyp==1
 
@@ -772,7 +779,7 @@
 	restart revisited
 	allow for initial output with itm...
 	offline checked
-	initializationf from file for u,v,z
+	initialization from file for u,v,z
 
 26.10.2015    VERS_7_3_10
 
@@ -938,12 +945,12 @@
 	this is a big release of changes
 	nobody should really use this version
 	this is only used to prepare the new major version with
-		modules instead of common blocks (inludes)
+		modules instead of common blocks (includes)
 		and arrays allocated on the heap
 	most of the conversion has been finished, but some points
 		still have to be done
 	some files will not be converted before the next major release:
-		lagrange
+		lagrangian
 		box
 		bfm
 
@@ -958,7 +965,7 @@
 	some central parts rewritten for OMP (new3di.f, newcon.f)
 	new data structure mklenkii
 	lagrangian completely rewritten (based on structure)
-	ext, flx, ets, frcition to modules
+	ext, flx, ets, friction to modules
 	plotting with logarithmic scale and color bar
 	bug fixes in offline
 	ia_icefree for ice cover implemented
@@ -1154,7 +1161,7 @@
 
 14-02-2012 - 6_1_44
 
-	restart inproved
+	restart improved
 
 27-01-2012 - 6_1_43
 
@@ -1166,7 +1173,7 @@
 
 24-01-2012 - 6_1_41
 
-	new module in lagrange for boundary induced particles and connectivity
+	new module in lagrangian for boundary induced particles and connectivity
 	automatic logo inclusion in plots
 	hard install
 

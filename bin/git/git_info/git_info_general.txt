@@ -122,7 +122,7 @@ iterate:
 	make regress
 	make doc
 	make depend
-	revision_last.sh [-log] -> output into LOG, BUG and RELEASE_NOTES
+	bin/revision/revision_last.sh [-log] -> for LOG, BUG and RELEASE_NOTES
 	git add -u
 
 make rules_diff; maybe make rules_new

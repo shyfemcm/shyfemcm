@@ -1,4 +1,37 @@
 
+14.10.2024
+
+! ./src/shyfem/explicit.f90:
+! 13.10.2024    ggu     bug fix for INTEL_BUG
+!
+! ./src/shyfem/bnd_routines.f90:
+! 10.10.2024    ggu     introduced dfluxnode to avoid INTEL_BUG compiler bug
+! 13.10.2024    ggu     introduced drvols to avoid INTEL_BUG compiler bug
+!
+! ./src/shyfem/shyfem_subs.f90:
+! 13.10.2024    ggu     more debug output for *.dbg files, reordered
+!
+! ./src/shyfem/tidef.f90:
+! 13.10.2024	ggu	bug fix for INTEL_BUG
+!
+! ./src/shyfem/meteo_admin.f90:
+! 13.10.2024	ggu	in convert_distributed() exchange rqdsv
+!
+! ./src/shyfem/bcvel.f90:
+! 14.10.2024	ggu	fixed INTEL_BUG
+!
+! ./src/shyfem/meteo_forcing.f90:
+! 13.10.2024    ggu     deal with INTEL_BUG
+!
+! ./src/utils/shympi/mpi_node.f90:
+! 13.10.2024    ggu     new parameter bextra_exchange to deal with INTEL_BUG
+!
+! ./src/utils/shympi/mpi_ghost.f90:
+! 11.10.2024	ggu	only write if my_unit > 0
+! ./src/utils/shympi/mpi_check.f90:
+! 08.10.2024	ggu	copied from mpi tvd
+
+
 08.10.2024
 
 ! ./src/shyfem/heat_admin2.f90:

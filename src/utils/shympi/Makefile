@@ -206,15 +206,21 @@ zip:	cleanall
 
 # DO NOT DELETE THIS LINE -- make depend depends on it.
 
+../../../lib/mod/mod_check_shympi_check.mod: check_shympi_check.o
 ../../../lib/mod/mod_save_index.mod: shyparts_basutil.o
+../../../lib/mod/mod_shympi_check.mod: mpi_check.o
 ../../../lib/mod/mod_shympi_debug.mod: check_shympi_debug.o
 ../../../lib/mod/shympi_aux.mod: mpi_node_internal.o
 ../../../lib/mod/shympi_debug.mod: mpi_debug.o
 ../../../lib/mod/shympi_time.mod: mpi_time.o
 ../../../lib/mod/shympi_tripple.mod: mpi_tripple.o
 ../../../lib/mod/shympi_tvd.mod: mpi_tvd.o
+check_shympi_check.o: ../../../lib/mod/clo.mod
 check_shympi_debug.o: ../../../lib/mod/clo.mod
 mpi_basin.o: ../../../lib/mod/basin.mod \
+		../../../lib/mod/shympi.mod 
+mpi_check.o: ../../../lib/mod/basin.mod \
+		../../../lib/mod/levels.mod \
 		../../../lib/mod/shympi.mod 
 mpi_custom.o: ../../../lib/mod/basin.mod \
 		../../../lib/mod/shympi.mod 
