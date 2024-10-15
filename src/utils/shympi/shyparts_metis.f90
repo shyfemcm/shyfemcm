@@ -32,6 +32,7 @@
 ! 22.04.2021	ggu	resolve bound check error (not yet finished)
 ! 11.04.2022	ggu	prepare for online partitioning
 ! 12.04.2022	ggu	bug fix: iarnv and iarv were not saved
+! 15.10.2024	ggu	set array tpwgts (which is real, not dble) (IFX bug)
 !
 !****************************************************************
 
@@ -49,11 +50,11 @@
 	integer epart(nel)
 
 	integer		      :: ie,ii,l
-	integer, allocatable  :: eptr(:) 		!index for eind
-	integer, allocatable  :: eind(:) 		!nodelist in elements
-	integer, pointer      :: vwgt(:)=>null() 	!weights of vertices
-        integer, pointer      :: vsize(:)=>null()	!size of the nodes
-        real(kind=8), pointer :: tpwgts(:)=>null()	!desired weight 
+	integer, allocatable  :: eptr(:) 	!index for eind
+	integer, allocatable  :: eind(:) 	!nodelist in elements
+	integer, allocatable  :: vwgt(:) 	!weights of vertices
+        integer, allocatable  :: vsize(:)	!size of the nodes
+        real, allocatable     :: tpwgts(:)	!desired partition weight 
 
         integer               :: objval		!edge-cut or total comm vol
 	integer               :: options(40)	!metis options
@@ -67,6 +68,16 @@
 
         allocate(eptr(nel+1))
         allocate(eind(nel*3))
+
+        allocate(vwgt(nkn))
+        allocate(vsize(nkn))
+	vwgt = 1
+	vsize = 1
+
+        allocate(tpwgts(nparts))
+	tpwgts = 1./dble(nparts)
+	!write(6,*) nparts
+	!write(6,*) tpwgts
 
 !-----------------------------------------------------------------
 ! set up METIS eptr and eind arrays structures
