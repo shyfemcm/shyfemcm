@@ -103,6 +103,7 @@ bin/shypre_noopti
 src/tools/shypre/shypre_orig
 bin/shypre_orig
 
+bin/gps.sh
 
 bin/grid
 src/tools/grid/grid
