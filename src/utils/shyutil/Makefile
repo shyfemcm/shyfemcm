@@ -71,6 +71,7 @@ OBJ  = \
 	find.o \
 	fast_find.o \
 	quad_tree.o \
+	shyaver.o \
 
 ALL = $(MOD) $(OBJ)
 
