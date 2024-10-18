@@ -7,12 +7,21 @@
 #
 #------------------------------------------------------------------------
 
+default: fem
 
-default: nothing
+FEMDIR = ../../
+include ../../Rules.make
+
+ifeq ($(ECOLOGICAL),BFM)
+	compile=compile_bfm
+endif
 
 shyfem: nothing
 
-fem: nothing
+fem: $(compile) nothing
+
+compile_bfm:
+	cd ecological/bfm ; make
 
 regress: nothing
 

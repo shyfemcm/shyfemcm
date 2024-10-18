@@ -111,6 +111,8 @@ FEMNOGRAPH   = $(FEMLIBS) $(FEMEXTRA) $(FEMMESH) $(FEMPROG) $(FEMUTIL)
 .IGNORE: clean
 .PHONY: publish version stable
 
+BFM_CONTRIB_DIR=$(FEMDIR)/src/contrib/ecological/bfm/
+
 #---------------------------------------------------------------
 # compiling and recursive targets
 #---------------------------------------------------------------
@@ -138,10 +140,10 @@ para_clean:
 	@cd $(PARADIR)/src; make clean
 
 bfm_compile: check_server
-	@fembfm/bfm_compile.sh $(BFMDIR) $(FORTRAN_COMPILER)
+	@$(BFM_CONTRIB_DIR)/external_lib/bfm_compile.sh $(BFMDIR) $(FORTRAN_COMPILER)
 
 bfm_clean:
-	@fembfm/bfm_compile.sh -clean $(BFMDIR)
+	@$(BFM_CONTRIB_DIR)/external_lib/bfm_compile.sh -clean $(BFMDIR)
 
 nograph: checkv directories links test_executable
 

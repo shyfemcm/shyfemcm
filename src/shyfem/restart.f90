@@ -144,7 +144,7 @@
 	integer, save :: idfrst = 749652	!id for restart file
 
 	integer, save :: nvmax = 16		!last version of file
-	integer, parameter :: nidmax = 8
+	integer, parameter :: nidmax = 9
 
 	integer, save :: id_hydro_rst = 1	!1		hydro
 	integer, save :: id_depth_rst = 2	!10		depth
@@ -154,6 +154,7 @@
 	integer, save :: id_eco_rst   = 6	!100000		ecology
 	integer, save :: id_merc_rst  = 7	!1000000	mercury
 	integer, save :: id_gotm_rst  = 8	!10000000	gotm
+	integer, save :: id_bfm_rst   = 9	!100000000	bfm
 
 	integer, save :: ibarcl_rst = 0
 	integer, save :: iconz_rst  = 0
@@ -171,6 +172,7 @@
      &		,'ecological model    '    &
      &		,'mercury model       '    &
      &		,'gotm turb model     '    &
+     &		,'bfm model     '    &
      &						/)
 
 	real, save, allocatable :: hlvrst(:)
@@ -1038,6 +1040,11 @@
 	  call write_restart_mercury(iunit)
         end if
 
+	write(iunit) ibfm
+	if( ibfm .gt. 0 ) then
+	  call write_restart_bfm(iunit)
+        end if
+
 	flush(iunit)
 
         end
@@ -1059,7 +1066,7 @@
 	integer iuout
 	integer iunit,nvers,nrec,nkn,nel,nlv,iflag,ierr
 	double precision atime
-	integer ibarcl,iconz,iwvert,ieco,imerc,iturb
+	integer ibarcl,iconz,iwvert,ieco,imerc,iturb,ibfm
 	integer idfile
 	integer date,time,it,id
 
@@ -1225,6 +1232,15 @@
           end if
         end if
 
+	if( nvers .ge. 15 ) then
+	  id = id_bfm_rst
+          read(iunit) ibfm
+          if( ibfm .gt. 0 ) then
+	    call rst_add_flag(id,iflag)
+	    call skip_restart_bfm(iunit)
+          end if
+        end if
+
 	ierr = 0
 	return
 
@@ -1270,7 +1286,7 @@
         integer ii,l,ie,k,i
         integer nvers,nversaux,nrec
         integer nknaux,nelaux,nlvaux
-	integer ibarcl,iconz,iwvert,ieco,imerc,iturb
+	integer ibarcl,iconz,iwvert,ieco,imerc,iturb,ibfm
 	integer date,time
 	real, allocatable :: hlvaux(:)
 
@@ -1421,6 +1437,21 @@
 	        call read_restart_mercury(iunit)
 	      else
 	        call skip_restart_mercury(iunit)
+	      end if
+	    end if
+          end if
+
+
+	  if( nvers .ge. 15 ) then
+	    id = id_bfm_rst
+	    read(iunit) ibfm
+            if( ibfm .gt. 0 ) then
+	      call rst_add_flag(id,iflag)
+	      if( rst_want_restart(id) ) then
+                call bfm_init_for_restart()
+	        call read_restart_bfm(iunit)
+	      else
+	        call skip_restart_bfm(iunit)
 	      end if
 	    end if
           end if

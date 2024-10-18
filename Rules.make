@@ -64,14 +64,14 @@ COMPILER_PROFILE = NORMAL
 ##############################################
 
 #FORTRAN_COMPILER = GNU_G77
-FORTRAN_COMPILER = GNU_GFORTRAN
-#FORTRAN_COMPILER = INTEL
+#FORTRAN_COMPILER = GNU_GFORTRAN
+FORTRAN_COMPILER = INTEL
 #FORTRAN_COMPILER = PORTLAND
 #FORTRAN_COMPILER = IBM
 #FORTRAN_COMPILER = PGI
 
-C_COMPILER = GNU_GCC
-#C_COMPILER = INTEL
+#C_COMPILER = GNU_GCC
+C_COMPILER = INTEL
 #C_COMPILER = IBM
 #C_COMPILER = PGI
 
@@ -112,8 +112,8 @@ INTEL_VERSION = IFORT
 PARALLEL_OMP = false
 #PARALLEL_OMP = true
 
-PARALLEL_MPI = NONE
-#PARALLEL_MPI = NODE
+#PARALLEL_MPI = NONE
+PARALLEL_MPI = NODE
 #PARALLEL_MPI = ELEM
 
 ##############################################
@@ -141,10 +141,10 @@ PARALLEL_MPI = NONE
 #
 ##############################################
 
-PARTS = NONE
-#PARTS = METIS
+#PARTS = NONE
+PARTS = METIS
 #PARTS = PARMETIS
-METISDIR =
+METISDIR = ${METIS_HOME}
 #METISDIR = /usr/local
 #METISDIR = $(HOME)/lib/metis
 #METISDIR = $(LD_LIBRARY_PATH)
@@ -196,7 +196,7 @@ SOLVER = SPARSKIT
 
 # PETSC_DIR it the path to the PETSc installation folder, it is 
 # needed for both the PETSc and the PETSc_AmgX solvers
-PETSC_DIR =
+PETSC_DIR =${PETSC_HOME}
 
 # The next 4 paths must be filled in for the PETSc_AmgX solver only.
 
@@ -260,10 +260,10 @@ GPU=NONE
 #
 ##############################################
 
-NETCDF = false
-#NETCDF = true
-#NETCDFDIR =
-
+#NETCDF = false
+NETCDF = true
+NETCDFDIR = $NETCDF_C_HOME
+NETCDFFDIR =$NETCDF_FORTRAN_HOME
 ##############################################
 # GOTM library
 ##############################################
@@ -295,11 +295,11 @@ GOTM = true
 #
 ##############################################
 
-ECOLOGICAL = NONE
+#ECOLOGICAL = NONE
 #ECOLOGICAL = EUTRO
 #ECOLOGICAL = ERSEM
 #ECOLOGICAL = AQUABC
-#ECOLOGICAL = BFM
+ECOLOGICAL = BFM
 
 ##############################################
 #
@@ -315,6 +315,7 @@ ECOLOGICAL = NONE
 #BFMDIR = /home/georg/appl/donata/bfm/bfmv5
 #BFMDIR = /home/georg/appl/donata/bfm/BiogeochemicalFluxModel-5.1.0
 #BFMDIR = $(HOME)/BFM
+BFMDIR=/g100_work/OGS23_PRACE_IT/SHYFEM_BFM/shyfem-bfm/shyfemcm-ismar_2024_10_18/bfm
 
 ##############################################
 # WW3 wave model

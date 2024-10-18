@@ -107,7 +107,7 @@ endif
 
 ifeq ($(SOLVER),PETSC)
    LIBG_PETSC = -L$(PETSC_DIR)/lib -lpetsc
-   SOLVER_OBJ		 = spk_blas.o matrix_inv.o \
+   SOLVER_OBJ		 =  matrix_inv.o \
 	amgx_c_wrapper_dummy.o mod_petsc_global.o \
 	mod_petsc_system.o simsys_petsc.o
 endif
@@ -154,6 +154,23 @@ HEAT_OBJ = \
 
 ECO_OBJ = \
       ecological.o bfm_dummy.o bfm.o mercury_dummy.o \
+
+ifeq ($(ECOLOGICAL),BFM)
+  LIBBFM =     bfm
+  ECO_OBJ = ecological.o mercury_dummy.o ../contrib/ecological/bfm/bfm_statevars.o ../contrib/ecological/bfm/bfm.o ../contrib/ecological/bfm/bfm_internal.o 
+  MOD_BFM =  $(FEMDIR)/lib/mod/mod_bfm.mod $(FEMDIR)/lib/mod/mod_bfm_internal.mod
+  LIBG_BFM     = -L$(BFMDIR)/lib/ -l$(LIBBFM)
+  LIBF_BFM     = $(BFMDIR)/lib/lib$(LIBBFM).a
+  INCL_BFM     = -I$(BFMDIR)/include
+  FFLAGS          += -fpp $(INCL_BFM) $(LIBG_BFM) $(LIBF_BFM)
+
+  LIB_NETCDF = 
+  ifeq ($(NETCDF),true)
+    LIB_NETCDF = -L$(NETCDFDIR)/lib -lnetcdf -L$(NETCDFFDIR)/lib -lnetcdff
+  endif
+
+  LIB_ECOLOGICAL=-L$(BFMDIR)/lib/ -l$(LIBBFM) $(LIB_NETCDF)
+endif
 
 SEDIMENT_OBJ = \
       sedim_util.o simple_sedi.o sedim_admin.o \
@@ -213,7 +230,7 @@ fem: shyfem links nothing
 
 #$(EXES_target): $(MODULES) $(OBJ) $(LIBF) shyfem.o
 shyfem: $(MODULES) $(OBJ) $(LIBF) shyfem.o
-	 $(F77) $(FFLAGS) $(INCLUDE) $(LFLAGS) $^ $(LIBL) -o shyfem 
+	 $(F77) $(FFLAGS) $(INCLUDE) $(LFLAGS) $^ $(LIBL)  $(LIB_ECOLOGICAL) -o shyfem 
 
 links:
 	@$(FEMBIN)/symlink $(FEMBIN) $(EXES)
