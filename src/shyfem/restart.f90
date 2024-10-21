@@ -172,7 +172,7 @@
      &		,'ecological model    '    &
      &		,'mercury model       '    &
      &		,'gotm turb model     '    &
-     &		,'bfm model     '    &
+     &		,'bfm model           '    &
      &						/)
 
 	real, save, allocatable :: hlvrst(:)

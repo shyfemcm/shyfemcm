@@ -7,8 +7,6 @@
 #
 #------------------------------------------------------------------------
 
-#--------------------------------------------- 
-
 DIR	= bfm
 
 #--------------------------------------------- just for default
@@ -43,12 +41,14 @@ LIBF	+= $(LIBDIR)/lib$(LIBSHYUTIL).a
 
 EXES	=	
 
-OBJ	=	bfm_statevars.o bfm.o bfm_internal.o 
-MOD_BFM =  $(FEMDIR)/lib/mod/mod_bfm.mod $(FEMDIR)/lib/mod/mod_bfm_internal.mod
+OBJ	     =	bfm_statevars.o bfm.o bfm_internal.o 
+
+BFMOBJ := $(foreach item,$(OBJ),$(PWD)/$(item))
+
 LIBG_BFM     = -L$(BFMDIR)/lib/ -l$(LIBBFM)
-LIBF_BFM     = $(BFMDIR)/lib/lib$(LIBBFM).a
 INCL_BFM     = -I$(BFMDIR)/include
-FFLAGS          += -fpp $(INCL_BFM) $(LIBG_BFM) $(LIBF_BFM)
+FFLAGS      += $(INCL_BFM)
+LFLAGS      += $(LIBG_BFM)
 
 ALL	=	$(OBJ)
 
@@ -60,14 +60,25 @@ MAKEDEPEND = $(FEMBIN)/mkdp.pl
 #--------------------------------------------- EXES
 
 default: fem
-fem:	$(OBJ) 
-all:	$(EXES)
+fem:	$(OBJ) nothing
+
+nothing:
+	@true
+
+objs:
+	@echo $(BFMOBJ)
+
+info:
+	@echo $(PWD)
+	@echo $(BFM_CONTRIB_DIR)
+	@echo $(OBJ)
+	@echo $(BFMOBJ)
 
 #--------------------------------------------- clean
 
 cleanall: clean cleanzip cleangrd
 
-clean: cleanobj cleanexe cleanvar cleantex cleanlinks
+clean: cleanobj cleanexe cleanvar cleanlinks
 
 cleanobj:
 	-rm -f *.o
@@ -81,9 +92,6 @@ cleanlinks:
 cleanexe:
 	-rm -f $(EXES)
 	-rm -f *.exe
-
-cleantex:
-	-rm -f *.dvi *.aux
 
 cleanvar:
 	-rm -f a.out core
@@ -139,27 +147,4 @@ strip:
 #--------------------------------------------- makedepend
 
 # DO NOT DELETE THIS LINE -- make depend depends on it.
-
-../../../lib/mod/mod_adj_grade.mod: mod_adj_grade.o
-../../../lib/mod/mod_adj_static.mod: mod_adj_grade.o
-adj4el.o: ../../../lib/mod/basin.mod \
-		../../../lib/mod/mod_adj_grade.mod 
-adj575.o: ../../../lib/mod/basin.mod \
-		../../../lib/mod/mod_adj_grade.mod 
-adj5el.o: ../../../lib/mod/basin.mod \
-		../../../lib/mod/mod_adj_grade.mod 
-adj7el.o: ../../../lib/mod/basin.mod \
-		../../../lib/mod/mod_adj_grade.mod 
-adjgrd.o: ../../../lib/mod/mod_adj_static.mod
-adjneu.o: ../../../lib/mod/basin.mod \
-		../../../lib/mod/mod_adj_grade.mod \
-		../../../lib/mod/mod_depth.mod 
-adjplo.o: ../../../lib/mod/basin.mod \
-		../../../lib/mod/mod_adj_grade.mod 
-adjvar.o: ../../../lib/mod/basin.mod \
-		../../../lib/mod/mod_adj_grade.mod \
-		../../../lib/mod/mod_adj_static.mod 
-shyadj.o: ../../../lib/mod/basin.mod ../../../lib/mod/clo.mod \
-		../../../lib/mod/mod_adj_grade.mod \
-		../../../lib/mod/mod_depth.mod 
 

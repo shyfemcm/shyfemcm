@@ -9,6 +9,11 @@
 #
 # $Id: Makefile,v 1.00 2020-11-06 :gmica ASC CMCC Exp $
 #
+
+#--------------------	FLAGS	---------------------
+
+MAKEFLAGS += --no-print-directory
+
 #--------------------	FILES	---------------------
 
 FEMDIR = ../..
@@ -145,7 +150,7 @@ LAGRANGE_OBJ = \
       lagrange_main.o lagrange_back.o \
 
 HEAT_OBJ = \
-      meteo.o meteo_forcing.o meteo_admin.o \
+      meteo_forcing.o meteo_admin.o \
       icemodel.o ice.o \
       waves.o waves_admin.o ww3_dummy.o \
       heat_util2.o heat_admin.o heat_admin2.o \
@@ -153,16 +158,18 @@ HEAT_OBJ = \
       heat_areg.o heat_gill.o heat_default.o \
 
 ECO_OBJ = \
-      ecological.o bfm_dummy.o bfm.o mercury_dummy.o \
+      ecological_dummy.o bfm_dummy.o mercury_dummy.o \
 
 ifeq ($(ECOLOGICAL),BFM)
   LIBBFM =     bfm
-  ECO_OBJ = ecological.o mercury_dummy.o ../contrib/ecological/bfm/bfm_statevars.o ../contrib/ecological/bfm/bfm.o ../contrib/ecological/bfm/bfm_internal.o 
-  MOD_BFM =  $(FEMDIR)/lib/mod/mod_bfm.mod $(FEMDIR)/lib/mod/mod_bfm_internal.mod
+  BFM_CONTRIB_DIR = $(FEMDIR)/src/contrib/ecological/bfm
+  BFM_OBJ =	$(shell cd $(BFM_CONTRIB_DIR); make objs --no-print-directory)
+  ECO_OBJ := 	ecological.o mercury_dummy.o \
+		$(BFM_OBJ)
   LIBG_BFM     = -L$(BFMDIR)/lib/ -l$(LIBBFM)
-  LIBF_BFM     = $(BFMDIR)/lib/lib$(LIBBFM).a
   INCL_BFM     = -I$(BFMDIR)/include
-  FFLAGS          += -fpp $(INCL_BFM) $(LIBG_BFM) $(LIBF_BFM)
+  FFLAGS      += $(INCL_BFM)
+  LFLAGS      += $(LIBG_BFM)
 
   LIB_NETCDF = 
   ifeq ($(NETCDF),true)
@@ -170,6 +177,7 @@ ifeq ($(ECOLOGICAL),BFM)
   endif
 
   LIB_ECOLOGICAL=-L$(BFMDIR)/lib/ -l$(LIBBFM) $(LIB_NETCDF)
+  LIBL += $(LIB_ECOLOGICAL)
 endif
 
 SEDIMENT_OBJ = \
@@ -179,13 +187,13 @@ MPI_EXTRA_OBJ = \
       mpi_assert.o lnkmpi.o
 
 OBJ = system_matrix.o \
-      hydro_admin.o openmp_admin.o \
-      turbulence_util.o sinking.o nudging.o internal.o \
-      ts.o hydro_vel.o restart.o gotm_aux.o diff_aux.o \
-      area.o roughness.o diffusion.o hydro_baro.o \
-      hydro_print.o conz_util.o \
+      openmp_admin.o \
+      turbulence_util.o nudging.o internal.o \
+      restart.o gotm_aux.o diff_aux.o \
+      area.o roughness.o hydro_baro.o \
+      conz_util.o \
       bnd_scalar.o subset.o tide_utils.o tidef.o \
-      layer_thickness.o bndo.o conz_common.o \
+      bndo.o conz_common.o \
       bclfix_util.o nohyd.o outputd.o elems_dealing.o sigma_admin.o \
       transforms.o tsfile_admin.o fluidmud.o mud_admin.o chezy.o \
       line_admin.o discharge_flux.o flux_util.o \
@@ -224,13 +232,12 @@ OBSOLETE = \
 
 default: fem
 
-#fem: shyfem
-#shyfem: $(EXES_target) links nothing
 fem: shyfem links nothing
 
-#$(EXES_target): $(MODULES) $(OBJ) $(LIBF) shyfem.o
+#shyfem: info
+
 shyfem: $(MODULES) $(OBJ) $(LIBF) shyfem.o
-	 $(F77) $(FFLAGS) $(INCLUDE) $(LFLAGS) $^ $(LIBL)  $(LIB_ECOLOGICAL) -o shyfem 
+	 $(F77) $(FFLAGS) $(INCLUDE) $(LFLAGS) $^ $(LIBL) -o shyfem 
 
 links:
 	@$(FEMBIN)/symlink $(FEMBIN) $(EXES)
@@ -240,6 +247,13 @@ depend:
 
 nothing:
 	@true
+
+info:
+	@echo "BFM_OBJ: $(BFM_OBJ)"
+	@echo "ECO_OBJ: $(ECO_OBJ)"
+	@#@echo "MODULES: $(MODULES)"
+	@#@echo "LIBF: $(LIBF)"
+	@#@echo "OBJ: $(OBJ)"
 
 #------------------------------------------------------------------------
 
@@ -327,18 +341,12 @@ cleanall: clean
 ../../lib/mod/mod_bstress.mod: substress.o
 ../../lib/mod/mod_conz.mod: conz_common.o
 ../../lib/mod/mod_diff_aux.mod: diff_aux.o
-../../lib/mod/mod_diff_visc_fric.mod: diffusion.o
 ../../lib/mod/mod_fluidmud.mod: fluidmud.o
 ../../lib/mod/mod_gotm_aux.mod: gotm_aux.o
-../../lib/mod/mod_hydro.mod: hydro_admin.o
 ../../lib/mod/mod_hydro_baro.mod: hydro_baro.o
-../../lib/mod/mod_hydro_print.mod: hydro_print.o
-../../lib/mod/mod_hydro_vel.mod: hydro_vel.o
 ../../lib/mod/mod_internal.mod: internal.o
 ../../lib/mod/mod_keps.mod: turbulence_util.o
 ../../lib/mod/mod_lagrange.mod: lagrange_data.o
-../../lib/mod/mod_layer_thickness.mod: layer_thickness.o
-../../lib/mod/mod_meteo.mod: meteo.o
 ../../lib/mod/mod_nohyd.mod: nohyd.o
 ../../lib/mod/mod_nudge.mod: nudge.o
 ../../lib/mod/mod_nudging.mod: nudging.o
@@ -352,7 +360,6 @@ cleanall: clean
 ../../lib/mod/mod_sediment_para.mod: sedim_admin.o
 ../../lib/mod/mod_sedtrans05.mod: sedim_util.o
 ../../lib/mod/mod_shyfem.mod: shyfem_subs.o
-../../lib/mod/mod_sinking.mod: sinking.o
 ../../lib/mod/mod_subset.mod: subset.o
 ../../lib/mod/mod_system.mod: system_matrix.o
 ../../lib/mod/mod_system_global.mod: simsys_petsc.o
@@ -360,7 +367,6 @@ cleanall: clean
 ../../lib/mod/mod_system_global.mod: system_spk.o
 ../../lib/mod/mod_system_interface.mod: system_matrix.o
 ../../lib/mod/mod_test_zeta.mod: test_zeta.o
-../../lib/mod/mod_ts.mod: ts.o
 ../../lib/mod/mod_waves.mod: waves.o
 ../../lib/mod/ocean_shyfem.mod: nuopc_shyfem_cap.o
 ../../lib/mod/omp_admin.mod: openmp_admin.o
@@ -956,7 +962,8 @@ test_zeta.o: ../../lib/mod/basin.mod ../../lib/mod/mod_hydro.mod \
 tidef.o: ../../lib/mod/basin.mod ../../lib/mod/coordinates.mod \
 		../../lib/mod/iso8601.mod \
 		../../lib/mod/mod_depth.mod \
-		../../lib/mod/mod_hydro.mod ../../lib/mod/tide.mod 
+		../../lib/mod/mod_hydro.mod \
+		../../lib/mod/shympi.mod ../../lib/mod/tide.mod 
 time_admin.o: ../../lib/mod/femtime.mod ../../lib/mod/shympi.mod
 topological_admin.o: ../../lib/mod/basin.mod \
 		../../lib/mod/evgeom.mod \

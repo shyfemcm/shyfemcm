@@ -453,7 +453,7 @@
 	implicit none
 	real getpar
 
-        if( mod_bfm_initialized==.False. ) then 
+        if( mod_bfm_initialized .eqv. .false. ) then 
           ibfm=nint(getpar('ibfm'))
 
           call mod_bfm_init(ibfm_state,nkn,nlvdi)

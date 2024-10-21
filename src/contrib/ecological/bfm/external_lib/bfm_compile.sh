@@ -52,6 +52,23 @@ RemoveFile()
   fi
 }
 
+RemoveExtension()
+{
+  local dir=$1
+  local ext=$2
+  local actdir=$( pwd )
+
+  [ $# -lt 2 ] && return
+
+  if [ -d $dir ]; then
+    [ $verbose = "YES" ] && echo "removing files with extension $ext in $dir"
+    cd $dir
+    #ls  *.$ext
+    rm -f *.$ext
+    cd $actdir
+  fi
+}
+
 RestoreSave()
 {
   local file=$1
@@ -92,6 +109,20 @@ SaveFile()
   if [ ! -f $file.save ]; then
     [ $verbose = "YES" ] && echo "saving $file"
     cp $file $file.save
+  fi
+}
+
+DeletFromLib()
+{
+  local object=$1
+  local lib=$2
+
+  [ $# -lt 2 ] && return
+
+  if [ -f $lib ]; then
+    [ $verbose = "YES" ] && echo "removing $object from $lib"
+    ar -dv $lib $object
+    echo ""
   fi
 }
 
@@ -138,6 +169,13 @@ if [ ! -d $BFMDIR ]; then
   exit 5
 fi
 
+FORTRAN_COMPILER=$2
+if [ -z "$FORTRAN_COMPILER" -a $clean = "NO" ]; then
+  echo "*** FORTRAN_COMPILER is not given - please specify in Rules.make"
+  echo "    Please see Rules.make for more details"
+  exit 7
+fi
+
 if [ $clean = "YES" ]; then
   verbose="YES"
   echo "cleaning BFM directory: $BFMDIR"
@@ -157,6 +195,9 @@ if [ $clean = "YES" ]; then
   RemoveFile src/BFM/General/AllocateMem.F90
   RemoveFile src/BFM/General/ModuleMem.F90
   RemoveFile src/BFM/General/set_var_info_bfm.F90
+  RemoveExtension include mod
+  RemoveFile include/BFM_module_list.h
+  RemoveFile include/BFM_var_list.h
   exit 0
 fi
 
@@ -167,29 +208,61 @@ echo "this has to be done only once"
 echo "you also have to recompile if you change compiler"
 
 #---------------------------------------------------------------
-# compile
+# prepare compilation parameters
 #---------------------------------------------------------------
+
+PL_DEBUG="YES"
+PL_DEBUG="NO"		# this is for production runs
+PL_DEBUG_EXT=""
+
+if [ $FORTRAN_COMPILER = "GNU_GFORTRAN" ]; then
+  PL_COMPILER=gfortran
+  [ $PL_DEBUG = "YES" ] && PL_DEBUG_EXT="_debug"
+elif [ $FORTRAN_COMPILER = "INTEL" ]; then
+  PL_COMPILER=intel
+  [ $PL_DEBUG = "YES" ] && PL_DEBUG_EXT=".dbg"
+else
+  echo "fortran compiler not recognized: $FORTRAN_COMPILER"
+  exit 9
+fi
+
 PL_ARCH=x86_64
 PL_OS=LINUX
-PL_COMPILER=intel
-PL_DEBUG=       # this is the choice for production flags 
-#PL_DEBUG=.dbg   # this is the one for debug flags
-INC_FILE=${PL_ARCH}.${PL_OS}.${PL_COMPILER}${PL_DEBUG}.inc
+
+if [ $PL_COMPILER = "intel" ]; then
+  INC_FILE=${PL_ARCH}.${PL_OS}.${PL_COMPILER}${PL_DEBUG_EXT}.inc
+elif [ $PL_COMPILER = "gfortran" ]; then
+  INC_FILE=${PL_COMPILER}${PL_DEBUG_EXT}.inc
+fi
+
+echo "using .inc file: $INC_FILE"
+
 #export MODULEFILE=/g100_work/OGS23_PRACE_IT/SHYFEM_BFM/shyfem-bfm/v.00.veg/shyfem-bfm-sgr.v00.config
 
 #source $MODULEFILE
 
+#---------------------------------------------------------------
+# compile
+#---------------------------------------------------------------
+
 cd $BFMDIR
 
-sed -i "s/.*ARCH.*/        ARCH    = '$INC_FILE'  /"  build/configurations/OGS_PELAGIC/configuration
-
-cd $BFMDIR/build
+sed -i "s/.*ARCH.*/        ARCH    = '$INC_FILE'  /"  \
+		build/configurations/OGS_PELAGIC/configuration
 
 mkdir -p $BFMDIR/lib
+mkdir -p $BFMDIR/build/tmp/OGS_PELAGIC
+echo "copying BFM_module_list.proto.h to $BFMDIR/build/tmp/OGS_PELAGIC"
+cp include/BFM_module_list.proto.h $BFMDIR/build/tmp/OGS_PELAGIC
+
+cd $BFMDIR/build
 
 ./bfm_configure.sh -gcv -o ../lib/libbfm.a -p OGS_PELAGIC
 
 if [ $? -ne 0 ] ; then  echo  ERROR in code generation; exit 1 ; fi
+
+echo "deleting standalone_main.o from library"
+DeletFromLib standalone_main.o $BFMDIR/lib/libbfm.a
 
 echo "...the library is ready in $BFMDIR/lib"
 

@@ -223,7 +223,7 @@
 ! initialization of module
 !-------------------------------------------------------------
 
-        if( mod_bfm_initialized==.False. ) then 
+        if( mod_bfm_initialized .eqv. .false. ) then 
 	if( ibfm < 0 ) return
 
         if( ibfm == 0 ) then

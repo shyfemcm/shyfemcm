@@ -78,9 +78,6 @@ OBJ := \
 	mod_hydro_plot.o \
 	$(FEMDIR)/src/tools/shyelab/elabtime.o \
 	$(FEMDIR)/src/tools/shyelab/elabutil.o \
-	$(FEMDIR)/src/shyfem/hydro_admin.o \
-	$(FEMDIR)/src/shyfem/hydro_vel.o \
-	$(FEMDIR)/src/shyfem/hydro_print.o \
 	$(FEMDIR)/src/tools/shyelab/shy_util2.o \
 	plotutil.o \
 	supout.o \
