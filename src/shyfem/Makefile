@@ -164,7 +164,7 @@ ifeq ($(ECOLOGICAL),BFM)
   LIBBFM =     bfm
   BFM_CONTRIB_DIR = $(FEMDIR)/src/contrib/ecological/bfm
   BFM_OBJ =	$(shell cd $(BFM_CONTRIB_DIR); make objs --no-print-directory)
-  ECO_OBJ := 	ecological.o mercury_dummy.o \
+  ECO_OBJ := 	ecological_dummy.o mercury_dummy.o \
 		$(BFM_OBJ)
   LIBG_BFM     = -L$(BFMDIR)/lib/ -l$(LIBBFM)
   INCL_BFM     = -I$(BFMDIR)/include
