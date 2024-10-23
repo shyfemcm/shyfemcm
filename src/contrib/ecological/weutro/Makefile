@@ -7,7 +7,7 @@
 #
 #------------------------------------------------------------------------
 
-DIR	= mercury
+DIR	= weutro
 
 #--------------------------------------------- just for default
 FEMDIR = ../../../..
@@ -24,17 +24,20 @@ include $(FEMDIR)/Rules.make
 
 EXES	=	
 
-OBJ	     = mercury_dummy.o
-ifeq ($(MERCURY),true)
-  OBJ	     =	\
-		merc_sed.o \
-		merc_sed4sed.o \
-		merc_water.o \
-		merc_water4sed.o \
-		mercury.o
+ifeq ($(ECOLOGICAL),EUTRO)
+  OBJ	     =	bio3d.o \
+		bio3d_util.o \
+		weutro.o \
+		weutro_light.o \
+		weutro_sedim.o \
+		weutro_seed.o \
+		weutro_shell.o \
+		weutro_ulva.o \
+		weutro_wdia.o \
+
 endif
 
-MERCOBJ := $(foreach item,$(OBJ),$(PWD)/$(item))
+WEUTROOBJ := $(foreach item,$(OBJ),$(PWD)/$(item))
 
 ALL	=	$(OBJ)
 
@@ -52,7 +55,7 @@ nothing:
 	@true
 
 objs:
-	@echo $(MERCOBJ)
+	@echo $(WEUTROOBJ)
 
 #--------------------------------------------- clean
 

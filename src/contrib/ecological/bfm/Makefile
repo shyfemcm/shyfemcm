@@ -41,7 +41,11 @@ LIBF	+= $(LIBDIR)/lib$(LIBSHYUTIL).a
 
 EXES	=	
 
-OBJ	     =	bfm_statevars.o bfm.o bfm_internal.o 
+OBJ = bfm_dummy.o
+ifeq ($(ECOLOGICAL),BFM)
+  OBJ	     =	bfm_statevars.o bfm.o bfm_internal.o 
+endif
+
 
 BFMOBJ := $(foreach item,$(OBJ),$(PWD)/$(item))
 

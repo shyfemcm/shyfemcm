@@ -145,10 +145,12 @@ PARTS = NONE
 #PARTS = METIS
 #PARTS = PARMETIS
 METISDIR =
+METISDIR = ${METIS_HOME}
 #METISDIR = /usr/local
 #METISDIR = $(HOME)/lib/metis
 #METISDIR = $(LD_LIBRARY_PATH)
 PARMETISDIR = 
+PARMETISDIR = ${PARMETIS_HOME}
 #PARMETISDIR = /usr/local
 #PARMETISDIR = $(HOME)/lib/parmetis
 #PARMETISDIR = $(LD_LIBRARY_PATH)
@@ -197,6 +199,7 @@ SOLVER = SPARSKIT
 # PETSC_DIR it the path to the PETSc installation folder, it is 
 # needed for both the PETSc and the PETSc_AmgX solvers
 PETSC_DIR =
+PETSC_DIR =${PETSC_HOME}
 
 # The next 4 paths must be filled in for the PETSc_AmgX solver only.
 
@@ -262,7 +265,9 @@ GPU=NONE
 
 NETCDF = false
 #NETCDF = true
-#NETCDFDIR =
+#NETCDFDIR = 
+NETCDFDIR = ${NETCDF_C_HOME}
+NETCDFFDIR =${NETCDF_FORTRAN_HOME}
 
 ##############################################
 # GOTM library
@@ -293,28 +298,30 @@ GOTM = true
 # ERSEM, AQUABC, and BFM.
 # The BFM model is still experimental.
 #
+# The mercury module can be used by setting MERCURY = true
+#
 ##############################################
 
 ECOLOGICAL = NONE
 #ECOLOGICAL = EUTRO
-#ECOLOGICAL = ERSEM
 #ECOLOGICAL = AQUABC
 #ECOLOGICAL = BFM
+
+MERCURY = false
+#MERCURY = true
 
 ##############################################
 #
 # BFM model - in order to use the BFM model
-# please see the README file in fembfm
+# please see the README file in src/contrib/ecological/bfm
 # and set the BFMDIR directory below.
 #
 # this feature is still experimental - no support
 #
 ##############################################
 
-#BFMDIR = /gpfs/work/OGS18_PRACE_P_0/SHYFEM_BFM/bfm
-#BFMDIR = /home/georg/appl/donata/bfm/bfmv5
-#BFMDIR = /home/georg/appl/donata/bfm/BiogeochemicalFluxModel-5.1.0
-#BFMDIR = $(HOME)/BFM
+BFMDIR =
+BFMDIR=$(BFM_HOME)
 
 ##############################################
 # WW3 wave model

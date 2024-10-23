@@ -7,7 +7,7 @@
 #
 #------------------------------------------------------------------------
 
-DIR	= mercury
+DIR	= aquabc
 
 #--------------------------------------------- just for default
 FEMDIR = ../../../..
@@ -24,17 +24,24 @@ include $(FEMDIR)/Rules.make
 
 EXES	=	
 
-OBJ	     = mercury_dummy.o
-ifeq ($(MERCURY),true)
+ifeq ($(ECOLOGICAL),AQUABC)
   OBJ	     =	\
-		merc_sed.o \
-		merc_sed4sed.o \
-		merc_water.o \
-		merc_water4sed.o \
-		mercury.o
+		aquabc_II_svindex.o \
+		aquabc_II_apara.o \
+		aquabc_II_ini.o \
+		aquabc_II_aout.o \
+		aquabc_II.o \
+		aquabc_II_co2sys.o \
+		aquabc_II_fem_interface.o \
+		aquabc_II_pelagic_lib.o \
+		aquabc_II_pelagic_model.o \
+		aquabc_II_sediment_lib.o \
+		aquabc_II_sediment_model_1.o \
+		aquabc_II_util.o \
+
 endif
 
-MERCOBJ := $(foreach item,$(OBJ),$(PWD)/$(item))
+AQUABC_OBJ := $(foreach item,$(OBJ),$(PWD)/$(item))
 
 ALL	=	$(OBJ)
 
@@ -52,11 +59,11 @@ nothing:
 	@true
 
 objs:
-	@echo $(MERCOBJ)
+	@echo $(AQUABC_OBJ)
 
 #--------------------------------------------- clean
 
-cleanall: clean cleanzip cleangrd
+cleanall: clean cleanmod cleanzip cleangrd
 
 clean: cleanobj cleanexe cleanvar cleanlinks
 
@@ -82,6 +89,10 @@ cleanvar:
 	-rm -f errout.dat
 	-rm -f gmon.out
 	-rm -f out.ps plot.ps
+
+cleanmod:
+
+	-rm -f $(LIBDIR)/mod/aquabc_ii_*.mod
 
 cleanzip:
 	-rm -f $(DIR).zip

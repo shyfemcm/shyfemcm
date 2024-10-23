@@ -153,7 +153,7 @@
 
 ! initialization of parameters
 
-C       BYPASS OPTIONS FOR SYSTEMS 1-9. 1=BYPASS 0=SIMULATE
+!       BYPASS OPTIONS FOR SYSTEMS 1-9. 1=BYPASS 0=SIMULATE
       
 
         PI = 3.14159
@@ -347,7 +347,7 @@ C       BYPASS OPTIONS FOR SYSTEMS 1-9. 1=BYPASS 0=SIMULATE
 !********************************************************************
 !********************************************************************
 
-        subroutine eutro0d(id,t,dt,vol,depth,vel,uws,stp,sal,qss
+        subroutine eutro0d(id,t,dt,vol,depth,vel,uws,stp,sal,qss &
      &				,c,loads)
 
 ! EUTRO 0-Dimensional
@@ -672,8 +672,8 @@ C       BYPASS OPTIONS FOR SYSTEMS 1-9. 1=BYPASS 0=SIMULATE
       iinst=qss0
 !      write(6,*)iinst
 
-C                        Compute derivatives
-C              For PHYT, OP, OPO4, ON, NH3, NO3, CBOD, DO
+!                        Compute derivatives
+!              For PHYT, OP, OPO4, ON, NH3, NO3, CBOD, DO
 
       do i=1,nstate
         cd(i,iseg) = 0.
@@ -877,13 +877,13 @@ C              For PHYT, OP, OPO4, ON, NH3, NO3, CBOD, DO
 
       SUBROUTINE EUTROINT
 
-C     Initialize Values
-C
-C     Last Revised:  Date: Thursday, 1 February 1990.  Time: 16:32:53.
+!     Initialize Values
+!
+!     Last Revised:  Date: Thursday, 1 February 1990.  Time: 16:32:53.
 
       implicit none
 
-CDDD      changed PHIMAX ---> PHIMX
+!DDD      changed PHIMAX ---> PHIMX
 
       INCLUDE 'weutro.h'
       real R0MIN
@@ -910,21 +910,21 @@ CDDD      changed PHIMAX ---> PHIMX
 !      GZ2 = 0.
 !      DZ2 = 0.
 !      CFOREA = 1.0
-C
+!
       noseg=segmax
 
       DO 1000 J = 0,noseg 
          RLGHTS (J, 1) = 0.0
          RLGHTS (J, 2) = 1.0
  1000 CONTINUE
-C
+!
       INITB = 1
       MXDMP = 4
-C
-C             Check to see if Michalis Menton constants are Zero
-C             and readjust values to prevent floating zero divide
-C
-CRBA--Date: Tuesday, 1 June 1993.  Time: 09:01:20.
+!
+!             Check to see if Michalis Menton constants are Zero
+!             and readjust values to prevent floating zero divide
+!
+!RBA--Date: Tuesday, 1 June 1993.  Time: 09:01:20.
       XARG = ABS(NCRB)
       IF (XARG .LT. R0MIN) NCRB = 0.25
       XARG = ABS(PCRB)
@@ -934,83 +934,83 @@ CRBA--Date: Tuesday, 1 June 1993.  Time: 09:01:20.
       if( LGHTSW .lt. 0 ) LGHTSW = 0
       if( LGHTSW .gt. 3 ) LGHTSW = 3
       
-CCSC
+!CSC
       XARG = ABS(KBOD)
       IF (XARG .LT. R0MIN) KBOD = 1.00E-20
-CCSC
+!CSC
       XARG = ABS(KNO3)
       IF (XARG .LT. R0MIN) KNO3 = 1.00E-20
-CCSC
+!CSC
       XARG = ABS(KPO4)
       IF (XARG .LT. R0MIN) KPO4 = 1.00E-20
-CCSC
+!CSC
       XARG = ABS(KNIT)
       IF (XARG .LT. R0MIN) KNIT = 1.00E-20
-CCSC
+!CSC
       XARG = ABS(KMNG1)
       IF (XARG .LT. R0MIN) KMNG1 = 1.00E-20
-CCSC
+!CSC
       XARG = ABS(KMPG1)
       IF (XARG .LT. R0MIN) KMPG1 = 1.00E-20
-CCSC
+!CSC
       XARG = ABS(KMPHYT)
       IF (XARG .LT. R0MIN) KMPHYT = 1.00E-20
-C
-CCSC
+!
+!CSC
       XARG = ABS(OCRB)
       IF (XARG .LT. R0MIN) OCRB = 32./12.
-CCSC
+!CSC
       XARG = ABS(IS1)
       IF (XARG .LT. R0MIN) IS1 = 300.
-CCSC
+!CSC
       XARG = ABS(CCHL)
       IF (XARG .LT. R0MIN) CCHL = 30.
-CCSC
+!CSC
       XARG = ABS(FON)
       IF (XARG .LT. R0MIN) FON = 1.0
-CCSC
+!CSC
       XARG = ABS(FOP)
       IF (XARG .LT. R0MIN) FOP = 1.0
-CCSC
+!CSC
       XARG = ABS(PHIMX)
       IF (XARG .LT. R0MIN) PHIMX = 720.
-CCSC
+!CSC
       XARG = ABS(XKC)
       IF (XARG .LT. R0MIN) XKC = 0.017
-C
-C  Check for Zero Temperature Correction Factors and readjust to 1.0
-C
-CCSC
+!
+!  Check for Zero Temperature Correction Factors and readjust to 1.0
+!
+!CSC
       XARG = ABS(K1320T)
       IF (XARG .LT. R0MIN) K1320T = 1.0
-CCSC
+!CSC
       XARG = ABS(K140T)
       IF (XARG .LT. R0MIN) K140T = 1.0
-CCSC
+!CSC
       XARG = ABS(K1T)
       IF (XARG .LT. R0MIN) K1T = 1.0
-CCSC
+!CSC
       XARG = ABS(K1RT)
       IF (XARG .LT. R0MIN) K1RT = 1.0
-CCSC
+!CSC
       XARG = ABS(KDT)
       IF (XARG .LT. R0MIN) KDT = 1.0
-CCSC
+!CSC
       XARG = ABS(K1013T)
       IF (XARG .LT. R0MIN) K1013T = 1.0
-CCSC
+!CSC
       XARG = ABS(KONDT)
       IF (XARG .LT. R0MIN) KONDT = 1.0
-CCSC
+!CSC
       XARG = ABS(K58T)
       IF (XARG .LT. R0MIN) K58T = 1.0
-CCSC
+!CSC
       XARG = ABS(KOPDT)
       IF (XARG .LT. R0MIN) KOPDT = 1.0
-CCSC
+!CSC
       XARG = ABS(KPZDT)
       IF (XARG .LT. R0MIN) KPZDT = 1.0
-CCSC
+!CSC
       XARG = ABS(KDST)
       IF (XARG .LT. R0MIN) KDST = 1.0
 
@@ -1030,7 +1030,7 @@ CCSC
 
       SUBROUTINE AMMONIA
 
-C     Last Revised:  Date: Thursday, 1 February 1990.  Time: 16:32:55.
+!     Last Revised:  Date: Thursday, 1 February 1990.  Time: 16:32:55.
 
       implicit none
 
@@ -1038,27 +1038,27 @@ C     Last Revised:  Date: Thursday, 1 February 1990.  Time: 16:32:55.
 
       INCLUDE 'weutro.h'
       include 'donata.h'      !GGU (and others)
-C
-C       *-*-*-*-*  SYSTEM 1 - AMMONIA (NH3-N)  *-*-*-*-*
-C
-C                        Sources
-C               Mineralization of organic nitrogen
-C
+!
+!       *-*-*-*-*  SYSTEM 1 - AMMONIA (NH3-N)  *-*-*-*-*
+!
+!                        Sources
+!               Mineralization of organic nitrogen
+!
       SR13ON = SK1013
       denit = 0.
       denit = SK14D
-C
-C                  Phytoplankton Death
-C
+!
+!                  Phytoplankton Death
+!
       SR13P = NCRB*DPP*(1.0 - FON)
-C
-C                        Sinks
-C                    Algal Uptake
-C
+!
+!                        Sinks
+!                    Algal Uptake
+!
       SK13P1 = PNH3G1*NCRB*GP1*PHYT
-C
-C                      Nitrification
-C
+!
+!                      Nitrification
+!
       IF (DO .GT. 1.0E-10) THEN
          SK1314 = (K1320C*K1320T**STP20)*NH3*DO/(KNIT + DO)
       ELSE
@@ -1068,9 +1068,9 @@ C
        ddin1=sk1013+SR13P-SK13P1        !GGU new
 !      write(6,*)ddin1
 
-C
-C                   Formulate Derivative
-C
+!
+!                   Formulate Derivative
+!
 !      write(6,*) 'ammonia debug :'
 !      write(6,*) SR13P,SR13ON,SK13P1,SK1314,VOL,CD (1, ISEG)
 !      write(6,*) PNH3G1,NCRB,GP1,PHYT
@@ -1083,7 +1083,7 @@ C
       CD (1, ISEG) = (SR13P + SR13ON - SK13P1 - SK1314)*VOL     !ORIG
 
 !      write(6,*) CD (1, ISEG),iseg
-C
+!
       RETURN
       END
 
@@ -1091,30 +1091,30 @@ C
 
       SUBROUTINE NITRATE
 
-C     Last Revised:  Date: Thursday, 1 February 1990.  Time: 16:32:56.
+!     Last Revised:  Date: Thursday, 1 February 1990.  Time: 16:32:56.
 
       implicit none
       INCLUDE 'weutro.h'
       include 'donata.h'
       real SR1413,SK14P1
-C
-C    *-*-*-*-* SYSTEM 2 - Nitrate (+Nitrite)  (NO3-N+NO2-N)  *-*-*-*-*
-C
-C                         Sources
-C                      Nitrification
-C
+!
+!    *-*-*-*-* SYSTEM 2 - Nitrate (+Nitrite)  (NO3-N+NO2-N)  *-*-*-*-*
+!
+!                         Sources
+!                      Nitrification
+!
       SR1413 = SK1314
-C
-C                          Sinks
-C                      Algal Uptake
-C
+!
+!                          Sinks
+!                      Algal Uptake
+!
       SK14P1 = (1. - PNH3G1)*NCRB*GP1*PHYT
-C
-C                     Denitrification
-C
+!
+!                     Denitrification
+!
       SK14D = (K140C*K140T**STP20)*NO3
       IF (DO .GT. 0) SK14D = SK14D*KNO3/(KNO3 + DO)
-C
+!
 ! for no denitrification set SK14D to 0.
 
 !      IF (SK14D .LT. 1.00E-24) SK14D = 1.00E-24
@@ -1123,16 +1123,16 @@ C
 !      write (6,*) ddin2
 
 
-C
-C                   Formulate Derivative
-C
+!
+!                   Formulate Derivative
+!
       if (wdebug) then
         write(99,*)'NO2debug:',SR1413,SK14P1,SK14D,DO,NO3
       end if
 
 
       CD (2, ISEG) = (SR1413 - SK14P1 - SK14D)*VOL
-C
+!
       RETURN
       END
 
@@ -1140,41 +1140,41 @@ C
 
       SUBROUTINE INORGANP
 
-C     Last Revised:  Date: Thursday, 1 February 1990.  Time: 16:32:56.
+!     Last Revised:  Date: Thursday, 1 February 1990.  Time: 16:32:56.
 
       implicit none
       INCLUDE 'weutro.h'
       include 'donata.h'
       real SR8P,SR8OP,SK8P
-C
-C   *-*-*-*-*  SYSTEM 3 - Dissolved Inorganic Phosphorous  *-*-*-*-*
-C
-C                            Sources
-C               Mineralization of Organic Phosphorous
-C
+!
+!   *-*-*-*-*  SYSTEM 3 - Dissolved Inorganic Phosphorous  *-*-*-*-*
+!
+!                            Sources
+!               Mineralization of Organic Phosphorous
+!
       SR8OP = SK58
-C
-C                         Phytoplankton Death
-C
+!
+!                         Phytoplankton Death
+!
       SR8P = PCRB*DPP*(1. - FOP)
-C
-C                            Sinks
-C                        Algal uptake
-C
+!
+!                            Sinks
+!                        Algal uptake
+!
       SK8P = PCRB*GPP
 
         prod = SR8OP+SR8P       !GGU new
       cons= SK8P              !GGU new
 !      write(6,*) 'prod phosph',prod
-C
-C                   Formulate Derivative
-C
+!
+!                   Formulate Derivative
+!
       if (wdebug) then
       write(99,*)'inPdebug:',SR8P,SR8OP,SK8P
       end if
 
       CD (3, ISEG) = (SR8P + SR8OP - SK8P)*VOL
-C
+!
       RETURN
       END
 
@@ -1182,7 +1182,7 @@ C
 
       SUBROUTINE PHYTO
 
-C     Last Revised:  Date: Thursday, 1 February 1990.  Time: 16:32:57.
+!     Last Revised:  Date: Thursday, 1 February 1990.  Time: 16:32:57.
 
       implicit none
 
@@ -1191,9 +1191,9 @@ C     Last Revised:  Date: Thursday, 1 February 1990.  Time: 16:32:57.
       parameter( R0MIN = 1.e-15 )
       REAL XARG,XDIFF,GIT1,CN,DOPO4
       real ttr, ttr1
-C
-C        *-*-*-*-*-*  System 4 - Phytoplankton  *-*-*-*-*-*
-C
+!
+!        *-*-*-*-*-*  System 4 - Phytoplankton  *-*-*-*-*-*
+!
 !         open (9, file = 'outgp.dat')      !ggu
 
 
@@ -1213,10 +1213,10 @@ C
             IKE = KEFN (ISEG)
       
 !         write(6,*) 'phyto, ctrl1 : ',GITMAX
-C
-C               Compute growth rate reduction due to light conditions
-C               using either Dick Smith's or Di Toro's formulation
-C
+!
+!               Compute growth rate reduction due to light conditions
+!               using either Dick Smith's or Di Toro's formulation
+!
             RLIGHT = 1.
             if( LGHTSW .eq. 1 ) call ditoro
             if( LGHTSW .eq. 2 ) call smith
@@ -1225,16 +1225,16 @@ C
              GIT1 = RLIGHT*GITMAX
 !            write(6,*) 'phyto, ctrl2 : ',GITMAX,GIT1
 
-C                   Compute ammonia preference
+!                   Compute ammonia preference
             PNH3G1 = 0.0
-C
-C
-            IF (NH3 .GE. 1.0E-5)
-     1         PNH3G1 = NH3*NO3/((KMNG1 + NH3)*(KMNG1 + NO3))
-     2         + NH3*KMNG1/((NH3 + NO3)*(KMNG1 + NO3))
-C
-C              Compute Michaelis Limitations
-C
+!
+!
+            IF (NH3 .GE. 1.0E-5) &
+     &         PNH3G1 = NH3*NO3/((KMNG1 + NH3)*(KMNG1 + NO3)) &
+     &         + NH3*KMNG1/((NH3 + NO3)*(KMNG1 + NO3))
+!
+!              Compute Michaelis Limitations
+!
             CN = NH3 + NO3
 !      write(6,*)KMNG1,PNH3G1,NH3,NO3,CN
             XEMP1 = CN/(KMNG1 + CN)
@@ -1242,10 +1242,10 @@ C
                DOPO4 = OPO4*FOPO4
             XEMP2 = DOPO4/(KMPG1 + DOPO4)
       
-C
-C       Compute Growth Rate Reduction due to Nutrient Limitation
-C
-CCSC
+!
+!       Compute Growth Rate Reduction due to Nutrient Limitation
+!
+!CSC
             XARG = ABS(NUTLIM)
             IF (XARG .LT. R0MIN) RNUTR = AMIN1 (XEMP1, XEMP2)
 
@@ -1253,22 +1253,22 @@ CCSC
 !      write(6,*) NUTLIM,XARG,R0MIN
 !      write(6,*) XEMP1,XEMP2,RNUTR
 !      write(6,*) '-------------- ggu --------------'
-CCSC
+!CSC
             IF (NUTLIM .EQ. 1.) RNUTR = XEMP1*XEMP2
 !            write(6,*) RNUTR
             GP1 = RNUTR*GIT1
             GPP = GP1*PHYT
       
 !
-C       ********************************************
-C                     Respiration Rate
-C       ********************************************
-C
+!       ********************************************
+!                     Respiration Rate
+!       ********************************************
+!
          RESP = K1RC*K1RT**STP20
 !      
-C
-C       ALGAL RESPIRATION + DEATH + GRAZING
-C
+!
+!       ALGAL RESPIRATION + DEATH + GRAZING
+!
 !         DP1 = RESP + K1D + K1G*ZOO*ZOOSG(ISEG)      !old
 
          DP1 = RESP + K1D             !FIXMED 
@@ -1280,16 +1280,16 @@ C
 !      write(6,*) DP1,RESP,K1D,K1G,ZOO,ZOOSG(iseg)
 
 
-C         IF (PHTY .GT. 1.0E-6)THEN
+!         IF (PHTY .GT. 1.0E-6)THEN
       XEMPRC=1.
-Cdoni            XEMPRC = PHYT/(KMPHYT + PHYT)
-C         ELSE
-C            XEMPRC = 1.0E-6/(KMPHYT + 1.0E-6)
-C         ENDIF
+!doni            XEMPRC = PHYT/(KMPHYT + PHYT)
+!         ELSE
+!            XEMPRC = 1.0E-6/(KMPHYT + 1.0E-6)
+!         ENDIF
 
-C
+!
       END IF      !sedsed
-C
+!
 !      write(6,*) 'phyto debug ggu'
       if (wdebug) then
       write(99,*)'phytodebug:',GP1,DPP,GRZ
@@ -1343,29 +1343,29 @@ C
 
       SUBROUTINE CBODSV
 
-C     Last Revised:  Date: Thursday, 1 February 1990.  Time: 16:32:57.
+!     Last Revised:  Date: Thursday, 1 February 1990.  Time: 16:32:57.
 
       implicit none
       INCLUDE 'weutro.h'
       real SR18P,SK18D,GRC
-C
-C                *-*-*-*-* SYSTEM 5 - CBOD  *-*-*-*-*
-C                             Sources
-C
+!
+!                *-*-*-*-* SYSTEM 5 - CBOD  *-*-*-*-*
+!                             Sources
+!
       IF ( .NOT. SEDSEG) GO TO 1000
       SR18P = OCRB*DPP
       GO TO 1010
-C
-C                        Phytoplankton 'DEATH'
-C
+!
+!                        Phytoplankton 'DEATH'
+!
  1000 CONTINUE
       DEATH = K1D*PHYT
       SR18P = OCRB*DEATH
       GRC= ZOOSK * OCRB
-C
-C                              Sinks
-C                            Oxidation
-C
+!
+!                              Sinks
+!                            Oxidation
+!
  1010 CONTINUE
       IF ( .NOT. SEDSEG) THEN
 !         IF (DO .GT. 1.0E-15) THEN
@@ -1381,20 +1381,20 @@ C
             SK180 = 0.0
          END IF
       END IF
-C
-C                         Denitrification
+!
+!                         Denitrification
 !
 ! ggu & mcg: next formula is indepenedent of BOD -> insert dependence
 
        SK18D = (5./4.)*(32./14.)*SK14D
-C
-C                      Formulate Derivative
+!
+!                      Formulate Derivative
       if (wdebug) then
       write(99,*)'cboddebug:',sr18p,grc,sk180,sk18d
       end if
-C
+!
       CD (5, ISEG) = (SR18P+GRC - SK180 - SK18D)*VOL
-C
+!
       RETURN
       END
 
@@ -1402,7 +1402,7 @@ C
 
       SUBROUTINE DISSOXYG
 
-C     Last Revised:  Date: Monday, 26 August 1991.  Time: 10:37:53.
+!     Last Revised:  Date: Monday, 26 August 1991.  Time: 10:37:53.
 
       implicit none
       INCLUDE 'weutro.h'
@@ -1412,11 +1412,11 @@ C     Last Revised:  Date: Monday, 26 August 1991.  Time: 10:37:53.
       REAL K2WIND, K2HYDRA
       real SR190,SR19PA,SR19PB,SK1913,SK1918,SK19S
       real TK,RLNCS,CL
-C
-C              *-*-*-*-*  SYSTEM 6 - OXYGEN  *-*-*-*-*
-C
-C                          Sources
-C
+!
+!              *-*-*-*-*  SYSTEM 6 - OXYGEN  *-*-*-*-*
+!
+!                          Sources
+!
       K20 = 0.0
       IF ( .NOT. SEDSEG) GO TO 1000
       SR190 = 0.0
@@ -1424,9 +1424,9 @@ C
       SR19PB = 0.0
       SK19P = 0.0
       GO TO 1010
-C
-C                         Reaeration
-C
+!
+!                         Reaeration
+!
  1000 CONTINUE
       IF ( topseg .AND. XICECVR .GT. 0.0) THEN
 
@@ -1455,64 +1455,64 @@ C
          KA = 0.0
       END IF
 
-C       Calculate oxygen saturation level for current water
-C       temperature; DOSAT is expressed as mg oxygen per liter
+!       Calculate oxygen saturation level for current water
+!       temperature; DOSAT is expressed as mg oxygen per liter
 
       CL = SAL/1.80655
       TK = STP + 273.
-      RLNCS = - 139.34411 + (1.575701E05/TK) - (6.642308E07/TK**2) +
-     1   (1.243800E10/TK**3) - (8.621949E11/TK**4) -
-     2   (CL*(3.1929E-02 - (19.428/TK) + (3.8673E03/TK**2)))
-C
+      RLNCS = - 139.34411 + (1.575701E05/TK) - (6.642308E07/TK**2) + &
+     &   (1.243800E10/TK**3) - (8.621949E11/TK**4) - &
+     &   (CL*(3.1929E-02 - (19.428/TK) + (3.8673E03/TK**2)))
+!
       CS = EXP (RLNCS)
-C
+!
       SR190 = KA*(CS - DO)
 
 !      write(88,*) KA,CS,SR190
-C
-C                 Evolution by phytoplankton
-C          growth of phytoplankton using CO2 and NH3
-C
+!
+!                 Evolution by phytoplankton
+!          growth of phytoplankton using CO2 and NH3
+!
       SR19PA = PNH3G1*GP1*PHYT*32./12.
-C
-C       Growth of phytoplankton using CO2 and NO3 (2NO3 = 2NH3 + 302)
-C
+!
+!       Growth of phytoplankton using CO2 and NO3 (2NO3 = 2NH3 + 302)
+!
       SR19PB = (1. - PNH3G1)*GP1*PHYT*32.*(1./12. + 1.5*NCRB/14.)
 
-C
+!
       SR19P = SR19PA + SR19PB
-C
-C      NOTE: SR19P = GPP*(32/12 + (1.5*NCRB/14)*(1-PNH3G1))
-C
-C                             Sinks
-C                       Algal Respiration
+!
+!      NOTE: SR19P = GPP*(32/12 + (1.5*NCRB/14)*(1-PNH3G1))
+!
+!                             Sinks
+!                       Algal Respiration
 
 !      SK19P = OCRB*RESP                  !BUGFIX1
       SK19P = OCRB*RESP*PHYT
-C
-C        Nitrification (NH3-N + 2O2 = NO3-N + H2O + H)
-C
+!
+!        Nitrification (NH3-N + 2O2 = NO3-N + H2O + H)
+!
  1010 CONTINUE
       SK1913 = 64./14.*SK1314
-C
-C                      Oxidation of CBOD
-C
+!
+!                      Oxidation of CBOD
+!
       SK1918 = SK180
-C
-C             Sediment Oxygen Demand (1-D Networks)
-C
+!
+!             Sediment Oxygen Demand (1-D Networks)
+!
       SK19S = SOD1D (ISEG)*SODTA(ISEG)**stp20/H
-C
-C======================================================================
-C                     Formulate Derivative
-C
+!
+!======================================================================
+!                     Formulate Derivative
+!
       if (wdebug) then
       write(99,*)'doxdebug:',SR190,SR19PA,SR19PB,SK19P &
      &                        ,SK1913,SK1918,SK19S
       end if
 
-      CD (6, ISEG) = (SR190 + SR19PA + SR19PB - SK19P
-     1   - SK1913 - SK1918 - SK19S)*VOL
+      CD (6, ISEG) = (SR190 + SR19PA + SR19PB - SK19P &
+     &   - SK1913 - SK1918 - SK19S)*VOL
 
 !        write(54,'(8(f8.4,2x))') SR190,SR19PA,SR19PB,SK19P,SK1913,SK1918
 !     & ,SK19S 
@@ -1525,37 +1525,37 @@ C
 
       SUBROUTINE ORGANICN
 
-C     Last Revised:  Date: Thursday, 1 February 1990.  Time: 16:32:59.
+!     Last Revised:  Date: Thursday, 1 February 1990.  Time: 16:32:59.
 
       implicit none
       INCLUDE 'weutro.h'
       real SR10P,GRN
-C
-C
-C             *-*-*-*-*  SYSTEM 7 Organic Nitrogen      *-*-*-*-*
-C
-C                          Sources
-C             Phytoplankton Respiration and 'DEATH'
-C            GRAZING and zooplankton death
-C                  GRN=  ZOO --> ORGANICN
+!
+!
+!             *-*-*-*-*  SYSTEM 7 Organic Nitrogen      *-*-*-*-*
+!
+!                          Sources
+!             Phytoplankton Respiration and 'DEATH'
+!            GRAZING and zooplankton death
+!                  GRN=  ZOO --> ORGANICN
 
-C
+!
       SR10P = NCRB*DPP*FON
       GRN   = ZOOSK*NCRB      !BUGFIX1
-C
-C                         Sinks
-C         Mineralization of Dissolved Organic Nitrogen
-C
+!
+!                         Sinks
+!         Mineralization of Dissolved Organic Nitrogen
+!
       IF ( .NOT. SEDSEG) SK1013 = (K1013C*K1013T**STP20)*ON*XEMPRC
       IF (SEDSEG) SK1013 = (KONDC*KONDT**STP20)*ON
-C
-C                   Formulate Derivative
-C
+!
+!                   Formulate Derivative
+!
       if (wdebug) then
       write(99,*)'orgNdebug:',SR10P,GRN,SK1013
       end if
       CD (7, ISEG) = (SR10P+ GRN - SK1013)*VOL
-C
+!
       RETURN
       END
 
@@ -1563,38 +1563,38 @@ C
 
       SUBROUTINE ORGANOP
 
-C     Last Revised:  Date: Thursday, 1 February 1990.  Time: 16:32:59.
+!     Last Revised:  Date: Thursday, 1 February 1990.  Time: 16:32:59.
 
       implicit none
       real SR5P,GRP
 
       INCLUDE 'weutro.h'
-C
-C        *-*-*-*-*-*  SYSTEM 8 Organic Phosphorous  *-*-*-*-*-*
-C
-C                            Sources
-C                 Phytoplankton respiration and 'death'
-C               GRAZING and zooplankton death
-C                  GRP=  ZOO --> ORGANOP
-C
+!
+!        *-*-*-*-*-*  SYSTEM 8 Organic Phosphorous  *-*-*-*-*-*
+!
+!                            Sources
+!                 Phytoplankton respiration and 'death'
+!               GRAZING and zooplankton death
+!                  GRP=  ZOO --> ORGANOP
+!
       SR5P = PCRB*DPP*FOP
       GRP  = ZOOSK * PCRB      !BUGFIX1
-C
-C                             Sinks
-C
-C           Mineralization of dissolved organic phosphorus and
-C           Phytoplankton respiration and 'death'
-C
+!
+!                             Sinks
+!
+!           Mineralization of dissolved organic phosphorus and
+!           Phytoplankton respiration and 'death'
+!
       IF ( .NOT. SEDSEG) SK58 = (K58C*K58T**STP20)*OP*XEMPRC
       IF (SEDSEG) SK58 = (KOPDC*KOPDT**STP20)*OP
-C
-C                        Formulate Derivative
-C
+!
+!                        Formulate Derivative
+!
       if (wdebug) then
       write(99,*)'orgPdebug:',SR5P,GRP,SK58
       end if
       CD (8, ISEG) = (SR5P + GRP - SK58)*VOL
-C
+!
       RETURN
       END
 
@@ -1639,9 +1639,9 @@ C
 
       SUBROUTINE DITORO
 
-C*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*
-C        Di Toro et al Light Formulation
-C*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*
+!*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*
+!        Di Toro et al Light Formulation
+!*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*
 !
 ! needs IAV, IS1 and FDAY (plus KESG)
 
@@ -1658,15 +1658,15 @@ C*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*
       SKE = SKE + KESHD
       TEMP1 = SKE*H
 
-C         Get average solar radiation during daylight hours
+!         Get average solar radiation during daylight hours
 
       TEMP2 = IAV/IS1
       TEMP2 = RLGHTS(ISEG,2)*IAV/IS1      !consider light attenuation - $LGA
       TEMP3 = EXP ( - TEMP1)
       IAVBOT=IAV * TEMP3
       RLGHTS (ITO, 2) = RLGHTS (ISEG, 2)*TEMP3
-      RLIGHT = 2.718*FDAY/TEMP1*(EXP ( - TEMP2*
-     1   TEMP3) - EXP ( - TEMP2))
+      RLIGHT = 2.718*FDAY/TEMP1*(EXP ( - TEMP2* &
+     &   TEMP3) - EXP ( - TEMP2))
       RLGHTS (ISEG, 1) = RLIGHT
 
 !      write(6,*) 'ditoro debug ggu'
@@ -1683,9 +1683,9 @@ C         Get average solar radiation during daylight hours
 
       SUBROUTINE SMITH
 
-C*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*
-C          Dick Smith variable carbon/chlorophyll ratio
-C*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*
+!*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*
+!          Dick Smith variable carbon/chlorophyll ratio
+!*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*
 !
 ! needs ITOT and FDAY (plus KESG)
 ! IS1 is not needed (optimal light value is computed)
@@ -1699,27 +1699,27 @@ C*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*
       real CCHL1,TCHLA
        real temp1, temp2, temp3
       integer I
-C
-C            IAV = IAV/1440.
-C
-C               (Average solar radiation during daylight hours)
-C
-C/cm2 day*[0.43 visible/total*10,000 cm2/m2*E/52,000]=E visible/m2-day
-C             0.083  is FU (E/M2 - Ly or E/10 Kcal)
-C
-CRBA--Date: Tuesday, 1 June 1993.  Time: 09:05:36.
+!
+!            IAV = IAV/1440.
+!
+!               (Average solar radiation during daylight hours)
+!
+!/cm2 day*[0.43 visible/total*10,000 cm2/m2*E/52,000]=E visible/m2-day
+!             0.083  is FU (E/M2 - Ly or E/10 Kcal)
+!
+!RBA--Date: Tuesday, 1 June 1993.  Time: 09:05:36.
       CCHL1 = CCHLX(ISEG)
       IS1 = IS1X(ISEG)
       IAVBOT=IAVBOTX(ISEG)
-C      CCHL1 = 0.3*0.083*PHIMX*XKC*IAV/(GITMX1*2.718)
-C      IF (CCHL1 .LT. 20.) CCHL1 = 20.
+!      CCHL1 = 0.3*0.083*PHIMX*XKC*IAV/(GITMX1*2.718)
+!      IF (CCHL1 .LT. 20.) CCHL1 = 20.
       TCHLA = PHYT/CCHL1
       RLIGHT = RLGHTS (ISEG, 1)
-C
+!
       IF (NEWDAY .GE. 1) THEN
-C
-C           Dick Smith formulation integrated every day
-C
+!
+!           Dick Smith formulation integrated every day
+!
          KESHD = XKC*1000.*TCHLA      !FIXME
          SKE = KESG (ISEG)
          IF (IKE .GT. 0 .AND. IKE .LE. 5) SKE = SKE*KE (IKE)
@@ -1734,14 +1734,14 @@ C
             DTDAY = FLOAT (I - 1)/24.
             IF (DTDAY .GT. FDAY) GO TO 1010
             I0 = IMAX*SIN (PI*DTDAY/FDAY)
-            SUM = SUM + 2.7183/TEMP1*
-     1         (EXP ( - TEMP2*I0*TEMP3) - EXP ( - TEMP2*I0))
+            SUM = SUM + 2.7183/TEMP1* &
+     &         (EXP ( - TEMP2*I0*TEMP3) - EXP ( - TEMP2*I0))
  1000    CONTINUE
  1010    CONTINUE
          RLIGHT = SUM/24.
          RLGHTS (ISEG, 1) = RLIGHT
-CRBA--Date: Tuesday, 1 June 1993.  Time: 09:06:22.
-C        Adapt carbon to chlorophyll ratio:
+!RBA--Date: Tuesday, 1 June 1993.  Time: 09:06:22.
+!        Adapt carbon to chlorophyll ratio:
          IAVSG=IAV*(1.0-TEMP3)/TEMP1
          CCHLX(ISEG)=0.3*0.083*PHIMX*XKC*IAVSG/(GITMX1*2.718)
          IF(CCHLX(ISEG).LT.20.0) CCHLX(ISEG)=20.0
@@ -1857,59 +1857,59 @@ C        Adapt carbon to chlorophyll ratio:
 
       SUBROUTINE KAWIND (WS, TW, TA, depth, WTYPE,  RK)
 
-C*     THIS SUBROUTINE CALCULATES:
-C*
-C*              RK = REAERATION COEFFICIENT (RK) (M/DAY)*
-C*
-C*     GIVEN:
-C*              WS = Wind Speed (WS) (m/s)
-C*              TA = Temperature of the Air  (Degrees C)
-C*              TW = Water Temperature (Degrees C)
-C*
-C* Using the method presented in:
-C*
-C*           Jour. of Env Eng, Vol. 109, NO.3,PP.731-752,
-C*           June 1983, Author: D.J.O'Connor, TITLE: "Wind Effects on
-C*           Gas- Liquid Transfer Coefficients"
-C*
-C*====================================================================
-C*
-C* THIS SUBROUTINE WAS WRITTEN BY:
-C*     SANDRA BIRD
-C*     USAE WATERWAYS EXPERIMENT STATION (WES-ES-Q)
-C*     VICKSBURG, MISSISSIPPI
-C* AND MODIFIED BY JAMES L. MARTIN
-C*
-C*
-C*====================================================================
-C*
-C*   Parameters used in the model include:
-C*
-C*        Transitional Shear Velocity - UT(cm/sec)
-C*        Critical Shear Velocity - UC (cm/sec)
-C*        Vonkarman's Constant (KARMAN)
-C*        Equilibrium Roughness - ZE (cm)
-C*        1/LAM Is a Reynold's Number
-C*        GAM is a a Nondimensional Coefficient Dependent on
-C*        Water Body Size (WTYPE).
-C*        LAM, GAM, UT, UC and ZE are Dependent on Water Body
-C*        Size (See O'Conners Paper for Table of Values).
-C*
-C*       UT       UC      ZE    LAM     GAM
-C*       10.0     11.    .35    3.0     5.          Large Scale
-C*       10.0     11.    .25    3.0     6.5         Intermediate
-C*        9.      22.    .25   10.     10.          Small Scale
-C*
-CC******************************************************************
+!*     THIS SUBROUTINE CALCULATES:
+!*
+!*              RK = REAERATION COEFFICIENT (RK) (M/DAY)*
+!*
+!*     GIVEN:
+!*              WS = Wind Speed (WS) (m/s)
+!*              TA = Temperature of the Air  (Degrees C)
+!*              TW = Water Temperature (Degrees C)
+!*
+!* Using the method presented in:
+!*
+!*           Jour. of Env Eng, Vol. 109, NO.3,PP.731-752,
+!*           June 1983, Author: D.J.O'Connor, TITLE: "Wind Effects on
+!*           Gas- Liquid Transfer Coefficients"
+!*
+!*====================================================================
+!*
+!* THIS SUBROUTINE WAS WRITTEN BY:
+!*     SANDRA BIRD
+!*     USAE WATERWAYS EXPERIMENT STATION (WES-ES-Q)
+!*     VICKSBURG, MISSISSIPPI
+!* AND MODIFIED BY JAMES L. MARTIN
+!*
+!*
+!*====================================================================
+!*
+!*   Parameters used in the model include:
+!*
+!*        Transitional Shear Velocity - UT(cm/sec)
+!*        Critical Shear Velocity - UC (cm/sec)
+!*        Vonkarman's Constant (KARMAN)
+!*        Equilibrium Roughness - ZE (cm)
+!*        1/LAM Is a Reynold's Number
+!*        GAM is a a Nondimensional Coefficient Dependent on
+!*        Water Body Size (WTYPE).
+!*        LAM, GAM, UT, UC and ZE are Dependent on Water Body
+!*        Size (See O'Conners Paper for Table of Values).
+!*
+!*       UT       UC      ZE    LAM     GAM
+!*       10.0     11.    .35    3.0     5.          Large Scale
+!*       10.0     11.    .25    3.0     6.5         Intermediate
+!*        9.      22.    .25   10.     10.          Small Scale
+!*
+!C******************************************************************
 
       implicit none
 
       real R0MIN
       parameter( R0MIN = 1.e-15 )
 !      INCLUDE 'weutro.h'
-C*
-C*  Declarations:
-C*
+!*
+!*  Declarations:
+!*
 
         real WS         !wind speed, m/s
         real TW         !water temperature C
@@ -1956,24 +1956,24 @@ C*
       real*4 cddrag
       COMMON /KAHOLD/ ut, uc, ze, lam, gam, TMPAIR
       data cont1/'$'/
-C*
-C*   Determine Water Body Type, if WTYPE=0., then default is large
-C*   Water Body:
-C*
-CCSC
-CRBA      XARG1 = ABS(WTYPE)
+!*
+!*   Determine Water Body Type, if WTYPE=0., then default is large
+!*   Water Body:
+!*
+!CSC
+!RBA      XARG1 = ABS(WTYPE)
 !dd      XWDIFF= WTYPE - 3.0
 !dd      XARG2 = ABS(XWDIFF)
       IWTYPE = NINT(WTYPE)
       IF (IWTYPE .eq. 3) then
-CRBA      IF (XARG1.LT.R0MIN.OR.XARG2.LT.R0MIN) THEN
+!RBA      IF (XARG1.LT.R0MIN.OR.XARG2.LT.R0MIN) THEN
 !ddd      IF (XARG2.LT.R0MIN) THEN
          UT = 10.0
          UC = 11.0
          ZE = 0.35
          LAM = 3.0
          GAM = 5.0
-CCSC
+!CSC
 !ddd         XWDIFF = WTYPE - 1.0
 !ddd         XARG1 = ABS(XWDIFF)
       ELSE IF (IWTYPE .eq. 1 ) THEN
@@ -1993,37 +1993,37 @@ CCSC
 !            write(6,*) 'iwtype: ',iwtype
             stop 'error stop'
       END IF
-C*
-C CALCULATE DIFFUSIVITY OF OXYGEN IN WATER (DIFF) (CM**2/SEC), VISCOSIT
-C OF WATER (VW) (CM**2/SEC),VISCOSITY OF AIR (VA) (CM**2/SEC),DENSITY
-C OF WATER (PW) (G/CM**3), DENSITY OF AIR (PA) (G/CM**3)
+!*
+! CALCULATE DIFFUSIVITY OF OXYGEN IN WATER (DIFF) (CM**2/SEC), VISCOSIT
+! OF WATER (VW) (CM**2/SEC),VISCOSITY OF AIR (VA) (CM**2/SEC),DENSITY
+! OF WATER (PW) (G/CM**3), DENSITY OF AIR (PA) (G/CM**3)
       DIFF = 4.58E-07*TW + 1.2E-05
-C  NOTE: IF OTHER CHEMICALS WERE USED, THEN THEIR DIFFUSIVITIES
-C  MAY VARY. FOR EXAMPLE FOR TCDD:   (JLM)
-C      DIFF=4.83E-6
-C
+!  NOTE: IF OTHER CHEMICALS WERE USED, THEN THEIR DIFFUSIVITIES
+!  MAY VARY. FOR EXAMPLE FOR TCDD:   (JLM)
+!      DIFF=4.83E-6
+!
       VW = 0.0164 - .00024514*TW
       VA = .133 + .0009*TA
       PA = .00129 - .0000040*TA
       PW = 1.00
       WS = WS*100.
       RK = 1.
-C USE NEWTON RAPHSON METHOD TO CALCULATE THE SQUARE ROOT OF THE DRAG
-C COEFFICIENT
+! USE NEWTON RAPHSON METHOD TO CALCULATE THE SQUARE ROOT OF THE DRAG
+! COEFFICIENT
       N = 0
-C PARAMETERS USED IN THE MODEL INCLUDE TRANSITIONAL SHEAR VELOCITY - UT(
-C CRITICAL SHEAR VELOCITY - UC (CM/SEC); VONKARMAN'S CONSTANT (KARMAN);
-C EQUILIBRIUM ROUGHNESS - ZE (CM); 1/LAM IS A REYNOLD'S NUMBER; GAM IS
-C NONDIMENSIONAL COEFFICIENT DEPENDENT ON WATER BODY SIZE.  LAM, GAM, UT
-C UC AND ZE ARE DEPENDENT ON WATER BODY SIZE
+! PARAMETERS USED IN THE MODEL INCLUDE TRANSITIONAL SHEAR VELOCITY - UT(
+! CRITICAL SHEAR VELOCITY - UC (CM/SEC); VONKARMAN'S CONSTANT (KARMAN);
+! EQUILIBRIUM ROUGHNESS - ZE (CM); 1/LAM IS A REYNOLD'S NUMBER; GAM IS
+! NONDIMENSIONAL COEFFICIENT DEPENDENT ON WATER BODY SIZE.  LAM, GAM, UT
+! UC AND ZE ARE DEPENDENT ON WATER BODY SIZE
       KARMAN = 0.4
       KA3 = KARMAN**.3333
       WH = 1000.
-C MAKE INITIAL GUESS FOR SQUARE ROOT OF THE DRAG COEFFICIENT
+! MAKE INITIAL GUESS FOR SQUARE ROOT OF THE DRAG COEFFICIENT
       SRCD = 0.04
  1000 CONTINUE
       N = N + 1
-C CALCULATE VALUE OF FUNCTION(F2) AND DERIVATIVE OF FUNCTION(FP)
+! CALCULATE VALUE OF FUNCTION(F2) AND DERIVATIVE OF FUNCTION(FP)
       EF = EXP ( - SRCD*WS/UT)
       F1 = LOG ((WH/ZE) + (WH*LAM/VA)*SRCD*WS*EF)
       F2 = F1 - KARMAN/SRCD
@@ -2031,9 +2031,9 @@ C CALCULATE VALUE OF FUNCTION(F2) AND DERIVATIVE OF FUNCTION(FP)
       FP2 = ((WH*LAM)/(VA*UT))*SRCD*WS**2*EF
       FP3 = (WH*LAM/VA)*WS*EF
       FP4 = FP1*(FP2 + FP3) + (KARMAN/(SRCD**2))
-C CALCULATE A NEW GUESS FOR SQUARE ROOT OF DRAG AND COMPARE TO
-C PREVIOUS GUESS AND LOOP BACK THROUGH N-R WITH NEW GUESS IF
-C APPROPRIATE
+! CALCULATE A NEW GUESS FOR SQUARE ROOT OF DRAG AND COMPARE TO
+! PREVIOUS GUESS AND LOOP BACK THROUGH N-R WITH NEW GUESS IF
+! APPROPRIATE
       SRCD2 = SRCD - F2/FP4
       ERR = ABS (SRCD - SRCD2)
       IF (ERR .GT. 0.0005 .AND. N .LT. 8) THEN
@@ -2048,20 +2048,20 @@ C APPROPRIATE
       IF (WS .LT. 6.0) GO TO 1020
       IF (WS .GE. 6.0 .AND. WS .LE. 20.0) GO TO 1030
       IF (WS .GT. 20.0) GO TO 1040
-C CALC 1050S VALUES FOR WINDSPEEDS LESS THAN 6.0 M/SEC
+! CALC 1050S VALUES FOR WINDSPEEDS LESS THAN 6.0 M/SEC
  1020 CONTINUE
       RK1 = (DIFF/VW)**0.666667*SRCD*(PA/PW)**0.5
       RK = RK1*KA3*WS/GAM
       RK = RK*3600.*24.
       GO TO 1050
-C CALC 1050S VALUES FOR WINDSPEED GREATER THAN 20 M/S
+! CALC 1050S VALUES FOR WINDSPEED GREATER THAN 20 M/S
  1040 CONTINUE
-CRBA--Date: Tuesday, 1 June 1993.  Time: 09:15:47.
-C      RK = (DIFF*PA*VA*US/(0.1*PW*VW))**0.5
+!RBA--Date: Tuesday, 1 June 1993.  Time: 09:15:47.
+!      RK = (DIFF*PA*VA*US/(0.1*PW*VW))**0.5
       RK = (DIFF*PA*VA*US/(KARMAN*ZE*PW*VW))**0.5
       RK = RK*3600.*24./100.
       GO TO 1050
-C CALC 1050S VALUES FOR WINDSPEED BETWEEN 6 AND 20 M/S
+! CALC 1050S VALUES FOR WINDSPEED BETWEEN 6 AND 20 M/S
  1030 CONTINUE
       GAMU = GAM*US*EXP ( - US/UC + 1.)/UC
       RK1 = (DIFF/VW)**.6667*KA3*(PA/PW)**0.5*US/GAMU
@@ -2085,72 +2085,72 @@ C CALC 1050S VALUES FOR WINDSPEED BETWEEN 6 AND 20 M/S
 
       SUBROUTINE KAHYDRA (K2HYDRA) 
 
-C     Last Revised:  Date: Thursday, 1 February 1990.  Time: 16:32:58.
+!     Last Revised:  Date: Thursday, 1 February 1990.  Time: 16:32:58.
 
       implicit none
       INCLUDE 'weutro.h'
       REAL K2HYDRA
       real CFOREA,AVDEPE,AVVELE,REAK,EXPREV,EXPRED,TRANDP,DIF
-C
-C
-C                      Calculate Oxygen Reaeration
-C
+!
+!
+!                      Calculate Oxygen Reaeration
+!
       CFOREA = 1.0
       AVDEPE = H
       AVVELE = ABS(VEL)
-C
-C
-C         Calculate reaeration coefficient for free-flowing reach
-C         Calculate reaeration coefficient as a power function of
-C         average hydraulic depth and velocity; determine exponents
-C         to depth and velocity terms and assign value to REAK
-C
+!
+!
+!         Calculate reaeration coefficient for free-flowing reach
+!         Calculate reaeration coefficient as a power function of
+!         average hydraulic depth and velocity; determine exponents
+!         to depth and velocity terms and assign value to REAK
+!
       IF (AVDEPE .GT. 0.61) GO TO 1000
-C
-C          Use Owen's formulation for reaeration
-C
+!
+!          Use Owen's formulation for reaeration
+!
       REAK = 5.349
       EXPREV = 0.67
       EXPRED = - 1.85
       GO TO 1010
-C
+!
  1000 CONTINUE
-C
-C       Calculate transition depth; transition depth determines
-C       which method of calculation is used given the current
-C       velocity
-C
+!
+!       Calculate transition depth; transition depth determines
+!       which method of calculation is used given the current
+!       velocity
+!
       IF (AVVELE .GE. 0.518) GO TO 1020
       TRANDP = 0.0
       GO TO 1030
  1020 CONTINUE
       TRANDP = 4.411*(AVVELE**2.9135)
  1030 CONTINUE
-C
+!
       DIF = AVDEPE - TRANDP
       IF (DIF .GT. 0.0) GO TO 1040
-C
-C                 Use Churchill's formulation for reaeration
-C
+!
+!                 Use Churchill's formulation for reaeration
+!
       REAK = 5.049
       EXPREV = .969
       EXPRED = - 1.673
       GO TO 1050
-C
+!
  1040 CONTINUE
-C
-C                 Use O'Connor-Dobbins formulation for reaeration
-C
+!
+!                 Use O'Connor-Dobbins formulation for reaeration
+!
       REAK = 3.93
       EXPREV = 0.5
       EXPRED = - 1.5
-C
+!
  1050 CONTINUE
-C
+!
  1010 CONTINUE
-C
-C                               Calculate reaeration coefficient
-C
+!
+!                               Calculate reaeration coefficient
+!
       K20 = REAK*(AVVELE**EXPREV)*(AVDEPE**EXPRED)
       IF (K20 .GT. 24.) K20 = 24.
       K2HYDRA = K20*1.028**STP20
@@ -2169,9 +2169,9 @@ C
         real oxysat
         real temp,salt
 
-        oxysat = (14.6244-0.367134*temp+4.4972E-3*temp**2
-     :     -0.0966*salt+0.00205*salt*temp+2.739E-4*salt**2)
-!     :    /32.
+        oxysat = (14.6244-0.367134*temp+4.4972E-3*temp**2 &
+     &     -0.0966*salt+0.00205*salt*temp+2.739E-4*salt**2)
+!     &    /32.
 
         end
 
@@ -2179,16 +2179,16 @@ C
 
       SUBROUTINE BENTFLUX
 
-C     Last Revised:  Date: Thursday, 1 February 1990.  Time: 16:32:54.
+!     Last Revised:  Date: Thursday, 1 February 1990.  Time: 16:32:54.
 
       implicit none
 
       INCLUDE 'weutro.h'
 
       REAL AUX, FLUXP, FLUXN
-C
-C              Benthic ammonium and phosphate fluxes
-C
+!
+!              Benthic ammonium and phosphate fluxes
+!
        AUX = SA * 0.001   !conversion to g/day, fluxes are [mg/(m**2 day)]
 
          FLUXN = FNH4 (ISEG)*AUX
@@ -2197,7 +2197,7 @@ C
          CD (3, ISEG) = CD (3, ISEG) + FLUXP
 
 !      write(77,*) FLUXN,ISEG,AUX,FNH4(ISEG)      !ggu
-C
+!
       RETURN
       END
 

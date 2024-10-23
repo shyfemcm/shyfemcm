@@ -40,6 +40,8 @@ MOD  = \
 	hydro_print.o \
 	meteo.o \
 	layer_thickness.o \
+	mod_sedim.o \
+	mod_flux.o \
 
 OBJ  = \
 

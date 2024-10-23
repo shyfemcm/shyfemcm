@@ -157,15 +157,24 @@ HEAT_OBJ = \
       heat_temp.o heat_mfsbulk.o heat_coare.o heat_gotm.o \
       heat_areg.o heat_gill.o heat_default.o \
 
-ECO_OBJ = \
-      ecological_dummy.o bfm_dummy.o mercury_dummy.o \
+#----------------------------------------------------------------
 
+ECO_DIR = $(FEMDIR)/src/contrib/ecological
+
+MERCURY_OBJ = $(shell cd $(ECO_DIR)/mercury; make objs --no-print-directory)
+
+ECO_OBJ = ecological_dummy.o
+ifeq ($(ECOLOGICAL),EUTRO)
+  ECO_OBJ = $(shell cd $(ECO_DIR)/weutro; make objs --no-print-directory)
+endif
+ifeq ($(ECOLOGICAL),AQUABC)
+  ECO_OBJ = $(shell cd $(ECO_DIR)/aquabc; make objs --no-print-directory)
+endif
+
+BFM_OBJ := $(ECO_DIR)/bfm/bfm_dummy.o
 ifeq ($(ECOLOGICAL),BFM)
   LIBBFM =     bfm
-  BFM_CONTRIB_DIR = $(FEMDIR)/src/contrib/ecological/bfm
-  BFM_OBJ =	$(shell cd $(BFM_CONTRIB_DIR); make objs --no-print-directory)
-  ECO_OBJ := 	ecological_dummy.o mercury_dummy.o \
-		$(BFM_OBJ)
+  BFM_OBJ =	$(shell cd $(ECO_DIR)/bfm; make objs --no-print-directory)
   LIBG_BFM     = -L$(BFMDIR)/lib/ -l$(LIBBFM)
   INCL_BFM     = -I$(BFMDIR)/include
   FFLAGS      += $(INCL_BFM)
@@ -179,6 +188,8 @@ ifeq ($(ECOLOGICAL),BFM)
   LIB_ECOLOGICAL=-L$(BFMDIR)/lib/ -l$(LIBBFM) $(LIB_NETCDF)
   LIBL += $(LIB_ECOLOGICAL)
 endif
+
+#----------------------------------------------------------------
 
 SEDIMENT_OBJ = \
       sedim_util.o simple_sedi.o sedim_admin.o \
@@ -217,6 +228,8 @@ OBJ = system_matrix.o \
 	$(SEDIMENT_OBJ) \
 	$(LAGRANGE_OBJ) \
 	$(ECO_OBJ) \
+	$(BFM_OBJ) \
+	$(MERCURY_OBJ) \
 	$(MPI_EXTRA_OBJ) \
 	$(SHYPRE_OBJ) \
 	turbulence.o nohydro.o explicit.o hydrodynamic.o \
@@ -254,6 +267,8 @@ info:
 	@#@echo "MODULES: $(MODULES)"
 	@#@echo "LIBF: $(LIBF)"
 	@#@echo "OBJ: $(OBJ)"
+	@echo "METISDIR: $(METISDIR)"
+	@echo "METIS_HOME: $(METIS_HOME)"
 
 #------------------------------------------------------------------------
 

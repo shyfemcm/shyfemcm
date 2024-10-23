@@ -27,20 +27,15 @@
 !************************************************************************
 !**************************co2sys routines***************************
 !************************************************************************
-!Includes:
-!  module VECTOR_MATRIX_UTILS
-!  module CO2SYS_CDIAC
-
-
 
 
 !*****************************************************
 !*****************************************************
 
-module VECTOR_MATRIX_UTILS
+module AQUABC_II_VECTOR_MATRIX_UTILS
     use AQUABC_II_GLOBAL
     implicit none
-!ontains
+contains
     !**************************************************************************
     ! UTILITY FUNCTIONS BETWEEN FORTRAN AND MATLAB
     !**************************************************************************
@@ -158,7 +153,7 @@ module VECTOR_MATRIX_UTILS
     end subroutine GENERATE_INDEX_ARRAY
 
     ! END OF UTILITY FUNCTIONS BETWEEN FORTAN AND MATLAB
-end module VECTOR_MATRIX_UTILS
+end module AQUABC_II_VECTOR_MATRIX_UTILS
 
 !*****************************************************
 !*****************************************************
@@ -169,12 +164,12 @@ end module VECTOR_MATRIX_UTILS
 !*****************************************************
 !*****************************************************
 
-module CO2SYS_CDIAC
+module AQUABC_II_CO2SYS_CDIAC
     use AQUABC_II_GLOBAL
-    use VECTOR_MATRIX_UTILS
+    use AQUABC_II_VECTOR_MATRIX_UTILS
     implicit none
 
-!ontains
+contains
 
     subroutine CO2SYS &
                (PAR1     , PAR2  , PAR1TYPE, PAR2TYPE, SALT, TEMPIN,   &
@@ -4897,7 +4892,7 @@ module CO2SYS_CDIAC
         
     end subroutine FindpHOnAllScales
 
-end module CO2SYS_CDIAC
+end module AQUABC_II_CO2SYS_CDIAC
 
 !******************************************************************
 !******************************************************************
