@@ -125,7 +125,7 @@ nuopc: fem
 	@$(FEMBIN)/recursivemake $@ $(FEMSRC)/shyfem
 
 fem: shyfem
-shyfem: libmod
+shyfem: checkv libmod
 	cd src; make
 
 para_get:

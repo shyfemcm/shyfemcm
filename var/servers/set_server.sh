@@ -77,7 +77,9 @@ SetVars()
     export NETCDF_FORTRAN_HOME=
     export NETCDFDIR=
     export METIS_HOME=$HOME/lib/metis
-    export PETSC_HOME=
+    export PARMETIS_HOME=
+    export PETSC_HOME=$HOME/lib/petsc
+    export BFM_HOME=$HOME/work/shyfem_repo/bfm-for-shyfem-private
   else
     echo "unknown server: $server"
     exit 1

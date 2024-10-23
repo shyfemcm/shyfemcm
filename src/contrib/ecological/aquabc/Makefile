@@ -139,3 +139,67 @@ strip:
 
 # DO NOT DELETE THIS LINE -- make depend depends on it.
 
+../../../../lib/mod/aquabc_ii_aout.mod: aquabc_II_aout.o
+../../../../lib/mod/aquabc_ii_bsed_model_constants.mod: \
+		aquabc_II_sediment_model_1.o 
+../../../../lib/mod/aquabc_ii_co2sys_cdiac.mod: aquabc_II_co2sys.o
+../../../../lib/mod/aquabc_ii_global.mod: aquabc_II.o
+../../../../lib/mod/aquabc_ii_layers_data.mod: aquabc_II_ini.o
+../../../../lib/mod/aquabc_ii_para_aqua.mod: aquabc_II_apara.o
+../../../../lib/mod/aquabc_ii_pel_state_var_indexes.mod: \
+		aquabc_II_svindex.o 
+../../../../lib/mod/aquabc_ii_pelagic_model_constants.mod: \
+		aquabc_II_pelagic_model.o 
+../../../../lib/mod/aquabc_ii_sed_ini.mod: aquabc_II_ini.o
+../../../../lib/mod/aquabc_ii_vars.mod: aquabc_II_ini.o
+../../../../lib/mod/aquabc_ii_vector_matrix_utils.mod: \
+		aquabc_II_co2sys.o 
+../../../../lib/mod/aquabc_ii_wc_ini.mod: \
+		aquabc_II_pelagic_model.o 
+aquabc_II.o: ../../../../lib/mod/aquabc_ii_layers_data.mod \
+		../../../../lib/mod/aquabc_ii_para_aqua.mod \
+		../../../../lib/mod/aquabc_ii_pel_state_var_indexes.mod \
+		../../../../lib/mod/aquabc_ii_sed_ini.mod \
+		../../../../lib/mod/basin.mod \
+		../../../../lib/mod/levels.mod \
+		../../../../lib/mod/mod_debug.mod 
+aquabc_II_aout.o: ../../../../lib/mod/aquabc_ii_vars.mod
+aquabc_II_co2sys.o: ../../../../lib/mod/aquabc_ii_global.mod
+aquabc_II_fem_interface.o: \
+		../../../../lib/mod/aquabc_ii_para_aqua.mod \
+		../../../../lib/mod/aquabc_ii_sed_ini.mod \
+		../../../../lib/mod/aquabc_ii_vars.mod \
+		../../../../lib/mod/basin.mod \
+		../../../../lib/mod/evgeom.mod \
+		../../../../lib/mod/femtime.mod \
+		../../../../lib/mod/levels.mod \
+		../../../../lib/mod/mod_debug.mod \
+		../../../../lib/mod/mod_diff_visc_fric.mod \
+		aquabc_II_aout.h 
+aquabc_II_ini.o: ../../../../lib/mod/aquabc_ii_para_aqua.mod \
+		../../../../lib/mod/aquabc_ii_pel_state_var_indexes.mod \
+		../../../../lib/mod/basin.mod \
+		../../../../lib/mod/femtime.mod \
+		../../../../lib/mod/levels.mod \
+		../../../../lib/mod/mod_sediment.mod 
+aquabc_II_pelagic_lib.o: ../../../../lib/mod/aquabc_ii_global.mod \
+		../../../../lib/mod/mod_debug.mod 
+aquabc_II_pelagic_model.o: \
+		../../../../lib/mod/aquabc_ii_co2sys_cdiac.mod \
+		../../../../lib/mod/aquabc_ii_global.mod \
+		../../../../lib/mod/aquabc_ii_para_aqua.mod \
+		../../../../lib/mod/aquabc_ii_pel_state_var_indexes.mod \
+		../../../../lib/mod/mod_debug.mod 
+aquabc_II_sediment_lib.o: ../../../../lib/mod/aquabc_ii_global.mod \
+		../../../../lib/mod/mod_debug.mod 
+aquabc_II_sediment_model_1.o: \
+		../../../../lib/mod/aquabc_ii_co2sys_cdiac.mod \
+		../../../../lib/mod/aquabc_ii_global.mod \
+		../../../../lib/mod/aquabc_ii_para_aqua.mod \
+		../../../../lib/mod/mod_debug.mod 
+aquabc_II_util.o: ../../../../lib/mod/basin.mod \
+		../../../../lib/mod/femtime.mod \
+		../../../../lib/mod/flux.mod \
+		../../../../lib/mod/levels.mod \
+		../../../../lib/mod/simul.mod 
+

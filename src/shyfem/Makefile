@@ -342,7 +342,6 @@ cleanall: clean
 ../../lib/mod/close.mod: closing.o
 ../../lib/mod/connectivity.mod: lagrange_connect.o
 ../../lib/mod/extra.mod: extra.o
-../../lib/mod/flux.mod: flux.o
 ../../lib/mod/ice_global.mod: icemodel.o
 ../../lib/mod/ice_params.mod: icemodel.o
 ../../lib/mod/ice_variables.mod: icemodel.o
@@ -366,18 +365,13 @@ cleanall: clean
 ../../lib/mod/mod_nudge.mod: nudge.o
 ../../lib/mod/mod_nudging.mod: nudging.o
 ../../lib/mod/mod_parwaves.mod: waves_admin.o
-../../lib/mod/mod_petsc_global.mod: mod_petsc_global.o
-../../lib/mod/mod_petsc_system.mod: mod_petsc_system.o
 ../../lib/mod/mod_renewal_time.mod: water_ren_time.o
 ../../lib/mod/mod_restart.mod: restart.o
 ../../lib/mod/mod_roughness.mod: roughness.o
-../../lib/mod/mod_sediment.mod: sedim_admin.o
-../../lib/mod/mod_sediment_para.mod: sedim_admin.o
 ../../lib/mod/mod_sedtrans05.mod: sedim_util.o
 ../../lib/mod/mod_shyfem.mod: shyfem_subs.o
 ../../lib/mod/mod_subset.mod: subset.o
 ../../lib/mod/mod_system.mod: system_matrix.o
-../../lib/mod/mod_system_global.mod: simsys_petsc.o
 ../../lib/mod/mod_system_global.mod: simsys_spkaux.o
 ../../lib/mod/mod_system_global.mod: system_spk.o
 ../../lib/mod/mod_system_interface.mod: system_matrix.o
@@ -393,10 +387,6 @@ cleanall: clean
 ../../lib/mod/subqfx.mod: heat_admin.o
 ../../lib/mod/subww3.mod: ww3_dummy.o
 ../../lib/mod/tide.mod: tide_utils.o
-amgx_c_wrapper_dummy.o: ../../lib/mod/petscdm.mod \
-		../../lib/mod/petscdmlabel.mod \
-		../../lib/mod/petscmat.mod \
-		../../lib/mod/petscvec.mod 
 baroclinic.o: ../../lib/mod/basin.mod ../../lib/mod/levels.mod \
 		../../lib/mod/mkonst.mod \
 		../../lib/mod/mod_diff_visc_fric.mod \
@@ -613,7 +603,7 @@ f_vol.o: ../../lib/mod/basin.mod ../../lib/mod/levels.mod \
 		../../lib/mod/mod_layer_thickness.mod 
 floodfill.o: ../../lib/mod/basin.mod ../../lib/mod/mod_geom.mod
 flux.o: ../../lib/mod/basin.mod ../../lib/mod/befor_after.mod \
-		../../lib/mod/levels.mod \
+		../../lib/mod/flux.mod ../../lib/mod/levels.mod \
 		../../lib/mod/mod_conz.mod \
 		../../lib/mod/mod_sediment.mod \
 		../../lib/mod/mod_ts.mod ../../lib/mod/nls.mod \
@@ -758,20 +748,6 @@ meteo_forcing.o: ../../lib/mod/basin.mod ../../lib/mod/evgeom.mod \
 		../../lib/mod/shympi.mod 
 mkdistance.o: ../../lib/mod/basin.mod ../../lib/mod/mod_geom.mod \
 		../../lib/mod/shympi.mod 
-mod_petsc_global.o: ../../lib/mod/basin.mod \
-		../../lib/mod/levels.mod \
-		../../lib/mod/mod_system.mod \
-		../../lib/mod/petscdm.mod \
-		../../lib/mod/petscdmlabel.mod \
-		../../lib/mod/shympi.mod 
-mod_petsc_system.o: ../../lib/mod/mod_petsc_global.mod \
-		../../lib/mod/mod_system.mod \
-		../../lib/mod/petscdm.mod \
-		../../lib/mod/petscdmlabel.mod \
-		../../lib/mod/petscksp.mod \
-		../../lib/mod/petscmat.mod \
-		../../lib/mod/petscvec.mod \
-		../../lib/mod/shympi.mod 
 model3d_util.o: ../../lib/mod/basin.mod ../../lib/mod/evgeom.mod \
 		../../lib/mod/levels.mod \
 		../../lib/mod/mod_depth.mod \
@@ -874,6 +850,8 @@ sedim_admin.o: ../../lib/mod/basin.mod ../../lib/mod/evgeom.mod \
 		../../lib/mod/mod_hydro_vel.mod \
 		../../lib/mod/mod_layer_thickness.mod \
 		../../lib/mod/mod_roughness.mod \
+		../../lib/mod/mod_sediment.mod \
+		../../lib/mod/mod_sediment_para.mod \
 		../../lib/mod/mod_sedtrans05.mod \
 		../../lib/mod/mod_ts.mod \
 		../../lib/mod/mod_waves.mod ../../lib/mod/para.mod 
@@ -936,17 +914,6 @@ simple_sedi.o: ../../lib/mod/basin.mod ../../lib/mod/evgeom.mod \
 		../../lib/mod/mod_layer_thickness.mod 
 simsys_lp.o: ../../lib/mod/basin.mod ../../lib/mod/levels.mod \
 		../../lib/mod/mod_system.mod 
-simsys_petsc.o: ../../lib/mod/mod_petsc_global.mod \
-		../../lib/mod/mod_petsc_system.mod \
-		../../lib/mod/mod_system.mod \
-		../../lib/mod/mod_system_interface.mod \
-		../../lib/mod/petscdm.mod \
-		../../lib/mod/petscdmlabel.mod \
-		../../lib/mod/petscksp.mod \
-		../../lib/mod/petscmat.mod \
-		../../lib/mod/petscvec.mod \
-		../../lib/mod/shympi.mod \
-		../../lib/mod/shympi_time.mod 
 simsys_spkaux.o: ../../lib/mod/basin.mod ../../lib/mod/levels.mod \
 		../../lib/mod/mod_system.mod \
 		../../lib/mod/mod_system_interface.mod \

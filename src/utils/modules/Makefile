@@ -154,12 +154,15 @@ zip:	cleanall
 
 # DO NOT DELETE THIS LINE -- make depend depends on it.
 
+../../../lib/mod/flux.mod: mod_flux.o
 ../../../lib/mod/mod_diff_visc_fric.mod: diffusion.o
 ../../../lib/mod/mod_hydro.mod: hydro_admin.o
 ../../../lib/mod/mod_hydro_print.mod: hydro_print.o
 ../../../lib/mod/mod_hydro_vel.mod: hydro_vel.o
 ../../../lib/mod/mod_layer_thickness.mod: layer_thickness.o
 ../../../lib/mod/mod_meteo.mod: meteo.o
+../../../lib/mod/mod_sediment.mod: mod_sedim.o
+../../../lib/mod/mod_sediment_para.mod: mod_sedim.o
 ../../../lib/mod/mod_sinking.mod: sinking.o
 ../../../lib/mod/mod_ts.mod: ts.o
 

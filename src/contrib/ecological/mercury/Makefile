@@ -128,3 +128,9 @@ strip:
 
 # DO NOT DELETE THIS LINE -- make depend depends on it.
 
+../../../../lib/mod/mercury.mod: mercury.o
+mercury.o: ../../../../lib/mod/basin.mod \
+		../../../../lib/mod/femtime.mod \
+		../../../../lib/mod/levels.mod \
+		../../../../lib/mod/mod_diff_visc_fric.mod 
+
