@@ -32,16 +32,27 @@ INCLUDE = -I$(INCDIR)
 #--------------------------------------------- macros
 
 MOD  = \
-	sinking.o \
-	ts.o \
-	diffusion.o \
-	hydro_admin.o \
-	hydro_vel.o \
-	hydro_print.o \
-	meteo.o \
-	layer_thickness.o \
-	mod_sedim.o \
+	mod_area.o \
+	mod_bclfix.o \
+	mod_diff_aux.o \
+	mod_diffusion.o \
+	mod_fluidmud.o \
 	mod_flux.o \
+	mod_hydro.o \
+	mod_hydro_baro.o \
+	mod_hydro_print.o \
+	mod_hydro_vel.o \
+	mod_internal.o \
+	mod_layer_thickness.o \
+	mod_meteo.o \
+	mod_nohyd.o \
+	mod_nudging.o \
+	mod_roughness.o \
+	mod_sedim.o \
+	mod_sinking.o \
+	mod_system_matrix.o \
+	mod_ts.o \
+	mod_waves.o \
 
 OBJ  = \
 
