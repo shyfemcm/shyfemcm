@@ -29,10 +29,13 @@
 !
 ! 02.10.2019	ggu	dummy routine introduced
 ! 22.04.2020	ggu	error if called
+! 23.10.2024	ggu	define ibfm in module
 
 !******************************************************************
 
 	module mod_bfm
+
+	integer, save :: ibfm = 0
 
 	contains
 
