@@ -471,6 +471,10 @@
 
 	  cv3(:,:) = cv3all(:,:,iv)
 
+	  if( bsmooth ) then
+	    call shy_smooth(nlvdi,nn,cv3,salpha,sloop)
+	  end if
+
 	  if( bverb .and. iv == 1 ) then
 	    call shy_write_time(.true.,dtime,atime,0)
 	  end if

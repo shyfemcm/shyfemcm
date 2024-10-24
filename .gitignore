@@ -81,6 +81,8 @@ src/tools/shyelab/extelab
 bin/extelab
 src/tools/shyelab/femelab
 bin/femelab
+src/tools/shyelab/femcombine
+bin/femcombine
 src/tools/shyelab/flxelab
 bin/flxelab
 src/tools/shyelab/lgrelab

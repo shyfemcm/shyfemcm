@@ -89,6 +89,7 @@
 ! 10.03.2023    ggu     map renamed to influencemap
 ! 18.04.2024    ggu     new option convsec to convert time to seconds
 ! 05.08.2024    ggu     new option ncglobal
+! 24.10.2024    ggu     new option smooth
 !
 !************************************************************
 
@@ -181,6 +182,11 @@
 
 	logical, save :: bdiff			= .false.
 	real, save :: deps			= 0.
+
+	logical, save :: bsmooth		= .false.
+        character*80, save :: ssmooth		= ' '
+	real, save :: salpha			= 0.
+	integer, save :: sloop			= 0
 
         character*80, save :: areafile		= ' '
         character*80, save :: datefile		= ' '
@@ -617,6 +623,9 @@
 	call clo_add_option('vorticity',.false. &
      &			,'compute vorticity for hydro file')
 
+	call clo_add_option('smooth alpha,loop',ssmooth &
+     &			,'smooths field with alpha and loop')
+
 	end subroutine elabutil_set_shy_options
 
 !************************************************************
@@ -801,6 +810,7 @@
           call clo_get_option('freq',ifreq)
           call clo_get_option('2d',b2d)
           call clo_get_option('vorticity',bvorticity)
+          call clo_get_option('smooth',ssmooth)
 	end if
 
 	if( bshowall .or. bshyfile ) then
@@ -869,6 +879,12 @@
 	end if
 
 !-------------------------------------------------------------------
+! elab some options
+!-------------------------------------------------------------------
+
+	call handle_smooth_option
+
+!-------------------------------------------------------------------
 ! set dependent parameters
 !-------------------------------------------------------------------
 
@@ -890,6 +906,7 @@
         boutput = boutput .or. newstring /= ' '
         boutput = boutput .or. sextract /= ' '
         boutput = boutput .or. bconvwindxy .or. bconvwindsd
+        boutput = boutput .or. bsmooth
 
         !btrans is added later
 	!if( bsumvar ) boutput = .false.
@@ -910,6 +927,30 @@
 	if( bsplitall ) bsplit = .true.
 
 	end subroutine elabutil_get_options
+
+!************************************************************
+
+	subroutine handle_smooth_option
+
+	integer ic
+	double precision d(2)
+
+	integer iscand
+
+	if( ssmooth == ' ' ) return
+
+	ic = iscand(ssmooth,d,2)
+	if( ic /= 2 ) then
+	  write(6,*) 'cannot parse smooth parameters: ',trim(ssmooth)
+	  stop 'error stop handle_smooth_option: cannot parse'
+	end if
+
+	salpha = d(1)
+	sloop = nint(d(2))
+
+	if( salpha > 0. .and. sloop > 0 ) bsmooth = .true.
+
+	end
 
 !************************************************************
 
@@ -992,6 +1033,33 @@
 !====================================================
 	end module elabutil
 !====================================================
+
+	function elabutil_is_silent()
+	use elabutil
+	implicit none
+	logical elabutil_is_silent
+	elabutil_is_silent = bsilent
+	end
+
+!***************************************************************
+
+	function elabutil_is_quiet()
+	use elabutil
+	implicit none
+	logical elabutil_is_quiet
+	elabutil_is_quiet = bquiet
+	end
+
+!***************************************************************
+
+	function elabutil_is_verbose()
+	use elabutil
+	implicit none
+	logical elabutil_is_verbose
+	elabutil_is_verbose = bverb
+	end
+
+!***************************************************************
 
         subroutine outfile_make_depth(nkn,nel,nen3v,hm3v,hev,hkv)
 
