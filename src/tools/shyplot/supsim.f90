@@ -2556,6 +2556,7 @@
 
 	use basin
 	use mod_color
+	use mod_connect
 
 	implicit none
 

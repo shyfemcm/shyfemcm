@@ -69,8 +69,9 @@
 
 ! sets up geometrical arrays
 
-	use mod_geom
 	use basin
+	use mod_geom
+	use mod_connect
 
         implicit none
 
@@ -80,8 +81,20 @@
 	integer ibound(nkn)
         integer kerr
 
-	bverbose = .true.
+	logical belem
+	integer ibase,ipf,ipl
+	integer k,ndim
+	integer ne,ne1,ne2
+	integer nk,nk1,nk2
+	integer ngr_local
+	integer, allocatable :: nlist(:,:)
+	integer, allocatable :: elist(:,:)
+	integer, allocatable :: ecv(:,:)
+	integer, allocatable :: bound(:)
+	integer, allocatable :: neaux(:)
+
 	bverbose = .false.
+	bverbose = .true.
 
 !-------------------------------------------------------------
 ! check maxlnk
@@ -90,15 +103,73 @@
 	if( ngr .gt. maxlnk ) goto 98
 
 !-------------------------------------------------------------
-! make static arrays
+! make static arrays - old way
 !-------------------------------------------------------------
 
 	call make_links_old(nkn,nel,nen3v)
 	call make_links(nkn,nel,nen3v,ibound,kerr)
 
 !-------------------------------------------------------------
+! make static arrays - new way
+!-------------------------------------------------------------
+
+        call connect_init(nkn,nel,nen3v)
+ 
+        call connect_get_grade(ngr_local)
+	if( ngr /= ngr_local ) then
+	  write(6,*) 'ngr,ngr_local: ',ngr,ngr_local
+	  stop 'error stop set_geom: incompatible ngr'
+	end if
+	allocate(nlist(0:ngr,nkn))
+	allocate(elist(0:ngr,nkn))
+	allocate(ecv(3,nel))
+	allocate(bound(nkn))
+        call connect_get_lists(nkn,ngr,nlist,elist)
+        call connect_get_ecv(nel,ecv)
+        call connect_get_bound(nkn,bound)
+
+	call connect_release
+
+!-------------------------------------------------------------
+! check results
+!-------------------------------------------------------------
+
+	ndim = ngr
+	allocate(neaux(ndim))
+
+	do k=1,nkn
+	  nk = nlist(0,k)
+	  ne = elist(0,k)
+	  belem = .false.
+	  call get_node_linkp(k,ipf,ipl)
+	  call get_node_links(k,nk1,ibase)
+	  call get_nodes_around(k,ndim,nk2,neaux)
+	  if( nk /= ipl-ipf+1 ) goto 89
+	  if( nk /= nk1 .or. nk /= nk2 ) goto 89
+	  if( any( nlist(1:nk,k) /= neaux(1:nk) ) ) goto 88
+	  belem = .true.
+	  call get_elem_linkp(k,ipf,ipl)
+	  call get_elem_links(k,ne1,ibase)
+	  call get_elems_around(k,ndim,ne2,neaux)
+	  if( ne /= ipl-ipf+1 ) goto 89
+	  if( ne /= ne1 .or. ne /= ne2 ) goto 89
+	  if( any( elist(1:ne,k) /= neaux(1:ne) ) ) goto 88
+	end do
+
+	if( any( ecv /= ieltv ) ) goto 87
+	if( any( bound /= iboundv ) ) goto 86
+
+	if( bverbose ) then
+	  write(6,*) 'set_geom: all compatibility checks successfully completed'
+	end if
+
+!-------------------------------------------------------------
 ! write some statistics
 !-------------------------------------------------------------
+
+	if( bverbose ) then
+	  write(6,*) 'set_geom: statistics'
+	end if
 
         ngrd=ilinkv(nkn+1)
         n=0
@@ -132,11 +203,37 @@
 	if( ngrd .ne. ngrd1 ) goto 99
 	if( ngrd .ne. ngrd2 ) goto 99
 
+	if( bverbose ) then
+	  write(6,*) 'set_geom: all statistics checks successfully completed'
+	end if
+
 !-------------------------------------------------------------
 ! end of routine
 !-------------------------------------------------------------
 
 	return
+   86	continue
+	stop 'error stop set_geom: bound'
+   87	continue
+	stop 'error stop set_geom: ecv'
+   88	continue
+	if( belem ) then
+	  write(6,*) elist(1:ne,k)
+	  write(6,*) neaux(1:ne)
+	  stop 'error stop set_geom: elist'
+	else
+	  write(6,*) nlist(1:ne,k)
+	  write(6,*) neaux(1:ne)
+	  stop 'error stop set_geom: nlist'
+	end if
+   89	continue
+	if( belem ) then
+	  write(6,*) ne,ne1,ne2
+	  stop 'error stop set_geom: ne'
+	else
+	  write(6,*) nk,nk1,nk2
+	  stop 'error stop set_geom: nk'
+	end if
    98	continue
 	write(6,*) 'ngr,maxlnk: ',ngr,maxlnk
 	stop 'error stop set_geom: maxlnk'

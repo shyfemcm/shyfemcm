@@ -39,16 +39,26 @@
 
 	implicit none
 
-	integer, save, private :: nkn = 0
-	integer, save, private :: nel = 0
-	integer, save, private :: ngr = 0
+	private
 
-	integer, save, private, allocatable :: nen3v(:,:)
+	integer, save :: nkn = 0
+	integer, save :: nel = 0
+	integer, save :: ngr = 0
+
+	integer, save, allocatable :: nen3v(:,:)
 
 	integer, save, allocatable :: nlist(:,:)
 	integer, save, allocatable :: elist(:,:)
 	integer, save, allocatable :: ecv(:,:)
 	integer, save, allocatable :: bound(:)
+
+	public :: connect_init
+	public :: connect_get_grade
+	public :: connect_get_grades
+	public :: connect_get_lists
+	public :: connect_get_ecv
+	public :: connect_get_bound
+	public :: connect_release
 
 ! nk = nlist(0,k) is total number of neighboring nodes of node k
 ! nlist(1:nk,k) is list of neighboring nodes of node k
@@ -56,6 +66,18 @@
 ! elist(1:ek,k) is list of connected elems of node k
 ! ecv(3,e) is list of elements connected to elem e
 ! bound(k) is indicator if k is boundary node
+
+! calling sequence:
+!
+!	call connect_init(nkn,nel,nen3v)
+!
+!	call connect_get_grade(ngr)
+!	call connect_get_grades(nkn,ngrade,egrade,ngr)
+!	call connect_get_lists(nkn,ngr,nlist,elist)
+!       call connect_get_ecv(nel,ecv)
+!       call connect_get_bound(nkn,bound)
+!
+!	call connect_release
 
 !==================================================================
 	contains
@@ -115,7 +137,7 @@
 
 	integer nkn_l,nel_l
 	integer ngr_l
-	integer nen3v_l(3,nel)
+	integer nen3v_l(3,nel_l)
 
 	if( ngr > 0 ) call connect_internal_deallocate
 
@@ -143,10 +165,27 @@
 
 !******************************************************************
 
-	subroutine connect_internal_check
+	subroutine connect_internal_check(nkn_l,nel_l,ngr_l)
+
+	integer nkn_l,nel_l,ngr_l
+
+	logical berror
 
 	if( ngr == 0 ) then
 	  stop 'error stop connect_internal_check: no initialization'
+	end if
+
+	berror = .false.
+
+	if( nkn_l > 0 .and. nkn_l /= nkn ) berror = .true.
+	if( nel_l > 0 .and. nel_l /= nel ) berror = .true.
+	if( ngr_l > 0 .and. ngr_l /= ngr ) berror = .true.
+
+	if( berror ) then
+	  write(6,*) 'nkn: ',nkn_l,nkn
+	  write(6,*) 'nel: ',nel_l,nel
+	  write(6,*) 'ngr: ',ngr_l,ngr
+	  stop 'error stop connect_internal_check: incompatible parameters'
 	end if
 
 	end
@@ -624,26 +663,20 @@
  1000	format(15i5)
 	end subroutine insert_item_in_list
 
-!==================================================================
-	end module mod_connect
-!==================================================================
-
 !*******************************************************************
 !*******************************************************************
 !*******************************************************************
-! utility routines - to be called from outside
+! public routines - to be called from outside
 !*******************************************************************
 !*******************************************************************
 !*******************************************************************
 
 	subroutine connect_init(nkn_l,nel_l,nen3v_l)
 
-	use mod_connect
-
 	implicit none
 
-	integer nkn_l,nel_l
-	integer nen3v_l(3,nel_l)
+	integer, intent(in) :: nkn_l,nel_l
+	integer, intent(in) :: nen3v_l(3,nel_l)
 
 	call connect_internal_init(nkn_l,nel_l,nen3v_l)
 
@@ -653,8 +686,6 @@
 
 	subroutine connect_release
 
-	use mod_connect
-
 	implicit none
 
 	call connect_internal_deallocate
@@ -663,22 +694,28 @@
 
 !*******************************************************************
 
-	subroutine connect_get_grades(nkn_l,ngrade,egrade,ngr_l)
-
-	use mod_connect
+	subroutine connect_get_grade(ngr_l)
 
 	implicit none
 
-	integer nkn_l
-	integer ngrade(nkn_l)
-	integer egrade(nkn_l)
-	integer ngr_l
+	integer, intent(out) :: ngr_l
 
-	integer nkn,nel,ngr
+	ngr_l = ngr
 
-	call connect_internal_check
+	end
 
-	call connect_internal_parameters(nkn,nel,ngr)
+!*******************************************************************
+
+	subroutine connect_get_grades(nkn_l,ngrade,egrade,ngr_l)
+
+	implicit none
+
+	integer, intent(in) :: nkn_l
+	integer, intent(out) :: ngrade(nkn_l)
+	integer, intent(out) :: egrade(nkn_l)
+	integer, intent(out) :: ngr_l
+
+	call connect_internal_check(nkn_l,0,0)
 
 	ngrade(:) = nlist(0,:)
 	egrade(:) = elist(0,:)
@@ -688,16 +725,32 @@
 
 !*******************************************************************
 
-	subroutine connect_get_bound(nkn_l,bound_l)
-
-	use mod_connect
+	subroutine connect_get_lists(nkn_l,ngr_l,nlist_l,elist_l)
 
 	implicit none
 
-	integer nkn_l
-	integer bound_l(nkn_l)
+	integer, intent(in) :: nkn_l
+	integer, intent(in) :: ngr_l
+	integer, intent(out) :: nlist_l(0:ngr_l,nkn_l)
+	integer, intent(out) :: elist_l(0:ngr_l,nkn_l)
 
-	call connect_internal_check
+	call connect_internal_check(nkn_l,0,ngr_l)
+
+	nlist_l = nlist
+	elist_l = elist
+
+	end
+
+!*******************************************************************
+
+	subroutine connect_get_bound(nkn_l,bound_l)
+
+	implicit none
+
+	integer, intent(in) :: nkn_l
+	integer, intent(out) :: bound_l(nkn_l)
+
+	call connect_internal_check(nkn_l,0,0)
 
 	bound_l = bound
 
@@ -707,18 +760,20 @@
 
 	subroutine connect_get_ecv(nel_l,ecv_l)
 
-	use mod_connect
-
 	implicit none
 
-	integer nel_l
-	integer ecv_l(3,nel_l)
+	integer, intent(in) :: nel_l
+	integer, intent(out) :: ecv_l(3,nel_l)
 
-	call connect_internal_check
+	call connect_internal_check(0,nel_l,0)
 
 	ecv_l = ecv
 
 	end
 
 !*******************************************************************
+
+!==================================================================
+	end module mod_connect
+!==================================================================
 

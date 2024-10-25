@@ -402,7 +402,7 @@
 !****************************************************************
 !****************************************************************
 
-        subroutine link_fill(n)
+        subroutine link_fill0(n)
 
 ! returns filling of linkv
 
@@ -530,10 +530,10 @@
 
         implicit none
 
-        integer k               !central node
-        integer ndim            !dimension of elems()
-        integer n               !total number of elems around k (return)
-        integer elems(ndim)     !elems around k (return)
+        integer, intent(in) :: k               !central node
+        integer, intent(in) :: ndim            !dimension of elems()
+        integer, intent(out) :: n              !total number of elems around k
+        integer, intent(out) :: elems(ndim)    !elems around k
 
 	integer i,ibase
 
@@ -560,10 +560,10 @@
 
         implicit none
 
-        integer k               !central node
-        integer ndim            !dimension of nodes()
-        integer n               !total number of nodes around k (return)
-        integer nodes(ndim)     !nodes around k (return)
+        integer, intent(in) :: k               !central node
+        integer, intent(in) :: ndim            !dimension of elems()
+        integer, intent(out) :: n              !total number of elems around k
+        integer, intent(out) :: nodes(ndim)    !nodes around k
 
 	integer i,ibase
 
@@ -596,8 +596,8 @@
 
 	implicit none
 
-! arguments
-        integer k1,k2,ie1,ie2
+        integer, intent(in)  :: k1,k2
+        integer, intent(out) :: ie1,ie2
 
         integer k,ipf,ipl,ip,ip2
 
