@@ -93,8 +93,8 @@
 	integer, allocatable :: bound(:)
 	integer, allocatable :: neaux(:)
 
-	bverbose = .false.
 	bverbose = .true.
+	bverbose = .false.
 
 !-------------------------------------------------------------
 ! check maxlnk
