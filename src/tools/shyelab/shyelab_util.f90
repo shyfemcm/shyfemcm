@@ -444,7 +444,7 @@
 
 	if( .not. elabutil_is_verbose() ) then
 	  cv3 = real(cnew)
-	  return
+	  cycle
 	end if
 
 	coacum = 0.
