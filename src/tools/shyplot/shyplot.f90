@@ -139,7 +139,6 @@
         !call ev_init(nel)
         call set_ev
 
-        call mod_geom_init(nkn,nel,ngr)
         call set_geom
 
         call mod_depth_init(nkn,nel)
@@ -1305,7 +1304,6 @@
           call get_coords_ev(isphe)
           call putpar('isphe',float(isphe))
 
-          call mod_geom_init(nkn,nel,ngr)
           call set_geom
 
           call levels_init(nkn,nel,nlv)
@@ -1707,9 +1705,6 @@
 	use plotutil
 
         implicit none
-
-        !call ev_init(nel)
-        call mod_geom_init(nkn,nel,ngr)
 
         call mod_depth_init(nkn,nel)
 

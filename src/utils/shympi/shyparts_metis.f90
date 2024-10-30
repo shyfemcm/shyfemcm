@@ -41,6 +41,8 @@
 ! partitions grd file using the METIS library
 ! requires metis-5.1.0.tar.gz
 
+	use shympi
+
 	implicit none
 
 	integer nkn,nel
@@ -58,6 +60,8 @@
 
         integer               :: objval		!edge-cut or total comm vol
 	integer               :: options(40)	!metis options
+
+	integer iu,nfill,i
 
 !-----------------------------------------------------------------
 ! initialiaze arrays
@@ -86,7 +90,7 @@
         eptr(1)=1
         do ie = 1,nel
           do ii = 1,3
-            l = eptr(ie) + ii -1
+            l = eptr(ie) + ii - 1
             eind(l) = nen3v(ii,ie)
           end do
           eptr(ie+1) = eptr(ie) + 3
@@ -104,6 +108,23 @@
         options(2) = 1		!OBJTYPE (0=cut,1=vol)
         options(12) = 1		!CONTIG (0=defoult,1=force contiguous)
         options(18) = 1		!NUMBERING (0 C-style, 1 Fortran-style)
+
+	iu = 770
+	if( n_threads > 1 ) iu = 780 + my_id
+
+	write(iu,*) nkn,nel,nparts
+	write(iu,*) options
+	write(iu,*) tpwgts
+	nfill = eptr(nel+1)
+	write(iu,*) nfill
+	write(iu,*) 'eptr'
+	do i=1,nel+1,10
+	  write(iu,*) i,eptr(i)
+	end do
+	write(iu,*) 'eind'
+	do i=1,nfill,100
+	  write(iu,*) i,eind(i)
+	end do
 
 !-----------------------------------------------------------------
 ! Call METIS for patitioning on nodes
@@ -142,7 +163,6 @@
 	ierr1 = 0
 	ierr2 = 0
 
-        call mod_geom_init(nkn,nel,ngr)
         call set_geom
 
         call link_set_stop(.false.)     !do not stop after error
@@ -163,7 +183,7 @@
 
         call link_set_stop(.true.)
 
-        call mod_geom_init(0,0,0)
+	call mod_geom_release
 
         end
 

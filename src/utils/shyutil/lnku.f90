@@ -537,6 +537,11 @@
 
 	integer i,ibase
 
+	n = elist(0,k)
+	if( n > ndim ) stop 'error stop get_elems_around: n>ndim'
+	elems(1:n) = elist(1:n,k)
+	return
+	
 	n = ilinkv(k+1)-ilinkv(k)
 	ibase = ilinkv(k)
 
@@ -567,6 +572,11 @@
 
 	integer i,ibase
 
+	n = nlist(0,k)
+	if( n > ndim ) stop 'error stop get_nodes_around: n>ndim'
+	nodes(1:n) = nlist(1:n,k)
+	return
+	
 	n = ilinkv(k+1)-ilinkv(k)
 	ibase = ilinkv(k)
 

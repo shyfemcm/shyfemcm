@@ -87,14 +87,52 @@
 	integer ne,ne1,ne2
 	integer nk,nk1,nk2
 	integer ngr_local
-	integer, allocatable :: nlist(:,:)
-	integer, allocatable :: elist(:,:)
+	integer ierr
+	integer, allocatable :: nnlist(:,:)
+	integer, allocatable :: eelist(:,:)
 	integer, allocatable :: ecv(:,:)
 	integer, allocatable :: bound(:)
 	integer, allocatable :: neaux(:)
+	integer, allocatable :: kerror(:)
 
 	bverbose = .true.
 	bverbose = .false.
+
+!-------------------------------------------------------------
+! make static arrays - new way
+!-------------------------------------------------------------
+
+        call connect_init(nkn,nel,nen3v,ierr)
+	if( ierr > 0 ) then
+	  write(6,*) 'connection errors found: ',ierr
+	  if( .not. allocated(kerror) ) allocate(kerror(ierr))
+	  call connect_check(ierr,kerror)
+	  stop 'error stop set_geom: connection error'
+	end if
+ 
+        call connect_get_grade(ngr_local)
+	if( ngr /= ngr_local ) then
+	  !write(6,*) 'ngr,ngr_local: ',ngr,ngr_local
+	  ngr = ngr_local		!insert new value into basin
+	end if
+	allocate(nnlist(0:ngr,nkn))
+	allocate(eelist(0:ngr,nkn))
+	allocate(ecv(3,nel))
+	allocate(bound(nkn))
+        call connect_get_lists(nkn,ngr,nnlist,eelist)
+        call connect_get_ecv(nel,ecv)
+        call connect_get_bound(nkn,bound)
+
+	call connect_release
+
+!-------------------------------------------------------------
+! allocate arrays
+!-------------------------------------------------------------
+
+	call mod_geom_init(nkn,nel,ngr)
+
+	nlist = nnlist
+	elist = eelist
 
 !-------------------------------------------------------------
 ! check maxlnk
@@ -108,27 +146,6 @@
 
 	call make_links_old(nkn,nel,nen3v)
 	call make_links(nkn,nel,nen3v,ibound,kerr)
-
-!-------------------------------------------------------------
-! make static arrays - new way
-!-------------------------------------------------------------
-
-        call connect_init(nkn,nel,nen3v)
- 
-        call connect_get_grade(ngr_local)
-	if( ngr /= ngr_local ) then
-	  write(6,*) 'ngr,ngr_local: ',ngr,ngr_local
-	  stop 'error stop set_geom: incompatible ngr'
-	end if
-	allocate(nlist(0:ngr,nkn))
-	allocate(elist(0:ngr,nkn))
-	allocate(ecv(3,nel))
-	allocate(bound(nkn))
-        call connect_get_lists(nkn,ngr,nlist,elist)
-        call connect_get_ecv(nel,ecv)
-        call connect_get_bound(nkn,bound)
-
-	call connect_release
 
 !-------------------------------------------------------------
 ! check results
@@ -194,6 +211,7 @@
 	nli = ngrd/2
 
 	if( bverbose ) then
+          write(6,*) 'ngr                      : ',ngr
           write(6,*) 'grades                   : ',ngrd
           write(6,*) 'formula (nis)            : ',ngrd1
           write(6,*) 'formula (nel)            : ',ngrd2

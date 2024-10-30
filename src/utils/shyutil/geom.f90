@@ -64,6 +64,9 @@
 	integer, allocatable, save :: ieltv(:,:)
 	integer, allocatable, save :: kantv(:,:)
 
+	integer, allocatable, save :: nlist(:,:)
+	integer, allocatable, save :: elist(:,:)
+
 !==================================================================
 	contains
 !==================================================================
@@ -91,6 +94,8 @@
           deallocate(iboundv)
           deallocate(ieltv)
           deallocate(kantv)
+          deallocate(nlist)
+          deallocate(elist)
         end if
 
 	nlk = 3*nel + 2*nkn
@@ -110,8 +115,18 @@
         allocate(iboundv(nkn))
         allocate(ieltv(3,nel))
         allocate(kantv(2,nkn))
+        allocate(nlist(0:ngr,nkn))
+        allocate(elist(0:ngr,nkn))
 
 	end subroutine mod_geom_init
+
+!------------------------------------------------------------------
+
+	subroutine mod_geom_release
+
+	call mod_geom_init(0,0,0)
+
+	end subroutine mod_geom_release
 
 !------------------------------------------------------------------
 
@@ -133,6 +148,8 @@
 
 	integer n
 
+	n_nodes_around = nlist(0,k)
+	return
 	n = ilinkv(k+1) - ilinkv(k)
 	n_nodes_around = n
 
@@ -147,6 +164,8 @@
 
 	integer n
 
+	n_elems_around = elist(0,k)
+	return
 	n = ilinkv(k+1) - ilinkv(k)
 	if( is_boundary_node(k) ) n = n - 1
 	n_elems_around = n

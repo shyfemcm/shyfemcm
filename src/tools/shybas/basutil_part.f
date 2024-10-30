@@ -598,10 +598,8 @@
 	integer k,ie,ngrm
 	integer ibound(nkn)
 
-	call estimate_max_grade(nk,ne,nenv,ngrm)
-	call mod_geom_init(nk,ne,ngrm)
+	call set_geom
 
-	!call make_links_old(nk,ne,nenv)
 	call make_links(nk,ne,nenv,ibound,kerr)
 
 	end

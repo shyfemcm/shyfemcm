@@ -49,10 +49,6 @@ LIBL	+= $(LIBG_METIS)
 
 EXES	=	shyparts
 
-XXOBJ	=	mod_adj_grade.o \
-		adj4el.o adj5el.o adj7el.o adj575.o \
-		adjplo.o adjgrd.o adjneu.o adjvar.o
-
 ALL	=	$(OBJ)
 
 SPECIAL =       Makefile TODO README

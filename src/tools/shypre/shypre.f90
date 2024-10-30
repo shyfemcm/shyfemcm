@@ -84,6 +84,7 @@
 !==========================================================
 
 	logical, save :: bopti
+	logical, save :: brenumber
 	logical, save :: bauto
 	logical, save :: bnoopti
 	logical, save :: bmanual
@@ -118,7 +119,7 @@
 	call shypre_init(grdfile)
 
 	call shypre_sub(grdfile,bquiet,bsilent,bauto,binfo &
-     &				,bopti,bnepart,eps_area,grdpart)
+     &				,bopti,brenumber,bnepart,eps_area,grdpart)
 
 	end
 
@@ -143,8 +144,9 @@
 	call clo_add_option('silent',.false.,'do not write anything')
 
 	call clo_add_sep('optimization options')
-	call clo_add_option('opti',.true.,'optimize bandwidth (default)' &
-     &				   ,'do not optimize bandwidth')
+	call clo_add_option('renumber',.false.,'renumber elements')
+	call clo_add_option('opti',.false.,'optimize bandwidth' &
+     &				// ' (implies -renumber )')
         call clo_add_option('manual',.false.,'manual optimization')
 
 	call clo_add_sep('options for partitioning')
@@ -159,6 +161,7 @@
         call clo_get_option('quiet',bquiet)
         call clo_get_option('silent',bsilent)
 
+        call clo_get_option('renumber',brenumber)
         call clo_get_option('opti',bopti)
         call clo_get_option('manual',bmanual)
 
@@ -167,6 +170,8 @@
 
 	bauto = .not. bmanual
 	if( bsilent ) bquiet = .true.
+
+	if( bopti ) brenumber = .true.
 
 	call shyfem_set_short_copyright(bquiet)
 	if( .not. bsilent ) then

@@ -87,7 +87,7 @@
 !**********************************************************
 
 	subroutine shypre_sub(grdfile,bquiet,bsilent,bauto,binfo &
-     &				,bopti,bnepart,eps_area,grdpart)
+     &				,bopti,brenumber,bnepart,eps_area,grdpart)
 
 	use basin
 	use evgeom
@@ -95,7 +95,7 @@
 	implicit none
 
         character*(*) grdfile
-	logical bquiet,bsilent,bauto,binfo,bopti,bnepart
+	logical bquiet,bsilent,bauto,binfo,bopti,brenumber,bnepart
 	real eps_area
 	character*(*) grdpart
 
@@ -197,7 +197,7 @@
 	allocate(ng(nk))
 
 !--------------------------------------------------------
-! handle depth
+! handle depth - checks how depth can be processed
 !--------------------------------------------------------
 
 	call grd_get_depth(nk,ne,hkv,hev)
@@ -214,7 +214,7 @@
         if(nbout.le.0) stop 'error stop shypre: error opening output file'
 
 !--------------------------------------------------------
-! start processing
+! start processing - checks nodes and elements - no rearranging
 !--------------------------------------------------------
 
         call handle_shypre_numbering(bwrite,bdebug,eps_area,nkn,nel,nen3v &
@@ -243,11 +243,11 @@
 ! renumber elements
 !--------------------------------------------------------
 
-        call renel(bwrite,nel,nen3v,ipev,iarv,hev,ierank)
+        call renumber_elements(bwrite,brenumber,nel,nen3v,ipev,iarv,hev,ierank)
 
-        !call debug_out('renel ierank',nkn,ierank)
-        !call debug_out_r('renel hev',nel,hev)
-        !call debug_out_r('renel hkv',nkn,hkv)
+        !call debug_out('renumber_elements ierank',nkn,ierank)
+        !call debug_out_r('renumber_elements hev',nel,hev)
+        !call debug_out_r('renumber_elements hkv',nkn,hkv)
 
 !--------------------------------------------------------
 ! handles depths
@@ -304,6 +304,8 @@
      &				,nkn,nel,nen3v &
      &				,ipv,ipev,ipdex,iedex &
      &				,xgv,ygv)
+
+! checks numbering of nodes and elements - does not rearrange nodes or elements
 
 	use mod_sort
 
@@ -1126,19 +1128,17 @@
 
 !**********************************************************
 
-        subroutine renel(bwrite,nel,nen3v,ipev,iarv,hev,ierank)
+        subroutine renumber_elements(bwrite,brenumber &
+     &				,nel,nen3v,ipev,iarv,hev,ierank)
 
 ! renumbering of elements
-
-! we construct iedex newly and use iaux,iedex as aux arrays
-! iedex is also used as a real aux array for rcopy	-> changed
-! neaux is probably he3v (real) used as an aux array	-> changed
 
 	use mod_sort
 
         implicit none
 
 	logical bwrite
+	logical brenumber
         integer nel
         integer nen3v(3,nel)
         integer ipev(nel)
@@ -1151,13 +1151,20 @@
         integer neaux(3,nel)
         integer ival(nel)
 
-        if( bwrite ) write(6,*) ' ...renumbering elements'
+        if( bwrite ) write(6,*) ' ...renumbering elements ',brenumber
+
+	if( .not. brenumber ) then	!only construct obvious ierank
+	  do ie=1,nel
+	    ierank(ie) = ie
+	  end do
+	  return
+	end if
 
         do ie=1,nel
           ival(ie)=min(nen3v(1,ie),nen3v(2,ie),nen3v(3,ie))
 	end do
 
-        call sort(nel,ival,iedex)    !iedex is the index table
+        call sort(nel,ival,iedex)     !iedex is the index table
         call rank(nel,iedex,ierank)   !ierank is the rank table
 
         call icopy(nel,ipev,ierank)

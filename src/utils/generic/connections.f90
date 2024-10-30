@@ -52,12 +52,16 @@
 	integer, save, allocatable :: ecv(:,:)
 	integer, save, allocatable :: bound(:)
 
+	integer, save :: ierrors = 0
+	integer, save, allocatable :: kerrors(:)
+
 	public :: connect_init
 	public :: connect_get_grade
 	public :: connect_get_grades
 	public :: connect_get_lists
 	public :: connect_get_ecv
 	public :: connect_get_bound
+	public :: connect_check
 	public :: connect_release
 
 ! nk = nlist(0,k) is total number of neighboring nodes of node k
@@ -69,7 +73,7 @@
 
 ! calling sequence:
 !
-!	call connect_init(nkn,nel,nen3v)
+!	call connect_init(nkn,nel,nen3v,ierr)
 !
 !	call connect_get_grade(ngr)
 !	call connect_get_grades(nkn,ngrade,egrade,ngr)
@@ -77,6 +81,7 @@
 !       call connect_get_ecv(nel,ecv)
 !       call connect_get_bound(nkn,bound)
 !
+!	call connect_check(ierr,kerr)
 !	call connect_release
 
 !==================================================================
@@ -94,6 +99,7 @@
 	if( ngr > 0 ) then
 	  if( nkn == nkn_l .and. nel == nel_l ) brealloc = .false.
 	end if
+	brealloc = .true.
 
 	if( .not. brealloc ) return
 
@@ -129,19 +135,25 @@
 	deallocate(bound)
 	deallocate(ecv)
 
+	if( allocated(kerrors) ) deallocate(kerrors)
+
 	end
 
 !******************************************************************
 
-	subroutine connect_internal_init(nkn_l,nel_l,nen3v_l)
+	subroutine connect_internal_init(nkn_l,nel_l,nen3v_l,ierr)
 
 	integer nkn_l,nel_l
 	integer ngr_l
 	integer nen3v_l(3,nel_l)
+	integer ierr
 
 	if( ngr > 0 ) call connect_internal_deallocate
+	if( .not. allocated( kerrors) ) allocate( kerrors(nkn_l) )
+	kerrors = 0
 
-	call make_grade(nkn_l,nel_l,nen3v_l,ngr_l)
+	call make_grade(nkn_l,nel_l,nen3v_l,ngr_l,ierr)
+	if( ierr /= 0 ) return
 	call connect_internal_allocate(nkn_l,nel_l,ngr_l,nen3v_l)
 
 	call make_ne_list
@@ -204,7 +216,7 @@
 !******************************************************************
 !******************************************************************
 
-	subroutine make_grade(nkn,nel,nen3v,ngr)
+	subroutine make_grade(nkn,nel,nen3v,ngr,ierr)
 
 ! makes grade ngr - also computes ngrade and egrade
 
@@ -213,12 +225,15 @@
 	integer nkn,nel
 	integer nen3v(3,nel)
 	integer ngr		!maximum grade (return)
+	integer ierr
 
 	integer ie,ii,k,ii1,k1,ngre
 	integer idiff,nbnd
 	integer, allocatable :: ngrade(:)
 	integer, allocatable :: egrade(:)
 	integer, allocatable :: nalist(:,:)
+
+	ierr = 0
 
 	allocate(ngrade(nkn))
 	allocate(egrade(nkn))
@@ -258,10 +273,19 @@
 	  if( idiff == 1 ) then
 	    nbnd = nbnd + 1
 	  else if( idiff /= 0 ) then
-	    write(6,*) k,idiff,ngrade(k),egrade(k)
-	    stop 'error stop: error in grade'
+	    write(6,*) 'error in grade: ',k,ngrade(k),egrade(k)
+	    ierrors = ierrors + 1
+	    kerrors(ierrors) = k
 	  end if
 	end do
+
+	!if( ierrors > 0 ) then
+	!  write(6,*) 'nkn,nel,ngr: ',nkn,nel,ngr
+	!  write(6,*) 'ierrors,nbnd: ',ierrors,nbnd
+	!  !stop 'error stop make_grade: error in grade'
+	!end if
+
+	ierr = ierrors
 
 	!write(6,*) 'nkn,nint,nbnd: ',nkn,nkn-nbnd,nbnd
 
@@ -275,7 +299,7 @@
 	  if( nalist(i,k1) == k2 ) return
 	end do
 	n = n + 1
-	if( n > 2*ngr ) stop 'error stop: ngr'
+	if( n > 2*ngr ) stop 'error stop make_grade: ngr'
 	nalist(n,k1) = k2
 	ngrade(k1) = n
 	end subroutine insert_in_list
@@ -398,7 +422,7 @@
 	write(6,*) 'error in list'
 	write(6,*)  'ie,iee: ',ie,iee
 	call info('on error',k)
-	stop 'error stop: generic'
+	stop 'error stop sort_ne_lists: generic'
 
 	end
 
@@ -465,7 +489,7 @@
 	    write(6,*) ie,ii,iee,bbound
 	    write(6,*) ie,ecv(:,ie)
 	    if( iee > 0 ) write(6,*) iee,ecv(:,iee)
-	    stop 'error stop: checking ecv'
+	    stop 'error stop make_ecv: checking ecv'
 	  end do
 	end do
 
@@ -671,14 +695,15 @@
 !*******************************************************************
 !*******************************************************************
 
-	subroutine connect_init(nkn_l,nel_l,nen3v_l)
+	subroutine connect_init(nkn_l,nel_l,nen3v_l,ierr)
 
 	implicit none
 
 	integer, intent(in) :: nkn_l,nel_l
 	integer, intent(in) :: nen3v_l(3,nel_l)
+	integer, intent(out) :: ierr
 
-	call connect_internal_init(nkn_l,nel_l,nen3v_l)
+	call connect_internal_init(nkn_l,nel_l,nen3v_l,ierr)
 
 	end
 
@@ -689,6 +714,31 @@
 	implicit none
 
 	call connect_internal_deallocate
+
+	end
+
+!*******************************************************************
+
+	subroutine connect_check(ierr,kerr)
+
+! fills kerr with error nodes (up to ierr)
+
+	implicit none
+
+	integer ierr
+	integer kerr(ierr)
+
+	integer i,k,ndim
+
+	ndim = ierr
+
+	do i=1,ierrors
+	  k = kerrors(i)
+	  write(6,*) 'connection error in node ',k
+	  if( i <= ndim ) kerr(i) = k
+	end do
+
+	if( ndim > 0 ) ierr = min(ierrors,ndim)
 
 	end
 
