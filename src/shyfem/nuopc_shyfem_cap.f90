@@ -271,7 +271,7 @@
 	  SHYFEM_FieldMetadata(num) = SHYFEM_Metadata( &
      &      fieldName="prec", &
      &      longName="precipitation_flux", &
-     &      meshloc=ESMF_MESHLOC_NODE) &
+     &      meshloc=ESMF_MESHLOC_NODE)
 #endif
           SHYFEM_numOfImportFields = num
 #ifdef WITHFIELDS_SST
@@ -860,14 +860,16 @@
 
 	  rc = ESMF_SUCCESS
 
-          !call SHYFEM_ConvertMeshToEsmf(ShyfemToEsmf_Mesh)
+!          call SHYFEM_ConvertMeshToEsmf(ShyfemToEsmf_Mesh)
 
 	  !! We save the number of nodes and the number of elements
 	  !! We got this from the well known global variables \textsf{nkn}
 	  !! and \textsf{nel} of SHYFEM. These are available into the module
 	  !! \textsf{grid} which is nested into \textsf{mod\_shyfem}
-	  SHYFEM_numberOfNodes    = nkn_local !ShyfemToEsmf_Mesh%nkn_ghost
-          SHYFEM_numberOfElements = nel_local !nel_unique
+	  SHYFEM_numberOfNodes    = nkn_local
+!     &     ShyfemToEsmf_Mesh%nkn_ghost
+          SHYFEM_numberOfElements = nel_local
+!     &     nel_unique
 
           allocate( SHYFEM_nodeIds(SHYFEM_numberOfNodes) )
           allocate( SHYFEM_nodeMask(SHYFEM_numberOfNodes) )
@@ -910,8 +912,10 @@
 	  !! $\{x_1,\,y_1,\,...,\,x_9,\,y_9\}$. 
 	  !SHYFEM_nodeOwners = 0
           do i=1,SHYFEM_numberOfNodes
-            SHYFEM_nodeOwners(i) = id_node(i)!ShyfemToEsmf_Mesh%id_node_ghost(i)
-            SHYFEM_nodeIds(i) = ipv(i)!ShyfemToEsmf_Mesh%ipv_ghost(i)
+            SHYFEM_nodeOwners(i) = id_node(i)
+!     &        ShyfemToEsmf_Mesh%id_node_ghost(i)
+            SHYFEM_nodeIds(i) = ipv(i)
+!     &        ShyfemToEsmf_Mesh%ipv_ghost(i)
             SHYFEM_nodeMask(i) = 0
             SHYFEM_nodeCoords(i*SHYFEM_spatialDim-1) = xgv(i)
 !     &        ShyfemToEsmf_Mesh%xgv_ghost(i)
