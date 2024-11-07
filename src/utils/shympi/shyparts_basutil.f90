@@ -45,6 +45,7 @@
 ! 30.03.2022	ggu	bug fix: nkn_save,nel_save were not initialized
 ! 13.04.2022    ggu     new call to make_links (ibound)
 ! 04.04.2023    ggu     minor changes
+! 07.11.2024    ggu     ignore connection errors
 !
 !****************************************************************
 
@@ -587,6 +588,8 @@
 	kerr = nkn
 	call check_elem_index(nkn,nel,nen3v,kerr,kerror)
 	if( kerr > 0 ) then
+	  write(6,*) 'global domain has connection errors...'
+	  stop 'error stop check_connections: irregular domain'
 	end if
 
 	if( shympi_is_master() ) then
@@ -597,7 +600,7 @@
 
 	call shympi_barrier
 
-	!write(6,*) 'finished checking total domain'
+	!write(6,*) 'finished checking total domain ',my_id
 
 !---------------------------------------------
 ! loop on domains
@@ -639,7 +642,7 @@
 	      end if
 	    end do
 	  end if
-	  if( kerr > 0 ) berror = .true.
+	  !if( kerr > 0 ) berror = .true.
 
 	  !if( bwrite ) write(6,*) 'finished checking domain ',ic
 
@@ -669,6 +672,8 @@
 	end do	!do while(bloop)
 
 	end if
+
+	kerr = 0
 
 !---------------------------------------------
 ! end of loop on domains
@@ -791,7 +796,7 @@
 	integer k,ie,ngrm
 
 	call connect_init(nk,ne,nenv,kerr)
-	call connect_check(kerr,kerror)
+	call connect_errors(kerr,kerror)
 	call connect_release
 
 	end

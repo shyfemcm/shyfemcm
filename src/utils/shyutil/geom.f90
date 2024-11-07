@@ -32,6 +32,7 @@
 ! 21.05.2019	ggu	changed VERS_7_5_62
 ! 13.04.2022	ggu	new array iboundv (indicator of boundary node)
 ! 26.04.2022	ggu	dxv, dyv eliminated
+! 07.11.2024	ggu	introduced buselink (must be false)
 
 !**************************************************************************
 
@@ -47,6 +48,7 @@
 	integer, private, save  :: nlk_geom = 0
 
 	integer, save :: maxlnk = 0
+	logical, parameter :: buselink = .false.
 
 !	ilinkv(1) == 0
 !	ilinkv(k+1) == max entries in lenkv and linkv
@@ -87,10 +89,12 @@
         end if
 
         if( nkn_geom > 0 ) then
-          deallocate(ilinkv)
-          deallocate(lenkv)
-          deallocate(lenkiiv)
-          deallocate(linkv)
+	  if( buselink ) then
+            deallocate(ilinkv)
+            deallocate(lenkv)
+            deallocate(lenkiiv)
+            deallocate(linkv)
+	  end if
           deallocate(iboundv)
           deallocate(ieltv)
           deallocate(kantv)
@@ -108,10 +112,12 @@
 
 	if( nkn == 0 ) return
 
-        allocate(ilinkv(nkn+1))
-        allocate(lenkv(nlk))
-        allocate(lenkiiv(nlk))
-        allocate(linkv(nlk))
+	if( buselink ) then
+          allocate(ilinkv(nkn+1))
+          allocate(lenkv(nlk))
+          allocate(lenkiiv(nlk))
+          allocate(linkv(nlk))
+	end if
         allocate(iboundv(nkn))
         allocate(ieltv(3,nel))
         allocate(kantv(2,nkn))
@@ -146,12 +152,7 @@
 	integer n_nodes_around
 	integer, intent(in) :: k
 
-	integer n
-
 	n_nodes_around = nlist(0,k)
-	return
-	n = ilinkv(k+1) - ilinkv(k)
-	n_nodes_around = n
 
 	end function n_nodes_around
 
@@ -162,13 +163,7 @@
 	integer n_elems_around
 	integer, intent(in) :: k
 
-	integer n
-
 	n_elems_around = elist(0,k)
-	return
-	n = ilinkv(k+1) - ilinkv(k)
-	if( is_boundary_node(k) ) n = n - 1
-	n_elems_around = n
 
 	end function n_elems_around
 

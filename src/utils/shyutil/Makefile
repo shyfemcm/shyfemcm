@@ -47,7 +47,7 @@ OBJ  = \
 	expand.o \
 	geom.o \
 	levels.o \
-	links.o \
+	link_dummy.o \
 	lnku.o \
 	bnd.o \
 	bnd_aux.o \
@@ -71,6 +71,10 @@ OBJ  = \
 	find.o \
 	fast_find.o \
 	quad_tree.o \
+
+OBJ_OBSOLETE = \
+	links.o \
+	link_dummy.o \
 
 ALL = $(MOD) $(OBJ)
 

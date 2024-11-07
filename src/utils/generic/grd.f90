@@ -119,6 +119,7 @@
 ! 13.12.2022	ggu	new routine write_grd_file_with_depth()
 ! 18.10.2023	ggu	deleted routines dealing with gr3 and msh files
 ! 10.05.2024	ggu	handles isphe given in grd file (FEM-SPHER)
+! 07.11.2024	ggu	in write_grd_file_with_detail() also write zoom window
 !
 !**********************************************************
 
@@ -2366,6 +2367,7 @@
 	integer nen3v(3)
 	real depth,x,y
 	real, parameter :: flag = -999.
+	character*80 zoom
 
 	integer, parameter :: ndim = 100
 	integer kn(3*ndim)
@@ -2474,6 +2476,58 @@
 	end do
 
 	close(nout)
+
+	zoom = 'zoom_' // trim(file)
+	open(nout,file=zoom,status='unknown',form='formatted')
+	call make_rect(nout,1.,xmin,ymin,xmax,ymax)
+	call make_rect(nout,0.5,xmin,ymin,xmax,ymax)
+	call make_rect(nout,0.25,xmin,ymin,xmax,ymax)
+	close(nout)
+
+	end
+
+!*****************************************************************
+
+	subroutine make_rect(nout,fact,xmin,ymin,xmax,ymax)
+
+	implicit none
+
+	integer nout
+	real fact
+	real xmin,ymin,xmax,ymax
+
+	integer, save :: n = 0
+	integer, save :: l = 0
+	integer, save :: itype = 0
+	real, parameter :: flag = -999.
+	integer nodes(5)
+
+	real dx,dy,x0,y0
+	real xmin0,ymin0,xmax0,ymax0
+	real depth
+
+	depth = flag
+
+	dx = xmax-xmin
+	dy = ymax-ymin
+	x0 = 0.5*(xmin+xmax)
+	y0 = 0.5*(ymin+ymax)
+
+	xmin0 = x0 - 0.5*fact*dx
+	ymin0 = y0 - 0.5*fact*dy
+	xmax0 = x0 + 0.5*fact*dx
+	ymax0 = y0 + 0.5*fact*dy
+
+	call grd_write_node(nout,n+1,itype,xmin0,ymin0,depth)
+	call grd_write_node(nout,n+2,itype,xmin0,ymax0,depth)
+	call grd_write_node(nout,n+3,itype,xmax0,ymax0,depth)
+	call grd_write_node(nout,n+4,itype,xmax0,ymin0,depth)
+	
+	l = l + 1
+	nodes = (/n+1,n+2,n+3,n+4,n+1/)
+        call grd_write_item(nout,3,l,itype,5,nodes,depth)
+
+	n = n + 4
 
 	end
 

@@ -62,6 +62,7 @@
 ! 20.05.2020	ggu	new way to compute link structure (still experimental)
 ! 28.05.2020	ggu	some more changes in constructing link structure
 ! 13.04.2022	ggu	new call to make_links (ibound)
+! 07.11.2024	ggu	new framework for connection
 !
 !*****************************************************************
 
@@ -83,7 +84,7 @@
 
 	logical belem
 	integer ibase,ipf,ipl
-	integer k,ndim
+	integer k,ndim,kext
 	integer ne,ne1,ne2
 	integer nk,nk1,nk2
 	integer ngr_local
@@ -92,8 +93,11 @@
 	integer, allocatable :: eelist(:,:)
 	integer, allocatable :: ecv(:,:)
 	integer, allocatable :: bound(:)
+	integer, allocatable :: kant(:,:)
 	integer, allocatable :: neaux(:)
 	integer, allocatable :: kerror(:)
+
+	integer ipint
 
 	bverbose = .true.
 	bverbose = .false.
@@ -104,24 +108,21 @@
 
         call connect_init(nkn,nel,nen3v,ierr)
 	if( ierr > 0 ) then
-	  write(6,*) 'connection errors found: ',ierr
 	  if( .not. allocated(kerror) ) allocate(kerror(ierr))
-	  call connect_check(ierr,kerror)
-	  stop 'error stop set_geom: connection error'
+	  call connect_errors(ierr,kerror)
 	end if
  
         call connect_get_grade(ngr_local)
-	if( ngr /= ngr_local ) then
-	  !write(6,*) 'ngr,ngr_local: ',ngr,ngr_local
-	  ngr = ngr_local		!insert new value into basin
-	end if
+	if( ngr /= ngr_local ) ngr = ngr_local	!insert new value into basin
 	allocate(nnlist(0:ngr,nkn))
 	allocate(eelist(0:ngr,nkn))
 	allocate(ecv(3,nel))
 	allocate(bound(nkn))
+	allocate(kant(2,nkn))
         call connect_get_lists(nkn,ngr,nnlist,eelist)
         call connect_get_ecv(nel,ecv)
         call connect_get_bound(nkn,bound)
+        call connect_get_kant(nkn,kant)
 
 	call connect_release
 
@@ -144,8 +145,14 @@
 ! make static arrays - old way
 !-------------------------------------------------------------
 
-	call make_links_old(nkn,nel,nen3v)
-	call make_links(nkn,nel,nen3v,ibound,kerr)
+	ieltv = ecv
+	iboundv = bound
+	kantv = kant
+
+	if( buselink ) then
+	  call make_links_old(nkn,nel,nen3v)
+	  call make_links(nkn,nel,nen3v,ibound,kerr)
+	end if
 
 !-------------------------------------------------------------
 ! check results
@@ -158,26 +165,34 @@
 	  nk = nlist(0,k)
 	  ne = elist(0,k)
 	  belem = .false.
-	  call get_node_linkp(k,ipf,ipl)
-	  call get_node_links(k,nk1,ibase)
 	  call get_nodes_around(k,ndim,nk2,neaux)
-	  if( nk /= ipl-ipf+1 ) goto 89
+	  nk1 = nk2
+	  if( buselink ) then
+	    call get_node_linkp(k,ipf,ipl)
+	    call get_node_links(k,nk1,ibase)
+	    if( nk /= ipl-ipf+1 ) goto 89
+	  end if
 	  if( nk /= nk1 .or. nk /= nk2 ) goto 89
 	  if( any( nlist(1:nk,k) /= neaux(1:nk) ) ) goto 88
 	  belem = .true.
-	  call get_elem_linkp(k,ipf,ipl)
-	  call get_elem_links(k,ne1,ibase)
 	  call get_elems_around(k,ndim,ne2,neaux)
-	  if( ne /= ipl-ipf+1 ) goto 89
+	  ne1 = ne2
+	  if( buselink ) then
+	    call get_elem_linkp(k,ipf,ipl)
+	    call get_elem_links(k,ne1,ibase)
+	    if( ne /= ipl-ipf+1 ) goto 89
+	  end if
 	  if( ne /= ne1 .or. ne /= ne2 ) goto 89
 	  if( any( elist(1:ne,k) /= neaux(1:ne) ) ) goto 88
 	end do
 
 	if( any( ecv /= ieltv ) ) goto 87
 	if( any( bound /= iboundv ) ) goto 86
+	if( any( kant /= kantv ) ) goto 85
 
 	if( bverbose ) then
-	  write(6,*) 'set_geom: all compatibility checks successfully completed'
+	  write(6,*) 'set_geom: all connection compatibility checks' // &
+     &				' successfully completed'
 	end if
 
 !-------------------------------------------------------------
@@ -188,13 +203,27 @@
 	  write(6,*) 'set_geom: statistics'
 	end if
 
-        ngrd=ilinkv(nkn+1)
-        n=0
-        do i=1,ngrd
-          if(lenkv(i).eq.0) n=n+1
-        end do
+	nbn = 0
+	ngrd = 0
+	if( buselink ) then
+          ngrd=ilinkv(nkn+1)
+          n=0
+          do i=1,ngrd
+            if(lenkv(i).eq.0) n=n+1
+          end do
+	  nbn = n
+	end if
 
-	nbn = n
+	n = 0
+	do k=1,nkn
+	  if( elist(0,k) /= nlist(0,k) ) n = n + 1
+	end do
+	if( .not. buselink ) nbn = n
+	if( n /= nbn ) then
+	  write(6,*) n,nbn
+	  stop 'error stop set_geom: n/=nbn'
+	end if
+
 	nin = nkn - nbn
 	nis = (nel-2*nkn+nbn+2)/2
 
@@ -208,6 +237,7 @@
 
 	ngrd1 = 4*nbn+6*nin+6*(nis-1)
         ngrd2 = 3*nel+nbn
+	if( .not. buselink ) ngrd = ngrd1
 	nli = ngrd/2
 
 	if( bverbose ) then
@@ -219,7 +249,7 @@
 	end if
 
 	if( ngrd .ne. ngrd1 ) goto 99
-	if( ngrd .ne. ngrd2 ) goto 99
+	if( ierr == 0 .and. ngrd .ne. ngrd2 ) goto 99
 
 	if( bverbose ) then
 	  write(6,*) 'set_geom: all statistics checks successfully completed'
@@ -230,6 +260,8 @@
 !-------------------------------------------------------------
 
 	return
+   85	continue
+	stop 'error stop set_geom: kant'
    86	continue
 	stop 'error stop set_geom: bound'
    87	continue
@@ -256,6 +288,7 @@
 	write(6,*) 'ngr,maxlnk: ',ngr,maxlnk
 	stop 'error stop set_geom: maxlnk'
    99	continue
+	write(6,*) ngrd,ngrd1,ngrd2,ierr
 	stop 'error stop set_geom: ngrade'
 	end
 
@@ -274,8 +307,10 @@
 ! check static arrays
 !-------------------------------------------------------------
 
-        call checklenk(nkn,ilinkv,lenkv,nen3v)
-        call checklink(nkn,ilinkv,linkv)
+	if( buselink ) then
+          call checklenk(nkn,ilinkv,lenkv,nen3v)
+          call checklink(nkn,ilinkv,linkv)
+	end if
 
         call checkkant(nkn,kantv)
         call checkielt(nel,ieltv,nen3v)
@@ -303,6 +338,8 @@
 	integer nl,i,ip,ie1,ie2,nn,k1,k2
 	integer nodes(maxlnk)
 	integer elems(maxlnk)
+
+	if( .not. buselink ) return
 
 !-------------------------------------------------------------
 ! check element index
