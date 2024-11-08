@@ -145,8 +145,9 @@
 
 	call clo_add_sep('optimization options')
 	call clo_add_option('renumber',.false.,'renumber elements')
-	call clo_add_option('opti',.false.,'optimize bandwidth' &
-     &				// ' (implies -renumber )')
+	call clo_add_option('opti',.false. &
+				,'optimize bandwidth (implies -renumber)' &
+     &			 	,'do not optimize bandwidth (default)')
         call clo_add_option('manual',.false.,'manual optimization')
 
 	call clo_add_sep('options for partitioning')
