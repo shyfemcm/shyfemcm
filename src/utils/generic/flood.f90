@@ -94,11 +94,15 @@
 	integer aaux(nel)	!aux array to show what has been filled
 
 	integer ac,ii,ieo,ien,id
+	integer, allocatable :: ecv(:,:)
 
 	ac = acode(ie)
 
 	call queue_init(id)
 	call queue_enqueue(id,ie)
+
+	allocate(ecv(3,nel))
+	call connect_get_ecv(nel,ecv)
 
 	do
 
@@ -228,12 +232,20 @@
 	integer nnode		!number of nodes in area (return)
 
 	integer ac,i,n,ko,kn,id
+	integer ngr
+	integer, allocatable :: nlist(:,:)
+	integer, allocatable :: elist(:,:)
 
 	nnode = 0
 	ac = acode(k)
 
 	call queue_init(id)
 	call queue_enqueue(id,k)
+
+	call connect_get_grade(ngr)
+	allocate(nlist(0:ngr,nkn))
+	allocate(elist(0:ngr,nkn))
+	call connect_get_lists(nkn,ngr,nlist,elist)
 
 	do
 

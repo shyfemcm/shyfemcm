@@ -398,6 +398,7 @@
 
 	nsize = size(array,1)
 	allocate(array3d(1,nsize))
+	array3d(1,:) = array(:)
 
 	call mpi_check_initialize(dtime,what,isact,belem,b2d)
 	call mpi_check_set(array3d)

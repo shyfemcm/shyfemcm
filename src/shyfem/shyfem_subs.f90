@@ -857,7 +857,7 @@
 	call mod_geom_dynamic_init(nkn,nel)
 
 	call mod_meteo_init(nkn)
-	call mod_geom_init(nkn,nel,ngr)
+	!call mod_geom_init(nkn,nel,ngr)
 	call mod_bndo_init(ngr,nrb)
 
 	call mod_depth_init(nkn,nel)

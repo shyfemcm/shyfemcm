@@ -57,6 +57,7 @@
 ! 22.04.2022    ggu     locator functions substituted with save version
 ! 26.04.2022    ggu     mkdxy eliminated
 ! 29.04.2022    ggu     in checkkant do not stop for nmpi>0
+! 07.11.2024    ggu     this file is not used anymore
 !
 !****************************************************************
 !****************************************************************
@@ -1793,15 +1794,16 @@
 
 !****************************************************************
 
-        subroutine update_ielt(nel,ibound,ieltv,nen3v)
+        subroutine update_ielt(nkn,nel,ibound,ieltv,nen3v)
 
 ! updates vector ieltv with open boundary nodes
 
         implicit none
 
 ! arguments
+        integer nkn
         integer nel
-        integer ibound(*)	! >0 => open boundary node
+        integer ibound(nkn)	! >0 => open boundary node
         integer ieltv(3,nel)
         integer nen3v(3,nel)
 ! local

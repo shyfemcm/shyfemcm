@@ -21,6 +21,10 @@
 # now works for versions 4.6 and 5.0
 # adjusted for 5.2
 #
+# revision log :
+#
+# 17.10.2024    ggu     adapted for dash lines
+#
 #-----------------------------------------------------------
 
 use strict;
@@ -79,6 +83,12 @@ sub shift_marker {
     print; $_ = <>;
   }
 
+  if( /C\s*$/ ) {			# must still loop - happens with dash
+    #print STDERR "skipping C line: $_";
+    print; $_ = <>;
+  }
+
+  #print STDERR "found M line: $_";
   if( /M\s*$/ ) {			# it is a line
     shift_line();
   } else {				# it is a point
@@ -166,7 +176,8 @@ sub shift_legend {	# we have to modify the next three lines
   print;
 
   $_ = <>;
-  print;
+  #print STDERR "last line of shift legend: $_";
+  print;	# this skips UL line
 }
 
 sub skip_intro_lines {

@@ -345,10 +345,12 @@
 	    id = id_node(k)
 	    if( id == my_id ) then
 	      write(6,*) 'One node open boundary not permitted'
-	      write(6,*) i,k,ipext(k)
+	      write(6,*) 'node in boundary: ',i
+	      write(6,*) 'node number (internal): ',k
 	      write(6,*) 'node number (external): ',ipext(k)
 	      write(6,*) 'domain: ',my_id
 	      write(6,*) 'boundary: ',ibc
+	      write(6,*) 'knext,klast: ',knext,klast
 	      stop 'error stop bndo'
 	    else
 	      dx = 0.

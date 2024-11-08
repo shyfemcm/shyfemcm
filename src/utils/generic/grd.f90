@@ -119,6 +119,7 @@
 ! 13.12.2022	ggu	new routine write_grd_file_with_depth()
 ! 18.10.2023	ggu	deleted routines dealing with gr3 and msh files
 ! 10.05.2024	ggu	handles isphe given in grd file (FEM-SPHER)
+! 07.11.2024	ggu	in write_grd_file_with_detail() also write zoom window
 !
 !**********************************************************
 
@@ -2337,6 +2338,196 @@
 	end do
 
 	close(nout)
+
+	end
+
+!*****************************************************************
+
+	subroutine write_grd_file_with_detail(file &
+     &			,text,nk,ne,xg,yg,index &
+     &			,inext,ieext,intype,ietype &
+     &			,kcext,window)
+
+! writes grd file with depth information
+
+	implicit none
+
+	character*(*) file		!file name
+	character*(*) text		!text string
+	integer nk,ne			!total nodes and elements
+	real xg(nk),yg(nk)		!coordinates
+	integer index(3,ne)		!element index (internal numbers)
+	integer inext(nk),ieext(ne)	!external nodes and element numbers
+	integer intype(nk),ietype(ne)	!node and element type
+	integer kcext			!central node (external number)
+	real window			!window around node (fact)
+
+	integer nout
+	integer k,ie,ii,itype,kext,eext,n,i
+	integer nen3v(3)
+	real depth,x,y
+	real, parameter :: flag = -999.
+	character*80 zoom
+
+	integer, parameter :: ndim = 100
+	integer kn(3*ndim)
+	real xn(3*ndim),yn(3*ndim)	!be sure the array is big enough
+	integer kc,ksum
+	real xmin,ymin,xmax,ymax,dx,dy
+	integer, allocatable :: kin(:),ein(:)
+
+!---------------------------------------------------------
+! determine min/max of detail
+!---------------------------------------------------------
+
+	do k=1,nk
+	  if( inext(k) == kcext ) exit
+	end do
+	kc = k
+	if( kc > nk ) then
+	  write(6,*) 'kcext = ',kcext
+	  stop 'error stopwrite_grd_file_with_detail: no such node'
+	end if
+
+	!write(6,*) 'node (ext/int) : ',kcext,kc
+
+	n = 0
+	do ie=1,ne
+	  if( all( index(:,ie) /= kc ) ) cycle
+	  if( n+3 > ndim ) stop 'error stop write_grd_file_with_detail: ndim'
+	  do ii=1,3
+	    n = n + 1
+	    k = index(ii,ie)
+	    kn(n) = k
+	    xn(n) = xg(k)
+	    yn(n) = yg(k)
+	  end do
+	end do
+
+	xmin = minval(xn(1:n))
+	ymin = minval(yn(1:n))
+	xmax = maxval(xn(1:n))
+	ymax = maxval(yn(1:n))
+	dx = xmax - xmin
+	dy = ymax - ymin
+	xmin = xmin - window*dx
+	ymin = ymin - window*dy
+	xmax = xmax + window*dx
+	ymax = ymax + window*dy
+
+	allocate(kin(nk))
+	allocate(ein(ne))
+	kin = 0
+	ein = 0
+
+	do k=1,nk
+	  x = xg(k)
+	  y = yg(k)
+	  if( x < xmin .or. x > xmax ) cycle
+	  if( y < ymin .or. y > ymax ) cycle
+	  kin(k) = 1
+	end do
+
+	do ie=1,ne
+	  ksum = 0
+	  do ii=1,3
+	    k = index(ii,ie)
+	    ksum = ksum + kin(k)
+	  end do
+	  if( ksum == 3 ) ein(ie) = 1
+	end do
+
+!---------------------------------------------------------
+! now write grd
+!---------------------------------------------------------
+	
+	depth = flag
+
+	nout = 1
+	open(nout,file=file,status='unknown',form='formatted')
+
+	depth = flag
+
+	if( text /= ' ' ) then
+	  write(nout,*)
+	  write(nout,'(a,a)') '0 ',trim(text)
+	  write(nout,*)
+	end if
+
+	do k=1,nk
+	  if( kin(k) == 0 ) cycle
+	  kext = inext(k)
+	  itype = intype(k)
+	  x = xg(k)
+	  y = yg(k)
+	  call grd_write_node(nout,kext,itype,x,y,depth)
+	end do
+
+	n = 3
+	do ie=1,ne
+	  if( ein(ie) == 0 ) cycle
+	  eext = ieext(ie)
+	  itype = ietype(ie)
+	  do ii=1,n
+	    k = index(ii,ie)
+	    nen3v(ii) = inext(k)
+	  end do
+          call grd_write_item(nout,2,eext,itype,n,nen3v,depth)
+	end do
+
+	close(nout)
+
+	zoom = 'zoom_' // trim(file)
+	open(nout,file=zoom,status='unknown',form='formatted')
+	call make_rect(nout,1.,xmin,ymin,xmax,ymax)
+	call make_rect(nout,0.5,xmin,ymin,xmax,ymax)
+	call make_rect(nout,0.25,xmin,ymin,xmax,ymax)
+	close(nout)
+
+	end
+
+!*****************************************************************
+
+	subroutine make_rect(nout,fact,xmin,ymin,xmax,ymax)
+
+	implicit none
+
+	integer nout
+	real fact
+	real xmin,ymin,xmax,ymax
+
+	integer, save :: n = 0
+	integer, save :: l = 0
+	integer, save :: itype = 0
+	real, parameter :: flag = -999.
+	integer nodes(5)
+
+	real dx,dy,x0,y0
+	real xmin0,ymin0,xmax0,ymax0
+	real depth
+
+	depth = flag
+
+	dx = xmax-xmin
+	dy = ymax-ymin
+	x0 = 0.5*(xmin+xmax)
+	y0 = 0.5*(ymin+ymax)
+
+	xmin0 = x0 - 0.5*fact*dx
+	ymin0 = y0 - 0.5*fact*dy
+	xmax0 = x0 + 0.5*fact*dx
+	ymax0 = y0 + 0.5*fact*dy
+
+	call grd_write_node(nout,n+1,itype,xmin0,ymin0,depth)
+	call grd_write_node(nout,n+2,itype,xmin0,ymax0,depth)
+	call grd_write_node(nout,n+3,itype,xmax0,ymax0,depth)
+	call grd_write_node(nout,n+4,itype,xmax0,ymin0,depth)
+	
+	l = l + 1
+	nodes = (/n+1,n+2,n+3,n+4,n+1/)
+        call grd_write_item(nout,3,l,itype,5,nodes,depth)
+
+	n = n + 4
 
 	end
 

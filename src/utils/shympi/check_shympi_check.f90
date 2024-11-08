@@ -161,8 +161,6 @@
 	    ierror = ierror + 1
 	    if( ierror > ierror_max ) cycle
 	    write(6,1000) ierror,l,i,ies(:,i),vals(i),vals2(i)
-	    !write(6,*) ierror,l,i,ies(:,i)
-	    !write(6,*) vals(i),vals2(i)
 	  end if
 	end do
 	if( ierror > 0 ) then

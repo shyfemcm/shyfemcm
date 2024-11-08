@@ -35,6 +35,7 @@
 ! 18.03.2023    ggu     adapted to new id_elem(0:3,:)
 ! 20.03.2023    ggu     write_grd_domain() is now called in shympi_setup()
 ! 29.03.2023    ggu     refactoring
+! 07.11.2024    ggu     updated to new connection framework
 !
 !*****************************************************************
 
@@ -43,9 +44,10 @@
 ! sets up geometrical arrays
 !
 ! geom structures have already been setup on local domain
-! with this call they are corrected with gloval boundary node information
+! with this call they are corrected with global boundary node information
 
 	use mod_geom
+	use mod_connect
 	use basin
 	use shympi
 
@@ -58,7 +60,7 @@
 	integer ide,idk,nid
 	integer iunit
 	integer, allocatable :: ibound(:)
-        integer kerr
+        integer kerr,ierr
 
 	integer knext,kbhnd
 
@@ -76,9 +78,12 @@
 	!write(iunit,*) '-------- set_geom_mpi ----------'
 	!write(iunit,*) 'global: ',nkn_global,nel_global
 	!write(iunit,*) 'local: ',nkn,nel
-	allocate(ibound(nkn_global))
 	!call link_set_wmpi(.true.)
-	call make_links(nkn_global,nel_global,nen3v_global,ibound,kerr)
+	allocate(ibound(nkn_global))
+	!call make_links(nkn_global,nel_global,nen3v_global,ibound,kerr)
+        call connect_init(nkn_global,nel_global,nen3v_global,ierr)
+        call connect_get_bound(nkn_global,ibound)
+        !call connect_get_kant(nkn,kant)
 	!call link_set_wmpi(.false.)
 	!stop
 

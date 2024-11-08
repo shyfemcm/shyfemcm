@@ -129,7 +129,6 @@ c-----------------------------------------------------------------
 	!call ev_init(nel)
 	call set_ev
 
-	call mod_geom_init(nkn,nel,ngr)
 	call set_geom
 
 	call mod_geom_dynamic_init(nkn,nel)

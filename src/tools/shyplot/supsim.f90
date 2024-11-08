@@ -2556,17 +2556,21 @@
 
 	use basin
 	use mod_color
+	use mod_connect
 
 	implicit none
 
 	integer ids(nel)
 
-	integer nmax,ncol,i
+	integer nmax,ncol,i,ierr
 	integer, allocatable :: matrix(:,:)
 	integer color(nel)
 	integer ecv(3,nel)
 
-	call connect_init(nkn,nel,nen3v)
+	call connect_init(nkn,nel,nen3v,ierr)
+	if( ierr /= 0 ) then
+	  stop 'error stop transform_color_to_min: ierr/=0'
+	end if
 	call connect_get_ecv(nel,ecv)
 	call make_elem_matrix(nel,ecv,ids,nmax,matrix)
 	call color_graph(nel,ids,nmax,matrix,ncol,color)

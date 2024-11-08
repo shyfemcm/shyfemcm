@@ -355,20 +355,29 @@
 	logical bquiet,bsilent
 
 	logical bauto,binfo
-	logical bopti,bnepart
+	logical bopti,bnepart,brenumber
 	real eps_area
 	character*80 grdpart
 
 	eps_area = 0.
 	bauto = .true.
 	binfo = .false.
-	!bopti = .false.
 	bopti = .true.
+	bopti = .false.
+	brenumber = .false.
 	bnepart = .false.
 	grdpart = ' '
 
+	if( .not. bquiet ) then
+	  if( bopti ) then
+	    write(6,*) 'reading grd file with optimzation: ',trim(grid_file)
+	  else
+	    write(6,*) 'reading grd file without optimzation: ',trim(grid_file)
+	  end if
+	end if
+
 	call shypre_sub(grid_file,bquiet,bsilent,bauto,binfo &
-     &                          ,bopti,bnepart,eps_area,grdpart)
+     &                          ,bopti,brenumber,bnepart,eps_area,grdpart)
 
 	end
 

@@ -134,6 +134,7 @@ git pull
 git-commit
 
 git-tag
+git push
 git push --tags
 git-release or better git-release -full_release
 
