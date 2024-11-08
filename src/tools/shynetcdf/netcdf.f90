@@ -3075,13 +3075,20 @@
 	  cmin = -10.
 	  cmax = 100.
         else if( ivar .eq. 13 ) then    ! density anomaly
-          name = 'density anomaly'
+          name = 'density_anomaly'
           what = 'standard_name'
           std = 'sea_water_density_anomaly'
           units = 'kg m-3'
           cmin = -1000.
           cmax = +1000.		
-        else if( ivar .eq. 14 ) then    ! vertical mass-transfer among layers
+	else if( ivar .eq. 14 ) then	! skin temperature
+	  name = 'skin_temperature'
+	  what = 'standard_name'
+	  std = 'sea_surface_skin_temperature'
+	  units = 'degC'
+	  cmin = -10.
+	  cmax = 100.
+        else if( ivar .eq. 17 ) then    ! vertical mass-transfer among layers
           name = 'w_velocity'
           what = 'standard_name'
           std = 'vertical_sea_water_mass_tranfer'

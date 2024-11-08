@@ -1248,6 +1248,7 @@
 	call strings_add_new('skin temperature',14)
 	call strings_add_new('oxygen',15)
 	call strings_add_new('discharge',16)
+	call strings_add_new('w velocity',17)
 	call strings_add_new('rms speed',18)
 	call strings_add_new('rms velocity',18)
 	call strings_add_new('current vorticity',19)
@@ -1346,6 +1347,7 @@
 	call strings_set_short(14,'tskin')
 	call strings_set_short(15,'oxy')
 	call strings_set_short(16,'disch')
+	call strings_set_short(17,'wvel')
 	call strings_set_short(18,'rms')
 	call strings_set_short(19,'vorticity')
 
