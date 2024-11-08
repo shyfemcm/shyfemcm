@@ -632,7 +632,7 @@
           write(6,*) 'area is 0'
 	  if( barea ) then
 	    write(6,*) 'the average is relative to the area given'
-	    write(6,*) 'by the line contained in ',trim(areafile)
+	    write(6,*) 'by the line(s) contained in ',trim(areafile)
 	  else
 	    write(6,*) 'the average is relative to the whole basin'
 	  end if
