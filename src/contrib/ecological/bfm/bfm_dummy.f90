@@ -29,6 +29,23 @@
 !
 ! 02.10.2019	ggu	dummy routine introduced
 ! 22.04.2020	ggu	error if called
+! 23.10.2024	ggu	define ibfm in module
+
+!******************************************************************
+
+	module mod_bfm
+
+	integer, save :: ibfm = 0
+
+	contains
+
+	subroutine bfm_init
+	end
+
+	subroutine bfm_run
+	end
+
+	end module mod_bfm
 
 !******************************************************************
 
@@ -42,6 +59,25 @@
 
 	subroutine bfm_reactor_internal
 	end
+
+        subroutine write_restart_bfm(iunit)
+        implicit none
+        integer iunit
+        end
+
+        subroutine skip_restart_bfm(iunit)
+        implicit none
+        integer iunit
+        end
+
+        subroutine read_restart_bfm(iunit)
+        implicit none
+        integer iunit
+        end
+
+        subroutine bfm_init_for_restart()
+        implicit none
+        end
 
 !******************************************************************
 

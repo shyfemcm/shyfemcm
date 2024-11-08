@@ -7,9 +7,11 @@
 #
 #------------------------------------------------------------------------
 
-DIR = fempara
+DIR = paralution
 
-LIBDIR = ../femlib
+FEMDIR = ../../..
+
+LIBDIR = $(FEMDIR)/lib
 LIB     = $(LIBDIR)/libparalution.a
 
 #-----------------------------------------------------------

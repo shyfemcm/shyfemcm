@@ -208,10 +208,9 @@
 	use levels
 	use basin
 	use eutro
+	use mkonst
 
 	implicit none
-
-	include 'mkonst.h'
 
         character*10 what,whataux
 	character*2 whatn

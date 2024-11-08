@@ -60,7 +60,7 @@ Error()
 
 SetupDirs()
 {
-  dirs="/usr /opt/sw/netcdf /usr/local/netcdf /usr/local"
+  dirs="/usr /opt/sw/netcdf /usr/local/netcdf /usr/local $NETCDF_C_HOME $NETCDF_FORTRAN_HOME"
   dirs_intel=" \
 		/usr/local/intel \
 		/usr/lib/x86_64-linux-gnu \

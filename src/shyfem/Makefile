@@ -9,6 +9,11 @@
 #
 # $Id: Makefile,v 1.00 2020-11-06 :gmica ASC CMCC Exp $
 #
+
+#--------------------	FLAGS	---------------------
+
+MAKEFLAGS += --no-print-directory
+
 #--------------------	FILES	---------------------
 
 FEMDIR = ../..
@@ -107,7 +112,7 @@ endif
 
 ifeq ($(SOLVER),PETSC)
    LIBG_PETSC = -L$(PETSC_DIR)/lib -lpetsc
-   SOLVER_OBJ		 = spk_blas.o matrix_inv.o \
+   SOLVER_OBJ		 =  matrix_inv.o \
 	amgx_c_wrapper_dummy.o mod_petsc_global.o \
 	mod_petsc_system.o simsys_petsc.o
 endif
@@ -145,15 +150,46 @@ LAGRANGE_OBJ = \
       lagrange_main.o lagrange_back.o \
 
 HEAT_OBJ = \
-      meteo.o meteo_forcing.o meteo_admin.o \
+      meteo_forcing.o meteo_admin.o \
       icemodel.o ice.o \
       waves.o waves_admin.o ww3_dummy.o \
       heat_util2.o heat_admin.o heat_admin2.o \
       heat_temp.o heat_mfsbulk.o heat_coare.o heat_gotm.o \
       heat_areg.o heat_gill.o heat_default.o \
 
-ECO_OBJ = \
-      ecological.o bfm_dummy.o bfm.o mercury_dummy.o \
+#----------------------------------------------------------------
+
+ECO_DIR = $(FEMDIR)/src/contrib/ecological
+
+MERCURY_OBJ = $(shell cd $(ECO_DIR)/mercury; make objs --no-print-directory)
+
+ECO_OBJ = ecological_dummy.o
+ifeq ($(ECOLOGICAL),EUTRO)
+  ECO_OBJ = $(shell cd $(ECO_DIR)/weutro; make objs --no-print-directory)
+endif
+ifeq ($(ECOLOGICAL),AQUABC)
+  ECO_OBJ = $(shell cd $(ECO_DIR)/aquabc; make objs --no-print-directory)
+endif
+
+BFM_OBJ := $(ECO_DIR)/bfm/bfm_dummy.o
+ifeq ($(ECOLOGICAL),BFM)
+  LIBBFM =     bfm
+  BFM_OBJ =	$(shell cd $(ECO_DIR)/bfm; make objs --no-print-directory)
+  LIBG_BFM     = -L$(BFMDIR)/lib/ -l$(LIBBFM)
+  INCL_BFM     = -I$(BFMDIR)/include
+  FFLAGS      += $(INCL_BFM)
+  LFLAGS      += $(LIBG_BFM)
+
+  LIB_NETCDF = 
+  ifeq ($(NETCDF),true)
+    LIB_NETCDF = -L$(NETCDFDIR)/lib -lnetcdf -L$(NETCDFFDIR)/lib -lnetcdff
+  endif
+
+  LIB_ECOLOGICAL=-L$(BFMDIR)/lib/ -l$(LIBBFM) $(LIB_NETCDF)
+  LIBL += $(LIB_ECOLOGICAL)
+endif
+
+#----------------------------------------------------------------
 
 SEDIMENT_OBJ = \
       sedim_util.o simple_sedi.o sedim_admin.o \
@@ -162,13 +198,13 @@ MPI_EXTRA_OBJ = \
       mpi_assert.o lnkmpi.o
 
 OBJ = system_matrix.o \
-      hydro_admin.o openmp_admin.o \
-      turbulence_util.o sinking.o nudging.o internal.o \
-      ts.o hydro_vel.o restart.o gotm_aux.o diff_aux.o \
-      area.o roughness.o diffusion.o hydro_baro.o \
-      hydro_print.o conz_util.o \
+      openmp_admin.o \
+      turbulence_util.o nudging.o internal.o \
+      restart.o gotm_aux.o diff_aux.o \
+      area.o roughness.o hydro_baro.o \
+      conz_util.o \
       bnd_scalar.o subset.o tide_utils.o tidef.o \
-      layer_thickness.o bndo.o conz_common.o \
+      bndo.o conz_common.o \
       bclfix_util.o nohyd.o outputd.o elems_dealing.o sigma_admin.o \
       transforms.o tsfile_admin.o fluidmud.o mud_admin.o chezy.o \
       line_admin.o discharge_flux.o flux_util.o \
@@ -192,6 +228,8 @@ OBJ = system_matrix.o \
 	$(SEDIMENT_OBJ) \
 	$(LAGRANGE_OBJ) \
 	$(ECO_OBJ) \
+	$(BFM_OBJ) \
+	$(MERCURY_OBJ) \
 	$(MPI_EXTRA_OBJ) \
 	$(SHYPRE_OBJ) \
 	turbulence.o nohydro.o explicit.o hydrodynamic.o \
@@ -207,11 +245,10 @@ OBSOLETE = \
 
 default: fem
 
-#fem: shyfem
-#shyfem: $(EXES_target) links nothing
 fem: shyfem links nothing
 
-#$(EXES_target): $(MODULES) $(OBJ) $(LIBF) shyfem.o
+#shyfem: info
+
 shyfem: $(MODULES) $(OBJ) $(LIBF) shyfem.o
 	 $(F77) $(FFLAGS) $(INCLUDE) $(LFLAGS) $^ $(LIBL) -o shyfem 
 
@@ -223,6 +260,15 @@ depend:
 
 nothing:
 	@true
+
+info:
+	@echo "BFM_OBJ: $(BFM_OBJ)"
+	@echo "ECO_OBJ: $(ECO_OBJ)"
+	@#@echo "MODULES: $(MODULES)"
+	@#@echo "LIBF: $(LIBF)"
+	@#@echo "OBJ: $(OBJ)"
+	@echo "METISDIR: $(METISDIR)"
+	@echo "METIS_HOME: $(METIS_HOME)"
 
 #------------------------------------------------------------------------
 
@@ -296,7 +342,6 @@ cleanall: clean
 ../../lib/mod/close.mod: closing.o
 ../../lib/mod/connectivity.mod: lagrange_connect.o
 ../../lib/mod/extra.mod: extra.o
-../../lib/mod/flux.mod: flux.o
 ../../lib/mod/ice_global.mod: icemodel.o
 ../../lib/mod/ice_params.mod: icemodel.o
 ../../lib/mod/ice_variables.mod: icemodel.o
@@ -310,40 +355,27 @@ cleanall: clean
 ../../lib/mod/mod_bstress.mod: substress.o
 ../../lib/mod/mod_conz.mod: conz_common.o
 ../../lib/mod/mod_diff_aux.mod: diff_aux.o
-../../lib/mod/mod_diff_visc_fric.mod: diffusion.o
 ../../lib/mod/mod_fluidmud.mod: fluidmud.o
 ../../lib/mod/mod_gotm_aux.mod: gotm_aux.o
-../../lib/mod/mod_hydro.mod: hydro_admin.o
 ../../lib/mod/mod_hydro_baro.mod: hydro_baro.o
-../../lib/mod/mod_hydro_print.mod: hydro_print.o
-../../lib/mod/mod_hydro_vel.mod: hydro_vel.o
 ../../lib/mod/mod_internal.mod: internal.o
 ../../lib/mod/mod_keps.mod: turbulence_util.o
 ../../lib/mod/mod_lagrange.mod: lagrange_data.o
-../../lib/mod/mod_layer_thickness.mod: layer_thickness.o
-../../lib/mod/mod_meteo.mod: meteo.o
 ../../lib/mod/mod_nohyd.mod: nohyd.o
 ../../lib/mod/mod_nudge.mod: nudge.o
 ../../lib/mod/mod_nudging.mod: nudging.o
 ../../lib/mod/mod_parwaves.mod: waves_admin.o
-../../lib/mod/mod_petsc_global.mod: mod_petsc_global.o
-../../lib/mod/mod_petsc_system.mod: mod_petsc_system.o
 ../../lib/mod/mod_renewal_time.mod: water_ren_time.o
 ../../lib/mod/mod_restart.mod: restart.o
 ../../lib/mod/mod_roughness.mod: roughness.o
-../../lib/mod/mod_sediment.mod: sedim_admin.o
-../../lib/mod/mod_sediment_para.mod: sedim_admin.o
 ../../lib/mod/mod_sedtrans05.mod: sedim_util.o
 ../../lib/mod/mod_shyfem.mod: shyfem_subs.o
-../../lib/mod/mod_sinking.mod: sinking.o
 ../../lib/mod/mod_subset.mod: subset.o
 ../../lib/mod/mod_system.mod: system_matrix.o
-../../lib/mod/mod_system_global.mod: simsys_petsc.o
 ../../lib/mod/mod_system_global.mod: simsys_spkaux.o
 ../../lib/mod/mod_system_global.mod: system_spk.o
 ../../lib/mod/mod_system_interface.mod: system_matrix.o
 ../../lib/mod/mod_test_zeta.mod: test_zeta.o
-../../lib/mod/mod_ts.mod: ts.o
 ../../lib/mod/mod_waves.mod: waves.o
 ../../lib/mod/ocean_shyfem.mod: nuopc_shyfem_cap.o
 ../../lib/mod/omp_admin.mod: openmp_admin.o
@@ -355,10 +387,6 @@ cleanall: clean
 ../../lib/mod/subqfx.mod: heat_admin.o
 ../../lib/mod/subww3.mod: ww3_dummy.o
 ../../lib/mod/tide.mod: tide_utils.o
-amgx_c_wrapper_dummy.o: ../../lib/mod/petscdm.mod \
-		../../lib/mod/petscdmlabel.mod \
-		../../lib/mod/petscmat.mod \
-		../../lib/mod/petscvec.mod 
 baroclinic.o: ../../lib/mod/basin.mod ../../lib/mod/levels.mod \
 		../../lib/mod/mkonst.mod \
 		../../lib/mod/mod_diff_visc_fric.mod \
@@ -575,7 +603,7 @@ f_vol.o: ../../lib/mod/basin.mod ../../lib/mod/levels.mod \
 		../../lib/mod/mod_layer_thickness.mod 
 floodfill.o: ../../lib/mod/basin.mod ../../lib/mod/mod_geom.mod
 flux.o: ../../lib/mod/basin.mod ../../lib/mod/befor_after.mod \
-		../../lib/mod/levels.mod \
+		../../lib/mod/flux.mod ../../lib/mod/levels.mod \
 		../../lib/mod/mod_conz.mod \
 		../../lib/mod/mod_sediment.mod \
 		../../lib/mod/mod_ts.mod ../../lib/mod/nls.mod \
@@ -720,20 +748,6 @@ meteo_forcing.o: ../../lib/mod/basin.mod ../../lib/mod/evgeom.mod \
 		../../lib/mod/shympi.mod 
 mkdistance.o: ../../lib/mod/basin.mod ../../lib/mod/mod_geom.mod \
 		../../lib/mod/shympi.mod 
-mod_petsc_global.o: ../../lib/mod/basin.mod \
-		../../lib/mod/levels.mod \
-		../../lib/mod/mod_system.mod \
-		../../lib/mod/petscdm.mod \
-		../../lib/mod/petscdmlabel.mod \
-		../../lib/mod/shympi.mod 
-mod_petsc_system.o: ../../lib/mod/mod_petsc_global.mod \
-		../../lib/mod/mod_system.mod \
-		../../lib/mod/petscdm.mod \
-		../../lib/mod/petscdmlabel.mod \
-		../../lib/mod/petscksp.mod \
-		../../lib/mod/petscmat.mod \
-		../../lib/mod/petscvec.mod \
-		../../lib/mod/shympi.mod 
 model3d_util.o: ../../lib/mod/basin.mod ../../lib/mod/evgeom.mod \
 		../../lib/mod/levels.mod \
 		../../lib/mod/mod_depth.mod \
@@ -836,6 +850,8 @@ sedim_admin.o: ../../lib/mod/basin.mod ../../lib/mod/evgeom.mod \
 		../../lib/mod/mod_hydro_vel.mod \
 		../../lib/mod/mod_layer_thickness.mod \
 		../../lib/mod/mod_roughness.mod \
+		../../lib/mod/mod_sediment.mod \
+		../../lib/mod/mod_sediment_para.mod \
 		../../lib/mod/mod_sedtrans05.mod \
 		../../lib/mod/mod_ts.mod \
 		../../lib/mod/mod_waves.mod ../../lib/mod/para.mod 
@@ -898,17 +914,6 @@ simple_sedi.o: ../../lib/mod/basin.mod ../../lib/mod/evgeom.mod \
 		../../lib/mod/mod_layer_thickness.mod 
 simsys_lp.o: ../../lib/mod/basin.mod ../../lib/mod/levels.mod \
 		../../lib/mod/mod_system.mod 
-simsys_petsc.o: ../../lib/mod/mod_petsc_global.mod \
-		../../lib/mod/mod_petsc_system.mod \
-		../../lib/mod/mod_system.mod \
-		../../lib/mod/mod_system_interface.mod \
-		../../lib/mod/petscdm.mod \
-		../../lib/mod/petscdmlabel.mod \
-		../../lib/mod/petscksp.mod \
-		../../lib/mod/petscmat.mod \
-		../../lib/mod/petscvec.mod \
-		../../lib/mod/shympi.mod \
-		../../lib/mod/shympi_time.mod 
 simsys_spkaux.o: ../../lib/mod/basin.mod ../../lib/mod/levels.mod \
 		../../lib/mod/mod_system.mod \
 		../../lib/mod/mod_system_interface.mod \
@@ -939,7 +944,8 @@ test_zeta.o: ../../lib/mod/basin.mod ../../lib/mod/mod_hydro.mod \
 tidef.o: ../../lib/mod/basin.mod ../../lib/mod/coordinates.mod \
 		../../lib/mod/iso8601.mod \
 		../../lib/mod/mod_depth.mod \
-		../../lib/mod/mod_hydro.mod ../../lib/mod/tide.mod 
+		../../lib/mod/mod_hydro.mod \
+		../../lib/mod/shympi.mod ../../lib/mod/tide.mod 
 time_admin.o: ../../lib/mod/femtime.mod ../../lib/mod/shympi.mod
 topological_admin.o: ../../lib/mod/basin.mod \
 		../../lib/mod/evgeom.mod \

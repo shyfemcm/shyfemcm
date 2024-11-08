@@ -189,7 +189,8 @@ shy_util.o: ../../../lib/mod/basin.mod ../../../lib/mod/levels.mod \
 shy_util1.o: ../../../lib/mod/basin.mod \
 		../../../lib/mod/evgeom.mod \
 		../../../lib/mod/levels.mod \
-		../../../lib/mod/mod_depth.mod 
+		../../../lib/mod/mod_depth.mod \
+		../../../lib/mod/mod_sort.mod 
 topo_update.o: ../../../lib/mod/basin.mod \
 		../../../lib/mod/evgeom.mod \
 		../../../lib/mod/mod_geom.mod \

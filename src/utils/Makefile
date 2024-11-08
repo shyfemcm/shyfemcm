@@ -10,7 +10,7 @@
 FEMDIR = ../..
 BINDIR = $(FEMDIR)/bin
 
-SUBDIRS = generic shyutil shympi shyutilmpi
+SUBDIRS = generic modules shyutil shympi shyutilmpi
 
 #------------------------------------------------------------------------
 

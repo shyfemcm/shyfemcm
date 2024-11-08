@@ -1,16 +1,16 @@
 
 #------------------------------------------------------------------------
 #
-#    Copyright (C) 1985-2024  Georg Umgiesser
+#    Copyright (C) 1985-2020  Georg Umgiesser
 #
 #    This file is part of SHYFEM.
 #
 #------------------------------------------------------------------------
 
-FEMDIR = ../..
+FEMDIR = ../../..
 
 BINDIR = $(FEMDIR)/bin
-SUBDIRS = ecological paralution
+SUBDIRS = bfm mercury aquabc weutro
 
 #------------------------------------------------------------------------
 
@@ -30,10 +30,6 @@ status: nothing
 
 list:
 	pwd; ls
-
-libmod: $(FEMDIR)/lib/mod
-$(FEMDIR)/lib/mod:
-	mkdir -p $(FEMDIR)/lib/mod
 
 depend: nothing
 	@$(BINDIR)/recursivemake $@ $(SUBDIRS)
