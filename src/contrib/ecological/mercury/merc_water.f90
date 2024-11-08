@@ -36,7 +36,7 @@
 !
       subroutine mercury_react(id,bsurf,bbottom,boxtype,dtday,vol &
      &                         ,depth,k,temp,uwind10,area,sal,qrad &
-     &                         ,C,loads,vds,vdp,conz1,conz2,    !tday, &
+     &                         ,C,loads,vds,vdp,conz1,conz2,     &
      &                         Shgsil,Shgpom,Smhgsil,Smhgpom, &
      &                         faq1,faq2,fdoc1,fdoc2)
    
@@ -585,7 +585,7 @@
 !---------------------------------------------------
 !********************************************************************
 
-      subroutine  merc_gas_exchange(salin,temp,area,uwind10,Hg0,Hg0atm,
+      subroutine  merc_gas_exchange(salin,temp,area,uwind10,Hg0,Hg0atm, &
      &               flux2)
 !
 ! 4.05.2017	dmc	
@@ -605,7 +605,7 @@
 !	 parameters 
         real AW		!Constant based on the Weibull distribution of 
 !			!wind speeds over oceans
-        real mw		!molecular weight of water [g mol-1]\
+        real mw		!molecular weight of water [g mol-1]
         real molHg	!molal volume of mercury at its normal boiling
                         !temperature [cm3 mol-1]
         real phiw	!solvent association factor introduced to define 
@@ -648,7 +648,8 @@
       	real tempk	!temperature [K]
     	
         mw=18.0		!molecular weight of water [g mol-1]
-        molHg= 12.74	!molal volume of mercury at its normal boiling
+	molhg = 0.
+        !molHg = 12.74	!molal volume of mercury at its normal boiling
      			!temperature [cm3 mol-1]
         phiw=2.26	!solvent association factor 
        	AW=0.25		!Weibull Constant based on wind distribution
@@ -657,27 +658,27 @@
 
 	tempk=temp+273.15	!temperature Kelvin
 
-C ======================================================================
-C ======================================================================
-C
-C Compute the density and the dynamic viscosity of water from the temperature
-C and the salinity
+! ======================================================================
+! ======================================================================
+!
+! Compute the density and the dynamic viscosity of water from the temperature
+! and the salinity
 
-C compute the dynamic/molecular viscosity
+! compute the dynamic/molecular viscosity
 !      VISC0=1.802863d-3 - 6.1086d-5*TEMP + 1.31419d-06*TEMP**2 -
 !       &1.35576d-08*TEMP**3 + 2.15123d-06*SALIN + 3.59406d-11*SALIN**2
 
         a=0.0001529
         b=0.000016826
         p=1.013253
-        c=8.3885*(10**(-8))
+        c=8.3885E-8
         d=p**(2)
         e=0.0024727
-        g=4.8429*(10**(-5))
-        h=4.7172*(10**(-6))
-        m=7.5986*(10**(-8))
-        n=6.0574*(10**(-6))
-        o= 2.676*(10**(-9))
+        g=4.8429E-5
+        h=4.7172E-6
+        m=7.5986E-8
+        n=6.0574E-6
+        o= 2.676E-9
         v1= temp*(0.06144-temp*(0.001451-temp*b))
         v2=a*p
         v3=c*d
@@ -688,22 +689,22 @@ C compute the dynamic/molecular viscosity
         visc=(1.791- v1-v2+v3+v4+ v5+v6)/1000     ![kg m-1* s-1]
 
 ! mpute the water density according to Brydon et al. 1999, J. Geoph. Res.
-C 104/C1, 1537-1540, equation 2 with Coefficient of Table 4, without pressure
-C component. Ranges TEMP -2 - 40øC, S 0-42, surface water.
-C      RHOW=9.20601d-2 + 5.10768d-2*TEMP + 8.05999d-1*SALIN
-C     &     -7.40849d-3*TEMP**2 - 3.01036d-3*SALIN*TEMP +
-C     %     3.32267d-5*TEMP**3 + 3.21931d-5*SALIN*TEMP**2
-C      RHOW=RHOW+1000d0
+! 104/C1, 1537-1540, equation 2 with Coefficient of Table 4, without pressure
+! component. Ranges TEMP -2 - 40øC, S 0-42, surface water.
+!      RHOW=9.20601d-2 + 5.10768d-2*TEMP + 8.05999d-1*SALIN
+!     &     -7.40849d-3*TEMP**2 - 3.01036d-3*SALIN*TEMP +
+!     %     3.32267d-5*TEMP**3 + 3.21931d-5*SALIN*TEMP**2
+!      RHOW=RHOW+1000d0
 
-C compute the water density according to EOS80, Fofonoff 198599,
-C J. Geoph. Res. 90/C2, 3332-3342, without pressure component.
+! compute the water density according to EOS80, Fofonoff 198599,
+! J. Geoph. Res. 90/C2, 3332-3342, without pressure component.
 !	[kg * m-2]
 
-      RHOW=999.842594d0 +6.793952d-2*TEMP -9.095290d-3*TEMP**2
-     &   +1.00168d-4*TEMP**3 -1.120083d-6*TEMP**4 +6.536332d-9*TEMP**5
-     & +(8.24493d-1 -4.0899d-3*TEMP +7.6438d-5*TEMP**2
-     &   -8.2467d-7*TEMP**3 +5.3875d-9*TEMP**4) * SALIN
-     & +(-5.72466d-3 +1.0227d-4*TEMP -1.6546d-6*TEMP**2) * SALIN**1.5d0
+      RHOW=999.842594d0 +6.793952d-2*TEMP -9.095290d-3*TEMP**2 &
+     &   +1.00168d-4*TEMP**3 -1.120083d-6*TEMP**4 +6.536332d-9*TEMP**5 &
+     & +(8.24493d-1 -4.0899d-3*TEMP +7.6438d-5*TEMP**2 &
+     &   -8.2467d-7*TEMP**3 +5.3875d-9*TEMP**4) * SALIN &
+     & +(-5.72466d-3 +1.0227d-4*TEMP -1.6546d-6*TEMP**2) * SALIN**1.5d0 &
      & +4.8314d-4*SALIN**2
 
 	bvis1=.true.
@@ -717,8 +718,8 @@ C J. Geoph. Res. 90/C2, 3332-3342, without pressure component.
 	end if
 
 
-C ======================================================================
-C ======================================================================
+! ======================================================================
+! ======================================================================
 
         diff=((7.4*0.00000001)*((phiw*mw)**0.5)*tempk) 
         diff=diff/(visc*1000*(molHg**0.6))      !diffusivity

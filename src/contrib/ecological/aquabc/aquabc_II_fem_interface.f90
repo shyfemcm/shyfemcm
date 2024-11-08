@@ -252,6 +252,7 @@
       !instead of param.h        
       use levels, only: ilhkv, nlvdi, nlv  
       use basin, only: nkn, nkndi, neldi, ipv
+	use femtime
       
       use mod_debug
       use mod_diff_visc_fric
@@ -264,8 +265,6 @@
 
       include 'aquabc_II_aout.h' !variables and parameters for output to ASCII file
 
-      include 'femtime.h'
-      
 
       !integer it	!time in seconds. Comes from femtime.h now
       !integer idt  !time step in seconds.Comes from femtime.h now
@@ -755,11 +754,11 @@
 !         initialize parameters of eco model and output to ascii files
 !----------------------------------------------------------------------
 
-          call aquabcini(bsedim,par,par_sed,PHTIME,PHTAB,TEMPTIME,
-     *                       TEMPTAB, NBIOTS, BIOTSNOD, BIOTSFUN,
-     *                       NBIOTS_sed, BIOTSNOD_sed, BIOTSFUN_sed,
-     *                       NDGTS, DGTSNOD, DGTSFUN,
-     *                       NDGTS_sed,DGTSNOD_sed,DGTSFUN_sed)        
+          call aquabcini(bsedim,par,par_sed,PHTIME,PHTAB,TEMPTIME, &
+     &                       TEMPTAB, NBIOTS, BIOTSNOD, BIOTSFUN, &
+     &                       NBIOTS_sed, BIOTSNOD_sed, BIOTSFUN_sed, &
+     &                       NDGTS, DGTSNOD, DGTSFUN, &
+     &                       NDGTS_sed,DGTSNOD_sed,DGTSFUN_sed)        
             
 
 !------------------------------------------------------------------------
@@ -776,8 +775,8 @@
 
           !print *,'idtc=',idtc,'itmc=',itmc
 
-          print *,'WRITING WC STATE VARIABLE INITIAL',
-     *               ' VALUES FOR SELECTED NODES'
+          print *,'WRITING WC STATE VARIABLE INITIAL', &
+     &               ' VALUES FOR SELECTED NODES'
 
           do l = 1,nlvdi
            do k = 1,nkn
@@ -787,12 +786,12 @@
            end do                          ! with calculation of derivatives for the first time step
           end do
 
-          call biotser_write(1, 'wc',
-     *                 wc_output, noutput, nstate, dg, NDIAGVAR,
-     *                 ilhkv,nlvdi,
-     *                 itmc,idtc,
-     *                 NBIOTSMX,NBIOTS,BIOTSNOD,BIOTSFUN,
-     *                 NDGTSMX, NDGTS, DGTSNOD, DGTSFUN)
+          call biotser_write(1, 'wc', &
+     &                 wc_output, noutput, nstate, dg, NDIAGVAR, &
+     &                 ilhkv,nlvdi, &
+     &                 itmc,idtc, &
+     &                 NBIOTSMX,NBIOTS,BIOTSNOD,BIOTSFUN, &
+     &                 NDGTSMX, NDGTS, DGTSNOD, DGTSFUN)
 
           call init_binary_output_wc
           call write_binary_output_wc(dtime0)
@@ -861,17 +860,17 @@
            end if
 
 
-           print *,'WRITING BS STATE VARIABLE INITIAL',
-     *               ' VALUES FOR SELECTED NODES'
+           print *,'WRITING BS STATE VARIABLE INITIAL', &
+     &               ' VALUES FOR SELECTED NODES'
      
            !sed_output gets values of state and derived vars by sed_recalc_ini 
 
-           call biotser_write(1, 'bs',sed_output,nsoutput,nsstate,
-     *               dg_sed,NDIAGVAR_sed,
-     *               ilhkv_sed,NOSLAY,
-     *               itmc,idtc,
-     *               NBIOTSMX_sed,NBIOTS_sed,BIOTSNOD_sed,BIOTSFUN_sed,
-     *               NDGTSMX_sed, NDGTS_sed, DGTSNOD_sed, DGTSFUN_sed)
+           call biotser_write(1, 'bs',sed_output,nsoutput,nsstate, &
+     &               dg_sed,NDIAGVAR_sed, &
+     &               ilhkv_sed,NOSLAY, &
+     &               itmc,idtc, &
+     &               NBIOTSMX_sed,NBIOTS_sed,BIOTSNOD_sed,BIOTSFUN_sed, &
+     &               NDGTSMX_sed, NDGTS_sed, DGTSNOD_sed, DGTSFUN_sed)
      
            call init_binary_output_bs      
            call write_binary_output_bs(dtime0)
@@ -1092,26 +1091,26 @@
 !         print *,'pppppppppppppppppppppppppppppppppp'
 !         print *, 'before AQUABC'   
 
-            CALL AQUABC_II(nkn,lmax_fast,nlayers,
-     *                  tday,dtday,
-     *                  vol_fast,vol_old_fast,area_fast,
-     *                  depth_fast,vel_fast,
-     *                  wtemp_fast, sal_fast,
-     *                  wind_fast,atemp_fast,
-     *                  light_fast,FDAY,
-     *                  ice_cover_fast,
-     *                  elaux,
-     *                  par,nconst,
-     *                  e_fast0,e_fast1,nstate,
-     *                  wc_output, noutput,
-     *                  dg, NDIAGVAR,
-     *                  bsedim,
-     *                  par_sed,nsconst,
-     *                  es_fast0, es_fast1,
-     *                  nsstate,noslay,
-     *                  waves_fast,
-     *                  sed_output, nsoutput,
-     *                  dg_sed, NDIAGVAR_sed,ifirst_it)
+            CALL AQUABC_II(nkn,lmax_fast,nlayers, &
+     &                  tday,dtday, &
+     &                  vol_fast,vol_old_fast,area_fast, &
+     &                  depth_fast,vel_fast, &
+     &                  wtemp_fast, sal_fast, &
+     &                  wind_fast,atemp_fast, &
+     &                  light_fast,FDAY, &
+     &                  ice_cover_fast, &
+     &                  elaux, &
+     &                  par,nconst, &
+     &                  e_fast0,e_fast1,nstate, &
+     &                  wc_output, noutput, &
+     &                  dg, NDIAGVAR, &
+     &                  bsedim, &
+     &                  par_sed,nsconst, &
+     &                  es_fast0, es_fast1, &
+     &                  nsstate,noslay, &
+     &                  waves_fast, &
+     &                  sed_output, nsoutput, &
+     &                  dg_sed, NDIAGVAR_sed,ifirst_it)
 
              !print *,'aquabc_fem_interface: Leaving AQUABC'
              
@@ -1224,12 +1223,12 @@
 
 ! WATER COLUMN TEXT OUTPUT
 
-        call biotser_write(0, 'wc',wc_output, noutput, nstate,
-     *                  dg, NDIAGVAR,
-     *                  ilhkv,nlvdi,
-     *                  itmc,idtc,
-     *                  NBIOTSMX,NBIOTS,BIOTSNOD,BIOTSFUN,
-     *                  NDGTSMX,NDGTS, DGTSNOD, DGTSFUN)
+        call biotser_write(0, 'wc',wc_output, noutput, nstate, &
+     &                  dg, NDIAGVAR, &
+     &                  ilhkv,nlvdi, &
+     &                  itmc,idtc, &
+     &                  NBIOTSMX,NBIOTS,BIOTSNOD,BIOTSFUN, &
+     &                  NDGTSMX,NDGTS, DGTSNOD, DGTSFUN)
 
          if(idump.eq.1 .and. it .eq. itend) then
             call  dump_aquabc('dump_wc.dat',e, &
@@ -1241,12 +1240,12 @@
 ! BOTTOM SEDIMENTS TEXT OUPUT
           if( bsedim ) then
 
-           call biotser_write(0, 'bs',sed_output,nsoutput,nsstate,
-     *                   dg_sed,NDIAGVAR_sed,
-     *                    ilhkv_sed,NOSLAY,
-     *                    itmc,idtc,
-     *            NBIOTSMX_sed,NBIOTS_sed,BIOTSNOD_sed,BIOTSFUN_sed,
-     *            NDGTSMX_sed, NDGTS_sed, DGTSNOD_sed, DGTSFUN_sed)
+           call biotser_write(0, 'bs',sed_output,nsoutput,nsstate, &
+     &                   dg_sed,NDIAGVAR_sed, &
+     &                    ilhkv_sed,NOSLAY, &
+     &                    itmc,idtc, &
+     &            NBIOTSMX_sed,NBIOTS_sed,BIOTSNOD_sed,BIOTSFUN_sed, &
+     &            NDGTSMX_sed, NDGTS_sed, DGTSNOD_sed, DGTSFUN_sed)
 
           if(idump.eq.1 .and. it .eq. itend) then
 !          Dumping last time moment for repeated runs
@@ -1435,9 +1434,12 @@
 !                              TIME STEP has been fixed
 
 
+	use basin
+	use levels
+	use evgeom
+
 	implicit none
 
-      include 'param.h'
 	integer nstate
 	parameter(nstate=9)
 
@@ -1445,17 +1447,7 @@
 !     CORPI, 15 July 2004
 !     TAKE CARE
 !     eload(3,neldim,nstate) -----> eload(nlvdim,nkndim,nstate)
-	real eload(nlvdim,nkndim,nstate)
-
-      integer nkn,nel,nrz,nrq,nrb,nbc,ngr,mbw
-      common /nkonst/ nkn,nel,nrz,nrq,nrb,nbc,ngr,mbw
-
-	real ev(13,1)
-	common /ev/ev
-	integer nen3v(3,1)
-	common /nen3v/nen3v
-	real hm3v(3,1)
-	common /hm3v/hm3v
+	real eload(nlvdi,nkn,nstate)
 
 !	ADDED BY PETRAS AND ALI
 !     CORPI, 19 July 2004
@@ -1517,7 +1509,7 @@
 
 	save itloa2, preit2
 
-    	integer aree(nkndim)
+    	integer aree(nkn)
 
 
 !	ADDED BY PETRAS AND ALI
@@ -1667,8 +1659,6 @@
 
 !	ADDED BY ALI
 !     CORPI, 02 August 2004
-      integer ipv(nkndim)	!external node numbers
-      common  /ipv/ipv
 
 
 !	ADDED BY PETRAS AND ALI
@@ -2260,9 +2250,6 @@
       
 	implicit none
 
-      !include 'param.h'
-      !include 'aquabc_II.h'
-
       integer ulog,it 
        
       integer nslayer   
@@ -2271,11 +2258,6 @@
       character*(*) title
       real e(nlvdi,nkndi,nstate)	        !state vector
       real es(NOSLAY,nkndi,nsstate)		!sediment state variables
-
-        !integer nkn,nel,nrz,nrq,nrb,nbc,ngr,mbw
-        !common /nkonst/ nkn,nel,nrz,nrq,nrb,nbc,ngr,mbw
-        !integer nlvdi,nlv
-        !common /level/ nlvdi,nlv
 
         character*16 text
         integer i
@@ -2287,13 +2269,13 @@
         text = '!!! BIO CHECK'
 ! Changed by Petras 11 January 2005 to pass number of variable
        do i=1,nstate
-        call check2Dbio(it,ulog,nlvdi,nkndi,70+i,e(1,1,i),
-     *                     -0.001,25.,text,title)
+        call check2Dbio(it,ulog,nlvdi,nkndi,70+i,e(1,1,i), &
+     &                     -0.001,25.,text,title)
        end do
 
 		do i=1,nsstate
-        call check2Dbio(it,ulog,nslayer,nkndi,100+i,es(1,1,i),
-     *                     -0.001,100000.,text,title)
+        call check2Dbio(it,ulog,nslayer,nkndi,100+i,es(1,1,i), &
+     &                     -0.001,100000.,text,title)
         end do
 
       end
@@ -2310,10 +2292,6 @@
         
         implicit none
 
-        !include 'param.h'
-
-        !integer ipv(nkndi) !external numbers of nodes
-        !common /ipv/ipv
         integer n   ,nlv
         integer nvar         !state variable number
         real a(nlv,1)     !array of variable values for levels and nodes
@@ -2392,9 +2370,6 @@
 
         implicit none
 
-        !include 'param.h'
-        !include 'nbasin.h'
-
         character*(*) name           !name of variable
         real var(nlvdi,nkndi,1)    !variable to set for water column (name='bioin')
 
@@ -2404,11 +2379,6 @@
                                     !2 - heterogeneous initial conditions.
                                     !3 - homogeneous layers
                                     !4 - heterogenous for repeated runs
-
-        !integer nkn,nel,nrz,nrq,nrb,nbc,ngr,mbw
-        !common /nkonst/ nkn,nel,nrz,nrq,nrb,nbc,ngr,mbw
-        !real hlv(1)       !hlv(i)absolute depth of layer i bottom
-        !common /hlv/hlv
 
         character*80 file
         integer nb,irec
@@ -2572,8 +2542,8 @@
       do ivar=1,nvar
        read(nb, *, err=90) (varval_array(l),l=1,lmax)
 
-       print *,'Initial condition: ','var= ',ivar,'value=',
-     *       (varval_array(l),l=1,lmax)
+       print *,'Initial condition: ','var= ',ivar,'value=', &
+     &       (varval_array(l),l=1,lmax)
 
        do l=1,lmax
         do k=1,nkn
@@ -2657,10 +2627,6 @@
 
         implicit none
 
-        !include 'param.h'
-        !include 'aquabc_II.h'
-        !include 'nbasin.h'
-
         character*(*) name           !name of variable
 
         real var(noslay,nkndi,1)   !variable to set for bottom sediments (name='biosin')
@@ -2670,11 +2636,6 @@
                                     !2 - heterogeneous initial conditions.
                                     !3 - homogeneous layers for BS
                                     !4 - heterogenous for repeated runs
-
-        !integer nkn,nel,nrz,nrq,nrb,nbc,ngr,mbw
-        !common /nkonst/ nkn,nel,nrz,nrq,nrb,nbc,ngr,mbw
-        !real hlv(1)       !hlv(i)absolute depth of bottom of layer i
-        !common /hlv/hlv
 
         character*80 file
         integer nb,irec
@@ -2839,8 +2800,8 @@
       do ivar=1,nvar
        read(nb, *, err=90) (varval_array(l),l=1,lmax)
 
-       print *,'Initial condition: ','var= ',ivar,'value=',
-     *       (varval_array(l),l=1,lmax)
+       print *,'Initial condition: ','var= ',ivar,'value=', &
+     &       (varval_array(l),l=1,lmax)
 
        do l=1,lmax
         do k=1,nkn
@@ -2948,8 +2909,8 @@
         secs = rem - mins*60.
 
 
-        write(6,'(" RUN TIME: ",i3,"d",i2,"h",i2,"m",f6.3,"s")')
-     *            days,hours,mins,secs
+        write(6,'(" RUN TIME: ",i3,"d",i2,"h",i2,"m",f6.3,"s")') &
+     &            days,hours,mins,secs
 
       end !calc_run_time
 
@@ -3006,10 +2967,10 @@
        call dtsini(date0,0)              ! Initializing time routine
 
 
-       call dts2it(start_times,s_year,s_month,s_day,
-     *             s_hour,s_mins,s_sec)
-       call dts2it(end_times,e_year,e_month,e_day,
-     *               e_hour,e_mins,e_sec)
+       call dts2it(start_times,s_year,s_month,s_day, &
+     &             s_hour,s_mins,s_sec)
+       call dts2it(end_times,e_year,e_month,e_day, &
+     &               e_hour,e_mins,e_sec)
 
        start_time = dble(start_times) + 0.001*dble(start_array(8))
        end_time   = dble(end_times)   + 0.001*dble(end_array(8))
@@ -3018,14 +2979,14 @@
 
 
        write(6,*)'==============================='
-       write(6,'(a8,i4.4,"-",i2.2,"-",i2.2," ",
-     *           i2.2,":",i2.2,":",i2.2,":",i3.3)') ' START :',
-     *           s_year, s_month, s_day,
-     *           s_hour, s_mins, s_sec, start_array(8)
-       write(6,'(a8,i4.4,"-",i2.2,"-",i2.2, " ",
-     *           i2.2,":",i2.2,":",i2.2,":",i3.3)') ' FINISH:',
-     *           e_year, e_month, e_day,
-     *           e_hour, e_mins, e_sec, end_array(8)
+       write(6,'(a8,i4.4,"-",i2.2,"-",i2.2," ", &
+     &           i2.2,":",i2.2,":",i2.2,":",i3.3)') ' START :', &
+     &           s_year, s_month, s_day, &
+     &           s_hour, s_mins, s_sec, start_array(8)
+       write(6,'(a8,i4.4,"-",i2.2,"-",i2.2, " ", &
+     &           i2.2,":",i2.2,":",i2.2,":",i3.3)') ' FINISH:', &
+     &           e_year, e_month, e_day, &
+     &           e_hour, e_mins, e_sec, end_array(8)
 
        call calc_run_time (run_time)
        write(6,*)'==============================='
@@ -3055,11 +3016,11 @@
 !     Subroutine extended to read diagnostic output control information
 !CCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCC
 
-      subroutine biotser_init(nb,nstate,
-     *                       NBIOTSMX,NBIOTS,
-     *                       BIOTSNOD,BIOTSFUN,
-     *                       NDGTSMX,NDIAGVAR,
-     *                       NDGTS,DGTSNOD,DGTSFUN)
+      subroutine biotser_init(nb,nstate, &
+     &                       NBIOTSMX,NBIOTS, &
+     &                       BIOTSNOD,BIOTSFUN, &
+     &                       NDGTSMX,NDIAGVAR, &
+     &                       NDGTS,DGTSNOD,DGTSFUN)
 
 
       integer nstate
@@ -3169,19 +3130,19 @@
      &                'WILL BE CREATED'
 	end if
 
-C     Read RECORD 4 - Read two lines
+!     Read RECORD 4 - Read two lines
       read(nb, 5010, err=102) header
       read(nb, 5010, err=102) header
 
 
       do j=1, nstate
-C         Read RECORD 5
+!         Read RECORD 5
           read(nb, 5010, err=103) header
           write(*,*) 'RECORD 5 Read for state variable ', j
 
 !          write(6,*)'bioser_init:', 'j=',j, 'NDGTS: ',NDGTS
 
-C         Read RECORD 6
+!         Read RECORD 6
           read(nb, *, err=104) NDGTS(j)
           write(*,*) 'RECORD 6 Read for state variable ', j
 	    if(NDGTS(j).LT.0) then
@@ -3311,12 +3272,12 @@ C         Read RECORD 6
 !*******************************************************************************
 !*******************************************************************************
 
-       subroutine biotser_write(initial,what,
-     *                         e,noutput,nstate,dg,NDIAGVAR,
-     *                         ilhkv,nlvd,
-     *                         itmcon,idtcon,
-     *                         NBIOTSMX,NBIOTS,BIOTSNOD,BIOTSFUN,
-     *                         NDGTSMX, NDGTS, DGTSNOD, DGTSFUN)
+       subroutine biotser_write(initial,what, &
+     &                         e,noutput,nstate,dg,NDIAGVAR, &
+     &                         ilhkv,nlvd, &
+     &                         itmcon,idtcon, &
+     &                         NBIOTSMX,NBIOTS,BIOTSNOD,BIOTSFUN, &
+     &                         NDGTSMX, NDGTS, DGTSNOD, DGTSFUN)
 
 !ccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccc
 ! Writes state variable(water column or sediments) and rates for defined
@@ -3339,11 +3300,9 @@ C         Read RECORD 6
 !
 !ccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccc
       use basin
+	use femtime
       
       implicit none
-      !include 'param.h'
-      integer itanf,itend,idt,nits,niter,it
-      common /femtim/ itanf,itend,idt,nits,niter,it
 
       real e(nlvd,nkndi,noutput)	!state variables
       real dg  (nlvd,nkndi,nstate,NDIAGVAR) !intermediate variables
@@ -3450,20 +3409,20 @@ C         Read RECORD 6
 
 
              if (ilhkv(BIOTSNOD(i)).le.1) then
-              if(isec.eq.1) write(BIOTSFUN(i),FMT_1) it,
-     *                           (e(1,BIOTSNOD(i),j),j=1,noutput)
+              if(isec.eq.1) write(BIOTSFUN(i),FMT_1) it, &
+     &                           (e(1,BIOTSNOD(i),j),j=1,noutput)
 
-              if(isec.eq.0) write(BIOTSFUN(i),FMT_1_d)
-     *                            year,month,day,hour,min,sec,
-     *                           (e(1,BIOTSNOD(i),j),j=1,noutput)
+              if(isec.eq.0) write(BIOTSFUN(i),FMT_1_d) &
+     &                            year,month,day,hour,min,sec, &
+     &                           (e(1,BIOTSNOD(i),j),j=1,noutput)
 
              else
               do k=1,ilhkv(BIOTSNOD(i))
-               if(isec.eq.1) write(BIOTSFUN(i),FMT_many) it,k,
-     *                               (e(k,BIOTSNOD(i),j),j=1,noutput)
-               if(isec.eq.0) write(BIOTSFUN(i),FMT_many_d)
-     *                                year,month,day,hour,min,sec,k,
-     *                               (e(k,BIOTSNOD(i),j),j=1,noutput)
+               if(isec.eq.1) write(BIOTSFUN(i),FMT_many) it,k, &
+     &                               (e(k,BIOTSNOD(i),j),j=1,noutput)
+               if(isec.eq.0) write(BIOTSFUN(i),FMT_many_d) &
+     &                                year,month,day,hour,min,sec,k, &
+     &                               (e(k,BIOTSNOD(i),j),j=1,noutput)
               enddo
              endif
 
@@ -3475,9 +3434,9 @@ C         Read RECORD 6
 
        end do
 ! Write to the standard output
-          write(6,*) 'BIOTSER_WRITE: ',what, ' variables ',
-     *     ' for defined nodes',
-     *     ' written to text files at ',it
+          write(6,*) 'BIOTSER_WRITE: ',what, ' variables ', &
+     &     ' for defined nodes', &
+     &     ' written to text files at ',it
 
       if (initial.eq.1) return ! Writing initial conditions only
 
@@ -3497,14 +3456,14 @@ C         Read RECORD 6
 
         else
          do k=1,ilhkv(DGTSNOD(i,istate))
-          if(isec.eq.1) write(DGTSFUN(i,istate),FMT_diag_many)
-     *              it,k,
-     *              (dg(k,DGTSNOD(i,istate),istate,j),
-     *                                  j=1,NDIAGVAR)
-          if(isec.eq.0) write(DGTSFUN(i,istate),FMT_diag_many_d)
-     *                          year,month,day,hour,min,sec,k,
-     *                      (dg(k,DGTSNOD(i,istate),istate,j),
-     *                                  j=1,NDIAGVAR)
+          if(isec.eq.1) write(DGTSFUN(i,istate),FMT_diag_many) &
+     &              it,k, &
+     &              (dg(k,DGTSNOD(i,istate),istate,j), &
+     &                                  j=1,NDIAGVAR)
+          if(isec.eq.0) write(DGTSFUN(i,istate),FMT_diag_many_d) &
+     &                          year,month,day,hour,min,sec,k, &
+     &                      (dg(k,DGTSNOD(i,istate),istate,j), &
+     &                                  j=1,NDIAGVAR)
          enddo
         endif
 
@@ -3549,7 +3508,7 @@ C         Read RECORD 6
 
 !     execution part
 
-      if( npar. ne. nconst) then
+      if( npar .ne. nconst) then
         print *, 'CUR_PARAM_READ_INI_WC:'
         print *, '  wrong required number of params'
         print *, '  required: ',nconst
@@ -3952,7 +3911,7 @@ C         Read RECORD 6
 
 !     execution part
 
-      if( npar. ne. nconst) then
+      if( npar .ne. nconst) then
         print *, 'CUR_PARAM_READ_INI_BS:'
         print *, '  wrong required number of params'
         print *, '  required: ',nconst
@@ -4163,15 +4122,14 @@ C         Read RECORD 6
 ! Output:
 !   par     - parameters array. Is initialized but not used more. Fixme
 ! Uses:
-!   module para_aqua (it is necessary to all routines mentioned above)
+!   module aquabc_II_para_aqua (it is necessary to all routines mentioned above)
 ! Called:
 !   by AQUABCINI
 !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
 
-      use para_aqua
+      use aquabc_II_para_aqua
       implicit none
 
-      !include 'aquabc_II.h'
       integer nconst
       character*2 what !'wc' - for water column
                        !'bs' - for bottom sediments
@@ -4185,16 +4143,16 @@ C         Read RECORD 6
       integer j,iassign
       integer ifile
 
-C     ARRAY FOR MODEL CONSTANTS
+!     ARRAY FOR MODEL CONSTANTS
       real par(nconst)
 
-C     MODEL CONSTANTS DATA TYPE
+!     MODEL CONSTANTS DATA TYPE
       integer ctype
 
-C     GENERAL PURPOSE COUNTER FOR ARRAY INDICES, ....
+!     GENERAL PURPOSE COUNTER FOR ARRAY INDICES, ....
       integer i
 
-C     INITIALIZE ARRAYS BEFORE READING
+!     INITIALIZE ARRAYS BEFORE READING
 
       do i=1, nconst
           par(i)   = 0.0
@@ -4326,8 +4284,8 @@ C     INITIALIZE ARRAYS BEFORE READING
         write(6,*) 'Number of parameters ',nconst
 
         do j = 1,nconst
-          if (bname(j). ne. ' ' ) write(*,44) j,trim(adjustl(bname(j))),
-     *        par(j)
+          if (bname(j) .ne. ' ' ) write(*,44) j,trim(adjustl(bname(j))), &
+     &        par(j)
         end do
 
         write(*,*)
@@ -4343,12 +4301,12 @@ C     INITIALIZE ARRAYS BEFORE READING
 !********************************************************************
 
 
-      subroutine aquabcini(bsedim,par,par_sed,PHTIME,PHTAB,
-     *                     TEMPTIME,TEMPTAB,
-     *                     NBIOTS, BIOTSNOD, BIOTSFUN,
-     *                     NBIOTS_sed, BIOTSNOD_sed, BIOTSFUN_sed,
-     *                     NDGTS, DGTSNOD, DGTSFUN,
-     *                     NDGTS_sed,DGTSNOD_sed,DGTSFUN_sed)
+      subroutine aquabcini(bsedim,par,par_sed,PHTIME,PHTAB, &
+     &                     TEMPTIME,TEMPTAB, &
+     &                     NBIOTS, BIOTSNOD, BIOTSFUN, &
+     &                     NBIOTS_sed, BIOTSNOD_sed, BIOTSFUN_sed, &
+     &                     NDGTS, DGTSNOD, DGTSFUN, &
+     &                     NDGTS_sed,DGTSNOD_sed,DGTSFUN_sed)
 
 
 !   Initializes aquabc routines for writing results to ASCII files
@@ -4367,7 +4325,6 @@ C     INITIALIZE ARRAYS BEFORE READING
     
 	implicit none
 
-	!include 'aquabc_II.h'
 	include 'aquabc_II_aout.h'
 
 	logical bsedim
@@ -4419,11 +4376,11 @@ C     INITIALIZE ARRAYS BEFORE READING
        print *,'Control file name for Water Column variables ', &
      &       ' ASCII output',file
 
-       call biotser_init(nb,nstate,
-     *                        NBIOTSMX,NBIOTS,
-     *                        BIOTSNOD,BIOTSFUN,
-     *                        NDGTSMX,NDIAGVAR,
-     *                        NDGTS,DGTSNOD,DGTSFUN)
+       call biotser_init(nb,nstate, &
+     &                        NBIOTSMX,NBIOTS, &
+     &                        BIOTSNOD,BIOTSFUN, &
+     &                        NDGTSMX,NDIAGVAR, &
+     &                        NDGTS,DGTSNOD,DGTSFUN)
 
        if (bsedim) then
        write(6,*) '--------------------------------------------------' &
@@ -4448,17 +4405,17 @@ C     INITIALIZE ARRAYS BEFORE READING
         stop
       end if
 
-       print *,'Control file unit number for Botom Sediments',
-     * '  variables  ASCII output',nb_sed
-       print *,'Control file name for Botom Sediments variables ',
-     * ' ASCII output',file_sed
+       print *,'Control file unit number for Botom Sediments', &
+     & '  variables  ASCII output',nb_sed
+       print *,'Control file name for Botom Sediments variables ', &
+     & ' ASCII output',file_sed
 
 
-       call biotser_init(nb_sed,nsstate,
-     *                        NBIOTSMX_sed,NBIOTS_sed,
-     *                        BIOTSNOD_sed,BIOTSFUN_sed,
-     *                        NDGTSMX_sed,NDIAGVAR_sed,
-     *                        NDGTS_sed,DGTSNOD_sed,DGTSFUN_sed)
+       call biotser_init(nb_sed,nsstate, &
+     &                        NBIOTSMX_sed,NBIOTS_sed, &
+     &                        BIOTSNOD_sed,BIOTSFUN_sed, &
+     &                        NDGTSMX_sed,NDIAGVAR_sed, &
+     &                        NDGTS_sed,DGTSNOD_sed,DGTSFUN_sed)
 
        endif
 
@@ -4512,8 +4469,8 @@ C     INITIALIZE ARRAYS BEFORE READING
 
  1020     CONTINUE
 
-              READ(INFUN, *, ERR = 100, END = 200)
-     *             PHTIME(I), PH(I)
+              READ(INFUN, *, ERR = 100, END = 200) &
+     &             PHTIME(I), PH(I)
 
 
               IF (I .GT. 1) THEN
@@ -4610,8 +4567,8 @@ C     INITIALIZE ARRAYS BEFORE READING
 
  1020     CONTINUE
 
-              READ(INFUN, *, ERR = 100, END = 200)
-     *             TEMPTIME(I), TEMP(I)
+              READ(INFUN, *, ERR = 100, END = 200) &
+     &             TEMPTIME(I), TEMP(I)
 
 
               IF (I .GT. 1) THEN
@@ -4646,8 +4603,8 @@ C     INITIALIZE ARRAYS BEFORE READING
 
   101     CONTINUE
 
-          WRITE(6,*) "READ_TEMP : ",
-     *    "Time must be greater than previous time"
+          WRITE(6,*) "READ_TEMP : ", &
+     &    "Time must be greater than previous time"
 
           WRITE(6, FMT = "(A7, I5)") "LINE : ", I
           STOP
@@ -4655,8 +4612,8 @@ C     INITIALIZE ARRAYS BEFORE READING
 
   102     CONTINUE
 
-          WRITE(6,*) "READ_TEMP : ",
-     *    "Temparature must be between -2.0 and 65.0"
+          WRITE(6,*) "READ_TEMP : ", &
+     &    "Temparature must be between -2.0 and 65.0"
 
           WRITE(6,*) "Temperature you entered is :", TEMP(I)
           WRITE(6, FMT = "(A7, I5)") "LINE : ", I
@@ -4752,11 +4709,11 @@ C     INITIALIZE ARRAYS BEFORE READING
                   PREV_H = 10.0**(-PH(P_IND))
                   NEXT_H = 10.0**(-PH(N_IND))
 
-                  H_INCR = (NEXT_H - PREV_H) /
-     *                     (PHTIME(N_IND) - PHTIME(P_IND))
+                  H_INCR = (NEXT_H - PREV_H) / &
+     &                     (PHTIME(N_IND) - PHTIME(P_IND))
 
-                  H_PLUS = PREV_H +
-     *                     (H_INCR * (TIME - PHTIME(P_IND)))
+                  H_PLUS = PREV_H + &
+     &                     (H_INCR * (TIME - PHTIME(P_IND)))
 
                   GET_PH = -LOG10(H_PLUS)
 
@@ -4837,11 +4794,11 @@ C     INITIALIZE ARRAYS BEFORE READING
                   N_IND = I
 
 
-                  T_INCR = (TEMP(N_IND) - TEMP(P_IND)) /
-     *                     (TEMPTIME(N_IND) - TEMPTIME(P_IND))
+                  T_INCR = (TEMP(N_IND) - TEMP(P_IND)) / &
+     &                     (TEMPTIME(N_IND) - TEMPTIME(P_IND))
 
-                  GET_TEMP = TEMP(P_IND) +
-     *                       (T_INCR * (TIME - TEMPTIME(P_IND)))
+                  GET_TEMP = TEMP(P_IND) + &
+     &                       (T_INCR * (TIME - TEMPTIME(P_IND)))
 
               END IF
 

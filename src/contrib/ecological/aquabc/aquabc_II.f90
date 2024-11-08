@@ -129,21 +129,14 @@ subroutine AQUABC_II(nkn,lmax_fast, nlayers, &
     !
     !cccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccc
     use aquabc_II_sed_ini
-    use para_aqua       
+    use aquabc_II_para_aqua       
              
     use levels, only: nlvdi
     use basin, only: ipv, nkndi
-    use aquabc_pel_state_var_indexes
+    use aquabc_II_pel_state_var_indexes
     use aquabc_II_layers_data
 
     implicit none
-
-    ! This include is commented because it is present in aquabc_II_sed_ini
-    !include 'param.h'
-    !include 'basin.h' !ipv is used from there
-
-    !integer ipv(nkndim)	!external node numbers
-    !common  /ipv/ipv
 
     logical bsedim                      !  false - no bottom sediments processing
                                         !  true - b. sed. procesing
@@ -1640,8 +1633,8 @@ subroutine AQUABC_II(nkn,lmax_fast, nlayers, &
 !       is not removed from parameters list. Fixme
 !=============================================================
 
-      use para_aqua
-      use aquabc_pel_state_var_indexes
+      use aquabc_II_para_aqua
+      use aquabc_II_pel_state_var_indexes
 
       implicit none
 
@@ -1718,7 +1711,7 @@ subroutine AQUABC_II(nkn,lmax_fast, nlayers, &
       ! Takes  into account only Chl a in this version
       ! Calculates only for nodes that exist for current layer
 
-          use para_aqua
+          use aquabc_II_para_aqua
 
           IMPLICIT NONE
 
@@ -1888,11 +1881,10 @@ subroutine derived_vars(nkn,nstate, nlayers, lmax_fast, STATE_VARIABLES,  &
 !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
 
   use AQUABC_II_GLOBAL
-  use para_aqua
-  use aquabc_pel_state_var_indexes
+  use aquabc_II_para_aqua
+  use aquabc_II_pel_state_var_indexes
 
   implicit none
-  include 'param.h'
 
 ! Inputs:
   integer         , intent(in) :: nkn, nstate, nlayers

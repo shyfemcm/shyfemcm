@@ -45,6 +45,8 @@
 	!use mod_depth
 	!use levels
 	use basin, only : nkn,nel,ngr,mbw
+	use femtime
+	use simul
 
 	implicit none
 
@@ -53,21 +55,13 @@
 	integer nvar		!total number of variables to write    (in)
 	character*(*) type	!extension of file		       (in)
 
-	!include 'param.h' !COMMON_GGU_SUBST
-	include 'femtime.h'
-
-	include 'simul.h'
-! 	include 'nbasin.h'
-! 	include 'levels.h'
-! 	include 'depth.h'
-
-	integer nvers
-	integer date,time
+	!integer nvers
+	!integer date,time
 	integer iu,ierr
-	character*80 title,femver
+	!character*80 title,femver
 
-	integer ifemop
-	double precision dgetpar
+	!integer ifemop
+	!double precision dgetpar
 
 	!Variables to run for bottom sediment kinetics	
 	!integer ilhkv_(nkn)
@@ -81,43 +75,43 @@
 ! open file
 !-----------------------------------------------------
 
-	iu = ifemop(type,'unformatted','new')
-	if( iu .le. 0 ) goto 98
-	ia_out(4) = iu
+	!iu = ifemop(type,'unformatted','new')
+	!if( iu .le. 0 ) goto 98
+	!ia_out(4) = iu
 
 !-----------------------------------------------------
 ! initialize parameters
 !-----------------------------------------------------
 
-	nvers = 5
-	date = nint(dgetpar('date'))
-	time = nint(dgetpar('time'))
-	title = descrp
-	call get_shyfem_version(femver)
+	!nvers = 5
+	!date = nint(dgetpar('date'))
+	!time = nint(dgetpar('time'))
+	!title = descrp
+	!call get_shyfem_version(femver)
 
 !-----------------------------------------------------
 ! write header of file
 !-----------------------------------------------------
 
-	call nos_init(iu,nvers)
-	call nos_set_title(iu,title)
-	call nos_set_date(iu,date,time)
-	call nos_set_femver(iu,femver)
-	call nos_write_header(iu,nkn,nel,nlv,nvar,ierr)
-        if(ierr.gt.0) goto 99
+	!call nos_init(iu,nvers)
+	!call nos_set_title(iu,title)
+	!call nos_set_date(iu,date,time)
+	!call nos_set_femver(iu,femver)
+	!call nos_write_header(iu,nkn,nel,nlv,nvar,ierr)
+        !if(ierr.gt.0) goto 99
     
     ! ilhkv(nkndim) from levels  - number of layers for each node
     ! hlv(nlvdim)   from levels  - absolute(from surface) depth of layer bottom
     ! hev(neldim)   from depth.h - depth of element
        
-	call nos_write_header2(iu,ilhkv_,hlv_,hev_,ierr)
-        if(ierr.gt.0) goto 99
+	!call nos_write_header2(iu,ilhkv_,hlv_,hev_,ierr)
+        !if(ierr.gt.0) goto 99
 
 !-----------------------------------------------------
 ! write informational message to terminal
 !-----------------------------------------------------
 
-        write(6,*) 'open_scalar_file_bio: ',type,' file opened ',it
+        !write(6,*) 'open_scalar_file_bio: ',type,' file opened ',it
 
 !-----------------------------------------------------
 ! end of routine
@@ -144,6 +138,7 @@
 ! the file must be open, the file will be written unconditionally
 
 	use basin, only: nkn
+	use femtime
 
 	implicit none
 
@@ -152,43 +147,36 @@
 	integer nlvdi		!vertical dimension of c
 	real c(nlvdi,1)		!scalar to write
 
-	!include 'param.h' !COMMON_GGU_SUBST
-	include 'femtime.h'
-
-	!include 'levels.h'
-
-	logical binfo
+	!logical binfo
 	integer iu,ierr
 	
 	!Variables to run for bottom sediment kinetics		
 	integer ilhkv_(nkn)
 	
-	binfo = .false.
-
-
+	!binfo = .false.
 
 !-----------------------------------------------------
 ! check if files has to be written
 !-----------------------------------------------------
 
-	iu = ia_out(4)
-	if( iu .le. 0 ) return
+	!iu = ia_out(4)
+	!if( iu .le. 0 ) return
 
 !-----------------------------------------------------
 ! write file
 !-----------------------------------------------------
 
-	call nos_write_record(iu,it,ivar,nlvdi,ilhkv_,c,ierr)
-	if(ierr.gt.0) goto 99
+	!call nos_write_record(iu,it,ivar,nlvdi,ilhkv_,c,ierr)
+	!if(ierr.gt.0) goto 99
 
 !-----------------------------------------------------
 ! write informational message to terminal
 !-----------------------------------------------------
 
-	if( binfo ) then
-      write(6,*) 'write_scalar_file_bio: ivar = ', &
-     & ivar,' written at ',it
-	end if
+	!if( binfo ) then
+      !write(6,*) 'write_scalar_file_bio: ivar = ', &
+     !& ivar,' written at ',it
+	!end if
 
 !-----------------------------------------------------
 ! end of routine
@@ -281,10 +269,9 @@
 	use levels, only : nlvdi,nlv
 	use basin, only : nkn
 	use flux
+	use simul
 
 	implicit none
-
-	include 'simul.h'
 
 	character(len=4) :: ext		!extension of new file (e.g., '.fxw')
 	integer ivbase			!base for variable numbers
