@@ -226,6 +226,7 @@ supout.o: ../../../lib/mod/basin.mod ../../../lib/mod/levels.mod \
 		../../../lib/mod/simul.mod 
 supsim.o: ../../../lib/mod/basin.mod ../../../lib/mod/levels.mod \
 		../../../lib/mod/mod_color.mod \
+		../../../lib/mod/mod_connect.mod \
 		../../../lib/mod/mod_depth.mod \
 		../../../lib/mod/mod_geom.mod \
 		../../../lib/mod/mod_hydro.mod \

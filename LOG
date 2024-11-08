@@ -1,4 +1,54 @@
 
+08.11.2024
+
+! ./src/shyfem/tidef.f90:
+! 15.10.2024	ggu	bug fix for INTEL_BUG (IFX)
+!
+! ./src/shyfem/lnkmpi.f90:
+! 07.11.2024    ggu     updated to new connection framework
+!
+! ./src/tools/shyelab/shyelab1.f90:
+! 17.10.2024    ggu     for shy_make_basin_aver() allow for percentile
+!
+! ./src/tools/shyelab/elabutil.f90:
+! 17.10.2024    ggu     new option percentile
+! 24.10.2024    ggu     new option smooth
+!
+! ./src/utils/shympi/shyparts_basutil.f90:
+! 07.11.2024    ggu     ignore connection errors
+!
+! ./src/utils/shympi/shyparts_metis.f90:
+! 15.10.2024	ggu	set array tpwgts (which is real, not dble) (IFX bug)
+!
+! ./src/utils/generic/grd.f90:
+! 07.11.2024	ggu	in write_grd_file_with_detail() also write zoom window
+!
+! ./src/utils/generic/connections.f90:
+! 07.11.2024	ggu	is ready now (completely auto-sufficient)
+!
+! ./src/utils/shyutilmpi/topo_update.f90:
+! 07.11.2024	ggu	updated call to update_ielt()
+!
+! ./src/utils/shyutilmpi/shy_util1.f90:
+! 17.10.2024    ggu     in shy_make_basin_aver() allow for percentile
+!
+! ./src/utils/shyutilmpi/depth_util.f90:
+! 15.10.2024	ggu	INTEL_BUG (IFX) solved
+!
+! ./src/utils/shyutil/topological.f90:
+! 07.11.2024	ggu	new framework for connection
+!
+! ./src/utils/shyutil/geom.f90:
+! 07.11.2024	ggu	introduced buselink (must be false)
+! ./src/utils/shyutil/links.f90:
+! 07.11.2024    ggu     this file is not used anymore
+!
+! ./src/utils/shyutil/shyaver.f90:
+! 18.10.2024	ggu	shyaver started
+! ./src/utils/shyutil/lnku.f90:
+! 07.11.2024	ggu	new framework for connection
+
+
 14.10.2024
 
 ! ./src/shyfem/explicit.f90:

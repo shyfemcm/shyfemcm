@@ -703,7 +703,8 @@ lagrange_vertical.o: ../../lib/mod/basin.mod \
 		../../lib/mod/mod_hydro_vel.mod \
 		../../lib/mod/mod_lagrange.mod 
 line_admin.o: ../../lib/mod/basin.mod ../../lib/mod/mod_geom.mod
-lnkmpi.o: ../../lib/mod/basin.mod ../../lib/mod/mod_geom.mod \
+lnkmpi.o: ../../lib/mod/basin.mod ../../lib/mod/mod_connect.mod \
+		../../lib/mod/mod_geom.mod \
 		../../lib/mod/shympi.mod 
 meteo_admin.o: ../../lib/mod/basin.mod ../../lib/mod/evgeom.mod \
 		../../lib/mod/levels.mod \
@@ -939,7 +940,8 @@ test_zeta.o: ../../lib/mod/basin.mod ../../lib/mod/mod_hydro.mod \
 tidef.o: ../../lib/mod/basin.mod ../../lib/mod/coordinates.mod \
 		../../lib/mod/iso8601.mod \
 		../../lib/mod/mod_depth.mod \
-		../../lib/mod/mod_hydro.mod ../../lib/mod/tide.mod 
+		../../lib/mod/mod_hydro.mod \
+		../../lib/mod/shympi.mod ../../lib/mod/tide.mod 
 time_admin.o: ../../lib/mod/femtime.mod ../../lib/mod/shympi.mod
 topological_admin.o: ../../lib/mod/basin.mod \
 		../../lib/mod/evgeom.mod \

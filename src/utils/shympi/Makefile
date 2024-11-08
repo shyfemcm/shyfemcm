@@ -243,6 +243,7 @@ mpi_tvd.o: ../../../lib/mod/basin.mod ../../../lib/mod/levels.mod \
 		../../../lib/mod/shympi.mod 
 shyparts_basutil.o: ../../../lib/mod/basin.mod \
 		../../../lib/mod/grd.mod \
+		../../../lib/mod/mod_connect.mod \
 		../../../lib/mod/mod_depth.mod \
 		../../../lib/mod/mod_geom.mod \
 		../../../lib/mod/shympi.mod 
@@ -254,7 +255,8 @@ shyparts_custom.o: ../../../lib/mod/basin.mod \
 		../../../lib/mod/queue.mod 
 shyparts_dummy.o: ../../../lib/mod/basin.mod
 shyparts_metis.o: ../../../lib/mod/basin.mod \
-		../../../lib/mod/mod_geom.mod 
+		../../../lib/mod/mod_geom.mod \
+		../../../lib/mod/shympi.mod 
 shyparts_util.o: ../../../lib/mod/basin.mod \
 		../../../lib/mod/grd.mod 
 
