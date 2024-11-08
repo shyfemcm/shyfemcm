@@ -393,6 +393,7 @@
 ! 20.09.2024	ggu	version 8.0.8   NUOPC final framework edition
 ! 08.10.2024	ggu	version 8.0.9   TVD MPI edition
 ! 14.10.2024	ggu	version 8.0.10  INTEL_BUG edition
+! 08.11.2024	ggu	version 8.1.0   FRAIMA edition
 !
 !*****************************************************************
 
@@ -402,9 +403,9 @@
 
 ! DOCS	START	P_version
 !
-! \newcommand{\VERSION}{8.0.10}
-! \newcommand{\version}{8\_0\_10}
-! \newcommand{\COMMIT}{2024-10-14}
+! \newcommand{\VERSION}{8.1.0}
+! \newcommand{\version}{8\_1\_0}
+! \newcommand{\COMMIT}{2024-11-08}
 !
 ! DOCS	END
 
@@ -412,8 +413,8 @@
 
 	logical, save		:: bshort = .false.
 
-        character*10, parameter :: version = '8.0.10'
-        character*10, parameter :: commit  = '2024-10-14'
+        character*10, parameter :: version = '8.1.0'
+        character*10, parameter :: commit  = '2024-11-08'
         character*17, parameter :: text    = 'SHYFEM VERSION = '
 
         character*40, parameter :: string = text//version//'  '//commit

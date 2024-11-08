@@ -1,5 +1,16 @@
 ============================================================
 
+Fri Nov  8 10:25:23 CET 2024
+
+new stable version
+
+ RELEASE_NOTES                 |   5 +++++
+ docs/final/shyfem.pdf         | Bin 334850 -> 334857 bytes
+ src/utils/shyutil/version.f90 |  11 ++++++-----
+ 3 files changed, 11 insertions(+), 5 deletions(-)
+
+============================================================
+
 Mon Oct 14 18:15:32 CEST 2024
 
 New version 8_0_10
