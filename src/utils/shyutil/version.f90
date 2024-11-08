@@ -394,6 +394,7 @@
 ! 08.10.2024	ggu	version 8.0.9   TVD MPI edition
 ! 14.10.2024	ggu	version 8.0.10  INTEL_BUG edition
 ! 08.11.2024	ggu	version 8.1.0   FRAIMA edition
+! 08.11.2024	ggu	version 8.2.0   FRAIMA edition - develop branch
 !
 !*****************************************************************
 
@@ -403,8 +404,8 @@
 
 ! DOCS	START	P_version
 !
-! \newcommand{\VERSION}{8.1.0}
-! \newcommand{\version}{8\_1\_0}
+! \newcommand{\VERSION}{8.2.0}
+! \newcommand{\version}{8\_2\_0}
 ! \newcommand{\COMMIT}{2024-11-08}
 !
 ! DOCS	END
@@ -413,7 +414,7 @@
 
 	logical, save		:: bshort = .false.
 
-        character*10, parameter :: version = '8.1.0'
+        character*10, parameter :: version = '8.2.0'
         character*10, parameter :: commit  = '2024-11-08'
         character*17, parameter :: text    = 'SHYFEM VERSION = '
 
