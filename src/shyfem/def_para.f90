@@ -1251,6 +1251,22 @@
 	call addpar('icemod',0.)	!use ice model?
 	call addpar('idtice',0.)	!time step for ice model
 
+       ! whether to output - instantaneous salt temp rho fields (icon_av=0),  
+       !                   - time-averaged fields (icon_av=1),  
+       !                   - vertically averged and time-averaged fields (icon_av=1)
+	call addpar('icon_av',0.) 
+       ! whether to output - instantaneous hydrodynamic fields (iout_av=0),  
+       !                   - time-averaged fields (iout_av=1),  
+	call addpar('iout_av',0.) 
+       ! whether to output - instantaneous ecological fields (ieco_av=0),  
+       !                   - time-averaged fields (ieco_av=1),  
+       !                   - vertically averaged and time-averaged fields (ieco_av=2)
+	call addpar('ieco_av',0.) 
+       ! whether to output - instantaneous layer thickness fields (ilayers=0),  
+       !                   - time-averaged thickness fields (ilayers=1),  
+       !                   - vertically averaged and time-averaged fields (ilayers=2)
+	call addpar('ilayers',-1.) 
+
 	end
 
 !************************************************************************

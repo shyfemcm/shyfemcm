@@ -152,7 +152,7 @@ LAGRANGE_OBJ = \
 HEAT_OBJ = \
       meteo_forcing.o meteo_admin.o \
       icemodel.o ice.o \
-      waves.o waves_admin.o ww3_dummy.o \
+      waves_admin.o ww3_dummy.o \
       heat_util2.o heat_admin.o heat_admin2.o \
       heat_temp.o heat_mfsbulk.o heat_coare.o heat_gotm.o \
       heat_areg.o heat_gill.o heat_default.o \
@@ -197,16 +197,15 @@ SEDIMENT_OBJ = \
 MPI_EXTRA_OBJ = \
       mpi_assert.o lnkmpi.o
 
-OBJ = system_matrix.o \
+OBJ = \
       openmp_admin.o \
-      turbulence_util.o nudging.o internal.o \
-      restart.o gotm_aux.o diff_aux.o \
-      area.o roughness.o hydro_baro.o \
+      turbulence_util.o \
+      restart.o gotm_aux.o \
       conz_util.o \
       bnd_scalar.o subset.o tide_utils.o tidef.o \
       bndo.o conz_common.o \
-      bclfix_util.o nohyd.o outputd.o elems_dealing.o sigma_admin.o \
-      transforms.o tsfile_admin.o fluidmud.o mud_admin.o chezy.o \
+      outputd.o elems_dealing.o sigma_admin.o \
+      transforms.o tsfile_admin.o mud_admin.o chezy.o \
       line_admin.o discharge_flux.o flux_util.o \
       flxm.o modls.o \
       ous_admin.o residual.o tvd_admin.o \
@@ -315,6 +314,7 @@ clean:
 	-rm -f *.o
 	-rm -f $(EXES)
 	-rm -f $(BINDIR)/$(EXES)
+	-rm -f *.tmp *.bak
 
 cleanall: clean
 	-rm -f $(MODDIR)/*.mod
@@ -348,35 +348,23 @@ cleanall: clean
 ../../lib/mod/lgr_sedim_module.mod: lagrange_sedim.o
 ../../lib/mod/lines.mod: line_admin.o
 ../../lib/mod/meteo_forcing_module.mod: meteo_forcing.o
-../../lib/mod/mod_area.mod: area.o
-../../lib/mod/mod_bclfix.mod: bclfix_util.o
 ../../lib/mod/mod_bfm.mod: bfm.o
 ../../lib/mod/mod_bndo.mod: bndo.o
 ../../lib/mod/mod_bstress.mod: substress.o
 ../../lib/mod/mod_conz.mod: conz_common.o
-../../lib/mod/mod_diff_aux.mod: diff_aux.o
-../../lib/mod/mod_fluidmud.mod: fluidmud.o
 ../../lib/mod/mod_gotm_aux.mod: gotm_aux.o
-../../lib/mod/mod_hydro_baro.mod: hydro_baro.o
-../../lib/mod/mod_internal.mod: internal.o
 ../../lib/mod/mod_keps.mod: turbulence_util.o
 ../../lib/mod/mod_lagrange.mod: lagrange_data.o
-../../lib/mod/mod_nohyd.mod: nohyd.o
 ../../lib/mod/mod_nudge.mod: nudge.o
-../../lib/mod/mod_nudging.mod: nudging.o
 ../../lib/mod/mod_parwaves.mod: waves_admin.o
 ../../lib/mod/mod_renewal_time.mod: water_ren_time.o
 ../../lib/mod/mod_restart.mod: restart.o
-../../lib/mod/mod_roughness.mod: roughness.o
 ../../lib/mod/mod_sedtrans05.mod: sedim_util.o
 ../../lib/mod/mod_shyfem.mod: shyfem_subs.o
 ../../lib/mod/mod_subset.mod: subset.o
-../../lib/mod/mod_system.mod: system_matrix.o
 ../../lib/mod/mod_system_global.mod: simsys_spkaux.o
 ../../lib/mod/mod_system_global.mod: system_spk.o
-../../lib/mod/mod_system_interface.mod: system_matrix.o
 ../../lib/mod/mod_test_zeta.mod: test_zeta.o
-../../lib/mod/mod_waves.mod: waves.o
 ../../lib/mod/ocean_shyfem.mod: nuopc_shyfem_cap.o
 ../../lib/mod/omp_admin.mod: openmp_admin.o
 ../../lib/mod/poisson.mod: poisson.o

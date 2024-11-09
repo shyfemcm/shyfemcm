@@ -197,7 +197,7 @@ cleanlocal:
 	-rm -f fem.tar fem.tar.gz
 	-rm -f changed_zip.zip
 	-rm -f *~
-	-rm -f *.tmp *.bak *.out
+	-rm -f *.tmp *.bak *.out *.log
 	-rm -f *.revnew
 	-rm -f ggg hhh
 	-rm -f errout.dat a.out plot.ps

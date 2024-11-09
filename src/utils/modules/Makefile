@@ -166,14 +166,26 @@ zip:	cleanall
 # DO NOT DELETE THIS LINE -- make depend depends on it.
 
 ../../../lib/mod/flux.mod: mod_flux.o
-../../../lib/mod/mod_diff_visc_fric.mod: diffusion.o
-../../../lib/mod/mod_hydro.mod: hydro_admin.o
-../../../lib/mod/mod_hydro_print.mod: hydro_print.o
-../../../lib/mod/mod_hydro_vel.mod: hydro_vel.o
-../../../lib/mod/mod_layer_thickness.mod: layer_thickness.o
-../../../lib/mod/mod_meteo.mod: meteo.o
+../../../lib/mod/mod_area.mod: mod_area.o
+../../../lib/mod/mod_bclfix.mod: mod_bclfix.o
+../../../lib/mod/mod_diff_aux.mod: mod_diff_aux.o
+../../../lib/mod/mod_diff_visc_fric.mod: mod_diffusion.o
+../../../lib/mod/mod_fluidmud.mod: mod_fluidmud.o
+../../../lib/mod/mod_hydro.mod: mod_hydro.o
+../../../lib/mod/mod_hydro_baro.mod: mod_hydro_baro.o
+../../../lib/mod/mod_hydro_print.mod: mod_hydro_print.o
+../../../lib/mod/mod_hydro_vel.mod: mod_hydro_vel.o
+../../../lib/mod/mod_internal.mod: mod_internal.o
+../../../lib/mod/mod_layer_thickness.mod: mod_layer_thickness.o
+../../../lib/mod/mod_meteo.mod: mod_meteo.o
+../../../lib/mod/mod_nohyd.mod: mod_nohyd.o
+../../../lib/mod/mod_nudging.mod: mod_nudging.o
+../../../lib/mod/mod_roughness.mod: mod_roughness.o
 ../../../lib/mod/mod_sediment.mod: mod_sedim.o
 ../../../lib/mod/mod_sediment_para.mod: mod_sedim.o
-../../../lib/mod/mod_sinking.mod: sinking.o
-../../../lib/mod/mod_ts.mod: ts.o
+../../../lib/mod/mod_sinking.mod: mod_sinking.o
+../../../lib/mod/mod_system.mod: mod_system_matrix.o
+../../../lib/mod/mod_system_interface.mod: mod_system_matrix.o
+../../../lib/mod/mod_ts.mod: mod_ts.o
+../../../lib/mod/mod_waves.mod: mod_waves.o
 

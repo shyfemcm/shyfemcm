@@ -114,6 +114,7 @@
 ! 01.04.2023	ggu	new array bexnod, handle fix boundary condition (bfix)
 ! 02.04.2023	ggu	merged files subbndo.f and mod_bndo.f
 ! 21.04.2023	ggu	call bexnod() only for existing boundaries
+! 29.10.2024	ggu	check if boundary node is unique
 !
 !--------------------------------------------------------------------------
 
@@ -223,7 +224,7 @@
 	integer i,ibc
 	integer inext,ilast,knext,klast
 	integer ie,n,ngood,ie_mpi,id
-	integer ii,iii,ib,in,kn,nb,j
+	integer ii,iii,ib,in,kn,nb,j,ip
 	integer nbc
 	integer iunit,kint,kext
 	real area
@@ -239,13 +240,16 @@
 	iopbnd(:) = 0
 
 	nbndo = 0
-        ndebug = 0              !unit number for debug (in common block)
+        ndebug = 0              !unit number for debug (in module)
+	bdebug = ( ndebug > 0 )
 
 	nbc = nbnds()
+	if( bdebug ) write(ndebug,*) 'boundaries: ',nbc,bmpi
 
 	do ibc = 1,nbc
 	  nodes = nkbnds(ibc)
 	  itype = itybnd(ibc)
+	  if( bdebug ) write(ndebug,*) 'boundary: ',ibc,nodes,itype
 
 	  ngood = 0
 	  bexternal = ( itype .ge. 1 .and. itype .le. 2                & 
@@ -253,15 +257,29 @@
 
 	  do i=1,nodes
 	    k = kbnds(ibc,i)
-	    if( k <= 0 ) cycle
+	    if( k <= 0 ) then
+	      if( bmpi ) cycle			!node can be in other domain
+	      write(6,*) ibc,i,k
+	      stop 'error stop bndo_init: no such node'
+	    end if
 	    ngood = ngood + 1
 	    nbndo = nbndo + 1
 	    if( nbndo .gt. kbcdim ) goto 99
+	    if( iopbnd(k) > 0 ) then
+	      ip = iopbnd(k)
+	      write(6,*) 'boundary node already inserted'
+	      write(6,*) 'boundary: ',ibc
+	      write(6,*) 'node already in boundary: ',ibcnod(ip)
+	      write(6,*) 'kint,kext: ',k,ipext(k)
+	      stop 'error stop bndo_init: not unique boundary node'
+	    end if
 	    iopbnd(k) = nbndo
 	    ibcnod(nbndo) = ibc
 	    kbcnod(nbndo) = k
 	    itynod(nbndo) = itype
 	    bexnod(nbndo) = bexternal		!flag this node as external
+	    if( bdebug ) write(ndebug,*) ibc,i,k,nbndo
+            !if( iopbnd(k) .ne. i ) then
 	  end do
 
 	  if( ngood == 0 ) then
@@ -547,7 +565,8 @@
 	  nb = nopnod(i)
 
 	  if( iopbnd(k) .ne. i ) then
-	    stop 'error stop bndo_info: internal error (11)'
+	    write(6,*) i,iopbnd(k)
+	    stop 'error stop bndo_info: internal error (11a)'
 	  end if
 
 	  write(iu,*) '-------------------------------- bndo_info'
@@ -680,7 +699,7 @@
         logical bdebug
         integer i,j,k,l
         integer ibc,ibcold
-        integer nb,lmax
+        integer nb,lmax,lmin
         integer ibtyp
         real value,rb,flag
 
@@ -707,13 +726,15 @@
 	  blevel = ibtyp .eq. 1
 	  bfix = ibtyp .eq. 5
           lmax = ilhkv(k)
+          lmin = jlhkv(k)
 
           if( iopbnd(k) .ne. i ) then
-	    stop 'error stop bndo_impbc: internal error (11)'
+	    write(6,*) i,iopbnd(k)
+	    stop 'error stop bndo_impbc: internal error (11b)'
 	  end if
 
 	  if( blevel .or. bfix ) then
-            do l=1,lmax
+            do l=lmin,lmax
 	      rb = rbc(l,k)
               if( rb /= flag ) cv(l,k) = rb
             end do
@@ -756,7 +777,7 @@
 	integer i,j,k,l
 	integer ibtyp,igrad0
 	integer ibc,ibcold
-	integer nb,nlev,ko
+	integer nb,nlev,flev,ko
         integer ntbc,nlevko
 	real dx,dy
 	real scal,bc,weight,tweight
@@ -800,7 +821,8 @@
 	  bdebug = ( k == kint )
 
 	  if( iopbnd(k) .ne. i ) then
-	    stop 'error stop bndo_adjbc: internal error (11)'
+	    write(6,*) i,iopbnd(k)
+	    stop 'error stop bndo_adjbc: internal error (11c)'
 	  end if
 
 	  if( ibc .ne. ibcold ) then
@@ -816,8 +838,9 @@
 	  dx = xynorm(1,i)
 	  dy = xynorm(2,i)
 	  nlev = ilhkv(k)
+	  flev = jlhkv(k)
 
-	  do l=1,nlev
+	  do l=flev,nlev
 	    scal = dx * uprv(l,k) + dy * vprv(l,k)
 	    bout = scal .le. 0.				!outgoing flow
 	    bamb = cv(l,k) == flag			!make ambient value
@@ -912,11 +935,13 @@
 
 	  if( ibc .ne. ibcold ) then
 	    call get_bnd_ipar(ibc,'ibtyp',ibtyp)
+	    ibcold = ibc
 	  end if
           !write(78,*) i,k,nb,ibc,ibtyp
 
 	  if( iopbnd(k) .ne. i ) then
-	    stop 'error stop bndo_radiat: internal error (11)'
+	    write(6,*) i,iopbnd(k)
+	    stop 'error stop bndo_radiat: internal error (11d)'
 	  end if
 
           if( ibtyp .eq. 31 ) then       !radiation condition only

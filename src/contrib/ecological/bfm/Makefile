@@ -44,15 +44,13 @@ EXES	=
 OBJ = bfm_dummy.o
 ifeq ($(ECOLOGICAL),BFM)
   OBJ	     =	bfm_statevars.o bfm.o bfm_internal.o 
+  LIBG_BFM     = -L$(BFMDIR)/lib/ -l$(LIBBFM)
+  INCL_BFM     = -I$(BFMDIR)/include
+  FFLAGS      += $(INCL_BFM)
+  LFLAGS      += $(LIBG_BFM)
 endif
 
-
 BFMOBJ := $(foreach item,$(OBJ),$(PWD)/$(item))
-
-LIBG_BFM     = -L$(BFMDIR)/lib/ -l$(LIBBFM)
-INCL_BFM     = -I$(BFMDIR)/include
-FFLAGS      += $(INCL_BFM)
-LFLAGS      += $(LIBG_BFM)
 
 ALL	=	$(OBJ)
 

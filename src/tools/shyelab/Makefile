@@ -131,7 +131,10 @@ shystrings: $(LIBF) shystrings.o
 
 #----------------------------------------------------------------------------
 
-clean: cleanobj cleanlinks cleanexe
+clean: cleanobj cleanlinks cleanexe cleanvar
+
+cleanvar:
+	-rm -f *.tmp *.bak
 
 cleanobj:
 	-rm -f *.o

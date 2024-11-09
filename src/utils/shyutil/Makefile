@@ -197,6 +197,7 @@ zip:	cleanall
 ../../../lib/mod/mod_geom.mod: geom.o
 ../../../lib/mod/mod_geom_dynamic.mod: geom_dynamic.o
 ../../../lib/mod/mod_quad_tree.mod: quad_tree.o
+../../../lib/mod/mod_shyaver.mod: shyaver.o
 ../../../lib/mod/mod_tvd.mod: tvd.o
 ../../../lib/mod/pkonst.mod: pkonst.o
 ../../../lib/mod/regular.mod: regular.o
@@ -217,6 +218,7 @@ links.o: ../../../lib/mod/basin.mod ../../../lib/mod/mod_geom.mod
 lnku.o: ../../../lib/mod/basin.mod ../../../lib/mod/mod_geom.mod
 quad_tree.o: ../../../lib/mod/basin.mod ../../../lib/mod/stack.mod
 regular.o: ../../../lib/mod/basin.mod
+shyaver.o: ../../../lib/mod/basin.mod
 submask.o: ../../../lib/mod/basin.mod
 topological.o: ../../../lib/mod/basin.mod \
 		../../../lib/mod/mod_geom.mod 

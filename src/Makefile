@@ -38,9 +38,11 @@ depend: nothing
 
 clean: nothing
 	@$(BINDIR)/recursivemake $@ $(SUBDIRS)
+	-rm -f *.tmp *.bak
 
 cleanall: nothing
 	@$(BINDIR)/recursivemake $@ $(SUBDIRS)
+	-rm -f *.tmp *.bak
 
 save: nothing
 
