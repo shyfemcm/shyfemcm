@@ -76,6 +76,16 @@ info:
 	@echo $(OBJ)
 	@echo $(BFMOBJ)
 
+#--------------------------------------------- private stuff
+
+BFMPRIVATE = bfm_statevars.f90 bfm.f90 bfm_internal.f90
+
+bfmcopy:
+	cp -f arc/*.f90 .
+
+bfmdelete:
+	-rm -f $(BFMPRIVATE)
+
 #--------------------------------------------- clean
 
 cleanall: clean cleanzip cleangrd
@@ -149,4 +159,6 @@ strip:
 #--------------------------------------------- makedepend
 
 # DO NOT DELETE THIS LINE -- make depend depends on it.
+
+../../../../lib/mod/mod_bfm.mod: bfm_dummy.o
 

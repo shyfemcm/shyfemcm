@@ -27,6 +27,7 @@ git push --set-upstream origin new_branch       # pushes new branch to origin
 git push --set-upstream myfork new_branch       # pushes new branch to myfork
 
 # delete some files from last commit
+# https://www.geeksforgeeks.org/how-to-remove-file-from-latest-commit/
 
 git rm --cached file1 file2 ...
 git commit --amend
