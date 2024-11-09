@@ -38,6 +38,13 @@
 ! 14.02.2019	ggu	changed VERS_7_5_56
 ! 16.02.2019	ggu	changed VERS_7_5_60
 ! 13.03.2019	ggu	changed VERS_7_5_61
+! 22.10.2024	ggu	converted to module
+
+!===============================================================
+	module aquabc_II_aout
+!===============================================================
+
+	use aquabc_II_vars
 
 	      integer NBIOTSMX             !Maximal number of time series(nodes) for WC 
 		  parameter(NBIOTSMX=100)    
@@ -79,4 +86,7 @@
 		integer DGTSNOD_sed(NDGTSMX, nsstate) !Nodes for intermediate variables in output
 	    real    dgar_sed(NOSLAY,nsstate,NDIAGVAR_sed)    ! Diagnostics data, for temporary storage
 
+!===============================================================
+	end module aquabc_II_aout
+!===============================================================
 

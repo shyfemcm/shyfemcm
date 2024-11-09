@@ -93,9 +93,9 @@
 
 ! general interface to mercury module
 
-        implicit none
+	use femtime
 
-	include 'femtime.h'
+        implicit none
 
         real dt
 
@@ -115,6 +115,7 @@
 	use levels
 	use basin
 	use mercury
+	use femtime
  
 	implicit none
 
@@ -233,9 +234,6 @@
         integer fortfilenum
         integer itype
          
-
-        include 'femtime.h'
-
 !------------------------------------------------------------------
 !	initial and boundary conditions  [mg/l]			??
 !	initial loadings                 [g/m**2/sec]		??
@@ -533,7 +531,7 @@
                conz2=esolw(2)
       call mercury_react(id,bsurf,bbottom,boxtype,dtday,vol &
      &                  ,d,k,t,uws,area,s,qrad,epela,epload &
-     &                  ,Vds,Vdp,conz1,conz2,             !tday, &
+     &                  ,Vds,Vdp,conz1,conz2,               &
      &                  Shgsil,Shgpom,Smhgsil,Smhgpom, &
      &                  faq1,faq2,fdoc1,fdoc2)
 
@@ -546,11 +544,13 @@
           esols(:)=emsols(k,:)
         
 !         write(6,*) esols, 'esols' 
+!claurent-OGS: send sum instead of single sinks
+
           call sed4merc_sed(k,dtday,area,esolw,vol, &
-     &                         tau,esols,Dssink_sum,Dpsink_sum,  !claurent-OGS: send sum instead of single sinks &
+     &                         tau,esols,Dssink_sum,Dpsink_sum, &
      &                           Sres,Pres,Vr,Bvels,Bvelp, &
-     &                        ds_gm2s, dp_gm2s,tcek(k),       !claurent-OGS: values required by sed4merc_sed &
-     &                        dZbed(k),dZactiv(k))    !claurent-OGS: get thicknesses for extraction of the fields in output                
+     &                        ds_gm2s, dp_gm2s,tcek(k), &
+     &                        dZbed(k),dZactiv(k)) 
           
           emsolw(l,k,:)=esolw(:)
           emsols(k,:)=esols(:)
@@ -617,8 +617,10 @@
 !$OMP DO SCHEDULE(DYNAMIC) ! claurent-OGS: ...  region must be associated to only one loop		     
 	do i=1,nsolwst
 
-          call scal_adv(what2,i                          ! claurent-OGS: sends solid boundary conditions  &
-     &                          ,emsolw(1,1,i),ids4merc  ! claurent-OGS: sends solid boundary conditions &
+!claurent-OGS: sends solid boundary conditions
+
+          call scal_adv(what2,i &
+     &                          ,emsolw(1,1,i),ids4merc &
      &                          ,rkpar,wsink &
      &                          ,difhv,difv,difmol)
 

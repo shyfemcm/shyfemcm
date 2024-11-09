@@ -117,7 +117,7 @@
 	real K1T 	!growth rate temperature coeff WHEN SYSBY(4)=1 
 	real K1C	!maximum growth rate day-1 WHEN SYSBY(4)=1
 
-	common /phytog/ GP1,GPP,RESP,KMPHYT,XEMPRC,K1C,GITMX1,K1T,GITMAX
+	common /phytog/ GP1,GPP,RESP,KMPHYT,XEMPRC,K1C,GITMX1,K1T,GITMAX &
      &                ,K1RT,K1RC
 	save /phytog/
 
@@ -160,10 +160,10 @@
 			!microg/microg
 	real FOPO4	!spatially variable dissolved fraction of inorganic P	
 !
-	common /phytonp/ PNH3G1,KMNG1,KMPG1,XEMP1,XEMP2,FOPO4,
+	common /phytonp/ PNH3G1,KMNG1,KMPG1,XEMP1,XEMP2,FOPO4, &
      &                   RNUTR,NUTLIM
 	save /phytonp/
-C
+!
 !--------grazing------------
 !	set in param.f if zooplankton is a state variable or a forcing:
 !       if graztype=1 simulate
@@ -219,7 +219,7 @@ C
 	real KOPDT	!temperature coeff for mineralization  of org P in sed
 	real KPO4	!half saturation constant for P microgP/L
 
-	common /com_phos/ PCRB,FOP,SK58,
+	common /com_phos/ PCRB,FOP,SK58, &
      &				K58C,K58T,KOPDC,KOPDT,KPO4,FPO4
 	save /com_phos/
 
@@ -256,10 +256,10 @@ C
 	real KONDC	!rate for mineralization of N in sediment
 	real KONDT	!temperature coeff for mineralization of N in sediment
 
-	common /comn/ NCRB,FON,SK1013,
-     &                 SK1314,SK14D,K1320C,K1320T,
-     &                K140C,K140T,KNIT,KNO3,K1013C,K1013T,KONDC,
-     &			KONDT
+	common /comn/ NCRB,FON,SK1013, &
+     &                 SK1314,SK14D,K1320C,K1320T, &
+     &                K140C,K140T,KNIT,KNO3,K1013C,K1013T,KONDC, &
+     &			KONDT &
      &			,FNH4
 	save /comn/ 
 
@@ -321,8 +321,8 @@ C
 
 	real K2		!reareation rate 20 C (when not calc from physical vv) 
 
-	common /rearphysic/ ITYPE,K2,WIND,
-     &          AIRTMP,WTYPE,KA,
+	common /rearphysic/ ITYPE,K2,WIND, &
+     &          AIRTMP,WTYPE,KA, &
      &			CS, XICECVR
     	save /rearphysic/
 	
@@ -400,13 +400,13 @@ C
 			! when LGHTSW=1 deifined originally in eutroint.f
 	real CCHL	!C/Chla ratio
 
-	common /comditoro/ KESG,KE,FDAY,IS1,IKE,
+	common /comditoro/ KESG,KE,FDAY,IS1,IKE, &
      &                    IAVBOT,CCHL,IAV,RLGHTS,ITO,KEFN
 	save /comditoro/
 
 !--------------------------------------------------------------
 !	subroutine smith
-!--------------------------------------------------------------c
+!--------------------------------------------------------------
 
 !----------variables---
 
@@ -430,7 +430,7 @@ C
 	real DTDAY	!??????verificare, serve a modulare il seno: day
 	real NEWDAY	!unknown????if G.E. 1 calcolo smith (a new day)
 
-	common /comsmith/ PHIMX,CCHLX,XKC,PI,ITOT,DTDAY,
+	common /comsmith/ PHIMX,CCHLX,XKC,PI,ITOT,DTDAY, &
      &			NEWDAY,IS1X,IAVBOTX
 	save /comsmith/
 
@@ -438,8 +438,8 @@ C
 !	subroutine kawind
 !--------------------------------------------------------------
 
-!	common /comwind/ DIFF,TW,VW,VA,TA,PA,PW,WS,RK,WH,SRCD,EF,F1,
-!     &		F2,FP1,FP2,FP3,FP4,N,SRCD2,ERR,US,Z0,RK1,GAMU,RK2,
+!	common /comwind/ DIFF,TW,VW,VA,TA,PA,PW,WS,RK,WH,SRCD,EF,F1, &
+!     &		F2,FP1,FP2,FP3,FP4,N,SRCD2,ERR,US,Z0,RK1,GAMU,RK2, &
 !     &		RK3,depth,ut,uc,ze,gam
 !	save /comwind/
 

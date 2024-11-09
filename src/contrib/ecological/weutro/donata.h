@@ -1,7 +1,7 @@
 
 !--------------------------------------------------------------------------
 !
-!    Copyright (C) 2019-2020  Georg Umgiesser
+!    Copyright (C) 2010,2019  Georg Umgiesser
 !
 !    This file is part of SHYFEM.
 !
@@ -23,25 +23,22 @@
 !
 !--------------------------------------------------------------------------
 
-! routines for BFM module - dummy routine
-!
+!---------------------------------------------------------
+!---donata.h----------------------------------------------
+!----------------------------------------------------------
 ! revision log :
 !
-! 02.10.2019	ggu	dummy routine introduced
-! 22.04.2020	ggu	error if called
+! 23.03.2010	ggu	changed v6.1.1
+! 16.02.2019	ggu	changed VERS_7_5_60
 
-!******************************************************************
+!----------------------------------------------------------
 
-	subroutine bfm_init_internal
 
-	write(6,*) 'bfm routines have not been linked into shyfem'
-	write(6,*) 'please correct Rules.make file'
-	stop 'error stop bfm_init_internal: no bfm routines'
+	real prod,cons,ddin1,ddin2
+	real denit
 
-	end
+	common /lczpar/prod,cons,ddin1,ddin2,denit
 
-	subroutine bfm_reactor_internal
-	end
+	save /lczpar/
 
-!******************************************************************
 
