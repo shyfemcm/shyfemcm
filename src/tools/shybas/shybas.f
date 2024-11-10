@@ -126,7 +126,6 @@ c-----------------------------------------------------------------
 	call levels_init_2d(nkn,nel)
 
 	call ev_set_verbose(bwrite)
-	!call ev_init(nel)
 	call set_ev
 
 	call set_geom
@@ -169,6 +168,7 @@ c-----------------------------------------------------------------
 	if( binvert ) call invert_depth		!inverts depth values
 	if( bbox ) call basbox			!creates box index
 	if( bboxgrd ) call basboxgrd		!creates grd from index
+	if( slayers /= ' ' ) call bas_layers(slayers)	!compute area/vol
 
 	if( bcustom ) call bas_custom
 	if( bfastfind ) call test_fast_find
@@ -228,6 +228,7 @@ c*******************************************************************
 	  if( bwrite ) write(6,*) 'reading GRD file: ',trim(file)
 	  call grd_read(file)
 	  call grd_to_basin
+	  call bas_check_spherical
 	  call estimate_ngr(ngr)
 	  breadbas = .false.
 	else

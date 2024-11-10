@@ -52,6 +52,7 @@
 ! 16.02.2022	ggu	new option -boxgrd implemented (bboxgrd, index_file)
 ! 12.10.2022	ggu	new option -detail (bdetail)
 ! 03.10.2024	ggu	new option -fastfind to test fast_find routines
+! 09.11.2024	ggu	new option -layers to compute areas and volumes
 !
 !************************************************************
 
@@ -93,6 +94,7 @@
 
         character*80, save :: bfile
         character*80, save :: lfile
+        character*256, save :: slayers
         character*80, save :: index_file
 	logical, save :: ball		!interpolate everywhere
 	integer, save :: btype		!only interpolate on elems type=btype
@@ -200,6 +202,9 @@
         call clo_add_option('boxgrd index',' ','creates grd from index')
         call clo_add_option('custom',.false. &
      &				,'run custom routine defined by user')
+        call clo_add_option('layers string',' ' &
+     &			,'compute area and volume for layers given in string')
+
         call clo_add_sep('bathymetry interpolation:')
 
         call clo_add_option('bfile bathy',' ' &
@@ -217,12 +222,14 @@
      &				 '(Default 3)')
 
         call clo_add_sep('limiting and smoothing bathymetry:')
+
         call clo_add_option('hmin val',-99999.,'minimum depth')
         call clo_add_option('hmax val',99999.,'maximum depth')
         call clo_add_option('asmooth alpha',0,'alpha for smoothing')
         call clo_add_option('iter n',0,'iterations for smoothing')
 
         call clo_add_sep(' ')
+
         call clo_add_sep('interpolation mode: (default=1) ')
         call clo_add_com('   1 exponential')
         call clo_add_com('   2 uniform on squares')
@@ -267,6 +274,7 @@
         call clo_get_option('box',bbox)
         call clo_get_option('boxgrd',index_file)
         call clo_get_option('custom',bcustom)
+        call clo_get_option('layers',slayers)
         call clo_get_option('fastfind',bfastfind)
 
         call clo_get_option('hsigma',hsigma)

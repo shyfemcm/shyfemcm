@@ -46,7 +46,7 @@
 ! 17.04.2021	ggu	new shympi_exchange_array_3(), check_external_numbers()
 ! 22.04.2021	ggu	allocation of some arrays for bounds check
 ! 22.04.2021	ggu	bug fix in shympi_copy_*()
-! 23.04.2021    clr     formal modifications in MODEL PROCEDURE declaration for meson compatibility
+! 23.04.2021    clr     changes in MODEL PROCEDURE decl. for meson compatibility
 ! 25.06.2021    ggu     in shympi_init() check if basin has been read
 ! 10.11.2021    ggu     error fix mixing scalar and array arguments
 ! 22.11.2021    ggu     error fix when reading grd file

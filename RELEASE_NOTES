@@ -5,8 +5,9 @@
 	new framework for connections
 	in shyelab allow for percentile computation and field smoothing
 	in do_partition correct errors
-	started output for average fileds (instead of immediate fields)
+	started output for average fields (instead of immediate fields)
 	changes from other branches integrated (ku,ogs,mpi)
+	ecological models (aquabc,eutro,bfm) and mercury integrated
 
 08.11.2024	VERS_8_2_0	FRAIMA edition - develop version
 
