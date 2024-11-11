@@ -19,12 +19,14 @@
 	!! advertise any importable/exportable Field. Use should you this only if you
 	!! want to drive the model independently.
         !! You could also couples the ocean component only through
-	!! momentum or heat flux or sst only. This may be useful for
+	!! momentum or heat flux or sst only. This options may be useful for
 	!! debugging and testing for example. In general, all the macros must be defined.
-#undef  WITHFIELDS_MOMENTUMFLUX
-#undef  WITHFIELDS_HEATFLUX
-#undef  WITHFIELDS_MASSFLUX
-#undef  WITHFIELDS_SST
+        !! Switching on/off the different fields is possible through the each model
+        !! configuration file.
+#define WITHFIELDS_MOMENTUMFLUX
+#define WITHFIELDS_HEATFLUX
+#define WITHFIELDS_MASSFLUX
+#define WITHFIELDS_SST
 
 	!! The ocean component is coded into a Fortran module.
         module ocean_shyfem
