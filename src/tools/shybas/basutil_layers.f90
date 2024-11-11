@@ -38,6 +38,7 @@
 	subroutine bas_layers(slayers)
 
 	use basin
+	use levels
 	use mod_depth
 	use evgeom
 
@@ -45,28 +46,23 @@
 
 	character*(*) slayers
 
-	integer ie,l,lmax
-	double precision hlev,depth,ldown,lup
+	integer ie,l,lmax,llmax
+	double precision thick,depth,hup
 	double precision areae,area,volume,area_tot,volume_tot
-	double precision, allocatable :: levels(:)
+	double precision, allocatable :: layers(:)
 	real, save :: hflag = -999.
-
-!-------------------------------------------------------
-! make depth values
-!-------------------------------------------------------
-
-        call makehev(hev)
-        call makehkv_minmax(hkv,-1)     !use minimum depth
 
 !-----------------------------------------------------------------
 ! prepare levels
 !-----------------------------------------------------------------
 
 	lmax = 0
-	call make_levels(slayers,lmax,levels)
-	allocate(levels(0:lmax))
-	levels = 0.
-	call make_levels(slayers,lmax,levels(1:lmax))
+	call parse_levels(slayers,lmax,layers)
+	allocate(layers(0:lmax))
+	layers = 0.
+	call parse_levels(slayers,lmax,layers(1:lmax))
+
+	call create_levels(lmax,layers(1:lmax))
 
 !-----------------------------------------------------------------
 ! compute volumes and areas
@@ -78,19 +74,20 @@
 	area_tot = 0.
 	volume_tot = 0.
 
-	do l=1,lmax
+	do l=1,nlv
 	  area = 0.
 	  volume = 0.
-	  lup = levels(l-1)
-	  ldown = levels(l)
+	  hup = 0.
+	  if( l > 1 ) hup = hlv(l-1)
 	  do ie=1,nel
+	    llmax = ilhv(ie)
+	    if( l > llmax ) cycle
 	    depth = hev(ie)
+	    thick = hldv(l)
+	    if( l == llmax ) thick = depth - hup
 	    areae = 12.*ev(10,ie)
-	    if( depth <= lup ) cycle
-	    hlev = ldown - lup
-	    if( depth < ldown ) hlev = depth - lup
 	    area = area + areae
-	    volume = volume + hlev*areae
+	    volume = volume + thick*areae
 	  end do
 	  write(6,1000) l,area,volume
 	  volume_tot = volume_tot + volume
@@ -110,20 +107,68 @@
 
 !*******************************************************************
 
-	subroutine make_levels(string,lmax,levels)
+	subroutine parse_levels(string,lmax,layers)
 
 	implicit none
 
 	character*(*) string
 	integer lmax
-	double precision levels(lmax)
+	double precision layers(lmax)
 
 	integer n
 	integer iscand
 
-	n = iscand(string,levels,lmax)
+	n = iscand(string,layers,lmax)
 	if( lmax == 0 ) lmax = n
 
+	end
+
+!*******************************************************************
+
+	subroutine create_levels(lmax,layers)
+
+	use basin
+	use levels
+	use mod_depth
+
+	implicit none
+
+	integer lmax
+	double precision layers(lmax)
+
+	integer ie,l
+	real depth
+	real hup,hdown
+
+        call makehev(hev)
+	call levels_init(nkn,nel,lmax)
+	hlv = 0.
+	hldv = 0.
+	hlv = layers(1:lmax)
+
+	hup = 0.
+	do l=1,lmax
+	  hdown = hlv(l)
+	  hldv(l) = hdown - hup
+	  hup = hdown
+	end do
+
+	nlv = 0
+	do ie=1,nel
+	  depth = hev(ie)
+	  do l=1,lmax
+	    if( depth <= layers(l) ) exit
+	  end do
+	  if( l > lmax ) goto 99
+	  ilhv(ie) = l
+	  nlv = max(nlv,l)
+	end do
+
+	return
+   99	continue
+	write(6,*) depth
+	write(6,*) lmax,layers
+	stop 'error stop create_levels: not enough levels'
 	end
 
 !*******************************************************************
