@@ -975,6 +975,18 @@
 !	handle rain
 !	---------------------------------------------------------
 
+        if ( iatm == 1 ) then                 !no file but coupling atm-oce
+          if( irain .eq. 1 .and. ievap .eq. 1 ) then
+            write(6,*) 'atmosphere-ocean coupling with irain=1'
+            write(6,*) '(take precip/evap from atmosphere model)'
+            write(6,*) 'but ievap=1 (compute evap internally)'
+            write(6,*) 'set ievap = 0'
+            write(6,*) 'to avoid consider evaporation twice'
+            stop 'error stop meteo_set_rain_data: ievap'
+          end if
+        endif
+
+
 	call iff_get_var_description(id,1,string)
 
 	if( string == ' ' ) then	!TS file or constant

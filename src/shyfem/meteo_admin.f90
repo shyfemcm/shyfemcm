@@ -123,14 +123,15 @@
 
 	implicit none
 
-	integer k,ievap
+	integer k,ievap,irain
         double precision racum,eacum
 	real getpar
 
 	ievap = nint(getpar('ievap'))
+        irain = nint(getpar('irain'))
 
 	do k=1,nkn
-	  rqdsv(k) = rqdsv(k) + metrain(k) - ievap*evapv(k)
+	  rqdsv(k) = rqdsv(k) + irain*metrain(k) - ievap*evapv(k)
 	end do
 
         !racum = sum(metrain) / nkn

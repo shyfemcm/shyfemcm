@@ -788,8 +788,21 @@
 	call addpar('albed4',0.06)	!albedo for temp below 4 degrees
 
 ! |ievap| 	Compute evaporation mass flux (Default 0).
+!		This option computes internally the evaporation rate
+!		and adds it to the mass balance.
 
 	call addpar('ievap',0.)		!compute evaporation mass flux
+
+! |irain|       Compute precipitation mass flux (Default 1).
+!		If no precipitation file is given, the precipitation rate is set
+!		to zero internally. If a file is found and irain is set to
+!		the default value, then the precipitation rate is considered
+!		into the mass balance. Note that, if some evaporation data is
+!		known this can be added into the precipation file as a net mass
+!		balance. In this case please set |ievap|=0 to not add
+!		evaporation twice.
+
+        call addpar('irain',1.)         !compute precipitation mass flux
 
 !c------------------------------------------------------------------------
 

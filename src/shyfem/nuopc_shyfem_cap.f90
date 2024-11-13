@@ -194,7 +194,7 @@
 	  !! array. This ordering is beneficial to factorize the code and perform the 
 	  !! many operations of the fields with do loops. You have to keep in mind that, 
 	  !! first we have import fields, and only after we have export fields. 
-	  allocate( SHYFEM_FieldMetadata(11) )
+	  allocate( SHYFEM_FieldMetadata(10) )
 
           !! The field list is defined here. You can modify this part adding new fields.
 	  !! The metadata of each field is filled with a simple constructor statement.
@@ -261,14 +261,7 @@
      &      meshloc=ESMF_MESHLOC_NODE)
 #endif
 #ifdef WITHFIELDS_MASSFLUX
-          !! \item evaporation $E$.
-          num = num + 1
-	  SHYFEM_FieldMetadata(num) = SHYFEM_Metadata( &
-     &      fieldName="evap", &
-     &      longName="evaporation_flux", &
-     &      meshloc=ESMF_MESHLOC_NODE)
-
-          !! \item precipitation $P$.
+          !! \item evaportaion/precipitation rate $P-E$.
           num = num + 1
 	  SHYFEM_FieldMetadata(num) = SHYFEM_Metadata( &
      &      fieldName="prec", &
@@ -1527,9 +1520,6 @@
             case ("rlns")
               metcc(1:nkn_inner) = fieldPtr(1:nkn_inner)
 	      call shympi_exchange_2d_node(metcc)
-	    case ("evap")
-	      evapv(1:nkn_inner) = fieldPtr(1:nkn_inner)
-	      call shympi_exchange_2d_node(evapv)
 	    case ("prec")
 	      metrain(1:nkn_inner) = fieldPtr(1:nkn_inner)
 	      call shympi_exchange_2d_node(metrain)
