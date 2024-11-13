@@ -290,8 +290,9 @@
         double precision, save :: dda_out(4)
         integer, save :: nbflx = 0
 
-	real, save, allocatable :: trs(:)
-	real, save, allocatable :: scalt(:,:,:,:)	!accumulator array
+	double precision, save, allocatable :: trs(:)
+	double precision, save, allocatable :: scalt(:,:,:,:)!accumulator array
+	!real, save, allocatable :: fluxes_r(:,:,:)	!accumulator array
 
 	integer ifemop,ipext
 	logical has_output_d,next_output_d,is_over_output_d
@@ -321,12 +322,13 @@
 
         	allocate(trs(nscal))
         	allocate(scalt(0:nlvdi,3,nsect,nscal))
+        	!allocate(fluxes_r(0:nlvdi,3,nsect))
 
         	call flx_alloc_arrays(nlvdi,nsect)
 		call get_nlayers(kfluxm,kflux,nsect,nlayers,nllmax)
 
 		do i=1,nscal
-		  call fluxes_init(nlvdi,nsect,nlayers,trs(i) &
+		  call fluxes_init_d(nlvdi,nsect,nlayers,trs(i) &
      &				,scalt(0,1,1,i))
 		end do
 
@@ -373,7 +375,7 @@
 	do i=1,nscal
 	  ivar = ivbase + i
 	  call flxscs(kfluxm,kflux,iflux,az,fluxes,ivar,scal(1,1,i))
-	  call fluxes_accum(nlvdi,nsect,nlayers,dt,trs(i) &
+	  call fluxes_accum_d(nlvdi,nsect,nlayers,dt,trs(i) &
      &			,scalt(0,1,1,i),fluxes)
 	end do
 
@@ -391,10 +393,11 @@
 
 	do i=1,nscal
 	  ivar = ivbase + i
-	  call fluxes_aver(nlvdi,nsect,nlayers,trs(i) &
+	  call fluxes_aver_d(nlvdi,nsect,nlayers,trs(i) &
      &			,scalt(0,1,1,i),fluxes)
+	  fluxes_r = fluxes
           call flx_write_record(nbflx,nvers,atime,nlvdi,nsect,ivar &
-     &                          ,nlayers,fluxes,ierr)
+     &                          ,nlayers,fluxes_r,ierr)
           if( ierr /= 0 ) goto 97
 	end do
 
@@ -403,7 +406,7 @@
 !	-------------------------------------------------------
 
 	do i=1,nscal
-	  call fluxes_init(nlvdi,nsect,nlayers,trs(i) &
+	  call fluxes_init_d(nlvdi,nsect,nlayers,trs(i) &
      &			,scalt(0,1,1,i))
 	end do
 

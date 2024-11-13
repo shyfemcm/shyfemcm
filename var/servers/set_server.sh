@@ -80,6 +80,14 @@ SetVars()
     export PARMETIS_HOME=
     export PETSC_HOME=$HOME/lib/petsc
     export BFM_HOME=$HOME/work/shyfem_repo/bfm-for-shyfem-private
+  elif [ $server = "tide" ]; then
+    export NETCDF_C_HOME=
+    export NETCDF_FORTRAN_HOME=
+    export NETCDFDIR=
+    export METIS_HOME=$HOME/georg/lib/metis
+    export PARMETIS_HOME=
+    export PETSC_HOME=$HOME/georg/lib/petsc
+    export BFM_HOME=$HOME/georg/lib/bfm
   else
     echo "unknown server: $server"
     exit 1
