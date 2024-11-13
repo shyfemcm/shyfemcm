@@ -84,6 +84,7 @@
 ! 06.09.2024    ggu     better debug info for shympi_check_array()
 ! 06.09.2024    lrp     nuopc-compliant
 ! 13.10.2024    ggu     new parameter bextra_exchange to deal with INTEL_BUG
+! 13.11.2024    ggu     new routine shympi_find_element()
 !
 !******************************************************************
 
@@ -2155,14 +2156,21 @@
 
 !*******************************
 
+!******************************************************************
+!******************************************************************
+!******************************************************************
+
 	subroutine shympi_find_node(ke,ki,id)
+
+! returns internal node number and id of domain given external node number
 
 	use basin
 
-	integer ke,ki,id
+	integer, intent(in)  ::  ke	! external node number
+	integer, intent(out) ::  ki	! internal node number
+	integer, intent(out) ::  id	! domain
 
-	integer k,ic,i
-	integer n,no
+	integer k,ka,i,j
 	integer vals(1,n_threads)
 	integer kk(1),kkk(n_threads)
 
@@ -2170,6 +2178,11 @@
 	  if( ipv(k) == ke ) exit
 	end do
 	if( k > nkn_unique ) k = 0
+	ka = findloc(ipv(1:nkn_unique),ke,1)
+	if( k /= ka ) then
+	  write(6,*) k,ka,nkn_unique,my_id
+	  stop 'error stop shympi_find_node: internal (1)'
+	end if
 
 	if( bmpi_skip ) then
 	  ki = k
@@ -2178,39 +2191,105 @@
 	end if
 
 	kk(1) = k
-	n = 1
-	no = 1
-	call shympi_allgather_i_internal(n,no,kk,vals)
+	call shympi_allgather_i_internal(1,1,kk,vals)
 	kkk(:) = vals(1,:)
 
-	ic = count( kkk /= 0 )
-	if( ic /= 1 ) then
-	  if( ic > 1 ) then
-	    write(6,*) 'node found in more than one domain: '
-	  else
-	    write(6,*) 'node not found in any domain:'
-	  end if
-	  write(6,*) '==========================='
-	  write(6,*) n_threads,my_id
-	  write(6,*) 'nkn_unique = ',nkn_unique
-	  write(6,*) 'node = ',ke
-	  write(6,*) 'internal = ',k
-	  write(6,*) kkk
-	  write(6,*) '==========================='
-	  call shympi_finalize
-	  stop 'error stop shympi_find_node: more than one domain'
-	end if
+	call shympi_check_find_item(kkk,ke,k)
 
 	do i=1,n_threads
 	  if( kkk(i) /= 0 ) exit
 	end do
 
-	ki = kkk(i)
-	id = i-1
+	j = maxloc(kkk,1)
+	if( i /= j ) stop 'error stop shympi_find_node: internal (2)'
+
+	ki = kkk(j)
+	id = j-1
 
 	end subroutine shympi_find_node
 
 !*******************************
+
+	subroutine shympi_find_elem(ieext,ieint,id)
+
+! returns internal elem number and id of domain given external elem number
+
+	use basin
+
+	integer, intent(in)  ::  ieext	! external elem number
+	integer, intent(out) ::  ieint	! internal elem number
+	integer, intent(out) ::  id	! domain
+
+	integer ie,iee,i,j
+	integer vals(1,n_threads)
+	integer kk(1),kkk(n_threads)
+
+	do ie=1,nel_unique
+	  if( ipev(ie) == ieext ) exit
+	end do
+	if( ie > nel_unique ) ie = 0
+	iee = findloc(ipev(1:nel_unique),ieext,1)
+	if( ie /= iee ) stop 'error stop shympi_find_elem: internal (1)'
+
+	if( bmpi_skip ) then
+	  ieint = ie
+	  id = 0
+	  return
+	end if
+
+	kk(1) = ie
+	call shympi_allgather_i_internal(1,1,kk,vals)
+	kkk(:) = vals(1,:)
+
+	call shympi_check_find_item(kkk,ieext,ie)
+
+	do i=1,n_threads
+	  if( kkk(i) /= 0 ) exit
+	end do
+
+	j = maxloc(kkk,1)
+	if( i /= j ) stop 'error stop shympi_find_elem: internal (2)'
+
+	ieint = kkk(j)
+	id = j-1
+
+	end subroutine shympi_find_elem
+
+!*******************************
+
+	subroutine shympi_check_find_item(items,ext,int)
+
+	integer items(n_threads)
+	integer ext,int
+
+	integer ic
+
+        ic = count( items /= 0 )
+
+        if( ic /= 1 ) then              ! error - abort
+          if( ic > 1 ) then
+            write(6,*) 'item found in more than one domain: '
+          else
+            write(6,*) 'item not found in any domain:'
+          end if
+          write(6,*) '==========================='
+          write(6,*) n_threads,my_id
+          write(6,*) 'nkn_unique = ',nkn_unique
+          write(6,*) 'nel_unique = ',nel_unique
+          write(6,*) 'external number = ',ext
+          write(6,*) 'internal number = ',int
+          write(6,*) items
+          write(6,*) '==========================='
+          call shympi_finalize
+          stop 'error stop shympi_check_find_item: more than one or no domain'
+        end if
+
+	end subroutine shympi_check_find_item
+
+!******************************************************************
+!******************************************************************
+!******************************************************************
+
 
 	subroutine shympi_reduce_r(what,vals,val)
 

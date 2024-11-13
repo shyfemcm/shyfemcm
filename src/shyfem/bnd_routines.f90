@@ -192,6 +192,7 @@
 ! 18.12.2023    ggu     new routine get_discharge_3d()
 ! 10.10.2024    ggu     introduced dfluxnode to avoid INTEL_BUG compiler bug
 ! 13.10.2024    ggu     introduced drvols to avoid INTEL_BUG compiler bug
+! 13.11.2024    ggu     marked old code with INTEL_BUG_OLD
 !
 !***************************************************************
 
@@ -1040,10 +1041,12 @@
 	integer ibtyp,levmax,levmin
 	integer nbc
 	double precision dtime
-	double precision dfluxnode,drval,dvol,dvoltot
-	double precision dvols(nlv),drvols(nlv)
+	!real dfluxnode,drval,dvol,dvoltot		!INTEL_BUG_OLD
+	!real dvols(nlv),drvols(nlv)			!INTEL_BUG_OLD
+	double precision dfluxnode,drval,dvol,dvoltot	!INTEL_BUG
+	double precision dvols(nlv),drvols(nlv)		!INTEL_BUG
 	real flux,vol,voltot,fluxtot,fluxnode,rval
-	real vols(nlv),rvols(nlv)
+	real vols(nlv)
 
 	integer nkbnds,kbnds,nbnds,kbndind
 	integer ipext,ipint
@@ -1142,6 +1145,7 @@
 	    dfluxnode = dfluxnode + flux
 	  end do
 	  rqv(k) = real(dfluxnode)		!INTEL_BUG
+	  !rqv(k) = dfluxnode			!INTEL_BUG_OLD
 	  fluxtot = fluxtot + dfluxnode
 	end do
 
