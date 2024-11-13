@@ -248,6 +248,7 @@
 	integer, save :: iatm = 0
 	integer, save :: iheat = 0
 	integer, save :: iwtype,itdrag
+        integer, save :: ievap,irain
 	integer, save :: irtype
 	integer, save :: ihtype
 	integer, save :: ictype
@@ -970,6 +971,8 @@
 	end if
 
         rfact = nint(getpar('rfact'))
+        ievap = nint(getpar('ievap'))
+        irain = nint(getpar('irain'))
 
 !	---------------------------------------------------------
 !	handle rain
