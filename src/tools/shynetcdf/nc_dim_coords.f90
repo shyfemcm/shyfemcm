@@ -45,6 +45,7 @@
 ! 27.01.2022	ggu	new values for atmos
 ! 20.06.2022	ggu	look in variable name to find coordinates
 ! 23.10.2022	ggu	new routine handle_exceptions()
+! 15.11.2024	ggu	use bclip for some coordinates
 !
 ! notes :
 !
@@ -260,7 +261,7 @@
 
 	bdebug = .true.			!GGU
 	bdebug = .false.			!GGU
-	bdebug = bdebug .and. what == 'var'
+	bdebug = bdebug .and. what == 'coord'
 
 	short = ' '
 	name = descrp
@@ -269,33 +270,32 @@
 	call to_lower(name)
 	il = len_trim(name)
 	if( bdebug ) then
-	write(6,*) 'in ncnames_get... -------------------'
-	write(6,*) 'name: |',trim(name),'|',il
-	do i=1,20
-	  !write(6,*) i,ichar(descrp(i:i))
-	  if( ichar(descrp(i:i)) == 0 ) then
-	    write(6,*) 'char 0 in string: ',trim(name),i,il
-	  end if
-	end do
+	  write(6,*) 'in ncnames_get... -------------------'
+	  write(6,*) 'name: |',trim(name),'|',il
+	  do i=1,20
+	    !write(6,*) i,ichar(descrp(i:i))
+	    if( ichar(descrp(i:i)) == 0 ) then
+	      write(6,*) 'char 0 in string: ',trim(name),i,il
+	    end if
+	  end do
 	end if
 	if( name == ' ' ) stop 'empty string'
 
 	if( bdebug ) then
-	write(6,*) 'checking: ',trim(what),idlast,'  ',trim(descrp),bclip
+	  write(6,*) 'checking: ',trim(what),idlast,'  ',trim(descrp),bclip
 	end if
 
 	do id=1,idlast
-	  !bdebug = ( bdebug .and. id == 56 )		!GGU
 	  if( pentry(id)%what /= what ) cycle
 	  ilen = il
 	  if( pentry(id)%bclip ) ilen = pentry(id)%ilen
-	if( bdebug ) then
-	write(6,*) id,il,ilen,pentry(id)%bclip		!GGU
-	write(6,*) pentry(id)%descrp(1:ilen),'  ',trim(name)
-	end if
+	  if( bdebug ) then
+	    write(6,*) id,il,ilen,pentry(id)%bclip &
+     &		    ,trim(name),'  ',pentry(id)%descrp(1:ilen)
+	  end if
 	  if( pentry(id)%descrp(1:ilen) == name(1:ilen) ) then
 	    short = pentry(id)%short
-	if( bdebug ) write(6,*) 'found: ',trim(short)
+	    if( bdebug ) write(6,*) 'found: ',trim(short)
 	    return
 	  end if
 	end do
@@ -897,7 +897,7 @@
 	call ncnames_add_coord('z','eta values on full',bclip)
 	call ncnames_add_coord('z','tcell zstar depth')
 	call ncnames_add_coord('z','ocean_s_coordinate_g1')
-	call ncnames_add_coord('z','Vertical T levels')
+	call ncnames_add_coord('z','Vertical T levels',bclip)
 	!call ncnames_add_coord('z','S-coordinate at RHO-points')
 
 	end subroutine ncnames_add_coordinates

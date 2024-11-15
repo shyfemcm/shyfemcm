@@ -184,6 +184,7 @@
 ! 06.09.2024    lrp     nuopc-compliant
 ! 29.09.2024    ggu     call tvd_init before time loop
 ! 13.10.2024    ggu     more debug output for *.dbg files, reordered
+! 15.11.2024    ggu     flush iuinfo before stopping
 !
 !*****************************************************************
 !
@@ -653,6 +654,8 @@
 
 	implicit none
 
+	integer iuinfo
+
 	call cpu_time_end(2)
 
 	call print_end_time
@@ -713,6 +716,9 @@
         write(6,*) 'simulation start:   ',aline_start 
         write(6,*) 'simulation end:     ',aline_end 
         write(6,*) 'simulation runtime: ',atime_end-atime_start
+
+	call getinfo(iuinfo)
+	if( iuinfo > 0 ) flush(iuinfo)
 
 	end if
 
