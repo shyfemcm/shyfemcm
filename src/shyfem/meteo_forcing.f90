@@ -857,7 +857,6 @@
 	real cd,wxymax,txy,wspeed,wdir,fact,fice,aice,ach
 	real pmin,pmax
 	real wparam
-	real wxy			!INTEL_BUG_OLD
 	double precision dwxy		!INTEL_BUG
 	character*80 string
 	double precision dtime
@@ -907,9 +906,8 @@
 	  else				!data is wind velocity [m/s]
             do k=1,n
 	      dwxy = dble(wx(k))**2 + dble(wy(k))**2
-              wspeed = sqrt( dwxy )		!INTEL_BUG
-	      !wxy = wx(k)**2 + wy(k)**2
-              !wspeed = sqrt( wxy )		!INTEL_BUG_OLD
+              wspeed = sqrt( dwxy )			!INTEL_BUG
+	      !wspeed = sqrt( wx(k)**2 + wy(k)**2 )	!INTEL_BUG_OLD
 	      ws(k) = wspeed
 	    end do
 	  end if
@@ -924,7 +922,7 @@
       &          .or. itdrag == 2 .or. itdrag == 5 )) then
 		call get_drag(itdrag,wspeed,cd,ach)
 	    end if
-	    wparam = fice * wfact * cd * wspeed	!INTEL_BUG_OLD
+	    wparam = fice * wfact * cd * wspeed		!INTEL_BUG_OLD
             tx(k) = wparam * wx(k)
             ty(k) = wparam * wy(k)
           end do

@@ -1110,6 +1110,7 @@
             flux = rflux(kindex)
             do l=lmin,lmax
               rval = flux * drvols(l)
+              !rval = flux * dvols(l) / dvoltot	!INTEL_BUG_OLD
               mfluxv(l,k) = mfluxv(l,k) + rval
             end do
 
@@ -1145,7 +1146,6 @@
 	    dfluxnode = dfluxnode + flux
 	  end do
 	  rqv(k) = real(dfluxnode)		!INTEL_BUG
-	  !rqv(k) = dfluxnode			!INTEL_BUG_OLD
 	  fluxtot = fluxtot + dfluxnode
 	end do
 
