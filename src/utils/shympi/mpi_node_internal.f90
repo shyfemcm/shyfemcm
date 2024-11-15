@@ -545,6 +545,10 @@
 	nvert = nlv_global
 	if( nvert == 0 ) then
 	  nvert = 1000
+	  if( nlvddi > nvert ) then
+	    write(6,*) nlvddi,nvert,nlv_global
+	    stop 'error stop shympi_exchange_internal_r: nlvddi>nvert'
+	  end if
 	  write(6,*) 'increasing nvert ',nvert,my_id
 	end if
 

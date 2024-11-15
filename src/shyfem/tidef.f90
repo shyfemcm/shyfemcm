@@ -41,6 +41,7 @@
 ! 28.04.2023	ggu	avoid using floating for **2
 ! 13.10.2024	ggu	bug fix for INTEL_BUG
 ! 15.10.2024	ggu	bug fix for INTEL_BUG (IFX)
+! 13.11.2024    ggu     marked old code with INTEL_BUG_OLD
 !
 !********************************************************************
 ! DOCS  START   S_tide
@@ -221,10 +222,13 @@
         real  			 :: llat,llon
 	double precision	 :: fact,arg 			!INTEL_BUG
 	double precision	 :: hdepth			!INTEL_BUG
+	!real			 :: fact,arg 			!INTEL_BUG_OLD
+	!real			 :: hdepth			!INTEL_BUG_OLD
         real, parameter          :: d2r=4.0*atan(1.0)/180.0
         real, parameter          :: twopi=8.d0*atan(1.d0)
 	integer			 :: i,ld1
         double precision         :: eqtide  !Equilibrium tide [m] !INTEL_BUG
+        !real		         :: eqtide  !Equilibrium tide [m] !INTEL_BUG_OLD
         real			 :: loadb   !loading tide factor 
 					    ! [0.054,0.047,= ltidec*depth]
 
@@ -270,8 +274,9 @@
 !       Compute loading tide
 !-----------------------------------------------
 
-	hdepth = dble(hkv(k))+dble(zov(k))
-        loadb = ltidec * hdepth
+	hdepth = dble(hkv(k))+dble(zov(k))		!INTEL_BUG
+        loadb = ltidec * hdepth				!INTEL_BUG
+        !loadb = ltidec * ( hkv(k) + zov(k) )		!INTEL_BUG_OLD
 
 !-----------------------------------------------
 !	Compute earth + loading

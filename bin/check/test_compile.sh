@@ -221,6 +221,13 @@ Rules()
   echo "setting macros: $1" >> allstderr.txt
 }
 
+PrintAll()
+{
+  echo "setting macros: $1"
+  echo "setting macros: $1" >> allstdout.txt
+  echo "setting macros: $1" >> allstderr.txt
+}
+
 Regress()
 {
   [ "$regress" = "NO" ] && return
@@ -284,9 +291,9 @@ Clean_before
 for comp in $compilers
 do
 
-  echo "================================="
-  echo "compiling with $comp"
-  echo "================================="
+  PrintAll "================================="
+  PrintAll "compiling with $comp"
+  PrintAll "================================="
 
   SetCompiler $comp
   [ $? -ne 0 ] && continue

@@ -1250,8 +1250,17 @@
      &			+ gravy + (hhi/rowass)*presy + yexpl  &
      &  		+ wavey
 
-	ppx = ppx + ppx_aux
+	ppx = ppx + ppx_aux	!INTEL_BUG
 	ppy = ppy + ppy_aux
+
+	!below INTEL_BUG_OLD
+!	ppx = ppx + aat*uui - bbt*uuip - cct*uuim - gammat*vvi  &
+!     &			+ gravx + (hhi/rowass)*presx + xexpl  &
+!     &  		+ wavex
+!	ppy = ppy + aat*vvi - bbt*vvip - cct*vvim + gammat*uui  &
+!     &			+ gravy + (hhi/rowass)*presy + yexpl  &
+!     &  		+ wavey
+
 
 !	------------------------------------------------------
 !	set up matrix A

@@ -70,6 +70,7 @@
 ! 03.06.2022	ggu	prepared for mpi (not yet ready)
 ! 09.05.2023    lrp     introduce top layer index variable
 ! 14.10.2024	ggu	fixed INTEL_BUG
+! 13.11.2024	ggu	marked old code with INTEL_BUG_OLD
 !
 !*****************************************************************
 
@@ -220,13 +221,18 @@
 
 	double precision tnudge	!relaxation time for nudging [s]
 	double precision tramp	!time for smooth init
+	double precision h,alpha,uexpl,vexpl		!INTEL_BUG
+        double precision u(nlvdi),v(nlvdi)		!INTEL_BUG
+	double precision dfact				!INTEL_BUG
+	!real tnudge	!relaxation time for nudging [s]!INTEL_BUG_OLD
+	!real tramp	!time for smooth init		!INTEL_BUG_OLD
+	!real h,alpha,uexpl,vexpl			!INTEL_BUG_OLD
+        !real u(nlvdi),v(nlvdi)				!INTEL_BUG_OLD
+	!real dfact					!INTEL_BUG_OLD
 
         integer ie,l,i,k,ii,n,ie_mpi
 	integer lmax,lmin
 	integer nbc
-	double precision h,alpha,uexpl,vexpl		!INTEL_BUG
-        double precision u(nlvdi),v(nlvdi)		!INTEL_BUG
-	double precision dfact				!INTEL_BUG
         
 	integer nintp,nvar
 	real cdef(2)

@@ -66,6 +66,7 @@ OBJ := \
 	basutil_hsigma.o \
 	basutil_part.o \
 	basutil_fastfind.o \
+	basutil_layers.o \
 
 #----------------------------------------------------------------------------
 

@@ -162,7 +162,7 @@ c checks for flag values
           end do
         end do
 
-	write(6,*) 'hm3v iflag/hmin,hmax: ',iflag,hmin,hmax
+	!write(6,*) 'hm3v iflag,hmin,hmax: ',iflag,hmin,hmax
 
 	end
 
