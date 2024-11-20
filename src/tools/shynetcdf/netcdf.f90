@@ -3200,6 +3200,13 @@
 	  units = 'm'
 	  cmin = 0.
 	  cmax = 100.
+	else if( ivar > 300 .and. ivar < 400 ) then	! concentration
+	  name = 'concentration'
+	  what = 'long_name'
+	  std = 'concentration'		! no CF convention name available
+	  units = ''
+	  cmin = 0.
+	  cmax = 0.
 	else if( ivar .eq. 800 ) then	! suspended sediment concentration
 	  name = 'ssc'
 	  what = 'long_name'

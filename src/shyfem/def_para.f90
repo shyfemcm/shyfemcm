@@ -229,6 +229,7 @@
 ! 15.02.2022	ggu	new parameters for limiting_scalar
 ! 20.07.2023    lrp     new parameter nzadapt
 ! 13.09.2024    lrp     new parameter iatm
+! 16.11.2024	ggu	new parameter ibasin
 !
 !************************************************************************
 
@@ -460,6 +461,46 @@
 	call addpar('idtmet',0.)
 	call addpar('itmmet',-1.)
 	call addpar('imetout',0.)
+
+!c------------------------------------------------------------------------
+
+! DOCS	BASIN		Reading of grd files
+!
+! The model normally reads a file |.bas| that contains the numerical
+! mesh in an unformatted format. This file can be produced by running
+! |shypre| on a |.grd| file that contains the numerical grid in
+! ASCII format. However, |shyfem| can also directly process a |.grd| file
+! and transform it into a |.bas| file, eliminating the need for a
+! pre-processing of the |.grd| file by |shypre|.
+!
+! If the basin name specified in the |STR| file has no extension, then
+! |shyfem| will first look for a |.bas| file and read it. If not available,
+! it will look for a |.grd| file, read and process it. If also a |.grd|
+! file is not found, |shyfem| will exit with an error.
+!
+! If the basin name in the |STR| file has an extension |.bas|, 
+! |shyfem| will only look for a |.bas| file, and, if not found, 
+! it will exit with an error. If the basin file in the |STR| file has
+! the extension |.grd|, |shyfem| will look for a |.grd| file and
+! process it to create a |.bas| file, even if such a file already exists.
+! If no file |.grd| is found, |shyfem| will exit with an error.
+!
+! If a |.grd| file has to be read, then the parameter |ibasin| will
+! regulate, how the file will be processed. A value of -1 will just
+! read the file and not change the numbering of nodes and element. 
+! A value of 0 will just renumber the elements, and a value of 1 will
+! optimize the bandwidth, renumbering both nodes and elements.
+! These values correspond to the command line options of |shypre|
+! as |-noopti| for -1, |-renumber| for 0, and |-opti| for 1.
+
+! |ibasin|		Treatment of the |.grd| file. A value of -1
+!			will leave the numbering of nodes and elements
+!			as in the |.grd| file, a value of 0 just
+!			renumbers the elements, and a value of 1
+!			optimizes the bandwidth, renumbering both 
+!			nodes and elements.
+
+	call addpar('ibasin',-1.)
 
 !c------------------------------------------------------------------------
 
