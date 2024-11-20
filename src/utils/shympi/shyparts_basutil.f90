@@ -600,6 +600,8 @@
 
 	call shympi_barrier
 
+	!return
+
 	!write(6,*) 'finished checking total domain ',my_id
 
 !---------------------------------------------

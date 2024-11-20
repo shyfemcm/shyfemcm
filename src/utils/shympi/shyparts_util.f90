@@ -32,6 +32,7 @@
 ! 22.04.2021	ggu	resolve bound check error (not yet finished)
 ! 12.04.2022	ggu	preapred for online partitioning
 ! 10.04.2024	ggu	new routine write_single_nodes()
+! 18.11.2024	ggu	writes partition.np.txt
 !
 !****************************************************************
 
@@ -49,6 +50,7 @@
 	integer ic,k,ia
 	integer netot,neint
 	integer min,max
+	character*80 name
 
         integer, allocatable  :: nc(:)                  !array for check
         integer, allocatable  :: ne(:)                  !array for check
@@ -99,6 +101,25 @@
      &		,ne(ic),ne(ic)-ni(ic),(100.*(ne(ic)-ni(ic)))/ne(ic)
         end do
         write(6,*) 
+
+	call make_name_with_number('partition',nparts,'txt',name)
+	open(1,file=name,form='formatted',status='unknown')
+        !write(1,*) 'total number of nodes: ',nkn
+        !write(1,*) 'total number of elems: ',nel
+        !write(1,*) 'Information on domains: ',nparts
+	write(1,'(a)') '        np       nkn       nel'
+	write(1,'(3i10)') nparts,nkn,nel
+        write(1,*) '   domain      area     nodes   percent' &
+     &				// '  elements     ghost' &
+     &				// '   percent'
+        do ic=min,max
+	  ia = ic
+	  if( min == 0 ) ia = ic + 1
+          write(1,'(3i10,f10.2,2i10,f10.2)')  &
+     &		 ia-1,ia,nc(ic),(100.*nc(ic))/nkn &
+     &		,ne(ic),ne(ic)-ni(ic),(100.*(ne(ic)-ni(ic)))/ne(ic)
+        end do
+	close(1)
 
 	end
 

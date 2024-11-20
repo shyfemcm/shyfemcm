@@ -1104,6 +1104,9 @@
 	integer area_elem(nel)
 	integer ierr1,ierr2
 
+	logical, save :: bwritegrd = .true.
+	character*80, save :: filename = 'partition'
+
 	ierr1 = 0
 	ierr2 = 0
 
@@ -1123,6 +1126,8 @@
 	  end if
 	  call do_partition(nkn,nel,nen3v,nparts,area_node,area_elem)
 	  call check_partition(area_node,area_elem,ierr1,ierr2)
+	  call write_partition_to_grd(filename,.false. &
+     &				,nparts,area_node,area_elem)
 	  area_node = area_node - 1	!gives back 1-nparts
 	else if( nnp == nparts ) then
 	  if( shympi_is_master() ) then

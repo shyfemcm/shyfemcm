@@ -43,6 +43,7 @@
 	implicit none
 
         logical, save :: breadbas       !internal - true if file read is bas
+        logical, save :: bwritetxt      !write txt file
 
 !================================================================
 	end module mod_shyparts
@@ -60,6 +61,7 @@
 	!use basutil
 	use shympi
         use grd
+	use mod_shyparts
 
 	implicit none
 
@@ -70,7 +72,7 @@
 
 	logical bdebug
 	integer ierr1,ierr2
-	character*80 grdfile
+	character*80 grdfile,grdname
 
 !-----------------------------------------------------------------
 ! read in basin
@@ -83,6 +85,13 @@
         if( grdfile == ' ' ) call clo_usage
 	call grd_set_write(.false.)
         call read_command_line_file(grdfile)
+
+	grdname = grdfile
+	if( breadbas ) then
+	  call delete_extension(grdname,'.bas')
+	else
+	  call delete_extension(grdname,'.grd')
+	end if
 
         call shympi_init(.false.)
 
@@ -117,7 +126,7 @@
 ! write grd files
 !-----------------------------------------------------------------
 
-        call write_partition_to_grd(grdfile,bdebug                      &
+        call write_partition_to_grd(grdname,bdebug                      &
      &                  ,nparts,npart,epart)
 
 !-----------------------------------------------------------------
@@ -175,6 +184,7 @@
 	subroutine shyparts_init(grdfile,np,bdebug)
 
 	use clo
+	use mod_shyparts
 
 	implicit none
 
@@ -189,6 +199,7 @@
 	call clo_add_sep('options for partitioning')
         call clo_add_option('np',-1,'number of partitions')
         call clo_add_option('debug',.false.,'write debug grd files')
+        call clo_add_option('writetxt',.false.,'write info also to file')
 
 	call clo_parse_options
 
@@ -197,6 +208,7 @@
 
         call clo_get_option('np',np)
         call clo_get_option('debug',bdebug)
+        call clo_get_option('writetxt',bwritetxt)
 
         if (np == -1 ) then
 	  stop 'error stop shyparts_init: no np given'
