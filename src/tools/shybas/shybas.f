@@ -76,6 +76,7 @@ c 12.01.2023    ggu     correct statistics of area also for lat/lon
 c 29.01.2023    ggu     more on correct area computation (eliminated areatr)
 c 10.05.2024    ggu     new routine write_basin_txt() (bbastxt)
 c 03.10.2024    ggu     new call to test_fast_find()
+c 21.11.2024    ggu     renamed call to some routines
 c
 c todo :
 c
@@ -1555,8 +1556,8 @@ c*******************************************************************
         call link_set_stop(.false.)     !do not stop after error
         call link_set_write(.false.)    !do not write error
 
-	call check_connectivity(ierr1)
-	call check_connections(ierr2)
+	call check_bas_connectivity(ierr1)
+	call check_bas_connections(ierr2)
 
 	if( ierr1 /= 0 .or. ierr2 /= 0 ) then
 	  write(6,*) 'there were errors in link structure:'

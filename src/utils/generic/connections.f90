@@ -893,6 +893,8 @@
 
 	ndim = ierr
 
+	if( ierrors == 0 ) return
+
 	write(6,*) 'connection errors found: ',ierrors
 	do i=1,ierrors
 	  k = kerrors(i)

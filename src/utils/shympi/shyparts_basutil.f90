@@ -46,6 +46,7 @@
 ! 13.04.2022    ggu     new call to make_links (ibound)
 ! 04.04.2023    ggu     minor changes
 ! 07.11.2024    ggu     ignore connection errors
+! 21.11.2024    ggu     call check routines with bdebug, less error messages
 !
 !****************************************************************
 
@@ -316,6 +317,7 @@
 
 	character*(*) llfile
 
+	logical bdebug
 	integer ierr
 	integer k,i,nl,il,n,ib,in,node,ilext,np,ic
 	integer, allocatable :: nc(:)
@@ -328,6 +330,8 @@
 !-----------------------------------------------------------------
 ! open and read file containing lines
 !-----------------------------------------------------------------
+
+	bdebug = .false.
 
 	if( .not. filex(llfile) ) then
 	  write(6,*) 'Cannot open file ',trim(llfile)
@@ -411,9 +415,9 @@
 	end if
 
 	call shympi_syncronize
-	call check_connectivity(ierr)
+	call check_connectivity(bdebug,ierr)
 	call shympi_syncronize
-	call check_connections(ierr)
+	call check_connections(bdebug,ierr)
 	call shympi_syncronize
 
 !-----------------------------------------------------------------
@@ -425,12 +429,13 @@
 
 !*******************************************************************
 
-	subroutine check_connectivity(ierr)
+	subroutine check_connectivity(bdebug,ierr)
 
 	use basin
 
 	implicit none
 
+	logical bdebug
 	integer ierr
 
 	integer ier
@@ -533,7 +538,7 @@
 
 !*******************************************************************
 
-	subroutine check_connections(kerr)
+	subroutine check_connections(bdebug,kerr)
 
 ! this checks connections with link/lenk data structure
 
@@ -543,12 +548,14 @@
 
 	implicit none
 
+	logical bdebug
 	integer kerr
 
 	logical bloop
 	logical bwrite
 	logical bwritegrd
 	logical berror
+	logical bhandle_errors
 	integer nloop
 	integer ic,nc,ncol,kext,iu,i,k
 	integer nk,ne
@@ -568,8 +575,12 @@
 	berror = .false.
 	bwritegrd = .false.
 	bwritegrd = .true.
+	bhandle_errors = .false.
 	bloop = .true.
 	nloop = 0
+
+	bwritegrd = bdebug	!only write error grid if in debug mode
+	bwrite = bdebug
 
 	allocate(kerror(nkn))
 
@@ -577,7 +588,7 @@
 	nc = maxval(icolor)
 
 	iu = 0
-	if( shympi_is_master() ) iu = 777
+	!if( shympi_is_master() ) iu = 777
 
 	if( shympi_is_master() ) then
 	write(6,*) '========================================'
@@ -592,17 +603,15 @@
 	  stop 'error stop check_connections: irregular domain'
 	end if
 
-	if( shympi_is_master() ) then
-	  if( bwritegrd ) then
-	    call write_partition_grd(icolor,0)
-	  end if
-	end if
+	!if( shympi_is_master() ) then
+	!  if( bwritegrd ) then
+	!    call write_partition_grd(icolor,0)
+	!  end if
+	!end if
 
 	call shympi_barrier
 
 	!return
-
-	!write(6,*) 'finished checking total domain ',my_id
 
 !---------------------------------------------
 ! loop on domains
@@ -614,7 +623,7 @@
 
 	nloop = nloop + 1
 	if( nloop > 10 ) exit
-	!if( nloop > 1 ) exit
+	if( nloop > 1 ) exit
 
 	do ic=1,nc
 	  ncol = count( icolor == ic )
@@ -653,7 +662,7 @@
 	  !-------------------------------------------
 
 	  kext = 0
-	  if( kerr /= 0 ) then
+	  if( bhandle_errors .and. kerr /= 0 ) then
 	    kext = ipext(kerr)
 	    !write(6,*) 'adjusting node kerr = ',kerr,kext,ic
 	    call restore_old_basin
@@ -664,7 +673,7 @@
 	  call restore_old_basin
 	end do
 
-	if( kerr > 0 ) then
+	if( bhandle_errors .and. kerr > 0 ) then
 	  if( iu > 0 ) write(iu,*) 'check_connections: ',nloop,kerr,kext
 	  call elim_isolated_element(icolor,kerr)
 	end if

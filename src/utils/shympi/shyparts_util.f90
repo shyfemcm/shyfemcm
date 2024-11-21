@@ -33,6 +33,7 @@
 ! 12.04.2022	ggu	preapred for online partitioning
 ! 10.04.2024	ggu	new routine write_single_nodes()
 ! 18.11.2024	ggu	writes partition.np.txt
+! 21.11.2024	ggu	use make_name_with_number() to create file names
 !
 !****************************************************************
 
@@ -125,7 +126,7 @@
 
 !****************************************************************
 
-	subroutine write_partition_to_grd(grdfile,bdebug &
+	subroutine write_partition_to_grd(grdname,bdebug &
      &			,nparts,npart,epart)
 
 ! write grd files
@@ -135,7 +136,7 @@
 
 	implicit none
 
-	character*(*) grdfile
+	character*(*) grdname
 	logical bdebug
 	integer nparts
 	integer npart(nkn)
@@ -143,8 +144,7 @@
 
 	logical bldebug
 	integer i,nmax,ntot,ic
-	character*3 numb
-	character*80 basnam,name
+	character*80 name
 
 	bldebug = .true.
 	bldebug = .false.
@@ -153,15 +153,9 @@
 	call basin_to_grd
 	call grd_set_write(.false.)
 
-	write(numb,'(i3)') nparts
-        numb = adjustl(numb)
-        basnam = grdfile
-        call delete_extension(basnam,'.grd')
-
         ianv = npart
-        name = trim(basnam)//'.'//trim(numb)//'.'//'node.grd'
+	call make_name_with_number(grdname,nparts,'node.grd',name)
         call grd_write(name)
-	!write(6,*) ''
 	write(6,*) 'Grid with partition on nodes in file: ',trim(name)
 
 	if( bldebug ) then
@@ -177,26 +171,26 @@
 	end if
 
         iaev = epart
-        name = trim(basnam)//'.'//trim(numb)//'.'//'elem.grd'
+	call make_name_with_number(grdname,nparts,'elem.grd',name)
         call grd_write(name)
 	write(6,*) 'Grid with partition on elements in file: ',trim(name) 
 
 	if( bdebug ) then
-	  call grd_write_debug(basnam,nparts,npart)
+	  call grd_write_debug(grdname,nparts,npart)
 	end if
 
         end
 
 !****************************************************************
 
-	subroutine grd_write_debug(basnam,nparts,npart)
+	subroutine grd_write_debug(grdname,nparts,npart)
 
 	use basin
         use grd
 
 	implicit none
 
-	character*(*) basnam
+	character*(*) grdname
 	integer nparts
 	integer npart(nkn)
 
@@ -205,20 +199,18 @@
 	character*80 name,pre,post,numb
 	integer epart(nel)
 
-	write(numb,'(i3)') nparts
-        numb = adjustl(numb)
-	pre = trim(basnam)//'.'//trim(numb)//'.'
-	post = '.node.grd'
+	call make_name_with_number(grdname,nparts,'',pre)
 
 	write(6,*) 'writing debug grd files...'
 
 	do i=1,nparts
-	  write(numb,'(i3)') i
-          numb = adjustl(numb)
-          name = trim(pre)//trim(numb)//trim(post)
+	  !write(numb,'(i3)') i
+          !numb = adjustl(numb)
+          !name = trim(pre)//trim(numb)//trim(post)
+	  call make_name_with_number(pre,i,'grd',name)
 	  write(6,*) 'writing debug file: ',trim(name)
           ianv = npart
-	  where( ianv /= i ) ianv = 0
+	  where( ianv /= i ) ianv = -1
 	  iaev = 0
 	  do ie=1,nel
 	    bhasnode = .false.

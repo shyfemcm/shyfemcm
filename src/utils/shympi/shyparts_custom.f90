@@ -57,7 +57,7 @@
 
 !*******************************************************************
 
-	subroutine check_partition(npart,epart,ierr1,ierr2)
+	subroutine check_partition(npart,epart,bdebug,ierr1,ierr2)
 
 	use basin
 
@@ -65,6 +65,7 @@
 
         integer npart(nkn)
         integer epart(nel)
+	logical bdebug
 	integer ierr1,ierr2
 
 	ierr1 = 0

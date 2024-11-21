@@ -33,6 +33,7 @@
 ! 12.04.2022	ggu	restructured to allow for online computing
 ! 04.04.2023	ggu	minor changes
 ! 27.04.2023	ggu	better error handling
+! 21.11.2024	ggu	honor debug flag
 !
 !****************************************************************
 
@@ -43,7 +44,6 @@
 	implicit none
 
         logical, save :: breadbas       !internal - true if file read is bas
-        logical, save :: bwritetxt      !write txt file
 
 !================================================================
 	end module mod_shyparts
@@ -58,10 +58,8 @@
 	use evgeom
 	use basin
 	use clo
-	!use basutil
 	use shympi
         use grd
-	use mod_shyparts
 
 	implicit none
 
@@ -85,13 +83,7 @@
         if( grdfile == ' ' ) call clo_usage
 	call grd_set_write(.false.)
         call read_command_line_file(grdfile)
-
-	grdname = grdfile
-	if( breadbas ) then
-	  call delete_extension(grdname,'.bas')
-	else
-	  call delete_extension(grdname,'.grd')
-	end if
+	call make_grd_name(grdfile,grdname)
 
         call shympi_init(.false.)
 
@@ -114,10 +106,10 @@
 ! check partition
 !-----------------------------------------------------------------
 
-	call check_partition(npart,epart,ierr1,ierr2)
+	call check_partition(npart,epart,bdebug,ierr1,ierr2)
 
 !-----------------------------------------------------------------
-! write partition information to terminal
+! write partition information to terminal and file
 !-----------------------------------------------------------------
 
 	call info_partition(nparts,npart)
@@ -149,6 +141,25 @@
 
 !*******************************************************************
 !*******************************************************************
+!*******************************************************************
+
+	subroutine make_grd_name(grdfile,grdname)
+
+	use mod_shyparts
+
+	implicit none
+
+	character*(*) grdfile,grdname
+
+	grdname = grdfile
+	if( breadbas ) then
+	  call delete_extension(grdname,'.bas')
+	else
+	  call delete_extension(grdname,'.grd')
+	end if
+
+	end
+
 !*******************************************************************
 
 	subroutine read_command_line_file(file)
@@ -184,7 +195,6 @@
 	subroutine shyparts_init(grdfile,np,bdebug)
 
 	use clo
-	use mod_shyparts
 
 	implicit none
 
@@ -199,7 +209,6 @@
 	call clo_add_sep('options for partitioning')
         call clo_add_option('np',-1,'number of partitions')
         call clo_add_option('debug',.false.,'write debug grd files')
-        call clo_add_option('writetxt',.false.,'write info also to file')
 
 	call clo_parse_options
 
@@ -208,7 +217,6 @@
 
         call clo_get_option('np',np)
         call clo_get_option('debug',bdebug)
-        call clo_get_option('writetxt',bwritetxt)
 
         if (np == -1 ) then
 	  stop 'error stop shyparts_init: no np given'

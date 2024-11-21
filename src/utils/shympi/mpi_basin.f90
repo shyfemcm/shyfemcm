@@ -39,6 +39,7 @@
 ! 20.03.2023	ggu	ghost node calls transferred to submpi_ghost.f
 ! 20.03.2023	ggu	call to write_grd_domain() at end of shympi_setup()
 ! 12.04.2023	ggu	protect from nkn == nel
+! 21.11.2024	ggu	new call to check_partition() and write_partition()
 
 ! notes :
 !
@@ -1105,7 +1106,8 @@
 	integer ierr1,ierr2
 
 	logical, save :: bwritegrd = .true.
-	character*80, save :: filename = 'partition'
+	logical, save :: bdebug_grd = .false.
+	character*80, save :: grdname = 'partition'
 
 	ierr1 = 0
 	ierr2 = 0
@@ -1125,8 +1127,8 @@
 	    write(6,*) 'we will do partitioning for domains: ',nparts
 	  end if
 	  call do_partition(nkn,nel,nen3v,nparts,area_node,area_elem)
-	  call check_partition(area_node,area_elem,ierr1,ierr2)
-	  call write_partition_to_grd(filename,.false. &
+	  call check_partition(area_node,area_elem,bdebug_grd,ierr1,ierr2)
+	  call write_partition_to_grd(grdname,bdebug_grd &
      &				,nparts,area_node,area_elem)
 	  area_node = area_node - 1	!gives back 1-nparts
 	else if( nnp == nparts ) then

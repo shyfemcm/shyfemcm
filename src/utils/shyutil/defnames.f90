@@ -64,6 +64,7 @@
 ! 21.05.2019	ggu	changed VERS_7_5_62
 ! 08.04.2024	ggu	new routine make_name_with_number()
 ! 10.05.2024	ggu	new routine parse_file_name()
+! 21.11.2024	ggu	in make_name_with_number() use no dot if ext == ''
 !
 ! notes :
 !
@@ -677,7 +678,11 @@
         write(aux,'(i10)') n
         aux = adjustl(aux)
 
-        name = trim(base) // '.' // trim(aux) // '.' // trim(ext)
+	if( ext == ' ' ) then
+          name = trim(base) // '.' // trim(aux)
+	else
+          name = trim(base) // '.' // trim(aux) // '.' // trim(ext)
+	end if
 
         end
 
