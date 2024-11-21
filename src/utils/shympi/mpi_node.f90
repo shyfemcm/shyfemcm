@@ -1060,7 +1060,7 @@
 	subroutine shympi_abort
 
 	call shympi_abort_internal(33)
-	stop
+	stop 'error stop: abort'
 
 	end subroutine shympi_abort
 

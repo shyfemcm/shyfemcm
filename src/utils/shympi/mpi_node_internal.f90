@@ -50,6 +50,7 @@
 ! 27.03.2024	ggu	introduced aux array to make dims equal in gather
 ! 05.04.2024	ggu	changes in shympi_exchange_internal_r()
 ! 06.09.2024    lrp     nuopc-compliant
+! 21.11.2024    ggu     change in shympi_abort_internal() -> hangs for ever
 !
 !******************************************************************
 
@@ -172,8 +173,8 @@
 
         integer ierr,ierr_code
 
-	call MPI_BARRIER( MPI_COMM_WORLD, ierr)
-	call MPI_FINALIZE(ierr_code)
+	!call MPI_BARRIER( MPI_COMM_WORLD, ierr)
+	!call MPI_FINALIZE(ierr_code)		!this will hang for ever
 	call MPI_ABORT(MPI_COMM_WORLD,ierr_code,ierr)
 
         end subroutine shympi_abort_internal

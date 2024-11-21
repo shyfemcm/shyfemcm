@@ -41,6 +41,7 @@
 ! 09.06.2023    ggu     bug fix for tripple point on external boundary
 ! 23.10.2023    ggu     in exchange_areas() eliminated dependency from evgeom
 ! 13.04.2024    ggu     introduced buffer_tripple_in, elim hydro dependency
+! 21.11.2024    ggu     test for external neigbor was wrong
 !
 !******************************************************************
 
@@ -617,7 +618,7 @@
 	  if( ineib == 0 .and. iext == 0 ) then
 	    write(6,*) 'not real tripple point... ignoring ',i
 	    cycle
-	  else if( ineib /= -1000 ) then
+	  else if( ineib > -999 ) then
 	    write(6,*) i,ineib,iext
 	    write(6,*) '*** neigbor not flagged as external: ',ineib
 	    call error_stop('tripple_points','internal (14)')
