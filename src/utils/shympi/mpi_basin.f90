@@ -1108,6 +1108,7 @@
 
 	logical, save :: bwritegrd = .true.
 	logical, save :: bdebug_grd = .false.
+	real pqual
 	character*80, save :: grdname = 'partition'
 
 	ierr1 = 0
@@ -1154,7 +1155,7 @@
 	  !write(6,*) nmin,nmax
 	  write(6,*) 'domains: ',nmin,nmax
 
-	  call info_partition(nparts,area_node,pquality)
+	  call info_partition(nparts,area_node,pqual)
 	end if
 
 	!if( ierr1 /= 0 .or. ierr2 /= 0 ) then

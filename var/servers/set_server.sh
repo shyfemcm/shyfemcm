@@ -34,7 +34,7 @@ FindServer()
 
 Usage()
 {
-  echo "Usage: check_server.sh [-h|-help] host"
+  echo "Usage: set_server.sh [-h|-help] host"
 }
 
 FullUsage()
@@ -44,13 +44,12 @@ FullUsage()
 
 ParseOptions()
 {
+  what="set"
   while [ -n "$1" ]
   do
     case $1 in
         -server)        what="server";;
-        -check)         what="check";;
         -show)          what="show";;
-        -reset)         what="reset";;
         -load)          what="load"; setting=$2; shift;;
         -h|-help)       FullUsage; exit 0;;
         -*)             echo "no such option: $1"; exit 1;;
@@ -64,6 +63,8 @@ ParseOptions()
 
 Sourced()
 {
+  [ $what = "show" ] && return
+
   if [[ "${BASH_SOURCE[0]}" == "${0}" ]]; then
     echo "script is not sourced"
     echo "please run this script as \". ${0}\""
@@ -96,12 +97,22 @@ SetVars()
 
 #--------------------------------------------------------------
 
-Sourced
-
 ParseOptions $*
 FindServer
 
+Sourced
+
 SetVars
+
+if [ $what = "show" ]; then
+    echo " NETCDF_C_HOME = $NETCDF_C_HOME"
+    echo " NETCDF_FORTRAN_HOME = $NETCDF_FORTRAN_HOME"
+    echo " NETCDFDIR = $NETCDFDIR"
+    echo " METIS_HOME = $METIS_HOME"
+    echo " PARMETIS_HOME = $PARMETIS_HOME"
+    echo " PETSC_HOME = $PETSC_HOME"
+    echo " BFM_HOME = $BFM_HOME"
+fi
 
 #--------------------------------------------------------------
 

@@ -158,6 +158,10 @@
         integer,save,allocatable :: nen3v_global(:,:)	!global element index
 	real,save,allocatable :: hlv_global(:)		!global layer depths
 
+        ! quality index of partition
+
+        real, save :: pquality = 0.
+
         type communication_info
           integer, public :: numberID
           integer, public :: totalID
