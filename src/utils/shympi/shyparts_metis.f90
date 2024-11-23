@@ -34,6 +34,7 @@
 ! 12.04.2022	ggu	bug fix: iarnv and iarv were not saved
 ! 15.10.2024	ggu	set array tpwgts (which is real, not dble) (IFX bug)
 ! 21.11.2024	ggu	call check_partition() with bdebug flag
+! 23.11.2024	ggu	code cleaned
 !
 !****************************************************************
 
@@ -81,8 +82,6 @@
 
         allocate(tpwgts(nparts))
 	tpwgts = 1./dble(nparts)
-	!write(6,*) nparts
-	!write(6,*) tpwgts
 
 !-----------------------------------------------------------------
 ! set up METIS eptr and eind arrays structures
@@ -109,26 +108,6 @@
         options(2) = 1		!OBJTYPE (0=cut,1=vol)
         options(12) = 1		!CONTIG (0=defoult,1=force contiguous)
         options(18) = 1		!NUMBERING (0 C-style, 1 Fortran-style)
-
-	iu = 770
-	iu = 0
-	if( iu > 0 ) then
-	if( n_threads > 1 ) iu = 780 + my_id
-
-	write(iu,*) nkn,nel,nparts
-	write(iu,*) options
-	write(iu,*) tpwgts
-	nfill = eptr(nel+1)
-	write(iu,*) nfill
-	write(iu,*) 'eptr'
-	do i=1,nel+1,10
-	  write(iu,*) i,eptr(i)
-	end do
-	write(iu,*) 'eind'
-	do i=1,nfill,100
-	  write(iu,*) i,eind(i)
-	end do
-	end if
 
 !-----------------------------------------------------------------
 ! Call METIS for patitioning on nodes

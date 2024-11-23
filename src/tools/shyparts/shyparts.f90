@@ -34,6 +34,7 @@
 ! 04.04.2023	ggu	minor changes
 ! 27.04.2023	ggu	better error handling
 ! 21.11.2024	ggu	honor debug flag
+! 23.11.2024	ggu	introduced pqual
 !
 !****************************************************************
 
@@ -70,6 +71,7 @@
 
 	logical bdebug
 	integer ierr1,ierr2
+	real pqual
 	character*80 grdfile,grdname
 
 !-----------------------------------------------------------------
@@ -112,7 +114,7 @@
 ! write partition information to terminal and file
 !-----------------------------------------------------------------
 
-	call info_partition(nparts,npart)
+	call info_partition(nparts,npart,pqual)
 
 !-----------------------------------------------------------------
 ! write grd files
@@ -129,7 +131,8 @@
           write(6,*) 'domain successfully partitioned'
           call exit(0)
         else
-          write(6,*) 'errors in domains: ',ierr1,ierr2
+          write(6,*) 'conectivity errors in domains: ',ierr1,ierr2
+          write(6,*) '(errors can be ignored)'
           call exit(9)
         end if
 

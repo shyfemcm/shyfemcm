@@ -230,6 +230,7 @@
 ! 20.07.2023    lrp     new parameter nzadapt
 ! 13.09.2024    lrp     new parameter iatm
 ! 16.11.2024	ggu	new parameter ibasin
+! 23.11.2024	ggu	new parameter pqual
 !
 !************************************************************************
 
@@ -464,7 +465,7 @@
 
 !c------------------------------------------------------------------------
 
-! DOCS	BASIN		Reading of grd files
+! DOCS	BASIN		Handling of grd files
 !
 ! The model normally reads a file |.bas| that contains the numerical
 ! mesh in an unformatted format. This file can be produced by running
@@ -498,9 +499,35 @@
 !			as in the |.grd| file, a value of 0 just
 !			renumbers the elements, and a value of 1
 !			optimizes the bandwidth, renumbering both 
-!			nodes and elements.
+!			nodes and elements. (Default -1)
 
 	call addpar('ibasin',-1.)
+
+! The model, if run in MPI mode, also checks the quality of the partition
+! that is automatically produced. If the quality is too bad the execution
+! of the program stops.
+!
+! The quality index is an empirical value that gives an indication
+! on the quality of the partition. Its value depends on the ratio
+! of ghost elements to the total number of elements. Smaller numbers
+! of the index are better.
+!
+! If the value of the index is higher than the value in |pqual| the
+! program stops executing. If you are satisfied anyway with the partition
+! produced, just set the value of |pqual| higher than the computed
+! quality index and |shyfem| will run. i
+!
+! The partition can be checked with one of the following commands:
+! |grid -FT partition.np.node.grd| or |grid -FTo partition.np.node.grd|
+! where np is the number of the desired domains.
+!
+! It is important to note that the
+! quality index does not concern the quality of the results, just
+! the speed of execution of the program.
+
+! |pqual|		Maximum quality index allowed. (Default 2.5)
+
+	call addpar('pqual',2.5)
 
 !c------------------------------------------------------------------------
 

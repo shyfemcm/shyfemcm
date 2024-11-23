@@ -34,10 +34,11 @@
 ! 10.04.2024	ggu	new routine write_single_nodes()
 ! 18.11.2024	ggu	writes partition.np.txt
 ! 21.11.2024	ggu	use make_name_with_number() to create file names
+! 23.11.2024	ggu	new routine info_partition_quality()
 !
 !****************************************************************
 
-	subroutine info_partition(nparts,area_node)
+	subroutine info_partition(nparts,area_node,pquality)
 
 ! write partition information to terminal
 
@@ -45,8 +46,9 @@
 
 	implicit none
 
-	integer nparts
-	integer area_node(nkn)
+	integer, intent(in) :: nparts
+	integer, intent(in) :: area_node(nkn)
+	real, intent(out) :: pquality
 
 	integer ic,k,ia
 	integer netot,neint
@@ -64,6 +66,8 @@
         allocate(ni(0:nparts))
 
         nc = 0
+        ne = 0
+        ni = 0
 	netot = 0
 	neint = 0
 	min = minval(area_node)
@@ -105,9 +109,6 @@
 
 	call make_name_with_number('partition',nparts,'txt',name)
 	open(1,file=name,form='formatted',status='unknown')
-        !write(1,*) 'total number of nodes: ',nkn
-        !write(1,*) 'total number of elems: ',nel
-        !write(1,*) 'Information on domains: ',nparts
 	write(1,'(a)') '        np       nkn       nel'
 	write(1,'(3i10)') nparts,nkn,nel
         write(1,*) '   domain      area     nodes   percent' &
@@ -121,6 +122,42 @@
      &		,ne(ic),ne(ic)-ni(ic),(100.*(ne(ic)-ni(ic)))/ne(ic)
         end do
 	close(1)
+
+	call info_partition_quality(nparts,ne,ni,pquality)
+
+	write(6,*) 'partition quality: ',pquality
+
+	end
+
+!****************************************************************
+
+	subroutine info_partition_quality(np,ne,ni,pquality)
+
+	use basin
+
+	implicit none
+
+	integer np
+	integer ne(0:np)
+	integer ni(0:np)
+	real pquality
+
+	integer ic
+	real gmax,g,gtheo
+	real base,logfact
+
+	gmax = 0
+	do ic=0,np
+	  if( ne(ic) == 0 ) cycle
+	  g = (ne(ic)-ni(ic))/real(ne(ic))
+	  gmax = max(gmax,g)
+	end do
+
+        base = 2
+        logfact = log(real(np))/log(real(base))
+        gtheo = logfact*sqrt(real(nkn/np))/real(nel/np)
+
+	pquality = gmax / gtheo
 
 	end
 

@@ -47,6 +47,7 @@
 ! 04.04.2023    ggu     minor changes
 ! 07.11.2024    ggu     ignore connection errors
 ! 21.11.2024    ggu     call check routines with bdebug, less error messages
+! 23.11.2024    ggu     ignore errors in connectivity
 !
 !****************************************************************
 
@@ -684,7 +685,7 @@
 
 	end if
 
-	kerr = 0
+	!kerr = 0
 
 !---------------------------------------------
 ! end of loop on domains
@@ -697,9 +698,9 @@
 	    !write(6,*) 'no problems found in domains'
 	  end if
 	else
-	  write(6,*) 'could not correct error in connections...',nloop
-	  write(6,*) 'error occurred in domain ',my_id
-	  call write_partition_grd(icolor,0)
+	  !write(6,*) 'could not correct error in connections...',nloop
+	  !write(6,*) 'error occurred in domain ',my_id
+	  !call write_partition_grd(icolor,0)
 	end if
 
 	iarnv = icolor

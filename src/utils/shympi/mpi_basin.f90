@@ -40,6 +40,7 @@
 ! 20.03.2023	ggu	call to write_grd_domain() at end of shympi_setup()
 ! 12.04.2023	ggu	protect from nkn == nel
 ! 21.11.2024	ggu	new call to check_partition() and write_partition()
+! 23.11.2024	ggu	eliminate error stop in handle_partition()
 
 ! notes :
 !
@@ -1153,13 +1154,13 @@
 	  !write(6,*) nmin,nmax
 	  write(6,*) 'domains: ',nmin,nmax
 
-	  call info_partition(nparts,area_node)
+	  call info_partition(nparts,area_node,pquality)
 	end if
 
-	if( ierr1 /= 0 .or. ierr2 /= 0 ) then
-	  write(6,*) 'error in partitioning: ',ierr1,ierr2
-	  stop 'error stop handle_partition: partitioning error'
-	end if
+	!if( ierr1 /= 0 .or. ierr2 /= 0 ) then
+	!  write(6,*) 'error in partitioning: ',ierr1,ierr2
+	!  stop 'error stop handle_partition: partitioning error'
+	!end if
 
 	end
 

@@ -166,8 +166,10 @@
 
 	return
    99	continue
-	write(6,*) depth
-	write(6,*) lmax,layers
+	write(6,*) 'depth = ',depth
+	write(6,*) 'lmax,layers: ',lmax,layers
+	write(6,*) 'not enough layers for handling depth of basin'
+	write(6,*) 'add one more layer >= maximum depth of basin'
 	stop 'error stop create_levels: not enough levels'
 	end
 

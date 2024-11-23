@@ -85,6 +85,7 @@
 ! 06.09.2024    lrp     nuopc-compliant
 ! 13.10.2024    ggu     new parameter bextra_exchange to deal with INTEL_BUG
 ! 13.11.2024    ggu     new routine shympi_find_element()
+! 23.11.2024    ggu     new variable pquality
 !
 !******************************************************************
 
@@ -204,6 +205,10 @@
 
 	integer,save,allocatable :: nen3v_global(:,:)	!global element index
 	real,save,allocatable :: hlv_global(:)		!global layer depths
+
+	! quality index of partition
+
+	real, save :: pquality = 0.
 
 	! communication structures
 

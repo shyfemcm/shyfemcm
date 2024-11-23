@@ -77,7 +77,7 @@
 
 !****************************************************************
 
-	subroutine info_partition(nparts,area_node)
+	subroutine info_partition(nparts,area_node,pquality)
 
 ! write partition information to terminal
 
@@ -87,6 +87,7 @@
 
 	integer nparts
 	integer area_node(nkn)
+	real pquality
 
 	integer ic,k,ia
 	integer netot,neint
@@ -95,6 +96,8 @@
         integer, allocatable  :: nc(:)                  !array for check
         integer, allocatable  :: ne(:)                  !array for check
         integer, allocatable  :: ni(:)                  !array for check
+
+	pquality = 0.
 
 	end
 

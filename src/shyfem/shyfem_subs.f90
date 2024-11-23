@@ -185,6 +185,7 @@
 ! 29.09.2024    ggu     call tvd_init before time loop
 ! 13.10.2024    ggu     more debug output for *.dbg files, reordered
 ! 15.11.2024    ggu     flush iuinfo before stopping
+! 23.11.2024    ggu     introduced check_partition_quality()
 !
 !*****************************************************************
 !
@@ -332,6 +333,7 @@
 	call system_clock(count3, count_rate, count_max)
         mpi_t_start = shympi_wtime()
 	call shympi_setup			!sets up partitioning of basin
+	call check_partition_quality
         parallel_start = shympi_wtime()
 
 	call allocate_2d_arrays
@@ -995,6 +997,39 @@
 !$OMP END PARALLEL 	
 
 	end subroutine
+
+!*****************************************************************
+
+	subroutine check_partition_quality
+
+	use shympi
+
+	implicit none
+
+	real pqual
+	real getpar
+
+	pqual = nint(getpar("pqual"))
+
+	if( pquality > pqual ) then
+	  write(6,*) 'the partition quality index is an empirical'
+	  write(6,*) 'index that shows the quality of the partition'
+	  write(6,*) 'smaller numbers indicate better quality'
+	  write(6,*) 'computed partition quality: ',pquality
+	  write(6,*) 'allowed partition quality:  ',pqual
+	  write(6,*) 'please check the partition of your domain'
+	  write(6,*) 'you can find a graphical rappresentation in'
+	  write(6,*) 'partition.np.node.grd'
+	  write(6,*) 'you can visualize the partition with the command'
+	  write(6,*) 'grid -FT partition.np.node.grd'
+	  write(6,*) 'where np is the number of the desired domains'
+	  write(6,*) 'if you are satisfied with this partition,'
+	  write(6,*) 'set the value of pqual in the $para section'
+	  write(6,*) 'to a value higher then the computed quality'
+	  call error_stop('partition quality')
+	end if
+
+	end
 
 !*****************************************************************
 

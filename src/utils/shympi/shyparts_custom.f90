@@ -44,6 +44,8 @@
         integer npart(nkn)
         integer epart(nel)
 
+	real pquality
+
 	npart = 0
 	epart = 0
 	write(6,*) 'using SDDA algorithm for partitioning'
@@ -51,7 +53,7 @@
 
         call do_sdda(nkn,nel,nen3v,nparts,npart,epart)
 
-	!call info_partition(nparts,npart)
+	!call info_partition(nparts,npart,pquality)
 
 	end
 
