@@ -1,3 +1,91 @@
+version  8_2_2    24-11-2024    VERS_8_2_2
+
+========================================================== 24-11-2024 - 8_2_2
+
+! ./src/shyfem/iostr.f90:
+! 15.11.2024    ggu     double for energy introduced
+!
+! ./src/shyfem/bnd_routines.f90:
+! 13.11.2024    ggu     marked old code with INTEL_BUG_OLD
+!
+! ./src/shyfem/constants.f90:
+! 16.11.2024	ggu	in handle_grid_read() use ibasin to decide what to do
+!
+! ./src/shyfem/model3d_util.f90:
+! 15.11.2024    ggu     double for energy introduced
+!
+! ./src/shyfem/arc/area_util.f90:
+! 10.11.2024	ggu	copied from area_utils.f90 and started
+!
+! ./src/shyfem/shyfem_subs.f90:
+! 15.11.2024    ggu     flush iuinfo before stopping
+! 23.11.2024    ggu     introduced check_partition_quality()
+!
+! ./src/shyfem/tidef.f90:
+! 13.11.2024    ggu     marked old code with INTEL_BUG_OLD
+!
+! ./src/shyfem/lnkmpi.f90:
+! 13.11.2024    ggu     indicate other domain (not yet finished)
+!
+! ./src/shyfem/bcvel.f90:
+! 13.11.2024	ggu	marked old code with INTEL_BUG_OLD
+!
+! ./src/shyfem/def_para.f90:
+! 16.11.2024	ggu	new parameter ibasin
+! 23.11.2024	ggu	new parameter pqual
+!
+! ./src/shyfem/meteo_forcing.f90:
+! 13.11.2024    ggu     marked old code with INTEL_BUG_OLD
+!
+! ./src/tools/shynetcdf/nc_dim_coords.f90:
+! 15.11.2024	ggu	use bclip for some coordinates
+!
+! ./src/tools/shyparts/shyparts.f90:
+! 21.11.2024	ggu	honor debug flag
+! 23.11.2024	ggu	introduced pqual
+!
+! ./src/tools/shybas/basutil.f90:
+! 09.11.2024	ggu	new option -layers to compute areas and volumes
+!
+! ./src/tools/shybas/basutil_layers.f90:
+! 09.11.2024	ggu	copied, computes areas and volumes of layers
+!
+! ./src/utils/shympi/shyparts_basutil.f90:
+! 21.11.2024    ggu     call check routines with bdebug, less error messages
+! 23.11.2024    ggu     ignore errors in connectivity
+!
+! ./src/utils/shympi/mpi_tripple.f90:
+! 21.11.2024    ggu     test for external neigbor was wrong
+!
+! ./src/utils/shympi/shyparts_util.f90:
+! 18.11.2024	ggu	writes partition.np.txt
+! 21.11.2024	ggu	use make_name_with_number() to create file names
+! 23.11.2024	ggu	new routine info_partition_quality()
+!
+! ./src/utils/shympi/shyparts_metis.f90:
+! 21.11.2024	ggu	call check_partition() with bdebug flag
+! 23.11.2024	ggu	code cleaned
+!
+! ./src/utils/shympi/mpi_basin.f90:
+! 21.11.2024	ggu	new call to check_partition() and write_partition()
+! 23.11.2024	ggu	eliminate error stop in handle_partition()
+! ./src/utils/shympi/mpi_node.f90:
+! 13.11.2024    ggu     new routine shympi_find_element()
+! 23.11.2024    ggu     new variable pquality
+! ./src/utils/shympi/mpi_node_internal.f90:
+! 21.11.2024    ggu     change in shympi_abort_internal() -> hangs for ever
+!
+! ./src/utils/shyutilmpi/depth_util.f90:
+! 13.11.2024    ggu     marked old code with INTEL_BUG_OLD
+!
+! ./src/utils/shyutil/defnames.f90:
+! 21.11.2024	ggu	in make_name_with_number() use no dot if ext == ''
+!
+! ./src/utils/shyutil/version.f90:
+! 24.11.2024	ggu	version 8.2.2   La Salute edition
+
+==========================================================
+
 version  8_2_1    09-11-2024    VERS_8_2_1   commit_2024-11-24
 
 version  8_2_1    09-11-2024    VERS_8_2_1
