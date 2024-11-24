@@ -86,7 +86,7 @@
 ! 13.10.2024    ggu     new parameter bextra_exchange to deal with INTEL_BUG
 ! 13.11.2024    ggu     new routine shympi_find_element()
 ! 23.11.2024    ggu     new variable pquality
-!
+
 !******************************************************************
 
 ! for partioning on nodes the following is true (at least 2 domains)

@@ -1,5 +1,19 @@
 ============================================================
 
+Sun Nov 24 20:20:44 CET 2024
+
+new version, ibasin and pqual
+
+ LOG                           |  84 ++++++++++++++++++++++++++++++++++++++++++
+ RELEASE_NOTES                 |   7 ++++
+ docs/final/shyfem.pdf         | Bin 336364 -> 337226 bytes
+ src/tools/shybas/Makefile     |   4 ++
+ src/utils/shympi/mpi_node.f90 |   2 +-
+ src/utils/shyutil/version.f90 |  11 +++---
+ 6 files changed, 102 insertions(+), 6 deletions(-)
+
+============================================================
+
 Sat Nov  9 12:04:17 CET 2024
 
 New version 8_2_1

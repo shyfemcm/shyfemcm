@@ -1,4 +1,11 @@
 
+24.11.2024	VERS_8_2_2	La Salute edition
+
+	new parameters ibasin and pqual for handling basin read/partitioning
+	partition quality is controlled
+	ignore errors in connectivity
+	marked INTEL BUG with INTEL_BUG and INTEL_BUG_OLD
+
 09.11.2024	VERS_8_2_1	FRAIMA bis edition
 
 	changes for Intel IFX compiler
