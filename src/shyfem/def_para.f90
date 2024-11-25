@@ -915,18 +915,20 @@
 	call addpar('hlvmin',0.25)	!min percentage of last layer thickness
 
 ! With $z-$layers the treatment of the free-surface must be addressed.
-! What happen if the water level falls below the first $z$-level? 
+! What happens if the water level falls below the first $z$-level? 
 ! A $z-$star type vertical grid deformation can be deployed.
-! The next parameter specify the number of surface layers that are moving.
+! The next parameter specifies the number of surface layers that are moving.
 
-! |nzadapt|	Parameter that controls the number of surface $z-$layers that are moving.
-!		The value $|nzadapt|\le 1$ corresponds to standard $z-$layers (Default). 
-!		Then, some care is needed to define the first interface sufficiently 
-!		deep to avoid the well-known "drying" of the first layer. 
-!		The value of $|nzadapt| = N_{tot}$, with $N_{tot}$ the total number 
-!		of $z$-layers, is $z-$star (all layers are moving).
-!		Other values of $1<|nzadapt|<N_{tot}$ corresponds to move, at minimum,
-!		the first |nzadapt| surface layers with $z-$star.  
+! |nzadapt|	Parameter that controls the number of surface $z-$layers
+!		that are moving. The value $|nzadapt|\le 1$ corresponds
+!		to standard $z-$layers (Default). Then, some care is
+!		needed to define the first interface sufficiently deep to
+!		avoid the well-known "drying" of the first layer. The
+!		value of $|nzadapt| = N_{tot}$, with $N_{tot}$ the total 
+!		numberof $z$-layers, is the conventional $z-$star 
+!		(all layers are moving). Other values of 
+!		$1<|nzadapt|<N_{tot}$ corresponds to move, at minimum,
+!		the first |nzadapt| surface layers with $z-$star.
 !		These feature is still experimental.
 
         call addpar('nzadapt',0.)      ! z-layers parameter
