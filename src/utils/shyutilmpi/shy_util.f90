@@ -611,8 +611,8 @@
 	integer id
 
 	integer date,time
-	real simpar(3)
-	real hzmin,hzoff,nzadapt
+	real simpar(4)
+	real hzmin,hzoff,nzadapt,dtaver
 	character*80 title
 	character*80 femver
 	double precision dgetpar
@@ -624,10 +624,11 @@
 	hzmin = dgetpar('hzmin')
 	hzoff = dgetpar('hzoff')
 	nzadapt = dgetpar('nzadapt')
+	dtaver = 0.
         title = descrp
         call get_shyfem_version_and_commit(femver)
 
-	simpar = (/hzmin,hzoff,nzadapt/)
+	simpar = (/hzmin,hzoff,nzadapt,dtaver/)
 
         call shy_set_date(id,date,time)
         call shy_set_title(id,title)

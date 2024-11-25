@@ -131,6 +131,7 @@
 	integer id,idout,iddiff
 	integer n,m,nndim,nn
 	integer naccum
+	integer nzadapt
 	character*80 title,name,file
 	character*80 basnam,simnam
 	character*20 aline
@@ -271,7 +272,8 @@
 	call shyutil_init(nkn,nel,nlv)
 
 	call init_sigma_info(nlv,hlv)
-	call init_rzmov_info(nlv,nint(simpar(3)),hlv,rzmov)
+	nzadapt = nint(simpar(3))
+	call init_rzmov_info(nlv,nzadapt,hlv,rzmov)
 
 	call shy_make_area
 	!call shy_check_area

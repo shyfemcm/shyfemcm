@@ -64,6 +64,7 @@
 ! 28.04.2023    ggu     update function calls for belem
 ! 07.06.2023    ggu     new version 13 - simpar introduced
 ! 22.09.2024    ggu     increase nvar_act earlier (bug)
+! 25.11.2024    ggu     can use shy_[sg]et_simpar() with flexible nsimpar
 !
 !**************************************************************
 !**************************************************************
@@ -230,7 +231,12 @@
 	integer, parameter, private :: ext_type = 4
 	integer, parameter, private :: flx_type = 5
 
-	integer, parameter :: nsimpar = 3		!size of simpar array
+	integer, parameter :: nsimpar = 4	!size of auxiliary simpar array
+
+	! simpar(1)		hzmin
+	! simpar(2)		hzoff
+	! simpar(3)		nzadapt
+	! simpar(4)		dtaver
 
 	type, private :: entry
 
@@ -723,6 +729,7 @@
         write(6,*) 'nsimpar:  ',pentry(id)%nsimpar
         write(6,*) 'hzmin/off:',pentry(id)%simpar(1:2)
         write(6,*) 'nzadapt:  ',nint(pentry(id)%simpar(3))        
+        write(6,*) 'dtaver :  ',pentry(id)%simpar(4)        
 	write(6,*) 'title:    ',trim(pentry(id)%title)
         write(6,*) 'femver:   ',trim(pentry(id)%femver)
 
@@ -1015,21 +1022,23 @@
 !************************************************************
 
 	subroutine shy_get_simpar(id,simpar)
-	integer id
-	real simpar(:)
-	integer nsp
+	integer, intent(in) :: id
+	real, intent(out) :: simpar(:)
+	integer nsp,n
 	nsp = size(simpar)
-	if( nsp /= nsimpar ) stop 'error stopshy_get_simpar: nsp/=nsimpar'
-	simpar(:) = pentry(id)%simpar(:)
+	n = min(nsp,nsimpar)
+	simpar = 0.
+	simpar(1:n) = pentry(id)%simpar(1:n)
 	end subroutine shy_get_simpar
 
 	subroutine shy_set_simpar(id,simpar)
-	integer id
-	real simpar(:)
-	integer nsp
+	integer, intent(in) :: id
+	real, intent(in) :: simpar(:)
+	integer nsp,n
 	nsp = size(simpar)
-	if( nsp /= nsimpar ) stop 'error stopshy_set_simpar: nsp/=nsimpar'
-	pentry(id)%simpar(:) = simpar(:)
+	n = min(nsp,nsimpar)
+	pentry(id)%simpar(:) = 0.
+	pentry(id)%simpar(1:n) = simpar(1:n)
 	end subroutine shy_set_simpar
 
 !************************************************************
@@ -1238,7 +1247,7 @@
         ierr = 5
         read(iunit,iostat=ios) nsp
         if( ios /= 0 ) return
-        if( nsp /= nsimpar ) return
+	simpar = 0.
         read(iunit,iostat=ios) simpar(1:nsp)
         if( ios /= 0 ) return
         call shy_set_simpar(id,simpar)

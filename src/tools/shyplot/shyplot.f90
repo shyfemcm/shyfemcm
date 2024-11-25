@@ -789,6 +789,7 @@
 	integer naccum
 	integer isphe
 	integer date,time
+	integer nzadapt
 	character*80 title,name,file
 	character*80 basnam,simnam,varline
 	real rnull
@@ -916,7 +917,8 @@
 	call shyutil_init(nkn,nel,nlv)
 
 	call init_sigma_info(nlv,hlv)
-        call init_rzmov_info(nlv,nint(simpar(3)),hlv,rzmov)
+	nzadapt = nint(simpar(3))
+        call init_rzmov_info(nlv,nzadapt,hlv,rzmov)
 
 	call shy_make_area
 	call outfile_make_depth(nkn,nel,nen3v,hm3v,hev,hkv)
