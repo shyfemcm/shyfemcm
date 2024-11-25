@@ -145,7 +145,7 @@ METISDIR =
 #METISDIR = /usr/local
 #METISDIR = $(HOME)/lib/metis
 #METISDIR = $(LD_LIBRARY_PATH)
-PARMETISDIR = 
+PARMETISDIR =
 #PARMETISDIR = /usr/local
 #PARMETISDIR = $(HOME)/lib/parmetis
 #PARMETISDIR = $(LD_LIBRARY_PATH)
@@ -330,7 +330,7 @@ ECOLOGICAL = NONE
 
 WW3 = false
 #WW3 = true
-#WW3DIR = $(HOME)/WW3
+WW3DIR = /path/to/WW3
 
 ##############################################
 # Experimental features
@@ -483,6 +483,21 @@ endif
 ifeq ($(PARALLEL_MPI),ELEM)
   RULES_MAKE_PARAMETERS = RULES_MAKE_PARAMETER_ERROR
   RULES_MAKE_MESSAGE = "MPI on element partition is not yet ready"
+endif
+
+ifeq ($(WW3),true)
+  ifneq ($(PARTS),PARMETIS)
+    RULES_MAKE_PARAMETERS = RULES_MAKE_PARAMETER_ERROR
+    RULES_MAKE_MESSAGE = "Please set PARTS = PARMETIS"
+  endif
+  ifneq ($(PARALLEL_MPI),NODE)
+    RULES_MAKE_PARAMETERS = RULES_MAKE_PARAMETER_ERROR
+    RULES_MAKE_MESSAGE = "PARALLEL_MPI must be set to NODE"
+  endif
+  ifneq ($(NETCDF),true)
+    RULES_MAKE_PARAMETERS = RULES_MAKE_PARAMETER_ERROR
+    RULES_MAKE_MESSAGE = "WW3 model needs NETCDF support"
+  endif
 endif
 
 ##############################################

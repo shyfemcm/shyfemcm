@@ -235,9 +235,6 @@
 	use mod_test_zeta
 	use befor_after
 	use mod_trace_point
-#ifdef W3_SHYFEM
-	use subww3
-#endif
 
 	implicit none
 
