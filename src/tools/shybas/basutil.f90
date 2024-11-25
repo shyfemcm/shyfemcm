@@ -94,7 +94,7 @@
 
         character*80, save :: bfile
         character*80, save :: lfile
-        character*256, save :: slayers
+        character*1024, save :: slayers
         character*80, save :: index_file
 	logical, save :: ball		!interpolate everywhere
 	integer, save :: btype		!only interpolate on elems type=btype

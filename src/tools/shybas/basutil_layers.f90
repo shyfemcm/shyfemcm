@@ -56,6 +56,7 @@
 ! prepare levels
 !-----------------------------------------------------------------
 
+	write(6,*) 'rrr: ',trim(slayers)
 	lmax = 0
 	call parse_levels(slayers,lmax,layers)
 	allocate(layers(0:lmax))
@@ -69,7 +70,7 @@
 !-----------------------------------------------------------------
 
 	write(6,*) 'areas and volumes of layers:'
-	write(6,'(a)') ' layer            area          volume'
+	write(6,'(a)') ' layer     depth            area          volume'
 
 	area_tot = 0.
 	volume_tot = 0.
@@ -89,20 +90,20 @@
 	    area = area + areae
 	    volume = volume + thick*areae
 	  end do
-	  write(6,1000) l,area,volume
+	  write(6,1000) l,layers(l),area,volume
 	  volume_tot = volume_tot + volume
 	  if( l == 1 ) area_tot = area
 	end do
 
-	write(6,1100) ' total',area_tot,volume_tot
+	write(6,1100) ' total          ',area_tot,volume_tot
 
 !-----------------------------------------------------------------
 ! end of routine
 !-----------------------------------------------------------------
 
 	return
- 1000	format(i6,2e16.8)
- 1100	format(a6,2e16.8)
+ 1000	format(i6,f10.2,2e16.8)
+ 1100	format(a16,2e16.8)
 	end
 
 !*******************************************************************
@@ -118,7 +119,9 @@
 	integer n
 	integer iscand
 
+	write(6,*) 'hhh: ',trim(string)
 	n = iscand(string,layers,lmax)
+	write(6,*) 'hhh nnn: ',n,lmax
 	if( lmax == 0 ) lmax = n
 
 	end
