@@ -468,6 +468,8 @@
 	integer ierr
 
 	integer cc,i,nfound
+	logical, save :: bfirst = .true.
+	character*80 header
 
 	ierr = 0
 	cc = count( icolor == ic )
@@ -480,13 +482,23 @@
 	  call flood_fill_bas(i,n,icolor,nfound)
 	  !write(6,*) ic,nfound,(100.*nfound)/n,' %'
 	  if( nfound /= cc ) then
-	    write(6,*) '  *** area is not connected...'
-	    write(6,*) '      area code:     ',ic
-	    write(6,*) '      contains node: ',ipv(i)
+	    if( bfirst ) then
+	      header = '*** error in conections            area' &
+     &			// '     nthis    ntotal      node'
+	      bfirst = .false.
+	      write(6,'(a)') header
+	    end if
+	    !write(6,*) '  *** area is not connected...'
+	    !write(6,*) '      area code:     ',ic
+	    !write(6,*) '      total,here:    ',cc,nfound
+	    !write(6,*) '      contains node: ',ipv(i)
+	    write(6,1000) '  *** area is not connected: ',ic,nfound,cc,ipv(i)
 	    ierr = 1
 	  end if
 	end do
 
+	return
+ 1000	format(a,4i10)
 	end
 
 !*******************************************************************
