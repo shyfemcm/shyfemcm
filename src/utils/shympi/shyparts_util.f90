@@ -35,7 +35,8 @@
 ! 18.11.2024	ggu	writes partition.np.txt
 ! 21.11.2024	ggu	use make_name_with_number() to create file names
 ! 23.11.2024	ggu	new routine info_partition_quality()
-! 30.11.2024	ggu	compute number of non contiguous areas
+! 29.11.2024	ggu	compute number of non contiguous areas
+! 30.11.2024	ggu	use color as aux array for flood_fill
 !
 !****************************************************************
 
@@ -61,6 +62,7 @@
         integer, allocatable  :: ne(:)    !total number of elements of ic
         integer, allocatable  :: ni(:)    !internal number of elements of ic
         integer, allocatable  :: na(:)    !number of areas
+        integer, allocatable  :: color(:) !aux array for area_node
 
 	write(6,*) 'writing information on partion to terminal...'
 
@@ -68,6 +70,7 @@
         allocate(ne(0:nparts))
         allocate(ni(0:nparts))
         allocate(na(0:nparts))
+	allocate(color(nkn))
 
         nc = 0
         ne = 0
@@ -87,15 +90,13 @@
           ic = area_node(k)
           nc(ic) = nc(ic) + 1
 	end do
+	color = area_node	!to not change area_node
 	do ic=min,max
-	  call count_elements(nkn,nel,nen3v,ic,area_node,netot,neint)
+	  call count_elements(nkn,nel,nen3v,ic,color,netot,neint)
 	  iareas = -1
-	  call check_part_color(ic,nkn,area_node,iareas)
+	  call check_part_color(ic,nkn,color,iareas)
 	  if( iareas == 0 ) iareas = 1
 	  na(ic) = iareas
-	  !call count_areas(nkn,nel,nen3v,ic,area_node,netot,neint)
-	  !write(6,*) nel,netot,neint,(100.*neint)/netot
-	  !write(6,*) 'ic,netot,neint:',ic,netot,neint
 	  ne(ic) = netot
 	  ni(ic) = neint
         end do

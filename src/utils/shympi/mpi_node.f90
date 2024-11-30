@@ -1026,9 +1026,11 @@
 
 	subroutine shympi_finalize
 
+! this is called from all processes to finish gracefully
+
 	call shympi_barrier_internal
 	call shympi_finalize_internal
-	stop
+	stop 'finalizing...'
 
 	end subroutine shympi_finalize
 
@@ -1036,12 +1038,14 @@
 
 	subroutine shympi_exit(ierr)
 
+! this is called on error - do not call barrier
+
 	integer ierr
 
-	call shympi_barrier_internal
+	!call shympi_barrier_internal
 	call shympi_finalize_internal
 	call exit(ierr)
-	stop
+	stop 'exiting...'
 
 	end subroutine shympi_exit
 
@@ -1049,14 +1053,16 @@
 
 	subroutine shympi_stop(text)
 
+! this is called as error stop - do not call barrier
+
 	character*(*) text
 
 	if( shympi_is_master() ) then
-	  write(6,*) 'error stop shympi_stop: ',trim(text)
+	  write(6,*) 'error stop ',trim(text)
 	end if
-	call shympi_barrier_internal
-	call shympi_finalize_internal
-	stop
+	!call shympi_barrier_internal
+	call shympi_abort_internal(37)
+	stop 'aborting...'
 
 	end subroutine shympi_stop
 

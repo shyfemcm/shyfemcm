@@ -85,6 +85,7 @@
 	integer n,nn
 	integer n_lk,n_le
 	integer nkn_tot,nel_tot
+	integer err_id
 	integer nodes(nkn)
 	integer elems(nel)
 	integer nindex(nkn)
@@ -134,11 +135,13 @@
 
 	nc = maxval(area_node)
 	if( nc+1 /= n_threads ) then
+	  err_id = my_id
 	  if( shympi_is_master() ) then
+	    write(6,*) 'domain            = ',err_id
 	    write(6,*) 'number of threads = ',n_threads
 	    write(6,*) 'number of domains = ',nc+1
 	  end if
-	  call shympi_stop('error stop: thread/domain mismatch')
+	  call shympi_stop('shympi_setup: thread/domain mismatch')
 	end if
 
 !	-----------------------------------------------------
