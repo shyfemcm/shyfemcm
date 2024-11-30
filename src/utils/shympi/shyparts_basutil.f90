@@ -48,6 +48,7 @@
 ! 07.11.2024    ggu     ignore connection errors
 ! 21.11.2024    ggu     call check routines with bdebug, less error messages
 ! 23.11.2024    ggu     ignore errors in connectivity
+! 30.11.2024    ggu     renamed check_color() to check_part_color()
 !
 !****************************************************************
 
@@ -448,7 +449,8 @@
 	nc = maxval(icolor)
 
 	do ic=0,nc
-	  call check_color(ic,nkn,icolor,ier)
+	  ier = 0
+	  call check_part_color(ic,nkn,icolor,ier)
 	  ierr = ierr + ier
 	end do
 
@@ -456,7 +458,13 @@
 
 !*******************************************************************
 
-	subroutine check_color(ic,n,icolor,ierr)
+	subroutine check_part_color(ic,n,icolor,ierr)
+
+! checks number of doamins with color ic
+!
+! writes out error if not contigous
+! if ierr == -1 on entry does not write error
+! on return in ierr is number of sub-domains
 
 	use basin
 
@@ -468,9 +476,11 @@
 	integer ierr
 
 	integer cc,i,nfound
+	logical bwrite
 	logical, save :: bfirst = .true.
 	character*80 header
 
+	bwrite = ( ierr /= -1 )
 	ierr = 0
 	cc = count( icolor == ic )
 
@@ -480,20 +490,17 @@
 	  end do
 	  if( i > n ) exit
 	  call flood_fill_bas(i,n,icolor,nfound)
-	  !write(6,*) ic,nfound,(100.*nfound)/n,' %'
 	  if( nfound /= cc ) then
-	    if( bfirst ) then
-	      header = '*** error in conections            area' &
+	    if( bfirst .and. bwrite ) then
+	      header = '                               area' &
      &			// '     nthis    ntotal      node'
 	      bfirst = .false.
 	      write(6,'(a)') header
 	    end if
-	    !write(6,*) '  *** area is not connected...'
-	    !write(6,*) '      area code:     ',ic
-	    !write(6,*) '      total,here:    ',cc,nfound
-	    !write(6,*) '      contains node: ',ipv(i)
-	    write(6,1000) '  *** area is not connected: ',ic,nfound,cc,ipv(i)
-	    ierr = 1
+	    if( bwrite ) then
+	      write(6,1000) '  area is not connected: ',ic,nfound,cc,ipv(i)
+	    end if
+	    ierr = ierr + 1
 	  end if
 	end do
 
