@@ -71,6 +71,7 @@
 ! 02.04.2023    ggu     only master writes to iuinfo
 ! 09.05.2023    lrp     introduce top layer index variable
 ! 24.05.2023    ggu     debug section introduced in hydro_internal_stability()
+! 01.12.2023    ggu     gindex not reduced in here
 !
 !*****************************************************************
 !*****************************************************************
@@ -397,6 +398,7 @@
 	use levels
 	use basin, only : nkn,nel,ngr,mbw
 	use shympi
+	use mod_info_output
 
         implicit none
 
@@ -411,6 +413,7 @@
         real rkpar,azpar,ahpar,rlin
 	real dindex,aindex,tindex,sindex,gindex
 	real rmax
+	real array(4)
 
 	logical openmp_in_parallel
 
@@ -483,38 +486,29 @@
 	dindex = dindex*dt
 	gindex = gindex*dt
 
-	tindex = shympi_max(tindex)
+	array = (/tindex,aindex,dindex,gindex/)
+	call shympi_array_reduce('max',array)
+	call info_output('rindex','none',4,array,.false.)
 
 	if( mode .eq. 1 ) then		!error output
 	  write(6,*) 'hydro_internal_stability: '
 	  write(6,*) 'tindex,aindex,dindex,gindex: '
-	  write(6,*) tindex,aindex,dindex,gindex
+	  write(6,*) array
 	  call output_errout_stability(dt,sauxe)
 	end if
 
-	rindex = tindex
+	rindex = array(1)
 
 	deallocate(sauxe1,sauxe2,sauxe3,sauxe)
 
-	bdebug = .false.
-	if( bdebug ) then
-	  icall = icall + 1
-	  iu = 230 + my_id
-	  !write(iu,*) icall,my_id,tindex,aindex,dindex,gindex
-	  write(iu,*) icall,my_id,tindex,aindex,dindex
-	  flush(iu)
-	  if( my_id == 0 ) then
-	  write(220,*) icall,my_id,tindex,aindex,dindex
-	  flush(220)
-	  end if
-	end if
-
 	if( iuinfo > 0 ) then
-	  write(iuinfo,*) 'rindex: ',tindex,aindex,dindex,gindex
+	  write(iuinfo,*) 'rindex: ',array
 	end if
 
-	!iu = 450 + my_id
-	!write(iu,*) 'rindex: ',tindex,aindex,dindex,gindex
+	array = (/tindex,aindex,dindex,gindex/)
+	call info_output('rindex','max',4,array,.false.)
+
+	icall = icall + 1
 
         end
 
@@ -804,7 +798,7 @@
 	  garray(ie) = ri
 	end do
 
-	gindex = shympi_max(gindex)
+	!gindex = shympi_max(gindex)
 
 	!write(6,*) nel,gindex,1./gindex
 	!stop

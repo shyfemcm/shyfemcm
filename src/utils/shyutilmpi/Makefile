@@ -43,6 +43,7 @@ OBJ  = \
 	coordinates.o \
 	io_off.o \
 	trace_point.o \
+	info_output.o \
 
 OBSOLETE = \
 	evgeom.o \

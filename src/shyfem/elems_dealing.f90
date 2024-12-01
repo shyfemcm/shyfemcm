@@ -129,6 +129,7 @@
 ! 05.06.2023    lrp     introduce z-star
 ! 20.03.2024    ggu     bug fix for hlast
 ! 10.05.2024    ggu     new routine check_int_ext_params()
+! 01.12.2024    ggu     in masscont() and scalcont() do not exchange
 !
 !****************************************************************
 
@@ -1164,9 +1165,8 @@
 !----------------------------------------------------------------
 
 	if( shympi_partition_on_nodes() ) then
-	  !call shympi_comment('exchanging hdkn')
+	  call shympi_comment('exchanging hdkn')
 	  call shympi_exchange_3d_node(hdkn)
-	  !call shympi_barrier
 	end if
 
 !----------------------------------------------------------------
@@ -1214,7 +1214,7 @@
 	  end do
 	end do
 
-	total = shympi_sum(total)
+	!total = shympi_sum(total)
 	masscont = total
 
 	!call check_int_ext_params
@@ -1296,7 +1296,7 @@
 	  end do
 	end do
 
-	total = shympi_sum(total)
+	!total = shympi_sum(total)
 	scalcont = total
 
 	end

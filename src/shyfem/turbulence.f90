@@ -1007,6 +1007,7 @@
 	use basin, only : nkn,nel,ngr,mbw
 	use shympi
 	use pkonst
+	use mod_info_output
 
 	implicit none
 
@@ -1021,6 +1022,7 @@
 	real cnpar			!numerical "implicitness" parameter
 	real n2max,n2
 	real nfreq,nperiod
+	real array(3)
 
 	integer, save :: iuinfo = 0
 
@@ -1092,6 +1094,8 @@
 	if(shympi_is_master()) then
 	  write(iuinfo,*) 'n2max: ',n2max,nfreq,nperiod
 	end if
+	array = (/n2max,nfreq,nperiod/)
+	call info_output('n2max',' ',3,array,.false.)
 
 	end
 

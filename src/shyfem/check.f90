@@ -646,12 +646,15 @@
 ! computes and writes total water volume
 
 	use shympi
+	use mod_info_output
 
         implicit none
 
 	integer mode
 
         real mtot              !total computed mass of ts
+	real mtot_orig
+	double precision dmtot
 	double precision masscont
 	character*20 aline
 
@@ -667,12 +670,16 @@
 	  stop 'error stop vol_mass: wrong value for mode'
 	end if
 
-	mtot = masscont(mode)
+	dmtot = masscont(mode)
+	mtot_orig = real(dmtot)
+	dmtot = shympi_sum(dmtot)
+	mtot = real(dmtot)
 
         if( iuinfo > 0 ) then
 	  call get_act_timeline(aline)
 	  write(iuinfo,*) 'total_volume: ',aline,mtot
 	end if
+	call info_output('total_volume','sum',mtot_orig,.true.)
 
         end
 
@@ -691,6 +698,7 @@
 	use basin
 	use shympi
 	use mkonst
+	use mod_info_output
 
 	implicit none
 
@@ -705,6 +713,7 @@
 	real volo,voln
 	real ubar,vbar
 	real vbmax,vlmax,vrbmax,vrlmax
+	real verrvol(4)
 	real vrwarn,vrerr
 	real qinput
 	character*20 aline
@@ -924,10 +933,7 @@
 	vbmax = vmax		!absolute error for water column
 	vrbmax = vrmax		!relative error for water column
 
-	vlmax = shympi_max(vlmax)
-	vbmax = shympi_max(vbmax)
-	vrbmax = shympi_max(vrbmax)
-	vrlmax = shympi_max(vrlmax)
+	verrvol = (/vlmax,vbmax,vrbmax,vrlmax/)
 
 !----------------------------------------------------------------
 ! write diagnostic output
@@ -953,6 +959,14 @@
 	    stop 'error stop mass_conserve: mass error too high'
 	  end if
 	end if
+
+	verrvol = (/vbmax,vlmax,vrbmax,vrlmax/)
+	call info_output('mass_balance','max',4,verrvol)
+
+	vlmax = shympi_max(vlmax)
+	vbmax = shympi_max(vbmax)
+	vrbmax = shympi_max(vrbmax)
+	vrlmax = shympi_max(vrlmax)
 
 	if( iuinfo > 0 ) then
 	  write(iuinfo,*) 'mass_balance: ',vbmax,vlmax,vrbmax,vrlmax

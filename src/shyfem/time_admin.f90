@@ -467,6 +467,7 @@
 
 	use shympi
 	use femtime
+	use mod_info_output
 
         implicit none
 
@@ -484,6 +485,7 @@
         real ri,rindex,rindex1,sindex
 	real perc,rmax
 	real dhpar,chpar,thpar,shpar
+	real array(5)
 
         real, save :: cmax,tfact,dtmin,zhpar
         integer, save :: idtsync,isplit,idtmin
@@ -595,6 +597,8 @@
         if( iuinfo > 0 ) then
 	  write(iuinfo,*) 'stability_hydro: ',rindex,dtaux,dt
 	end if
+	array(1:3) = (/rindex,dtaux,real(dt)/)
+	call info_output('stability_hydro',' ',3,array,.false.)
 
 	if( dt <= 0 ) then
 	  write(6,*) 'dt is negative after setting'
@@ -718,6 +722,8 @@
      &				,t_act,istot,iss,dt,perc
 	  flush(iuinfo)	
 	end if
+	array = (/real(t_act),real(istot),real(iss),real(dt),real(perc)/)
+	call info_output('timestep',' ',5,array,.true.)
 
 	call shympi_barrier
 

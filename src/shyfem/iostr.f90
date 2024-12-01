@@ -803,6 +803,7 @@
 ! writes info on total energy to info file
 
 	use shympi
+	use mod_info_output
 
 	implicit none
 
@@ -810,6 +811,7 @@
 	double precision kenergy,penergy,tenergy,ksurf
 	character*20 aline
 	logical debug
+	real array(4)
 
 	integer, save :: iuinfo = 0
 
@@ -821,6 +823,12 @@
 
 	call energ3d(kenergy,penergy,ksurf,-1)
 	!call energ3d(kenergy,penergy,ksurf,0)
+
+	array(1) = kenergy
+	array(2) = penergy
+	array(3) = ksurf
+	array(1:3) = (/real(kenergy),real(penergy),real(ksurf)/)
+	call shympi_array_reduce('sum',array(1:3))
 
 	if( debug ) write(6,*) 'penergy: ',my_id,penergy
 	kenergy = shympi_sum(kenergy)
@@ -836,6 +844,10 @@
      &				,kenergy,penergy,tenergy,ksurf
  1000	  format(a,a20,4e12.4)
 	end if
+	
+	array(4) = array(3)
+	array(3) = array(1) + array(2)
+	call info_output('energy','none',4,array,.true.)
 
 	end
 

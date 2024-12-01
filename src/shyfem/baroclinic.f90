@@ -252,7 +252,7 @@
 ! functions
 !	real sigma
 	real getpar
-	double precision scalcont,dq
+	double precision dq
 	integer iround
 	integer nbnds
 	logical rst_use_restart

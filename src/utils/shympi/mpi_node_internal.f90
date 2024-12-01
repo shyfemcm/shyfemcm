@@ -98,7 +98,7 @@
 	subroutine shympi_internal_reduce_what(what,mpi_what)
 
 	character*(*), intent(in) :: what
-	integer, intent(out) :: param
+	integer, intent(out) :: mpi_what
 
          if( what == 'min' ) then
 	  mpi_what = MPI_MIN
@@ -735,7 +735,7 @@
 !******************************************************************
 !******************************************************************
 
-        subroutine shympi_allgather_i_internal(ni,no,val,vals)
+        subroutine shympi_allgather_internal_i(ni,no,val,vals)
 
 	use shympi_aux
 	use shympi
@@ -752,7 +752,7 @@
 	if( ni > no ) then
 	  write(6,*) 'n > no... ',ni,no
 	  !commenting next statement creates mpi error and backtrace
-	  !stop 'error stop shympi_allgather_i_internal: n > no'
+	  !stop 'error stop shympi_allgather_internal_i: n > no'
 	end if
 
 	allocate(aux(no))
@@ -764,19 +764,19 @@
           call MPI_ALLGATHER (aux,nn,MPI_INTEGER &
      &                  ,vals,no,MPI_INTEGER &
      &                  ,MPI_COMM_WORLD,ierr)
-	  call shympi_error('shympi_allgather_i_internal' &
-     &			,'gather',ierr)
+	  call shympi_error('shympi_allgather_internal_i' &
+     &			,'allgather',ierr)
 	else
 	  vals(1:ni,1) = val(:)
 	end if
 
-	call shympi_icomment('shympi_allgather_i_internal')
+	call shympi_icomment('shympi_allgather_internal_i')
 
-        end subroutine shympi_allgather_i_internal
+        end subroutine shympi_allgather_internal_i
 
 !******************************************************************
 
-        subroutine shympi_allgather_r_internal(ni,no,val,vals)
+        subroutine shympi_allgather_internal_r(ni,no,val,vals)
 
 	use shympi_aux
 	use shympi
@@ -799,19 +799,19 @@
           call MPI_ALLGATHER (aux,nn,MPI_REAL &
      &                  ,vals,no,MPI_REAL &
      &                  ,MPI_COMM_WORLD,ierr)
-	  call shympi_error('shympi_allgather_r_internal' &
-     &			,'gather',ierr)
+	  call shympi_error('shympi_allgather_internal_r' &
+     &			,'allgather',ierr)
 	else
 	  vals(1:ni,1) = val(:)
 	end if
 
-	call shympi_icomment('shympi_allgather_r_internal')
+	call shympi_icomment('shympi_allgather_internal_r')
 
-        end subroutine shympi_allgather_r_internal
+        end subroutine shympi_allgather_internal_r
 
 !******************************************************************
 
-        subroutine shympi_allgather_d_internal(ni,no,val,vals)
+        subroutine shympi_allgather_internal_d(ni,no,val,vals)
 
 	use shympi_aux
 	use shympi
@@ -825,8 +825,6 @@
         integer ierr,nn
         double precision, allocatable :: aux(:)
 
-	if( bpdebug ) write(6,*) 'allgather i start: ',bpmpi,ni,no,my_id
-
 	allocate(aux(no))
 	aux = 0.
 	aux(1:ni) = val(1:ni)
@@ -836,21 +834,19 @@
           call MPI_ALLGATHER (aux,nn,MPI_DOUBLE &
      &                  ,vals,no,MPI_DOUBLE &
      &                  ,MPI_COMM_WORLD,ierr)
-	  call shympi_error('shympi_allgather_d_internal' &
-     &			,'gather',ierr)
+	  call shympi_error('shympi_allgather_internal_d' &
+     &			,'allgather',ierr)
 	else
 	  vals(1:ni,1) = val(:)
 	end if
 
-	if( bpdebug ) write(6,*) 'allgather i end: ',bpmpi,ni,no,my_id
+	call shympi_icomment('shympi_allgather_internal_d')
 
-	call shympi_icomment('shympi_allgather_d_internal')
-
-        end subroutine shympi_allgather_d_internal
+        end subroutine shympi_allgather_internal_d
 
 !******************************************************************
 
-        subroutine shympi_gather_d_internal(n,no,val,vals)
+        subroutine shympi_gather_internal_d(n,no,val,vals)
 
 	use shympi_aux
 	use shympi
@@ -868,15 +864,15 @@
      &                  ,vals,no,MPI_DOUBLE &
      &			,0 &
      &                  ,MPI_COMM_WORLD,ierr)
-	  call shympi_error('shympi_gather_d_internal' &
+	  call shympi_error('shympi_gather_internal_d' &
      &			,'gather',ierr)
 	else
 	  vals(1:n,1) = val(:)
 	end if
 
-	call shympi_icomment('shympi_gather_d_internal')
+	call shympi_icomment('shympi_gather_internal_d')
 
-        end subroutine shympi_gather_d_internal
+        end subroutine shympi_gather_internal_d
 
 !******************************************************************
 
@@ -951,7 +947,7 @@
 !******************************************************************
 !******************************************************************
 
-	subroutine shympi_reduce_d_internal(what,val)
+	subroutine shympi_reduce_internal_d(what,val)
 
 	use shympi_aux
 
@@ -961,41 +957,25 @@
 	double precision val
 
         integer ierr
+	integer mpi_what
 	double precision valout
 
+	ierr = 0
 	if( bpmpi ) then
-!	  call shympi_internal_reduce_what(what,mpi_what)
-!	  call MPI_ALLREDUCE(val,valout,1,MPI_DOUBLE,mpi_what &
-!     &				,MPI_COMM_WORLD,ierr)
-	  
-         if( what == 'min' ) then
-	  call MPI_ALLREDUCE(val,valout,1,MPI_DOUBLE,MPI_MIN &
+	  call shympi_internal_reduce_what(what,mpi_what)
+	  call MPI_ALLREDUCE(val,valout,1,MPI_DOUBLE,mpi_what &
      &				,MPI_COMM_WORLD,ierr)
 	  val = valout
-         else if( what == 'max' ) then
-	  call MPI_ALLREDUCE(val,valout,1,MPI_DOUBLE,MPI_MAX &
-     &				,MPI_COMM_WORLD,ierr)
-	  val = valout
-         else if( what == 'sum' ) then
-	  call MPI_ALLREDUCE(val,valout,1,MPI_DOUBLE,MPI_SUM &
-     &				,MPI_COMM_WORLD,ierr)
-	  val = valout
-         else
-          write(6,*) 'what = ',what
-          stop 'error stop shympi_reduce_d_internal: not ready'
-         end if
-	else
-	 ierr = 0
 	end if
 
-	call shympi_error('shympi_reduce_d_internal','reduce',ierr)
-	call shympi_icomment('shympi_reduce_d_internal')
+	call shympi_error('shympi_reduce_internal_d','reduce',ierr)
+	call shympi_icomment('shympi_reduce_internal_d')
 
-	end subroutine shympi_reduce_d_internal
+	end subroutine shympi_reduce_internal_d
 
 !******************************************************************
 
-	subroutine shympi_reduce_r_internal(what,val)
+	subroutine shympi_reduce_internal_r(what,val)
 
 	use shympi_aux
 
@@ -1005,37 +985,25 @@
 	real val
 
         integer ierr
+	integer mpi_what
 	real valout
 
+	ierr = 0
 	if( bpmpi ) then
-         if( what == 'min' ) then
-	  call MPI_ALLREDUCE(val,valout,1,MPI_REAL,MPI_MIN &
+	  call shympi_internal_reduce_what(what,mpi_what)
+	  call MPI_ALLREDUCE(val,valout,1,MPI_REAL,mpi_what &
      &				,MPI_COMM_WORLD,ierr)
 	  val = valout
-         else if( what == 'max' ) then
-	  call MPI_ALLREDUCE(val,valout,1,MPI_REAL,MPI_MAX &
-     &				,MPI_COMM_WORLD,ierr)
-	  val = valout
-         else if( what == 'sum' ) then
-	  call MPI_ALLREDUCE(val,valout,1,MPI_REAL,MPI_SUM &
-     &				,MPI_COMM_WORLD,ierr)
-	  val = valout
-         else
-          write(6,*) 'what = ',what
-          stop 'error stop shympi_reduce_r_internal: not ready'
-         end if
-	else
-	 ierr = 0
 	end if
 
-	call shympi_error('shympi_reduce_r_internal','reduce',ierr)
-	call shympi_icomment('shympi_reduce_r_internal')
+	call shympi_error('shympi_reduce_internal_r','reduce',ierr)
+	call shympi_icomment('shympi_reduce_internal_r')
 
-	end subroutine shympi_reduce_r_internal
+	end subroutine shympi_reduce_internal_r
 
 !******************************************************************
 
-	subroutine shympi_reduce_i_internal(what,val)
+	subroutine shympi_reduce_internal_i(what,val)
 
 	use shympi_aux
 
@@ -1045,33 +1013,110 @@
 	integer val
 
         integer ierr
+	integer mpi_what
 	integer valout
 
+	ierr = 0
 	if( bpmpi ) then
-         if( what == 'min' ) then
-	  call MPI_ALLREDUCE(val,valout,1,MPI_INTEGER,MPI_MIN &
-     &				,MPI_COMM_WORLD,ierr)
-	  val = valout
-         else if( what == 'max' ) then
-	  call MPI_ALLREDUCE(val,valout,1,MPI_INTEGER,MPI_MAX &
-     &				,MPI_COMM_WORLD,ierr)
-	  val = valout
-         else if( what == 'sum' ) then
-	  call MPI_ALLREDUCE(val,valout,1,MPI_INTEGER,MPI_SUM &
-     &				,MPI_COMM_WORLD,ierr)
-	  val = valout
-         else
-          write(6,*) 'what = ',what
-          stop 'error stop shympi_reduce_i_internal: not ready'
-         end if
-	else
-	 ierr = 0
+          call shympi_internal_reduce_what(what,mpi_what)
+          call MPI_ALLREDUCE(val,valout,1,MPI_INTEGER,mpi_what &
+     &                          ,MPI_COMM_WORLD,ierr)
+          val = valout
 	end if
 
-	call shympi_error('shympi_reduce_i_internal','reduce',ierr)
-	call shympi_icomment('shympi_reduce_i_internal')
+	call shympi_error('shympi_reduce_internal_i','reduce',ierr)
+	call shympi_icomment('shympi_reduce_internal_i')
 
-	end subroutine shympi_reduce_i_internal
+	end subroutine shympi_reduce_internal_i
+
+!******************************************************************
+!******************************************************************
+!******************************************************************
+
+	subroutine shympi_reduce_array_internal_i(what,n,vals)
+
+	use shympi_aux
+
+	implicit none
+
+	character*(*) what
+	integer n
+	integer vals(n)
+
+        integer ierr
+	integer mpi_what
+	integer valout(n)
+
+	ierr = 0
+	if( bpmpi ) then
+          call shympi_internal_reduce_what(what,mpi_what)
+          call MPI_ALLREDUCE(vals,valout,n,MPI_INTEGER,mpi_what &
+     &                          ,MPI_COMM_WORLD,ierr)
+          vals = valout
+	end if
+
+	call shympi_error('shympi_reduce_array_internal_i','reduce',ierr)
+	call shympi_icomment('shympi_reduce_array_internal_i')
+
+	end subroutine shympi_reduce_array_internal_i
+
+!******************************************************************
+
+	subroutine shympi_reduce_array_internal_r(what,n,vals)
+
+	use shympi_aux
+
+	implicit none
+
+	character*(*) what
+	integer n
+	real vals(n)
+
+        integer ierr
+	integer mpi_what
+	real valout(n)
+
+	ierr = 0
+	if( bpmpi ) then
+          call shympi_internal_reduce_what(what,mpi_what)
+          call MPI_ALLREDUCE(vals,valout,n,MPI_REAL,mpi_what &
+     &                          ,MPI_COMM_WORLD,ierr)
+          vals = valout
+	end if
+
+	call shympi_error('shympi_reduce_array_internal_r','reduce',ierr)
+	call shympi_icomment('shympi_reduce_array_internal_r')
+
+	end subroutine shympi_reduce_array_internal_r
+
+!******************************************************************
+
+	subroutine shympi_reduce_array_internal_d(what,n,vals)
+
+	use shympi_aux
+
+	implicit none
+
+	character*(*) what
+	integer n
+	double precision vals(n)
+
+        integer ierr
+	integer mpi_what
+	double precision valout(n)
+
+	ierr = 0
+	if( bpmpi ) then
+          call shympi_internal_reduce_what(what,mpi_what)
+          call MPI_ALLREDUCE(vals,valout,n,MPI_DOUBLE,mpi_what &
+     &                          ,MPI_COMM_WORLD,ierr)
+          vals = valout
+	end if
+
+	call shympi_error('shympi_reduce_array_internal_d','reduce',ierr)
+	call shympi_icomment('shympi_reduce_array_internal_d')
+
+	end subroutine shympi_reduce_array_internal_d
 
 !******************************************************************
 !******************************************************************

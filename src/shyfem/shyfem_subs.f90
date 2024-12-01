@@ -336,6 +336,8 @@
 	call check_partition_quality
         parallel_start = shympi_wtime()
 
+	call trace_point('started shyfem_initialize')
+
 	call allocate_2d_arrays
 
 !-----------------------------------------------------------
@@ -565,6 +567,10 @@
 
 	do while( dtime .lt. dtmax )
 
+	   call trace_point('=============================')
+	   call trace_point('start_of_timestep')
+	   call trace_point('=============================')
+
            if(bmpi_debug) call shympi_check_all(0)	!checks arrays
 
 	   call check_crc
@@ -640,6 +646,10 @@
 
 	   icall_nuopc = 0		!the next timsteps icall_nuopc is false
 
+	   call trace_point('=============================')
+	   call trace_point('end_of_timestep')
+	   call trace_point('=============================')
+
 	end do
 
 	call trace_point('finished shyfem_run')
@@ -659,6 +669,8 @@
 	integer iuinfo
 
 	call cpu_time_end(2)
+
+	call trace_point('starting shyfem_finalize')
 
 	call print_end_time
 	call ww3_finalize
@@ -727,6 +739,7 @@
 	call test_zeta_close
 
         !call shyfem_finished
+	call trace_point('finished shyfem_finalize')
 
 	!call pripar(15)
 	!call prifnm(15)

@@ -785,6 +785,7 @@
 	use mod_geom_dynamic
 	use basin
 	use shympi
+	use mod_info_output
 
         implicit none
 
@@ -792,6 +793,7 @@
 
         integer ie,idry
 	integer, save :: iuinfo = 0
+	real array(2)
 
 	idry = 0
         do ie=1,nel_unique
@@ -804,6 +806,8 @@
         if(shympi_is_master()) then
           write(iuinfo,*) 'dry_elems: ',iloop,idry
         end if
+	array = (/real(iloop),real(idry)/)
+	call info_output('dry_elems',' ',2,array,.false.)
 
 	end
 

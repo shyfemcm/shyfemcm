@@ -111,6 +111,7 @@
 ! 05.06.2023    lrp     introduce z-star
 ! 13.04.2024    ggu     use tripple_point_set_values, also in hydro_stability
 ! 13.10.2024    ggu     bug fix for INTEL_BUG
+! 01.12.2024    ggu     in momentum_advective_stability() do not reduce
 !
 ! notes :
 !
@@ -274,7 +275,8 @@
 
         end do
 
-        rindex = shympi_max(amax)
+        !rindex = shympi_max(amax)
+	rindex = amax
 
         end
 
@@ -372,7 +374,8 @@
 
 	end do
 
-	rindex = shympi_max(amax)
+	!rindex = shympi_max(amax)
+	rindex = amax
 
 ! debug section
 
@@ -918,7 +921,8 @@
 	  end do
 	end do
 
-	rindex = shympi_max(cmax)
+	!rindex = shympi_max(cmax)
+	rindex = cmax
 	!call compute_stability_stats(1,cc)
 
 	end

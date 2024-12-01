@@ -113,6 +113,10 @@
 	logical, save :: bmpi_ldebug = .false.		!local debug
 	logical, save :: bextra_exchange = .false.	!deal with INTEL_BUG
 
+        logical, parameter :: bcomment = .true. 	!write comment
+        integer, parameter :: iuc = 999          	!unit for comment
+        character*2, parameter :: indent = '  '		!indent for comment
+
 	logical, parameter :: blocal_shympi_debug = .false. !write debug
 
 	integer,save :: n_threads = 1
@@ -399,11 +403,11 @@
 
         INTERFACE shympi_max
         MODULE PROCEDURE   shympi_max_r &
-     &			  ,shympi_max_i          &
-!     +			  ,shympi_max_d &
+     &			  ,shympi_max_i &
+     &			  ,shympi_max_d &
      &			  ,shympi_max_0_r        &
-     &			  ,shympi_max_0_i
-!     +			  ,shympi_max_0_d
+     &			  ,shympi_max_0_i	 &
+     &			  ,shympi_max_0_d
         END INTERFACE
 
         INTERFACE shympi_sum
@@ -413,6 +417,12 @@
      &			  ,shympi_sum_0_r &
      &			  ,shympi_sum_0_i &
      &			  ,shympi_sum_0_d
+        END INTERFACE
+
+        INTERFACE shympi_array_reduce
+        MODULE PROCEDURE   shympi_array_reduce_i &
+     &			  ,shympi_array_reduce_r &
+     &			  ,shympi_array_reduce_d
         END INTERFACE
 
 !-------------------------------------------------------
@@ -1705,7 +1715,7 @@
 	valv(1) = val
 	ni = 1
 	no = 1
-	call shympi_allgather_i_internal(ni,no,valv,vals)
+	call shympi_allgather_internal_i(ni,no,valv,vals)
 
 	end subroutine shympi_gather_scalar_i
 
@@ -1725,7 +1735,7 @@
 
 	ni = size(val)
 	no = size(vals,1)
-	call shympi_allgather_i_internal(ni,no,val,vals)
+	call shympi_allgather_internal_i(ni,no,val,vals)
 
 	end subroutine shympi_gather_array_2d_i
 
@@ -1751,7 +1761,7 @@
 	aux = 0.
 	aux(1:ni) = val(1:ni)
 
-	call shympi_allgather_r_internal(no,no,aux,vals)
+	call shympi_allgather_internal_r(no,no,aux,vals)
 
 	end subroutine shympi_gather_array_2d_r
 
@@ -1771,7 +1781,7 @@
 
 	ni = size(val)
 	no = size(vals,1)
-	call shympi_allgather_d_internal(ni,no,val,vals)
+	call shympi_allgather_internal_d(ni,no,val,vals)
 
 	end subroutine shympi_gather_array_2d_d
 
@@ -1804,7 +1814,7 @@
 	ni = no1 * ni2
 	no = no1 * no2
 
-	call shympi_allgather_i_internal(ni,no,aux,vals)
+	call shympi_allgather_internal_i(ni,no,aux,vals)
 
 	end subroutine shympi_gather_array_3d_i
 
@@ -1836,7 +1846,7 @@
 	ni = no1 * ni2
 	no = no1 * no2
 
-	call shympi_allgather_r_internal(ni,no,aux,vals)
+	call shympi_allgather_internal_r(ni,no,aux,vals)
 
 	end subroutine shympi_gather_array_3d_r
 
@@ -1868,7 +1878,7 @@
 	ni = no1 * ni2
 	no = no1 * no2
 
-	call shympi_allgather_d_internal(ni,no,aux,vals)
+	call shympi_allgather_internal_d(ni,no,aux,vals)
 
 	end subroutine shympi_gather_array_3d_d
 
@@ -1901,7 +1911,7 @@
 	ni = ni1 * ni2
 	no = no1 * no2
 
-	call shympi_allgather_i_internal(ni,no,val,vals)
+	call shympi_allgather_internal_i(ni,no,val,vals)
 
 	end subroutine shympi_gather_array_fix_i
 
@@ -1934,7 +1944,7 @@
 	ni = ni1 * ni2
 	no = no1 * no2
 
-	call shympi_allgather_r_internal(ni,no,val,vals)
+	call shympi_allgather_internal_r(ni,no,val,vals)
 
 	end subroutine shympi_gather_array_fix_r
 
@@ -1964,12 +1974,10 @@
 	  stop 'error stop shympi_gather_array_fix: incomp first dim'
 	end if
 
-	call shympi_bdebug('in_gather_fix',nfix,ni2,no2)
 	ni = ni1 * ni2
 	no = no1 * no2
 
-	call shympi_allgather_d_internal(ni,no,val,vals)
-	call shympi_bdebug('after_allgather',nfix,ni,no)
+	call shympi_allgather_internal_d(ni,no,val,vals)
 
 	end subroutine shympi_gather_array_fix_d
 
@@ -1991,7 +1999,7 @@
 
 	ni = size(val)
 	no = size(vals,1)
-	call shympi_gather_d_internal(ni,no,val,vals)
+	call shympi_gather_internal_d(ni,no,val,vals)
 
 	end subroutine shympi_gather_root_array_2d_d
 
@@ -2010,7 +2018,7 @@
 
 	n = size(val)
 	no = n
-	call shympi_allgather_i_internal(n,no,val,vals)
+	call shympi_allgather_internal_i(n,no,val,vals)
 	val(:) = SUM(vals,dim=2)
 
 	end subroutine shympi_gather_and_sum_i
@@ -2028,7 +2036,7 @@
 
 	n = size(val)
 	no = n
-	call shympi_allgather_r_internal(n,no,val,vals)
+	call shympi_allgather_internal_r(n,no,val,vals)
 	val(:) = SUM(vals,dim=2)
 
 	end subroutine shympi_gather_and_sum_r
@@ -2046,7 +2054,7 @@
 
 	n = size(val)
 	no = n
-	call shympi_allgather_d_internal(n,no,val,vals)
+	call shympi_allgather_internal_d(n,no,val,vals)
 	val(:) = SUM(vals,dim=2)
 
 	end subroutine shympi_gather_and_sum_d
@@ -2064,7 +2072,7 @@
 	if( bmpi_skip ) return
 
 	n = 1
-	call shympi_bcast_i_internal(n,val)
+	call shympi_bcast_internal_i(n,val)
 
 	end subroutine shympi_bcast_scalar_i
 
@@ -2079,7 +2087,7 @@
 	if( bmpi_skip ) return
 
 	n = size(val)
-	call shympi_bcast_r_internal(n,val)
+	call shympi_bcast_internal_r(n,val)
 
 	end subroutine shympi_bcast_array_r
 
@@ -2094,7 +2102,7 @@
 	if( bmpi_skip ) return
 
 	n = size(val)
-	call shympi_bcast_d_internal(n,val)
+	call shympi_bcast_internal_d(n,val)
 
 	end subroutine shympi_bcast_array_d
 
@@ -2202,7 +2210,7 @@
 	end if
 
 	kk(1) = k
-	call shympi_allgather_i_internal(1,1,kk,vals)
+	call shympi_allgather_internal_i(1,1,kk,vals)
 	kkk(:) = vals(1,:)
 
 	call shympi_check_find_item(kkk,ke,k)
@@ -2249,7 +2257,7 @@
 	end if
 
 	kk(1) = ie
-	call shympi_allgather_i_internal(1,1,kk,vals)
+	call shympi_allgather_internal_i(1,1,kk,vals)
 	kkk(:) = vals(1,:)
 
 	call shympi_check_find_item(kkk,ieext,ie)
@@ -2310,13 +2318,13 @@
 
 	if( what == 'min' ) then
 	  val = MINVAL(vals)
-	  if( bmpi ) call shympi_reduce_r_internal(what,val)
+	  if( bmpi ) call shympi_reduce_internal_r(what,val)
 	else if( what == 'max' ) then
 	  val = MAXVAL(vals)
-	  if( bmpi ) call shympi_reduce_r_internal(what,val)
+	  if( bmpi ) call shympi_reduce_internal_r(what,val)
 	else if( what == 'sum' ) then
 	  val = SUM(vals)
-	  if( bmpi ) call shympi_reduce_r_internal(what,val)
+	  if( bmpi ) call shympi_reduce_internal_r(what,val)
 	else
 	  write(6,*) 'what = ',what
 	  stop 'error stop shympi_reduce_r: not ready'
@@ -2344,10 +2352,6 @@
 
 	call shympi_get_array_internal_r(1,n &
      &                                    ,vals,val_out)
-
-!	call shympi_getvals_internal_r(kind,1,nkn
-!     +                                    ,vals,val)
-!	stop 'error stop shympi_get_array_2d_r: not ready'
 
 	end subroutine shympi_get_array_2d_r
 
@@ -3405,7 +3409,7 @@
 	double precision val
 
 	val = MINVAL(vals)
-	if( bmpi ) call shympi_reduce_d_internal('min',val)
+	if( bmpi ) call shympi_reduce_internal_d('min',val)
 
 	shympi_min_d = val
 
@@ -3420,7 +3424,7 @@
 	real val
 
 	val = MINVAL(vals)
-	if( bmpi ) call shympi_reduce_r_internal('min',val)
+	if( bmpi ) call shympi_reduce_internal_r('min',val)
 
 	shympi_min_r = val
 
@@ -3435,7 +3439,7 @@
 	integer val
 
 	val = MINVAL(vals)
-	if( bmpi ) call shympi_reduce_i_internal('min',val)
+	if( bmpi ) call shympi_reduce_internal_i('min',val)
 
 	shympi_min_i = val
 
@@ -3450,7 +3454,7 @@
 	double precision val
 
 	val = val0
-	if( bmpi ) call shympi_reduce_d_internal('min',val)
+	if( bmpi ) call shympi_reduce_internal_d('min',val)
 
 	shympi_min_0_d = val
 
@@ -3465,7 +3469,7 @@
 	real val
 
 	val = val0
-	if( bmpi ) call shympi_reduce_r_internal('min',val)
+	if( bmpi ) call shympi_reduce_internal_r('min',val)
 
 	shympi_min_0_r = val
 
@@ -3480,11 +3484,26 @@
 	integer val
 
 	val = val0
-	if( bmpi ) call shympi_reduce_i_internal('min',val)
+	if( bmpi ) call shympi_reduce_internal_i('min',val)
 
 	shympi_min_0_i = val
 
 	end function shympi_min_0_i
+
+!******************************************************************
+
+	function shympi_max_d(vals)
+
+	double precision shympi_max_d
+	double precision vals(:)
+	double precision val
+
+	val = MAXVAL(vals)
+	if( bmpi ) call shympi_reduce_internal_d('max',val)
+
+	shympi_max_d = val
+
+	end function shympi_max_d
 
 !******************************************************************
 
@@ -3495,7 +3514,7 @@
 	real val
 
 	val = MAXVAL(vals)
-	if( bmpi ) call shympi_reduce_r_internal('max',val)
+	if( bmpi ) call shympi_reduce_internal_r('max',val)
 
 	shympi_max_r = val
 
@@ -3510,7 +3529,7 @@
 	integer val
 
 	val = MAXVAL(vals)
-	if( bmpi ) call shympi_reduce_i_internal('max',val)
+	if( bmpi ) call shympi_reduce_internal_i('max',val)
 
 	shympi_max_i = val
 
@@ -3527,7 +3546,7 @@
 	integer val
 
 	val = val0
-	if( bmpi ) call shympi_reduce_i_internal('max',val)
+	if( bmpi ) call shympi_reduce_internal_i('max',val)
 
 	shympi_max_0_i = val
 
@@ -3544,11 +3563,28 @@
 	real val
 
 	val = val0
-	if( bmpi ) call shympi_reduce_r_internal('max',val)
+	if( bmpi ) call shympi_reduce_internal_r('max',val)
 
 	shympi_max_0_r = val
 
 	end function shympi_max_0_r
+
+!******************************************************************
+
+	function shympi_max_0_d(val0)
+
+! routine for val that is scalar
+
+	double precision shympi_max_0_d
+	double precision val0
+	double precision val
+
+	val = val0
+	if( bmpi ) call shympi_reduce_internal_d('max',val)
+
+	shympi_max_0_d = val
+
+	end function shympi_max_0_d
 
 !******************************************************************
 
@@ -3559,7 +3595,7 @@
 	double precision val
 
 	val = SUM(vals)
-	if( bmpi ) call shympi_reduce_d_internal('sum',val)
+	if( bmpi ) call shympi_reduce_internal_d('sum',val)
 
 	shympi_sum_d = val
 
@@ -3574,7 +3610,7 @@
 	real val
 
 	val = SUM(vals)
-	if( bmpi ) call shympi_reduce_r_internal('sum',val)
+	if( bmpi ) call shympi_reduce_internal_r('sum',val)
 
 	shympi_sum_r = val
 
@@ -3589,7 +3625,7 @@
 	integer val
 
 	val = SUM(vals)
-	if( bmpi ) call shympi_reduce_i_internal('sum',val)
+	if( bmpi ) call shympi_reduce_internal_i('sum',val)
 
 	shympi_sum_i = val
 
@@ -3604,7 +3640,7 @@
 	double precision val
 
 	val = val0
-	if( bmpi ) call shympi_reduce_d_internal('sum',val)
+	if( bmpi ) call shympi_reduce_internal_d('sum',val)
 
 	shympi_sum_0_d = val
 
@@ -3619,7 +3655,7 @@
 	real val
 
 	val = val0
-	if( bmpi ) call shympi_reduce_r_internal('sum',val)
+	if( bmpi ) call shympi_reduce_internal_r('sum',val)
 
 	shympi_sum_0_r = val
 
@@ -3634,11 +3670,39 @@
 	integer val
 
 	val = val0
-	if( bmpi ) call shympi_reduce_i_internal('sum',val)
+	if( bmpi ) call shympi_reduce_internal_i('sum',val)
 
 	shympi_sum_0_i = val
 
 	end function shympi_sum_0_i
+
+!******************************************************************
+
+	subroutine shympi_array_reduce_i(what,vals)
+	character*(*) what
+	integer vals(:)
+	if( bmpi ) then
+	  call shympi_reduce_array_internal_i(what,size(vals),vals)
+	end if
+	end subroutine shympi_array_reduce_i
+
+	subroutine shympi_array_reduce_r(what,vals)
+	character*(*) what
+	real vals(:)
+	if( bmpi ) then
+	  call shympi_reduce_array_internal_r(what,size(vals),vals)
+	end if
+	end subroutine shympi_array_reduce_r
+
+	subroutine shympi_array_reduce_d(what,vals)
+	character*(*) what
+	double precision vals(:)
+	if( bmpi ) then
+	  call shympi_reduce_array_internal_d(what,size(vals),vals)
+	end if
+	end subroutine shympi_array_reduce_d
+
+!******************************************************************
 
 !******************************************************************
 !******************************************************************
@@ -3706,15 +3770,29 @@
 
 	subroutine shympi_comment(text)
 
-	character*(*) text
+	character*(*), intent(in) :: text
 
-	!if( bmpi .and. bmpi_debug .and. my_id == 0 ) then
-	if( bmpi_debug .and. my_id == 0 ) then
-	  write(6,*) 'shympi_comment: ' // trim(text)
-	  write(299,*) 'shympi_comment: ' // trim(text)
+	if( bcomment ) then
+	  if( bmpi_master ) then
+	    write(iuc,*) indent,trim(text)
+	  end if
 	end if
 
 	end subroutine shympi_comment
+
+!******************************************************************
+
+	subroutine shympi_comment_main(text)
+
+	character*(*), intent(in) :: text
+
+	if( bcomment ) then
+	  if( bmpi_master ) then
+	    write(iuc,*) trim(text)
+	  end if
+	end if
+
+	end subroutine shympi_comment_main
 
 !******************************************************************
 

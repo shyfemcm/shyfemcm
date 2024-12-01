@@ -203,6 +203,7 @@
           vp0v = vp0v / vv
 	end where
 
+        call shympi_comment('uvtop0: exchange up0v, vp0v')
 	call shympi_exchange_2d_node(up0v)
 	call shympi_exchange_2d_node(vp0v)
 
@@ -264,6 +265,7 @@
 	  vprv = vprv / vv
 	end where
 
+        call shympi_comment('uvtopr: exchange uprv, vprv')
 	call shympi_exchange_3d_node(uprv)
 	call shympi_exchange_3d_node(vprv)
 
