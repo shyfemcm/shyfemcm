@@ -24,7 +24,7 @@ include $(FEMDIR)/Rules.make
 
 #--------------------------------------------- libraries
 
-ifeq ($(PARTS),METIS)
+ifeq ($(PARTS),$(filter $(PARTS),METIS PARMETIS))
   LIBG_METIS = -L$(METISDIR)/lib -lmetis
 endif
 

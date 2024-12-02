@@ -633,6 +633,7 @@
 !------------------------------------------------------
 
 		if (.not. bww3) return
+                FLLEV = .true.
 
 !       -----------------------------------------------
 !       Same time step, do read
@@ -706,12 +707,12 @@
 					cxn(:,1) = currxgl
 					cyn(:,1) = currygl
 				endif 
-			if (myrank == 0) then
-				write(*,*) 'mean currents cx', sum(currxgl)/real(size(currxgl))
-				write(*,*) 'mean currents cy', sum(currygl)/real(size(currygl))
-				write(*,*) 'max cx, cy', maxval(currxgl), maxval(currygl)
-				write(*,*) 'min cx, cy', minval(currxgl), minval(currygl)
-			endif
+			!if (myrank == 0) then
+			!	write(*,*) 'mean currents cx', sum(currxgl)/real(size(currxgl))
+			!	write(*,*) 'mean currents cy', sum(currygl)/real(size(currygl))
+			!	write(*,*) 'max cx, cy', maxval(currxgl), maxval(currygl)
+			!	write(*,*) 'min cx, cy', minval(currxgl), minval(currygl)
+			!endif
 		endif ! flcur
 
 !         water level
@@ -719,14 +720,14 @@
 			wlv = znv 
 			call get_global_array_shyfem(wlv,wlvgl)
 			wlev(:,1) = wlvgl
-			if (myrank == 0) then
-				write(*,*) 'mean wlv', sum(wlvgl)/real(size(wlvgl))
-				write(*,*) 'max wlv', maxval(wlvgl)
-				write(*,*) 'min wlv', minval(wlvgl)
-				do k = 1, nkn
-					write(10010,*) k, xgvgl(k), ygvgl(k)
-				enddo 
-			endif
+			!if (myrank == 0) then
+			!	write(*,*) 'mean wlv', sum(wlvgl)/real(size(wlvgl))
+			!	write(*,*) 'max wlv', maxval(wlvgl)
+			!	write(*,*) 'min wlv', minval(wlvgl)
+			!	do k = 1, nkn
+			!		write(10010,*) k, xgvgl(k), ygvgl(k)
+			!	enddo 
+			!endif
 		endif
 
 		end if ! dtcoup

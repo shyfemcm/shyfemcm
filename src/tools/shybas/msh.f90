@@ -449,7 +449,7 @@
 	deallocate(nextern)
 
 	return
- 1000	format(i10,3f16.8)
+ 1000	format(i10,3f19.8)
  2000	format(7i10)
    99	continue
 	write(6,*) 'error opening output file'
