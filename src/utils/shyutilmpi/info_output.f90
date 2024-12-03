@@ -30,6 +30,7 @@
 ! revision log :
 !
 ! 01.12.2024    ggu     written from scratch
+! 03.12.2024    ggu     allow for optional format
 !
 !--------------------------------------------------------------------------
 
@@ -41,9 +42,10 @@
 
 	private
 
-        logical, parameter :: binfo_do = .true.	!enables info point
-        !logical, parameter :: binfo_do = .false.	!enables info point
+        logical, parameter :: binfo_do = .true.	!enables info output
+        !logical, parameter :: binfo_do = .false.	!enables info output
 
+        logical, parameter :: binfo = binfo_do		!accessible outside
         logical, save :: binfo_init = .false.		!has been initialized?
 	integer, save :: iuinfo = 0			!unit for writing info
 
@@ -52,29 +54,31 @@
      &                   ,info_output_array
         END INTERFACE
 
+	public :: binfo
 	public :: info_output
 
 !================================================================
         contains
 !================================================================
 
-	subroutine info_output_scalar(text,what,scalar,btime)
+	subroutine info_output_scalar(text,what,scalar,btime,format)
 
 	character*(*) text
 	character*(*) what
 	real scalar
 	logical, optional :: btime
+	character*(*), optional :: format
 
 	real array(1)
 
 	array(1) = scalar
-	call info_output_array(text,what,1,array,btime)
+	call info_output_array(text,what,1,array,btime,format)
 
 	end subroutine info_output_scalar
 
 !****************************************************************
 
-	subroutine info_output_array(text,what,n,array,btime)
+	subroutine info_output_array(text,what,n,array,btime,format)
 
 	use shympi
 
@@ -83,6 +87,7 @@
 	integer n
 	real array(n)
 	logical, optional :: btime
+	character*(*), optional :: format
 
 	logical bt
 	integer i,nl
@@ -92,14 +97,14 @@
 	if( .not. binfo_do ) return
 
 	if( .not. binfo_init ) then
-	  if( shympi_is_master() ) then
+	  if( bmpi_master ) then
 	    call getinfo(iuinfo)		!FIXME - if error routine hangs
 	  end if
 	  binfo_init = .true.
 	end if
 
 	bt = .false.
-	if( present(btime ) ) bt = btime
+	if( present(btime) ) bt = btime
 
 	if( what == ' ' ) then
 	  !nothing
@@ -114,6 +119,8 @@
 	  stop 'error stop info_output: unknown what'
 	end if
 	
+	if( .not. bmpi_master ) return
+
 	if( bt ) then
 	  call get_act_timeline(aline)
 	  string = trim(text)//': '//aline
@@ -123,7 +130,11 @@
 	  nl = len_trim(string) + 1
 	end if
 
-	write(iuinfo,*) string(1:nl),array
+	if( present(format) ) then
+	  write(iuinfo,format) string(1:nl),array
+	else
+	  write(iuinfo,*) string(1:nl),array
+	end if
 
 	end subroutine info_output_array
 

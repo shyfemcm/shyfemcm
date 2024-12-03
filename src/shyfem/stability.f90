@@ -501,12 +501,12 @@
 
 	deallocate(sauxe1,sauxe2,sauxe3,sauxe)
 
-	if( iuinfo > 0 ) then
-	  write(iuinfo,*) 'rindex: ',array
-	end if
+	!if( iuinfo > 0 ) then
+	!  write(iuinfo,*) 'rindex: ',array
+	!end if
 
-	array = (/tindex,aindex,dindex,gindex/)
-	call info_output('rindex','max',4,array,.false.)
+	!array = (/tindex,aindex,dindex,gindex/)
+	!call info_output('rindex','max',4,array,.false.)
 
 	icall = icall + 1
 

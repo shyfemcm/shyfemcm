@@ -380,6 +380,7 @@ baroclinic.o: ../../lib/mod/basin.mod ../../lib/mod/levels.mod \
 		../../lib/mod/mod_diff_visc_fric.mod \
 		../../lib/mod/mod_hydro.mod \
 		../../lib/mod/mod_hydro_print.mod \
+		../../lib/mod/mod_info_output.mod \
 		../../lib/mod/mod_layer_thickness.mod \
 		../../lib/mod/mod_trace_point.mod \
 		../../lib/mod/mod_ts.mod ../../lib/mod/pkonst.mod \
@@ -450,6 +451,7 @@ check.o: ../../lib/mod/basin.mod ../../lib/mod/evgeom.mod \
 		../../lib/mod/mod_hydro_baro.mod \
 		../../lib/mod/mod_hydro_print.mod \
 		../../lib/mod/mod_hydro_vel.mod \
+		../../lib/mod/mod_info_output.mod \
 		../../lib/mod/mod_internal.mod \
 		../../lib/mod/mod_layer_thickness.mod \
 		../../lib/mod/mod_meteo.mod \
@@ -654,6 +656,7 @@ initialize.o: ../../lib/mod/basin.mod \
 intp_tst.o: ../../lib/mod/basin.mod ../../lib/mod/mod_hydro.mod
 iostr.o: ../../lib/mod/basin.mod ../../lib/mod/befor_after.mod \
 		../../lib/mod/levels.mod \
+		../../lib/mod/mod_info_output.mod \
 		../../lib/mod/mod_trace_point.mod \
 		../../lib/mod/nls.mod ../../lib/mod/shympi.mod \
 		../../lib/mod/simul.mod 
@@ -732,6 +735,7 @@ meteo_forcing.o: ../../lib/mod/basin.mod ../../lib/mod/evgeom.mod \
 		../../lib/mod/intp_fem_file.mod \
 		../../lib/mod/levels.mod \
 		../../lib/mod/mod_depth.mod \
+		../../lib/mod/mod_info_output.mod \
 		../../lib/mod/mod_meteo.mod \
 		../../lib/mod/shyfem_strings.mod \
 		../../lib/mod/shympi.mod 
@@ -912,6 +916,7 @@ sparskit_admin.o: ../../lib/mod/mod_system.mod \
 stability.o: ../../lib/mod/basin.mod ../../lib/mod/levels.mod \
 		../../lib/mod/mod_diff_visc_fric.mod \
 		../../lib/mod/mod_hydro.mod \
+		../../lib/mod/mod_info_output.mod \
 		../../lib/mod/pkonst.mod ../../lib/mod/shympi.mod 
 subset.o: ../../lib/mod/basin.mod
 substress.o: ../../lib/mod/basin.mod ../../lib/mod/evgeom.mod \
@@ -935,7 +940,9 @@ tidef.o: ../../lib/mod/basin.mod ../../lib/mod/coordinates.mod \
 		../../lib/mod/mod_depth.mod \
 		../../lib/mod/mod_hydro.mod \
 		../../lib/mod/shympi.mod ../../lib/mod/tide.mod 
-time_admin.o: ../../lib/mod/femtime.mod ../../lib/mod/shympi.mod
+time_admin.o: ../../lib/mod/femtime.mod \
+		../../lib/mod/mod_info_output.mod \
+		../../lib/mod/shympi.mod 
 topological_admin.o: ../../lib/mod/basin.mod \
 		../../lib/mod/evgeom.mod \
 		../../lib/mod/mod_geom.mod \
@@ -980,6 +987,7 @@ turbulence.o: ../../lib/mod/basin.mod ../../lib/mod/evgeom.mod \
 		../../lib/mod/mod_hydro.mod \
 		../../lib/mod/mod_hydro_print.mod \
 		../../lib/mod/mod_hydro_vel.mod \
+		../../lib/mod/mod_info_output.mod \
 		../../lib/mod/mod_keps.mod \
 		../../lib/mod/mod_layer_thickness.mod \
 		../../lib/mod/mod_meteo.mod \
@@ -1018,5 +1026,6 @@ wetdry.o: ../../lib/mod/basin.mod ../../lib/mod/evgeom.mod \
 		../../lib/mod/mod_geom_dynamic.mod \
 		../../lib/mod/mod_hydro.mod \
 		../../lib/mod/mod_hydro_baro.mod \
+		../../lib/mod/mod_info_output.mod \
 		../../lib/mod/shympi.mod 
 

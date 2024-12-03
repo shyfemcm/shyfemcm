@@ -810,10 +810,13 @@
 	!real kenergy,penergy,tenergy,ksurf
 	double precision kenergy,penergy,tenergy,ksurf
 	character*20 aline
+	character*80 format
 	logical debug
 	real array(4)
 
 	integer, save :: iuinfo = 0
+
+	if( .not. binfo ) return
 
 	debug = .false.
 
@@ -831,23 +834,24 @@
 	call shympi_array_reduce('sum',array(1:3))
 
 	if( debug ) write(6,*) 'penergy: ',my_id,penergy
-	kenergy = shympi_sum(kenergy)
-	penergy = shympi_sum(penergy)
-	ksurf = shympi_sum(ksurf)
+!	kenergy = shympi_sum(kenergy)
+!	penergy = shympi_sum(penergy)
+!	ksurf = shympi_sum(ksurf)
 	if( debug ) write(6,*) 'penergy total: ',my_id,penergy
 
 	tenergy = kenergy + penergy
 
-	if(shympi_is_master()) then
-	  call get_act_timeline(aline)
-	  write(iuinfo,1000) ' energy: ',aline &
-     &				,kenergy,penergy,tenergy,ksurf
- 1000	  format(a,a20,4e12.4)
-	end if
+!	if(shympi_is_master()) then
+!	  call get_act_timeline(aline)
+!	  write(iuinfo,1000) ' energy: ',aline &
+!     &				,kenergy,penergy,tenergy,ksurf
+! 1000	  format(a,a20,4e12.4)
+!	end if
 	
 	array(4) = array(3)
 	array(3) = array(1) + array(2)
-	call info_output('energy','none',4,array,.true.)
+	format = '(a,4e12.5)'
+	call info_output(' energy','none',4,array,.true.,format)
 
 	end
 

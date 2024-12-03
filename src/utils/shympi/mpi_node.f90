@@ -113,7 +113,7 @@
 	logical, save :: bmpi_ldebug = .false.		!local debug
 	logical, save :: bextra_exchange = .false.	!deal with INTEL_BUG
 
-        logical, parameter :: bcomment = .true. 	!write comment
+        logical, parameter :: bcomment = .false. 	!write comment
         integer, parameter :: iuc = 999          	!unit for comment
         character*2, parameter :: indent = '  '		!indent for comment
 

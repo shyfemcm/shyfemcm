@@ -1269,11 +1269,10 @@
 
 	rarea = dice
 	rnodes = dacu
-	call get_act_timeline(aline)
-
-	if( iuinfo > 0 ) then
-	  write(iuinfo,*) 'ice: ',aline,rarea,rnodes,nflag
-	end if
+	!call get_act_timeline(aline)
+	!if( iuinfo > 0 ) then
+	!  write(iuinfo,*) 'ice: ',aline,rarea,rnodes,nflag
+	!end if
 
 	array = (/rarea,rnodes,real(nflag)/)
 	call info_output('ice','sum',3,array,.true.)
@@ -1452,6 +1451,7 @@
 ! converts percent to fraction
 
 	use mod_meteo
+	use shympi
 
 	implicit none
 
@@ -1461,6 +1461,7 @@
 	real maxcc
 	integer, save :: icall = 0
 	integer, save :: ncall = 1
+	integer, save :: ncall_max = 100
 
 	if( any( cc > 1.5 ) ) then
 	  maxcc = maxval(cc)
@@ -1468,7 +1469,9 @@
 	  icall = icall + 1
 	  if( mod(icall,ncall) == 0 ) then
 	    ncall = ncall * 2
-	    write(6,*) 'cloudcover in %... must convert to fraction',maxcc
+	    if( bmpi_master .and. ncall <= ncall_max ) then
+	      write(6,*) 'cloudcover in %... converting to fraction',maxcc
+	    end if
 	  end if
 	end if
 

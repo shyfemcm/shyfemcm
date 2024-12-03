@@ -40,7 +40,7 @@
 
 	implicit none
 
-        logical, parameter :: btrace_enable = .true.	!enables trace point
+        logical, parameter :: btrace_enable = .false.	!enables trace point
         logical, parameter :: btrace_master = .true.	!only master writes
 
         logical, save      :: btrace_do = .true.	!user trace point

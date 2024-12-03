@@ -193,6 +193,7 @@
 ! 10.10.2024    ggu     introduced dfluxnode to avoid INTEL_BUG compiler bug
 ! 13.10.2024    ggu     introduced drvols to avoid INTEL_BUG compiler bug
 ! 13.11.2024    ggu     marked old code with INTEL_BUG_OLD
+! 03.12.2024    ggu     run init_flux() only for ibtyp>1
 !
 !***************************************************************
 
@@ -915,7 +916,8 @@
 	integer ipext,itybnd
 
         ibtyp = itybnd(ibc)
-	if( ibtyp <= 0 ) return
+	!if( ibtyp <= 0 ) return
+	if( ibtyp <= 1 ) return
 
         call kmanfend(ibc,kranf,krend)
 

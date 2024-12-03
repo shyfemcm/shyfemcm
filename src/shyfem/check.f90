@@ -660,6 +660,8 @@
 
 	integer, save :: iuinfo = 0
 
+	if( .not. binfo ) return
+
 	if( iuinfo == 0 ) then
 	  iuinfo = -1
           if(shympi_is_master()) call getinfo(iuinfo)
@@ -672,13 +674,13 @@
 
 	dmtot = masscont(mode)
 	mtot_orig = real(dmtot)
-	dmtot = shympi_sum(dmtot)
-	mtot = real(dmtot)
 
-        if( iuinfo > 0 ) then
-	  call get_act_timeline(aline)
-	  write(iuinfo,*) 'total_volume: ',aline,mtot
-	end if
+	!dmtot = shympi_sum(dmtot)
+	!mtot = real(dmtot)
+        !if( iuinfo > 0 ) then
+	!  call get_act_timeline(aline)
+	!  write(iuinfo,*) 'total_volume: ',aline,mtot
+	!end if
 	call info_output('total_volume','sum',mtot_orig,.true.)
 
         end
@@ -968,9 +970,9 @@
 	vrbmax = shympi_max(vrbmax)
 	vrlmax = shympi_max(vrlmax)
 
-	if( iuinfo > 0 ) then
-	  write(iuinfo,*) 'mass_balance: ',vbmax,vlmax,vrbmax,vrlmax
-	end if
+	!if( iuinfo > 0 ) then
+	!  write(iuinfo,*) 'mass_balance: ',vbmax,vlmax,vrbmax,vrlmax
+	!end if
 
 	deallocate(vf,va)
 

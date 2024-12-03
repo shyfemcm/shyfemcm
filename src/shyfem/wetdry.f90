@@ -795,6 +795,8 @@
 	integer, save :: iuinfo = 0
 	real array(2)
 
+	if( .not. binfo ) return
+
 	idry = 0
         do ie=1,nel_unique
           if( iwegv(ie) /= 0 ) idry = idry + 1
@@ -802,12 +804,12 @@
 
 	idry = shympi_sum(idry)
 
-        if( iuinfo .le. 0 ) call getinfo(iuinfo)
-        if(shympi_is_master()) then
-          write(iuinfo,*) 'dry_elems: ',iloop,idry
-        end if
+        !if( iuinfo .le. 0 ) call getinfo(iuinfo)
+        !if(shympi_is_master()) then
+        !  write(iuinfo,*) 'dry_elems: ',iloop,idry
+        !end if
 	array = (/real(iloop),real(idry)/)
-	call info_output('dry_elems',' ',2,array,.false.)
+	call info_output('dry_elems','none',2,array,.false.)
 
 	end
 

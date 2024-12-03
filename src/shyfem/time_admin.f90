@@ -486,6 +486,7 @@
 	real perc,rmax
 	real dhpar,chpar,thpar,shpar
 	real array(5)
+	character*80 format
 
         real, save :: cmax,tfact,dtmin,zhpar
         integer, save :: idtsync,isplit,idtmin
@@ -523,6 +524,8 @@
         end if
 
         icall = icall + 1
+
+	call info_output('new timestep','none',0,array,.false.,'(a)')
 
 !----------------------------------------------------------------------
 !        idtsync = 0             !time step for syncronization
@@ -594,11 +597,11 @@
 
         dtaux = 0.
         if( rindex > 0 ) dtaux = cmax / rindex  ! maximum allowed time step
-        if( iuinfo > 0 ) then
-	  write(iuinfo,*) 'stability_hydro: ',rindex,dtaux,dt
-	end if
+        !if( iuinfo > 0 ) then
+	!  write(iuinfo,*) 'stability_hydro: ',rindex,dtaux,dt
+	!end if
 	array(1:3) = (/rindex,dtaux,real(dt)/)
-	call info_output('stability_hydro',' ',3,array,.false.)
+	call info_output('stability_hydro','none',3,array,.false.)
 
 	if( dt <= 0 ) then
 	  write(6,*) 'dt is negative after setting'
@@ -717,13 +720,14 @@
 	iss = 0
 	if( bsync ) iss = 1
 
-	if( iuinfo > 0 ) then
-          write(iuinfo,1004) 'timestep: ',aline_act &
-     &				,t_act,istot,iss,dt,perc
-	  flush(iuinfo)	
-	end if
+!	if( iuinfo > 0 ) then
+!          write(iuinfo,1004) 'timestep: ',aline_act &
+!     &				,t_act,istot,iss,dt,perc
+!	  flush(iuinfo)	
+!	end if
 	array = (/real(t_act),real(istot),real(iss),real(dt),real(perc)/)
-	call info_output('timestep',' ',5,array,.true.)
+	format = '(a,f18.4,f6.0,f4.0,2f10.2)'
+	call info_output(' timestep','none',5,array,.true.,format)
 
 	call shympi_barrier
 
