@@ -1,5 +1,146 @@
 ============================================================
 
+Sun Nov 24 20:21:31 CET 2024
+
+New version 8_2_2
+
+
+============================================================
+
+Sun Nov 24 20:20:44 CET 2024
+
+new version, ibasin and pqual
+
+ LOG                           |  84 ++++++++++++++++++++++++++++++++++++++++++
+ RELEASE_NOTES                 |   7 ++++
+ docs/final/shyfem.pdf         | Bin 336364 -> 337226 bytes
+ src/tools/shybas/Makefile     |   4 ++
+ src/utils/shympi/mpi_node.f90 |   2 +-
+ src/utils/shyutil/version.f90 |  11 +++---
+ 6 files changed, 102 insertions(+), 6 deletions(-)
+
+============================================================
+
+Sat Nov  9 12:04:17 CET 2024
+
+New version 8_2_1
+
+
+============================================================
+
+Fri Nov  8 10:37:09 CET 2024
+
+New version 8_2_0
+
+
+============================================================
+
+Fri Nov  8 10:36:02 CET 2024
+
+new develop version started
+
+ RELEASE_NOTES                 |   5 +++++
+ docs/final/shyfem.pdf         | Bin 334857 -> 334825 bytes
+ src/utils/shyutil/version.f90 |   7 ++++---
+ 3 files changed, 9 insertions(+), 3 deletions(-)
+
+============================================================
+
+Fri Nov  8 10:27:03 CET 2024
+
+New version 8_1_0
+
+
+============================================================
+
+Fri Nov  8 10:25:23 CET 2024
+
+new stable version
+
+ RELEASE_NOTES                 |   5 +++++
+ docs/final/shyfem.pdf         | Bin 334850 -> 334857 bytes
+ src/utils/shyutil/version.f90 |  11 ++++++-----
+ 3 files changed, 11 insertions(+), 5 deletions(-)
+
+============================================================
+
+Mon Oct 14 18:15:32 CEST 2024
+
+New version 8_0_10
+
+
+============================================================
+
+Mon Oct 14 18:14:22 CEST 2024
+
+new version VERS_8_0_10
+
+ docs/final/shyfem.pdf | Bin 334823 -> 334850 bytes
+ 1 file changed, 0 insertions(+), 0 deletions(-)
+
+============================================================
+
+Tue Oct  8 11:55:39 CEST 2024
+
+New version 8_0_9
+
+
+============================================================
+
+Tue Oct  8 11:54:18 CEST 2024
+
+last changes for new version
+
+ LOG                           |  88 ++++++++++++++++++++++++++++++++++++++++++
+ RELEASE_NOTES                 |  11 ++++++
+ docs/femdoc.pl                |   2 +
+ docs/final/shyfem.pdf         | Bin 334806 -> 334823 bytes
+ docs/waves_ww3.tex            |  36 +++++++++--------
+ src/utils/shyutil/version.f90 |  11 +++---
+ 6 files changed, 127 insertions(+), 21 deletions(-)
+
+============================================================
+
+Thu Oct  3 12:21:11 CEST 2024
+
+netcdf output for meteo variables
+
+ src/tools/shyelab/shyelab1.f90        |   5 +-
+ src/tools/shyelab/shyelab_output.f90  |   8 +-
+ src/tools/shynetcdf/elab_nc.f90       |  72 ++++++++++++++---
+ src/tools/shynetcdf/elab_nc_dummy.f90 |   3 +-
+ src/tools/shynetcdf/netcdf.f90        | 140 ++++++++++++++++++++++++----------
+ src/utils/shyutil/strings.f90         |  52 ++++++++++++-
+ 6 files changed, 221 insertions(+), 59 deletions(-)
+
+============================================================
+
+Fri Sep 20 16:49:46 CEST 2024
+
+New version 8_0_8
+
+
+============================================================
+
+Fri Sep 20 16:48:28 CEST 2024
+
+NUOPC final framework
+
+ LOG                           |  23 +++++++++++++++++++++++
+ RELEASE_NOTES                 |   5 +++++
+ Rules.make                    |  34 ----------------------------------
+ bin/check/test_compile.sh     |   5 +++++
+ bin/getheader.pl              |   5 ++++-
+ bin/revision/revision_last.sh |   4 +++-
+ bin/revision/revisionlog.pl   |   2 +-
+ docs/final/shyfem.pdf         | Bin 334915 -> 334915 bytes
+ src/shyfem/Makefile           |  11 +++++++++--
+ src/utils/shyutil/version.f90 |  11 ++++++-----
+ var/rules/Rules.dist          |   2 +-
+ 11 files changed, 57 insertions(+), 45 deletions(-)
+
+============================================================
+
 Fri Sep 13 16:35:28 CEST 2024
 
 changed implementation for OMP
@@ -134,6 +275,30 @@ compiler errors with intel fixed
 
 ============================================================
 
+Thu Sep  5 11:48:37 CEST 2024
+
+more on tvd mpi
+
+ src/shyfem/tvd.f90           |  18 ++++---
+ src/shyfem/tvd_admin.f90     |  87 ++++++-------------------------
+ src/utils/shympi/mpi_tvd.f90 | 119 ++++++++++++++++++++++++++++++++++++++++---
+ 3 files changed, 138 insertions(+), 86 deletions(-)
+
+============================================================
+
+Wed Aug 28 14:21:32 CEST 2024
+
+first part of tvd finished
+
+ Rules.make                    |  15 ++--
+ src/shyfem/tvd_admin.f90      |  81 ++++++++++++++++--
+ src/utils/shympi/mpi_node.f90 |  18 ++--
+ src/utils/shympi/mpi_tvd.f90  | 187 +++++++++++++++++++++++++++++++++++-------
+ src/utils/shyutilmpi/find.f90 |  79 ++++++++++++++++++
+ 5 files changed, 330 insertions(+), 50 deletions(-)
+
+============================================================
+
 Mon Aug  5 14:54:48 CEST 2024
 
 new option ncglobal, error when reading nc-4 files
@@ -143,6 +308,20 @@ new option ncglobal, error when reading nc-4 files
  src/tools/shynetcdf/elab_nc.f90      |  7 +++-
  src/tools/shynetcdf/netcdf.f90       | 75 +++++++++++++++++++++++++++++++++++-
  4 files changed, 90 insertions(+), 5 deletions(-)
+
+============================================================
+
+Sun Aug  4 20:37:42 CEST 2024
+
+started tvd mpi
+
+ src/shyfem/tvd.f90           |   3 +
+ src/shyfem/tvd_admin.f90     |  18 ++--
+ src/utils/shympi/Makefile    |   1 +
+ src/utils/shympi/mpi_tvd.f90 | 215 +++++++++++++++++++++++++++++++++++++++++++
+ 4 files changed, 231 insertions(+), 6 deletions(-)
+ new file:
+   src/utils/shympi/mpi_tvd.f90
 
 ============================================================
 
@@ -173,6 +352,20 @@ update netcdf, projection in shyelab
  11 files changed, 490 insertions(+), 55 deletions(-)
  renamed:
     src/tools/shyelab/shyproj.f -> src/tools/shyelab/shyproj.f90
+
+============================================================
+
+Tue Jul 30 17:33:14 CEST 2024
+
+started tvd
+
+ src/shyfem/hydrodynamic.f90   |  50 ++++-------
+ src/shyfem/lagrange_main.f90  |  29 +++---
+ src/shyfem/openmp_admin.f90   | 202 +++++++++++++++++++++++++++++++++++++++++-
+ src/shyfem/shyfem.f90         |   2 +-
+ src/shyfem/tvd_admin.f90      | 146 +++++++++++++++++++++++++-----
+ src/utils/shyutilmpi/find.f90 |  20 ++++-
+ 6 files changed, 373 insertions(+), 76 deletions(-)
 
 ============================================================
 

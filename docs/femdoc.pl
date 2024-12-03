@@ -68,6 +68,8 @@ sub docs_process {
 	docs_close_description();
   } elsif ( /^!!/ ) {				#normal comment
 	docs_close_description();
+  } elsif ( /^!c/ ) {				#normal comment
+	docs_close_description();
   } elsif ( /^[cC!]\w+#/ ) {			#comment for environments
 	docs_close_description();
   } elsif ( /^[cC!](\s*)(.*)\n$/ ) {		#docs comment

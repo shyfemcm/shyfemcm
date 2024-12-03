@@ -30,6 +30,7 @@
 ! 24.03.2022    ggu     newly started with Aron
 ! 05.05.2022    aar     lots of changes from Aron
 ! 15.10.2022    ggu     shympi_exchange_array substituted with shympi_l2g_array
+! 03.12.2024    lrp     ww3 restored
 
 !===========================================================
 	module mod_ww3

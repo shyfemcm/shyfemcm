@@ -20,3 +20,17 @@ git switch DestinationBranch
 git pull
 git checkout --merge SourceBranch file1 file2
 
+# new branch and push to remote
+
+git br -av					# see all branches
+git push --set-upstream origin new_branch       # pushes new branch to origin
+git push --set-upstream myfork new_branch       # pushes new branch to myfork
+
+# delete some files from last commit
+# https://www.geeksforgeeks.org/how-to-remove-file-from-latest-commit/
+
+git rm --cached file1 file2 ...
+git commit --amend
+rm -f file1 file2			# deletes files from working dir
+git push --force			# if changes had already been pushed
+

@@ -41,6 +41,7 @@ c 13.06.2013	ggu	copy_depth() renamed to transfer_depth()
 c 10.10.2015	ggu	changed VERS_7_3_2
 c 16.02.2019	ggu	changed VERS_7_5_60
 c 26.03.2022	ggu	bug: ike was passed, but logical needed -> bnodes
+c 21.11.2024	ggu	renamed some routines
 c
 c****************************************************************
 
@@ -363,7 +364,7 @@ c deletes elements with depth lower then hmin
 	write(6,*) 'checking connectivity of basin'
 	write(6,*)
 
-	call check_connection(icon,icol,ibig)
+	call check_smooth_connection(icon,icol,ibig)
 
 	do ie=1,nel
 	  if( icon(ie) .ne. ibig ) then
@@ -384,7 +385,7 @@ c deletes elements with depth lower then hmin
 	write(6,*) 'final check'
 	write(6,*)
 
-	call check_connection(icon,icol,ibig)
+	call check_smooth_connection(icon,icol,ibig)
 
 	write(6,*)
 	write(6,*) 'end deleting elements'
@@ -528,7 +529,7 @@ c determines what element/nodes must be shifted
 
 c*******************************************************************
 
-	subroutine check_connection(icon,icol,ibig)
+	subroutine check_smooth_connection(icon,icol,ibig)
 
 	use mod_geom
 	use basin

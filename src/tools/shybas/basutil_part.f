@@ -45,6 +45,7 @@
 ! 30.03.2022	ggu	bug fix: nkn_save,nel_save were not initialized
 ! 13.04.2022    ggu     new call to make_links (ibound)
 ! 04.04.2023    ggu     minor changes
+! 21.11.2024    ggu     renamed some routines
 !
 !****************************************************************
 
@@ -272,9 +273,9 @@
 	end if
 
 	call shympi_syncronize
-	call check_connectivity(ierr)
+	call check_bas_connectivity(ierr)
 	call shympi_syncronize
-	call check_connections(ierr)
+	call check_bas_connections(ierr)
 	call shympi_syncronize
 
 !-----------------------------------------------------------------
@@ -286,7 +287,7 @@
 
 !*******************************************************************
 
-	subroutine check_connectivity(ierr)
+	subroutine check_bas_connectivity(ierr)
 
 	use basin
 
@@ -303,7 +304,7 @@
 	nc = maxval(icolor)
 
 	do ic=0,nc
-	  call check_color(ic,nkn,icolor,ier)
+	  call check_bas_color(ic,nkn,icolor,ier)
 	  ierr = ierr + ier
 	end do
 
@@ -311,7 +312,7 @@
 
 !*******************************************************************
 
-	subroutine check_color(ic,n,icolor,ierr)
+	subroutine check_bas_color(ic,n,icolor,ierr)
 
 	use basin
 
@@ -394,7 +395,7 @@
 
 !*******************************************************************
 
-	subroutine check_connections(kerr)
+	subroutine check_bas_connections(kerr)
 
 ! this checks connections with link/lenk data structure
 
@@ -475,7 +476,8 @@
 	end do
 
 	if( kerr > 0 ) then
-	  if( iu > 0 ) write(iu,*) 'check_connections: ',nloop,kerr,kext
+	  if( iu > 0 ) write(iu,*) 'check_bas_connections: '
+     &				,nloop,kerr,kext
 	  call elim_isolated_element(icolor,kerr)
 	end if
 
@@ -496,7 +498,7 @@
 	else
 	  write(6,*) 'could not correct error in connections...',nloop
 	  write(6,*) 'error occurred in domain ',my_id
-	  call write_partition_grd(icolor)  
+	  call write_partition_bas_grd(icolor)  
 	end if
 
 	iarnv = icolor
@@ -598,10 +600,8 @@
 	integer k,ie,ngrm
 	integer ibound(nkn)
 
-	call estimate_max_grade(nk,ne,nenv,ngrm)
-	call mod_geom_init(nk,ne,ngrm)
+	call set_geom
 
-	!call make_links_old(nk,ne,nenv)
 	call make_links(nk,ne,nenv,ibound,kerr)
 
 	end
@@ -695,7 +695,7 @@
 
 !*******************************************************************
 
-	subroutine write_partition_grd(icolor)  
+	subroutine write_partition_bas_grd(icolor)  
 
 	use basin
 	use shympi

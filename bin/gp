@@ -12,8 +12,9 @@
 #
 #########################################################
 
-version=2.04
+version=2.05
 
+# 2.05	17.10.2024	lt for dash substituted with dt
 # 2.04	06.05.2024	debug option and ParseTime()
 # 2.03	07.03.2024	adjust paths for helper routines
 # 2.02	03.03.2024	use absolute paths in calling other scripts
@@ -553,7 +554,7 @@ Plotting()
     with=""
     lc=""
     lw=""
-    lt=""
+    dt=""
     fs=""
     use=$using
     if [ -n "$style" ]; then
@@ -580,7 +581,7 @@ Plotting()
       axes="axes $axes"
     fi
     if [ -n "$dash" ]; then
-      lt="lt $dash"
+      dt="dt $dash"
     fi
     if [ -n "$color" -a "$color" != "none" ]; then
       lc="lc rgb '$color'"
@@ -595,7 +596,7 @@ Plotting()
     [ -z "$2" ] && eol=' '
 
     legend=`MakeLegend $file`
-    line="     \"$file\" $use $axes title \"$legend\" $with $lt $fs $lc $lw"
+    line="     \"$file\" $use $axes title \"$legend\" $with $dt $fs $lc $lw"
     echo "$cont $line $eol" >> gnu.tmp
     cont=', '
 

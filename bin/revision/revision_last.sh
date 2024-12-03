@@ -112,7 +112,9 @@ echo "using compare date $comparedate"
 # find files
 #------------------------------------------------------------
 
-files=`find . -name "*.[cfFh]"`
+files=`find . -name "*.f90"`
+#files=`find . -name "*.[cfFh]"`
+#echo "looking for files: $files"
 
 $bindir/revisionlog.sh -after $comparedate $files > $tmpfile
 $bindir/revisionlog_adjust.pl $tmpfile $version_file > $tmpfile2

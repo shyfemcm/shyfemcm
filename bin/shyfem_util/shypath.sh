@@ -12,7 +12,7 @@
 #
 #-----------------------------------------------------------
 
-all="git fem3d grd"
+all="git fem3d grd shyfem_util"
 
 has_dot="NO"
 set_path="NO"
@@ -95,6 +95,7 @@ bindir=
 execdir=$( dirname ${BASH_SOURCE[0]} | pwd -P )
 #echo "execdir = $execdir"
 MakeBinDir
+bindir=$SHYFEMDIR/bin
 
 shyfemdir=$( echo $bindir | sed -E 's/\/[^\/]*$//' )
 

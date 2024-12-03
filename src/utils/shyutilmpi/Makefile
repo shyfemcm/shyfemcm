@@ -41,12 +41,12 @@ OBJ  = \
 	shy_util1.o \
 	intp_fem_file.o \
 	coordinates.o \
-	find.o \
 	io_off.o \
 	trace_point.o \
 
 OBSOLETE = \
 	evgeom.o \
+	find.o \
 
 ALL = $(MOD) $(OBJ)
 
@@ -177,8 +177,6 @@ coordinates.o: ../../../lib/mod/basin.mod \
 depth_util.o: ../../../lib/mod/basin.mod \
 		../../../lib/mod/mod_depth.mod \
 		../../../lib/mod/shympi.mod 
-find.o: ../../../lib/mod/basin.mod ../../../lib/mod/evgeom.mod \
-		../../../lib/mod/mod_geom.mod 
 intp_fem_file.o: ../../../lib/mod/shympi.mod
 io_off.o: ../../../lib/mod/basin.mod \
 		../../../lib/mod/mod_trace_point.mod \
@@ -191,7 +189,8 @@ shy_util.o: ../../../lib/mod/basin.mod ../../../lib/mod/levels.mod \
 shy_util1.o: ../../../lib/mod/basin.mod \
 		../../../lib/mod/evgeom.mod \
 		../../../lib/mod/levels.mod \
-		../../../lib/mod/mod_depth.mod 
+		../../../lib/mod/mod_depth.mod \
+		../../../lib/mod/mod_sort.mod 
 topo_update.o: ../../../lib/mod/basin.mod \
 		../../../lib/mod/evgeom.mod \
 		../../../lib/mod/mod_geom.mod \

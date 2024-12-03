@@ -83,6 +83,7 @@
 	logical, save :: bmpi_support = .false.
         logical, save :: bmpi_unit = .false.            !write debug to my_unit
         logical, save :: bmpi_allgather = .true.        !do allgather
+        logical, save :: bextra_exchange = .false.
 
 	logical, parameter :: blocal_shympi_debug = .false. !write debug
 
@@ -156,6 +157,10 @@
 
         integer,save,allocatable :: nen3v_global(:,:)	!global element index
 	real,save,allocatable :: hlv_global(:)		!global layer depths
+
+        ! quality index of partition
+
+        real, save :: pquality = 0.
 
         type communication_info
           integer, public :: numberID

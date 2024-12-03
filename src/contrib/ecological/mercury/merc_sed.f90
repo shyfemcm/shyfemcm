@@ -34,10 +34,10 @@
      &             silt,pom,Vr,bvels,bvelp)
 
 !	
-************************************************************************
-* 
-* !! reaction mass yied coefficients: 1.07 (met); 0.93 (demet) !!
-* !! oppure calcolare in mol e poi convertire (?) !!
+!************************************************************************
+!* 
+!* !! reaction mass yied coefficients: 1.07 (met); 0.93 (demet) !!
+!* !! oppure calcolare in mol e poi convertire (?) !!
 
 ! -----------------------------------------------------------------------
 ! ---- Call from bentic sediment model: ---------------------------------
@@ -48,7 +48,7 @@
 ! INITIAL CONDITIONS: concentrations of hg and mehg [ mg(hg)/kg(sed) ]
 ! that are converted to hgit and mehgt [ ug(hg)/m3(s+w) ] 
 !
-************************************************************************
+!************************************************************************
       implicit none
 !	include 'mercury.h'
       integer m,nvmerc !water or sediment box
@@ -178,19 +178,19 @@
 ! -----kd hg = 2.97 + 0.15*LOI ---(= 10**3 -10**4)----------- 
 ! -----kd mehg = 1.98 + 0.18*LOI ---(= 10**2.2 -10**3.1)-----
 
-***** call from solids water module********************************
+!***** call from solids water module********************************
 !	
 !	Sw, POMw, Vds, Vdp   ! solids water and sink velocities
 !--------------------------------------------------------------
-****** call from Hg water module***********************************
+!****** call from Hg water module***********************************
 ! 
 !     hgitw, MeHgw ! hgit in water [ng l-1] or [μg m-3]    
 !     fsilt1w,fpom1w, fdiss1w  !fraction Hg-silt -pom -diss water
 !      fsilt2w, fpom2w, fdiss2w  ! fraction MeHg-silt -pom -diss water
 !
-****** call from solids module***********************************
-****** CONCENTRATIONS of silt, POM, DOC in sed*********part 04**********
-******* converted from [g m-3] to [g cm-3] or [kg l-1]***********
+!****** call from solids module***********************************
+!****** CONCENTRATIONS of silt, POM, DOC in sed*********part 04**********
+!******* converted from [g m-3] to [g cm-3] or [kg l-1]***********
  
       Cdoc  = por*DOC/10.**6. ! g(DOC)/m3(w) * 0.8 m3(w)/m3(s+w) -> mg(DOC)/L(s+w)/10**6 -> kgl-1
       Csilt = silt/10.**6.  ! from [g m-3] to [g cm-3] or [kg l-1]      
@@ -408,17 +408,17 @@
 !      JMHgD=0.0    
  
       if (bursHg .GE. 0.) then       
-      CD(1) = +Shgsil +Shgpom +(-Rhgsil -Rhgpom +JHgD -bursHg -burpHg 
+      CD(1) = +Shgsil +Shgpom +(-Rhgsil -Rhgpom +JHgD -bursHg -burpHg  &
      & +sksdem-sksme)*86400
       else 
-      CD(1) = +Shgsil +Shgpom +(-Rhgsil +JHgD -Rhgpom +sksdem-sksme
+      CD(1) = +Shgsil +Shgpom +(-Rhgsil +JHgD -Rhgpom +sksdem-sksme &
      & )*86400
       end if
       if (bursMHg .GE. 0.) then       
-      CD(2) = +Smhgsil+Smhgpom+(-Rmhgsil-Rmhgpom+JMHgD-bursMHg-burpMHg
+      CD(2) = +Smhgsil+Smhgpom+(-Rmhgsil-Rmhgpom+JMHgD-bursMHg-burpMHg &
      & -sksdem+sksme)*86400
       else 
-      CD(2) = +Smhgsil+Smhgpom+(-Rmhgsil-Rmhgpom+JMHgD -sksdem+sksme
+      CD(2) = +Smhgsil+Smhgpom+(-Rmhgsil-Rmhgpom+JMHgD -sksdem+sksme &
      & )*86400
       end if    
 

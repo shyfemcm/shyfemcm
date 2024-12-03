@@ -47,6 +47,7 @@ LIBF = $(LIBFUM) $(LIBFMP) $(LIBFSU) $(LIBFUT)
 #----------------------------------------------------------------------------
 
 EXES = shypre shypre_orig shypre_noopti
+EXES = shypre
 
 OBJ_ORIG := rosen.o cuthill_mckee.o
 OBJ_OPTI := \

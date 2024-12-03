@@ -45,6 +45,10 @@
 ! 30.03.2022	ggu	bug fix: nkn_save,nel_save were not initialized
 ! 13.04.2022    ggu     new call to make_links (ibound)
 ! 04.04.2023    ggu     minor changes
+! 07.11.2024    ggu     ignore connection errors
+! 21.11.2024    ggu     call check routines with bdebug, less error messages
+! 23.11.2024    ggu     ignore errors in connectivity
+! 30.11.2024    ggu     renamed check_color() to check_part_color()
 !
 !****************************************************************
 
@@ -56,56 +60,85 @@
 
 	integer, save, private :: nkn_save = 0
 	integer, save, private :: nel_save = 0
+	integer, save, private :: ngr_save = 0
 
 	integer, allocatable :: save_ipv(:)
 	integer, allocatable :: save_ipev(:)
 	integer, allocatable :: save_nen3v(:,:)
-	integer, allocatable :: aux_ipv(:)
-	integer, allocatable :: aux_ipev(:)
+	real, allocatable    :: save_xgv(:)
+	real, allocatable    :: save_ygv(:)
+	integer, allocatable :: save_iarv(:)
+	integer, allocatable :: save_iarnv(:)
+
+        INTERFACE copy_array
+        MODULE PROCEDURE  copy_array_i &
+     &                   ,copy_array_r
+        END INTERFACE
 
 !================================================================
 	contains
 !================================================================
 
-	subroutine mod_save_index_init(nkn,nel)
+	subroutine mod_save_index_init(nkn,nel,ngr)
 
 	implicit none
 
-        integer nkn, nel
+        integer nkn, nel, ngr
 
-        if( nkn == nkn_save .and. nel == nel_save ) return
+        if( nkn == nkn_save .and. nel == nel_save .and. ngr == ngr_save ) return
 
-        if( nel > 0 .or. nkn > 0 ) then
-          if( nel == 0 .or. nkn == 0 ) then
-            write(6,*) 'nel,nkn: ',nel,nkn
+        if( nel > 0 .or. nkn > 0 .or. ngr > 0 ) then
+          if( nel == 0 .or. nkn == 0 .or. ngr == 0 ) then
+            write(6,*) 'nel,nkn,ngr: ',nel,nkn,ngr
             stop 'error stop mod_save_index: incompatible parameters'
           end if
         end if
 
-        if( nkn_save > 0 ) then
-	  deallocate(save_ipv)
-	  deallocate(save_ipev)
-	  deallocate(save_nen3v)
-	  deallocate(aux_ipv)
-	  deallocate(aux_ipev)
-        end if
+	call release_save_index
 
 	nkn_save = nkn
 	nel_save = nel
+	ngr_save = ngr
 
 	if( nkn == 0 ) return
 
 	allocate(save_ipv(nkn))
 	allocate(save_ipev(nel))
 	allocate(save_nen3v(3,nel))
-	allocate(aux_ipv(nkn))
-	allocate(aux_ipev(nel))
+	allocate(save_xgv(nkn))
+	allocate(save_ygv(nkn))
+	allocate(save_iarv(nel))
+	allocate(save_iarnv(nkn))
 
 	end subroutine mod_save_index_init
 
 !****************************************************************
 
-	subroutine make_new_index(nk,ne,nenv,nodep,elemp)
+	subroutine release_save_index
+
+	implicit none
+
+        if( nkn_save > 0 ) then
+	  deallocate(save_ipv)
+	  deallocate(save_ipev)
+	  deallocate(save_nen3v)
+	  deallocate(save_xgv)
+	  deallocate(save_ygv)
+	  deallocate(save_iarv)
+	  deallocate(save_iarnv)
+	end if
+
+	nkn_save = 0
+	nel_save = 0
+	ngr_save = 0
+
+	end subroutine
+
+!****************************************************************
+
+	subroutine make_new_basin(nk,ne,nenv,nodep,elemp)
+
+! uses nenv as new element index and copies arrays to new basin
 
 	use basin
 
@@ -116,44 +149,155 @@
 	integer nodep(nk)
 	integer elemp(ne)
 
-	integer k,ie
+	integer k,ie,ng,nn
 
 	if( nk > nkn .or. ne > nel ) then
 	  write(6,*) 'can only make smaller index: ',nk,nkn,ne,nel
-	  stop 'error stop make_new_index: nk/ne > nkn/nel'
+	  stop 'error stop make_new_basin: nk/ne > nkn/nel'
 	end if
 
-	call mod_save_index_init(nkn,nel)
+	call mod_save_index_init(nkn,nel,ngr)
 
 	save_ipv = ipv
 	save_ipev = ipev
 	save_nen3v = nen3v
+	save_xgv = xgv
+	save_ygv = ygv
 
 	nen3v(:,1:ne) = nenv(:,1:ne)
 
-	do k=1,nk
-	  aux_ipv(k) = ipv(nodep(k))
-	end do
-	ipv(1:nk) = aux_ipv(1:nk)
+	call copy_array(nk,ipv,nodep)
+	call copy_array(ne,ipev,elemp)
 
-	do ie=1,ne
-	  aux_ipev(ie) = ipev(elemp(ie))
-	end do
-	ipev(1:ne) = aux_ipev(1:ne)
+	call copy_array(nk,xgv,nodep)
+	call copy_array(nk,ygv,nodep)
+
+	call copy_array(ne,iarv,elemp)
+	call copy_array(nk,iarnv,nodep)
+
+	!do k=1,nk
+	!  aux_ipv(k) = ipv(nodep(k))
+	!end do
+	!ipv(1:nk) = aux_ipv(1:nk)
+
+	!do ie=1,ne
+	!  aux_ipev(ie) = ipev(elemp(ie))
+	!end do
+	!ipev(1:ne) = aux_ipev(1:ne)
+
+	call estimate_grade(nk,ne,nenv,ng)
+
+	nkn = nk
+	nel = ne
+	ngr = ng
 
 	end subroutine
 
 !****************************************************************
 
-	subroutine restore_old_index
+	subroutine transfer_array(n,array,ipointer,array_new)
+
+	implicit none
+
+	integer n
+	integer array(:)
+	integer ipointer(n)
+	integer array_new(n)
+
+	integer i
+	integer aux(n)
+
+	do i=1,n
+	  aux(i) = array(ipointer(i))
+	end do
+	array_new(1:n) = aux(1:n)
+
+	end
+
+!****************************************************************
+
+	subroutine copy_array_i(n,array,ipointer)
+
+	implicit none
+
+	integer n
+	integer array(:)
+	integer ipointer(n)
+
+	integer i
+	integer aux(n)
+
+	do i=1,n
+	  aux(i) = array(ipointer(i))
+	end do
+	array(1:n) = aux(1:n)
+
+	end
+
+!****************************************************************
+
+	subroutine copy_array_r(n,array,ipointer)
+
+	implicit none
+
+	integer n
+	real array(:)
+	integer ipointer(n)
+
+	integer i
+	real aux(n)
+
+	do i=1,n
+	  aux(i) = array(ipointer(i))
+	end do
+	array(1:n) = aux(1:n)
+
+	end
+
+!****************************************************************
+
+	subroutine restore_old_basin
 
 	use basin
 
 	implicit none
 
+	nkn = nkn_save
+	nel = nel_save
+	ngr = ngr_save
+
 	nen3v = save_nen3v
 	ipv = save_ipv
 	ipev = save_ipev
+	xgv = save_xgv
+	ygv = save_ygv
+
+	end subroutine
+
+!****************************************************************
+
+	subroutine estimate_grade(nk,ne,nenv,ng)
+
+	implicit none
+
+	integer nk,ne
+	integer nenv(3,ne)
+	integer ng
+
+	integer ie,ii,k
+	integer, allocatable :: node(:)
+
+	allocate(node(nk))
+	node = 0
+
+	do ie=1,ne
+	  do ii=1,3
+	    k = nenv(ii,ie)
+	    node(k) = node(k) + 1
+	  end do
+	end do
+
+	ng = 1 + maxval(node)
 
 	end subroutine
 
@@ -175,6 +319,7 @@
 
 	character*(*) llfile
 
+	logical bdebug
 	integer ierr
 	integer k,i,nl,il,n,ib,in,node,ilext,np,ic
 	integer, allocatable :: nc(:)
@@ -187,6 +332,8 @@
 !-----------------------------------------------------------------
 ! open and read file containing lines
 !-----------------------------------------------------------------
+
+	bdebug = .false.
 
 	if( .not. filex(llfile) ) then
 	  write(6,*) 'Cannot open file ',trim(llfile)
@@ -270,9 +417,9 @@
 	end if
 
 	call shympi_syncronize
-	call check_connectivity(ierr)
+	call check_connectivity(bdebug,ierr)
 	call shympi_syncronize
-	call check_connections(ierr)
+	call check_connections(bdebug,ierr)
 	call shympi_syncronize
 
 !-----------------------------------------------------------------
@@ -284,12 +431,13 @@
 
 !*******************************************************************
 
-	subroutine check_connectivity(ierr)
+	subroutine check_connectivity(bdebug,ierr)
 
 	use basin
 
 	implicit none
 
+	logical bdebug
 	integer ierr
 
 	integer ier
@@ -301,7 +449,8 @@
 	nc = maxval(icolor)
 
 	do ic=0,nc
-	  call check_color(ic,nkn,icolor,ier)
+	  ier = 0
+	  call check_part_color(ic,nkn,icolor,ier)
 	  ierr = ierr + ier
 	end do
 
@@ -309,7 +458,13 @@
 
 !*******************************************************************
 
-	subroutine check_color(ic,n,icolor,ierr)
+	subroutine check_part_color(ic,n,icolor,ierr)
+
+! checks number of doamins with color ic
+!
+! writes out error if not contigous
+! if ierr == -1 on entry does not write error
+! on return in ierr is number of sub-domains
 
 	use basin
 
@@ -321,7 +476,11 @@
 	integer ierr
 
 	integer cc,i,nfound
+	logical bwrite
+	logical, save :: bfirst = .true.
+	character*80 header
 
+	bwrite = ( ierr /= -1 )
 	ierr = 0
 	cc = count( icolor == ic )
 
@@ -331,15 +490,22 @@
 	  end do
 	  if( i > n ) exit
 	  call flood_fill_bas(i,n,icolor,nfound)
-	  !write(6,*) ic,nfound,(100.*nfound)/n,' %'
 	  if( nfound /= cc ) then
-	    write(6,*) '  *** area is not connected...'
-	    write(6,*) '      area code:     ',ic
-	    write(6,*) '      contains node: ',ipv(i)
-	    ierr = 1
+	    if( bfirst .and. bwrite ) then
+	      header = '                               area' &
+     &			// '     nthis    ntotal      node'
+	      bfirst = .false.
+	      write(6,'(a)') header
+	    end if
+	    if( bwrite ) then
+	      write(6,1000) '  area is not connected: ',ic,nfound,cc,ipv(i)
+	    end if
+	    ierr = ierr + 1
 	  end if
 	end do
 
+	return
+ 1000	format(a,4i10)
 	end
 
 !*******************************************************************
@@ -392,7 +558,7 @@
 
 !*******************************************************************
 
-	subroutine check_connections(kerr)
+	subroutine check_connections(bdebug,kerr)
 
 ! this checks connections with link/lenk data structure
 
@@ -402,84 +568,143 @@
 
 	implicit none
 
+	logical bdebug
 	integer kerr
 
 	logical bloop
 	logical bwrite
+	logical bwritegrd
+	logical berror
+	logical bhandle_errors
 	integer nloop
-	integer ic,nc,ncol,kext,iu
+	integer ic,nc,ncol,kext,iu,i,k
 	integer nk,ne
 	integer nenv(3,nel)
 	integer icolor(nkn)
+	integer icolor_new(nkn)
 	integer icol(nkn)
 	integer nodep(nkn)
 	integer elemp(nel)
 	character*80 grdfile
+	integer, allocatable :: kerror(:)
 
 	integer ipint,ipext
 
 	bwrite = .false.
+	bwrite = .true.
+	berror = .false.
+	bwritegrd = .false.
+	bwritegrd = .true.
+	bhandle_errors = .false.
 	bloop = .true.
 	nloop = 0
+
+	bwritegrd = bdebug	!only write error grid if in debug mode
+	bwrite = bdebug
+
+	allocate(kerror(nkn))
+
 	icolor = iarnv
 	nc = maxval(icolor)
 
 	iu = 0
-	if( shympi_is_master() ) iu = 777
+	!if( shympi_is_master() ) iu = 777
 
+	if( shympi_is_master() ) then
 	write(6,*) '========================================'
 	write(6,*) 'checking total domain... total domains = ',nc
 	write(6,*) '========================================'
+	end if
 
-	call check_elem_index(nkn,nel,nen3v,kerr)
+	kerr = nkn
+	call check_elem_index(nkn,nel,nen3v,kerr,kerror)
+	if( kerr > 0 ) then
+	  write(6,*) 'global domain has connection errors...'
+	  stop 'error stop check_connections: irregular domain'
+	end if
+
+	!if( shympi_is_master() ) then
+	!  if( bwritegrd ) then
+	!    call write_partition_grd(icolor,0)
+	!  end if
+	!end if
+
+	call shympi_barrier
+
+	!return
 
 !---------------------------------------------
 ! loop on domains
 !---------------------------------------------
 
+	if( shympi_is_master() ) then
+
 	do while( bloop )
 
 	nloop = nloop + 1
 	if( nloop > 10 ) exit
-	!if( nloop > 1 ) exit
+	if( nloop > 1 ) exit
 
 	do ic=1,nc
 	  ncol = count( icolor == ic )
 	  if( ncol == 0 ) cycle
 
-	  !write(6,*) '========================================'
 	  if( bwrite ) write(6,*) 'checking domain ',ic,ncol
-	  !write(6,*) '========================================'
 
 	  call make_elem_index(.true.,ic,icolor &
      &				,nk,ne,nenv,nodep,elemp)
-	  call make_new_index(nk,ne,nenv,nodep,elemp)
-	  call check_elem_index(nk,ne,nenv,kerr)
+	  call make_new_basin(nk,ne,nenv,nodep,elemp)
+	  call transfer_array(nk,icolor,nodep,icolor_new)
+	  call check_elem_index(nk,ne,nenv,kerr,kerror)
+
+	  if( shympi_is_master() ) then
+	    if( kerr > 0 ) then
+	      write(6,*) 'errors found: ',kerr
+	      write(6,'(a)') '    ierr    kint    kext    icol' // &
+     &			 '               x               y'
+	    end if
+	    do i=1,kerr
+	      k = kerror(i)
+	      kext = ipv(k)
+	      write(6,1000) i,k,kext,icolor_new(k),xgv(k),ygv(k)
+ 1000	      format(4i8,2f16.8)
+	      if( bwritegrd ) then
+	        call write_partition_grd(icolor_new,kext)
+	      end if
+	    end do
+	  end if
+	  !if( kerr > 0 ) berror = .true.
+
+	  !if( bwrite ) write(6,*) 'finished checking domain ',ic
 
 	  !-------------------------------------------
 	  ! handle errors
 	  !-------------------------------------------
 
 	  kext = 0
-	  if( kerr /= 0 ) then
+	  if( bhandle_errors .and. kerr /= 0 ) then
 	    kext = ipext(kerr)
 	    !write(6,*) 'adjusting node kerr = ',kerr,kext,ic
-	    call restore_old_index
-	    call adjust_domain(ic,nkn,icolor,kext)
+	    call restore_old_basin
+	    call adjust_domain(ic,nkn,icolor_new,kext)
 	    exit
 	  end if
 
-	  call restore_old_index
+	  call restore_old_basin
 	end do
 
-	if( kerr > 0 ) then
+	if( bhandle_errors .and. kerr > 0 ) then
 	  if( iu > 0 ) write(iu,*) 'check_connections: ',nloop,kerr,kext
 	  call elim_isolated_element(icolor,kerr)
 	end if
 
+	if( berror ) stop 'error stop check_connections: connections'
 	if( ic > nc ) bloop = .false.
-	end do
+	end do	!do while(bloop)
 
+	end if
+
+	!kerr = 0
 
 !---------------------------------------------
 ! end of loop on domains
@@ -489,12 +714,12 @@
 	  if( nloop > 1 ) then
 	    write(6,*) 'all domains have been corrected...',nloop
 	  else
-	    write(6,*) 'no problems found in domains'
+	    !write(6,*) 'no problems found in domains'
 	  end if
 	else
-	  write(6,*) 'could not correct error in connections...',nloop
-	  write(6,*) 'error occurred in domain ',my_id
-	  call write_partition_grd(icolor)  
+	  !write(6,*) 'could not correct error in connections...',nloop
+	  !write(6,*) 'error occurred in domain ',my_id
+	  !call write_partition_grd(icolor,0)
 	end if
 
 	iarnv = icolor
@@ -504,6 +729,10 @@
 !---------------------------------------------
 ! end of routine
 !---------------------------------------------
+
+	write(6,*) '========================================'
+	write(6,*) 'finished checking domain...'
+	write(6,*) '========================================'
 
 	end
 
@@ -518,13 +747,13 @@
 
 	implicit none
 
-	logical bghost		!include ghost nodes (and elements)
-	integer ic
-	integer icolor(nkn)
-	integer nk,ne
-	integer nenv(3,nel)
-	integer nodep(nkn)
-	integer elemp(nel)
+	logical, intent(in) ::  bghost	!include ghost nodes (and elements)
+	integer, intent(in) ::  ic
+	integer, intent(in) ::  icolor(nkn)
+	integer, intent(out) ::  nk,ne
+	integer, intent(out) ::  nenv(3,nel)
+	integer, intent(out) ::  nodep(nkn)
+	integer, intent(out) ::  elemp(nel)
 
 	integer ie,ii,k,nic
 	integer node_aux(nkn)
@@ -551,7 +780,7 @@
 	do ie=1,ne
 	  do ii=1,3
 	    k = nenv(ii,ie)
-	    node_aux(k) = 1
+	    node_aux(k) = 1		! these nodes are needed
 	  end do
 	end do
 
@@ -576,7 +805,7 @@
 
 !*******************************************************************
 
-	subroutine check_elem_index(nk,ne,nenv,kerr)
+	subroutine check_elem_index(nk,ne,nenv,kerr,kerror)
 
 ! checks the element structure
 !
@@ -586,21 +815,20 @@
 
 	use basin
 	use mod_geom
+	use mod_connect
 
 	implicit none
 
 	integer nk,ne
 	integer nenv(3,ne)
 	integer kerr
+	integer kerror(kerr)
 
 	integer k,ie,ngrm
-	integer ibound(nkn)
 
-	call estimate_max_grade(nk,ne,nenv,ngrm)
-	call mod_geom_init(nk,ne,ngrm)
-
-	!call make_links_old(nk,ne,nenv)
-	call make_links(nk,ne,nenv,ibound,kerr)
+	call connect_init(nk,ne,nenv,kerr)
+	call connect_errors(kerr,kerror)
+	call connect_release
 
 	end
 
@@ -693,7 +921,7 @@
 
 !*******************************************************************
 
-	subroutine write_partition_grd(icolor)  
+	subroutine write_partition_grd(icolor,kext)  
 
 	use basin
 	use shympi
@@ -701,23 +929,28 @@
 	implicit none
 
 	integer icolor(nkn)
+	integer kext			!external node for detail - 0 if none
 
+	logical bdetail
 	integer iecolor1(nel)
 	integer iecolor2(nel)
 	integer inext(nkn)
 	integer ieext(nel)
-	integer k,ie,ii,ic,nc,n3c
+	integer k,ie,ii,ic,n3c
+	integer nc,ncmin,ncmax
+	real window
 	integer icc(3)
 	character*80 grdfile
 	character*80 text,tcolor
 
 	if( .not. shympi_is_master() ) return
 
+	bdetail = kext > 0
+	window = 10.
+
 !---------------------------------------------------------------
 ! prepare arrays
 !---------------------------------------------------------------
-
-	text = 'error domain partitioning'
 
 	do k=1,nkn
 	  inext(k) = ipv(k)
@@ -735,7 +968,7 @@
 	    k = nen3v(ii,ie)
 	    icc(ii) = icolor(k)
 	  end do
-	  iecolor1(ie) = -1
+	  iecolor1(ie) = -1		! means no coloring
 	  iecolor2(ie) = -1
 	  if( all(icc==icc(1)) ) iecolor1(ie) = icc(1)
 	  if( icc(1) == icc(2) ) iecolor2(ie) = icc(1)
@@ -743,28 +976,44 @@
 	  if( icc(3) == icc(1) ) iecolor2(ie) = icc(3)
 	end do
 
-	grdfile = 'part_error1.grd'
-	write(6,*) 'writing to file ',trim(grdfile)
-        call write_grd_file(grdfile,text,nkn,nel,xgv,ygv &
-     &                          ,nen3v,inext,ieext,icolor,iecolor1)
+	text = 'error domain partitioning - only proper elements colored'
+	if( bdetail ) then
+	  call grd_name_part1('part_error1',kext,grdfile)
+	  write(6,*) 'writing to file ',trim(grdfile)
+          call write_grd_file_with_detail(grdfile,text,nkn,nel,xgv,ygv &
+     &                ,nen3v,inext,ieext,icolor,iecolor1,kext,window)
+	else
+	  grdfile = 'part_error1.grd'
+	  write(6,*) 'writing to file ',trim(grdfile)
+          call write_grd_file(grdfile,text,nkn,nel,xgv,ygv &
+     &                ,nen3v,inext,ieext,icolor,iecolor1)
+	end if
 
-	grdfile = 'part_error2.grd'
-	write(6,*) 'writing to file ',trim(grdfile)
-        call write_grd_file(grdfile,text,nkn,nel,xgv,ygv &
-     &                          ,nen3v,inext,ieext,icolor,iecolor2)
+	text = 'error domain partitioning - all elements colored'
+	if( bdetail ) then
+	  call grd_name_part1('part_error2',kext,grdfile)
+	  write(6,*) 'writing to file ',trim(grdfile)
+          call write_grd_file_with_detail(grdfile,text,nkn,nel,xgv,ygv &
+     &                ,nen3v,inext,ieext,icolor,iecolor2,kext,window)
+	else
+	  grdfile = 'part_error2.grd'
+	  write(6,*) 'writing to file ',trim(grdfile)
+          call write_grd_file(grdfile,text,nkn,nel,xgv,ygv &
+     &                ,nen3v,inext,ieext,icolor,iecolor2)
+	end if
 
 !---------------------------------------------------------------
 ! write single domains
 !---------------------------------------------------------------
 
-	nc = maxval(icolor)
+	ncmin = minval(icolor)
+	ncmax = maxval(icolor)
 
-	do ic=0,nc
+	do ic=ncmin,ncmax
 	  iecolor1 = -1
-	  write(tcolor,'(i5)') ic
-	  tcolor = adjustl(tcolor)
-	  grdfile = 'domain_error_' // trim(tcolor) // '.grd'
-	  write(6,*) 'grdfile: ',ic,trim(grdfile)
+	  text = 'domain error for color ' // trim(tcolor)
+	  call grd_name_part2('domain_error',ic,kext,grdfile)
+	  write(6,*) 'writing to file ',trim(grdfile)
 	  do ie=1,nel
 	    do ii=1,3
 	      k = nen3v(ii,ie)
@@ -775,13 +1024,56 @@
 	    if( n3c == 2 ) iecolor1(ie) = 2
 	    if( n3c == 1 ) iecolor1(ie) = 1
 	  end do
-          call write_grd_file(grdfile,text,nkn,nel,xgv,ygv &
-     &                          ,nen3v,inext,ieext,icolor,iecolor1)
+	  if( bdetail ) then
+            call write_grd_file_with_detail(grdfile,text,nkn,nel,xgv,ygv &
+     &                ,nen3v,inext,ieext,icolor,iecolor1,kext,window)
+	  else
+            call write_grd_file(grdfile,text,nkn,nel,xgv,ygv &
+     &                ,nen3v,inext,ieext,icolor,iecolor1)
+	  end if
 	end do
 
 !---------------------------------------------------------------
 ! end of routine
 !---------------------------------------------------------------
+
+	end
+
+!*******************************************************************
+
+	subroutine grd_name_part1(text,k,name)
+
+	implicit none
+
+	character*(*) text
+	integer k
+	character*(*) name
+
+	character*80 ttext
+
+	write(ttext,'(i10)') k
+	ttext = '_' // adjustl(ttext(1:10))
+	name = trim(text) // trim(ttext) // '.grd'
+
+	end
+
+!*******************************************************************
+
+	subroutine grd_name_part2(text,ic,k,name)
+
+	implicit none
+
+	character*(*) text
+	integer ic,k
+	character*(*) name
+
+	character*80 ttext1,ttext2
+
+	write(ttext1,'(i10)') ic
+	ttext1 = '_' // adjustl(ttext1(1:10))
+	write(ttext2,'(i10)') k
+	ttext2 = '_' // adjustl(ttext2(1:10))
+	name = trim(text) // trim(ttext1) // trim(ttext2) // '.grd'
 
 	end
 

@@ -9,7 +9,7 @@
 
 FEMDIR = ..
 BINDIR = $(FEMDIR)/bin
-SUBDIRS = contrib external utils shyfem tools
+SUBDIRS = external utils contrib shyfem tools 
 
 #------------------------------------------------------------------------
 
@@ -17,9 +17,7 @@ default: shyfem
 
 fem: shyfem
 shyfem: libmod nothing
-	@$(BINDIR)/recursivemake $@ $(SUBDIRS)
-	@$(BINDIR)/recursivemake fem shyfem
-	@$(BINDIR)/recursivemake fem tools
+	@$(BINDIR)/recursivemake fem $(SUBDIRS)
 
 test: nothing
 	@$(BINDIR)/recursivemake $@ $(SUBDIRS)
@@ -40,9 +38,11 @@ depend: nothing
 
 clean: nothing
 	@$(BINDIR)/recursivemake $@ $(SUBDIRS)
+	-rm -f *.tmp *.bak
 
 cleanall: nothing
 	@$(BINDIR)/recursivemake $@ $(SUBDIRS)
+	-rm -f *.tmp *.bak
 
 save: nothing
 

@@ -117,7 +117,7 @@ sub revisionlog_fortran {
     print STDERR "     $after-$date-$befor $_" if $debug;
     if( $date && $after <= $date && $date <= $befor ) {
       if( $file && not $noname ) {
-	print "${sepname}c $file:\n${sepname}";
+	print "${sepname}! $file:\n${sepname}";
 	$file = "";
       }
       print;

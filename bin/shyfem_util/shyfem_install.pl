@@ -64,9 +64,11 @@ sub write_section {
   print "\#--- SHYFEM --- set up start\n";
   print "export SHYFEM_INSTALL=$femdir\n";
   print "export SHYFEMDIR=\$SHYFEM_INSTALL\n";
-  print "if [ -f \$SHYFEMDIR/fembin/shyfem_profile.sh ]; then\n";
-  print	"  . \$SHYFEMDIR/fembin/shyfem_profile.sh\n";
-  print "fi\n";
+  print "SHYFEM_PROFILE=\$SHYFEMDIR/bin/shyfem_util/shyfem_profile.sh\n";
+  print "[ -f \$SHYFEM_PROFILE ] && . \$SHYFEM_PROFILE\n";
+  print "PATH=\$SHYFEMDIR/bin:\$PATH\n";
   print "\#--- SHYFEM --- set up end\n";
 }
   
+#---------------------------------------------------------------
+

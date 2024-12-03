@@ -81,6 +81,8 @@ src/tools/shyelab/extelab
 bin/extelab
 src/tools/shyelab/femelab
 bin/femelab
+src/tools/shyelab/femcombine
+bin/femcombine
 src/tools/shyelab/flxelab
 bin/flxelab
 src/tools/shyelab/lgrelab
@@ -89,16 +91,21 @@ src/tools/shyelab/tselab
 bin/tselab
 src/tools/shyelab/shyproj
 bin/shyproj
+src/tools/shyelab/shystrings
+bin/shystrings
 src/tools/shyparts/shyparts
 bin/shyparts
 src/utils/shympi/check_shympi_debug
 bin/check_shympi_debug
+src/utils/shympi/check_shympi_check
+bin/check_shympi_check
 
 src/tools/shypre/shypre_noopti
 bin/shypre_noopti
 src/tools/shypre/shypre_orig
 bin/shypre_orig
 
+bin/gps.sh
 
 bin/grid
 src/tools/grid/grid

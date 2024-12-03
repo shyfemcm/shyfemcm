@@ -55,15 +55,19 @@ LIBF    += $(LIBDIR)/lib$(LIBUTIL).a
 
 LIBL    += $(LIB_NETCDF)
 
+#$(info FFLAGS = $(FFLAGS) )
+#$(info LFLAGS = $(LFLAGS) )
+
 #---------------------------------------------
 
-EXES = shyelab extelab flxelab lgrelab tselab femelab shyproj shyfile
+EXES = shyelab extelab flxelab lgrelab tselab femelab shyproj shyfile \
+	shystrings femcombine
 
 MAKEDEPEND = $(FEMBIN)/mkdp.pl
 
 #----------------------------------------------------------------------------
 
-LFLAGS:= $(LIB_NETCDF) $(LIB_MPI)
+LFLAGS	+= $(LIB_NETCDF) $(LIB_MPI)
 
 #----------------------------------------------------------------------------
 
@@ -113,6 +117,9 @@ lgrelab: $(OBJ) $(LIBF) lgrelab.o
 femelab: $(OBJ) $(LIBF) femelab.o
 	$(F77) $(FFLAGS) $(INCLUDE) $(LFLAGS) $(OBJ) $@.o $(LIBL) -o $@
 
+femcombine: $(OBJ) $(LIBF) femcombine.o
+	$(F77) $(FFLAGS) $(INCLUDE) $(LFLAGS) $(OBJ) $@.o $(LIBL) -o $@
+
 tselab: $(OBJ) $(LIBF) tselab.o
 	$(F77) $(FFLAGS) $(INCLUDE) $(LFLAGS) $(OBJ) $@.o $(LIBL) -o $@
 
@@ -122,9 +129,15 @@ shyproj: $(LIBF) shyproj.o
 shyfile: $(LIBF) shyfile.o
 	$(F77) $(FFLAGS) $(INCLUDE) $(LFLAGS) $@.o $(LIBL) -o $@
 
+shystrings: $(LIBF) shystrings.o
+	$(F77) $(FFLAGS) $(INCLUDE) $(LFLAGS) $@.o $(LIBL) -o $@
+
 #----------------------------------------------------------------------------
 
-clean: cleanobj cleanlinks cleanexe
+clean: cleanobj cleanlinks cleanexe cleanvar
+
+cleanvar:
+	-rm -f *.tmp *.bak
 
 cleanobj:
 	-rm -f *.o
@@ -146,14 +159,19 @@ depend:
 
 #----------------------------------------------------------------------------
 
-%.o:%.f
-	${F77} $(FFLAGS) $(INCLUDE) -c $< -o $@
+.SUFFIXES: .F .f90
 
-%.o:%.f90
-	${F77} $(FFLAGS) $(INCLUDE) -c $< -o $@
+.c.o:
+	$(CC) -c $(CFLAGS) $<
 
-%.o:%.c
-	${CC} $(CFLAGS) $(INCLUDE) -c $< -o $@
+.f.o:
+	$(F77) -c $(FFLAGS) $<
+
+.f90.o:
+	${F77} -c $(FFLAGS) $<
+
+.F.o:
+	$(F77) -c -cpp $(FFLAGS) $<
 
 #----------------------------------------------------------------------------
 
@@ -180,6 +198,8 @@ extelab1.o: ../../../lib/mod/basin.mod ../../../lib/mod/clo.mod \
 		../../../lib/mod/levels.mod \
 		../../../lib/mod/mod_depth.mod \
 		../../../lib/mod/shyfem_strings.mod 
+femcombine.o: ../../../lib/mod/clo.mod \
+		../../../lib/mod/fem_util.mod 
 femelab1.o: ../../../lib/mod/clo.mod ../../../lib/mod/elabtime.mod \
 		../../../lib/mod/elabutil.mod \
 		../../../lib/mod/iso8601.mod \
@@ -248,6 +268,8 @@ shyfile.o: ../../../lib/mod/clo.mod ../../../lib/mod/elabutil.mod \
 shyproj.o: ../../../lib/mod/basin.mod ../../../lib/mod/clo.mod \
 		../../../lib/mod/grd.mod \
 		../../../lib/mod/projection.mod 
+shystrings.o: ../../../lib/mod/clo.mod \
+		../../../lib/mod/shyfem_strings.mod 
 tselab1.o: ../../../lib/mod/clo.mod ../../../lib/mod/elabtime.mod \
 		../../../lib/mod/elabutil.mod \
 		../../../lib/mod/shyfem_strings.mod 

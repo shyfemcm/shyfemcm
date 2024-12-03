@@ -52,6 +52,7 @@
 ! 15.05.2019	ggu	nicer error reporting
 ! 15.07.2021	ggu	reorder structure (double first)
 ! 10.05.2024	ggu	implement no option
+! 25.11.2024	ggu	check length of string, use nlen to set max string len
 !
 ! notes :
 !
@@ -77,6 +78,8 @@
 
 	implicit none
 
+	integer, parameter, private :: nlen = 1024
+
 	type, private :: entry
 
 	  double precision :: value	! value if number
@@ -85,7 +88,7 @@
 	  logical :: hidden		! option is hidden?
 	  logical :: bnoallow		! allow no-option
 	  character*80 :: name		! name of option
-	  character*80 :: string	! string if string
+	  character(len=nlen) :: string	! string if string
 	  character*80 :: text		! description for clo_fullusage
 	  character*80 :: textra	! if number or string extra info
 
@@ -948,9 +951,9 @@
 
 	logical bnooption
 	integer nexpect
-	integer nc,i,n
+	integer nc,i,n,nl
 	character*80 option,nooption
-	character*80 string
+	character(len=2*nlen) :: string
 	double precision value
 
 	nexpect = 0
@@ -1006,6 +1009,14 @@
 	      call clo_s2d(string,value)
 	      call clo_set_option(option,value)
 	    else if( clo_is_string(option) ) then
+	      nl = len_trim(string)
+	      if( nl > nlen ) then
+		write(6,*) 'string is too long to be handled'
+		write(6,*) 'nstring,nmax: ',nl,nlen
+		write(6,*) trim(string)
+		write(6,*) 'please adjust nlen in clo.f90'
+	        stop 'error stop clo_parse_options: internal error (2)'
+	      end if
 	      call clo_set_option(option,string)
 	    else
 	      stop 'error stop clo_parse_options: internal error (1)'

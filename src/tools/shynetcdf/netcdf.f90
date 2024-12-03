@@ -72,6 +72,8 @@
 ! 02.08.2024	ggu	eliminated cf_role for CF compliance
 ! 05.08.2024	ggu	add error message for xtype==12 formats
 ! 05.08.2024	ggu	new routine nc_user_defined_global()
+! 03.10.2024	ggu	introduced directional variable
+! 03.10.2024	ggu	new variables added
 !
 ! notes :
 !
@@ -127,6 +129,14 @@
 
 	logical, save :: bdebug_nc = .false.
 	logical, save :: bquiet_nc = .false.
+
+! if b_use_cf_role == .true. then cf_convention must be CF-1.4
+! CF-1.6 does not understand cf_role (-> error)
+! CF-1.11 should resolve this problem, but there is no CF checker yet
+
+	logical, save :: b_use_cf_role = .true.
+	character*80, save :: cf_convention = 'CF-1.4'
+	character*80, save :: ugrid_convention = 'UGRID-1.0'
 
 	INTERFACE
 	subroutine nc_handle_err(errcode,string)
@@ -698,7 +708,7 @@
 
 	what = 'cf_role'
 	text = 'mesh_topology'
-	!call nc_define_attr(ncid,what,text,varid)
+	if( b_use_cf_role ) call nc_define_attr(ncid,what,text,varid)
 
 	what = 'long_name'
 	text = 'topology data of 2D unstructured mesh'
@@ -725,7 +735,7 @@
 
 	what = 'cf_role'
 	text = 'face_node_connectivity'
-	!call nc_define_attr(ncid,what,text,varid)
+	if( b_use_cf_role ) call nc_define_attr(ncid,what,text,varid)
 
 	what = 'long_name'
 	text = 'Maps every triangular face to its three corner nodes'
@@ -2069,21 +2079,17 @@
 	rminmax(1) = rmin
 	rminmax(2) = rmax
 
-!	retval = nf_put_att_real(ncid, var_id, 'valid_range', NF_REAL
-!     +				,2,rminmax)
-!	call nc_handle_err(retval,'define_range')
+	if( rmin < rmax ) then
 
-        retval = nf_put_att_real(ncid, var_id, 'valid_min', NF_REAL     &
+          retval = nf_put_att_real(ncid, var_id, 'valid_min', NF_REAL     &
      &                          ,1,rmin)
-	call nc_handle_err(retval,'define_range')
+	  call nc_handle_err(retval,'define_range')
 
-        retval = nf_put_att_real(ncid, var_id, 'valid_max', NF_REAL     &
+          retval = nf_put_att_real(ncid, var_id, 'valid_max', NF_REAL     &
      &                          ,1,rmax)
-	call nc_handle_err(retval,'define_range')
+	  call nc_handle_err(retval,'define_range')
 
-!	retval = nf_put_att_real(ncid, var_id, 'missing_value', NF_REAL
-!     +				,1,flag)
-!	call nc_handle_err(retval,'define_range')
+	end if
 
         retval = nf_put_att_real(ncid, var_id, '_FillValue', NF_REAL    &
      &                          ,1,flag)
@@ -2643,8 +2649,8 @@
 	varid = NF_GLOBAL
 
 	what = 'Conventions'
-	text = 'CF-1.6'
-	if( bugrid ) text = 'CF-1.6, UGRID-1.0'
+	text = cf_convention
+	if( bugrid ) text = trim(cf_convention)//','//trim(ugrid_convention)
 	call nc_define_attr(ncid,what,text,varid)
 
 	what = 'title'
@@ -3002,7 +3008,7 @@
 !*****************************************************************
 !*****************************************************************
 
-	subroutine nc_init_variable(ncid,breg,dim,ivar,flag,var_id)
+	subroutine nc_init_variable(ncid,breg,dim,ivar,idir,flag,var_id)
 
 	use netcdf_params
 
@@ -3012,6 +3018,7 @@
 	logical breg
 	integer dim
 	integer ivar
+	integer idir
 	real flag
 	integer var_id		! id to be used for other operations (return)
 
@@ -3026,30 +3033,16 @@
 	  cmin = -10.
 	  cmax = +10.
 	else if( ivar .eq. 2 ) then	! x-velocity
-	  name = 'u_velocity'
+	  if( idir == 1 ) then
+	    name = 'u_velocity'
+	    std = 'eastward_sea_water_velocity'
+	  else if( idir == 2 ) then
+	    name = 'v_velocity'
+	    std = 'northward_sea_water_velocity'
+	  else
+	    goto 99
+	  end if
 	  what = 'standard_name'
-	  std = 'eastward_sea_water_velocity'
-	  units = 'm s-1'
-	  cmin = -10.
-	  cmax = +10.
-	else if( ivar .eq. 3 ) then	! y-velocity
-	  name = 'v_velocity'
-	  what = 'standard_name'
-	  std = 'northward_sea_water_velocity'
-	  units = 'm s-1'
-	  cmin = -10.
-	  cmax = +10.
-	else if( ivar .eq. 4 ) then	! x-velocity (no tide)
-	  name = 'u_velocity'
-	  what = 'standard_name'
-	  std = 'eastward_sea_water_velocity_assuming_no_tide'
-	  units = 'm s-1'
-	  cmin = -10.
-	  cmax = +10.
-	else if( ivar .eq. 5 ) then	! y-velocity (no tide)
-	  name = 'v_velocity'
-	  what = 'standard_name'
-	  std = 'northward_sea_water_velocity_assuming_no_tide'
 	  units = 'm s-1'
 	  cmin = -10.
 	  cmax = +10.
@@ -3082,13 +3075,20 @@
 	  cmin = -10.
 	  cmax = 100.
         else if( ivar .eq. 13 ) then    ! density anomaly
-          name = 'density anomaly'
+          name = 'density_anomaly'
           what = 'standard_name'
           std = 'sea_water_density_anomaly'
           units = 'kg m-3'
           cmin = -1000.
           cmax = +1000.		
-        else if( ivar .eq. 14 ) then    ! vertical mass-transfer among layers
+	else if( ivar .eq. 14 ) then	! skin temperature
+	  name = 'skin_temperature'
+	  what = 'standard_name'
+	  std = 'sea_surface_skin_temperature'
+	  units = 'degC'
+	  cmin = -10.
+	  cmax = 100.
+        else if( ivar .eq. 17 ) then    ! vertical mass-transfer among layers
           name = 'w_velocity'
           what = 'standard_name'
           std = 'vertical_sea_water_mass_tranfer'
@@ -3101,7 +3101,70 @@
 	  std = 'ocean_relative_vorticity'
 	  units = 's-1'
 	  cmin = -100.
+	  cmax =  100.
+	else if( ivar .eq. 20 ) then	! atmospheric pressure
+	  name = 'atmospheric_pressure'
+	  what = 'standard_name'
+	  std = 'air_pressure_at_mean_sea_level'
+	  units = 'Pa'
+	  cmin =  90000.
+	  cmax = 110000.
+	else if( ivar .eq. 21 ) then	! wind velocity
+	  if( idir == 1 ) then
+	    name = 'x_wind_velocity_at_10m'
+	    std = 'eastward_wind'
+	  else if( idir == 2 ) then
+	    name = 'y_wind_velocity_at_10m'
+	    std = 'northward_wind'
+	  else
+	    goto 99
+	  end if
+	  what = 'standard_name'
+	  units = 'm s-1'
+	  cmin =  -100.
+	  cmax =  +100.
+	else if( ivar .eq. 22 ) then	! solar radiation
+	  name = 'solar_radiation'
+	  what = 'standard_name'
+	  std = 'solar_irradiance'
+	  units = 'W m-2'
+	  cmin = 0.
+	  cmax = 1300.
+	else if( ivar .eq. 23 ) then	! air temperature
+	  name = 'air_temperature'
+	  what = 'standard_name'
+	  std = 'air_temperature'
+	  units = 'degree Celsius'
+	  cmin = -100.
+	  cmax = +100.
+	else if( ivar .eq. 24 ) then	! relative humidity
+	  name = 'relative_humidity'
+	  what = 'standard_name'
+	  std = 'relative_humidity'
+	  units = '%'
+	  cmin = 0.
 	  cmax = 100.
+	else if( ivar .eq. 25 ) then	! cloud cover
+	  name = 'cloud_cover'
+	  what = 'standard_name'
+	  std = 'cloud_area_fraction'
+	  units = ''
+	  cmin = 0.
+	  cmax = 1.
+	else if( ivar .eq. 26 ) then	! rain
+	  name = 'rain'
+	  what = 'standard_name'
+	  std = 'rainfall_rate'
+	  units = 'mm d-1'
+	  cmin = 0.
+	  cmax = +100.
+	else if( ivar .eq. 28 ) then	! wind speed
+	  name = 'wind_speed'
+	  what = 'standard_name'
+	  std = 'wind_speed'
+	  units = 'm s-1'
+	  cmin = -100.
+	  cmax = +100.
 	else if( ivar .eq. 99 ) then	! wrt
 	  name = 'water_renewal_time'
 	  what = 'long_name'
@@ -3123,6 +3186,13 @@
 	  units = 'num km-2'
 	  cmin = 0.
 	  cmax = 50000.
+	else if( ivar .eq. 85 ) then	! ice cover
+	  name = 'ice_cover'
+	  what = 'standard_name'
+	  std = 'sea_ice_area_fraction'
+	  units = ''
+	  cmin = 0.
+	  cmax = 1.
 	else if( ivar .eq. 86 ) then	! ice thickness
 	  name = 'sea_ice_thickness'
 	  what = 'long_name'
@@ -3130,6 +3200,13 @@
 	  units = 'm'
 	  cmin = 0.
 	  cmax = 100.
+	else if( ivar > 300 .and. ivar < 400 ) then	! concentration
+	  name = 'concentration'
+	  what = 'long_name'
+	  std = 'concentration'		! no CF convention name available
+	  units = ''
+	  cmin = 0.
+	  cmax = 0.
 	else if( ivar .eq. 800 ) then	! suspended sediment concentration
 	  name = 'ssc'
 	  what = 'long_name'
@@ -3143,21 +3220,21 @@
 	  std = 'erosion-deposition'
 	  units = 'm'
 	  cmin = 0.
-	  cmax = 100.
+	  cmax = 0.
 	else if( ivar .eq. 892 ) then	! sediment grainsize
 	  name = 'sediment_grainsize'
 	  what = 'long_name'
 	  std = 'average sediment grainsize'
 	  units = 'm'
 	  cmin = 0.
-	  cmax = 1.
+	  cmax = 0.
 	else if( ivar .eq. 893 ) then	! bottom_shear_stress
 	  name = 'bottom_shear_stress'
 	  what = 'long_name'
 	  std = 'bottom_shear_stress'
 	  units = 'm'
 	  cmin = 0.
-	  cmax = 100.
+	  cmax = 0.
 	else if( ivar .eq. 894 ) then	! mud_fraction
 	  name = 'mud_fraction'
 	  what = 'long_name'
@@ -3171,9 +3248,10 @@
 	  std = 'bedload_transport'
 	  units = 'kg/ms'
 	  cmin = 0.
-	  cmax = 1.
+	  cmax = 0.
 	else
 	  write(6,*) 'unknown variable: ',ivar
+	  write(6,*) 'this variable has no CL description'
 	  stop 'error stop descr_var'
 	end if
 
@@ -3195,10 +3273,16 @@
 	  end if
 	end if
 
-	call nc_define_attr(ncid,'units',units,var_id)
+	if( units /= ' ' ) call nc_define_attr(ncid,'units',units,var_id)
 	call nc_define_attr(ncid,what,std,var_id)
 	call nc_define_range(ncid,cmin,cmax,flag,var_id)
 
+	!write(6,*) 'var_id: ',var_id
+
+	return
+   99	continue
+	write(6,*) 'cannot parse directional flag: ',ivar,idir
+	stop 'error stop nc_init_variable: internal error (1)'
 	end
 
 !*****************************************************************

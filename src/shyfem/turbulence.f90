@@ -372,7 +372,10 @@
 	call bnstress(czdef,taub)
 
 	!call shympi_comment('exchanging taub')
-	call shympi_exchange_2d_node(taub)
+
+	if( bextra_exchange ) then
+	  call shympi_exchange_2d_node(taub)
+	end if
 
 	!call shympi_check_2d_node(taub,'taub')
 	!call shympi_check_3d_node(uprv,'uprv')
@@ -390,8 +393,10 @@
 	shearf2 = 0.
  	buoyf2 = 0.
 	call setm2n2(nlvdi,buoyf2,shearf2)
-	call shympi_exchange_3d_node(buoyf2)
-	call shympi_exchange_3d_node(shearf2)
+	if( bextra_exchange ) then
+	  call shympi_exchange_3d_node(buoyf2)
+	  call shympi_exchange_3d_node(shearf2)
+	end if
 	!call shympi_check_3d_node(buoyf2,'buoyf2')
 	!call shympi_check_3d_node(shearf2,'shearf2')
 
@@ -597,8 +602,10 @@
     1     continue
 	end do
 
-	call shympi_exchange_3d0_node(visv)
-	call shympi_exchange_3d0_node(difv)
+	if( bextra_exchange ) then
+	  call shympi_exchange_3d0_node(visv)
+	  call shympi_exchange_3d0_node(difv)
+	end if
 
 	if( levdbg >= 2 ) call checka(nlvdi,shearf2,buoyf2,taub)
  

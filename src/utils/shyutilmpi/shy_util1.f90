@@ -56,6 +56,7 @@
 ! 28.04.2023    ggu     update function calls for belem
 ! 09.05.2023    lrp     introduce top layer index variable
 ! 05.06.2023    lrp     introduce z-star
+! 17.10.2024    ggu     in shy_make_basin_aver() allow for percentile
 !
 !***************************************************************
 
@@ -177,9 +178,11 @@
 	real cv2(nndim)
 
 	integer ivar,lmax,nn,ie,i
+	real perc
 	real cmin,cmax,cmed,cstd,atot,vtot
 	integer iflag(nndim)
 
+	perc = -1.
         ivar = idims(4)
         lmax = idims(3)
         nn = idims(1) * idims(2)
@@ -193,10 +196,10 @@
 	else
 	  iflag = 1
 	  if( belem ) then
-	    call make_aver_3d(nlvdi,nn,cv3,areae,vol3e,ilhv,iflag &
+	    call make_aver_3d(nlvdi,nn,cv3,areae,vol3e,ilhv,iflag,perc &
      &				,cmin,cmax,cmed,cstd,atot,vtot,cv2)
 	  else
-	    call make_aver_3d(nlvdi,nn,cv3,areak,vol3k,ilhkv,iflag &
+	    call make_aver_3d(nlvdi,nn,cv3,areak,vol3k,ilhkv,iflag,perc &
      &				,cmin,cmax,cmed,cstd,atot,vtot,cv2)
 	  end if
 	end if
@@ -205,7 +208,7 @@
 
 !***************************************************************
 
-	subroutine shy_make_basin_aver(idims,nlvddi,nndim,cv3,iflag &
+	subroutine shy_make_basin_aver(idims,nlvddi,nndim,cv3,iflag,perc &
      &				,cmin,cmax,cmed,cstd,atot,vtot)
 
 ! this is called only for scalar (nndim==nkn)
@@ -221,6 +224,7 @@
 	integer nndim
 	real cv3(nlvddi,nndim)
 	integer iflag(nndim)
+	real perc				!percentile
 	real cmin,cmax,cmed,cstd,atot,vtot
 
 	integer ivar,lmax,nn
@@ -242,17 +246,17 @@
 	    stop 'error stop shy_make_basin_aver: level must have lmax=1'
 	  end if
 	  if( nn == nkn ) then
-	    call make_aver_2d(nlvdi,nn,cv3,areak,iflag &
+	    call make_aver_2d(nlvdi,nn,cv3,areak,iflag,perc &
      &				,cmin,cmax,cmed,cstd,atot,vtot)
 	    vtot = sum(vol2k,mask=iflag>0)
 	  else if( nn == nel ) then
-	    call make_aver_2d(nlvdi,nn,cv3,areae,iflag &
+	    call make_aver_2d(nlvdi,nn,cv3,areae,iflag,perc &
      &				,cmin,cmax,cmed,cstd,atot,vtot)
 	    vtot = sum(vol2e,mask=iflag>0)
 	  else if( nn == 3*nel ) then			!zenv
 	    ze(:) = cv3(1,1)
 	    call shy_make_zeta_from_elem(nel,ze,zaux)
-	    call make_aver_2d(nlvdi,nel,zaux,areae,iflag &
+	    call make_aver_2d(nlvdi,nel,zaux,areae,iflag,perc &
      &				,cmin,cmax,cmed,cstd,atot,vtot)
 	    vtot = sum(vol2e,mask=iflag>0)
 	  else
@@ -265,10 +269,10 @@
 	    stop 'error stop shy_make_basin_aver: nlvdi/=nlvddi'
 	  end if
 	  if( nn == nkn ) then
-	    call make_aver_3d(nlvddi,nn,cv3,areak,vol3k,ilhkv,iflag &
+	    call make_aver_3d(nlvddi,nn,cv3,areak,vol3k,ilhkv,iflag,perc &
      &				,cmin,cmax,cmed,cstd,atot,vtot,cv2)
 	  else if( nn == nel ) then
-	    call make_aver_3d(nlvddi,nn,cv3,areae,vol3e,ilhv,iflag &
+	    call make_aver_3d(nlvddi,nn,cv3,areae,vol3e,ilhv,iflag,perc &
      &				,cmin,cmax,cmed,cstd,atot,vtot,cv2)
 	  else
 	    write(6,*) ivar,nn,nkn,nel
@@ -280,7 +284,7 @@
 
 !***************************************************************
 
-	subroutine make_aver_2d(nlvddi,nn,cv3,area,iflag &
+	subroutine make_aver_2d(nlvddi,nn,cv3,area,iflag,perc &
      &				,cmin,cmax,cmed,cstd,atot,vtot)
 
 	implicit none
@@ -290,12 +294,15 @@
 	real cv3(nlvddi,nn)
 	real area(nn)
 	integer iflag(nn)
+	real perc				!percentile
 	real cmin,cmax,cmed,cstd,atot,vtot
 
+	logical bpercentile
 	integer i
 	double precision c,v
 	double precision cctot,vvtot,c2tot,ccmin,ccmax
 	real, parameter :: high = 1.e+30
+	real, allocatable :: cperc(:)
 
 	ccmin = +high
 	ccmax = -high
@@ -303,9 +310,13 @@
 	vvtot = 0.
 	c2tot = 0.
 
+	if( perc > 0. ) bpercentile = .true.
+	if( bpercentile ) allocate(cperc(nn))
+
 	do i=1,nn
 	    if( iflag(i) <= 0 ) cycle
 	    c = cv3(1,i)
+	    if( bpercentile ) cperc(i) = c
 	    v = area(i)
 	    ccmin = min(ccmin,c)
 	    ccmax = max(ccmax,c)
@@ -324,11 +335,13 @@
 	if( cstd < 0 ) cstd = 0.
 	cstd = sqrt( cstd )
 
+	if( bpercentile ) call compute_percentile(nn,cperc,perc,cmed)
+
 	end
 
 !***************************************************************
 
-	subroutine make_aver_3d(nlvddi,nn,cv3,area,vol,il,iflag &
+	subroutine make_aver_3d(nlvddi,nn,cv3,area,vol,il,iflag,perc &
      &				,cmin,cmax,cmed,cstd,atot,vtot,cv2)
 
 	implicit none
@@ -340,14 +353,17 @@
 	real vol(nlvddi,nn)
 	integer il(nn)
 	integer iflag(nn)
+	real perc				!percentile
 	real cmin,cmax,cmed,cstd,atot,vtot
 	real cv2(nn)
 
-	integer i,l,lmax
+	logical bpercentile
+	integer i,l,lmax,np
 	double precision c,v,a
 	double precision cctot,vvtot,c2tot,aatot,ccmin,ccmax
 	double precision c2,v2
 	real, parameter :: high = 1.e+30
+	real, allocatable :: cperc(:)
         integer :: ks = 0
         logical bdebug
         logical bcompute
@@ -359,6 +375,10 @@
 	vvtot = 0.
 	aatot = 0.
 
+	if( perc > 0. ) bpercentile = .true.
+	if( bpercentile ) allocate(cperc(nn*nlvddi))
+	np = 0
+
 	do i=1,nn
 	  bcompute = ( iflag(i) > 0 )
 	  lmax = il(i)
@@ -368,6 +388,8 @@
 	  a = area(i)
 	  do l=1,lmax
 	    c = cv3(l,i)
+	    np = np + 1
+	    if( bpercentile ) cperc(np) = c
 	    v = vol(l,i)
 	    c2 = c2 + v*c
 	    v2 = v2 + v
@@ -393,6 +415,8 @@
 	cstd = c2tot / vvtot - cmed**2
 	if( cstd < 0 ) cstd = 0.
 	cstd = sqrt( cstd )
+
+	if( bpercentile ) call compute_percentile(np,cperc,perc,cmed)
 
 	end
 
@@ -779,6 +803,27 @@
 
 	dir(:,:,:,iv,ip) = 0.
 
+	end
+
+!***************************************************************
+
+	subroutine compute_percentile(nn,cperc,perc,cmed)
+
+	use mod_sort
+
+	implicit none
+
+	integer nn
+	real cperc(nn)
+	real perc
+	real cmed
+
+	integer nperc
+
+	call sort(nn,cperc)
+	nperc = nint(nn*perc/100)
+	cmed = cperc(nperc)
+	
 	end
 
 !***************************************************************

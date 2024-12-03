@@ -129,7 +129,7 @@
         POM=CS(2)
 
 !       __________________________________________________
-C       processes sed4merc_sed
+!       processes sed4merc_sed
 !       __________________________________________________
             
          p_POM = POM/(POM+silt)*100.
@@ -404,11 +404,11 @@ C       processes sed4merc_sed
         POMw=C(2)
 
        if (POMw .LE. 0.0) then 
-       write(*,*), 'instability - negative POM_w in sed4merc_sed kext=', &
+       write(*,*) 'instability - negative POM_w in sed4merc_sed kext=', &
      &   ipext(k)
        stop
        else if (sw .LE. 0.0) then  
-       write(*,*), 'instability - negative slt_w in sed4merc_sed kext=', &
+       write(*,*) 'instability - negative slt_w in sed4merc_sed kext=', &
      &   ipext(k)
        stop 
        end if 

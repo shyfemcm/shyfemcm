@@ -78,16 +78,14 @@ present limitations of MPI mode
 things that are not (yet) working:
 
 	ktilt	(see marmenor)
-	tvd	itvd==1 is ok, but itvd==2 gives wrong results
-	velocity nudging at open boundary
-	PETsC (check with Celia)
+	velocity nudging at open boundary (must be checked)
 
 	sediments
 	lagrangian
 	closing routines
 
 notes:
-	must exchange rqv in sub11.f
+	maybe must exchange rqv in bnd_routines.f90
 	must exchange twice in newcon.f -> check if really necessary
 
 ===============================

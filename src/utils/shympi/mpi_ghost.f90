@@ -39,6 +39,7 @@
 ! 27.03.2023	ggu	bug fix... no ieaux
 ! 19.04.2023	ggu	in ghost_exchange adapt call to shympi_check_array()
 ! 05.04.2024	ggu	set n_ghost_max_global
+! 11.10.2024	ggu	only write if my_unit > 0
 
 ! notes :
 !
@@ -61,6 +62,10 @@
 	use shympi
 
 	implicit none
+
+	call shympi_syncronize
+
+        write(6,*) 'start running ghost_handle ',my_id
 
         call ghost_make         !here also call to shympi_alloc_ghost()
         !call ghost_debug
@@ -86,6 +91,10 @@
 
         call ghost_exchange
 
+        write(6,*) 'finished running ghost_handle ',my_id
+
+	call shympi_syncronize
+
 	end
 
 !*****************************************************************
@@ -99,6 +108,7 @@
 
 	implicit none
 
+	logical bdebug
 	integer k,id,i,n,ncsmax,ia,ic,ie,ii,iu,iu5,iu6
 	integer nc,nc_in,nc_out
 	integer iea,ies,iloop,id0
@@ -127,9 +137,15 @@
 	  if( ncs(n) > 0 ) n_ghost_areas = n_ghost_areas + 1
 	end do
 
-	write(my_unit,*) 'debug ghost: ',my_id
-	write(my_unit,*) n_ghost_areas
-	write(my_unit,*) ncs
+	bdebug = ( my_unit > 0 )
+
+	if( bdebug ) then
+	  write(my_unit,*) 'this debug file is written by ghost_make'
+	  write(my_unit,*) 'debug ghost: ',my_id
+	  write(my_unit,*) 'my_unit: ',my_unit
+	  write(my_unit,*) n_ghost_areas
+	  write(my_unit,*) ncs
+	end if
 
 !	--------------------------------------------------
 !	collect info on neibor ghost areas
@@ -148,8 +164,10 @@
 	  end if
 	end do
 
-	write(my_unit,*) ga
-	write(my_unit,*) 'outer_max: ',ncsmax
+	if( bdebug ) then
+	  write(my_unit,*) ga
+	  write(my_unit,*) 'outer_max: ',ncsmax
+	end if
 
 	n_ghost_nodes_max = ncsmax	!outer ghost nodes
 
@@ -179,7 +197,7 @@
 	  ncsmax = max(ncsmax,nc)
 	end do
 
-	write(my_unit,*) 'inner_max: ',ncsmax
+	if( bdebug ) write(my_unit,*) 'inner_max: ',ncsmax
 
 	n_ghost_nodes_max = max(n_ghost_nodes_max,ncsmax)
 
@@ -204,7 +222,7 @@
 	  ncsmax = max(ncsmax,ncs(ic))
 	end do
 	n_ghost_elems_max = ncsmax
-	write(my_unit,*) 'maximum elem: ',ncsmax
+	if( bdebug ) write(my_unit,*) 'maximum elem: ',ncsmax
 
 !	--------------------------------------------------
 !	allocate ghost arrays
@@ -212,7 +230,9 @@
 
 	n_ghost_max = max(n_ghost_nodes_max,n_ghost_elems_max)
 	n_ghost_max_global = shympi_max(n_ghost_max)
-	write(my_unit,*) 'n_ghost_max: ',n_ghost_max,n_ghost_max_global
+	if( bdebug ) then
+	  write(my_unit,*) 'n_ghost_max: ',n_ghost_max,n_ghost_max_global
+	end if
 	call shympi_alloc_ghost(n_ghost_max)
 	ghost_areas(1,:) = ga(:)
 	deallocate(ga)
@@ -306,7 +326,7 @@
 !	write debug information
 !	--------------------------------------------------
 
-	if( bmpi_debug ) then
+	if( bdebug ) then
 
 	do ia=1,n_ghost_areas
 	  ic = ghost_areas(1,ia)
@@ -398,8 +418,10 @@
 
 	deallocate(ncs)
 
-	write(my_unit,*) 'finished setting up ghost: ',my_id
-	flush(my_unit)
+	if( bdebug ) then
+	  write(my_unit,*) 'finished setting up ghost: ',my_id
+	  flush(my_unit)
+	end if
 
 	return
    97	continue
@@ -468,7 +490,12 @@
 
 	implicit none
 
+	logical bdebug
 	integer ia,ic,nc,i,k,ie
+
+	bdebug = ( my_unit > 0 )
+
+	if( .not. bdebug ) return
 
 	write(my_unit,*) 'writing ghost node info for my_id: ',my_id
 
@@ -524,7 +551,7 @@
 	end do
 
 	write(my_unit,*) 'finished writing ghost node info'
-	  flush(my_unit)
+	flush(my_unit)
 
 	end
 
@@ -749,6 +776,7 @@
 
 	implicit none
 
+	logical bdebug
 	logical, parameter :: be = .true.
 	logical, parameter :: bn = .false.
 	integer i
@@ -757,31 +785,29 @@
 	integer, allocatable :: num_e(:)
 	integer, allocatable :: num_n(:)
 	
+	bdebug = .false.
+
 	allocate(num_elems(nel))
 	allocate(num_nodes(nkn))
 	num_elems = ipev
 	num_nodes = ipv
 
-	write(6,*) 'start exchange ghost',my_id
+	write(6,*) 'ghost_exchange: start exchange...',my_id
 	flush(6)
 	call shympi_syncronize
 
 	call shympi_exchange_2d_node(ipv)
-	write(6,*) 'exchange ghost nodes',my_id,nkn
-	flush(6)
+	if( bdebug ) write(6,*) 'exchange ghost nodes',my_id,nkn
 	call shympi_syncronize
 	call shympi_exchange_2d_elem(ipev)
-	write(6,*) 'exchange ghost elems',my_id,nel
-	flush(6)
+	if( bdebug ) write(6,*) 'exchange ghost elems',my_id,nel
 	call shympi_syncronize
 
 	call shympi_check_2d_node(ipv,'ghost ipv')
-	write(6,*) 'check ghost nodes',my_id
-	flush(6)
+	if( bdebug ) write(6,*) 'check ghost nodes',my_id
 	call shympi_syncronize
 	call shympi_check_2d_elem(ipev,'ghost ipev')
-	write(6,*) 'check ghost elems',my_id
-	flush(6)
+	if( bdebug ) write(6,*) 'check ghost elems',my_id
 	call shympi_syncronize
 
 	allocate(num_e(nel))
@@ -790,14 +816,12 @@
 	num_n = ipv
 
 	call shympi_syncronize
-	write(6,*) 'extra checks',my_id
-	flush(6)
+	if( bdebug ) write(6,*) 'extra checks',my_id
 
 	i = count( num_nodes /= num_n )
-	write(6,*) 'different nodes: ',my_id,i
+	if( bdebug ) write(6,*) 'different nodes: ',my_id,i
 	i = count( num_elems /= num_e )
-	write(6,*) 'different elems: ',my_id,i
-	flush(6)
+	if( bdebug ) write(6,*) 'different elems: ',my_id,i
 	call shympi_syncronize
 
 	call shympi_check_array(bn,1,nkn,nkn,num_nodes,ipv,'ghost ipv')
@@ -808,7 +832,6 @@
 	call shympi_syncronize
 	write(6,*) 'ghost_exchange: finished exchange...',my_id
 	flush(6)
-	!stop
 
 	end
 

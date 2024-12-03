@@ -44,6 +44,7 @@
 ! 16.02.2019	ggu	changed VERS_7_5_60
 ! 16.02.2019	ggu	transferred and started close_inlets2()
 ! 10.11.2021    ggu     avoid warning for stack size
+! 03.12.2024    lrp     new parameter irain for the coupled model
 !
 !**********************************************************************
 

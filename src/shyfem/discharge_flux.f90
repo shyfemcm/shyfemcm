@@ -79,6 +79,7 @@
 ! 18.12.2023	ggu	finished for new 3d flux computation
 ! 20.12.2023	ggu	debugged 3d flux computation, still to be cleaned
 ! 13.03.2024	ggu	bwrite introduced to write flux divergence
+! 16.09.2024	ggu	in flxtyp() fake inner node if one node boundary
 !
 ! info :
 !
@@ -860,9 +861,10 @@
 	   else if( bafter ) then			!BOO
 		ktype = 3
 	   else
-		write(6,*) 'error at open boundary node ',ipext(k)
-		write(6,*) 'boundary consisting of one node'
-		stop 'error stop flxtype'
+		ktype = 1			!fake inner node (ibtype==3)
+		!write(6,*) 'error at open boundary node ',ipext(k)
+		!write(6,*) 'boundary consisting of one node'
+		!stop 'error stop flxtype'
 	   end if
 	else
 	   stop 'error stop flxtype: internal error (1)'

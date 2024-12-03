@@ -25,12 +25,12 @@
 !--------------------------------------------------------------------------
 
 !ccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccc
-C     Parameters and arrays for writing state variables to ASCII files for defined nodes 
+!     Parameters and arrays for writing state variables to ASCII files for defined nodes 
 !ccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccz
 
 
 
-C      Output of variables for water column
+!      Output of variables for water column
 
 ! revision log :
 !
@@ -45,7 +45,7 @@ C      Output of variables for water column
 		  integer BIOTSFUN(NBIOTSMX)   !file units for WC state variables ASCII output	
 		  integer BIOTSNOD(NBIOTSMX)   !nodes for WC state variables ASCII output
 
-C      Output  variables for sediments
+!      Output  variables for sediments
 		   integer NBIOTSMX_sed               !Maximal number of time series(nodes) for BS
 		   parameter(NBIOTSMX_sed=100)    
 	       integer NBIOTS_sed                 !Actual number of time series(nodes) for BS	
@@ -55,10 +55,10 @@ C      Output  variables for sediments
 
 
 !ccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccc
-C     Parameters and arrays for writing diagnostics(components of derivatives) to ASCII files for defined nodes 
+!     Parameters and arrays for writing diagnostics(components of derivatives) to ASCII files for defined nodes 
 !ccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccc
 
-C WATER COLUMN
+! WATER COLUMN
 		integer   NDIAGVAR           !Maximum number of different intermediate variables in output.  
 		parameter (NDIAGVAR=26)      !Number of auxilary variables for output	
 		integer   NDGTSMX            !Total number of nodes for intermediates of each state variable 
@@ -69,7 +69,7 @@ C WATER COLUMN
 		real    dgar(nstate,NDIAGVAR)    !dgar (Diagnostics data) for each sediments layer
 
 
-C BOTTOM SEDIMENTS
+! BOTTOM SEDIMENTS
 		integer   NDIAGVAR_sed          !Maximum number of different intermediate variables in output. Chek biotser_write formats
 		parameter (NDIAGVAR_sed=25)      !Number of auxilary variables for output	
 		integer   NDGTSMX_sed           !Total number of nodes for intermediates of each state variable 

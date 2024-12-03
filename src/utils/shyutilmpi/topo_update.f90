@@ -61,6 +61,7 @@
 ! 20.05.2020	ggu	new way to compute link structure (still experimental)
 ! 28.05.2020	ggu	some more changes in constructing link structure
 ! 13.04.2022	ggu	new call to make_links (ibound)
+! 07.11.2024	ggu	updated call to update_ielt()
 !
 !*****************************************************************
 
@@ -81,9 +82,7 @@
 ! update ieltv
 !-------------------------------------------------------------
 
-        call update_ielt(nel,inodv,ieltv,nen3v)
-
-	!call exchange_ieltv
+        call update_ielt(nkn,nel,inodv,ieltv,nen3v)
 
 !-------------------------------------------------------------
 ! end of routine

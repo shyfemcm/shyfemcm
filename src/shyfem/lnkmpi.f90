@@ -35,6 +35,8 @@
 ! 18.03.2023    ggu     adapted to new id_elem(0:3,:)
 ! 20.03.2023    ggu     write_grd_domain() is now called in shympi_setup()
 ! 29.03.2023    ggu     refactoring
+! 07.11.2024    ggu     updated to new connection framework
+! 13.11.2024    ggu     indicate other domain (not yet finished)
 !
 !*****************************************************************
 
@@ -43,9 +45,10 @@
 ! sets up geometrical arrays
 !
 ! geom structures have already been setup on local domain
-! with this call they are corrected with gloval boundary node information
+! with this call they are corrected with global boundary node information
 
 	use mod_geom
+	use mod_connect
 	use basin
 	use shympi
 
@@ -58,7 +61,8 @@
 	integer ide,idk,nid
 	integer iunit
 	integer, allocatable :: ibound(:)
-        integer kerr
+	integer, allocatable :: ecgv(:,:)	! global ieltv
+        integer kerr,ierr
 
 	integer knext,kbhnd
 
@@ -76,9 +80,14 @@
 	!write(iunit,*) '-------- set_geom_mpi ----------'
 	!write(iunit,*) 'global: ',nkn_global,nel_global
 	!write(iunit,*) 'local: ',nkn,nel
-	allocate(ibound(nkn_global))
 	!call link_set_wmpi(.true.)
-	call make_links(nkn_global,nel_global,nen3v_global,ibound,kerr)
+	allocate(ibound(nkn_global))
+	allocate(ecgv(3,nel_global))
+	!call make_links(nkn_global,nel_global,nen3v_global,ibound,kerr)
+        call connect_init(nkn_global,nel_global,nen3v_global,ierr)
+        call connect_get_bound(nkn_global,ibound)
+        call connect_get_ecv(nel_global,ecgv)
+        !call connect_get_kant(nkn,kant)
 	!call link_set_wmpi(.false.)
 	!stop
 
@@ -131,7 +140,13 @@
 	    kb = kbhnd(k,ie)
 	    ! dont do this if both nodes are on boundary
 	    if( iboundv(kn) > 0 .and. iboundv(kb) > 0 ) cycle
-	    ieltv(ii,ie) = -1000 		!internal (not real) border
+	    if( nid == 3 ) then			! tripple point
+	      do i=1,3
+		if( id_elem(i,ie) /= my_id ) exit	! choose any not my_id
+	      end do
+	      ide = id_elem(i,ie)
+	    end if
+	    ieltv(ii,ie) = -1000 - ide	! internal (not real) border
 	  end do
 	end do
 

@@ -12,7 +12,7 @@
 
 FEMDIR=..
 SHYDIR=$FEMDIR/src/shyfem
-BIODIR=$FEMDIR/src/contrib/ecological/bio3d
+BIODIR=$FEMDIR/src/contrib/ecological/weutro
 UTIDIR=$FEMDIR/src/utils/shyutil
 UTMDIR=$FEMDIR/src/utils/shyutilmpi
 TOLDIR=$FEMDIR/src/tools/shyplot

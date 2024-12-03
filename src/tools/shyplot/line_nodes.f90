@@ -293,11 +293,7 @@
 
 	if( iapini(1,0,0,0) .le. 0 ) stop
 
-	call mod_geom_init(nkn,nel,ngr)
-
-	nlkdi = 3*nel + 2*nkn
-        call mklenk(nlkdi,nkn,nel,nen3v,ilinkv,lenkv)
-        call mklink(nkn,ilinkv,lenkv,linkv)
+	call set_geom
 
 	call find_line_nodes(nl,x,y,ndim,n,nodes)
 

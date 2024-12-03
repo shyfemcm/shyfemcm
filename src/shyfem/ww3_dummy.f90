@@ -30,6 +30,7 @@
 ! 04.07.2019    ggu     written from scratch
 ! 24.03.2022    ggu     newly started with Aron
 ! 06.05.2022    ggu     module renamed to subww3
+! 03.12.2024    lrp     ww3 restored
 
 !===========================================================
         module mod_ww3

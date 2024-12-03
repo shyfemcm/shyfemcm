@@ -69,6 +69,8 @@
 ! 13.03.2019	ggu	changed VERS_7_5_61
 ! 03.06.2022	ggu	prepared for mpi (not yet ready)
 ! 09.05.2023    lrp     introduce top layer index variable
+! 14.10.2024	ggu	fixed INTEL_BUG
+! 13.11.2024	ggu	marked old code with INTEL_BUG_OLD
 !
 !*****************************************************************
 
@@ -217,16 +219,20 @@
 
         implicit none 
 
-	real tnudge	!relaxation time for nudging [s]
-	real tramp	!time for smooth init
+	double precision tnudge	!relaxation time for nudging [s]
+	double precision tramp	!time for smooth init
+	double precision h,alpha,uexpl,vexpl		!INTEL_BUG
+        double precision u(nlvdi),v(nlvdi)		!INTEL_BUG
+	double precision dfact				!INTEL_BUG
+	!real tnudge	!relaxation time for nudging [s]!INTEL_BUG_OLD
+	!real tramp	!time for smooth init		!INTEL_BUG_OLD
+	!real h,alpha,uexpl,vexpl			!INTEL_BUG_OLD
+        !real u(nlvdi),v(nlvdi)				!INTEL_BUG_OLD
+	!real dfact					!INTEL_BUG_OLD
 
         integer ie,l,i,k,ii,n,ie_mpi
 	integer lmax,lmin
 	integer nbc
-        real u(nlvdi),v(nlvdi)
-        real h,t
-        real alpha
-	real uexpl,vexpl
         
 	integer nintp,nvar
 	real cdef(2)
@@ -334,8 +340,9 @@
 	    else if( tnudge > 0 ) then		!nudge velocities
 	      do l=lmin,lmax
                 h = hdeov(l,ie)
-                uexpl = (ulnv(l,ie)-u(l))*alpha*h/tnudge
-                vexpl = (vlnv(l,ie)-v(l))*alpha*h/tnudge
+		dfact = alpha*h/tnudge		!INTEL_BUG
+                uexpl = (ulnv(l,ie)-u(l))*dfact
+                vexpl = (vlnv(l,ie)-v(l))*dfact
 	        fxv(l,ie) = fxv(l,ie) + uexpl
 	        fyv(l,ie) = fyv(l,ie) + vexpl
 	      end do

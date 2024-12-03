@@ -32,10 +32,15 @@
 ! 22.04.2021	ggu	resolve bound check error (not yet finished)
 ! 12.04.2022	ggu	preapred for online partitioning
 ! 10.04.2024	ggu	new routine write_single_nodes()
+! 18.11.2024	ggu	writes partition.np.txt
+! 21.11.2024	ggu	use make_name_with_number() to create file names
+! 23.11.2024	ggu	new routine info_partition_quality()
+! 29.11.2024	ggu	compute number of non contiguous areas
+! 30.11.2024	ggu	use color as aux array for flood_fill
 !
 !****************************************************************
 
-	subroutine info_partition(nparts,area_node)
+	subroutine info_partition(nparts,area_node,pquality)
 
 ! write partition information to terminal
 
@@ -43,24 +48,34 @@
 
 	implicit none
 
-	integer nparts
-	integer area_node(nkn)
+	integer, intent(in) :: nparts
+	integer, intent(in) :: area_node(nkn)
+	real, intent(out) :: pquality
 
 	integer ic,k,ia
 	integer netot,neint
+	integer iareas
 	integer min,max
+	character*80 name
 
-        integer, allocatable  :: nc(:)                  !array for check
-        integer, allocatable  :: ne(:)                  !array for check
-        integer, allocatable  :: ni(:)                  !array for check
+        integer, allocatable  :: nc(:)    !total number of nodes with color ic
+        integer, allocatable  :: ne(:)    !total number of elements of ic
+        integer, allocatable  :: ni(:)    !internal number of elements of ic
+        integer, allocatable  :: na(:)    !number of areas
+        integer, allocatable  :: color(:) !aux array for area_node
 
 	write(6,*) 'writing information on partion to terminal...'
 
         allocate(nc(0:nparts))
         allocate(ne(0:nparts))
         allocate(ni(0:nparts))
+        allocate(na(0:nparts))
+	allocate(color(nkn))
 
         nc = 0
+        ne = 0
+        ni = 0
+        na = 0
 	netot = 0
 	neint = 0
 	min = minval(area_node)
@@ -75,10 +90,13 @@
           ic = area_node(k)
           nc(ic) = nc(ic) + 1
 	end do
+	color = area_node	!to not change area_node
 	do ic=min,max
-	  call count_elements(nkn,nel,nen3v,ic,area_node,netot,neint)
-	  !write(6,*) nel,netot,neint,(100.*neint)/netot
-	  !write(6,*) 'ic,netot,neint:',ic,netot,neint
+	  call count_elements(nkn,nel,nen3v,ic,color,netot,neint)
+	  iareas = -1
+	  call check_part_color(ic,nkn,color,iareas)
+	  if( iareas == 0 ) iareas = 1
+	  na(ic) = iareas
 	  ne(ic) = netot
 	  ni(ic) = neint
         end do
@@ -90,21 +108,73 @@
         write(6,*) 
         write(6,*) '   domain      area     nodes   percent' &
      &				// '  elements     ghost' &
+     &				// '   percent   areas'
+        do ic=min,max
+	  ia = ic
+	  if( min == 0 ) ia = ic + 1
+          write(6,'(3i10,f10.2,2i10,f10.2,i8)')  &
+     &		 ia-1,ia,nc(ic),(100.*nc(ic))/nkn &
+     &		,ne(ic),ne(ic)-ni(ic),(100.*(ne(ic)-ni(ic)))/ne(ic),na(ic)
+        end do
+        write(6,*) 
+
+	call make_name_with_number('partition',nparts,'txt',name)
+	open(1,file=name,form='formatted',status='unknown')
+	write(1,'(a)') '        np       nkn       nel'
+	write(1,'(3i10)') nparts,nkn,nel
+        write(1,*) '   domain      area     nodes   percent' &
+     &				// '  elements     ghost' &
      &				// '   percent'
         do ic=min,max
 	  ia = ic
 	  if( min == 0 ) ia = ic + 1
-          write(6,'(3i10,f10.2,2i10,f10.2)')  &
+          write(1,'(3i10,f10.2,2i10,f10.2)')  &
      &		 ia-1,ia,nc(ic),(100.*nc(ic))/nkn &
      &		,ne(ic),ne(ic)-ni(ic),(100.*(ne(ic)-ni(ic)))/ne(ic)
         end do
-        write(6,*) 
+	close(1)
+
+	call info_partition_quality(nparts,ne,ni,pquality)
+
+	write(6,*) 'partition quality: ',pquality
 
 	end
 
 !****************************************************************
 
-	subroutine write_partition_to_grd(grdfile,bdebug &
+	subroutine info_partition_quality(np,ne,ni,pquality)
+
+	use basin
+
+	implicit none
+
+	integer np
+	integer ne(0:np)
+	integer ni(0:np)
+	real pquality
+
+	integer ic
+	real gmax,g,gtheo
+	real base,logfact
+
+	gmax = 0
+	do ic=0,np
+	  if( ne(ic) == 0 ) cycle
+	  g = (ne(ic)-ni(ic))/real(ne(ic))
+	  gmax = max(gmax,g)
+	end do
+
+        base = 2
+        logfact = log(real(np))/log(real(base))
+        gtheo = logfact*sqrt(real(nkn/np))/real(nel/np)
+
+	pquality = gmax / gtheo
+
+	end
+
+!****************************************************************
+
+	subroutine write_partition_to_grd(grdname,bdebug &
      &			,nparts,npart,epart)
 
 ! write grd files
@@ -114,7 +184,7 @@
 
 	implicit none
 
-	character*(*) grdfile
+	character*(*) grdname
 	logical bdebug
 	integer nparts
 	integer npart(nkn)
@@ -122,8 +192,7 @@
 
 	logical bldebug
 	integer i,nmax,ntot,ic
-	character*3 numb
-	character*80 basnam,name
+	character*80 name
 
 	bldebug = .true.
 	bldebug = .false.
@@ -132,15 +201,9 @@
 	call basin_to_grd
 	call grd_set_write(.false.)
 
-	write(numb,'(i3)') nparts
-        numb = adjustl(numb)
-        basnam = grdfile
-        call delete_extension(basnam,'.grd')
-
         ianv = npart
-        name = trim(basnam)//'.'//trim(numb)//'.'//'node.grd'
+	call make_name_with_number(grdname,nparts,'node.grd',name)
         call grd_write(name)
-	!write(6,*) ''
 	write(6,*) 'Grid with partition on nodes in file: ',trim(name)
 
 	if( bldebug ) then
@@ -156,26 +219,26 @@
 	end if
 
         iaev = epart
-        name = trim(basnam)//'.'//trim(numb)//'.'//'elem.grd'
+	call make_name_with_number(grdname,nparts,'elem.grd',name)
         call grd_write(name)
 	write(6,*) 'Grid with partition on elements in file: ',trim(name) 
 
 	if( bdebug ) then
-	  call grd_write_debug(basnam,nparts,npart)
+	  call grd_write_debug(grdname,nparts,npart)
 	end if
 
         end
 
 !****************************************************************
 
-	subroutine grd_write_debug(basnam,nparts,npart)
+	subroutine grd_write_debug(grdname,nparts,npart)
 
 	use basin
         use grd
 
 	implicit none
 
-	character*(*) basnam
+	character*(*) grdname
 	integer nparts
 	integer npart(nkn)
 
@@ -184,20 +247,18 @@
 	character*80 name,pre,post,numb
 	integer epart(nel)
 
-	write(numb,'(i3)') nparts
-        numb = adjustl(numb)
-	pre = trim(basnam)//'.'//trim(numb)//'.'
-	post = '.node.grd'
+	call make_name_with_number(grdname,nparts,'',pre)
 
 	write(6,*) 'writing debug grd files...'
 
 	do i=1,nparts
-	  write(numb,'(i3)') i
-          numb = adjustl(numb)
-          name = trim(pre)//trim(numb)//trim(post)
+	  !write(numb,'(i3)') i
+          !numb = adjustl(numb)
+          !name = trim(pre)//trim(numb)//trim(post)
+	  call make_name_with_number(pre,i,'grd',name)
 	  write(6,*) 'writing debug file: ',trim(name)
           ianv = npart
-	  where( ianv /= i ) ianv = 0
+	  where( ianv /= i ) ianv = -1
 	  iaev = 0
 	  do ie=1,nel
 	    bhasnode = .false.

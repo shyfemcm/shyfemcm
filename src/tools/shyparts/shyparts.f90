@@ -33,6 +33,8 @@
 ! 12.04.2022	ggu	restructured to allow for online computing
 ! 04.04.2023	ggu	minor changes
 ! 27.04.2023	ggu	better error handling
+! 21.11.2024	ggu	honor debug flag
+! 23.11.2024	ggu	introduced pqual
 !
 !****************************************************************
 
@@ -57,7 +59,6 @@
 	use evgeom
 	use basin
 	use clo
-	!use basutil
 	use shympi
         use grd
 
@@ -70,7 +71,8 @@
 
 	logical bdebug
 	integer ierr1,ierr2
-	character*80 grdfile
+	real pqual
+	character*80 grdfile,grdname
 
 !-----------------------------------------------------------------
 ! read in basin
@@ -83,6 +85,7 @@
         if( grdfile == ' ' ) call clo_usage
 	call grd_set_write(.false.)
         call read_command_line_file(grdfile)
+	call make_grd_name(grdfile,grdname)
 
         call shympi_init(.false.)
 
@@ -105,19 +108,19 @@
 ! check partition
 !-----------------------------------------------------------------
 
-	call check_partition(npart,epart,ierr1,ierr2)
+	call check_partition(npart,epart,bdebug,ierr1,ierr2)
 
 !-----------------------------------------------------------------
-! write partition information to terminal
+! write partition information to terminal and file
 !-----------------------------------------------------------------
 
-	call info_partition(nparts,npart)
+	call info_partition(nparts,npart,pqual)
 
 !-----------------------------------------------------------------
 ! write grd files
 !-----------------------------------------------------------------
 
-        call write_partition_to_grd(grdfile,bdebug                      &
+        call write_partition_to_grd(grdname,bdebug                      &
      &                  ,nparts,npart,epart)
 
 !-----------------------------------------------------------------
@@ -128,7 +131,8 @@
           write(6,*) 'domain successfully partitioned'
           call exit(0)
         else
-          write(6,*) 'errors in domains: ',ierr1,ierr2
+          write(6,*) 'conectivity errors in domains: ',ierr1,ierr2
+          write(6,*) '(errors can be ignored)'
           call exit(9)
         end if
 
@@ -140,6 +144,25 @@
 
 !*******************************************************************
 !*******************************************************************
+!*******************************************************************
+
+	subroutine make_grd_name(grdfile,grdname)
+
+	use mod_shyparts
+
+	implicit none
+
+	character*(*) grdfile,grdname
+
+	grdname = grdfile
+	if( breadbas ) then
+	  call delete_extension(grdname,'.bas')
+	else
+	  call delete_extension(grdname,'.grd')
+	end if
+
+	end
+
 !*******************************************************************
 
 	subroutine read_command_line_file(file)

@@ -53,6 +53,7 @@
 ! 16.05.2019	ggu	write regular grid information
 ! 28.01.2020	ggu	changes for vorticity
 ! 28.04.2023    ggu     update function calls for belem
+! 03.10.2024    ggu     added var_dim
 !
 !***************************************************************
 !
@@ -312,7 +313,7 @@
 	integer id,idout
 	double precision dtime
 	logical belem
-	integer ivar,iv,n,m,ncid,var_id
+	integer ivar,iv,n,m,ncid,var_id,var_dim
 	integer lmax,nlvddi
 	real cv3(nlvddi,n*m)
 
@@ -358,6 +359,8 @@
 	  if( m /= 1 ) goto 98
 	end if
 
+!	the value to be written is in svalue - already interpolated
+
 	if( bsplit .and. .not. bhydro ) then
 	  call shy_split_id(ivar,id,id_out)
 	  call shy_write_output_record(id_out,dtime,ivar &
@@ -383,7 +386,8 @@
 	  else if( outformat == 'nc' ) then
 	    ncid = idout
 	    call nc_output_get_var_id(iv,var_id)
-	    call nc_output_record(ncid,var_id,np,svalue)
+	    call nc_output_get_var_dim(iv,var_dim)
+	    call nc_output_record(ncid,var_id,var_dim,np,svalue)
 	  else if( outformat == 'off' ) then
 	    ! nothing to be done
 	  else
@@ -628,7 +632,7 @@
           write(6,*) 'area is 0'
 	  if( barea ) then
 	    write(6,*) 'the average is relative to the area given'
-	    write(6,*) 'by the line contained in ',trim(areafile)
+	    write(6,*) 'by the line(s) contained in ',trim(areafile)
 	  else
 	    write(6,*) 'the average is relative to the whole basin'
 	  end if

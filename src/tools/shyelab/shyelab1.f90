@@ -78,6 +78,7 @@
 ! 07.06.2023    ggu     array simpar introduced
 ! 20.07.2023    lrp     new paramter nzadapt
 ! 29.09.2023    ggu     new atime0out for correct concatenating of files
+! 17.10.2024    ggu     for shy_make_basin_aver() allow for percentile
 !
 !**************************************************************
 
@@ -471,6 +472,10 @@
 
 	  cv3(:,:) = cv3all(:,:,iv)
 
+	  if( bsmooth ) then
+	    call shy_smooth(nlvdi,nn,cv3,salpha,sloop)
+	  end if
+
 	  if( bverb .and. iv == 1 ) then
 	    call shy_write_time(.true.,dtime,atime,0)
 	  end if
@@ -491,7 +496,7 @@
      &						,1,1,cv2)
 	  else if( bsumvar .or. binfluencemap .or. bvorticity ) then
 	    ! only write at end of loop over variables
-	  else
+	  else		! this handles normal (3D) output
 	    call shyelab_record_output(id,idout,dtime,ivar,iv &
      &						,belem,n,m &
      &						,lmax,nlvdi,cv3)
@@ -499,7 +504,7 @@
 
 	  if( baverbas .and. bscalar ) then
 	    call shy_assert(nndim==nkn,'shyelab internal error (123)')
-	    call shy_make_basin_aver(idims(:,iv),nlv,nndim,cv3,ikflag &
+	    call shy_make_basin_aver(idims(:,iv),nlv,nndim,cv3,ikflag,perc &
      &                          ,cmin,cmax,cmed,cstd,atot,vtot)
 	    call shy_write_aver(aline,nvar,iv,ivar &
      &				,cmin,cmax,cmed,cstd,atot,vtot)
@@ -512,7 +517,7 @@
 	 !--------------------------------------------------------------
 
 	 if( baverbas .and. bhydro ) then
-           call shy_make_hydro_aver(aline,nndim,cv3all,ikflag &
+           call shy_make_hydro_aver(aline,nndim,cv3all,ikflag,perc &
      &                  ,znv,uprv,vprv,sv,dv)
 	 end if
 
@@ -539,7 +544,8 @@
            call write_nodes(atime,ftype,nndim,nvar,ivars,cv3all)
 	 end if
  
-	 ! bsumvar is also handled in here
+	 ! this handles hydro files - bsumvar is also handled in here
+
 	 call shyelab_post_output(id,idout,dtime,nvar,n,m,nndim &
      &                                  ,lmax,nlvdi,cv3all)
 
@@ -669,7 +675,7 @@
 !***************************************************************
 !***************************************************************
 
-        subroutine shy_make_hydro_aver(aline,nndim,cv3all,ikflag &
+        subroutine shy_make_hydro_aver(aline,nndim,cv3all,ikflag,perc &
      &                  ,znv,uprv,vprv,sv,dv)
 
         use basin
@@ -686,6 +692,7 @@
         integer idims(4,nvar)
         real cv3all(nlvdi,nndim,0:nvar)
 	integer ikflag(nkn)
+	real perc
         real znv(nkn)
         real uprv(nlvdi,nkn)
         real vprv(nlvdi,nkn)
@@ -701,7 +708,7 @@
 	iv = 1
         ivar = 1
         idim = (/nkn,1,1,ivar/)
-        call shy_make_basin_aver(idim,1,nkn,znv,ikflag &
+        call shy_make_basin_aver(idim,1,nkn,znv,ikflag,perc &
      &                          ,cmin,cmax,cmed,cstd,atot,vtot)
         call shy_write_aver(aline,nvar,iv,ivar &
      &				,cmin,cmax,cmed,cstd,atot,vtot)
@@ -709,13 +716,13 @@
 	iv = 2
         ivar = 2
         idim = (/nkn,1,nlv,ivar/)
-        call shy_make_basin_aver(idim,nlv,nkn,uprv,ikflag &
+        call shy_make_basin_aver(idim,nlv,nkn,uprv,ikflag,perc &
      &                          ,cmin,cmax,cmed,cstd,atot,vtot)
         call shy_write_aver(aline,nvar,iv,ivar &
      &				,cmin,cmax,cmed,cstd,atot,vtot)
 
 	iv = 3
-        call shy_make_basin_aver(idim,nlv,nkn,vprv,ikflag &
+        call shy_make_basin_aver(idim,nlv,nkn,vprv,ikflag,perc &
      &                          ,cmin,cmax,cmed,cstd,atot,vtot)
         call shy_write_aver(aline,nvar,iv,ivar &
      &				,cmin,cmax,cmed,cstd,atot,vtot)
@@ -723,7 +730,7 @@
 	iv = 4
         ivar = 6
         idim = (/nkn,1,nlv,ivar/)
-        call shy_make_basin_aver(idim,nlv,nkn,sv,ikflag &
+        call shy_make_basin_aver(idim,nlv,nkn,sv,ikflag,perc &
      &                          ,cmin,cmax,cmed,cstd,atot,vtot)
 	!vtot = 0.
         call shy_write_aver(aline,nvar,iv,ivar &

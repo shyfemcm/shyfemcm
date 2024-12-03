@@ -238,8 +238,8 @@
         write(18,22) it,(tstot(i),i=1,nstate)
         write(17,22) it,(tsstot(i),i=1,nsstate)
 
-        Ntstot=tstot(1)+tstot(2)+tsstot(2)+(tstot(4)+tstot(9))*0.115+
-     $  tstot(7)
+        Ntstot=tstot(1)+tstot(2)+tsstot(2)+(tstot(4)+tstot(9))*0.115+ &
+     &  tstot(7)
         Ptstot=tstot(3)+tstot(8)+(tstot(4)+tstot(9))*0.025+tsstot(1)
 
         write(19,22)it,Ntstot,Ptstot

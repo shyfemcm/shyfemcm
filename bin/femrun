@@ -14,7 +14,7 @@
 
 #---------------------------------------------------------------
 FEMDIR=${SHYFEMDIR:=$HOME/shyfem}
-BINDIR=$FEMDIR/fembin
+BINDIR=$FEMDIR/bin
 #---------------------------------------------------------------
 fembat="$BINDIR/fembat"
 fembatch="$BINDIR/fembatch"

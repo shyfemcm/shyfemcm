@@ -111,6 +111,8 @@ FEMNOGRAPH   = $(FEMLIBS) $(FEMEXTRA) $(FEMMESH) $(FEMPROG) $(FEMUTIL)
 .IGNORE: clean
 .PHONY: publish version stable
 
+BFM_CONTRIB_DIR=$(FEMDIR)/src/contrib/ecological/bfm/
+
 #---------------------------------------------------------------
 # compiling and recursive targets
 #---------------------------------------------------------------
@@ -123,7 +125,7 @@ nuopc: fem
 	@$(FEMBIN)/recursivemake $@ $(FEMSRC)/shyfem
 
 fem: shyfem
-shyfem: libmod
+shyfem: checkv libmod
 	cd src; make
 
 para_get:
@@ -138,10 +140,10 @@ para_clean:
 	@cd $(PARADIR)/src; make clean
 
 bfm_compile: check_server
-	@fembfm/bfm_compile.sh $(BFMDIR) $(FORTRAN_COMPILER)
+	@$(BFM_CONTRIB_DIR)/external_lib/bfm_compile.sh $(BFMDIR) $(FORTRAN_COMPILER)
 
 bfm_clean:
-	@fembfm/bfm_compile.sh -clean $(BFMDIR)
+	@$(BFM_CONTRIB_DIR)/external_lib/bfm_compile.sh -clean $(BFMDIR)
 
 nograph: checkv directories links test_executable
 
@@ -195,7 +197,7 @@ cleanlocal:
 	-rm -f fem.tar fem.tar.gz
 	-rm -f changed_zip.zip
 	-rm -f *~
-	-rm -f *.tmp *.bak *.out
+	-rm -f *.tmp *.bak *.out *.log
 	-rm -f *.revnew
 	-rm -f ggg hhh
 	-rm -f errout.dat a.out plot.ps
@@ -329,18 +331,12 @@ update_copyright:
 install: install_soft
 
 install_soft: checkv
-	$(FEMBIN)/shyfem_install_soft.sh
+	$(FEMBIN)/shyfem_util/shyfem_install_soft.sh
 
-install_hard: checkv
-	$(FEMBIN)/shyfem_install_hard.sh
-
-uninstall: install_hard_reset install_soft_reset
+uninstall: install_soft_reset
 
 install_soft_reset: checkv
-	$(FEMBIN)/shyfem_install_soft.sh -reset
-
-install_hard_reset: checkv
-	$(FEMBIN)/shyfem_install_hard.sh -reset
+	$(FEMBIN)/shyfem_util/shyfem_install_soft.sh -reset
 
 #--------------------------------------------------------
 # private and admin commands

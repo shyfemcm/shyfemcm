@@ -44,6 +44,8 @@
         integer npart(nkn)
         integer epart(nel)
 
+	real pquality
+
 	npart = 0
 	epart = 0
 	write(6,*) 'using SDDA algorithm for partitioning'
@@ -51,13 +53,13 @@
 
         call do_sdda(nkn,nel,nen3v,nparts,npart,epart)
 
-	!call info_partition(nparts,npart)
+	!call info_partition(nparts,npart,pquality)
 
 	end
 
 !*******************************************************************
 
-	subroutine check_partition(npart,epart,ierr1,ierr2)
+	subroutine check_partition(npart,epart,bdebug,ierr1,ierr2)
 
 	use basin
 
@@ -65,6 +67,7 @@
 
         integer npart(nkn)
         integer epart(nel)
+	logical bdebug
 	integer ierr1,ierr2
 
 	ierr1 = 0

@@ -38,7 +38,7 @@ FEMBIN=$(dirname $script)
 gps2eps=$FEMBIN/gps2eps.pl
 psresetbb=$FEMBIN/psresetbb.sh
 parr=$FEMBIN/parr.pl
-ps2pdf=ps2pdf
+ps2pdf=/usr/bin/ps2pdf
 
 #--------------------------------------------------------
 

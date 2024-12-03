@@ -250,7 +250,7 @@
 !--------------------------------------------------------------
 !...    MINIMUM QUOTA - p_Qmin
 !
-        if (Quonew. lt. p_Qmin) then
+        if (Quonew .lt. p_Qmin) then
 
         Wdtnew = Wdt - mtu * dt
         Quonew  = Quota              ! è una sorta di luxury uptake
@@ -272,7 +272,7 @@
 !
 !...    MAXIMUM QUOTA - p_Qmax
 !
-        if (Quonew. gt. p_Qmax) then
+        if (Quonew .gt. p_Qmax) then
                 Quonew  = p_Qmax
         endif
 !

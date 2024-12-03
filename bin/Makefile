@@ -28,6 +28,9 @@ fem: nothing
 nothing:
 	@true
 
+links:
+	-ln -fs gps/gps.sh
+
 #----------------------------------------------------------
 
 clean:

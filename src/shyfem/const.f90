@@ -86,6 +86,8 @@
 ! 21.05.2019	ggu	changed VERS_7_5_62
 ! 10.05.2024	ggu	read and process also grd files
 ! 17.09.2024	lrp&ggu	call sleep(1) after writing basin
+! 16.11.2024	ggu	in handle_grid_read() use ibasin to decide what to do
+! 03.12.2024    lrp     ww3 restored
 !
 !************************************************************************
 
@@ -355,20 +357,37 @@
 	logical bquiet,bsilent
 
 	logical bauto,binfo
-	logical bopti,bnepart
+	logical bopti,bnepart,brenumber
+	integer ibasin
 	real eps_area
 	character*80 grdpart
 
+	real getpar
+
+	ibasin = nint(getpar('ibasin'))
+
+	bopti = .false.
+	brenumber = .false.
+	if( ibasin >= 0 ) brenumber = .true.
+	if( ibasin == 1 ) bopti = .true.
+	if( bopti ) brenumber = .true.
+	
 	eps_area = 0.
 	bauto = .true.
 	binfo = .false.
-	!bopti = .false.
-	bopti = .true.
 	bnepart = .false.
 	grdpart = ' '
 
+	if( .not. bquiet ) then
+	  if( bopti ) then
+	    write(6,*) 'reading grd file with optimzation: ',trim(grid_file)
+	  else
+	    write(6,*) 'reading grd file without optimzation: ',trim(grid_file)
+	  end if
+	end if
+
 	call shypre_sub(grid_file,bquiet,bsilent,bauto,binfo &
-     &                          ,bopti,bnepart,eps_area,grdpart)
+     &                          ,bopti,brenumber,bnepart,eps_area,grdpart)
 
 	end
 

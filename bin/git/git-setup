@@ -127,6 +127,7 @@ git config --global mergetool.$tool.keepbackup false
 git config --global mergetool.$tool.trustexitcode false
 
 git config --global push.default simple
+git config --global advice.detachedHead false
 
 git config --global core.editor vi
 

@@ -42,6 +42,8 @@
 ! function is_upper(c)				checks if c is upper case
 ! function is_letter(c)				checks if c is letter
 ! function is_alpha(c)				checks if c is alphanumeric
+! function is_whitespace(c)			checks if c is white space
+! function is_integer(string)			checks if string is integer
 ! subroutine to_lower(string)			converts string to lower case
 ! subroutine to_upper(string)			converts string to upper case
 !
@@ -87,6 +89,7 @@
 ! 13.03.2019	ggu	changed VERS_7_5_61
 ! 21.05.2019	ggu	changed VERS_7_5_62
 ! 11.12.2020	ggu	ichafs() and ichanm() moved here from subsss.f
+! 21.09.2024	ggu	new routines is_whitespace() and is_integer()
 !
 !****************************************************************
 
@@ -100,7 +103,7 @@
 	character*1,  parameter :: plus = '+'
 	character*1,  parameter :: minus = '-'
 	character*1,  parameter :: dot = '.'
-	character*4,  parameter :: expont = 'eEdD'
+	character*4,  parameter :: exponent = 'eEdD'
 	character*10, parameter :: number = '1234567890'
 
 !================================================================
@@ -221,7 +224,7 @@
 		else
 			berr=.true.
 		end if
-	else if( icindx(expont,c) .gt. 0 ) then
+	else if( icindx(exponent,c) .gt. 0 ) then
 		if( .not.bexp .and. bnumb ) then
 			bexp=.true.
 		else
@@ -663,6 +666,71 @@
 	logical is_letter,is_digit
 
 	is_alpha = is_letter(c) .or. is_digit(c) .or. c == '_'
+
+	end
+
+!****************************************************************
+
+	function is_whitespace(c)
+
+! checks if c is white space char
+
+	use scan_string
+
+	implicit none
+
+	logical is_whitespace
+	character*1 c
+
+	is_whitespace = ( c == blank .or. c == tab )
+
+	end
+
+!****************************************************************
+
+	function is_integer(string)
+
+! checks if string is an integer
+
+	use scan_string
+
+	implicit none
+
+	logical is_integer
+	character*(*) string
+
+	integer is,i,ic
+	logical berror
+	character*1 c
+
+	logical is_digit,is_whitespace
+	integer ichafs
+
+	ic = 0
+	berror = .false.
+
+	is = ichafs(string)
+	if( string(is:is) == minus .or. string(is:is) == plus ) is = is + 1
+
+	do i=is,len(string)
+	  c = string(i:i)
+	  if( is_digit(c) ) then
+	    ic = ic + 1
+	  else if( is_whitespace(c) ) then
+	    exit
+	  else
+	    berror = .true.
+	    exit
+	  end if
+	end do
+
+	if( berror ) then
+	  is_integer = .false.
+	else if( ic == 0 ) then
+	  is_integer = .false.
+	else
+	  is_integer = .true.
+	end if
 
 	end
 

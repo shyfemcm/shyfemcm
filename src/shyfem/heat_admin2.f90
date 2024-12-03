@@ -97,6 +97,7 @@
 ! 09.05.2023    lrp     introduce top layer index variable
 ! 06.09.2024    lrp     nuopc-compliant
 ! 13.09.2024    lrp     iatm and coupling with atmospheric model
+! 21.09.2024    ggu     new handle_skin() for handling skin temperature output
 !
 ! notes :
 !
@@ -618,8 +619,10 @@
 	end if
 
 !---------------------------------------------------------
-! special output
+! skin temperature and special output
 !---------------------------------------------------------
+
+	call handle_skin(dtime,tws)
 
 	call shyice_write_output
 
@@ -745,6 +748,49 @@
    98	continue
 	write(6,*) k,l,qs,qsbottom,qrad,albedo,tm,tnew
 	stop 'error stop check_heat2: Nan found'
+	end
+
+!*****************************************************************************
+
+	subroutine handle_skin(dtime,tws)
+
+! handles output of skin temperature
+
+	use basin
+
+	implicit none
+
+	double precision dtime
+	real tws(nkn)
+
+	integer, parameter :: nvar = 1
+	logical, parameter :: b2d = .true.
+	double precision, save :: da_out(4)
+	integer, save :: icall = 0
+	integer id,iskin
+
+	logical has_output_d,next_output_d
+	real getpar
+
+	if( icall < 0 ) return
+
+	if( icall == 0 ) then
+	  icall = -1
+	  iskin = nint(getpar('iskin'))
+	  if( iskin == 0 ) return			!no skin output wanted
+          call init_output_d('itmcon','idtcon',da_out)
+          if( .not. has_output_d(da_out) ) return	!has no skin output
+          call shyfem_init_scalar_file('tskin',nvar,b2d,id)
+          da_out(4) = id
+	  icall = 1
+	end if
+
+        if( next_output_d(da_out) ) then
+          id = nint(da_out(4))
+          call shy_write_scalar_record(id,dtime,14,1,tws)
+          call shy_sync(id)
+        end if
+
 	end
 
 !*****************************************************************************

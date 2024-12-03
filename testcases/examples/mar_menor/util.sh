@@ -111,8 +111,9 @@ PlotMapVel()
     plevel=""
     level=0
   fi
+  [ -z $freq ] && freq=32
 
-  shyplot -varid 2 -freq 32 $plevel $sim.hydro.shy $apn.str
+  shyplot -varid 2 -freq $freq $plevel $sim.hydro.shy $apn.str
   CheckStatus shyplot $?
   mv plot.ps $sim.vel.$level.$apn.ps
 }
@@ -129,8 +130,9 @@ PlotMapSalt()
     plevel=""
     level=0
   fi
+  [ -z $freq ] && freq=32
 
-  shyplot -varid 11 -freq 32 $plevel $sim.ts.shy $apn.str
+  shyplot -varid 11 -freq $freq $plevel $sim.ts.shy $apn.str
   CheckStatus shyplot $?
   mv plot.ps $sim.salt.$level.$apn.ps
 }

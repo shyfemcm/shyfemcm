@@ -124,6 +124,7 @@ branch=`git branch | grep '*' | sed -e 's/^\* //'`
 
 SetDiffTool
 [ $quiet = "NO" ] && echo "difftool used: $tool"
+[ $tool = "tkdiff" ] && tool="tkdiff -d -w"
 
 if [ -z "$files" ]; then
   Help

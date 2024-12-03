@@ -375,3 +375,100 @@
 
 !******************************************************************
 
+	subroutine shy_smooth(nlvddi,nn,cv3,salpha,sloop)	
+
+	use basin
+	use levels
+	use evgeom
+
+	implicit none
+
+	integer nlvddi,nn
+	real cv3(nlvddi,nn)
+	real salpha
+	integer sloop
+
+	integer ie,ii,k,l,lmax,n,iloop
+	double precision cacum,cmed
+	double precision coacum,cnacum
+	double precision area
+	integer, save :: icall = 0
+
+	integer, allocatable :: icount(:,:)
+	double precision, allocatable :: cnew(:,:)
+
+	logical elabutil_is_silent
+	logical elabutil_is_verbose
+
+	if( icall == 0 ) then
+	  if( .not. elabutil_is_silent() ) then
+	    write(6,*)
+	    write(6,*) 'smoothing with alpha = ',salpha, ' and nloop = ',sloop
+	  end if
+	end if
+	icall = icall + 1
+
+	allocate(cnew(nlvddi,nkn))
+	allocate(icount(nlvddi,nkn))
+
+	do iloop=1,sloop
+
+	cnew = 0.
+	icount = 0
+
+	do ie=1,nel
+	  area = ev(10,ie)
+	  lmax = ilhv(ie)
+	  do l=1,lmax
+	    cacum = 0.
+	    do ii=1,3
+	      k = nen3v(ii,ie)
+	      cacum = cacum + cv3(l,k)
+	    end do
+	    cmed = cacum / 3.
+	    do ii=1,3
+	      k = nen3v(ii,ie)
+	      cnew(l,k) = cnew(l,k) + cmed
+	      icount(l,k) = icount(l,k) + 1
+	    end do
+	  end do
+	end do
+
+	do k=1,nkn
+	  lmax = ilhkv(k)
+	  do l=1,lmax
+	    cmed = cnew(l,k) / icount(l,k)
+	    cnew(l,k) = (1.-salpha)*cv3(l,k) + salpha*cmed
+	  end do
+	end do
+
+	if( .not. elabutil_is_verbose() ) then
+	  cv3 = real(cnew)
+	  cycle
+	end if
+
+	coacum = 0.
+	cnacum = 0.
+	n = 0
+	do k=1,nkn
+	  lmax = ilhkv(k)
+	  do l=1,lmax
+	    n = n + 1
+	    coacum = coacum + cv3(l,k)
+	    cnacum = cnacum + cnew(l,k)
+	  end do
+	end do
+
+	coacum = coacum / n
+	cnacum = cnacum / n
+
+	write(6,*) 'smooth: ',n,iloop,abs(coacum-cnacum)
+	
+	cv3 = real(cnew)
+
+	end do
+
+	end
+
+!******************************************************************
+

@@ -29,14 +29,15 @@ fembin_install=$FEMDIR_INSTALL/bin
 binutil=$fembin_install
 [ -d $fembin_install/shyfem_util ] && binutil=$fembin_install/shyfem_util
 
-path=`$binutil/shyfem_path.pl $PATH`
-export PATH=$path:$fembin:$HOME/$dist/bin
+path=$( $binutil/shyfem_path.pl $PATH )
+export PATH=$path:$fembin
 
 # set aliases ----------------------------------------
 
 alias shyfemdir=". $binutil/shyfem_dir.sh"
 alias shyfeminstall=". $binutil/shyfem_dir.sh $FEMDIR_INSTALL"
 alias shyfemcd="cd $FEMDIR"
+alias shypath=". $binutil/shypath.sh"
 
 # end of routine ----------------------------------------
 

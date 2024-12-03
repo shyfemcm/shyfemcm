@@ -1320,7 +1320,9 @@
 	  end if
 	end do
 
-	call shympi_exchange_2d_elem(fcorv)
+	if( bextra_exchange ) then
+	  call shympi_exchange_2d_elem(fcorv)
+	end if
 
 	end
 

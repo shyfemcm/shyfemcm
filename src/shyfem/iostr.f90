@@ -163,6 +163,7 @@
 ! 16.02.2020	ggu	femtime finally eliminated
 ! 18.03.2020	ggu	admrst() substituted with rst_write_restart()
 ! 13.09.2024    lrp     iatm and coupling with atmospheric model
+! 15.11.2024    ggu     double for energy introduced
 !
 !************************************************************
 
@@ -805,8 +806,8 @@
 
 	implicit none
 
-	real kenergy,penergy,tenergy,ksurf,paux
-	real energy(3)
+	!real kenergy,penergy,tenergy,ksurf
+	double precision kenergy,penergy,tenergy,ksurf
 	character*20 aline
 	logical debug
 

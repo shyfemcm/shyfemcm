@@ -104,6 +104,7 @@
 ! 30.05.2022	ggu	more changes for mpi
 ! 18.05.2023	ggu	in flx_write() call flx_collect_3d()
 ! 22.05.2023	ggu	need fluxes_r for write
+! 23.10.2024    ggu     module definition taken out to mod_flux.f90
 !
 ! notes :
 !
@@ -172,49 +173,6 @@
 !******************************************************************
 !******************************************************************
 !******************************************************************
-
-!==================================================================
-        module flux
-!==================================================================
-
-        implicit none
-
-	integer, save :: nl_flux = 0
-	integer, save :: ns_flux = 0
-
-        logical, save :: bflxinit = .false.
-        logical, save :: bflxalloc = .false.
-        integer, save :: nsect = -1
-        integer, save :: kfluxm = 0
-        integer, save, allocatable :: kflux(:)
-        integer, save, allocatable :: kflux_ext(:)
-        integer, save, allocatable :: iflux(:,:)
-        integer, save, allocatable :: itable(:,:)
-        character*80, save, allocatable :: chflx(:)
-        double precision, save :: da_out(4) = 0.
-
-        integer, save :: nlmax
-        integer, save, allocatable :: nlayers(:)
-        integer, save, allocatable :: nlayers_global(:)
-
-        double precision, save, allocatable :: fluxes(:,:,:)
-        double precision, save, allocatable :: flux0d(:)
-
-        double precision, save, allocatable :: masst(:,:,:)
-        double precision, save, allocatable :: saltt(:,:,:)
-        double precision, save, allocatable :: tempt(:,:,:)
-        double precision, save, allocatable :: conzt(:,:,:)
-        double precision, save, allocatable :: ssctt(:,:,:)
-
-        real, save, allocatable :: fluxes_r(:,:,:)
-
-!==================================================================
-        contains
-!==================================================================
-
-!==================================================================
-        end module flux
-!==================================================================
 
         subroutine flx_read_section(n,ns)
 

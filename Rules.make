@@ -75,6 +75,9 @@ C_COMPILER = GNU_GCC
 #C_COMPILER = IBM
 #C_COMPILER = PGI
 
+INTEL_VERSION = IFORT
+#INTEL_VERSION = IFX
+
 ##############################################
 # Parallel compilation
 ##############################################
@@ -142,10 +145,12 @@ PARTS = NONE
 #PARTS = METIS
 #PARTS = PARMETIS
 METISDIR =
+METISDIR = ${METIS_HOME}
 #METISDIR = /usr/local
 #METISDIR = $(HOME)/lib/metis
 #METISDIR = $(LD_LIBRARY_PATH)
-PARMETISDIR =
+PARMETISDIR = 
+PARMETISDIR = ${PARMETIS_HOME}
 #PARMETISDIR = /usr/local
 #PARMETISDIR = $(HOME)/lib/parmetis
 #PARMETISDIR = $(LD_LIBRARY_PATH)
@@ -194,6 +199,7 @@ SOLVER = SPARSKIT
 # PETSC_DIR it the path to the PETSc installation folder, it is 
 # needed for both the PETSc and the PETSc_AmgX solvers
 PETSC_DIR =
+PETSC_DIR =${PETSC_HOME}
 
 # The next 4 paths must be filled in for the PETSc_AmgX solver only.
 
@@ -259,7 +265,9 @@ GPU=NONE
 
 NETCDF = false
 #NETCDF = true
-#NETCDFDIR =
+#NETCDFDIR = 
+NETCDFDIR = ${NETCDF_C_HOME}
+NETCDFFDIR =${NETCDF_FORTRAN_HOME}
 
 ##############################################
 # GOTM library
@@ -290,28 +298,30 @@ GOTM = true
 # ERSEM, AQUABC, and BFM.
 # The BFM model is still experimental.
 #
+# The mercury module can be used by setting MERCURY = true
+#
 ##############################################
 
 ECOLOGICAL = NONE
 #ECOLOGICAL = EUTRO
-#ECOLOGICAL = ERSEM
 #ECOLOGICAL = AQUABC
 #ECOLOGICAL = BFM
+
+MERCURY = false
+#MERCURY = true
 
 ##############################################
 #
 # BFM model - in order to use the BFM model
-# please see the README file in fembfm
+# please see the README file in src/contrib/ecological/bfm
 # and set the BFMDIR directory below.
 #
 # this feature is still experimental - no support
 #
 ##############################################
 
-#BFMDIR = /gpfs/work/OGS18_PRACE_P_0/SHYFEM_BFM/bfm
-#BFMDIR = /home/georg/appl/donata/bfm/bfmv5
-#BFMDIR = /home/georg/appl/donata/bfm/BiogeochemicalFluxModel-5.1.0
-#BFMDIR = $(HOME)/BFM
+BFMDIR =
+BFMDIR=$(BFM_HOME)
 
 ##############################################
 # WW3 wave model
@@ -330,7 +340,7 @@ ECOLOGICAL = NONE
 
 WW3 = false
 #WW3 = true
-WW3DIR = /path/to/WW3
+#WW3DIR = $(HOME)/WW3
 
 ##############################################
 # Experimental features
@@ -455,6 +465,13 @@ ifeq ($(SOLVER),PARALUTION)
   endif
 endif
 
+ifeq ($(SOLVER),PETSC)
+  ifeq ($(PETSC_DIR),)
+    RULES_MAKE_PARAMETERS = RULES_MAKE_PARAMETER_ERROR
+    RULES_MAKE_MESSAGE = "PETSC_DIR directory is empty"
+  endif
+endif
+
 ifeq ($(C_COMPILER),INTEL)
   ifneq ($(FORTRAN_COMPILER),INTEL)
     RULES_MAKE_PARAMETERS = RULES_MAKE_PARAMETER_ERROR
@@ -473,10 +490,14 @@ ifeq ($(ECOLOGICAL),BFM)
   endif
 endif
 
-ifneq ($(PARALLEL_MPI),NONE)
+ifeq ($(PARALLEL_MPI),NODE)
   ifeq ($(PARALLEL_OMP),true)
     RULES_MAKE_PARAMETERS = RULES_MAKE_PARAMETER_ERROR
     RULES_MAKE_MESSAGE = "OMP and MPI parallelization are incompatible"
+  endif
+  ifeq ($(PARTS),NONE)
+    RULES_MAKE_PARAMETERS = RULES_MAKE_PARAMETER_ERROR
+    RULES_MAKE_MESSAGE = "MPI parallelization PARTS = METIS"
   endif
 endif
 
@@ -1021,6 +1042,12 @@ ifeq ($(FORTRAN_COMPILER),INTEL)
   ifneq ($(PARALLEL_MPI),NONE)
     FINTEL      = mpiifort
   endif
+  ifeq ($(INTEL_VERSION),IFX)
+    FINTEL	= ifx
+    ifneq ($(PARALLEL_MPI),NONE)
+      FINTEL      = mpiifort -fc=ifx
+    endif
+  endif
   F77		= $(FINTEL)
   F95     	= $(F77)
   LINKER	= $(F77)
@@ -1055,6 +1082,9 @@ endif
 
 ifeq ($(C_COMPILER),INTEL)
   CC     = icc
+  ifeq ($(INTEL_VERSION),IFX)
+    CC	= icx
+  endif
   CFLAGS = -O -g -traceback -check-uninit
   CFLAGS = -O -g -traceback
   LCFLAGS = -O 

@@ -266,6 +266,7 @@
 	call populate_strings
 
 	if( blist ) then
+	  !call stats_strings
 	  call list_strings
 	  call exit(99)
 	end if

@@ -4,7 +4,7 @@
 	subroutine handle_shypre_optimization(bwrite,bww,bdebug,bauto,bopti &
      &				,nkn,nel,nen3v,ng,ipv &
      &				,kphv,iarnv &
-     &				,xgv,ygv,mbw,ngr)
+     &				,xgv,ygv,hkv,mbw,ngr)
 
 	implicit none
 

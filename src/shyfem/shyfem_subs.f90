@@ -182,6 +182,11 @@
 ! 12.12.2023    ggu     introduce dtmax to make limited run
 ! 10.05.2024    ggu     set spherical just after basin read
 ! 06.09.2024    lrp     nuopc-compliant
+! 29.09.2024    ggu     call tvd_init before time loop
+! 13.10.2024    ggu     more debug output for *.dbg files, reordered
+! 15.11.2024    ggu     flush iuinfo before stopping
+! 23.11.2024    ggu     introduced check_partition_quality()
+! 03.12.2024    lrp     ww3 restored
 !
 !*****************************************************************
 !
@@ -235,6 +240,7 @@
 	use mod_test_zeta
 	use befor_after
 	use mod_trace_point
+	use mod_quad_tree
 
 	implicit none
 
@@ -325,6 +331,7 @@
 	call system_clock(count3, count_rate, count_max)
         mpi_t_start = shympi_wtime()
 	call shympi_setup			!sets up partitioning of basin
+	call check_partition_quality
         parallel_start = shympi_wtime()
 
 	call allocate_2d_arrays
@@ -464,9 +471,11 @@
 	call tidefini
 	call close_init
         call shdist(rdistv)
+	call quad_tree_initialize
 	call tracer_init
-        call qhdist(qdistv) !DWNH
 	call bfm_init
+	call tvd_init
+        call qhdist(qdistv) !DWNH
 	call renewal_time
         call lagrange
 	call tidepar_init
@@ -509,7 +518,7 @@
 	!call custom(it)		!call for initialization
 
 	!write(6,*) 'starting time loop'
-        call shympi_comment('starting time loop...')
+        !call shympi_comment('starting time loop...')
 
 	call print_time
 
@@ -645,6 +654,8 @@
 
 	implicit none
 
+	integer iuinfo
+
 	call cpu_time_end(2)
 
 	call print_end_time
@@ -705,6 +716,9 @@
         write(6,*) 'simulation start:   ',aline_start 
         write(6,*) 'simulation end:     ',aline_end 
         write(6,*) 'simulation runtime: ',atime_end-atime_start
+
+	call getinfo(iuinfo)
+	if( iuinfo > 0 ) flush(iuinfo)
 
 	end if
 
@@ -849,14 +863,14 @@
 	call mod_geom_dynamic_init(nkn,nel)
 
 	call mod_meteo_init(nkn)
-	call mod_geom_init(nkn,nel,ngr)
+	!call mod_geom_init(nkn,nel,ngr)
 	call mod_bndo_init(ngr,nrb)
 
 	call mod_depth_init(nkn,nel)
 
 	!call ev_init(nel)
 
-	call mod_tvd_init(nel)
+	!call mod_tvd_init(nel)
 
 	write(6,*) '2D arrays allocated: ',nkn,nel,ngr
 
@@ -946,7 +960,7 @@
 	iconz = nint(getpar("iconz"))
 	itvd = nint(getpar("itvd"))
 	
-	call tvd_init(itvd)
+	call tvd_init
 	
 	if(itemp .gt. 0) nscal = nscal +1
 	if(isalt .gt. 0) nscal = nscal +1
@@ -981,6 +995,39 @@
 !$OMP END PARALLEL 	
 
 	end subroutine
+
+!*****************************************************************
+
+	subroutine check_partition_quality
+
+	use shympi
+
+	implicit none
+
+	real pqual
+	real getpar
+
+	pqual = nint(getpar("pqual"))
+
+	if( pquality > pqual ) then
+	  write(6,*) 'the partition quality index is an empirical'
+	  write(6,*) 'index that shows the quality of the partition'
+	  write(6,*) 'smaller numbers indicate better quality'
+	  write(6,*) 'computed partition quality: ',pquality
+	  write(6,*) 'allowed partition quality:  ',pqual
+	  write(6,*) 'please check the partition of your domain'
+	  write(6,*) 'you can find a graphical rappresentation in'
+	  write(6,*) 'partition.np.node.grd'
+	  write(6,*) 'you can visualize the partition with the command'
+	  write(6,*) 'grid -FT partition.np.node.grd'
+	  write(6,*) 'where np is the number of the desired domains'
+	  write(6,*) 'if you are satisfied with this partition,'
+	  write(6,*) 'set the value of pqual in the $para section'
+	  write(6,*) 'to a value higher then the computed quality'
+	  call error_stop('partition quality')
+	end if
+
+	end
 
 !*****************************************************************
 
@@ -1100,6 +1147,7 @@
 	use mod_diff_visc_fric
 	use mod_bound_dynamic
 	use tide
+	use mod_meteo
 
 	implicit none
 
@@ -1130,27 +1178,31 @@
 	icall = icall + 1
 	call shympi_write_debug_time(dtime)
 
-	!call shympi_write_debug_node('rqv',rqv)
-	!call shympi_write_debug_node('rqpsv',rqpsv)
-	!call shympi_write_debug_node('rqdsv',rqdsv)
-	!call shympi_write_debug_node('mfluxv',mfluxv)
+	call shympi_write_debug_node('mfluxv',mfluxv)
+	call shympi_write_debug_node('rqv',rqv)
+	call shympi_write_debug_node('rqpsv',rqpsv)
+	call shympi_write_debug_node('rqdsv',rqdsv)
+	call shympi_write_debug_node('tauxnv',tauxnv)
+	call shympi_write_debug_node('tauynv',tauynv)
+	call shympi_write_debug_node('wxv',wxv)
+	call shympi_write_debug_node('wyv',wyv)
 
+	call shympi_write_debug_elem('fxv',fxv)
+	call shympi_write_debug_elem('fyv',fyv)
 	call shympi_write_debug_node('zeqv',zeqv)
 	call shympi_write_debug_node('znv',znv)
 	call shympi_write_debug_node('zov',zov)
 	call shympi_write_debug_elem(3,'zenv',zenv)
-	call shympi_write_debug_elem('unv',unv)
-	call shympi_write_debug_elem('vnv',vnv)
 	call shympi_write_debug_elem('utlnv',utlnv)
 	call shympi_write_debug_elem('vtlnv',vtlnv)
+	call shympi_write_debug_elem('unv',unv)
+	call shympi_write_debug_elem('vnv',vnv)
+	call shympi_write_debug_node('wlnv',wlnv)
 	call shympi_write_debug_node('hdknv',hdknv)
 	call shympi_write_debug_elem('hdenv',hdenv)
 	call shympi_write_debug_node('saltv',saltv)
 	call shympi_write_debug_node('tempv',tempv)
 	call shympi_write_debug_node('rhov',rhov)
-	call shympi_write_debug_node('wlnv',wlnv)
-	call shympi_write_debug_elem('fxv',fxv)
-	call shympi_write_debug_elem('fyv',fyv)
 	if( allocated(cnv) ) then
 	  call shympi_write_debug_node('cnv',cnv)
 	end if

@@ -328,6 +328,7 @@
 	integer id
 	double precision value
 	queue_peek_d = .false.
+	value = 0.
 	if( pentry(id)%fill == 0 ) return
 	if( pentry(id)%type /= value_type ) then
 	  call queue_error(id,type_error)

@@ -68,7 +68,7 @@ MAKEDEPEND = $(FEMBIN)/mkdp.pl
 
 #----------------------------------------------------------------------------
 
-LFLAGS:= $(LIB_NETCDF) $(LIB_MPI)
+LFLAGS += $(LIB_NETCDF) $(LIB_MPI)
 
 #----------------------------------------------------------------------------
 
@@ -78,9 +78,6 @@ OBJ := \
 	mod_hydro_plot.o \
 	$(FEMDIR)/src/tools/shyelab/elabtime.o \
 	$(FEMDIR)/src/tools/shyelab/elabutil.o \
-	$(FEMDIR)/src/shyfem/hydro_admin.o \
-	$(FEMDIR)/src/shyfem/hydro_vel.o \
-	$(FEMDIR)/src/shyfem/hydro_print.o \
 	$(FEMDIR)/src/tools/shyelab/shy_util2.o \
 	plotutil.o \
 	supout.o \
@@ -120,8 +117,11 @@ $(EXES): $(OBJ) $(LIBF) $(EXES).o
 
 #----------------------------------------------------------------------------
 
-clean: cleanobj cleanlinks cleanexe
+clean: cleanobj cleanlinks cleanexe cleanvar
 	cd util; make clean
+
+cleanvar:
+	-rm -f *.tmp *.bak
 
 cleanobj:
 	-rm -f *.o
@@ -145,13 +145,13 @@ depend:
 #----------------------------------------------------------------------------
 
 %.o:%.f
-	${F77} $(FFLAGS) $(INCLUDE) -c $< -o $@
+	${F77} $(FFLAGS) $(INCLUDE) -c $<
 
 %.o:%.f90
-	${F77} $(FFLAGS) $(INCLUDE) -c $< -o $@
+	${F77} $(FFLAGS) $(INCLUDE) -c $<
 
 %.o:%.c
-	${CC} $(CFLAGS) $(INCLUDE) -c $< -o $@
+	${CC} $(CFLAGS) $(INCLUDE) -c $<
 
 #----------------------------------------------------------------------------
 
@@ -226,6 +226,7 @@ supout.o: ../../../lib/mod/basin.mod ../../../lib/mod/levels.mod \
 		../../../lib/mod/simul.mod 
 supsim.o: ../../../lib/mod/basin.mod ../../../lib/mod/levels.mod \
 		../../../lib/mod/mod_color.mod \
+		../../../lib/mod/mod_connect.mod \
 		../../../lib/mod/mod_depth.mod \
 		../../../lib/mod/mod_geom.mod \
 		../../../lib/mod/mod_hydro.mod \

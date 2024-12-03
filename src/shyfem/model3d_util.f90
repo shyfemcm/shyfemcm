@@ -75,6 +75,7 @@
 ! 19.04.2018	ggu	changed VERS_7_5_45
 ! 16.02.2019	ggu	changed VERS_7_5_60
 ! 09.05.2023    lrp     introduce top layer index variable
+! 15.11.2024    ggu     double for energy introduced
 !
 !******************************************
 
@@ -343,10 +344,10 @@
 
 	implicit none
 
-	real kenergy		!kinetic energy (return)
-	real penergy		!potential energy relative to z=0 (return)
-	real ksurf		!kinetic energy of surface layer (return)
-	integer ia_ignore	!area code to be ignored
+	double precision kenergy !kinetic energy (return)
+	double precision penergy !potential energy relative to z=0 (return)
+	double precision ksurf	 !kinetic energy of surface layer (return)
+	integer ia_ignore	 !area code to be ignored
 
 	integer ie,ii,l,lmax,lmin,ia,k,ntot
 	double precision area,pot,kin,kinsurf,z,zz,ke

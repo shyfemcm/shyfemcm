@@ -24,9 +24,9 @@
 !
 !--------------------------------------------------------------------------
 
-!module aquabc_pel_state_var_indexes
+!module aquabc_II_pel_state_var_indexes
 
-module aquabc_pel_state_var_indexes
+module aquabc_II_pel_state_var_indexes
     implicit none
     integer, parameter :: NH4_N_INDEX          = 1
     integer, parameter :: NO3_N_INDEX          = 2
@@ -58,4 +58,4 @@ module aquabc_pel_state_var_indexes
     integer, parameter :: S_PLUS_6_INDEX       = 28
     integer, parameter :: S_MINUS_2_INDEX      = 29
     integer, parameter :: CH4_C_INDEX          = 30 
-end module AQUABC_PEL_STATE_VAR_INDEXES
+end module AQUABC_II_PEL_STATE_VAR_INDEXES

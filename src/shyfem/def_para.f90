@@ -229,6 +229,9 @@
 ! 15.02.2022	ggu	new parameters for limiting_scalar
 ! 20.07.2023    lrp     new parameter nzadapt
 ! 13.09.2024    lrp     new parameter iatm
+! 16.11.2024	ggu	new parameter ibasin
+! 23.11.2024	ggu	new parameter pqual
+! 03.12.2024    lrp     new parameter irain for the coupled model
 !
 !************************************************************************
 
@@ -445,7 +448,87 @@
 
 ! |itmoff|	Start time for writing to file OFF,
 !		the file containing data for offline runs.
+
 	call addpar('itmoff',-1.)
+
+! |idtmet|, |itmmet|	Time step and start time for writing meteo
+!			variables read from file. 
+! |imetout|		This parameters indicates what meteo parameters
+!			should be output. For wind set it to 1, for heat 10,
+!			for rain 100, and for ice 1000. 
+!			Combinations are possible, e.g., 11 writes wind 
+!			and heat data, and 1111 writes all available data
+!			to the file. (Default 0)
+
+	call addpar('idtmet',0.)
+	call addpar('itmmet',-1.)
+	call addpar('imetout',0.)
+
+!c------------------------------------------------------------------------
+
+! DOCS	BASIN		Handling of grd files
+!
+! The model normally reads a file |.bas| that contains the numerical
+! mesh in an unformatted format. This file can be produced by running
+! |shypre| on a |.grd| file that contains the numerical grid in
+! ASCII format. However, |shyfem| can also directly process a |.grd| file
+! and transform it into a |.bas| file, eliminating the need for a
+! pre-processing of the |.grd| file by |shypre|.
+!
+! If the basin name specified in the |STR| file has no extension, then
+! |shyfem| will first look for a |.bas| file and read it. If not available,
+! it will look for a |.grd| file, read and process it. If also a |.grd|
+! file is not found, |shyfem| will exit with an error.
+!
+! If the basin name in the |STR| file has an extension |.bas|, 
+! |shyfem| will only look for a |.bas| file, and, if not found, 
+! it will exit with an error. If the basin file in the |STR| file has
+! the extension |.grd|, |shyfem| will look for a |.grd| file and
+! process it to create a |.bas| file, even if such a file already exists.
+! If no file |.grd| is found, |shyfem| will exit with an error.
+!
+! If a |.grd| file has to be read, then the parameter |ibasin| will
+! regulate, how the file will be processed. A value of -1 will just
+! read the file and not change the numbering of nodes and element. 
+! A value of 0 will just renumber the elements, and a value of 1 will
+! optimize the bandwidth, renumbering both nodes and elements.
+! These values correspond to the command line options of |shypre|
+! as |-noopti| for -1, |-renumber| for 0, and |-opti| for 1.
+
+! |ibasin|		Treatment of the |.grd| file. A value of -1
+!			will leave the numbering of nodes and elements
+!			as in the |.grd| file, a value of 0 just
+!			renumbers the elements, and a value of 1
+!			optimizes the bandwidth, renumbering both 
+!			nodes and elements. (Default -1)
+
+	call addpar('ibasin',-1.)
+
+! The model, if run in MPI mode, also checks the quality of the partition
+! that is automatically produced. If the quality is too bad the execution
+! of the program stops.
+!
+! The quality index is an empirical value that gives an indication
+! on the quality of the partition. Its value depends on the ratio
+! of ghost elements to the total number of elements. Smaller numbers
+! of the index are better.
+!
+! If the value of the index is higher than the value in |pqual| the
+! program stops executing. If you are satisfied anyway with the partition
+! produced, just set the value of |pqual| higher than the computed
+! quality index and |shyfem| will run. i
+!
+! The partition can be checked with one of the following commands:
+! |grid -FT partition.np.node.grd| or |grid -FTo partition.np.node.grd|
+! where np is the number of the desired domains.
+!
+! It is important to note that the
+! quality index does not concern the quality of the results, just
+! the speed of execution of the program.
+
+! |pqual|		Maximum quality index allowed. (Default 2.5)
+
+	call addpar('pqual',2.5)
 
 !c------------------------------------------------------------------------
 
@@ -846,18 +929,20 @@
 	call addpar('hlvmin',0.25)	!min percentage of last layer thickness
 
 ! With $z-$layers the treatment of the free-surface must be addressed.
-! What happen if the water level falls below the first $z$-level? 
+! What happens if the water level falls below the first $z$-level? 
 ! A $z-$star type vertical grid deformation can be deployed.
-! The next parameter specify the number of surface layers that are moving.
+! The next parameter specifies the number of surface layers that are moving.
 
-! |nzadapt|	Parameter that controls the number of surface $z-$layers that are moving.
-!		The value $|nzadapt|\le 1$ corresponds to standard $z-$layers (Default). 
-!		Then, some care is needed to define the first interface sufficiently 
-!		deep to avoid the well-known "drying" of the first layer. 
-!		The value of $|nzadapt| = N_{tot}$, with $N_{tot}$ the total number 
-!		of $z$-layers, is $z-$star (all layers are moving).
-!		Other values of $1<|nzadapt|<N_{tot}$ corresponds to move, at minimum,
-!		the first |nzadapt| surface layers with $z-$star.  
+! |nzadapt|	Parameter that controls the number of surface $z-$layers
+!		that are moving. The value $|nzadapt|\le 1$ corresponds
+!		to standard $z-$layers (Default). Then, some care is
+!		needed to define the first interface sufficiently deep to
+!		avoid the well-known "drying" of the first layer. The
+!		value of $|nzadapt| = N_{tot}$, with $N_{tot}$ the total 
+!		numberof $z$-layers, is the conventional $z-$star 
+!		(all layers are moving). Other values of 
+!		$1<|nzadapt|<N_{tot}$ corresponds to move, at minimum,
+!		the first |nzadapt| surface layers with $z-$star.
 !		These feature is still experimental.
 
         call addpar('nzadapt',0.)      ! z-layers parameter
@@ -1176,15 +1261,20 @@
 ! computed scalars (temperature, salinity, generic concentration) to file.
 !
 ! |idtcon|, |itmcon|	Time step and start time for writing to file
-!			conz.shy (concentration) and ts.shy (temperature and
-!			salinity).
-! |irho|	Flag if the density is also written together with T/S.
-!		A value different from 0 writes the density to file.
-!		(Default 0)
+!			|.conz.shy| (concentration) and
+!			|.ts.shy| (temperature and salinity).
+! |irho|		Flag to indicate if the density is also written 
+!			together with T/S. A value different from 0 
+!			writes the density to file. (Default 0)
+! |iskin|		Flag to indicate if the skin temperature is written
+!			to file |.tskin.shy|.
+!			A value different from 0 writes the 
+!			skin temperature to file. (Default 0)
 
 	call addpar('idtcon',0.)	!time step for output
 	call addpar('itmcon',-1.)	!minimum time for output
-	call addpar('irho',0.)		!write rho ?
+	call addpar('irho',0.)		!write rho
+	call addpar('iskin',0.)		!write skin temperature
 
 ! DOCS	END
 
@@ -1244,6 +1334,22 @@
 	call addpar('iaicef',-99.)	!area code for ice free condition
 	call addpar('icemod',0.)	!use ice model?
 	call addpar('idtice',0.)	!time step for ice model
+
+       ! whether to output - instantaneous salt temp rho fields (icon_av=0),  
+       !                   - time-averaged fields (icon_av=1),  
+       !                   - vertically averged and time-averaged fields (icon_av=1)
+	call addpar('icon_av',0.) 
+       ! whether to output - instantaneous hydrodynamic fields (iout_av=0),  
+       !                   - time-averaged fields (iout_av=1),  
+	call addpar('iout_av',0.) 
+       ! whether to output - instantaneous ecological fields (ieco_av=0),  
+       !                   - time-averaged fields (ieco_av=1),  
+       !                   - vertically averaged and time-averaged fields (ieco_av=2)
+	call addpar('ieco_av',0.) 
+       ! whether to output - instantaneous layer thickness fields (ilayers=0),  
+       !                   - time-averaged thickness fields (ilayers=1),  
+       !                   - vertically averaged and time-averaged fields (ilayers=2)
+	call addpar('ilayers',-1.) 
 
 	end
 
@@ -1319,7 +1425,7 @@
 
 ! |rwhpar|	A horizontal diffusion can be defined for the lagrangian model.
 !		Its value can be specified in |rwhpar| and the units are 
-!		[m**2/s]. If |rwhpar| < 0 the diffusion parameter depends on
+!		[m**2/s]. If |rwhpar<0| the diffusion parameter depends on
 !		the local diffusivity (see |idhtyp|) (Default 0)
 
 	call addpar('rwhpar',0.)	!diffusion for lagrangian model
@@ -1353,9 +1459,9 @@
 
 ! |ipvert|	Set the vertical distribution of particles:
 !		\begin{description}
-!		\item[0] releases one particles only in surface layer
-!		\item[$>$0] release n particles regularly
-!		\item[$<$0] release n particles randomly
+!		\item[0] releases particles only in surface layer
+!		\item[$>$ 0] release n particles regularly
+!		\item[$<$ 0] release n particles randomly
 !		\end{description}
 
         call addpar('ipvert',0.)
@@ -1754,7 +1860,7 @@
 
 !************************************************************************
 
-! This subroutine defines the simulation wave parameter
+! This subroutine defines the ocean-atmosphere coupling
 
         subroutine nlsinh_atm
 

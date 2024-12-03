@@ -5,6 +5,7 @@
 #-----------------------------------------------
 
 base="$HOME/shyfemcm"
+base="$SHYFEMDIR"
 
 alldir=$( find $base/src -type d )
 
@@ -28,6 +29,7 @@ FullUsage()
   echo "  -h|-help         this help"
   echo "  -verbose         be verbose"
   echo "  -quiet           be quiet"
+  echo "  -i               ignore case for pattern"
   echo "  -file            look for pattern in file names"
   echo "  -pattern         look for pattern in files"
   echo "  -obsolete        look also in obsolete dirs"
@@ -75,14 +77,14 @@ Do_Pattern()
   do
     if SkipObsolete; then continue; fi
     cd $dir
-    result=$( grep "$*" *.f90 *.f 2> /dev/null )
+    result=$( grep $options "$*" *.f90 *.f 2> /dev/null )
     if [ -n "$result" ]; then
       if [ $full_name = "YES" ]; then
         if [ $full_only = "NO" ]; then
           echo "---- $dir ----" >&2
-          grep "$*" *.f90 *.f 2> /dev/null
+          grep $options "$*" *.f90 *.f 2> /dev/null
 	fi
-        grep -l "$*" $PWD/*.f90 $PWD/*.f 2> /dev/null
+        grep -l $options "$*" $PWD/*.f90 $PWD/*.f 2> /dev/null
       else
         echo "---- $dir ----" >&2
         grep "$*" *.f90 *.f 2> /dev/null
@@ -102,6 +104,7 @@ verbose=NO
 show_obsolete="NO"
 full_name="NO"
 full_only="NO"
+options=""
 
 while [ -n "$1" ]
 do
@@ -109,6 +112,7 @@ do
         -quiet)         quiet="YES";;
         -verbose)       verbose="YES";;
         -file)          do_file="YES";;
+        -i)             options="$options -i";;
         -pattern)       do_pattern="YES";;
         -obsolete)      show_obsolete="YES";;
         -full)          full_name="YES";;

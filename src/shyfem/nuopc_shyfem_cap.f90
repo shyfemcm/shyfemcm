@@ -16,10 +16,10 @@
 	!! We have added the following preprocessor to selectively decouple the 
         !! ocean component from the rest of the earth system. Disabling all 
 	!! the following macros, will result in an ocean component that does not 
-	!! advertise any importable/exportable Field. Use should you this only if you
+	!! advertise any importable/exportable Field. You should use this only if you
 	!! want to drive the model independently.
         !! You could also couples the ocean component only through
-	!! momentum or heat flux or sst only. This options may be useful for
+	!! momentum or heat flux or sst only. These options may be useful for
 	!! debugging and testing for example. In general, all the macros must be defined.
         !! Switching on/off the different fields is possible through the each model
         !! configuration file.

@@ -28,6 +28,8 @@
 ! 10.07.2015	ggu	changed VERS_7_1_50
 ! 16.02.2019	ggu	changed VERS_7_5_60
 ! 21.05.2019	ggu	changed VERS_7_5_62
+! 03.09.2024	ggu	new data structures
+! 23.09.2024	ggu	new array itvdup()
 
 !**************************************************************************
 
@@ -41,9 +43,13 @@
 
 	integer, save :: itvd_type = 0
 
-        real, allocatable, save :: tvdupx(:,:,:)
-        real, allocatable, save :: tvdupy(:,:,:)
-        integer, allocatable, save :: ietvdup(:,:,:)
+        real, allocatable, save :: xtvdup(:,:,:)	!x-coordinate
+        real, allocatable, save :: ytvdup(:,:,:)	!y-coordinate
+        integer, allocatable, save :: ietvdup(:,:,:)	!internal element number
+        integer, allocatable, save :: ieetvdup(:,:,:)	!external elem number
+        integer, allocatable, save :: iatvdup(:,:,:)	!domain of element
+        integer, allocatable, save :: ltvdup(:,:,:)	!lmax of element
+        integer, allocatable, save :: itvdup(:,:,:)	!index into array
 
 !==================================================================
 	contains
@@ -56,18 +62,28 @@
         if( nel == nel_tvd ) return
 
         if( nel_tvd > 0 ) then
-          deallocate(tvdupx)
-          deallocate(tvdupy)
+          deallocate(xtvdup)
+          deallocate(ytvdup)
           deallocate(ietvdup)
+          deallocate(ieetvdup)
+          deallocate(iatvdup)
+          deallocate(ltvdup)
+          deallocate(itvdup)
         end if
 
         nel_tvd = nel
 
         if( nel == 0 ) return
 
-        allocate(tvdupx(3,3,nel))
-        allocate(tvdupy(3,3,nel))
+        allocate(xtvdup(3,3,nel))
+        allocate(ytvdup(3,3,nel))
         allocate(ietvdup(3,3,nel))
+        allocate(ieetvdup(3,3,nel))
+        allocate(iatvdup(3,3,nel))
+        allocate(ltvdup(3,3,nel))
+        allocate(itvdup(3,3,nel))
+
+	write(6,*) 'mod_tvd_init successfully called ',nel
 
         end subroutine mod_tvd_init
 

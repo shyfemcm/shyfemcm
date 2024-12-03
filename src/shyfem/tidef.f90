@@ -39,6 +39,9 @@
 ! 13.03.2019	ggu	changed VERS_7_5_61
 ! 21.05.2019	ggu	changed VERS_7_5_62
 ! 28.04.2023	ggu	avoid using floating for **2
+! 13.10.2024	ggu	bug fix for INTEL_BUG
+! 15.10.2024	ggu	bug fix for INTEL_BUG (IFX)
+! 13.11.2024    ggu     marked old code with INTEL_BUG_OLD
 !
 !********************************************************************
 ! DOCS  START   S_tide
@@ -148,13 +151,13 @@
 
         use tide
         use basin, only : nkn
+        use mod_depth
 !$      use omp_lib
 
         implicit none
 
-        integer			:: k
-        integer 		:: iks,ikend,nchunk,nthreads
-        
+        integer 		:: k,iks,ikend,nchunk,nthreads
+
 !--------------------------------------------------------
 !------ compute tidal potential? ------------------------
 !--------------------------------------------------------
@@ -209,6 +212,7 @@
         use mod_hydro
         use basin, only : nkn
         use iso8601
+	use shympi
 
         implicit none
 
@@ -216,13 +220,32 @@
 
         real, allocatable        :: latf(:)
         real  			 :: llat,llon
-	real	  		 :: fact,arg
+	double precision	 :: fact,arg 			!INTEL_BUG
+	double precision	 :: hdepth			!INTEL_BUG
+	!real			 :: fact,arg 			!INTEL_BUG_OLD
+	!real			 :: hdepth			!INTEL_BUG_OLD
         real, parameter          :: d2r=4.0*atan(1.0)/180.0
         real, parameter          :: twopi=8.d0*atan(1.d0)
 	integer			 :: i,ld1
-        real                     :: eqtide  !Equilibrium tide [m]
+        double precision         :: eqtide  !Equilibrium tide [m] !INTEL_BUG
+        !real		         :: eqtide  !Equilibrium tide [m] !INTEL_BUG_OLD
         real			 :: loadb   !loading tide factor 
 					    ! [0.054,0.047,= ltidec*depth]
+
+	integer iudb,ks
+	logical bdebug
+	double precision dtime
+	integer ipext
+	!iudb = 890 + my_id
+	!ks = 90521
+	!call get_act_dtime(dtime)
+	!bdebug = ipext(k) == ks .and. dtime == 400.
+	bdebug = .false.
+
+!-----------------------------------------------
+!       Set up constants and parameters
+!-----------------------------------------------
+
 	allocate(latf(0:2))
 
         llon  = xgeov(k)
@@ -234,7 +257,10 @@
         latf(1) = sin(2.*llat)         !diurnal
         latf(0) = 1.5*latf(2) - 1.     !long-period
 
+!-----------------------------------------------
 !       Compute equilibrium tide
+!-----------------------------------------------
+
         eqtide = 0.
         do i = 1,ntd
           ld1  = const_ar(i)%dood(1)
@@ -244,11 +270,30 @@
           eqtide = eqtide + fact*cos(arg)
         end do
 
+!-----------------------------------------------
 !       Compute loading tide
-        loadb = ltidec * (hkv(k) + zov(k))
+!-----------------------------------------------
 
+	hdepth = dble(hkv(k))+dble(zov(k))		!INTEL_BUG
+        loadb = ltidec * hdepth				!INTEL_BUG
+        !loadb = ltidec * ( hkv(k) + zov(k) )		!INTEL_BUG_OLD
+
+!-----------------------------------------------
 !	Compute earth + loading
+!-----------------------------------------------
+
         zeqv(k) = eqtide + loadb*zov(k)
+
+	if( bdebug ) then
+	  write(iudb,*) dtime,k,ipext(k),ks
+	  write(iudb,*) ltidec,hkv(k),zov(k)
+	  write(iudb,*) hdepth
+	  write(iudb,*) ltidec,loadb,eqtide,zeqv(k)
+	end if
+
+!-----------------------------------------------
+!       End of routine
+!-----------------------------------------------
 
         end subroutine equilibrium_tide
 

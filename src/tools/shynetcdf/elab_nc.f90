@@ -38,6 +38,7 @@
 ! 16.05.2019	ggu	also hydro output fixed
 ! 29.01.2020	ggu	always write variables as 3d
 ! 05.08.2024	ggu	new variable sncglobal
+! 03.10.2024	ggu	introduced dim and dir
 !
 !************************************************************
 
@@ -64,7 +65,9 @@
         integer, save :: lmaxreg = 0
 
         integer, save, allocatable :: var_ids(:)
+        integer, save, allocatable :: var_dims(:)
         real, save, allocatable :: var3d(:)
+
         real, save, allocatable :: value2d(:,:)
         real, save, allocatable :: value3d(:,:,:)
         real, save, allocatable :: vnc3d(:,:,:)
@@ -93,8 +96,11 @@
 
 	logical bhydro
 	integer date0,time0
-	integer lmax,i,iztype,idim,ivar,ncnlv
+	integer lmax,i,iztype,idim,ivar,ncnlv,idir
 	real, save :: ncflag = -999.
+
+	logical has_direction_ivar
+	logical is_2d
 
 	call dts_get_date(date0,time0)
 	call compute_iztype(iztype)
@@ -102,6 +108,8 @@
         ncnlv = nlv
 	if ( b2d ) ncnlv = 1
 	bugrid = .false.
+
+	!write(6,*) 'ivars: ',ivars
 
 	if( breg ) then
 	  allocate(value2d(nxreg,nyreg))
@@ -124,20 +132,26 @@
 
 	bhydro = ivars(1) == 1		!this is a hydro file
 	allocate(var_ids(nvar))
+	allocate(var_dims(nvar))
 	var_ids = 0
 
+	idir = 0
         do i=1,nvar
 	  ivar = ivars(i)
 	  idim = 3
 	  if( bhydro ) then
-	    if( i == 1 ) idim = 2
-	    if( i == 2 ) cycle	!do not write second level
-	    if( i == 3 ) ivar = 2
+	    if( i == 2 ) cycle			!do not write second level
+	    if( i >= 3 ) ivar = 2				!velocity
 	  end if
-          call nc_init_variable(ncid,breg,idim,ivar,ncflag,var_ids(i))
+	  if( has_direction_ivar(ivar) ) idir = idir + 1	!directional
+	  if( is_2d(ivar) ) idim = 2
+	  !write(6,*) 'nc_output_init: ivar,idim: ',i,ivar,idim,idir
+	  var_dims(i) = idim
+          call nc_init_variable(ncid,breg,idim,ivar,idir,ncflag,var_ids(i))
         end do
 
         call nc_end_define(ncid)
+	!write(6,*) 'end of define...'
 
         if( breg ) then
           call nc_write_coords_reg(ncid,nxreg,nyreg,ncnlv &
@@ -146,12 +160,13 @@
           call nc_write_coords_fem(ncid,nkn,nel,ncnlv,xgv,ygv &
      &					,hkv,nen3v,hlv)
         end if
+	!write(6,*) 'end of nc_output_init...'
 
 	end
 
 !********************************************************************
 
-	subroutine nc_output_record(ncid,var_id,np,sv)
+	subroutine nc_output_record(ncid,var_id,var_dim,np,sv)
 
 	use basin
 	use levels
@@ -161,12 +176,19 @@
 
 	integer ncid
 	integer var_id
+	integer var_dim
 	integer np
 	!real cv3(nlvdi,nkn)
 	real sv(nlvdi,np)
 
 	integer lmax,nx,ny,iwrite
 	real, allocatable :: rncaux(:,:,:)
+	real, allocatable :: val2d(:)
+
+	if( var_dim == 2 .and. nlvdi /= 1 ) then
+	  write(6,*) 'nc_output_record: ',var_dim,nlvdi,nlv
+	  stop 'error stop nc_output_record: not a 2d variable'
+	end if
 
 	iwrite = iwrite_nc
 
@@ -174,15 +196,28 @@
 	  lmax = lmaxreg
 	  nx = nxreg
 	  ny = nyreg
-	  allocate(rncaux(nx,ny,lmax))
 	  if( nx*ny /= np ) stop 'error stop nc_output_record: breg'
-          call nc_rewrite_3d_reg(nlvdi,lmax,nx,ny,sv,rncaux)
-          call nc_write_data_3d_reg(ncid,var_id,iwrite &
+	  if( var_dim == 3 ) then
+	    allocate(rncaux(nx,ny,lmax))
+            call nc_rewrite_3d_reg(nlvdi,lmax,nx,ny,sv,rncaux)
+            call nc_write_data_3d_reg(ncid,var_id,iwrite &
      &					,lmax,nx,ny,rncaux)
+	  else
+	    allocate(val2d(np))
+	    val2d(:) = sv(1,:)
+            !call fm2am2d(val2d,nx,ny,fmreg,value2d)
+            call nc_write_data_2d_reg(ncid,var_id,iwrite,nx,ny,val2d)
+	  end if
 	else
 	  if( nkn /= np ) stop 'error stop nc_output_record: nkn'
-          call nc_compact_3d(nlv,nlv,nkn,sv,var3d)
-          call nc_write_data_3d(ncid,var_id,iwrite,nlv,nkn,var3d)
+	  if( var_dim == 3 ) then
+            call nc_compact_3d(nlv,nlv,nkn,sv,var3d)
+            call nc_write_data_3d(ncid,var_id,iwrite,nlv,nkn,var3d)
+	  else
+	    allocate(val2d(np))
+	    val2d(:) = sv(1,:)
+            call nc_write_data_2d(ncid,var_id,iwrite,nkn,val2d)
+	  end if
         end if
 
 	end
@@ -326,6 +361,21 @@
 	integer :: var_id
 
 	var_id = var_ids(iv)
+
+	end
+
+!********************************************************************
+
+	subroutine nc_output_get_var_dim(iv,var_dim)
+
+	use netcdf_out
+
+	implicit none
+
+	integer :: iv
+	integer :: var_dim
+
+	var_dim = var_dims(iv)
 
 	end
 

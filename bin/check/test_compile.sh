@@ -128,16 +128,31 @@ CompTest()
 
 CompAll()
 {
-  Comp "ECOLOGICAL=NONE GOTM=true NETCDF=false SOLVER=SPARSKIT \
-		PARALLEL_OMP=false PARALLEL_MPI=NONE"
+  host=$( hostname )
+  echo "hostname = $host"
+  if [ "$host" = "tide" ]; then
+    METISDIR=$HOME/georg/lib/metis
+  else
+    METISDIR=$HOME/lib/metis
+  fi
+
+  INTEL_VERSION="IFORT"
+  #INTEL_VERSION="IFX"
+
+  Comp "INTEL_VERSION=$INTEL_VERSION \
+	ECOLOGICAL=NONE GOTM=true NETCDF=false \
+	SOLVER=SPARSKIT \
+	PARALLEL_OMP=false PARALLEL_MPI=NONE"
   #Comp "ECOLOGICAL=EUTRO GOTM=false SOLVER=PARDISO"
   Comp "ECOLOGICAL=EUTRO"
+  Comp "ECOLOGICAL=NONE MERCURY=true"
   #Comp "ECOLOGICAL=ERSEM GOTM=true NETCDF=true SOLVER=GAUSS"
-  Comp "ECOLOGICAL=NONE NETCDF=true SOLVER=SPARSKIT"
+  Comp "ECOLOGICAL=BFM NETCDF=true SOLVER=SPARSKIT"
   Comp "ECOLOGICAL=AQUABC NETCDF=false PARALLEL_OMP=true"
   Comp "ECOLOGICAL=NONE GOTM=true NETCDF=false SOLVER=SPARSKIT \
 	PARALLEL_OMP=false PARALLEL_MPI=NODE \
-	PARTS=METIS METISDIR=$HOME/lib/metis"
+	PARTS=METIS METISDIR=$METISDIR"
+  Comp "SOLVER=PETSC"
 
   [ "$regress" = "NO" ] && return
 
@@ -156,8 +171,11 @@ Comp()
   echo "start compiling in" `pwd`
   rm -f stdout.out stderr.out
   touch stdout.out stderr.out
-  make cleanall > tmp.tmp 2> tmp.tmp
-  make fem > stdout.out 2> stderr.tmp
+
+  if [ "$dry_run" = "NO" ]; then
+    make cleanall > tmp.tmp 2> tmp.tmp
+    make fem > stdout.out 2> stderr.tmp
+  fi
 
   [ -f stderr.tmp ] && cat stderr.tmp | grep -v "ar: creating" > stderr.out
 
@@ -198,6 +216,13 @@ Rules()
   ExitOnError "error executing subst_make.pl ...aborting"
   mv tmp.tmp Rules.make
 
+  echo "setting macros: $1"
+  echo "setting macros: $1" >> allstdout.txt
+  echo "setting macros: $1" >> allstderr.txt
+}
+
+PrintAll()
+{
   echo "setting macros: $1"
   echo "setting macros: $1" >> allstdout.txt
   echo "setting macros: $1" >> allstderr.txt
@@ -250,8 +275,15 @@ SetCompiler()
 # start routine
 #--------------------------------------------------------------------
 
+if [ ! -f VERSION ]; then
+  echo "must be in base directory to run this script... aborting"
+  exit 1
+fi
+
 regress="NO"
 [ "$1" = "-regress" ] && regress="YES"
+dry_run="NO"
+[ "$1" = "-dry_run" ] && dry_run="YES"
 
 SetUp
 Clean_before
@@ -259,9 +291,9 @@ Clean_before
 for comp in $compilers
 do
 
-  echo "================================="
-  echo "compiling with $comp"
-  echo "================================="
+  PrintAll "================================="
+  PrintAll "compiling with $comp"
+  PrintAll "================================="
 
   SetCompiler $comp
   [ $? -ne 0 ] && continue

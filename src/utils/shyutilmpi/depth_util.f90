@@ -73,6 +73,8 @@
 ! 13.03.2019	ggu	changed VERS_7_5_61
 ! 21.05.2019	ggu	changed VERS_7_5_62
 ! 05.12.2022	ggu	use ie_mpi for accumulation and computation of hkv
+! 15.10.2024	ggu	INTEL_BUG (IFX) solved
+! 13.11.2024    ggu     marked old code with INTEL_BUG_OLD
 !
 !********************************************************************
 
@@ -312,8 +314,10 @@
         real hkv(nkn)
 ! local
         integer ie,ii,k,kn,ie_mpi
-	real weight
-        real haux(nkn)   !aux array -> bug - was integer
+	!real weight     	!INTEL_BUG_OLD
+        !real haux(nkn) 	!INTEL_BUG_OLD
+	double precision weight    !INTEL_BUG
+        double precision haux(nkn) !aux array -> bug - was integer !INTEL_BUG
 
 	real weight_elem
 

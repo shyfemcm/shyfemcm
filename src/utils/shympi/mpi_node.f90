@@ -46,7 +46,7 @@
 ! 17.04.2021	ggu	new shympi_exchange_array_3(), check_external_numbers()
 ! 22.04.2021	ggu	allocation of some arrays for bounds check
 ! 22.04.2021	ggu	bug fix in shympi_copy_*()
-! 23.04.2021    clr     formal modifications in MODEL PROCEDURE declaration for meson compatibility
+! 23.04.2021    clr     changes in MODEL PROCEDURE decl. for meson compatibility
 ! 25.06.2021    ggu     in shympi_init() check if basin has been read
 ! 10.11.2021    ggu     error fix mixing scalar and array arguments
 ! 22.11.2021    ggu     error fix when reading grd file
@@ -83,10 +83,13 @@
 ! 28.08.2024    ggu     new variable bmpi_debug_txt
 ! 06.09.2024    ggu     better debug info for shympi_check_array()
 ! 06.09.2024    lrp     nuopc-compliant
-!
+! 13.10.2024    ggu     new parameter bextra_exchange to deal with INTEL_BUG
+! 13.11.2024    ggu     new routine shympi_find_element()
+! 23.11.2024    ggu     new variable pquality
+
 !******************************************************************
 
-! for partioning on nodes the following is true (at least 2 domaina)
+! for partioning on nodes the following is true (at least 2 domains)
 !
 ! nkn_global > nkn_local >  nkn_unique == nkn_inner
 ! nel_global > nel_local >= nel_unique >= nel_inner
@@ -108,6 +111,7 @@
 	logical, save :: bmpi_allgather = .true.	!do allgather
 	logical, save :: bmpi_skip = .false.		!skip if not bmpi
 	logical, save :: bmpi_ldebug = .false.		!local debug
+	logical, save :: bextra_exchange = .false.	!deal with INTEL_BUG
 
 	logical, parameter :: blocal_shympi_debug = .false. !write debug
 
@@ -135,12 +139,7 @@
 	integer,save :: ne_max = 0		!max of nel of all domains
 	integer,save :: nn_max = 0		!max of nkn/nel of all domains
 
-	integer,save :: n_ghost_areas = 0
-	integer,save :: n_ghost_nodes_max = 0
-	integer,save :: n_ghost_elems_max = 0
-	integer,save :: n_ghost_max = 0
-	integer,save :: n_ghost_max_global = 0
-	integer,save :: n_buffer = 0
+! total number of nodes/elems in domains
 
 	integer,save,pointer :: n_domains(:)
 	integer,save,target,allocatable :: nkn_domains(:)	!local total
@@ -151,17 +150,39 @@
 	integer,save,allocatable :: nel_cum_domains(:)
 	integer,save,allocatable :: nlv_domains(:)
 
+! information on ghost areas (nodes and elements)
+
+	integer,save :: n_ghost_areas = 0
+	integer,save :: n_ghost_nodes_max = 0
+	integer,save :: n_ghost_elems_max = 0
+	integer,save :: n_ghost_max = 0
+	integer,save :: n_ghost_max_global = 0
+	integer,save :: n_buffer = 0
+
+! arrays for ghost nodes/elems
+
 	integer,save,allocatable :: ghost_areas(:,:)
 	integer,save,allocatable :: ghost_nodes_in(:,:)
 	integer,save,allocatable :: ghost_nodes_out(:,:)
 	integer,save,allocatable :: ghost_elems_in(:,:)
 	integer,save,allocatable :: ghost_elems_out(:,:)
 
+! id of nodes and elems
+! the id of a node is unique
+! a node only belongs to one domain (partitioning on nodes)
+! an element can belong to more than one domain (maximum 3)
+! the dimension of id_elem is id_elem(0:3,nel)
+! id_elem(0,ie) is the the total number of domains the element ie belongs to
+! id_elem(1:3,ie) are the domains the element ie belongs to
+! in id_elem(1,ie) is the principal domain
+
 	integer,save,allocatable :: id_node(:)		!domain (id) of node
 	integer,save,allocatable :: id_elem(:,:)	!domain (id) of elem
 
-	integer,save,allocatable :: ip_sort_node(:)	!sorted external nodes
-	integer,save,allocatable :: ip_sort_elem(:)	!sorted external elems
+	! sorted node/elem numbering as in total domain
+
+	integer,save,allocatable :: ip_sort_node(:)	!sorted internal nodes
+	integer,save,allocatable :: ip_sort_elem(:)	!sorted internal elems
 
 	! next are global arrays for external node/elem numbers
 
@@ -171,6 +192,7 @@
 
 	! next are pointers from local to global internal node/elem numbers
 
+	integer,pointer :: ip_int(:) !pointer to  internal nums
 	integer,save,target,allocatable :: ip_int_node(:) !global internal nums
 	integer,save,target,allocatable :: ip_int_elem(:)
 
@@ -179,8 +201,16 @@
 	integer,save,target,allocatable :: ip_int_nodes(:,:) !global int nums
 	integer,save,target,allocatable :: ip_int_elems(:,:)
 
+	! nen3v and hlv index of global domain
+
 	integer,save,allocatable :: nen3v_global(:,:)	!global element index
 	real,save,allocatable :: hlv_global(:)		!global layer depths
+
+	! quality index of partition
+
+	real, save :: pquality = 0.
+
+	! communication structures
 
         type communication_info
           integer, public :: numberID
@@ -623,6 +653,11 @@
 	    write(my_unit,*) 'set bmpi_debug_txt=.false. to avoid this output'
 	    write(my_unit,*) '=========================================='
 	    write(my_unit,*) 'shympi initialized: ',my_id,n_threads,my_unit
+	  else
+	    if( shympi_is_master() ) then
+	      write(6,*) 'no mpi_debug_*.txt file opened: ',my_unit
+	      write(6,*) 'set bmpi_debug_txt=.true. to write this file'
+	    end if
 	  end if
 	  write(6,*) 'shympi initialized: ',my_id,n_threads,my_unit
 	else if( bmpi_debug ) then
@@ -991,9 +1026,11 @@
 
 	subroutine shympi_finalize
 
+! this is called from all processes to finish gracefully
+
 	call shympi_barrier_internal
 	call shympi_finalize_internal
-	stop
+	stop 'finalizing...'
 
 	end subroutine shympi_finalize
 
@@ -1001,12 +1038,14 @@
 
 	subroutine shympi_exit(ierr)
 
+! this is called on error - do not call barrier
+
 	integer ierr
 
-	call shympi_barrier_internal
+	!call shympi_barrier_internal
 	call shympi_finalize_internal
 	call exit(ierr)
-	stop
+	stop 'exiting...'
 
 	end subroutine shympi_exit
 
@@ -1014,14 +1053,16 @@
 
 	subroutine shympi_stop(text)
 
+! this is called as error stop - do not call barrier
+
 	character*(*) text
 
 	if( shympi_is_master() ) then
-	  write(6,*) 'error stop shympi_stop: ',trim(text)
+	  write(6,*) 'error stop ',trim(text)
 	end if
-	call shympi_barrier_internal
-	call shympi_finalize_internal
-	stop
+	!call shympi_barrier_internal
+	call shympi_abort_internal(37)
+	stop 'aborting...'
 
 	end subroutine shympi_stop
 
@@ -1030,7 +1071,7 @@
 	subroutine shympi_abort
 
 	call shympi_abort_internal(33)
-	stop
+	stop 'error stop: abort'
 
 	end subroutine shympi_abort
 
@@ -2126,14 +2167,21 @@
 
 !*******************************
 
+!******************************************************************
+!******************************************************************
+!******************************************************************
+
 	subroutine shympi_find_node(ke,ki,id)
+
+! returns internal node number and id of domain given external node number
 
 	use basin
 
-	integer ke,ki,id
+	integer, intent(in)  ::  ke	! external node number
+	integer, intent(out) ::  ki	! internal node number
+	integer, intent(out) ::  id	! domain
 
-	integer k,ic,i
-	integer n,no
+	integer k,ka,i,j
 	integer vals(1,n_threads)
 	integer kk(1),kkk(n_threads)
 
@@ -2141,6 +2189,11 @@
 	  if( ipv(k) == ke ) exit
 	end do
 	if( k > nkn_unique ) k = 0
+	ka = findloc(ipv(1:nkn_unique),ke,1)
+	if( k /= ka ) then
+	  write(6,*) k,ka,nkn_unique,my_id
+	  stop 'error stop shympi_find_node: internal (1)'
+	end if
 
 	if( bmpi_skip ) then
 	  ki = k
@@ -2149,39 +2202,105 @@
 	end if
 
 	kk(1) = k
-	n = 1
-	no = 1
-	call shympi_allgather_i_internal(n,no,kk,vals)
+	call shympi_allgather_i_internal(1,1,kk,vals)
 	kkk(:) = vals(1,:)
 
-	ic = count( kkk /= 0 )
-	if( ic /= 1 ) then
-	  if( ic > 1 ) then
-	    write(6,*) 'node found in more than one domain: '
-	  else
-	    write(6,*) 'node not found in any domain:'
-	  end if
-	  write(6,*) '==========================='
-	  write(6,*) n_threads,my_id
-	  write(6,*) 'nkn_unique = ',nkn_unique
-	  write(6,*) 'node = ',ke
-	  write(6,*) 'internal = ',k
-	  write(6,*) kkk
-	  write(6,*) '==========================='
-	  call shympi_finalize
-	  stop 'error stop shympi_find_node: more than one domain'
-	end if
+	call shympi_check_find_item(kkk,ke,k)
 
 	do i=1,n_threads
 	  if( kkk(i) /= 0 ) exit
 	end do
 
-	ki = kkk(i)
-	id = i-1
+	j = maxloc(kkk,1)
+	if( i /= j ) stop 'error stop shympi_find_node: internal (2)'
+
+	ki = kkk(j)
+	id = j-1
 
 	end subroutine shympi_find_node
 
 !*******************************
+
+	subroutine shympi_find_elem(ieext,ieint,id)
+
+! returns internal elem number and id of domain given external elem number
+
+	use basin
+
+	integer, intent(in)  ::  ieext	! external elem number
+	integer, intent(out) ::  ieint	! internal elem number
+	integer, intent(out) ::  id	! domain
+
+	integer ie,iee,i,j
+	integer vals(1,n_threads)
+	integer kk(1),kkk(n_threads)
+
+	do ie=1,nel_unique
+	  if( ipev(ie) == ieext ) exit
+	end do
+	if( ie > nel_unique ) ie = 0
+	iee = findloc(ipev(1:nel_unique),ieext,1)
+	if( ie /= iee ) stop 'error stop shympi_find_elem: internal (1)'
+
+	if( bmpi_skip ) then
+	  ieint = ie
+	  id = 0
+	  return
+	end if
+
+	kk(1) = ie
+	call shympi_allgather_i_internal(1,1,kk,vals)
+	kkk(:) = vals(1,:)
+
+	call shympi_check_find_item(kkk,ieext,ie)
+
+	do i=1,n_threads
+	  if( kkk(i) /= 0 ) exit
+	end do
+
+	j = maxloc(kkk,1)
+	if( i /= j ) stop 'error stop shympi_find_elem: internal (2)'
+
+	ieint = kkk(j)
+	id = j-1
+
+	end subroutine shympi_find_elem
+
+!*******************************
+
+	subroutine shympi_check_find_item(items,ext,int)
+
+	integer items(n_threads)
+	integer ext,int
+
+	integer ic
+
+        ic = count( items /= 0 )
+
+        if( ic /= 1 ) then              ! error - abort
+          if( ic > 1 ) then
+            write(6,*) 'item found in more than one domain: '
+          else
+            write(6,*) 'item not found in any domain:'
+          end if
+          write(6,*) '==========================='
+          write(6,*) n_threads,my_id
+          write(6,*) 'nkn_unique = ',nkn_unique
+          write(6,*) 'nel_unique = ',nel_unique
+          write(6,*) 'external number = ',ext
+          write(6,*) 'internal number = ',int
+          write(6,*) items
+          write(6,*) '==========================='
+          call shympi_finalize
+          stop 'error stop shympi_check_find_item: more than one or no domain'
+        end if
+
+	end subroutine shympi_check_find_item
+
+!******************************************************************
+!******************************************************************
+!******************************************************************
+
 
 	subroutine shympi_reduce_r(what,vals,val)
 
@@ -2286,6 +2405,7 @@
 	  call shympi_copy_2d_r(val_domain,nous,val_out &
      &				,nel_domains,ne_max,ip_int_elems)
 	else
+	  write(6,*) nous,nkn_global,nel_global
 	  stop 'error stop shympi_l2g_array_2d_r: (1)'
 	end if
 

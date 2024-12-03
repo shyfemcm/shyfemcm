@@ -90,6 +90,7 @@
 !  06.07.2018	ggu	changed VERS_7_5_48
 !  18.12.2018	ggu	changed VERS_7_5_52
 !  21.05.2019	ggu	changed VERS_7_5_62
+!  18.09.2024	ggu	new parameter rfaccol, new log colorbar
 ! 
 !  notes :
 ! 
@@ -657,7 +658,7 @@
 	integer ndec
 	integer nctick,ipllog
 	logical bhoriz
-	real fact
+	real fact,rfact
 	real x0,y0,x1,y1
 
 	integer iround
@@ -673,6 +674,8 @@
 
 	bhoriz = .true.
 	fact = getpar('faccol')
+        rfact = getpar('rfaccol')
+        if( fact == 1. .and. rfact /= 1. ) fact = 1. / rfact
 	ndec = iround(getpar('ndccol'))
 	nctick = iround(getpar('nctick'))
 	ipllog = iround(getpar('ipllog'))
@@ -713,7 +716,7 @@
 
 	character*80 line
 	integer i,imax,nw
-	integer ntk
+	integer ntk,ntks
 	integer nmin,nmax
 	integer icsave
 	integer idec
@@ -872,7 +875,8 @@
 	  amin = getcolval(1.)
 	  amax = getcolval(float(isoanz))
 	  ntk = ndim
-	  call logvals(amin,amax,idiv,ntk,rval,aval)
+	  ntks = nticks
+	  call logvals(amin,amax,idiv,ntk,ntks,rval,aval)
 	  !write(6,*) 'amin,amax: ',amin,amax
 	  !write(6,*) 'idiv,ntk: ',idiv,ntk
 	end if
