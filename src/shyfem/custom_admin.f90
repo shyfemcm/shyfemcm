@@ -1786,7 +1786,7 @@
 
         real volnode,depnode
 	double precision dgetpar
-        logical next_output_d,is_in_output_d
+        logical next_output_d,is_over_output_d
 
 	double precision, save :: da_out(4)
         integer, save :: icall = 0
@@ -1832,7 +1832,7 @@
 ! is it time ?
 !------------------------------------------------------------
 
-        if( .not. is_in_output_d(da_out) ) return
+        if( .not. is_over_output_d(da_out) ) return
 
 !------------------------------------------------------------
 ! sinking

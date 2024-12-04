@@ -64,6 +64,7 @@
 ! 28.04.2023    ggu     update function calls for belem
 ! 07.06.2023    ggu     new version 13 - simpar introduced
 ! 22.09.2024    ggu     increase nvar_act earlier (bug)
+! 04.12.2024    ggu     new routine shy_get_status()
 !
 !**************************************************************
 !**************************************************************
@@ -904,6 +905,14 @@
 
 !************************************************************
 !************************************************************
+!************************************************************
+
+	subroutine shy_get_status(id,bopen)
+	integer id
+	logical bopen
+	bopen = pentry(id)%is_opened
+	end subroutine shy_get_status
+
 !************************************************************
 
 	subroutine shy_get_iunit(id,iunit)

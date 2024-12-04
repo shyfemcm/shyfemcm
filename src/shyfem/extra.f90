@@ -281,6 +281,7 @@
 	real x(knausm)
 	real y(knausm)
 	real vals(nlv_global,knausm,3)
+	real, allocatable, save :: vals_all(:,:,:,:)
 	integer, save :: nvar
 	logical, save :: btemp,bsalt,brho,bconz,bwave,bsedi
 	integer, save, allocatable :: il(:)
@@ -332,6 +333,7 @@
 
 	  allocate(il(knausm))
 	  allocate(kind(2,knausm))
+	  allocate(vals_all(nlv_global,knausm,m,nvar))
 	  il = 0
 	  kext = 0
 	  hdep = 0.
@@ -370,12 +372,13 @@
 	nlv3d = nlv_global
 	!nlv2d = 1	!to be tested
 	vals = 0.
+	iv = 0
 
 !	-------------------------------------------------------
 !	barotropic velocities and water level
 !	-------------------------------------------------------
 
-	iv = 1
+	iv = iv + 1
 	ivar = 1
 	m = 3
 	do j=1,knausm
@@ -383,11 +386,14 @@
 	  call shympi_collect_node_value(k,up0v,vals(1,j,1))
 	  call shympi_collect_node_value(k,vp0v,vals(1,j,2))
 	  call shympi_collect_node_value(k,znv,vals(1,j,3))
+	  vals_all(1,j,1,iv) = up0v(k)
+	  vals_all(1,j,2,iv) = vp0v(k)
+	  vals_all(1,j,3,iv) = znv(k)
 	end do
 	if( shympi_is_master() ) then
           call ext_write_record(nbext,0,atime,knausm,nlv2d &
      &                                  ,ivar,m,il,vals,ierr)
-        if( ierr /= 0 ) goto 97
+          if( ierr /= 0 ) goto 97
 	end if
 
 !	-------------------------------------------------------

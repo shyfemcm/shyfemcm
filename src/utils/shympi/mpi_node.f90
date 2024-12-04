@@ -86,6 +86,7 @@
 ! 13.10.2024    ggu     new parameter bextra_exchange to deal with INTEL_BUG
 ! 13.11.2024    ggu     new routine shympi_find_element()
 ! 23.11.2024    ggu     new variable pquality
+! 04.12.2024    ggu     implement bmpi_allgather for gather routines
 
 !******************************************************************
 
@@ -1698,6 +1699,17 @@
 
 !******************************************************************
 !******************************************************************
+!******************************************************************
+
+	subroutine shympi_gather_all(ballgather)
+
+	logical ballgather
+
+	bmpi_allgather = ballgather
+
+	end subroutine shympi_gather_all
+
+!******************************************************************
 
 	subroutine shympi_gather_scalar_i(val,vals)
 
@@ -1715,7 +1727,12 @@
 	valv(1) = val
 	ni = 1
 	no = 1
-	call shympi_allgather_internal_i(ni,no,valv,vals)
+
+	if( bmpi_allgather ) then
+	  call shympi_allgather_internal_i(ni,no,valv,vals)
+	else
+	  call shympi_gather_internal_d(ni,no,valv,vals)
+	end if
 
 	end subroutine shympi_gather_scalar_i
 
@@ -1735,7 +1752,12 @@
 
 	ni = size(val)
 	no = size(vals,1)
-	call shympi_allgather_internal_i(ni,no,val,vals)
+
+	if( bmpi_allgather ) then
+	  call shympi_allgather_internal_i(ni,no,val,vals)
+	else
+	  call shympi_gather_internal_d(ni,no,val,vals)
+	end if
 
 	end subroutine shympi_gather_array_2d_i
 
@@ -1761,7 +1783,11 @@
 	aux = 0.
 	aux(1:ni) = val(1:ni)
 
-	call shympi_allgather_internal_r(no,no,aux,vals)
+	if( bmpi_allgather ) then
+	  call shympi_allgather_internal_r(no,no,aux,vals)
+	else
+	  call shympi_gather_internal_d(ni,no,aux,vals)
+	end if
 
 	end subroutine shympi_gather_array_2d_r
 
@@ -1781,7 +1807,12 @@
 
 	ni = size(val)
 	no = size(vals,1)
-	call shympi_allgather_internal_d(ni,no,val,vals)
+
+	if( bmpi_allgather ) then
+	  call shympi_allgather_internal_d(ni,no,val,vals)
+	else
+	  call shympi_gather_internal_d(ni,no,val,vals)
+	end if
 
 	end subroutine shympi_gather_array_2d_d
 
@@ -1810,11 +1841,14 @@
 	aux = 0.
 	aux(1:ni1,:) = val(:,:)
 
-	!ni = ni1 * ni2
 	ni = no1 * ni2
 	no = no1 * no2
 
-	call shympi_allgather_internal_i(ni,no,aux,vals)
+	if( bmpi_allgather ) then
+	  call shympi_allgather_internal_i(ni,no,aux,vals)
+	else
+	  call shympi_gather_internal_d(ni,no,aux,vals)
+	end if
 
 	end subroutine shympi_gather_array_3d_i
 
@@ -1846,7 +1880,11 @@
 	ni = no1 * ni2
 	no = no1 * no2
 
-	call shympi_allgather_internal_r(ni,no,aux,vals)
+	if( bmpi_allgather ) then
+	  call shympi_allgather_internal_r(ni,no,aux,vals)
+	else
+	  call shympi_gather_internal_d(ni,no,aux,vals)
+	end if
 
 	end subroutine shympi_gather_array_3d_r
 
@@ -1878,7 +1916,11 @@
 	ni = no1 * ni2
 	no = no1 * no2
 
-	call shympi_allgather_internal_d(ni,no,aux,vals)
+	if( bmpi_allgather ) then
+	  call shympi_allgather_internal_d(ni,no,aux,vals)
+	else
+	  call shympi_gather_internal_d(ni,no,aux,vals)
+	end if
 
 	end subroutine shympi_gather_array_3d_d
 
@@ -1911,7 +1953,11 @@
 	ni = ni1 * ni2
 	no = no1 * no2
 
-	call shympi_allgather_internal_i(ni,no,val,vals)
+	if( bmpi_allgather ) then
+	  call shympi_allgather_internal_i(ni,no,val,vals)
+	else
+	  call shympi_gather_internal_d(ni,no,val,vals)
+	end if
 
 	end subroutine shympi_gather_array_fix_i
 
@@ -1944,7 +1990,11 @@
 	ni = ni1 * ni2
 	no = no1 * no2
 
-	call shympi_allgather_internal_r(ni,no,val,vals)
+	if( bmpi_allgather ) then
+	  call shympi_allgather_internal_r(ni,no,val,vals)
+	else
+	  call shympi_gather_internal_d(ni,no,val,vals)
+	end if
 
 	end subroutine shympi_gather_array_fix_r
 
@@ -1977,7 +2027,11 @@
 	ni = ni1 * ni2
 	no = no1 * no2
 
-	call shympi_allgather_internal_d(ni,no,val,vals)
+	if( bmpi_allgather ) then
+	  call shympi_allgather_internal_d(ni,no,val,vals)
+	else
+	  call shympi_gather_internal_d(ni,no,val,vals)
+	end if
 
 	end subroutine shympi_gather_array_fix_d
 
@@ -1999,6 +2053,7 @@
 
 	ni = size(val)
 	no = size(vals,1)
+
 	call shympi_gather_internal_d(ni,no,val,vals)
 
 	end subroutine shympi_gather_root_array_2d_d

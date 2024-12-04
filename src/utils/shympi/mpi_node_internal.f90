@@ -52,6 +52,7 @@
 ! 06.09.2024    lrp     nuopc-compliant
 ! 21.11.2024    ggu     change in shympi_abort_internal() -> hangs for ever
 ! 30.11.2024    ggu     new routine shympi_icomment()
+! 04.12.2024    ggu     new routines shympi_gather_internal_r/i()
 !
 !******************************************************************
 
@@ -845,6 +846,68 @@
         end subroutine shympi_allgather_internal_d
 
 !******************************************************************
+!******************************************************************
+!******************************************************************
+
+        subroutine shympi_gather_internal_i(n,no,val,vals)
+
+	use shympi_aux
+	use shympi
+
+	implicit none
+
+	integer n,no
+        integer val(n)
+        integer vals(no,n_threads)
+
+        integer ierr
+
+	if( bpmpi ) then
+          call MPI_GATHER (val,n,MPI_INTEGER &
+     &                  ,vals,no,MPI_INTEGER &
+     &			,0 &
+     &                  ,MPI_COMM_WORLD,ierr)
+	  call shympi_error('shympi_gather_internal_i' &
+     &			,'gather',ierr)
+	else
+	  vals(1:n,1) = val(:)
+	end if
+
+	call shympi_icomment('shympi_gather_internal_i')
+
+        end subroutine shympi_gather_internal_i
+
+!******************************************************************
+
+        subroutine shympi_gather_internal_r(n,no,val,vals)
+
+	use shympi_aux
+	use shympi
+
+	implicit none
+
+	integer n,no
+        real val(n)
+        real vals(no,n_threads)
+
+        integer ierr
+
+	if( bpmpi ) then
+          call MPI_GATHER (val,n,MPI_REAL &
+     &                  ,vals,no,MPI_REAL &
+     &			,0 &
+     &                  ,MPI_COMM_WORLD,ierr)
+	  call shympi_error('shympi_gather_internal_r' &
+     &			,'gather',ierr)
+	else
+	  vals(1:n,1) = val(:)
+	end if
+
+	call shympi_icomment('shympi_gather_internal_r')
+
+        end subroutine shympi_gather_internal_r
+
+!******************************************************************
 
         subroutine shympi_gather_internal_d(n,no,val,vals)
 
@@ -874,6 +937,8 @@
 
         end subroutine shympi_gather_internal_d
 
+!******************************************************************
+!******************************************************************
 !******************************************************************
 
         subroutine shympi_bcast_internal_i(n,val)
