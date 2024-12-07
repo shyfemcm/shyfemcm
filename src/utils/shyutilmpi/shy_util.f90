@@ -71,6 +71,7 @@
 ! 20.07.2023    lrp     new paramter nzadapt
 ! 22.09.2024    ggu     bug fix in shy_check_nvar() - use also dtime0
 ! 04.12.2024    ggu     new framework for not doing gather_all
+! 07.12.2024    ggu     reduce only to root (not all)
 !
 ! contents :
 !
@@ -924,6 +925,7 @@
 
 	use shyfile
 	use shympi
+	use mod_trace_point
 
 	implicit none
 
@@ -1016,7 +1018,9 @@
 	  stop 'error stop shy_write_output_record: file opened and no master'
 	end if
 
-	call shympi_gather_all(.false.)
+	call trace_point('before shy_write_record')
+
+	call shympi_operate_all(.false.)
 
 	if( m > 1 ) then
 	  call shympi_l2g_array(m,cl,cg)
@@ -1029,7 +1033,9 @@
 	  call shy_write_record(id,dtime,ivar,belem,nn,1,lmax,ng,cg,ierr)
 	end if
 
-	call shympi_gather_all(.true.)
+	call shympi_operate_all(.true.)
+
+	call trace_point('after shy_write_record')
 
 	if( ierr /= 0 ) then
 	  write(6,*) 'error writing output file ',ierr

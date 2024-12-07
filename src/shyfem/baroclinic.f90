@@ -397,10 +397,10 @@
 !		initialize output files
 !		--------------------------------------------
 
-		call trace_point('initalizing output')
+		call trace_point('initalizing T/S output')
 
 		call bcl_open_output(da_out,itemp,isalt,irho)
-		call trace_point('writing output')
+		call trace_point('writing T/S output')
 		call bcl_write_output(dtime0,da_out,itemp,isalt,irho)
 
 		if( shympi_is_master() ) then

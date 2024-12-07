@@ -77,15 +77,22 @@
 
 	public
 
-	logical, save :: bmpi = .false.
+	logical, parameter :: blocal_shympi_debug = .false. !write debug
 	logical, save :: bmpi_debug = .false.
-	logical, save :: bmpi_master = .true.
-	logical, save :: bmpi_support = .false.
+	logical, save :: bmpi_debug_txt = .false.       !writes mpi_debug_*.txt
         logical, save :: bmpi_unit = .false.            !write debug to my_unit
-        logical, save :: bmpi_allgather = .true.        !do allgather
+
+        logical, save :: bmpi_skip = .false.
         logical, save :: bextra_exchange = .false.
 
-	logical, parameter :: blocal_shympi_debug = .false. !write debug
+!       ---------------------------------
+!       next variables are set internally
+!       ---------------------------------
+
+	logical, save :: bmpi = .false.
+	logical, save :: bmpi_master = .true.
+	logical, save :: bmpi_support = .false.
+	logical, save :: bmpi_alloper = .true.
 
 	integer,save :: n_threads = 1
 	integer,save :: my_id = 0
@@ -332,11 +339,6 @@
 !       general and special reduce routines
 !-------------------------------------------------------
 
-        INTERFACE shympi_reduce
-        MODULE PROCEDURE shympi_reduce_r
-!     +                   ,shympi_reduce_i
-        END INTERFACE
-
         INTERFACE shympi_min
         MODULE PROCEDURE   shympi_min_r  & 
      &			  ,shympi_min_i            &
@@ -362,6 +364,17 @@
       &			  ,shympi_sum_0_r    &
       &			  ,shympi_sum_0_i    &
       &			  ,shympi_sum_0_d    
+        END INTERFACE
+
+        INTERFACE shympi_array_reduce
+        MODULE PROCEDURE   shympi_array_reduce_i &
+     &                    ,shympi_array_reduce_r &
+     &                    ,shympi_array_reduce_d
+        END INTERFACE
+
+        INTERFACE shympi_reduce
+        MODULE PROCEDURE shympi_reduce_r
+!     +                   ,shympi_reduce_i
         END INTERFACE
 
 !-------------------------------------------------------
@@ -1247,6 +1260,14 @@
 !******************************************************************
 !******************************************************************
 
+        subroutine shympi_operate_all(balloper)
+
+        logical balloper
+
+        end subroutine shympi_operate_all
+
+!******************************************************************
+
 	subroutine shympi_gather_scalar_i(val,vals)
 
 	integer val
@@ -1483,27 +1504,6 @@
         id = 0
 
         end subroutine shympi_find_node
-
-!*******************************
-
-	subroutine shympi_reduce_r(what,vals,val)
-
-	character*(*) what
-	real vals(:)
-	real val
-
-	if( what == 'min' ) then
-	  val = MINVAL(vals)
-	else if( what == 'max' ) then
-	  val = MAXVAL(vals)
-	else if( what == 'sum' ) then
-	  val = SUM(vals)
-	else
-	  write(6,*) 'what = ',what
-	  stop 'error stop shympi_reduce_r: not ready'
-	end if
-
-	end subroutine shympi_reduce_r
 
 !******************************************************************
 !******************************************************************
@@ -2012,6 +2012,44 @@
 	shympi_sum_0_i = val
 
 	end function shympi_sum_0_i
+
+!******************************************************************
+
+        subroutine shympi_array_reduce_i(what,vals)
+        character*(*) what
+        integer vals(:)
+        end subroutine shympi_array_reduce_i
+
+        subroutine shympi_array_reduce_r(what,vals)
+        character*(*) what
+        real vals(:)
+        end subroutine shympi_array_reduce_r
+
+        subroutine shympi_array_reduce_d(what,vals)
+        character*(*) what
+        double precision vals(:)
+        end subroutine shympi_array_reduce_d
+
+!******************************************************************
+
+	subroutine shympi_reduce_r(what,vals,val)
+
+	character*(*) what
+	real vals(:)
+	real val
+
+	if( what == 'min' ) then
+	  val = MINVAL(vals)
+	else if( what == 'max' ) then
+	  val = MAXVAL(vals)
+	else if( what == 'sum' ) then
+	  val = SUM(vals)
+	else
+	  write(6,*) 'what = ',what
+	  stop 'error stop shympi_reduce_r: not ready'
+	end if
+
+	end subroutine shympi_reduce_r
 
 !******************************************************************
 !******************************************************************

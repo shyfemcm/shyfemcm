@@ -58,6 +58,7 @@
 ! 16.02.2019	ggu	changed VERS_7_5_60
 ! 02.04.2022	ggu	close ext file explicitly
 ! 18.09.2023	ggu	also write rho to ext file
+! 04.12.2024	ggu	only do one reduce call for mpi
 !
 !******************************************************************
 !******************************************************************
@@ -266,13 +267,14 @@
 	use extra
 	use shympi
 	use simul
+	use mod_trace_point
 
 	implicit none
 
 	logical blast
 	integer nbext,ierr
 	integer ivar,m,j,k,iv,nlv2d,nlv3d
-	integer lmax,l
+	integer lmax,l,nl,nlg,ip,ipstart
 	real href,hzmin,nzadapt
 	double precision atime,atime0
 	character*80 femver,title
@@ -281,7 +283,8 @@
 	real x(knausm)
 	real y(knausm)
 	real vals(nlv_global,knausm,3)
-	real, allocatable, save :: vals_all(:,:,:,:)
+	real vals_aux(nlv_global,knausm,3)
+	real, allocatable, save :: array(:)
 	integer, save :: nvar
 	logical, save :: btemp,bsalt,brho,bconz,bwave,bsedi
 	integer, save, allocatable :: il(:)
@@ -302,6 +305,7 @@
 !--------------------------------------------------------------
 
 	if( icall .eq. 0 ) then
+	  call trace_point('initializing extra')
           call init_output_d('itmext','idtext',da_out)
 	  call assure_initial_output_d(da_out)
           if( .not. has_output_d(da_out) ) icall = -1
@@ -333,7 +337,8 @@
 
 	  allocate(il(knausm))
 	  allocate(kind(2,knausm))
-	  allocate(vals_all(nlv_global,knausm,m,nvar))
+	  allocate(array(nlv_global*knausm*3*nvar))
+
 	  il = 0
 	  kext = 0
 	  hdep = 0.
@@ -365,14 +370,18 @@
 
         if( .not. next_output_d(da_out) ) return
 
+	call trace_point('writing extra')
+
         nbext = nint(da_out(4))
 	call get_absolute_act_time(atime)
 
 	nlv2d = nlv_global
 	nlv3d = nlv_global
 	!nlv2d = 1	!to be tested
+	nlg = nlv_global
 	vals = 0.
 	iv = 0
+	ip = 0
 
 !	-------------------------------------------------------
 !	barotropic velocities and water level
@@ -381,15 +390,21 @@
 	iv = iv + 1
 	ivar = 1
 	m = 3
+	nl = 1
+	ipstart = 0
 	do j=1,knausm
 	  k = knaus(j)
 	  call shympi_collect_node_value(k,up0v,vals(1,j,1))
 	  call shympi_collect_node_value(k,vp0v,vals(1,j,2))
 	  call shympi_collect_node_value(k,znv,vals(1,j,3))
-	  vals_all(1,j,1,iv) = up0v(k)
-	  vals_all(1,j,2,iv) = vp0v(k)
-	  vals_all(1,j,3,iv) = znv(k)
+	  call add_to_array(ip,k,nl,nlg,up0v,array)
+	  call add_to_array(ip,k,nl,nlg,vp0v,array)
+	  call add_to_array(ip,k,nl,nlg,znv,array)
 	end do
+	call shympi_array_reduce('sum',array(ipstart+1:ip))
+	call array_to_vals(ipstart,ip,array,nlg,knausm,m,vals_aux)
+	if( any( vals /= vals_aux ) ) goto 92
+
 	if( shympi_is_master() ) then
           call ext_write_record(nbext,0,atime,knausm,nlv2d &
      &                                  ,ivar,m,il,vals,ierr)
@@ -403,11 +418,19 @@
 	iv = iv + 1
 	ivar = 2
 	m = 2
+	nl = nlv
+	ipstart = ip
 	do j=1,knausm
 	  k = knaus(j)
 	  call shympi_collect_node_value(k,uprv,vals(:,j,1))
 	  call shympi_collect_node_value(k,vprv,vals(:,j,2))
+	  call add_to_array(ip,k,nl,nlg,uprv,array)
+	  call add_to_array(ip,k,nl,nlg,vprv,array)
 	end do
+	call shympi_array_reduce('sum',array(ipstart+1:ip))
+	call array_to_vals(ipstart,ip,array,nlg,knausm,m,vals_aux)
+	if( any( vals /= vals_aux ) ) goto 92
+
 	if( shympi_is_master() ) then
           call ext_write_record(nbext,0,atime,knausm,nlv3d &
      &                                  ,ivar,m,il,vals,ierr)
@@ -419,14 +442,21 @@
 !	-------------------------------------------------------
 
 	m = 1
+	nl = nlv
 
+	ipstart = ip
 	if( btemp ) then
 	  iv = iv + 1
 	  ivar = 12
 	  do j=1,knausm
 	    k = knaus(j)
 	    call shympi_collect_node_value(k,tempv,vals(:,j,1))
+	    call add_to_array(ip,k,nl,nlg,tempv,array)
 	  end do
+	  call shympi_array_reduce('sum',array(ipstart+1:ip))
+	  call array_to_vals(ipstart,ip,array,nlg,knausm,m,vals_aux)
+	  if( any( vals /= vals_aux ) ) goto 92
+
 	  if( shympi_is_master() ) then
             call ext_write_record(nbext,0,atime,knausm,nlv3d &
      &                                  ,ivar,m,il,vals,ierr)
@@ -438,13 +468,19 @@
 !	salinity
 !	-------------------------------------------------------
 
+	ipstart = ip
 	if( bsalt ) then
 	  iv = iv + 1
 	  ivar = 11
 	  do j=1,knausm
 	    k = knaus(j)
 	    call shympi_collect_node_value(k,saltv,vals(:,j,1))
+	    call add_to_array(ip,k,nl,nlg,saltv,array)
 	  end do
+	  call shympi_array_reduce('sum',array(ipstart+1:ip))
+	  call array_to_vals(ipstart,ip,array,nlg,knausm,m,vals_aux)
+	  if( any( vals /= vals_aux ) ) goto 92
+
 	  if( shympi_is_master() ) then
             call ext_write_record(nbext,0,atime,knausm,nlv3d &
      &                                  ,ivar,m,il,vals,ierr)
@@ -456,13 +492,19 @@
 !       density
 !       -------------------------------------------------------
 
+	ipstart = ip
         if( brho ) then
           iv = iv + 1
           ivar = 13
           do j=1,knausm
             k = knaus(j)
             call shympi_collect_node_value(k,rhov,vals(:,j,1))
+	    call add_to_array(ip,k,nl,nlg,rhov,array)
           end do
+	  call shympi_array_reduce('sum',array(ipstart+1:ip))
+	  call array_to_vals(ipstart,ip,array,nlg,knausm,m,vals_aux)
+	  if( any( vals /= vals_aux ) ) goto 92
+
           if( shympi_is_master() ) then
             call ext_write_record(nbext,0,atime,knausm,nlv3d &
      &                                  ,ivar,m,il,vals,ierr)
@@ -474,13 +516,19 @@
 !	concentration
 !	-------------------------------------------------------
 
+	ipstart = ip
 	if( bconz ) then
 	  iv = iv + 1
 	  ivar = 10
 	  do j=1,knausm
 	    k = knaus(j)
 	    call shympi_collect_node_value(k,cnv,vals(:,j,1))
+	    call add_to_array(ip,k,nl,nlg,cnv,array)
 	  end do
+	  call shympi_array_reduce('sum',array(ipstart+1:ip))
+	  call array_to_vals(ipstart,ip,array,nlg,knausm,m,vals_aux)
+	  if( any( vals /= vals_aux ) ) goto 92
+
 	  if( shympi_is_master() ) then
             call ext_write_record(nbext,0,atime,knausm,nlv3d &
      &                                  ,ivar,m,il,vals,ierr)
@@ -492,13 +540,19 @@
 !	total suspended sediment concentration
 !	-------------------------------------------------------
 
+	ipstart = ip
 	if( bsedi ) then
 	  iv = iv + 1
 	  ivar = 800
 	  do j=1,knausm
 	    k = knaus(j)
 	    call shympi_collect_node_value(k,tcn,vals(:,j,1))
+	    call add_to_array(ip,k,nl,nlg,tcn,array)
 	  end do
+	  call shympi_array_reduce('sum',array(ipstart+1:ip))
+	  call array_to_vals(ipstart,ip,array,nlg,knausm,m,vals_aux)
+	  if( any( vals /= vals_aux ) ) goto 92
+
 	  if( shympi_is_master() ) then
             call ext_write_record(nbext,0,atime,knausm,nlv3d &
      &                                  ,ivar,m,il,vals,ierr)
@@ -510,16 +564,25 @@
 !       waves
 !       -------------------------------------------------------
 
+	ipstart = ip
         if( bwave ) then
           iv = iv + 1
           ivar = 230
 	  m = 3
+	  nl = 1
           do j=1,knausm
             k = knaus(j)
 	    call shympi_collect_node_value(k,waveh,vals(1,j,1))
 	    call shympi_collect_node_value(k,wavep,vals(1,j,2))
 	    call shympi_collect_node_value(k,waved,vals(1,j,3))
+	    call add_to_array(ip,k,nl,nlg,waveh,array)
+	    call add_to_array(ip,k,nl,nlg,wavep,array)
+	    call add_to_array(ip,k,nl,nlg,waved,array)
           end do
+	  call shympi_array_reduce('sum',array(ipstart+1:ip))
+	  call array_to_vals(ipstart,ip,array,nlg,knausm,m,vals_aux)
+	  if( any( vals /= vals_aux ) ) goto 92
+
 	  if( shympi_is_master() ) then
             call ext_write_record(nbext,0,atime,knausm,nlv2d &
      &                                  ,ivar,m,il,vals,ierr)
@@ -552,6 +615,9 @@
 	write(6,*) 'iv,nvar: ',iv,nvar
 	write(6,*) 'iv is different from nvar'
 	stop 'error stop wrexta: internal error (1)'
+   92   continue
+	write(6,*) 'iv,ivar: ',iv,ivar
+	stop 'error stop wrexta: values differ'
    99   continue
 	write(6,*) 'Error opening EXT file :'
 	stop 'error stop wrexta: opening ext file'
@@ -624,6 +690,52 @@
 	end if
 	call shympi_finalize
 	stop
+
+	end
+
+!*********************************************************
+
+	subroutine add_to_array(ip,k,nl,nlg,val,array)
+
+	use basin
+
+	implicit none
+
+	integer ip
+	integer k
+	integer nl,nlg
+	real val(nl,nkn)
+	real array(*)
+
+	array(ip+1:ip+nlg) = 0.
+	if( k > 0 ) then
+	  array(ip+1:ip+nl) = val(1:nl,k)
+	end if
+	  
+	ip = ip + nlg
+	
+	end
+
+!*********************************************************
+
+	subroutine array_to_vals(ipstart,np,array,nlg,knausm,m,vals)
+
+	implicit none
+
+	integer ipstart,np
+	real array(np)
+	integer nlg,knausm,m
+	real vals(nlg,knausm,m)
+
+	integer ip,j,k
+
+	ip = ipstart
+	do j=1,knausm
+	  do k=1,m
+	    vals(1:nlg,j,k) = array(ip+1:ip+nlg)
+	    ip = ip + nlg
+	  end do
+	end do
 
 	end
 

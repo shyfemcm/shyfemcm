@@ -585,6 +585,7 @@ extra.o: ../../lib/mod/basin.mod ../../lib/mod/befor_after.mod \
 		../../lib/mod/mod_hydro.mod \
 		../../lib/mod/mod_hydro_print.mod \
 		../../lib/mod/mod_sediment.mod \
+		../../lib/mod/mod_trace_point.mod \
 		../../lib/mod/mod_ts.mod \
 		../../lib/mod/mod_waves.mod ../../lib/mod/nls.mod \
 		../../lib/mod/shympi.mod ../../lib/mod/simul.mod 
