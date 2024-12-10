@@ -129,6 +129,8 @@
 
 	subroutine shympi_internal_reduce_what(what,mpi_what)
 
+! returns what to reduce
+
 	character*(*), intent(in) :: what
 	integer, intent(out) :: mpi_what
 
@@ -458,7 +460,6 @@
 	  id = id_from
           call MPI_Irecv(val_out,n,MPI_REAL,id &
      &	          ,tag,MPI_COMM_WORLD,request(ir),ierr)
-	  !write(iu,*) 'receiving from: ',my_id,id,n
 	end if
 	if( ierr /= 0 ) write(6,*) 'internal error 1: ',ierr
 
@@ -467,7 +468,6 @@
 	  id = id_to
           call MPI_Isend(val_in,n,MPI_REAL,id &
      &	          ,tag,MPI_COMM_WORLD,request(ir),ierr)
-	  !write(iu,*) 'sending to: ',my_id,id,n
 	end if
 	if( ierr /= 0 ) write(6,*) 'internal error 2: ',ierr
 
@@ -628,7 +628,6 @@
 	  write(6,*) 'increasing nvert ',nvert,my_id
 	end if
 
-	!nb = (nlvddi-n0+1) * n_ghost_max_global
 	nb = (nvert-n0+1) * n_ghost_max_global
 	call shympi_alloc_buffer(nb)
 	allocate(buffer_in(nb,n_ghost_areas))
@@ -638,10 +637,8 @@
 
 	do ia=1,n_ghost_areas
 	  nc = ghost_areas(iout,ia)
-	  !call count_buffer(n0,nlvddi,n,nc,il,g_out(:,ia),nb)
 	  nbs(1,ia) = nb
 	  nc = ghost_areas(iin,ia)
-	  !call count_buffer(n0,nlvddi,n,nc,il,g_in(:,ia),nb)
 	  nbs(2,ia) = nb
 	  if( nbs(1,ia) /= nbs(2,ia) ) then
 	    nb = (nlvddi-n0+1) * n_ghost_max
@@ -1473,8 +1470,12 @@
 !******************************************************************
 !******************************************************************
 !******************************************************************
+! next rectify routines are useless and can be deleted
+!******************************************************************
+!******************************************************************
+!******************************************************************
 
-        subroutine shympi_rectify_internal_r(nv,nh,vals)
+        subroutine shympi_rectify_internal_r0(nv,nh,vals)
 
 	use shympi
 
@@ -1502,11 +1503,11 @@
           end do
         end do
 
-	end subroutine shympi_rectify_internal_r
+	end subroutine shympi_rectify_internal_r0
 
 !******************************************************************
 
-        subroutine shympi_rectify_internal_i(nv,nh,vals)
+        subroutine shympi_rectify_internal_i0(nv,nh,vals)
 
 	use shympi
 
@@ -1534,11 +1535,11 @@
           end do
         end do
 
-	end subroutine shympi_rectify_internal_i
+	end subroutine shympi_rectify_internal_i0
 
 !******************************************************************
 
-        subroutine shympi_rectify_internal_d(nv,nh,vals)
+        subroutine shympi_rectify_internal_d0(nv,nh,vals)
 
 	use shympi
 
@@ -1566,7 +1567,7 @@
           end do
         end do
 
-	end subroutine shympi_rectify_internal_d
+	end subroutine shympi_rectify_internal_d0
 
 !******************************************************************
 

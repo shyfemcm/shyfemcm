@@ -86,12 +86,13 @@
 ! 30.05.2022	ggu	more changes for mpi
 ! 18.05.2023	ggu	in flx_write() call flx_collect_3d()
 ! 22.05.2023	ggu	need fluxes_r for write
-! 23.10.2024	ggu	module definition taken out from flux.f90
+! 23.10.2024	ggu	definition taken out from flux.f90
+! 10.12.2024	ggu	allocation taken out from flux.f90, new name mod_flux
 !
 !******************************************************************
 
 !==================================================================
-        module flux
+        module mod_flux
 !==================================================================
 
         implicit none
@@ -126,6 +127,64 @@
         real, save, allocatable :: fluxes_r(:,:,:)
 
 !==================================================================
-        end module flux
+        contains
+!==================================================================
+
+        subroutine flx_alloc_arrays(nl,ns)
+
+        implicit none
+
+        integer nl      !layers
+        integer ns      !sections
+
+        if( nl == nl_flux .and. ns == ns_flux ) return
+
+        if( nl > 0 .or. ns > 0 ) then
+          if( nl == 0 .or. ns == 0 ) then
+            write(6,*) 'nl,ns: ',nl,ns
+            stop 'error stop flx_alloc_arrays: incompatible parameters'
+          end if
+        end if
+
+        !write(6,*) 'flx_alloc_arrays: ',nl,ns
+
+        if( ns_flux > 0 ) then
+          deallocate(nlayers)
+          deallocate(nlayers_global)
+          deallocate(fluxes)
+          deallocate(fluxes_r)
+          deallocate(flux0d)
+          deallocate(masst)
+          deallocate(saltt)
+          deallocate(tempt)
+          deallocate(conzt)
+          deallocate(ssctt)
+        end if
+
+        nl_flux = nl
+        ns_flux = ns
+
+        if( ns == 0 ) return
+
+        allocate(nlayers(ns))
+        allocate(nlayers_global(ns))
+        allocate(fluxes(0:nl,3,ns))
+        allocate(fluxes_r(0:nl,3,ns))
+        allocate(flux0d(ns))
+
+        allocate(masst(0:nl,3,ns))
+        allocate(saltt(0:nl,3,ns))
+        allocate(tempt(0:nl,3,ns))
+        allocate(conzt(0:nl,3,ns))
+        allocate(ssctt(0:nl,3,ns))
+
+        flux0d = 0.
+
+        bflxalloc = .true.
+
+        end subroutine flx_alloc_arrays
+
+!==================================================================
+        end module mod_flux
 !==================================================================
 

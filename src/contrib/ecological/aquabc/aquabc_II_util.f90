@@ -268,7 +268,7 @@
 !
 	use levels, only : nlvdi,nlv
 	use basin, only : nkn
-	use flux
+	use mod_flux
 	use simul
 
 	implicit none
@@ -459,7 +459,7 @@
 ! 
 ! 	use levels, only : nlvdi,nlv
 ! 	use basin, only : nkn
-! 	use flux
+! 	use mod_flux
 ! 
 ! 	implicit none
 ! 

@@ -297,7 +297,7 @@
 
 	integer ideffi,ipext
 	real getpar
-	logical has_output_d,next_output_d
+	logical has_output_d,next_output_d,is_last_output_d
 
 	double precision, save :: da_out(4) = 0
 	integer, save :: icall = 0
@@ -571,11 +571,10 @@
 ! finalize
 !--------------------------------------------------------------
 
-        call is_time_last(blast)
-        if( blast ) then
+        if( is_last_output_d(da_out) ) then
 	  close(nbext)
 	  call shympi_barrier
-	end if
+        end if
 
 !--------------------------------------------------------------
 ! end of routine

@@ -103,6 +103,7 @@
 ! 30.03.2021    ggu     bug fix in info_output_d()
 ! 18.03.2022    ggu     bug fix in increase_output_d() itend -> dtend
 ! 04.12.2024    ggu     routines updated, more documentation
+! 10.12.2024    ggu     new routine is_last_output_d()
 !
 ! info :
 !
@@ -123,6 +124,7 @@
 !
 ! assure_initial_output_d(da_out)	do output on initial step
 ! is_first_output_d(da_out)		is this the first output?
+! is_last_output_d(da_out)		is this the last output?
 !
 ! info_output_d(text,da_out)	writes info to terminal
 !
@@ -141,12 +143,14 @@
 !	if( .not. has_output_d(da_out) ) then
 !	  no output ever needed
 !	end if
+!	if( is_first_output_d(da_out) ) initialize
 !
 !	do
 !	  if( .not. is_over_output_d(da_out) ) return	not in output phase
 !	  if( next_output_d(da_out) ) then
 !	    do output here
 !	  end if
+!	  if( is_last_output_d(da_out) ) close file
 !	end do
 !
 !**********************************************************************
@@ -281,6 +285,23 @@
 	double precision da_out(4)
 
 	is_first_output_d = ( t_act == da_out(2) )
+
+	end
+
+!********************************************************************
+
+	function is_last_output_d(da_out)
+
+! checks if we are at last output (itout > itend)
+
+	use femtime
+
+	implicit none
+
+	logical is_last_output_d
+	double precision da_out(4)
+
+	is_last_output_d = ( da_out(3) > dtend )
 
 	end
 
