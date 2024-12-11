@@ -424,6 +424,7 @@
 	use levels, only : nlvdi,nlv
 	use mod_flux
 	use shympi
+	use mod_trace_point
 
 	implicit none
 
@@ -463,6 +464,7 @@
 !-----------------------------------------------------------------
 
         if( icall .eq. 0 ) then
+		call trace_point('initializing flux')
 
 		icall = 1
 
@@ -575,6 +577,8 @@
 !	-------------------------------------------------------
 
         if( .not. next_output_d(da_out) ) return
+
+	call trace_point('writing flux')
 
         nbflx = nint(da_out(4))
         call get_absolute_act_time(atime)
