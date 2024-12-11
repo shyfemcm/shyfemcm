@@ -69,17 +69,19 @@
         integer nc
         integer ntime,nrec
         integer nvers,nsect,kfluxm,idtflx
-        integer nlmax,nvar,ierr
+        integer nlmax,nvar,ivar,iv,ierr
 	integer is
+	integer nlvddi,lmax,l
 	integer nh,nv,nt
 	integer iu1
         integer ios
-        double precision dtime,atime0
+        double precision dtime,atime0,atime
         character*60 name_one,text
         character*80 title,femver
 
 	integer, save, allocatable :: kflux(:)
 	integer, save, allocatable :: nlayers(:)
+	real, save, allocatable :: fluxes(:,:,:)
 	character*80, save, allocatable :: strings(:)
 
         call clo_get_file(1,name_one)
@@ -120,34 +122,39 @@
 	  end do
 	end if
 
-	stop
+	iv = 0
+	nlvddi = nlmax
+	allocate(fluxes(0:nlvddi,3,nsect))
 
         do while(.true.)
 
-          read(1,end=9) dtime
-          if( .not. bquiet ) write(6,*) 'time = ',dtime
-          ntime = ntime + 1
+          call flx_read_record(iu1,nvers,atime &
+     &                  ,nlvddi,nsect,ivar &
+     &                  ,nlayers,fluxes,ierr)
 
-          if( bverbose ) then
-            write(6,*) '       irec          nh          nv' // &
-     &                  '        type name'
-          end if
+	  if( ierr < 0 ) exit
+	  if( ierr > 0 ) goto 97
 
-          nrec = 0
-          do while(.true.)
-            read(1,end=9) nh,nv,nt
-            if( nt == 0 ) exit
-            nrec = nrec + 1
-            read(1,end=9) text
-            read(1)
-            if( bverbose ) write(6,*) nrec,nh,nv,nt,trim(text)
-          end do
+	  iv = iv + 1
+          if( mod(iv,nvar) == 1 ) ntime = ntime + 1
+          if( .not. bquiet ) write(6,*) 'time = ',atime,ntime,ivar
+	  if( bverbose ) then
+	    do is=1,nsect
+	      lmax = nlayers(is)
+	      do l=1,lmax
+	        write(6,*) l,fluxes(l,:,is)
+	      end do
+	    end do
+	  end if
+
         end do
 
-    9   continue
         if( .not. bsilent ) write(6,*) 'time records read: ',ntime
 
 	return
+   97	continue
+	write(6,*) 'error reading record: ',ierr
+	stop 'error stop read_dbg_flx_file: error reading record'
    98	continue
 	write(6,*) 'error reading header2: ',ierr
 	stop 'error stop read_dbg_flx_file: error reading header2'
