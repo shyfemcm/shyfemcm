@@ -99,6 +99,8 @@ src/utils/shympi/check_shympi_debug
 bin/check_shympi_debug
 src/utils/shympi/check_shympi_check
 bin/check_shympi_check
+src/tools/shyelab/dbg_flx
+bin/dbg_flx
 
 src/tools/shypre/shypre_noopti
 bin/shypre_noopti
