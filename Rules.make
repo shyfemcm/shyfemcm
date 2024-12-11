@@ -265,7 +265,7 @@ GPU=NONE
 
 NETCDF = false
 #NETCDF = true
-#NETCDFDIR = 
+#NETCDFDIR =
 NETCDFDIR = ${NETCDF_C_HOME}
 NETCDFFDIR =${NETCDF_FORTRAN_HOME}
 
@@ -340,7 +340,8 @@ BFMDIR=$(BFM_HOME)
 
 WW3 = false
 #WW3 = true
-#WW3DIR = $(HOME)/WW3
+WW3DIR = ${WW3_HOME}
+#WW3DIR = /path/to/WW3
 
 ##############################################
 # Experimental features
@@ -381,7 +382,8 @@ FLUID_MUD = false
 ##############################################
 
 NUOPC = false
-ESMFDIR = /path/to/esmf-8.6.0
+ESMFDIR = ${ESMF_HOME}
+#ESMFDIR = /path/to/esmf-8.6.0
 
 ##############################################
 # end of user defined parameters and flags

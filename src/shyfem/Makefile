@@ -33,7 +33,9 @@ ifeq ($(SOLVER),PETSC)
 endif
 
 ifeq ($(NETCDF),true)
-  INCLUDE += -I$(NETCDFDIR)/include
+  ifneq ($(NETCDFDIR),)
+    INCLUDE += -I$(NETCDFDIR)/include
+  endif
 endif
 
 ifeq ($(NUOPC),true)
