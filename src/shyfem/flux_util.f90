@@ -358,6 +358,8 @@
 	  call flxtst(ns,ntotal,kflux(ifirst),iflux(1,ifirst))
 	end do
 
+	!stop 'flxtst output'
+
 !----------------------------------------------------------
 ! end of routine
 !----------------------------------------------------------
@@ -383,7 +385,6 @@
 	character*80 string
 	integer ids(n)
 
-	if( n > 80 ) write(6,*) 'only partial check...'
 	nmax = min(80,n)
 	nt = 0
 
@@ -401,12 +402,8 @@
 	end do
 
 	call shympi_syncronize
-	write(6,*) 'flxtst output'
-	call shympi_syncronize
 	if( nt > 0 ) then
-	  !write(6,*) ns,n,nmax,nt
-	  !write(6,'(a)') string(1:nmax)
-	  write(6,'(20i4)') my_id,ns,n,ids
+	  write(6,'(a,80i4)') 'flxtst: ',my_id,ns,n,ids
 	end if
 	call shympi_syncronize
 

@@ -14,7 +14,7 @@
         logical, save :: bnodiff = .true.       !do not show differences
         logical, save :: bsummary = .true.      !only show summary
         logical, save :: bbalance = .true.      !balance time step
-        integer, save :: maxdiff = 0.           !max difference allowed
+        double precision, save :: maxdiff = 0.  !max difference allowed
 
 !==========================================================================
         end module mod_dbg_flx
@@ -198,7 +198,7 @@
 
 !**************************************************************************
 
-        subroutine compare_dbg_flx_files(ierr)
+        subroutine compare_dbg_flx_files(ierr_recs)
 
 ! reads one file and outputs info
 
@@ -207,7 +207,7 @@
 
         implicit none
 
-	integer ierr
+	integer ierr_recs
 
         integer nc
         integer ntime,nrec
@@ -218,11 +218,11 @@
 	integer lmax,l
 	integer nh,nv,nt
 	integer iu,iu1,iu2
-        integer ios
-	double precision eps
+        integer ios,ierr
+	double precision eps,maxerr,mdiff
         double precision dtime,atime0,atime02,atime,atime2
         character*60 name_one,name_two,text
-        character*80 title,title2,femver
+        character*80 title,title2,femver,header
 
 	integer, save, allocatable :: kflux(:)
 	integer, save, allocatable :: nlayers(:)
@@ -232,6 +232,8 @@
 	integer, save, allocatable :: nlayers2(:)
 	real, save, allocatable :: fluxes2(:,:,:)
 	character*80, save, allocatable :: strings2(:)
+
+	header = ' time                iv    ivar      is       l    lmax'
 
 !--------------------------------------------------
 ! open file(s)
@@ -258,18 +260,18 @@
         call clo_get_file(2,name_two)
 
 	iu2 = 2
-        open(iu2,file=name_one,status='old',form='unformatted',iostat=ios)
+        open(iu2,file=name_two,status='old',form='unformatted',iostat=ios)
 
         if( ios /= 0 ) then
-          write(6,*) 'no such file: ',trim(name_one)
+          write(6,*) 'no such file: ',trim(name_two)
           stop 'error opening file'
         end if
 
-        if( .not. bquiet ) write(6,*) 'opened file: ',trim(name_one)
+        if( .not. bquiet ) write(6,*) 'opened file: ',trim(name_two)
 
 	call flx_is_flx_file(iu2,nvers)
 	if( nvers == 0 ) then
-          write(6,*) 'file is not a flx file: ',trim(name_one)
+          write(6,*) 'file is not a flx file: ',trim(name_two)
           stop 'error opening file'
 	end if
 
@@ -340,6 +342,10 @@
         ntime = 0
 	iv = 0
 	eps = maxdiff
+	ierr_recs = 0
+	mdiff = 0.
+
+	write(6,*) 'comparing with eps = ',eps
 
         do while(.true.)
 
@@ -366,12 +372,16 @@
 	  
 	  iv = iv + 1
           if( mod(iv,nvar) == 1 ) ntime = ntime + 1
-          if( .not. bquiet ) write(6,*) 'time = ',atime,ntime,ivar
+          !if( .not. bquiet ) write(6,*) 'time = ',atime,ntime,ivar
 	  do is=1,nsect
 	    lmax = nlayers(is)
 	    do l=1,lmax
-	      if( any( abs(fluxes(l,:,is)-fluxes(l,:,is)) > eps ) ) then
-	        write(6,*) is,l,lmax
+	      if( any( abs(fluxes(l,:,is)-fluxes2(l,:,is)) > eps ) ) then
+		ierr_recs = ierr_recs + 1
+		maxerr = maxval(abs(fluxes(l,:,is)-fluxes2(l,:,is)))
+		mdiff = max(mdiff,maxerr)
+	        write(6,*) trim(header)
+	        write(6,'(f16.2,5i8)') atime,iv,ivar,is,l,lmax
 	        write(6,*) fluxes(l,:,is)
 	        write(6,*) fluxes2(l,:,is)
 	      end if
@@ -385,6 +395,10 @@
 !--------------------------------------------------
 
         if( .not. bsilent ) write(6,*) 'time records read: ',ntime
+        if( ierr_recs > 0 ) then
+	  write(6,*) 'total number of errors: ',ierr_recs
+	  write(6,*) 'maximum error: ',mdiff
+	end if
 
 !--------------------------------------------------
 ! end of routine

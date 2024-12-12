@@ -89,6 +89,14 @@ SetVars()
     export PARMETIS_HOME=
     export PETSC_HOME=$HOME/georg/lib/petsc
     export BFM_HOME=$HOME/georg/lib/bfm
+  elif [ $server = "storm" ]; then
+    export NETCDF_C_HOME=
+    export NETCDF_FORTRAN_HOME=
+    export NETCDFDIR=
+    export METIS_HOME=$HOME/georg/lib/metis
+    export PARMETIS_HOME=$HOME/georg/lib/parmetis
+    export PETSC_HOME=$HOME/georg/lib/petsc
+    export BFM_HOME=$HOME/georg/lib/bfm
   else
     echo "unknown server: $server"
     exit 1
@@ -104,7 +112,6 @@ Sourced
 
 SetVars
 
-if [ $what = "show" ]; then
     echo " NETCDF_C_HOME = $NETCDF_C_HOME"
     echo " NETCDF_FORTRAN_HOME = $NETCDF_FORTRAN_HOME"
     echo " NETCDFDIR = $NETCDFDIR"
@@ -112,7 +119,6 @@ if [ $what = "show" ]; then
     echo " PARMETIS_HOME = $PARMETIS_HOME"
     echo " PETSC_HOME = $PETSC_HOME"
     echo " BFM_HOME = $BFM_HOME"
-fi
 
 #--------------------------------------------------------------
 
