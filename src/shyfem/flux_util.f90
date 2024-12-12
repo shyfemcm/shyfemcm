@@ -358,7 +358,6 @@
 	  call flxtst(ns,ntotal,kflux(ifirst),iflux(1,ifirst))
 	end do
 
-	stop
 !----------------------------------------------------------
 ! end of routine
 !----------------------------------------------------------
@@ -402,11 +401,12 @@
 	end do
 
 	call shympi_syncronize
+	write(6,*) 'flxtst output'
+	call shympi_syncronize
 	if( nt > 0 ) then
-	!write(6,*) ns,n,nmax,nt
-	!write(6,'(a)') string(1:nmax)
-	write(6,'(20i4)') my_id,n,ids
-	flush(6)
+	  !write(6,*) ns,n,nmax,nt
+	  !write(6,'(a)') string(1:nmax)
+	  write(6,'(20i4)') my_id,ns,n,ids
 	end if
 	call shympi_syncronize
 
