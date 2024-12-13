@@ -1,4 +1,35 @@
 
+!--------------------------------------------------------------------------
+!
+!    Copyright (C) 2024  Georg Umgiesser
+!
+!    This file is part of SHYFEM.
+!
+!    SHYFEM is free software: you can redistribute it and/or modify
+!    it under the terms of the GNU General Public License as published by
+!    the Free Software Foundation, either version 3 of the License, or
+!    (at your option) any later version.
+!
+!    SHYFEM is distributed in the hope that it will be useful,
+!    but WITHOUT ANY WARRANTY; without even the implied warranty of
+!    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
+!    GNU General Public License for more details.
+!
+!    You should have received a copy of the GNU General Public License
+!    along with SHYFEM. Please see the file COPYING in the main directory.
+!    If not, see <http://www.gnu.org/licenses/>.
+!
+!    Contributions to this file can be found below in the revision log.
+!
+!--------------------------------------------------------------------------
+
+! debug of flx files
+!
+! revision log :
+!
+! 10.12.2024    ggu     written from scratch
+! 13.12.2024    ggu     error_stop and other small changes
+
 !==========================================================================
         module mod_dbg_flx
 !==========================================================================
@@ -8,12 +39,11 @@
         logical, save :: bsilent = .false.      !be silent
         logical, save :: bquiet = .false.       !be quiet
         logical, save :: bverbose = .false.     !be verbose
-        logical, save :: bcheck = .true.        !check for differences
         logical, save :: bstop = .true.         !stop on error
         logical, save :: bnostop = .false.      !do not stop on differences
         logical, save :: bnodiff = .true.       !do not show differences
-        logical, save :: bsummary = .true.      !only show summary
-        logical, save :: bbalance = .true.      !balance time step
+        !logical, save :: bsummary = .true.      !only show summary
+        !logical, save :: bbalance = .true.      !balance time step
         double precision, save :: maxdiff = 0.  !max difference allowed
 
 !==========================================================================
@@ -24,10 +54,12 @@
 
         use clo
         use mod_dbg_flx
+        use mod_error_stop
 
         implicit none
 
         integer nc,ierr
+        character*80 routine
 
         call dbg_flx_init
 
@@ -41,15 +73,11 @@
           call compare_dbg_flx_files(ierr)
         else
           write(6,*) 'nc = ',nc
-          stop 'error stop dbg_flx: wrong number of files'
+	  call error_stop(routine,'wrong number of files')
         end if
 
-        if( ierr > 0 ) then
-          if( ierr == 99 ) ierr = 100   !terrible hack - FIXME
-          call exit(ierr)
-        else
-          call exit(99)
-        end if
+        if( ierr > 0 ) call error_stop(77)
+	call success
 
         end
 
@@ -61,6 +89,7 @@
 
         use clo
         use mod_dbg_flx
+        use mod_error_stop
 
         implicit none
 
@@ -76,11 +105,14 @@
         double precision dtime,atime0,atime
         character*60 name_one,text
         character*80 title,femver
+        character*80 routine
 
 	integer, save, allocatable :: kflux(:)
 	integer, save, allocatable :: nlayers(:)
 	real, save, allocatable :: fluxes(:,:,:)
 	character*80, save, allocatable :: strings(:)
+
+	routine = 'read_dbg_flx_file'
 
 !--------------------------------------------------
 ! open file(s)
@@ -93,7 +125,7 @@
 
         if( ios /= 0 ) then
           write(6,*) 'no such file: ',trim(name_one)
-          stop 'error opening file'
+	  call error_stop(routine,'error opening file')
         end if
 
         if( .not. bquiet ) write(6,*) 'opened file: ',trim(name_one)
@@ -101,7 +133,7 @@
 	call flx_is_flx_file(iu1,nvers)
 	if( nvers == 0 ) then
           write(6,*) 'file is not a flx file: ',trim(name_one)
-          stop 'error opening file'
+	  call error_stop(routine,'error opening file')
 	end if
 
 !--------------------------------------------------
@@ -185,15 +217,15 @@
    97	continue
 	write(6,*) 'on unit = ',iu
 	write(6,*) 'error reading record: ',ierr
-	stop 'error stop read_dbg_flx_file: error reading record'
+	call error_stop(routine,'error reading record')
    98	continue
 	write(6,*) 'on unit = ',iu
 	write(6,*) 'error reading header2: ',ierr
-	stop 'error stop read_dbg_flx_file: error reading header2'
+	call error_stop(routine,'error reading header2')
    99	continue
 	write(6,*) 'on unit = ',iu
 	write(6,*) 'error reading header: ',ierr
-	stop 'error stop read_dbg_flx_file: error reading header'
+	call error_stop(routine,'error reading header')
         end
 
 !**************************************************************************
@@ -204,6 +236,7 @@
 
         use clo
         use mod_dbg_flx
+        use mod_error_stop
 
         implicit none
 
@@ -222,7 +255,7 @@
 	double precision eps,maxerr,mdiff
         double precision dtime,atime0,atime02,atime,atime2
         character*60 name_one,name_two,text
-        character*80 title,title2,femver,header
+        character*80 title,title2,femver,header,routine
 
 	integer, save, allocatable :: kflux(:)
 	integer, save, allocatable :: nlayers(:)
@@ -233,6 +266,7 @@
 	real, save, allocatable :: fluxes2(:,:,:)
 	character*80, save, allocatable :: strings2(:)
 
+	routine = 'compare_dbg_flx_files'
 	header = ' time                iv    ivar      is       l    lmax'
 
 !--------------------------------------------------
@@ -246,7 +280,7 @@
 
         if( ios /= 0 ) then
           write(6,*) 'no such file: ',trim(name_one)
-          stop 'error opening file'
+	  call error_stop(routine,'error opening file')
         end if
 
         if( .not. bquiet ) write(6,*) 'opened file: ',trim(name_one)
@@ -254,7 +288,7 @@
 	call flx_is_flx_file(iu1,nvers)
 	if( nvers == 0 ) then
           write(6,*) 'file is not a flx file: ',trim(name_one)
-          stop 'error opening file'
+	  call error_stop(routine,'error opening file')
 	end if
 
         call clo_get_file(2,name_two)
@@ -264,7 +298,7 @@
 
         if( ios /= 0 ) then
           write(6,*) 'no such file: ',trim(name_two)
-          stop 'error opening file'
+	  call error_stop(routine,'error opening file')
         end if
 
         if( .not. bquiet ) write(6,*) 'opened file: ',trim(name_two)
@@ -272,7 +306,7 @@
 	call flx_is_flx_file(iu2,nvers)
 	if( nvers == 0 ) then
           write(6,*) 'file is not a flx file: ',trim(name_two)
-          stop 'error opening file'
+	  call error_stop(routine,'error opening file')
 	end if
 
 !--------------------------------------------------
@@ -372,7 +406,7 @@
 	  
 	  iv = iv + 1
           if( mod(iv,nvar) == 1 ) ntime = ntime + 1
-          !if( .not. bquiet ) write(6,*) 'time = ',atime,ntime,ivar
+          if( .not. bquiet ) write(6,*) 'time = ',atime,ntime,ivar
 	  do is=1,nsect
 	    lmax = nlayers(is)
 	    do l=1,lmax
@@ -380,10 +414,15 @@
 		ierr_recs = ierr_recs + 1
 		maxerr = maxval(abs(fluxes(l,:,is)-fluxes2(l,:,is)))
 		mdiff = max(mdiff,maxerr)
-	        write(6,*) trim(header)
-	        write(6,'(f16.2,5i8)') atime,iv,ivar,is,l,lmax
-	        write(6,*) fluxes(l,:,is)
-	        write(6,*) fluxes2(l,:,is)
+		if( .not. bnodiff ) then
+	          write(6,*) trim(header)
+	          write(6,'(f16.2,5i8)') atime,iv,ivar,is,l,lmax
+	          write(6,*) fluxes(l,:,is)
+	          write(6,*) fluxes2(l,:,is)
+		end if
+		if( bstop ) then
+		  call error_stop(routine,'difference found in files')
+		end if
 	      end if
 	    end do
 	  end do
@@ -394,10 +433,14 @@
 ! end of time loop
 !--------------------------------------------------
 
-        if( .not. bsilent ) write(6,*) 'time records read: ',ntime
-        if( ierr_recs > 0 ) then
-	  write(6,*) 'total number of errors: ',ierr_recs
-	  write(6,*) 'maximum error: ',mdiff
+        if( .not. bsilent ) then
+	  write(6,*) 'time records read: ',ntime
+          if( ierr_recs > 0 ) then
+	    write(6,*) 'total number of errors: ',ierr_recs
+	    write(6,*) 'maximum error: ',mdiff
+	  else
+	    write(6,*) 'no differences found'
+	  end if
 	end if
 
 !--------------------------------------------------
@@ -411,14 +454,14 @@
 	write(6,*) 'ivar: ',ivar,ivar2
 	write(6,*) 'nlayers: ',nlayers
 	write(6,*) 'nlayers2: ',nlayers2
-	stop 'error stop compare_dbg_flx_files: incompatible records'
+	call error_stop(routine,'incompatible records')
    94	continue
 	write(6,*) 'incompatible flx arrays:'
 	write(6,*) 'kflux: ',kflux
 	write(6,*) 'kflux2: ',kflux2
 	write(6,*) 'nlayers: ',nlayers
 	write(6,*) 'nlayers2: ',nlayers2
-	stop 'error stop compare_dbg_flx_files: incompatible arrays'
+	call error_stop(routine,'incompatible arrays')
    95	continue
 	write(6,*) 'incompatible flx parameters:'
 	write(6,*) 'nvers: ',nvers,nvers2
@@ -427,19 +470,19 @@
 	write(6,*) 'idtflx: ',idtflx,idtflx2
 	write(6,*) 'nlmax: ',nlmax,nlmax2
 	write(6,*) 'nvar: ',nvar,nvar2
-	stop 'error stop compare_dbg_flx_files: incompatible parameters'
+	call error_stop(routine,'incompatible parameters')
    97	continue
 	write(6,*) 'on unit = ',iu
 	write(6,*) 'error reading record: ',ierr
-	stop 'error stop compare_dbg_flx_files: error reading record'
+	call error_stop(routine,'error reading record')
    98	continue
 	write(6,*) 'on unit = ',iu
 	write(6,*) 'error reading header2: ',ierr
-	stop 'error stop compare_dbg_flx_files: error reading header2'
+	call error_stop(routine,'error reading header2')
    99	continue
 	write(6,*) 'on unit = ',iu
 	write(6,*) 'error reading header: ',ierr
-	stop 'error stop compare_dbg_flx_files: error reading header'
+	call error_stop(routine,'error reading header')
         end
 
 !**************************************************************************
@@ -465,22 +508,22 @@
         call clo_add_sep('general options:')
         call clo_add_option('silent',.false.,'be silent')
         call clo_add_option('quiet',.false.,'be quiet')
-        call clo_add_option('nodiff',.false.,'do not show differences')
         call clo_add_option('verbose',.false.,'be verbose')
+        call clo_add_option('nodiff',.false.,'do not show differences')
         call clo_add_option('nostop',.false.,'do not stop at error')
-        call clo_add_option('summary',.false.,'do only summary')
-        call clo_add_option('balance',.false.,'balance time records')
+        !call clo_add_option('summary',.false.,'do only summary')
+        !call clo_add_option('balance',.false.,'balance time records')
         call clo_add_option('maxdiff',0.,'maximum tolerated difference')
 
         call clo_parse_options
 
         call clo_get_option('silent',bsilent)
         call clo_get_option('quiet',bquiet)
-        call clo_get_option('nodiff',bnodiff)
         call clo_get_option('verbose',bverbose)
+        call clo_get_option('nodiff',bnodiff)
         call clo_get_option('nostop',baux)
-        call clo_get_option('summary',bsummary)
-        call clo_get_option('balance',bbalance)
+        !call clo_get_option('summary',bsummary)
+        !call clo_get_option('balance',bbalance)
         call clo_get_option('maxdiff',maxdiff)
 
         if( baux ) bstop = .false.

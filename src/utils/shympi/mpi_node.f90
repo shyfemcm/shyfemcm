@@ -88,6 +88,7 @@
 ! 23.11.2024    ggu     new variable pquality
 ! 04.12.2024    ggu     implement bmpi_allgather for gather routines
 ! 07.12.2024    ggu     big changes: make sure arrays are same length for reduce
+! 13.12.2024    ggu     error_stop() implemented
 
 !******************************************************************
 
@@ -118,6 +119,8 @@
 	logical, save :: bmpi_skip = .true.		!skip if not bmpi
 	logical, save :: bextra_exchange = .false.	!deal with INTEL_BUG
 
+	integer, save :: ierr_code = 33
+
 !	---------------------------------
 !	next variables are set internally
 !	---------------------------------
@@ -127,29 +130,29 @@
 	logical, save :: bmpi_support = .true.
 	logical, save :: bmpi_alloper = .true.	!do allgather and allreduce
 
-	integer,save :: n_threads = 1
-	integer,save :: my_id = 0
-	integer,save :: my_unit = 0
+	integer, save :: n_threads = 1
+	integer, save :: my_id = 0
+	integer, save :: my_unit = 0
 
-	integer,save :: status_size = 0
+	integer, save :: status_size = 0
 
-	integer,save :: ngr_global = 0		!ngr of total basin
-	integer,save :: nlv_global = 0		!nlv of total basin
+	integer, save :: ngr_global = 0		!ngr of total basin
+	integer, save :: nlv_global = 0		!nlv of total basin
 
-	integer,save :: nlv_local = 0		!nlv of this partition
+	integer, save :: nlv_local = 0		!nlv of this partition
 
-	integer,save :: nkn_global = 0		!total basin
-	integer,save :: nel_global = 0
-	integer,save :: nkn_local = 0		!this domain
-	integer,save :: nel_local = 0
-	integer,save :: nkn_unique = 0		!this domain unique
-	integer,save :: nel_unique = 0
-	integer,save :: nkn_inner = 0		!only proper, no ghost
-	integer,save :: nel_inner = 0
+	integer, save :: nkn_global = 0		!total basin
+	integer, save :: nel_global = 0
+	integer, save :: nkn_local = 0		!this domain
+	integer, save :: nel_local = 0
+	integer, save :: nkn_unique = 0		!this domain unique
+	integer, save :: nel_unique = 0
+	integer, save :: nkn_inner = 0		!only proper, no ghost
+	integer, save :: nel_inner = 0
 
-	integer,save :: nk_max = 0		!max of nkn of all domains
-	integer,save :: ne_max = 0		!max of nel of all domains
-	integer,save :: nn_max = 0		!max of nkn/nel of all domains
+	integer, save :: nk_max = 0		!max of nkn of all domains
+	integer, save :: ne_max = 0		!max of nel of all domains
+	integer, save :: nn_max = 0		!max of nkn/nel of all domains
 
 ! total number of nodes/elems in domains
 
@@ -164,12 +167,12 @@
 
 ! information on ghost areas (nodes and elements)
 
-	integer,save :: n_ghost_areas = 0
-	integer,save :: n_ghost_nodes_max = 0
-	integer,save :: n_ghost_elems_max = 0
-	integer,save :: n_ghost_max = 0
-	integer,save :: n_ghost_max_global = 0
-	integer,save :: n_buffer = 0
+	integer, save :: n_ghost_areas = 0
+	integer, save :: n_ghost_nodes_max = 0
+	integer, save :: n_ghost_elems_max = 0
+	integer, save :: n_ghost_max = 0
+	integer, save :: n_ghost_max_global = 0
+	integer, save :: n_buffer = 0
 
 ! arrays for ghost nodes/elems
 
@@ -510,7 +513,8 @@
         INTERFACE error_stop
         MODULE PROCEDURE  error_stop_2 &
      &			, error_stop_1 &
-     &			, error_stop_0
+     &			, error_stop_0 &
+     &			, error_stop_i0
         END INTERFACE
 
         INTERFACE shympi_bdebug
@@ -1080,7 +1084,7 @@
 	  write(6,*) 'error stop ',trim(text)
 	end if
 	!call shympi_barrier_internal
-	call shympi_abort_internal(37)
+	call shympi_abort_internal(ierr_code)
 	stop 'aborting...'
 
 	end subroutine shympi_stop
@@ -1089,7 +1093,7 @@
 
 	subroutine shympi_abort
 
-	call shympi_abort_internal(33)
+	call shympi_abort_internal(ierr_code)
 	stop 'error stop: abort'
 
 	end subroutine shympi_abort
@@ -4069,6 +4073,8 @@
 	end subroutine gassert
 
 !******************************************************************
+!******************************************************************
+!******************************************************************
 
 	subroutine error_stop_2(routine,text)
 
@@ -4076,7 +4082,7 @@
 
 	character*(*) routine,text
 
-	write(6,*) 'error stop ',routine,': ',text
+	write(6,*) 'error stop '//trim(routine)//': ',trim(text)
 	flush(6)
 	call shympi_abort
 
@@ -4090,7 +4096,7 @@
 
 	character*(*) text
 
-	write(6,*) 'error stop: ',text
+	write(6,*) 'error stop: ',trim(text)
 	flush(6)
 	call shympi_abort
 
@@ -4108,6 +4114,34 @@
 
 	end subroutine error_stop_0
 
+!******************************************************************
+
+	subroutine error_stop_i0(ierr)
+
+	implicit none
+
+	integer ierr
+
+	write(6,*) 'error stop'
+	flush(6)
+	ierr_code = ierr
+	call shympi_abort
+
+	end subroutine error_stop_i0
+
+!******************************************************************
+
+	subroutine success
+
+	implicit none
+
+	ierr_code = 0
+	call shympi_abort
+
+	end subroutine success
+
+!******************************************************************
+!******************************************************************
 !******************************************************************
 
 	subroutine shympi_bdebug_0(text)

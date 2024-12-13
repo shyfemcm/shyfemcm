@@ -61,6 +61,7 @@
 ! 09.06.2023    ggu     new routine error_stop()
 ! 07.03.2024    ggu     double routines for shympi_l2g_array_fix_d/2d_d
 ! 12.03.2024    ggu     double routines for shympi_g2l_array_fix_ird/2d_d
+! 13.12.2024    ggu     error_stop() implemented
 !
 !******************************************************************
 
@@ -85,6 +86,8 @@
         logical, save :: bmpi_skip = .false.
         logical, save :: bextra_exchange = .false.
 
+	integer, save :: ierr_code = 33
+
 !       ---------------------------------
 !       next variables are set internally
 !       ---------------------------------
@@ -94,36 +97,31 @@
 	logical, save :: bmpi_support = .false.
 	logical, save :: bmpi_alloper = .true.
 
-	integer,save :: n_threads = 1
-	integer,save :: my_id = 0
-	integer,save :: my_unit = 0
+	integer, save :: n_threads = 1
+	integer, save :: my_id = 0
+	integer, save :: my_unit = 0
 
-        integer,save :: status_size = 0
+        integer, save :: status_size = 0
 
-        integer,save :: ngr_global = 0		!ngr of total basin
-        integer,save :: nlv_global = 0		!nlv of total basin
+        integer, save :: ngr_global = 0		!ngr of total basin
+        integer, save :: nlv_global = 0		!nlv of total basin
 
-        integer,save :: nlv_local = 0		!nlv of this partition
+        integer, save :: nlv_local = 0		!nlv of this partition
 
-	integer,save :: nkn_global = 0		!total basin
-	integer,save :: nel_global = 0
-	integer,save :: nkn_local = 0		!this domain
-	integer,save :: nel_local = 0
-	integer,save :: nkn_unique = 0		!this domain unique
-	integer,save :: nel_unique = 0
-	integer,save :: nkn_inner = 0		!only proper, no ghost
-	integer,save :: nel_inner = 0
+	integer, save :: nkn_global = 0		!total basin
+	integer, save :: nel_global = 0
+	integer, save :: nkn_local = 0		!this domain
+	integer, save :: nel_local = 0
+	integer, save :: nkn_unique = 0		!this domain unique
+	integer, save :: nel_unique = 0
+	integer, save :: nkn_inner = 0		!only proper, no ghost
+	integer, save :: nel_inner = 0
 
-        integer,save :: nk_max = 0              !max of nkn of all domains
-        integer,save :: ne_max = 0              !max of nel of all domains
-        integer,save :: nn_max = 0              !max of nkn/nel of all domains
+        integer, save :: nk_max = 0              !max of nkn of all domains
+        integer, save :: ne_max = 0              !max of nel of all domains
+        integer, save :: nn_max = 0              !max of nkn/nel of all domains
 
-	integer,save :: n_ghost_areas = 0
-	integer,save :: n_ghost_nodes_max = 0
-	integer,save :: n_ghost_elems_max = 0
-	integer,save :: n_ghost_max = 0
-	integer,save :: n_ghost_max_global = 0
-	integer,save :: n_buffer = 0
+! total number of nodes/elems in domains
 
         integer,save,pointer :: n_domains(:)
         integer,save,target,allocatable :: nkn_domains(:)	!local total
@@ -134,14 +132,29 @@
         integer,save,allocatable :: nel_cum_domains(:)
         integer,save,allocatable :: nlv_domains(:)
 
+! information on ghost areas (nodes and elements)
+
+	integer, save :: n_ghost_areas = 0
+	integer, save :: n_ghost_nodes_max = 0
+	integer, save :: n_ghost_elems_max = 0
+	integer, save :: n_ghost_max = 0
+	integer, save :: n_ghost_max_global = 0
+	integer, save :: n_buffer = 0
+
+! arrays for ghost nodes/elems
+
 	integer,save,allocatable :: ghost_areas(:,:)
 	integer,save,allocatable :: ghost_nodes_in(:,:)
 	integer,save,allocatable :: ghost_nodes_out(:,:)
 	integer,save,allocatable :: ghost_elems_in(:,:)
 	integer,save,allocatable :: ghost_elems_out(:,:)
 
+! id of nodes and elems
+
 	integer,save,allocatable :: id_node(:)		!domain (id) of node
 	integer,save,allocatable :: id_elem(:,:)	!domain (id) of elem
+
+        ! sorted node/elem numbering as in total domain
 
         integer,save,allocatable :: ip_sort_node(:)     !sorted external nodes
         integer,save,allocatable :: ip_sort_elem(:)     !sorted external elems
@@ -162,12 +175,16 @@
         integer,save,target,allocatable :: ip_int_nodes(:,:) !global int nums
         integer,save,target,allocatable :: ip_int_elems(:,:)
 
+        ! nen3v and hlv index of global domain
+
         integer,save,allocatable :: nen3v_global(:,:)	!global element index
 	real,save,allocatable :: hlv_global(:)		!global layer depths
 
         ! quality index of partition
 
         real, save :: pquality = 0.
+
+        ! communication structures
 
         type communication_info
           integer, public :: numberID
@@ -454,7 +471,8 @@
         INTERFACE error_stop
         MODULE PROCEDURE  error_stop_2 &
      &                  , error_stop_1 &
-     &                  , error_stop_0
+     &                  , error_stop_0 &
+     &                  , error_stop_i0
         END INTERFACE
 
 !-------------------------------------------------------
@@ -2315,6 +2333,8 @@
         end subroutine shympi_bdebug
 
 !******************************************************************
+!******************************************************************
+!******************************************************************
 
         subroutine error_stop_2(routine,text)
 
@@ -2322,7 +2342,7 @@
 
         character*(*) routine,text
 
-        write(6,*) 'error stop ',routine,': ',text
+        write(6,*) 'error stop '//trim(routine)//': ',trim(text)
         flush(6)
         call shympi_abort
 
@@ -2336,7 +2356,7 @@
 
         character*(*) text
 
-        write(6,*) 'error stop: ',text
+        write(6,*) 'error stop: ',trim(text)
         flush(6)
         call shympi_abort
 
@@ -2353,6 +2373,32 @@
         call shympi_abort
 
         end subroutine error_stop_0
+
+!******************************************************************
+
+        subroutine error_stop_i0(ierr)
+
+        implicit none
+
+	integer ierr
+
+        write(6,*) 'error stop'
+        flush(6)
+	ierr_code = ierr
+        call shympi_abort
+
+        end subroutine error_stop_i0
+
+!******************************************************************
+
+        subroutine success
+
+        implicit none
+
+	ierr_code = 0
+        call shympi_abort
+
+        end subroutine success
 
 !==================================================================
         end module shympi

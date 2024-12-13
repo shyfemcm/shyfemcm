@@ -594,12 +594,15 @@ f_vol.o: ../../lib/mod/basin.mod ../../lib/mod/levels.mod \
 		../../lib/mod/mod_layer_thickness.mod 
 floodfill.o: ../../lib/mod/basin.mod ../../lib/mod/mod_geom.mod
 flux.o: ../../lib/mod/basin.mod ../../lib/mod/befor_after.mod \
-		../../lib/mod/flux.mod ../../lib/mod/levels.mod \
+		../../lib/mod/levels.mod \
 		../../lib/mod/mod_conz.mod \
+		../../lib/mod/mod_flux.mod \
 		../../lib/mod/mod_sediment.mod \
+		../../lib/mod/mod_trace_point.mod \
 		../../lib/mod/mod_ts.mod ../../lib/mod/nls.mod \
 		../../lib/mod/shympi.mod ../../lib/mod/simul.mod 
-flux_util.o: ../../lib/mod/levels.mod ../../lib/mod/mod_geom.mod
+flux_util.o: ../../lib/mod/levels.mod ../../lib/mod/mod_geom.mod \
+		../../lib/mod/shympi.mod 
 flxm.o: ../../lib/mod/shympi.mod ../../lib/mod/simul.mod
 gotm_aux.o: ../../lib/mod/basin.mod ../../lib/mod/levels.mod \
 		../../lib/mod/mod_restart.mod 

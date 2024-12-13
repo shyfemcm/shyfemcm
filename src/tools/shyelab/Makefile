@@ -182,8 +182,11 @@ depend:
 
 ../../../lib/mod/elabtime.mod: elabtime.o
 ../../../lib/mod/elabutil.mod: elabutil.o
+../../../lib/mod/mod_dbg_flx.mod: dbg_flx.o
 ../../../lib/mod/shy_extract.mod: shyelab_extract.o
 ../../../lib/mod/shyelab_out.mod: shyelab_output.o
+dbg_flx.o: ../../../lib/mod/clo.mod \
+		../../../lib/mod/mod_error_stop.mod 
 elab_check.o: ../../../lib/mod/iso8601.mod
 elab_gis.o: ../../../lib/mod/basin.mod \
 		../../../lib/mod/shyfem_strings.mod 
