@@ -73,6 +73,8 @@ Sourced()
 
 SetVars()
 {
+  [ $what = "show" ] && return
+
   if [ $server = "Caesium" ]; then
     export NETCDF_C_HOME=
     export NETCDF_FORTRAN_HOME=
@@ -112,6 +114,8 @@ Sourced
 
 SetVars
 
+if [ $what = "show" ]; then
+    echo " server = $server"
     echo " NETCDF_C_HOME = $NETCDF_C_HOME"
     echo " NETCDF_FORTRAN_HOME = $NETCDF_FORTRAN_HOME"
     echo " NETCDFDIR = $NETCDFDIR"
