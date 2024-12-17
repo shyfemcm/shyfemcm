@@ -119,7 +119,9 @@
 	logical, save :: bmpi_skip = .true.		!skip if not bmpi
 	logical, save :: bextra_exchange = .false.	!deal with INTEL_BUG
 
-	integer, save :: ierr_code = 33
+	integer, save :: i_code = 0
+	integer, save :: i_code_error = 33
+	integer, save :: i_code_success = 0
 
 !	---------------------------------
 !	next variables are set internally
@@ -1084,7 +1086,7 @@
 	  write(6,*) 'error stop ',trim(text)
 	end if
 	!call shympi_barrier_internal
-	call shympi_abort_internal(ierr_code)
+	call shympi_abort_internal(i_code_error)
 	stop 'aborting...'
 
 	end subroutine shympi_stop
@@ -1093,7 +1095,7 @@
 
 	subroutine shympi_abort
 
-	call shympi_abort_internal(ierr_code)
+	call shympi_abort_internal(i_code)
 	stop 'error stop: abort'
 
 	end subroutine shympi_abort
@@ -4084,6 +4086,7 @@
 
 	write(6,*) 'error stop '//trim(routine)//': ',trim(text)
 	flush(6)
+	i_code = i_code_error
 	call shympi_abort
 
 	end subroutine error_stop_2
@@ -4098,6 +4101,7 @@
 
 	write(6,*) 'error stop: ',trim(text)
 	flush(6)
+	i_code = i_code_error
 	call shympi_abort
 
 	end subroutine error_stop_1
@@ -4110,6 +4114,7 @@
 
 	write(6,*) 'error stop'
 	flush(6)
+	i_code = i_code_error
 	call shympi_abort
 
 	end subroutine error_stop_0
@@ -4124,7 +4129,7 @@
 
 	write(6,*) 'error stop'
 	flush(6)
-	ierr_code = ierr
+	i_code = ierr
 	call shympi_abort
 
 	end subroutine error_stop_i0
@@ -4135,7 +4140,7 @@
 
 	implicit none
 
-	ierr_code = 0
+	i_code = i_code_success
 	call shympi_abort
 
 	end subroutine success

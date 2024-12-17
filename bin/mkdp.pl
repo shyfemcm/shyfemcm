@@ -19,6 +19,8 @@
 #
 #------------------------------------------------------
 
+use Term::ANSIColor qw(:constants);
+
 use strict;
 
 #------------------------------------------------------
@@ -77,11 +79,13 @@ if( not $::make ) {
 my $mfile = change_makefile(\@lines);
 
 if( is_different("$mfile","$mfile.new") ) {
-  print STDERR "Makefile changed... substituting\n";
+  print STDERR RED, "Makefile changed... substituting\n", RESET;
+  #print STDERR "Makefile changed... substituting\n";
   rename("$mfile","$mfile.bak");
   rename("$mfile.new","$mfile");
 } else {
-  print STDERR "Makefile did not change... not substituting\n";
+  print STDERR GREEN, "Makefile did not change... not substituting\n", RESET;
+  #print STDERR "Makefile did not change... not substituting\n";
   rename("$mfile.new","$mfile.bak");
 }
 

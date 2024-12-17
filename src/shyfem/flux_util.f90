@@ -383,9 +383,11 @@
 
 	integer i,k,nmax,nt,id
 	character*80 string
+	character*80 format
 	integer ids(n)
 
 	nmax = min(80,n)
+	nmax = n
 	nt = 0
 
 	do i=1,nmax
@@ -393,17 +395,19 @@
 	  if( k > 0 ) then
 	    nt = nt + 1
 	    id = id_node(k)
-	    string(i:i) = '1'
+	    !string(i:i) = '1'
 	  else
 	    id = -1
-	    string(i:i) = '0'
+	    !string(i:i) = '0'
 	  end if
 	  ids(i) = id
 	end do
 
+	write(format,'(a,i4,a)') '(a,',n+3,'i4)'
+	!write(6,*) 'format: ',trim(format)
 	call shympi_syncronize
 	if( nt > 0 ) then
-	  write(6,'(a,80i4)') 'flxtst: ',my_id,ns,n,ids
+	  write(6,format) 'flxtst: ',my_id,ns,n,ids
 	end if
 	call shympi_syncronize
 

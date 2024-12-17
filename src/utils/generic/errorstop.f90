@@ -37,7 +37,8 @@
 
 	private
 
-	integer, save :: ierr_code = 7
+	integer, save :: i_code_error = 7
+	integer, save :: i_code_success = 0
 
         INTERFACE error_stop
         MODULE PROCEDURE          error_stop_2 &
@@ -60,7 +61,7 @@
 
 	write(6,*) 'error stop '//trim(routine)//': ',trim(text)
 	flush(6)
-	call exit(ierr_code)
+	call exit(i_code_error)
 
 	end subroutine error_stop_2
 
@@ -72,7 +73,7 @@
 
 	write(6,*) 'error stop: ',trim(text)
 	flush(6)
-	call exit(ierr_code)
+	call exit(i_code_error)
 
 	end subroutine error_stop_1
 
@@ -82,7 +83,7 @@
 
 	write(6,*) 'error stop'
 	flush(6)
-	call exit(ierr_code)
+	call exit(i_code_error)
 
 	end subroutine error_stop_0
 
@@ -102,7 +103,7 @@
 
 	subroutine success
 
-	call exit(0)
+	call exit(i_code_success)
 
 	end subroutine success
 

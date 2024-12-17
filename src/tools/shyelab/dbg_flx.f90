@@ -63,6 +63,8 @@
 
         call dbg_flx_init
 
+	ierr = 0
+
         nc = clo_number_of_files()
 
         if( nc == 0 ) then
