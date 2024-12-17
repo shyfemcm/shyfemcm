@@ -88,6 +88,8 @@ Clean_after()
 
 SetUp()
 {
+  . bin/colors.sh
+
   mkdir -p $rules_arc_dir $rules_dist_dir
   if [ $? -ne 0 ]; then
     echo "Cannot create directory arc... aborting"
@@ -109,10 +111,10 @@ WrapUp()
   echo "================================="
   echo "Final message on all compilations: "
   if [ $lines -ne 0 ]; then
-    echo "  *** some errors occured in compilation..."
+    echo "${red}  *** some errors occured in compilation...${normal}"
     echo "  (see allstderr.tmp for more details)"
   else
-    echo "  no compilation errors"
+    echo "${green}  no compilation errors${normal}"
   fi
   echo "================================="
 }
@@ -187,10 +189,10 @@ Comp()
   fi
 
   if [ $lines -ne 0 ]; then
-    echo "*** compilation errors..."
+    echo "${red}*** compilation errors...${normal}"
     cat stderr.out
   else
-    echo "no compilation errors"
+    echo "${green}successfull compilation${normal}"
   fi
   echo "-----------------"
 
