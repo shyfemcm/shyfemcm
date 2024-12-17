@@ -123,6 +123,7 @@ if [ $what = "show" ]; then
     echo " PARMETIS_HOME = $PARMETIS_HOME"
     echo " PETSC_HOME = $PETSC_HOME"
     echo " BFM_HOME = $BFM_HOME"
+fi
 
 #--------------------------------------------------------------
 
