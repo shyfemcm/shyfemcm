@@ -136,6 +136,7 @@
 	if( .not. shympi_is_master() ) return
 
 	write(iu_debug) 0,0,0
+	flush(iu_debug)
 
 	end
 

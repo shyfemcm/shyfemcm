@@ -486,8 +486,8 @@
 
 	ierr = 0
 
-	    read(1) nh1,nv1,nt1
-	    read(2) nh2,nv2,nt2
+	    read(1,end=9) nh1,nv1,nt1
+	    read(2,end=9) nh2,nv2,nt2
 	    if( nh1 .ne. nh2 ) goto 98
 	    if( nv1 .ne. nv2 ) goto 98
 	    if( nt1 .ne. nt2 ) goto 98
@@ -501,8 +501,8 @@
 
 	    !read(1,end=9) text1
 	    !read(2,end=9) text2
-	    read(1) text1
-	    read(2) text2
+	    read(1,end=9) text1
+	    read(2,end=9) text2
 	    if( text1 .ne. text2 ) goto 96
 	    text = text1
 
