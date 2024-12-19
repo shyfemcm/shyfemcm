@@ -70,7 +70,7 @@
 
         !include 'mpif.h'
 
-	logical, parameter :: bcomment = .true.	!write comment
+	logical, parameter :: bcomment = .false.	!write comment
 	integer, parameter :: iuc = 999          	!unit for comment
 	character*4, parameter :: indent = '    '	!indent for comment
 

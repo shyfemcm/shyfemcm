@@ -111,7 +111,7 @@
 
 	logical, parameter :: blocal_shympi_debug = .false. !write debug
 	logical, save :: bmpi_debug = .false.		!writes debug messages
-	logical, save :: bmpi_debug_txt = .true.	!writes mpi_debug_*.txt
+	logical, save :: bmpi_debug_txt = .false.	!writes mpi_debug_*.txt
 	logical, save :: bmpi_ldebug = .false.		!local debug
 	logical, save :: bmpi_unit = .false.		!write debug to my_unit
 	integer, save :: my_unit_base = 800		!unit base for output

@@ -563,42 +563,46 @@
 	  icall_nuopc = 1		!need to know if it is first shyfem timestep of the larger coupled timestep
 	end if
 
-	call trace_point('starting shyfem_run')
+	call trace_point_0('starting shyfem_run')
 
 	do while( dtime .lt. dtmax )
 
-	   call trace_point('=============================')
-	   call trace_point('start_of_timestep')
-	   call trace_point('=============================')
+	   call trace_point_0('=============================')
+	   call trace_point_0('start_of_timestep')
+	   call trace_point_0('=============================')
 
            if(bmpi_debug) call shympi_check_all(0)	!checks arrays
 
 	   call check_crc
 	   call set_dry
 
-	   call trace_point('set_timestep')
+	   call trace_point_0('set_timestep')
            call set_timestep(dtmax)		!sets dt and t_act
            call get_timestep(dt)
 	   call get_act_dtime(dtime)
 
-	   call trace_point('do_befor')
+	   call trace_point_0('do_befor')
 	   call do_befor
 
+	   call trace_point_0('before copy')
 	   call copy_uvz		!copies new to old time level
 	   call nonhydro_copy   	!copies non hydrostatic pressure terms
 	   call copy_depth		!copies layer depth to old
+	   call trace_point_0('after copy')
 
 	   call handle_offline(2)	!read from offline file
-	   call trace_point('sp111')
+	   call trace_point_0('before sp111')
 	   call sp111(2)		!boundary conditions
+	   call trace_point_0('after sp111')
            call read_wwm		!wwm wave model
+	   call trace_point_0('after wwm')
 	   
            if(bmpi_debug) call shympi_check_all(1)	!checks arrays
 
-	   call trace_point('hydro')
+	   call trace_point_0('hydro')
 	   call hydro			!hydro
 
-	   call trace_point('run_scalar')
+	   call trace_point_0('run_scalar')
 	   call run_scalar
 
            call turb_closure
@@ -618,7 +622,7 @@
 
 	   call handle_offline(1)	!write to offline file
 
-	   call trace_point('do_after')
+	   call trace_point_0('do_after')
 	   call do_after
 
 	   call tracer_write
@@ -646,13 +650,13 @@
 
 	   icall_nuopc = 0		!the next timsteps icall_nuopc is false
 
-	   call trace_point('=============================')
-	   call trace_point('end_of_timestep')
-	   call trace_point('=============================')
+	   call trace_point_0('=============================')
+	   call trace_point_0('end_of_timestep')
+	   call trace_point_0('=============================')
 
 	end do
 
-	call trace_point('finished shyfem_run')
+	call trace_point_0('finished shyfem_run')
 
 	end subroutine shyfem_run
 
@@ -1193,10 +1197,20 @@
 	icall = icall + 1
 	call shympi_write_debug_time(dtime)
 
-	call shympi_write_debug_node('mfluxv',mfluxv)
-	call shympi_write_debug_node('rqv',rqv)
+	call shympi_write_debug_node('zov',zov)
+	call shympi_write_debug_elem(3,'zeov',zeov)
+	call shympi_write_debug_node('hdkov',hdkov)
+	call shympi_write_debug_elem('hdeov',hdeov)
+	call shympi_write_debug_elem('utlov',utlov)
+	call shympi_write_debug_elem('vtlov',vtlov)
+	call shympi_write_debug_elem('uov',uov)
+	call shympi_write_debug_elem('vov',vov)
+	call shympi_write_debug_node('wlov',wlov)
+
 	call shympi_write_debug_node('rqpsv',rqpsv)
 	call shympi_write_debug_node('rqdsv',rqdsv)
+	call shympi_write_debug_node('mfluxv',mfluxv)
+	call shympi_write_debug_node('rqv',rqv)
 	call shympi_write_debug_node('tauxnv',tauxnv)
 	call shympi_write_debug_node('tauynv',tauynv)
 	call shympi_write_debug_node('wxv',wxv)
@@ -1206,7 +1220,6 @@
 	call shympi_write_debug_elem('fyv',fyv)
 	call shympi_write_debug_node('zeqv',zeqv)
 	call shympi_write_debug_node('znv',znv)
-	call shympi_write_debug_node('zov',zov)
 	call shympi_write_debug_elem(3,'zenv',zenv)
 	call shympi_write_debug_elem('utlnv',utlnv)
 	call shympi_write_debug_elem('vtlnv',vtlnv)
@@ -1918,6 +1931,106 @@
 	call shympi_barrier
 
         end
+
+!*****************************************************************
+!*****************************************************************
+!*****************************************************************
+! crc check routines
+!*****************************************************************
+!*****************************************************************
+!*****************************************************************
+
+	subroutine check_arrays_with_crc(text)
+
+	use shympi
+	use mod_debug
+	use mod_depth
+	use mod_ts
+	use mod_hydro_baro
+	use mod_hydro_vel
+	use mod_hydro_print
+	use mod_hydro
+	use mod_internal
+	use mod_conz
+	use levels
+	use basin
+	use mod_layer_thickness
+	use mod_diff_visc_fric
+	use mod_bound_dynamic
+	use tide
+	use mod_meteo
+
+	implicit none
+
+	character*(*) text
+	integer ip
+	real, allocatable :: aux3d(:,:)
+
+	if( .not. shympi_is_master() ) return
+
+	write(6,*) 'checking arrays with crc: ',trim(text)
+
+	ip = 1
+
+	call check_array_with_crc(ip,'zov',zov)
+	call check_array_with_crc(ip,'zeov',zeov)
+	call check_array_with_crc(ip,'hdkov',hdkov)
+	call check_array_with_crc(ip,'hdeov',hdeov)
+	call check_array_with_crc(ip,'utlov',utlov)
+	call check_array_with_crc(ip,'vtlov',vtlov)
+	call check_array_with_crc(ip,'uov',uov)
+	call check_array_with_crc(ip,'vov',vov)
+	call check_array_with_crc(ip,'wlov',wlov)
+
+	call check_array_with_crc(ip,'mfluxv',mfluxv)
+	call check_array_with_crc(ip,'rqv',rqv)
+	call check_array_with_crc(ip,'rqpsv',rqpsv)
+	call check_array_with_crc(ip,'rqdsv',rqdsv)
+	call check_array_with_crc(ip,'tauxnv',tauxnv)
+	call check_array_with_crc(ip,'tauynv',tauynv)
+	call check_array_with_crc(ip,'wxv',wxv)
+	call check_array_with_crc(ip,'wyv',wyv)
+
+	call check_array_with_crc(ip,'fxv',fxv)
+	call check_array_with_crc(ip,'fyv',fyv)
+	call check_array_with_crc(ip,'zeqv',zeqv)
+	call check_array_with_crc(ip,'znv',znv)
+	call check_array_with_crc(ip,'zenv',zenv)
+	call check_array_with_crc(ip,'hdknv',hdknv)
+	call check_array_with_crc(ip,'hdenv',hdenv)
+	call check_array_with_crc(ip,'utlnv',utlnv)
+	call check_array_with_crc(ip,'vtlnv',vtlnv)
+	call check_array_with_crc(ip,'unv',unv)
+	call check_array_with_crc(ip,'vnv',vnv)
+	call check_array_with_crc(ip,'wlnv',wlnv)
+	call check_array_with_crc(ip,'saltv',saltv)
+	call check_array_with_crc(ip,'tempv',tempv)
+	call check_array_with_crc(ip,'rhov',rhov)
+	if( allocated(cnv) ) then
+	  call check_array_with_crc(ip,'cnv',cnv)
+	end if
+
+	allocate(aux3d(nlvdi,nkn))
+	aux3d(:,:) = visv(1:nlvdi,:)
+	call check_array_with_crc(ip,'visv',aux3d)
+	aux3d(:,:) = difv(1:nlvdi,:)
+	call check_array_with_crc(ip,'difv',aux3d)
+
+	call check_array_with_crc(ip,'uprv',uprv)
+	call check_array_with_crc(ip,'vprv',vprv)
+
+	end
+
+!*****************************************************************
+
+	subroutine trace_point_0(text)
+	use mod_trace_point
+	implicit none
+	character(*) text
+	call trace_point(text)
+	if( btrace ) call check_arrays_with_crc(text)
+	end
+
 
 !*****************************************************************
 

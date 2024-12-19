@@ -141,6 +141,7 @@
 !		boxes_stats.txt has different section format
 ! 6		in 3d file also write act_eta and bstress
 !		in sections block write section number
+! 7		in 3d/vertical box section write also nvars2d (3/0)
 !
 !******************************************************************
 !
@@ -190,7 +191,7 @@
 	implicit none
 
         integer, parameter :: idbox = 473226		!id for box files
-        integer, parameter :: nversbox = 6		!newest version
+        integer, parameter :: nversbox = 7		!newest version
 
 	logical, save :: bextra = .true.		!write extra info
 	logical, save :: bflush = .true.		!flush after write
@@ -208,8 +209,8 @@
         integer, save :: nfxboxdim = 0	!maximum for kfluxm
 
 	real, parameter :: eps2d = 1.e-3	!eps for 2d mass balance
-	!real, parameter :: eps3d = 1.e-3	!eps for 3d mass balance
-	real, parameter :: eps3d = 0.0		!eps for 3d mass balance
+	real, parameter :: eps3d = 1.e-3	!eps for 3d mass balance
+	!real, parameter :: eps3d = 0.0		!eps for 3d mass balance
 
         integer, save :: nbox		!total number of boxes
         integer, save :: nbc_ob		!total number of open boundaries
@@ -773,6 +774,7 @@
      &                                  ,fluxesg_m,fluxesg_ob,aux2d)
 	end if
 	if( b3d .and. bmass3d ) then
+	  aux2d = barea*(eta_act-eta_old)
 	  aux3dg = valv3dg(:,:,1) + valv3dg(:,:,2)	   !vertical velocity
           call boxes_mass_balance_3d(dtbox,bvol2d                       &
      &                                  ,nblayers,nslayers              &
@@ -1764,6 +1766,7 @@
 	logical bw,bcheck
 	integer ib,is,ib1,ib2,ii,itype,iv,iss
 	integer lmax,l
+	integer, save :: nvars2d = 3
 
 	integer ifileo
 	character*80 file,s1,s2
@@ -1790,8 +1793,8 @@
 	if( bw ) write(iu,*) dtime,trim(aline)
 
         if( bextra ) write(iu,'(a)')                                    &
-     &          '#      boxes  max_layers       nvars'
-	if( bw ) write(iu,*) nbox,nblmax,nv3d
+     &          '#      boxes  max_layers       nvars     nvars2d'
+	if( bw ) write(iu,*) nbox,nblmax,nv3d,nvars2d
 
 	do ib=1,nbox
 	  lmax = nblayers(ib)
@@ -1895,7 +1898,8 @@
 
 	logical bw
 	integer ib,is,ib1,ib2,ii,itype,iv
-	integer lmax,l,max
+	integer lmax,l
+	integer, save :: nvars2d = 0
 
 	integer ifileo
 	character*80 file,s1
@@ -1922,8 +1926,8 @@
 	if( bw ) write(iu,*) dtime,trim(aline)
 
 	if( bextra ) write(iu,'(a)') &
-     &          '#      boxes  max_layers       nvars'
-	if( bw ) write(iu,*) nbox,nblmax,nvv3d
+     &          '#      boxes  max_layers       nvars     nvars2d'
+	if( bw ) write(iu,*) nbox,nblmax,nvv3d,nvars2d
 
 	valv3d(:,:,2) = -valv3d(:,:,2)		!make fluxes positive
 
@@ -3022,11 +3026,12 @@
 	integer ib,is,ib1,ib2
 	integer nb1,nb2,nbs
 	integer l,lmax,ltot
+	integer nblmax,nslmax
 	real volf,vole,volb,vola,vold,volr,volv
 	real wtop
 	real errmax,errv(nbox),errd(nbox)
 	real eps
-	double precision vol(nlvdi,nbox)
+	double precision vol(nlv_global,nbox)
 	double precision flux
 
 	eps = eps3d
@@ -3036,10 +3041,9 @@
 	bdebug = .true.
 	bw = ( my_id == 0 )
 
-	ltot = 0
-	do ib=1,nbox
-	  ltot = max(ltot,nblayers(ib))
-	end do
+	nblmax = maxval(nblayers)
+	nslmax = maxval(nslayers)
+	ltot = nblmax
 
 	vol = 0.
 	ierr = 0
@@ -3060,11 +3064,13 @@
 	    if( bdebug .and. abs(flux) > 0. ) then
 	      if( l > nb1 .or. l > nb2 ) then
 	       if( ib1 > 0 .and. nb1 > 0 ) then		
-		if( ierr == 0 ) write(6,'(19x,a)') trim(string)
-                write(6,'(a,6i5,g14.4)') 'non existing flux: '          &
+		if( bw ) then
+		 if( ierr == 0 ) write(6,'(19x,a)') trim(string)
+                 write(6,'(a,6i5,g14.4)') 'non existing flux: '          &
      &                          ,is,ib1,ib2                             &
      &                          ,nb1,nb2,l,flux
-		ierr = ierr + 1
+		 ierr = ierr + 1
+	        end if
 	       end if
 	      end if
 	    end if
@@ -3093,8 +3099,10 @@
 	  lmax = nblayers(ib)
 	  do l=lmax+1,ltot
 	    if( bdebug .and. vol(l,ib) /= 0. ) then
+	     if( bw ) then
               write(6,'(a,3i5,g14.4)') 'non existing box: '             &
      &                          ,ib,lmax,l,vol(l,ib)
+	     end if
 	    end if
 	  end do
 	  
@@ -3124,6 +3132,7 @@
 	string = 'boxes mass balance errmax 3d: '
 	if( errmax .gt. eps ) then
 	  if( bw ) write(6,*) '*** ',trim(string),errmax,eps
+	  !stop
 	else if( bdebug .and. bw ) then
 	  write(6,*) trim(string),errmax,eps
 	end if

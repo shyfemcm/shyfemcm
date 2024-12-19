@@ -360,6 +360,9 @@
 	end do
 
 	iu = 300 + my_id
+	write(iu,'(a)') 'this section is written in ghost_make()'
+	write(iu,'(a)') 'you can disable this output by setting'
+	write(iu,'(a)') '    bmpi_debug_txt = .false.'
 	write(iu,'(a,6i10)') 'looking for tripple points',my_id
 	do ie=1,nel
 	  if( id_elem(0,ie) == 3 ) then
@@ -370,6 +373,9 @@
 	flush(iu)
 
 	iu6 = 600 + my_id
+	write(iu6,'(a)') 'this section is written in ghost_make()'
+	write(iu6,'(a)') 'you can disable this output by setting'
+	write(iu6,'(a)') '    bmpi_debug_txt = .false.'
 	do ia=1,n_ghost_areas
 	  ic = ghost_areas(1,ia)
 	  nc = ghost_areas(2,ia)

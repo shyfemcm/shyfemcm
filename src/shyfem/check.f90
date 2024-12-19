@@ -1061,6 +1061,8 @@
 
 	subroutine check_crc_2d(iu,text,nlvdi,n,levels,array)
 
+	use mod_debug
+
 	implicit none
 
 	integer iu
@@ -1082,6 +1084,8 @@
 !*************************************************************
 
 	subroutine check_crc_1d(iu,text,n,array)
+
+	use mod_debug
 
 	implicit none
 

@@ -451,6 +451,7 @@
 !	initialize node vectors with boundary conditions
 !	-----------------------------------------------------
 
+	call trace_point_0('before initializing rqv...')
 	do k=1,nkn
           rwv2(k)=0.
           rzv(k)=flag
@@ -460,6 +461,7 @@
           ruv(k)=0.	!momentum input
           rvv(k)=0.
 	end do
+	call trace_point_0('after initializing rqv...')
 
 	rflux = 0.	!flux values for every boundary node
 
@@ -570,24 +572,29 @@
 
 	end do
 
+	call trace_point_0('after boundary conditions')
+
 !	-----------------------------------------------------
 !	tilting
 !	-----------------------------------------------------
 
 	call z_tilt
 	call c_tilt
+	call trace_point_0('after tilting')
 
 !	-----------------------------------------------------
 !	meteo forcing					!$$surel
 !	-----------------------------------------------------
 
 	call meteo_force
+	call trace_point_0('after meteo')
 
 !	-----------------------------------------------------
 !	set mass flux -> fills mfluxv and integrates to rqv
 !	-----------------------------------------------------
 
 	call set_mass_flux
+	call trace_point_0('after mass flux')
 
 !	-----------------------------------------------------
 !	testing
