@@ -106,6 +106,7 @@
 ! 20.12.2023	ggu	bug fixes for flux computation, no OBC section
 ! 16.12.2024	ggu	introduced barea3d and bdtarea3d
 ! 17.12.2024	ggu	bug fixes for vertical variables, still no 3dmass cons.
+! 20.12.2024	ggu	finished 3d mass conservation check
 !
 ! notes :
 !
@@ -305,7 +306,7 @@
 	double precision, save, allocatable :: bvol3d(:,:)	!vol of boxes
 	double precision, save, allocatable :: bdtarea(:)	!area*dt
 	double precision, save, allocatable :: bdtarea3d(:,:)	!area3d*dt
-	double precision, save, allocatable :: bdtvol(:,:)	!vol*dt
+	double precision, save, allocatable :: btdvol3d(:,:)	!vol*dt
 
 	integer, parameter :: nv3d = 4
 	double precision, save, allocatable :: val3d(:,:,:)	!3d variables
@@ -328,6 +329,9 @@
 	double precision, save, allocatable :: aux3dg(:,:)	!aux 3d vars
 	double precision, save, allocatable :: val3dg(:,:,:)	!3d variables
 	double precision, save, allocatable :: valv3dg(:,:,:)	!3d variables
+	double precision, save, allocatable :: bvol3dg(:,:)	!3d aver volume
+	double precision, save, allocatable :: bvol3dg_new(:,:)	!3d new volume
+	double precision, save, allocatable :: bvol3dg_old(:,:)	!3d old volume
 
 !==================================================================
 	contains
@@ -367,7 +371,7 @@
 	allocate(bdtarea3d(0:nlv,nb))		!area3d*dt
 
 	allocate(bvol3d(0:nlv,nb))
-	allocate(bdtvol(0:nlv,nb))		!vol*dt
+	allocate(btdvol3d(0:nlv,nb))		!vol*dt
 
 	allocate(val3d(0:nlv,nb,nv3d))
 	allocate(valv3d(0:nlv,nb,nvv3d))
@@ -380,6 +384,9 @@
 	allocate(aux3dg(0:nlvg,nb))
 	allocate(val3dg(0:nlvg,nb,nv3d))
 	allocate(valv3dg(0:nlvg,nb,nvv3d))
+	allocate(bvol3dg(0:nlvg,nb))
+	allocate(bvol3dg_new(0:nlvg,nb))
+	allocate(bvol3dg_old(0:nlvg,nb))
 
 	allocate(eta_old(nb))
 	allocate(eta_act(nb))
@@ -538,23 +545,20 @@
 		dtbox = 0.
 		bdtarea = 0.
 		bdtarea3d = 0.
-		bdtvol = 0.
+		btdvol3d = 0.
 		call boxes_3d_init(nlvdi,nbox,nv3d,val3d)   !3d variables
 		call boxes_3d_init(nlvdi,nbox,nvv3d,valv3d) !3d vert variables
 		call boxes_2d_init(nbox,nv2d,val2d)	!2d variables
 		call boxes_2d_init(nbox,nvmet,valmet)	!meteo variables
 
-		!write(6,*) 'gggguuuu 1',my_id; flush(6)
 		call shympi_syncronize
 		call box_aver_eta(zeov,aux2d)
 		eta_old = aux2d
 
-		!write(6,*) 'gggguuuu 2',my_id; flush(6)
-		!call shympi_syncronize
+		call boxes_compute_volume(bvol3d)
+		call boxes_3d_sum(nlvdi,nbox,bvol3d,bvol3dg_old)
 	
         	call box_flx_file_open(nvar,da_out)
-		!call shympi_syncronize
-		!write(6,*) 'gggguuuu 3',my_id; flush(6)
 
 !               here we could also compute and write section in m**2
 
@@ -632,9 +636,7 @@
 	bdtarea = bdtarea + dt*barea
 	bdtarea3d = bdtarea3d + dt*barea3d
 	call boxes_compute_volume(bvol3d)
-	bdtvol = bdtvol + dt*bvol3d
-
-	!call box_debug_2d('bvol3d',330,nbox,bvol3d(0,:))
+	btdvol3d = btdvol3d + dt*bvol3d
 
 	call box_3d_aver_scalar(tempv,aux3d,1)
 	call boxes_3d_accum(nlvdi,nbox,dt,bvol3d,val3d(:,:,1),aux3d)
@@ -658,7 +660,7 @@
 	call box_3d_aver_vertical(difv,aux3d,1)
 	call boxes_3d_accum(nlvdi,nbox,dt,barea3d,valv3d(:,:,4),aux3d)
 
-	call box_aver_eta(zenv,aux2d)
+	call box_aver_eta(zenv,aux2d)			!averages eta over box
 	call boxes_2d_accum(nbox,dt,barea,val2d(:,1),aux2d)
 	eta_act = aux2d * barea
 
@@ -690,9 +692,9 @@
 	! average and gather eta and barea
 	!------------------------------------------------------
 
-	call box_aver_eta(zenv,aux2d)
-	eta_act = aux2d * barea
-	call boxes_2d_aver(nbox,1,barea,eta_act)	!2d variables
+	call box_aver_eta(zenv,aux2d)			!averages eta over box
+	eta_act = aux2d * barea				!local value
+	call boxes_2d_aver(nbox,1,barea,eta_act)	!global eta
 
 	call gather_sum_d2(nbox,barea)
 
@@ -740,7 +742,7 @@
 	! average and gather box values
 	!------------------------------------------------------
 
-	call boxes_3d_aver(nlvdi,nbox,nv3d,bdtvol,val3d,val3dg)
+	call boxes_3d_aver(nlvdi,nbox,nv3d,btdvol3d,val3d,val3dg)
 	call boxes_3d_aver(nlvdi,nbox,nvv3d,bdtarea3d,valv3d,valv3dg)
 	!call boxes_2d_aver(nbox,1,barea,eta_act)	   !eta
 	call boxes_2d_aver(nbox,nv2d,bdtarea,val2d)	   !2d variables
@@ -751,8 +753,9 @@
 	! compute and gather volume
 	!------------------------------------------------------
 
-	call boxes_3d_sum(nlvdi,nbox,bdtvol,aux3dg)
-	val3dg(:,:,4) = aux3dg / dtbox			   !volume
+	call boxes_3d_sum(nlvdi,nbox,btdvol3d,aux3dg)
+	bvol3dg = aux3dg / dtbox
+	val3dg(:,:,4) = bvol3dg 			   !average volume
 
 	!------------------------------------------------------
 	! transform velocities to fluxes
@@ -766,19 +769,26 @@
 	! mass conservation check
 	!------------------------------------------------------
 
+	call get_act_timeline(aline)
+
 	if( bmass2d ) then
-	  aux2d = barea*(eta_act-eta_old)
+	  aux2d = barea*(eta_act-eta_old)		!global value
 	  call print_2d(nbox,barea,bvol2d,eta_act,eta_old)
 	  call print_3d_flx(nsect,nbc_ob,dtbox,fluxesg_m,fluxesg_ob)
-          call boxes_mass_balance_2d(dtbox,bvol2d                       &
+          call boxes_mass_balance_2d(aline,dtbox,bvol2d                       &
      &                                  ,fluxesg_m,fluxesg_ob,aux2d)
 	end if
 	if( b3d .and. bmass3d ) then
-	  aux2d = barea*(eta_act-eta_old)
+	  aux2d = barea*(eta_act-eta_old)		   !diff vol due to eta
 	  aux3dg = valv3dg(:,:,1) + valv3dg(:,:,2)	   !vertical velocity
-          call boxes_mass_balance_3d(dtbox,bvol2d                       &
+	  call boxes_compute_volume(bvol3d)
+	  call boxes_3d_sum(nlvdi,nbox,bvol3d,bvol3dg_new)
+          call boxes_mass_balance_3d(aline,dtbox,bvol2d                 &
+     &                                  ,bvol3dg                        &
+     &                                  ,bvol3dg_old                    &
+     &                                  ,bvol3dg_new                    &
      &                                  ,nblayers,nslayers              &
-     &                                  ,fluxesg_m,fluxesg_ob           &
+     &                                  ,fluxesg_m                      &
      &                                  ,aux2d,aux3dg)
 	end if
 
@@ -786,7 +796,6 @@
 !	write results
 !	-------------------------------------------------------
 
-	call get_act_timeline(aline)
 	if( shympi_is_master() ) then
 	  write(6,*) 'writing box results... ',trim(aline)
 	end if
@@ -830,13 +839,14 @@
 	dtbox = 0.
 	bdtarea = 0.
 	bdtarea3d = 0.
-	bdtvol = 0.
+	btdvol3d = 0.
 	call boxes_3d_init(nlvdi,nbox,nv3d,val3d)	!3d variables
 	call boxes_3d_init(nlvdi,nbox,nvv3d,valv3d)	!3d vert variables
 	call boxes_2d_init(nbox,nv2d,val2d)		!2d variables
 	call boxes_2d_init(nbox,nvmet,valmet)		!meteo variables
 
 	eta_old = eta_act
+	bvol3dg_old = bvol3dg_new
 
 !-----------------------------------------------------------------
 ! end of routine
@@ -1004,9 +1014,10 @@
 	  nelbox = id
 	  nbox = ftype
 	  nb = nvers
-	  if( nelbox .ne. nel ) goto 99
+	  if( nelbox .ne. nel_global ) goto 99
 	  read(1,*) (iboxes(ie),ie=1,nel)
 	else					!new read: id,ftype,nvers
+	  if( nvers /= 3 ) goto 91
 	  read(1,*) nelbox,nbox,nb
 	  if( nelbox .ne. nel_global ) goto 99
 	  iboxes = -1
@@ -1066,6 +1077,9 @@
 	close(iudeb)
 
 	return
+   91	continue
+	write(6,*) 'nvers = ',nvers
+	stop 'error stop box_read: cannot read this version'
    93	continue
 	write(6,*) ierr
 	stop 'error stop box_read: unspecified error'
@@ -2494,6 +2508,7 @@
 	double precision vbox(0:nlv_global,n)
 
 	if( .not. bmpi ) then
+	  if( nlvddi /= nlv_global ) stop 'error stop boxes_3d_sum: vert dim'
 	  valg = val
 	  return
 	end if
@@ -2899,8 +2914,8 @@
 !******************************************************************
 !******************************************************************
 
-        subroutine boxes_mass_balance_2d(dtbox,bvol2d                   &
-     &                                  ,fluxesg,fluxesg_ob,voldif)
+        subroutine boxes_mass_balance_2d(aline,dtbox,bvol2d                   &
+     &                                  ,fluxesg,fluxesg_ob,voledif)
 
 ! computes mass balance
 
@@ -2911,17 +2926,18 @@
 
 	implicit none
 
+	character*(*) aline
 	double precision dtbox
 	double precision bvol2d(nbox)
 	double precision fluxesg(0:nlv_global,3,nsect)
 	double precision fluxesg_ob(0:nlv_global,3,nbc_ob)
-	double precision voldif(nbox)		!volume difference due to eta
+	double precision voledif(nbox)		!volume difference due to eta
 
 	character*80 string
 	logical bdebug,bw
 	integer ib,is,ib1,ib2,iu,l
 	real volf,vole,volb,vola,vold,volr
-	real errmax,errv(nbox),errd(nbox)
+	real errmax,erraver,errv(nbox),errd(nbox)
 	real eps
 	double precision vol(nbox)
 	double precision flux
@@ -2935,37 +2951,24 @@
 
 	vol = 0.
 
-	!write(601,*) nsect
 	do is=1,nsect
 	  ib1 = isects(3,is)
 	  ib2 = isects(4,is)
 	  flux = dtbox * fluxesg(0,1,is)
-	  !write(601,*) ib1,ib2,flux,fluxes(0,1,is)
 	  if( ib1 > 0 ) vol(ib1) = vol(ib1) - flux
 	  if( ib2 > 0 ) vol(ib2) = vol(ib2) + flux
 	end do
 
-	!write(601,*) nbc_ob
-	do is=1,nbc_ob
-	  ib1 = iscbnd(3,is)
-	  ib2 = iscbnd(4,is)
-	  flux = dtbox * fluxesg_ob(0,1,is)
-	  !write(601,*) ib1,ib2,flux,fluxes_ob(0,1,is)
-	  !if( ib1 > 0 ) vol(ib1) = vol(ib1) - flux
-	  !if( ib2 > 0 ) vol(ib2) = vol(ib2) + flux
-	end do
-
 	errmax = 0.
+	erraver = 0.
 	do ib=1,nbox
 	  volb = bvol2d(ib)			!total volume of box
 	  if( volb <= 0. ) cycle
 	  volf = vol(ib)			!volume change by fluxes
-	  vole = voldif(ib)			!volume change by eta
+	  vole = voledif(ib)			!volume change by eta
 	  vola = max(abs(volf),abs(vole))
 	  vold = abs(volf-vole)
-	  !write(601,*) ib,volf,vole,vold
 	  volr = 0.
-	  !volr = vold/vola
 	  volr = vold/volb	!use total volume
 	  errv(ib) = volr
 	  errd(ib) = vold
@@ -2974,19 +2977,19 @@
 	    if(bw) write(6,*) '***',ib,volf,vole,vold,volr
 	  end if
 	  errmax = max(errmax,volr)
-	  !write(115,*) ib,volf,vole,vold,volr
+	  erraver = erraver + volr
 	end do
 
-	string = 'boxes mass balance errmax 2d: '
-
 	if( errmax .gt. eps ) then
-	  if( bw ) write(6,*) '*** ',trim(string),errmax,eps
-	else if( bdebug .and. bw ) then
-	  write(6,*) trim(string),errmax,eps
+	  string = '*** boxes mass error 2d: '
+	  if( bw ) write(6,*) trim(string),erraver,errmax,eps
+	else if( bdebug ) then
+	  string = 'boxes mass balance 2d: '
+	  if( bw ) write(6,*) trim(string),erraver,errmax,eps
 	end if
 
 	if( bmasserror .and. bw ) then
-	  write(601,*) trim(string),errmax,eps
+	  write(601,*) trim(string),erraver,errmax,eps
 	  write(601,*) nbox
 	  do ib=1,nbox
 	    write(601,*) ib,errv(ib),errd(ib)
@@ -2997,10 +3000,13 @@
 
 !******************************************************************
 
-        subroutine boxes_mass_balance_3d(dtbox,bvol2d                   &
+        subroutine boxes_mass_balance_3d(aline,dtbox,bvol2d             &
+     &                                  ,bvol3dg                        &
+     &                                  ,bvol3dg_old                    &
+     &                                  ,bvol3dg_new                    &
      &                                  ,nblayers,nslayers              &
-     &                                  ,fluxesg,fluxesg_ob             &
-     &                                  ,voldif,wflux)
+     &                                  ,fluxesg                        &
+     &                                  ,voledif,wflux)
 
 ! computes mass balance
 
@@ -3011,35 +3017,44 @@
 
 	implicit none
 
-	double precision dtbox
-	double precision bvol2d(nbox)
-	integer nblayers(nbox)
-	integer nslayers(nsect)		!number of layers in section
-	double precision fluxesg(0:nlv_global,3,nsect)
-	double precision fluxesg_ob(0:nlv_global,3,nbc_ob)
-	double precision voldif(nbox)			!volume difference due to eta
-	double precision wflux(0:nlv_global,nbox)	!vertical fluxes [m**3/s]
+	character*(*) aline				!time line
+	double precision dtbox				!total time step
+	double precision bvol2d(nbox)			!static 2d vol
+	double precision bvol3dg(0:nlv_global,nbox)	!average 3d vol
+	double precision bvol3dg_old(0:nlv_global,nbox)	!old 3d vol
+	double precision bvol3dg_new(0:nlv_global,nbox)	!new 3d vol
+	integer nblayers(nbox)				!layers in box
+	integer nslayers(nsect)				!layers in section
+	double precision fluxesg(0:nlv_global,3,nsect)	!horiz. flux [m**3/s]
+	double precision voledif(nbox)			!vol diff due to eta
+	double precision wflux(0:nlv_global,nbox)	!vertical flux [m**3/s]
 
 	character*80 string
-	logical bdebug,bw
+	logical bdebug,bw,bcheck
 	integer ierr
 	integer ib,is,ib1,ib2
 	integer nb1,nb2,nbs
 	integer l,lmax,ltot
 	integer nblmax,nslmax
+	integer iuchk
+	integer nvol
 	real volf,vole,volb,vola,vold,volr,volv
 	real wtop
-	real errmax,errv(nbox),errd(nbox)
+	real errmax,erraver,aerr(nbox),rerr(nbox)
 	real eps
 	double precision vol(nlv_global,nbox)
-	double precision flux
+	double precision flux,fluxdif,voldif
+	real rdif,adif
 
 	eps = eps3d
 	if( eps == 0. ) return
 
+	iuchk = 333
 	bdebug = .false.
 	bdebug = .true.
+	bcheck = .true.
 	bw = ( my_id == 0 )
+	bcheck = bcheck .and. bw
 
 	nblmax = maxval(nblayers)
 	nslmax = maxval(nslayers)
@@ -3077,24 +3092,17 @@
 	  end do
 	end do
 
-	do is=1,nbc_ob
-	  ib1 = iscbnd(3,is)
-	  ib2 = iscbnd(4,is)
-	  flux = dtbox * fluxesg_ob(1,1,is)
-	  !if( ib1 > 0 ) vol(1,ib1) = vol(1,ib1) - flux
-	  !if( ib2 > 0 ) vol(1,ib2) = vol(1,ib2) + flux
-	end do
-
-	do ib=1,nbox
-	  wtop = 0.
-	  wflux(ltot,ib) = wtop		!bottom
-	  do l=ltot,1,-1
-	    wtop = wtop + vol(l,ib)
-	    wflux(l-1,ib) = -wtop / dtbox
-	  end do
-	end do
+!	in vol(l,ib) is lateral flux into box (l,ib)
+!	in volv is vertical flux into box (l,ib)
 
 	errmax = 0.
+	erraver = 0.
+	nvol = 0
+	aerr = 0.
+	rerr = 0.
+
+	if( bcheck ) write(iuchk,*) '3d box volume check: ',trim(aline)
+
 	do ib=1,nbox
 	  lmax = nblayers(ib)
 	  do l=lmax+1,ltot
@@ -3105,43 +3113,41 @@
 	     end if
 	    end if
 	  end do
-	  
-	  volb = bvol2d(ib)
-	  if( volb <= 0. ) cycle
-
-	  do l=1,ltot
-	    volf = vol(l,ib)
-	    volv = dtbox * (wflux(l-1,ib) - wflux(l,ib))
-	    vold = abs(volf + volv)
-	    volr = vold/volb
-	    !write(116,'(2i5,4g14.4)') ib,l,volf,volv,vold,volr
-	    errmax = max(errmax,abs(volr))
+	  if( bcheck ) write(iuchk,*) 'box = ',ib,voledif(ib)
+	  do l=1,lmax
+	    voldif = bvol3dg_new(l,ib) - bvol3dg_old(l,ib)
+	    volv = dtbox * (wflux(l,ib) - wflux(l-1,ib))
+	    fluxdif = vol(l,ib) + volv
+	    adif = abs(fluxdif-voldif)
+	    rdif = adif / bvol3dg(l,ib)
+	    aerr(ib) = aerr(ib) + adif
+	    rerr(ib) = rerr(ib) + rdif
+	    errmax = max(errmax,abs(rdif))
+	    erraver = erraver + rdif
+	    if( bcheck ) write(iuchk,1000) l,vol(l,ib),volv,fluxdif,voldif,rdif
+ 1000	    format(i4,5e15.7)
 	  end do
-
-	  wtop = -dtbox * wflux(0,ib)
-	  vole = voldif(ib)
-	  vold = abs(wtop - vole)
-	  volr = vold/volb
-	  errv(ib) = volr
-	  errd(ib) = vold
-	  !write(116,'(a,i5,4g14.4)') 'first layer: ',ib,wtop,vole,vold,volr
-	  errmax = max(errmax,abs(volr))
-
+	  nvol = nvol + lmax
+	  aerr(ib) = aerr(ib) / lmax
+	  rerr(ib) = rerr(ib) / lmax
 	end do
 
-	string = 'boxes mass balance errmax 3d: '
+	erraver = erraver / nvol
+	if( bcheck ) write(iuchk,*) 'error summary: ',nvol,erraver,errmax
+
 	if( errmax .gt. eps ) then
-	  if( bw ) write(6,*) '*** ',trim(string),errmax,eps
-	  !stop
-	else if( bdebug .and. bw ) then
-	  write(6,*) trim(string),errmax,eps
+	  string = '*** boxes mass error 3d: '
+	  if( bw ) write(6,*) trim(string),erraver,errmax,eps
+	else if( bdebug ) then
+	  string = 'boxes mass balance 3d: '
+	  if( bw ) write(6,*) trim(string),erraver,errmax,eps
 	end if
 
 	if( bmasserror .and. bw ) then
-	  write(601,*) trim(string),errmax,eps
+	  write(601,*) trim(string),erraver,errmax,eps
 	  write(601,*) nbox
 	  do ib=1,nbox
-	    write(601,*) ib,errv(ib),errd(ib)
+	    write(601,*) ib,aerr(ib),rerr(ib)
 	  end do
 	end if
 

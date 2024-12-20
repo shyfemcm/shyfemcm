@@ -325,7 +325,7 @@
 	  end if
 
 	  call read_time_header(dtime,ntime,ierr)
-	  if( ierr == -1 ) exit
+	  if( ierr == -1 ) goto 9
 
 	  idiff_rec = 0
 	  rdiff_max = 0
@@ -335,7 +335,7 @@
 	  do while(.true.)
 
 	    call read_data_header(nh,nv,nt,ntot,nrec,text,ierr)
-	    if( nt == 0 .or. ierr == -1 ) exit
+	    if( nt == 0 .or. ierr == -1 ) goto 9
 
 	    call allocate_arrays(ntot,ndim &
      &			,ival1,ival2,rval1,rval2,dval1,dval2)
