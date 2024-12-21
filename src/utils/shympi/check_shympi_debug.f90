@@ -41,6 +41,7 @@
 ! 13.04.2023    ggu     avoid compiler errors for d/i/r_info
 ! 05.06.2023    ggu     handle exceptions, show records with highest errrors
 ! 09.06.2023    ggu     handle non existing files
+! 21.12.2024    ggu     more functionallity, possible dump of data record
 
 ! note :
 !
@@ -80,6 +81,7 @@
 	logical, save :: bbalance = .false.	!balance time records
 
 	double precision, save :: maxdiff = 0.	!maximum difference for error
+	character*80, save :: dump_var = ' '	!name of var to dump
 
 	integer, parameter :: imax = 20		!number of errors shown
 
@@ -147,7 +149,7 @@
 
 	integer nc
 	integer ntime,nrec
-	integer nh,nv,nt
+	integer nh,nv,nt,ntot
 	integer ios
 	double precision dtime
 	character*60 name_one,text
@@ -168,7 +170,7 @@
 	do while(.true.)
 
 	  read(1,end=9) dtime
-	  if( .not. bquiet ) write(6,*) 'time = ',dtime
+	  call write_time_info(dtime)
 	  ntime = ntime + 1
 
 	  if( bverbose ) then
@@ -181,14 +183,79 @@
 	    read(1,end=9) nh,nv,nt
 	    if( nt == 0 ) exit
 	    nrec = nrec + 1
+	    ntot = nh*nv
 	    read(1,end=9) text
-	    read(1)
+	    if( dump_var == text ) then
+              call dump_data_record1(dtime,text,nt,ntot)
+	    else
+	      read(1)
+	    end if
 	    if( bverbose ) write(6,*) nrec,nh,nv,nt,trim(text)
 	  end do
 	end do
 
     9	continue
 	if( .not. bsilent ) write(6,*) 'time records read: ',ntime
+
+	end
+
+!**************************************************************************
+
+	subroutine dump_data_record1(dtime,text,nt,ntot)
+
+	use mod_shympi_debug
+
+	implicit none
+
+        INTERFACE
+          subroutine allocate_arrays(nsize,ndim &
+     &                  ,ival1,ival2,rval1,rval2,dval1,dval2)
+          integer nsize,ndim
+          integer, allocatable :: ival1(:),ival2(:)
+          real, allocatable :: rval1(:),rval2(:)
+          double precision, allocatable :: dval1(:),dval2(:)
+          END subroutine
+        END INTERFACE
+
+	double precision dtime
+	character*(*) text
+	integer nt,ntot
+
+	integer i
+	integer, save :: ndim = 0
+	integer, save :: iu = 444
+	character*40, save :: dump = 'dump.txt'
+
+	if( ndim == 0 ) then
+	  open(iu,file=dump,status='unknown',form='formatted')
+	end if
+
+	call allocate_arrays(ntot,ndim &
+     &			,ival1,ival2,rval1,rval2,dval1,dval2)
+
+	call read_data_record1(nt,ntot)
+
+	write(6,*) 'dumping data record for ',trim(text),' to ',trim(dump)
+
+	write(iu,*) 'time = ',dtime
+	write(iu,*) 'var  = ',trim(text)
+
+	if( nt == 1 ) then			!integer
+	  do i=1,ntot
+	    write(iu,*) i,ival1(i)
+	  end do
+	else if( nt == 2 ) then			!real
+	  do i=1,ntot
+	    write(iu,*) i,rval1(i)
+	  end do
+	else if( nt == 3 ) then			!double
+	  do i=1,ntot
+	    write(iu,*) i,dval1(i)
+	  end do
+	else
+	  write(6,*) 'cannot handle nt = ',nt
+	  stop 'error stop: nt'
+	end if
 
 	end
 
@@ -355,7 +422,7 @@
 	
 	    bshowdiff = .not. bnodiff
 
-	    call read_data_record(nt,ntot)
+	    call read_data_record2(nt,ntot)
 
 	    if( bcheck ) then
 	      call check_val(dtime,nrec,nt,nh,nv,idiff,diff)
@@ -448,7 +515,7 @@
 	  read(2,end=9) dtime2
 	  if( dtime1 .ne. dtime2 ) goto 99
 	  dtime = dtime1
-	  if( .not. bquiet ) write(6,*) 'time = ',dtime
+	  call write_time_info(dtime)
 	  ntime = ntime + 1
 
 	  if( bverbose ) then
@@ -466,6 +533,24 @@
 	write(6,*) 'times: ',dtime1,dtime2
 	stop 'error stop check_debug: time mismatch'
 	end 
+
+!*******************************************************************
+
+	subroutine write_time_info(dtime)
+
+	use mod_shympi_debug
+
+	double precision dtime
+
+	integer, save :: irec = 0
+
+	irec = irec + 1
+
+	if( .not. bquiet ) then
+	  write(6,*) 'irec = ',irec,'  time = ',dtime
+	end if
+
+	end
 
 !*******************************************************************
 
@@ -530,7 +615,32 @@
 
 !*******************************************************************
 
-	subroutine read_data_record(nt,ntot)
+	subroutine read_data_record1(nt,ntot)
+
+	use mod_shympi_debug
+
+	implicit none
+
+	integer nt,ntot
+
+	integer i
+
+	if( nt == 1 ) then			!integer
+	  read(1) (ival1(i),i=1,ntot)
+	else if( nt == 2 ) then			!real
+	  read(1) (rval1(i),i=1,ntot)
+	else if( nt == 3 ) then			!double
+	  read(1) (dval1(i),i=1,ntot)
+	else
+	  write(6,*) 'cannot handle nt = ',nt
+	  stop 'error stop: nt'
+	end if
+
+	end
+
+!*******************************************************************
+
+	subroutine read_data_record2(nt,ntot)
 
 	use mod_shympi_debug
 
@@ -1247,6 +1357,7 @@
         call clo_add_option('summary',.false.,'do only summary')
         call clo_add_option('balance',.false.,'balance time records')
         call clo_add_option('maxdiff',0.,'maximum tolerated difference')
+        call clo_add_option('dump var',' ','dump var to file')
 
 	call clo_parse_options
 
@@ -1258,6 +1369,7 @@
         call clo_get_option('summary',bsummary)
         call clo_get_option('balance',bbalance)
         call clo_get_option('maxdiff',maxdiff)
+        call clo_get_option('dump',dump_var)
 
         if( baux ) bstop = .false.
         if( bsilent ) bquiet = .true.

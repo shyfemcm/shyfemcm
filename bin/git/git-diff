@@ -24,7 +24,7 @@ zip="NO"
 quiet="NO"
 tool=""
 
-tools="tkdiff xxdiff kdiff3 vimdiff"
+tools="tkdiff xxdiff kdiff3 vimdiff diff"
 
 mkdir -p $HOME/tmp
 
@@ -52,11 +52,22 @@ FullHelp()
   echo "    -name                  only show name of files that differ"
   echo "    -zip                   zip all changed files to changed.zip"
   echo "    -tool tool             use routine tool for comparing"
+  echo "    -tools                 show available diff tools"
   echo "    -nogui                 use diff instead of graphical tool"
   echo "    -quiet                 only print file names"
   echo "  tag can be origin to see diff between fetch and pull"
   echo "  tag can be HEAD-# to see diff between last # tag (HEAD-0 is actual)"
   echo "  possible tools for comparing: $tools"
+}
+
+ShowDiffTools()
+{
+  for tool in $tools
+  do
+    if [ -n "$( which $tool 2>/dev/null)" ]; then
+      echo "tool is available: $tool"
+    fi
+  done
 }
 
 SetDiffTool()
@@ -111,6 +122,7 @@ do
 	-name)		options="$options --name-only";;
 	-zip)		zip="YES";;
         -tool)          tool=$2; shift;;
+        -tools)         ShowDiffTools; exit 0;;
         -nogui)         tool=diff;;
         -quiet)         quiet="YES";;
         --*)            options="$options $1";;
