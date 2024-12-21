@@ -363,7 +363,6 @@ cleanall: clean
 ../../lib/mod/mod_shyfem.mod: shyfem_subs.o
 ../../lib/mod/mod_subset.mod: subset.o
 ../../lib/mod/mod_system_global.mod: simsys_spkaux.o
-../../lib/mod/mod_system_global.mod: system_spk.o
 ../../lib/mod/mod_test_zeta.mod: test_zeta.o
 ../../lib/mod/ocean_shyfem.mod: nuopc_shyfem_cap.o
 ../../lib/mod/omp_admin.mod: openmp_admin.o
@@ -444,6 +443,7 @@ check.o: ../../lib/mod/basin.mod ../../lib/mod/evgeom.mod \
 		../../lib/mod/mod_area.mod \
 		../../lib/mod/mod_bound_dynamic.mod \
 		../../lib/mod/mod_bound_geom.mod \
+		../../lib/mod/mod_debug.mod \
 		../../lib/mod/mod_depth.mod \
 		../../lib/mod/mod_diff_visc_fric.mod \
 		../../lib/mod/mod_geom_dynamic.mod \
@@ -933,10 +933,6 @@ substress.o: ../../lib/mod/basin.mod ../../lib/mod/evgeom.mod \
 		../../lib/mod/mod_ts.mod \
 		../../lib/mod/mod_waves.mod \
 		../../lib/mod/pkonst.mod ../../lib/mod/shympi.mod 
-system_spk.o: ../../lib/mod/basin.mod ../../lib/mod/levels.mod \
-		../../lib/mod/mod_system.mod \
-		../../lib/mod/mod_system_interface.mod \
-		../../lib/mod/shympi.mod 
 test_zeta.o: ../../lib/mod/basin.mod ../../lib/mod/mod_hydro.mod \
 		../../lib/mod/shympi.mod 
 tidef.o: ../../lib/mod/basin.mod ../../lib/mod/coordinates.mod \

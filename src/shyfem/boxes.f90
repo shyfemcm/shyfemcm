@@ -3133,7 +3133,10 @@
 	end do
 
 	erraver = erraver / nvol
-	if( bcheck ) write(iuchk,*) 'error summary: ',nvol,erraver,errmax
+	if( bcheck ) then
+	  write(iuchk,*) 'summary: '//trim(aline),nvol,erraver,errmax
+	  flush(iuchk)
+	end if
 
 	if( errmax .gt. eps ) then
 	  string = '*** boxes mass error 3d: '
