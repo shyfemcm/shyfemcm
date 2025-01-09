@@ -12,6 +12,7 @@
 #
 # possible command line options: see subroutine FullUsage
 #
+# version       1.8     09.01.2025     tselab, handle error in reduce
 # version       1.7     02.11.2023     -restart implemented
 # version       1.6     11.06.2023     -essential implemented
 # version       1.5     09.06.2023     handle flux/extra section with descrip
@@ -128,6 +129,7 @@ if( $::h or $::help ) {
   print STDERR "copy simulation of str file into directory $::collect\n";
   collect_str($str,$::collect);
 } else {
+  print STDERR "no action specified...\n";
   Usage();
 }
 
@@ -497,7 +499,15 @@ sub show_files {
 
   my $basin = $str->get_basin();
   $basin =~ s/^\s+//;
-  if( file_exists("$basin.grd") ) {
+  if( file_exists("$basin") ) {
+    if( file_has_extension("$basin",".grd") ) {
+      # ok
+    } elsif( file_has_extension("$basin",".bas") ) {
+      # ok
+    } else {
+      die "*** basin file $basin needs extension .grd or .bas";
+    }
+  } elsif( file_exists("$basin.grd") ) {
     $basin .= ".grd";
   } elsif( file_exists("$basin.bas") ) {
     $basin .= ".bas";
@@ -736,14 +746,26 @@ sub collect_str {
 	print "executing: $command $options $file";
         system("[ -f out.fem ] && rm -f out.fem");
         system("$command $options $file > /dev/null");
-        system("mv out.fem $input/$filename");
+	if( -f "out.fem" and -s "out.fem" ) {	#file existing and non empty
+	  #print STDERR "moving $file to $input/$filename\n";
+          system("mv out.fem $input/$filename");
+	} else {
+	  print STDERR "cannot reduce $file... just copying\n";
+          system("cp $file $input/$filename");
+	}
       } elsif( $type eq "TS" ) {
         print STDERR "  reducing ($type) $file to $input as $filename\n";
-        my $command = "tselab -tmin $itanf -tmax $itend";
+        my $command = "$::scriptpath/tselab -tmin $itanf -tmax $itend";
         my $options = "-out -inclusive";
-        system("[ -f out.txt ] && rm -f out.fem");
+        system("[ -f out.txt ] && rm -f out.txt");
         system("$command $options $file > /dev/null");
-        system("mv out.txt $input/$filename");
+	if( -f "out.txt" and -s "out.txt" ) {	#file existing and non empty
+	  #print STDERR "moving $file to $input/$filename\n";
+          system("mv out.txt $input/$filename");
+	} else {
+	  print STDERR "cannot reduce $file... just copying\n";
+          system("cp $file $input/$filename");
+	}
       } else {
         print STDERR "  cannot reduce type $type $file ...copying\n";
         system("cp $file $input");
@@ -786,7 +808,8 @@ sub collect_str {
   print STDERR "  zip -r $dir.zip $dir/*\n";
   print STDERR "  tar cvzf $dir.tar.gz $dir\n";
   print STDERR "you can run the simulation by doing the following:\n";
-  print STDERR "  cd $dir; make basin; make run\n";
+  print STDERR "  cd $dir; make run\n";
+  print STDERR "(you might have to specify where to find shyfem)\n";
 }
 
 sub file_exists {
@@ -794,6 +817,17 @@ sub file_exists {
   my $file = shift;
 
   if( -e $file ) {
+    return 1;
+  } else {
+    return 0;
+  }
+}
+
+sub file_has_extension {
+
+  my ($file,$ext) = @_;
+
+  if( $file =~ /$ext$/ ) {
     return 1;
   } else {
     return 0;
