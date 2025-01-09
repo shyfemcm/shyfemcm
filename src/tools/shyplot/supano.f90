@@ -91,6 +91,7 @@
 !  18.12.2018	ggu	changed VERS_7_5_52
 !  21.05.2019	ggu	changed VERS_7_5_62
 !  18.09.2024	ggu	new parameter rfaccol, new log colorbar
+!  09.01.2025	ggu	avoid divide by zero in scale_legend(): 10 -> 10.
 ! 
 !  notes :
 ! 
@@ -596,7 +597,7 @@
 !  find leading digit (must be 1,2,3,4,5,8)
 
 	is = istell(dd)
-	i0 = iround( dd / 10**is )
+	i0 = iround( dd / 10.0**is )
 
 	if( i0 .eq. 2 .or. i0 .eq. 4 .or. i0 .eq. 8 ) then
 		ntics = 4
