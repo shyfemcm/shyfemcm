@@ -74,6 +74,7 @@ OBJ  = \
 	stack.o \
 	reallocate.o \
 	histogram.o \
+	errorstop.o \
 
 OBSOLETE = \
 	expand.o \
@@ -197,6 +198,7 @@ zip:	cleanall
 ../../../lib/mod/mod_color.mod: color.o
 ../../../lib/mod/mod_connect.mod: connections.o
 ../../../lib/mod/mod_debug.mod: chk_NaN.o
+../../../lib/mod/mod_error_stop.mod: errorstop.o
 ../../../lib/mod/mod_flood.mod: flood.o
 ../../../lib/mod/mod_histo.mod: histogram.o
 ../../../lib/mod/mod_random.mod: random.o

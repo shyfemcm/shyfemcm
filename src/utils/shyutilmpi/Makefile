@@ -43,6 +43,7 @@ OBJ  = \
 	coordinates.o \
 	io_off.o \
 	trace_point.o \
+	info_output.o \
 
 OBSOLETE = \
 	evgeom.o \
@@ -165,6 +166,7 @@ zip:	cleanall
 
 ../../../lib/mod/coordinates.mod: coordinates.o
 ../../../lib/mod/intp_fem_file.mod: intp_fem_file.o
+../../../lib/mod/mod_info_output.mod: info_output.o
 ../../../lib/mod/mod_offline.mod: io_off.o
 ../../../lib/mod/mod_trace_point.mod: trace_point.o
 ../../../lib/mod/shyutil.mod: shy_util1.o
@@ -177,6 +179,7 @@ coordinates.o: ../../../lib/mod/basin.mod \
 depth_util.o: ../../../lib/mod/basin.mod \
 		../../../lib/mod/mod_depth.mod \
 		../../../lib/mod/shympi.mod 
+info_output.o: ../../../lib/mod/shympi.mod
 intp_fem_file.o: ../../../lib/mod/shympi.mod
 io_off.o: ../../../lib/mod/basin.mod \
 		../../../lib/mod/mod_trace_point.mod \

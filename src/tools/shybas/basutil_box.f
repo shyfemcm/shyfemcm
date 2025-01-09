@@ -43,6 +43,7 @@ c 18.05.2022	ggu	some more checks in sort_multiple_sections()
 c 08.06.2022	ggu	save external nodes in basboxgrd for grd_write_item()
 c 16.06.2022	ggu	write coloring errors to grd files
 c 13.07.2022	ggu	forgot setting listold(0,:)
+c 20.12.2024	ggu	general read for index file
 c
 c****************************************************************
 
@@ -865,8 +866,8 @@ c area code 0 is not allowed !!!!
 	integer iline,itype
 	integer is,nnodes,ib1,ib2
 	integer k,kext,i
-	integer nout
-	integer, allocatable :: ibox(:),icount(:)
+	integer nout,nvers
+	integer, allocatable :: iboxes(:)
 	integer, allocatable :: extnodes(:),nodes(:),used(:)
 	real x,y
 	real, parameter :: flag = -999.
@@ -875,6 +876,10 @@ c area code 0 is not allowed !!!!
 	integer ipint
 
 	write(6,*) 're-creating grd file from bas and index.txt'
+
+!-----------------------------------------------------------
+! open file
+!-----------------------------------------------------------
 
         if( .not. breadbas ) then
           write(6,*) 'for -boxgrd we need a bas file'
@@ -893,37 +898,22 @@ c area code 0 is not allowed !!!!
 	end if
 	write(6,*) 'reading index file...'
 
-	read(1,*) ne,nbox,nmax
-	write(6,*) nel,ne,nbox,nmax
-	if( ne /= nel ) then
-	  write(6,*) 'nel in basin and index file not compatible'
-	  write(6,*) nel,ne
-	  stop 'error stop basboxgrd: ne/= nel'
-	end if
+!-----------------------------------------------------------
+! read box header info
+!-----------------------------------------------------------
+
+	call boxes_read_header(ne,nbox,nmax,nvers)
 
 !-----------------------------------------------------------
 ! read box information and write index.grd
 !-----------------------------------------------------------
 
-	allocate(ibox(ne),icount(0:nmax))
-	read(1,*) ibox(1:ne)
+	write(6,*) 'reading areas of index file...'
 
-	icount = 0
-	do ie=1,ne
-	  ia = ibox(ie)
-	  if( ia < 0 .or. ia > nmax ) goto 99
-	  icount(ia) = icount(ia) + 1
-	end do
-
-	itot = 0
-	do ia=0,nmax
-	  write(6,*) ia,icount(ia)
-	  itot = itot + icount(ia)
-	end do
-	write(6,*) 'total: ',itot
-	if( itot /= ne ) stop 'error stop basboxgrd: internal error (1)'
+	allocate(iboxes(ne))
+	call boxes_read_boxes(ne,iboxes,nbox,nmax,nvers)
 	
-	iarv = ibox
+	iarv = iboxes
 
         call basin_to_grd
         call grd_write('index.grd')
@@ -943,15 +933,10 @@ c area code 0 is not allowed !!!!
 	iline = 0
 
 	do
-	  read(1,*) is,nnodes,ib1,ib2
-	  if( is == 0 ) exit
-	  write(6,*) is,nnodes,ib1,ib2
-	  read(1,*) (extnodes(i),i=1,nnodes)
+	  call boxes_read_section(nnodes,nodes,extnodes,ib1,ib2)
+	  if( nnodes == 0 ) exit
 	  iline = iline + 1
 	  itype = iline
-	  do i=1,nnodes
-	    nodes(i) = ipint(extnodes(i))	!nodes are external numbers!!!!
-	  end do
 	  do i=1,nnodes
 	    k = nodes(i)
 	    kext = extnodes(i)
@@ -973,11 +958,142 @@ c area code 0 is not allowed !!!!
 !-----------------------------------------------------------
 
 	return
+	end
+
+!*******************************************************************
+
+	subroutine boxes_read_header(ne,nbox,nmax,nvers)
+
+	use basin
+
+	implicit none
+
+	integer ne,nbox,nmax,nvers
+
+	integer id,ftype
+        integer, parameter :: idbox = 473226            !id for box files
+
+	read(1,*) id,ftype,nvers
+
+        if( id /= idbox .or. ftype /= 9 ) then  !old read: nel,nbox,nb
+          ne = id
+          nbox = ftype
+          nmax = nvers
+	  nvers = 2
+        else                                    !new read: id,ftype,nvers
+          read(1,*) ne,nbox,nmax
+	end if
+
+        if( ne .ne. nel ) goto 99
+	if( nvers < 2 .or. nvers > 3 ) goto 98
+
+	return
+   98   continue
+        write(6,*) 'nvers = ',nvers
+        stop 'error stop boxes_read_header: cannot read version'
+   99   continue
+        write(6,*) nel,ne
+        stop 'error stop boxes_read_header: nel/=nelbox'
+	end
+
+!*******************************************************************
+
+	subroutine boxes_read_boxes(ne,iboxes,nbox,nmax,nvers)
+
+	use basin
+
+	implicit none
+
+	integer ne
+	integer iboxes(ne)
+	integer nbox,nmax
+	integer nvers
+
+	integer ie,ie_int,ie_ext,ia,ic,itot
+	integer, allocatable :: icount(:)
+
+	integer ieint
+
+	allocate(icount(0:nmax))
+
+        iboxes = -1
+
+	if( nvers <= 2 ) then
+	  read(1,*) (iboxes(ie),ie=1,ne)
+	else
+          do ie=1,ne
+            read(1,*) ie_ext,ia
+            ie_int = ieint(ie_ext)
+            if( ie_int > 0 ) iboxes(ie_int) = ia
+          end do
+	end if
+
+        ic = count( iboxes == -1 )
+        if( ic > 0 ) goto 99
+
+	icount = 0
+	do ie=1,ne
+	  ia = iboxes(ie)
+	  if( ia < 0 .or. ia > nmax ) goto 98
+	  icount(ia) = icount(ia) + 1
+	end do
+
+	write(6,'(a)') '        ia     count'
+	itot = 0
+	do ia=0,nmax
+	  write(6,'(2i10)') ia,icount(ia)
+	  itot = itot + icount(ia)
+	end do
+	write(6,*) 'total: ',itot
+	if( itot /= ne ) goto 97
+
+	return
+   97	continue
+        stop 'error stop boxes_read_boxes: itot /= ne'
+   98	continue
+        write(6,*) 'area code out of bounds: ',ia
+        write(6,*) 'possible between: ',0,nmax
+        stop 'error stop boxes_read_boxes: erroneous area code'
    99	continue
-	write(6,*) 'area code out of range: ',ia
-	write(6,*) 'must be between 0 and ',nmax
-	write(6,*) 'element is ie = ',ie
-	stop 'error stop basboxgrd: out of range'
+        write(6,*) 'some elements are not part of a box: ',ic
+        stop 'error stop boxes_read_boxes: incomplete box information'
+	end
+
+!*******************************************************************
+
+	subroutine boxes_read_section(nnodes,nodes,extnodes,ib1,ib2)
+
+	use basin
+
+	implicit none
+
+	integer nnodes
+	integer ib1,ib2
+	integer nodes(nkn)
+	integer extnodes(nkn)
+
+	integer is,i
+	integer, save :: iline = 0
+	integer ipint
+
+	read(1,*) is,nnodes,ib1,ib2
+	if( is == 0 ) return
+	iline = iline + 1
+	if( is /= iline ) goto 99
+	read(1,*) (extnodes(i),i=1,nnodes)
+	do i=1,nnodes
+	  nodes(i) = ipint(extnodes(i))	!nodes are external numbers!!!!
+	end do
+
+	if( iline == 1 ) then
+	  write(6,'(a)') '   section     nodes   ib_from     ib_to'
+	end if
+	write(6,'(4i10)') is,nnodes,ib1,ib2
+
+	return
+   99	continue
+	write(6,*) is,iline
+	stop 'error stop boxes_read_section: is /= iline'
 	end
 
 !*******************************************************************

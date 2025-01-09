@@ -61,7 +61,7 @@ LIBL    += $(LIB_NETCDF)
 #---------------------------------------------
 
 EXES = shyelab extelab flxelab lgrelab tselab femelab shyproj shyfile \
-	shystrings femcombine
+	shystrings femcombine dbg_flx dbg_box
 
 MAKEDEPEND = $(FEMBIN)/mkdp.pl
 
@@ -132,6 +132,12 @@ shyfile: $(LIBF) shyfile.o
 shystrings: $(LIBF) shystrings.o
 	$(F77) $(FFLAGS) $(INCLUDE) $(LFLAGS) $@.o $(LIBL) -o $@
 
+dbg_flx: $(LIBF) dbg_flx.o
+	$(F77) $(FFLAGS) $(INCLUDE) $(LFLAGS) $@.o $(LIBL) -o $@
+
+dbg_box: $(LIBF) dbg_box.o
+	$(F77) $(FFLAGS) $(INCLUDE) $(LFLAGS) $@.o $(LIBL) -o $@
+
 #----------------------------------------------------------------------------
 
 clean: cleanobj cleanlinks cleanexe cleanvar
@@ -179,8 +185,11 @@ depend:
 
 ../../../lib/mod/elabtime.mod: elabtime.o
 ../../../lib/mod/elabutil.mod: elabutil.o
+../../../lib/mod/mod_dbg_flx.mod: dbg_flx.o
 ../../../lib/mod/shy_extract.mod: shyelab_extract.o
 ../../../lib/mod/shyelab_out.mod: shyelab_output.o
+dbg_flx.o: ../../../lib/mod/clo.mod \
+		../../../lib/mod/mod_error_stop.mod 
 elab_check.o: ../../../lib/mod/iso8601.mod
 elab_gis.o: ../../../lib/mod/basin.mod \
 		../../../lib/mod/shyfem_strings.mod 

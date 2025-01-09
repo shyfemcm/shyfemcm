@@ -256,8 +256,8 @@ first_time: links
 version:
 	@echo $(VERSION) $(COMMIT)
 
-tag:
-	@echo $(VERSION)
+tags:
+	bin/git/git-tags
 
 info: version
 	@echo "general:"

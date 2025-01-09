@@ -48,6 +48,7 @@
 ! 27.03.2021	ggu	debug output routines added
 ! 30.03.2021	ggu	new routine set_debug_unit()
 ! 16.11.2022	ggu	new routine check1Dd()
+! 19.12.2024	ggu	new routines to compute checksum
 !
 ! notes :
 !
@@ -89,6 +90,11 @@
 	integer, parameter, private :: real_type = 2
 	integer, parameter, private :: double_type = 3
 
+        integer, parameter :: ndim = 100
+        integer, parameter :: iucrc = 999
+        integer, save :: crcs(ndim) = -1
+        character*80, save :: crc_texts(ndim) = ' '
+
         INTERFACE is_nan
         MODULE PROCEDURE is_d_nan, is_r_nan, is_i_nan    &
            &			,is_d_array1_nan
@@ -116,6 +122,17 @@
 
         INTERFACE write_debug_final
         MODULE PROCEDURE write_debug_final_intern
+        END INTERFACE
+
+        INTERFACE checksum
+	MODULE PROCEDURE 	  checksum_2d_nolevel &
+     &				, checksum_2d &
+     &				, checksum_1d
+        END INTERFACE
+
+        INTERFACE check_array_with_crc 
+	MODULE PROCEDURE 	  check_array_with_crc_1d &
+     &				, check_array_with_crc_2d
         END INTERFACE
 
 !==================================================================
@@ -456,6 +473,176 @@
         write(iunit) val
         end
 
+!***************************************************************
+!***************************************************************
+!***************************************************************
+! checksum routines
+!***************************************************************
+!***************************************************************
+!***************************************************************
+
+	subroutine checksum_2d_nolevel(n1,n2,data,crc)
+
+	implicit none
+
+	integer n1,n2
+	real data(n1,n2)
+	integer crc
+
+	integer i,l
+	integer a,b
+
+	integer ivalue
+	real value
+
+	a = 1
+	b = 0
+
+	do i=1,n2
+	  do l=1,n1
+	    value = data(l,i)
+	    ivalue = transfer(value,1)
+	    call checksum_i(a,b,ivalue)
+	  end do
+	end do
+
+	crc = 256*256 * b + a
+
+	end
+
+!***************************************************************
+
+	subroutine checksum_2d(n1dim,n,nlv,levels,data,crc)
+
+	implicit none
+
+	integer n1dim			! dimension of first index
+	integer n
+	integer nlv			!nlv>0 use this  nlv<=0 use levels
+	integer levels(n)
+	real data(n1dim,n)
+	integer crc
+
+	integer a,b
+
+	integer i,lmax,l
+	integer ivalue
+	real value
+	!equivalence(value,ivalue)
+
+	a = 1
+	b = 0
+
+	do i=1,n
+	  lmax = nlv
+	  if( lmax .le. 0 ) lmax = levels(i)
+	  do l=1,lmax
+	    value = data(l,i)
+	    ivalue = transfer(value,1)
+	    call checksum_i(a,b,ivalue)
+	  end do
+	end do
+
+	crc = 256*256 * b + a
+
+	end
+
+!***************************************************************
+
+	subroutine checksum_1d(n,data,crc)
+
+	implicit none
+
+	integer n
+	real data(n)
+	integer crc
+
+	integer a,b
+
+	integer i
+	integer ivalue
+	real value
+	!equivalence(value,ivalue)
+
+	a = 1
+	b = 0
+
+	do i=1,n
+	  value = data(i)
+	  ivalue = transfer(value,1)
+	  call checksum_i(a,b,ivalue)
+	end do
+
+	crc = 256*256 * b + a
+
+	end
+
+!***************************************************************
+
+	subroutine checksum_i(a,b,data)
+
+	implicit none
+
+	integer a,b,data
+
+	integer MOD_ADLER
+	parameter ( MOD_ADLER = 65521 )
+
+	a = mod(a+data,MOD_ADLER)
+	b = mod(a+b,MOD_ADLER)
+
+	end
+
+!***************************************************************
+!***************************************************************
+!***************************************************************
+
+	subroutine check_array_with_crc_1d(ip,text,array)
+	implicit none
+	integer ip
+	character*(*) text
+	real array(:)
+	integer crc
+	call checksum_1d(size(array),array,crc)
+	call check_array_with_crc_internal(ip,text,crc)
+	end
+
+!***************************************************************
+
+	subroutine check_array_with_crc_2d(ip,text,array)
+	implicit none
+	integer ip
+	character*(*) text
+	real array(:,:)
+	integer crc
+	call checksum_2d_nolevel(size(array,1),size(array,2),array,crc)
+	call check_array_with_crc_internal(ip,text,crc)
+	end
+
+!***************************************************************
+
+	subroutine check_array_with_crc_internal(ip,text,crc)
+	implicit none
+	integer ip
+	character*(*) text
+	integer crc
+	!write(iucrc,*) trim(text),ip,crc,crcs(ip)
+	if( ip > ndim ) then
+	  stop 'error stop check_array_with_crc: ip>ndim'
+	!else if( crc_texts(ip) == ' ' ) then
+	else if( crcs(ip) == -1 ) then
+	  crc_texts(ip) = text
+	else if ( crc_texts(ip) /= text ) then
+	  write(6,*) trim(text),' /= ',trim(crc_texts(ip))
+	  stop 'error stop check_array_with_crc: incompatible arrays'
+	else if( crcs(ip) /= crc ) then
+	  write(6,*) 'array has changed: ',trim(text)
+	  write(iucrc,*) 'array has changed: ',trim(text)
+	end if
+	crcs(ip) = crc
+	ip = ip + 1
+	end
+
 !==================================================================
         end module mod_debug
 !==================================================================
@@ -657,87 +844,6 @@
 	end if
 
 	end
-	  
-!***************************************************************
-!***************************************************************
-!***************************************************************
-! checksum routines
-!***************************************************************
-!***************************************************************
-!***************************************************************
-
-	subroutine checksum_2d(n1dim,n,nlv,levels,data,crc)
-
-	integer n1dim			! dimension of first index
-	integer n
-	integer nlv			!nlv>0 use this  nlv<=0 use levels
-	integer levels(n)
-	real data(n1dim,n)
-	integer crc
-
-	integer a,b
-
-	integer ivalue
-	real value
-	!equivalence(value,ivalue)
-
-	a = 1
-	b = 0
-
-	do i=1,n
-	  lmax = nlv
-	  if( lmax .le. 0 ) lmax = levels(i)
-	  do l=1,lmax
-	    value = data(l,i)
-	    ivalue = transfer(value,1)
-	    call checksum_i(a,b,ivalue)
-	  end do
-	end do
-
-	crc = 256*256 * b + a
-
-	end
-
-!***************************************************************
-
-	subroutine checksum_1d(n,data,crc)
-
-	integer n
-	real data(n)
-	integer crc
-
-	integer a,b
-
-	integer ivalue
-	real value
-	!equivalence(value,ivalue)
-
-	a = 1
-	b = 0
-
-	do i=1,n
-	  value = data(i)
-	  ivalue = transfer(value,1)
-	  call checksum_i(a,b,ivalue)
-	end do
-
-	crc = 256*256 * b + a
-
-	end
-
-!***************************************************************
-
-	subroutine checksum_i(a,b,data)
-
-	integer a,b,data
-
-	integer MOD_ADLER
-	parameter ( MOD_ADLER = 65521 )
-
-	a = mod(a+data,MOD_ADLER)
-	b = mod(a+b,MOD_ADLER)
-
-	end
 
 !***************************************************************
 !***************************************************************
@@ -769,7 +875,6 @@
 !***************************************************************
 
 	subroutine test_debug
-
 	end
 
 !***************************************************************

@@ -165,12 +165,12 @@ zip:	cleanall
 
 # DO NOT DELETE THIS LINE -- make depend depends on it.
 
-../../../lib/mod/flux.mod: mod_flux.o
 ../../../lib/mod/mod_area.mod: mod_area.o
 ../../../lib/mod/mod_bclfix.mod: mod_bclfix.o
 ../../../lib/mod/mod_diff_aux.mod: mod_diff_aux.o
 ../../../lib/mod/mod_diff_visc_fric.mod: mod_diffusion.o
 ../../../lib/mod/mod_fluidmud.mod: mod_fluidmud.o
+../../../lib/mod/mod_flux.mod: mod_flux.o
 ../../../lib/mod/mod_hydro.mod: mod_hydro.o
 ../../../lib/mod/mod_hydro_baro.mod: mod_hydro_baro.o
 ../../../lib/mod/mod_hydro_print.mod: mod_hydro_print.o

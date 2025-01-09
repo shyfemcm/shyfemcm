@@ -1007,6 +1007,7 @@
 	use basin, only : nkn,nel,ngr,mbw
 	use shympi
 	use pkonst
+	use mod_info_output
 
 	implicit none
 
@@ -1021,6 +1022,7 @@
 	real cnpar			!numerical "implicitness" parameter
 	real n2max,n2
 	real nfreq,nperiod
+	real array(3)
 
 	integer, save :: iuinfo = 0
 
@@ -1049,7 +1051,7 @@
             n2 = dbuoy / dh
 	    n2max = max(n2max,n2)
             buoyf2(l,k) = n2
-	  if( bdebug ) write(iudbg,*) l,n2
+	    if( bdebug ) write(iudbg,*) l,n2
 
             du = 0.5*(                                   &
      &       (cnpar*abs((uprv(l+1,k)-uprv(l,k))          &
@@ -1083,15 +1085,19 @@
           end do
         end do
 
+	if( .not. binfo ) return
+
 	n2max = shympi_max(n2max)
 
 	nfreq = sqrt(n2max)
 	nperiod = 0.
 	if( nfreq .gt. 0. ) nperiod = 1. / nfreq
-	if( iuinfo .le. 0 ) call getinfo(iuinfo)
-	if(shympi_is_master()) then
-	  write(iuinfo,*) 'n2max: ',n2max,nfreq,nperiod
-	end if
+	!if( iuinfo .le. 0 ) call getinfo(iuinfo)
+	!if(shympi_is_master()) then
+	!  write(iuinfo,*) 'n2max: ',n2max,nfreq,nperiod
+	!end if
+	array = (/n2max,nfreq,nperiod/)
+	call info_output('n2max',' ',3,array,.false.)
 
 	end
 

@@ -384,13 +384,17 @@
 	  call adjust_mass_flux		!cope with dry nodes
 
 	  call system_init		!initializes matrix
+	  call trace_point('hydro_zeta')
 	  call hydro_zeta(rqv)		!assemble system matrix for z
 	  call cpu_time_start(3)
+	  call trace_point('system_solve')
 	  call system_solve(nkn,znv)	!solves system matrix for z
 	  call cpu_time_end(3)
+	  call trace_point('system_get')
 	  call system_get(nkn,znv)	!copies solution to new z
 
 	  if( trim(solver_type) /= 'PETSc' ) then
+	    call trace_point('exchange_znv')
             call shympi_exchange_2d_node(znv)
           endif
 
@@ -400,33 +404,28 @@
 
 	end do
 
+	call trace_point('hydro_transports_final')
 	call hydro_transports_final	!final transports (also barotropic)
 
-	call shympi_barrier
-	!we should really never exchange these arrays !FIXME
-	!write(6,*) 'utlnv has been computed...'
-	!call shympi_print_elem(159344,utlnv)
-	!call shympi_barrier
 	if( bextra_exchange ) then
 	  call shympi_exchange_3d_elem(utlnv)
 	  call shympi_exchange_3d_elem(vtlnv)
 	  call shympi_exchange_2d_elem(unv)
 	  call shympi_exchange_2d_elem(vnv)
 	end if
-	!write(6,*) 'utlnv has been exchanged...'
-	!call shympi_print_elem(159344,utlnv)
-	!call shympi_barrier
 
 !-----------------------------------------------------------------
-! end of soulution for hydrodynamic variables
+! end of solution for hydrodynamic variables
 !-----------------------------------------------------------------
 
         call setzev			!copy znv to zenv
         call setuvd			!set velocities in dry areas
 	call baro2l 			!sets transports in dry areas
 
+	call trace_point('make_new_depth')
 	call make_new_depth
 	call check_volume		!checks for negative volume 
+	call trace_point('arper')
         call arper
 
 !-----------------------------------------------------------------
@@ -438,6 +437,7 @@
 	  call nonhydro_adjust
 	end if
 
+	call trace_point('hydro_vertical')
 	call hydro_vertical(dzeta)		!compute vertical velocities
 
 	if (bnohyd .or. (iwvel .eq. 1)) then
@@ -461,7 +461,7 @@
 ! some checks
 !-----------------------------------------------------------------
 
-	!call trace_point('vol_mass')
+	call trace_point('vol_mass')
 	call vol_mass(1)		!computes and writes total volume
 	call mass_conserve		!check mass balance
 
@@ -469,6 +469,7 @@
 ! compute velocities on elements and nodes
 !-----------------------------------------------------------------
 
+	call trace_point('compute_velocities')
 	call compute_velocities
 	call trace_point('end_of_hydro')
 

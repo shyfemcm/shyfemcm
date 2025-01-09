@@ -35,6 +35,7 @@
 ! 15.10.2024	ggu	set array tpwgts (which is real, not dble) (IFX bug)
 ! 21.11.2024	ggu	call check_partition() with bdebug flag
 ! 23.11.2024	ggu	code cleaned
+! 29.11.2024	ggu	option to force contigous areas
 !
 !****************************************************************
 
@@ -63,7 +64,10 @@
         integer               :: objval		!edge-cut or total comm vol
 	integer               :: options(40)	!metis options
 
+	logical bcontig
 	integer iu,nfill,i
+
+	bcontig = .false.	!want contigous areas?
 
 !-----------------------------------------------------------------
 ! initialiaze arrays
@@ -104,10 +108,12 @@
 
         call METIS_SetDefaultOptions(options)
 
-        options(1) = 1		!PTYPE (0=rb,1=kway)
-        options(2) = 1		!OBJTYPE (0=cut,1=vol)
-        options(12) = 1		!CONTIG (0=defoult,1=force contiguous)
+        !options(1) = 1		!PTYPE (0=rb,1=kway)
+        !options(2) = 1		!OBJTYPE (0=cut,1=vol)
+        !options(12) = 1	!CONTIG (0=defoult,1=force contiguous)
         options(18) = 1		!NUMBERING (0 C-style, 1 Fortran-style)
+
+	if( bcontig ) options(12) = 1
 
 !-----------------------------------------------------------------
 ! Call METIS for patitioning on nodes

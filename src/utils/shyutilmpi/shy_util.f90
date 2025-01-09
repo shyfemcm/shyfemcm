@@ -70,6 +70,8 @@
 ! 07.06.2023    ggu     array simpar introduced
 ! 20.07.2023    lrp     new paramter nzadapt
 ! 22.09.2024    ggu     bug fix in shy_check_nvar() - use also dtime0
+! 04.12.2024    ggu     new framework for not doing gather_all
+! 07.12.2024    ggu     reduce only to root (not all)
 !
 ! contents :
 !
@@ -920,8 +922,11 @@
      &					,belem,n,m,lmax &
      &					,nlvdi,c)
 
+! low level routine to write out a record to a shy file
+
 	use shyfile
 	use shympi
+	use mod_trace_point
 
 	implicit none
 
@@ -935,7 +940,7 @@
 	integer nlvdi			!local vertical dimension
 	real c(nlvdi,m*n)
 
-	logical bdebug,b2d
+	logical bdebug,b2d,bopen
 	integer ierr,nn,nl,i,ng
 	real, allocatable :: cl(:,:),cg(:,:)
 	real, allocatable :: cl2d(:),cg2d(:)
@@ -978,7 +983,6 @@
           stop 'error stop shy_write_output_record: nlvdi>1 & m>1'
 	end if
 
-	!if( nlvdi > lmax ) then
 	if( nlvdi > lmax .and. lmax > 1 ) then
 	  write(6,*) 'error in vertical structure: ',nlvdi,lmax
 	  stop 'error stop shy_write_output_record: nlvdi>lmax'
@@ -1009,8 +1013,15 @@
 	  cg = 0.
 	end if
 
-	!call shympi_syncronize
-	!write(6,*) 'exchanging... ',m,lmax,nl,ng,n,nn	!GGURST
+	call shy_get_status(id,bopen)
+	if( bopen .and. .not. bmpi_master ) then
+	  write(6,*) 'debug shyfile ',dtime,bopen,id,my_id
+	  stop 'error stop shy_write_output_record: file opened and no master'
+	end if
+
+	call trace_point('before shy_write_record')
+
+	call shympi_operate_all(.false.)
 
 	if( m > 1 ) then
 	  call shympi_l2g_array(m,cl,cg)
@@ -1019,26 +1030,13 @@
 	  call shympi_l2g_array(cl2d,cg2d)
 	  call shy_write_record(id,dtime,ivar,belem,nn,1,1,1,cg2d,ierr)
 	else
-	  !write(6,*) 'start exchanging',nl,ng,n,nn
 	  call shympi_l2g_array(cl,cg)
-	  !write(6,*) 'end exchanging',nl
 	  call shy_write_record(id,dtime,ivar,belem,nn,1,lmax,ng,cg,ierr)
 	end if
 
-	if( bdebug .and. .false. ) then
-	 if( shympi_is_master() ) then		!mpi_debug_ggguuu
-	  if( ivar == 1 .and. m == 1 ) then
-	    write(700,*) ivar,nn,m,lmax
-	    write(700,*) cg
-	  else if( ivar == 1 .and. m == 3 ) then
-	    write(701,*) ivar,nn,m,lmax
-	    write(701,*) cg
-	  else
-	    write(703,*) ivar,nn,m,lmax
-	    write(703,*) cg
-	  end if
-	 end if
-	end if
+	call shympi_operate_all(.true.)
+
+	call trace_point('after shy_write_record')
 
 	if( ierr /= 0 ) then
 	  write(6,*) 'error writing output file ',ierr

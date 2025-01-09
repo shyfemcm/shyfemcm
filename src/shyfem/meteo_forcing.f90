@@ -1194,6 +1194,7 @@
 	use evgeom
 	use basin
 	use shympi
+	use mod_info_output
 
 	integer id
 	integer n
@@ -1201,6 +1202,7 @@
 
 	integer k,ie,ii,ia,nflag,nice
 	real rarea,rnodes
+	real array(3)
 	double precision dacu,dice,darea,area
 	character*20 aline
 
@@ -1213,10 +1215,15 @@
           if(shympi_is_master()) call getinfo(iuinfo)
         end if
 
+	if( n /= nkn_local ) then
+	  write(6,*) n,nkn_local
+	  stop 'error stop meteo_convert_ice_data: n/=nkn_local'
+	end if
+
 	nflag = 0
 	nice = 0
 
-	do k=1,n
+	do k=1,nkn_inner
 	  if( r(k) == flag ) then
 	    nflag = nflag + 1
 	    r(k) = 0
@@ -1262,11 +1269,13 @@
 
 	rarea = dice
 	rnodes = dacu
-	call get_act_timeline(aline)
+	!call get_act_timeline(aline)
+	!if( iuinfo > 0 ) then
+	!  write(iuinfo,*) 'ice: ',aline,rarea,rnodes,nflag
+	!end if
 
-	if( iuinfo > 0 ) then
-	  write(iuinfo,*) 'ice: ',aline,rarea,rnodes,nflag
-	end if
+	array = (/rarea,rnodes,real(nflag)/)
+	call info_output('ice','sum',3,array,.true.)
 
 	end subroutine meteo_convert_ice_data
 
@@ -1442,6 +1451,7 @@
 ! converts percent to fraction
 
 	use mod_meteo
+	use shympi
 
 	implicit none
 
@@ -1451,6 +1461,7 @@
 	real maxcc
 	integer, save :: icall = 0
 	integer, save :: ncall = 1
+	integer, save :: ncall_max = 100
 
 	if( any( cc > 1.5 ) ) then
 	  maxcc = maxval(cc)
@@ -1458,7 +1469,9 @@
 	  icall = icall + 1
 	  if( mod(icall,ncall) == 0 ) then
 	    ncall = ncall * 2
-	    write(6,*) 'cloudcover in %... must convert to fraction',maxcc
+	    if( bmpi_master .and. ncall <= ncall_max ) then
+	      write(6,*) 'cloudcover in %... converting to fraction',maxcc
+	    end if
 	  end if
 	end if
 

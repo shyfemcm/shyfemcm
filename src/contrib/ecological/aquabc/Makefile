@@ -199,7 +199,7 @@ aquabc_II_sediment_model_1.o: \
 		../../../../lib/mod/mod_debug.mod 
 aquabc_II_util.o: ../../../../lib/mod/basin.mod \
 		../../../../lib/mod/femtime.mod \
-		../../../../lib/mod/flux.mod \
 		../../../../lib/mod/levels.mod \
+		../../../../lib/mod/mod_flux.mod \
 		../../../../lib/mod/simul.mod 
 

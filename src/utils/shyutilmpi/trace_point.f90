@@ -41,10 +41,12 @@
 	implicit none
 
         logical, parameter :: btrace_enable = .true.	!enables trace point
-        logical, parameter :: btrace_master = .false.	!only master writes
+        logical, parameter :: btrace_master = .true.	!only master writes
 
         logical, save      :: btrace_do = .true.	!user trace point
         logical, save      :: btrace = btrace_enable	!final decsion
+
+	integer, parameter :: iut = 999			!unit for writing tp
 
 !================================================================
         contains
@@ -66,14 +68,16 @@
 	  bwrite = .true.
 	end if
 	  
-	call shympi_barrier
+	if( .not. btrace_master ) call shympi_barrier
 
 	if( bwrite ) then
 	  write(6,*) 'trace_point: ',trim(text),my_id
+	  write(iut,*) 'trace_point: ',trim(text),my_id
 	  flush(6)
+	  flush(iut)
 	end if
 
-	call shympi_barrier
+	if( .not. btrace_master ) call shympi_barrier
 
 	end subroutine trace_point
 

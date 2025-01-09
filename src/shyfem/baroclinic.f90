@@ -159,6 +159,7 @@
 ! 15.10.2022	ggu	bpresv deleted
 ! 02.04.2023	ggu	min/max of T/S computed correctly for mpi
 ! 09.05.2023    lrp     introduce top layer index variable
+! 03.12.2024    ggu     new info_output framework
 !
 ! notes :
 !
@@ -206,6 +207,7 @@
 	use pkonst
 	use mkonst
 	use mod_trace_point
+	use mod_info_output
 
 	implicit none
 !
@@ -216,7 +218,6 @@
 ! local
 	logical debug
 	logical bgdebug
-        logical binfo
         logical bstop
 	logical binitial_nos
 	logical boff
@@ -237,6 +238,7 @@
 	real mass
 	real wsink
 	real robs
+	real array(3)
 	real, allocatable :: rho_aux1(:,:)
 	real, allocatable :: rho_aux2(:,:)
 	double precision dtime0,dtime
@@ -252,7 +254,7 @@
 ! functions
 !	real sigma
 	real getpar
-	double precision scalcont,dq
+	double precision dq
 	integer iround
 	integer nbnds
 	logical rst_use_restart
@@ -285,7 +287,6 @@
 
 	levdbg = nint(getpar('levdbg'))
 	debug = levdbg .ge. 3
-	binfo = .true.
         bgdebug = .false.
 	binitial_nos = .true.
 
@@ -396,10 +397,10 @@
 !		initialize output files
 !		--------------------------------------------
 
-		call trace_point('initalizing output')
+		call trace_point('initalizing T/S output')
 
 		call bcl_open_output(da_out,itemp,isalt,irho)
-		call trace_point('writing output')
+		call trace_point('writing T/S output')
 		call bcl_write_output(dtime0,da_out,itemp,isalt,irho)
 
 		if( shympi_is_master() ) then
@@ -501,23 +502,29 @@
           if( itemp .gt. 0 ) then
   	    call tsmass(tempv,+1,nlvdi,ttot) 
       	    call conmima(nlvdi,tempv,tmin,tmax)
+	    ttot = shympi_sum(ttot)
 	    tmin = shympi_min(tmin)
 	    tmax = shympi_max(tmax)
+	    array = (/ttot,tmin,tmax/)
 !$OMP CRITICAL
-	    if( iuinfo > 0 ) then
-  	      write(iuinfo,*) 'temp: ',aline,ttot,tmin,tmax
-	    end if
+	    call info_output('temp','none',3,array,.true.)
+	    !if( iuinfo > 0 ) then
+  	    !  write(iuinfo,*) 'temp: ',aline,ttot,tmin,tmax
+	    !end if
 !$OMP END CRITICAL
 	  end if
           if( isalt .gt. 0 ) then
   	    call tsmass(saltv,+1,nlvdi,stot) 
        	    call conmima(nlvdi,saltv,smin,smax)
+	    stot = shympi_sum(stot)
 	    smin = shympi_min(smin)
 	    smax = shympi_max(smax)
+	    array = (/stot,smin,smax/)
 !$OMP CRITICAL
-	    if( iuinfo > 0 ) then
-  	      write(iuinfo,*) 'salt: ',aline,stot,smin,smax
-	    end if
+	    call info_output('salt','none',3,array,.true.)
+	    !if( iuinfo > 0 ) then
+  	    !  write(iuinfo,*) 'salt: ',aline,stot,smin,smax
+	    !end if
 !$OMP END CRITICAL
 	  end if
 	end if

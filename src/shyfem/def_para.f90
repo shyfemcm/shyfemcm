@@ -395,11 +395,19 @@
 	call addpar('idtflx',0.)
 	call addpar('itmflx',-1.)
 
-! |idtstb|, |itmstb|	Time step and start time for writing a file with
-!			the stability index for debug reasons.
+! |idtstb|, |itmstb|	Time step and start time for writing a file *.stb.shy
+!			with the stability index for debug reasons.
+!			The file is only written if a scalar is computed,
+!			such as S/T or tracer.
 
 	call addpar('idtstb',0.)
 	call addpar('itmstb',-1.)
+
+! |idtsti|, |itmsti|	Time step and start time for writing a file *.sti.shy
+!			with the maximum allowed time step for the simulation.
+
+	call addpar('idtsti',0.)
+	call addpar('itmsti',-1.)
 
 ! |idtdbg|, |itmdbg|	Time step and start time for writing a debug file
 !			with values of various variables. In order to
@@ -1273,9 +1281,6 @@
 !c------------------------------------------------------------------------
 !c still to be commented below here
 !c------------------------------------------------------------------------
-
-	call addpar('idtsti',0.)	!time step for stability index
-	call addpar('itmsti',-1.)	!minimum time for stability index
 
 !c------------------------------------------------------------------------
 

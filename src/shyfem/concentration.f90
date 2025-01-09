@@ -2078,8 +2078,6 @@
 	    write(197,1010) aline,kstab &
      &			,stabind,stabadv,stabdiff,stabvert,stabpoint
 	  end if
-	  !call get_orig_timestep(dtorig)
-	  !call output_stability_node(dtorig,cwrite)
 	end if
 
 !-----------------------------------------------------------------
