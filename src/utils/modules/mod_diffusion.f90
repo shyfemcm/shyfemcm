@@ -48,12 +48,12 @@
 	real, allocatable, save :: rfricv(:)	!friction term
 	real, allocatable, save :: ifricv(:,:)	!internal friction term
 	real, allocatable, save :: rcdv(:)	!bottom drag coefficient
-	real, allocatable, save :: bnstressv(:)	!normalized bottom stress
+	real, allocatable, target, save :: bnstressv(:)	!normalized bot. stress
 	real, allocatable, save :: czv(:)	!friction parameter (as given)
 
 	real, allocatable, save :: difhv(:,:)
-	real, allocatable, save :: visv(:,:)
-	real, allocatable, save :: difv(:,:)
+	real, allocatable, target, save :: visv(:,:)	!viscosity
+	real, allocatable, target, save :: difv(:,:)	!diffusivity
 
 !==================================================================
 	contains

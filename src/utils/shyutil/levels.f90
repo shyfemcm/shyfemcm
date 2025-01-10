@@ -53,12 +53,12 @@
         integer, save, private :: nel_levels = 0
         integer, save, private :: nlv_levels = 0
 
-        integer, save, allocatable :: ilhv(:)
-        integer, save, allocatable :: ilhkv(:)
-        integer, save, allocatable :: ilmv(:)
-        integer, save, allocatable :: ilmkv(:)
-        integer, save, allocatable :: jlhv(:)
-        integer, save, allocatable :: jlhkv(:)
+        integer, save, target, allocatable :: ilhv(:)
+        integer, save, target, allocatable :: ilhkv(:)
+        integer, save, target, allocatable :: ilmv(:)
+        integer, save, target, allocatable :: ilmkv(:)
+        integer, save, target, allocatable :: jlhv(:)
+        integer, save, target, allocatable :: jlhkv(:)
 
         real, save, allocatable :: hlv(:)
         real, save, allocatable :: hldv(:)

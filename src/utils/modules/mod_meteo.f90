@@ -45,24 +45,24 @@
         integer, private, save  :: nkn_meteo = 0
 	integer, save           :: icall_nuopc = 0 !coupled mode: flag first ts
 
-        real, allocatable, save :: wxv(:)	! wind velocity in x [m/s]
-        real, allocatable, save :: wyv(:)	! wind velocity in y [m/s]
+        real, allocatable, target, save :: wxv(:) ! wind velocity in x [m/s]
+        real, allocatable, target, save :: wyv(:) ! wind velocity in y [m/s]
         real, allocatable, save :: ppv(:)	! pressure (atmos) [Pa,mbar]
 
         real, allocatable, save :: tauxnv(:)	! wind stress in x [N/m**2]
         real, allocatable, save :: tauynv(:)	! wind stress in y [N/m**2]
 
-        real, allocatable, save :: metrad(:)	! downward sw solar rad [W/m**2]
+        real, allocatable, target, save :: metrad(:) ! sw solar rad [W/m**2]
         real, allocatable, save :: methum(:)	! humidity [%]
         real, allocatable, save :: metdew(:)    ! dew point temperature [C]  
-        real, allocatable, save :: mettair(:)	! 10 m air temperature [C]
+        real, allocatable, target, save :: mettair(:) ! 10 m air temperature [C]
         real, allocatable, save :: metcc(:)	! cloud cover [0-1]
         real, allocatable, save :: metrain(:)	! precipitation [m/s]
         real, allocatable, save :: metwbt(:)	! wet bulb temperature [C] 
         real, allocatable, save :: metshum(:)	! specific humidity [g/m**3] 
 
-        real, allocatable, save :: metice(:)	! ice cover [0-1]
-        real, allocatable, save :: metws(:)	! wind speed [m/s]
+        real, allocatable, target, save :: metice(:)	! ice cover [0-1]
+        real, allocatable, target, save :: metws(:)	! wind speed [m/s]
 
         real, allocatable, save :: windcd(:)	! wind drag coefficient
         real, allocatable, save :: evapv(:)	! evaporation [m/s]

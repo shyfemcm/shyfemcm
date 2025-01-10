@@ -43,9 +43,9 @@
 	integer, private, save :: nkn_ts = 0
 	integer, private, save :: nlv_ts = 0
 
-        real, allocatable, save :: rhov(:,:)
-        real, allocatable, save :: saltv(:,:)
-        real, allocatable, save :: tempv(:,:)
+        real, allocatable, target, save :: rhov(:,:)
+        real, allocatable, target, save :: saltv(:,:)
+        real, allocatable, target, save :: tempv(:,:)
 
         real, allocatable, save :: sobsv(:,:)
         real, allocatable, save :: stauv(:,:)

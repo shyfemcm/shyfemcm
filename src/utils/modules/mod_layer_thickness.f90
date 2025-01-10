@@ -40,10 +40,10 @@
         integer, private, save :: nel_layer_thickness = 0
         integer, private, save :: nlv_layer_thickness = 0
         
-        real, allocatable, save :: hdknv(:,:)
-        real, allocatable, save :: hdkov(:,:)
-        real, allocatable, save :: hdenv(:,:)
-        real, allocatable, save :: hdeov(:,:)
+        real, allocatable, target, save :: hdknv(:,:)
+        real, allocatable, target, save :: hdkov(:,:)
+        real, allocatable, target, save :: hdenv(:,:)
+        real, allocatable, target, save :: hdeov(:,:)
 
         contains
 
