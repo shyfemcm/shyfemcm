@@ -829,6 +829,7 @@
 
 	!level = 1
 	level = 0	!mixing 2d/3d - not yet implemented
+        if( nz1 == 0 ) nz1 = 1    !HACK - maybe not needed
 
 	nrec = 0
 	if( nvar == 0 ) return
