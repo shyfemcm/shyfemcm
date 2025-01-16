@@ -56,13 +56,15 @@ LIBFS      = $(LIBF_NETCDF)
 #--------------------------------------------------------------
 
 OBJS = ncf_util.o subclo.o ncf_dim_coords.o subscn.o
-OBJS = ncf_util.o subclo.o
-OBJSBGC = ncf_util.o subclo.o ncf_dim_coords.o subscn.o bgc_util.o subgeo.o
-OBJSTIME = ncf_tutil.o subiso8601.o subdts.o
-OBJSBGC += $(OBJSTIME)
+OBJS_INFO = ncf_util.o subclo.o
+OBJS_ELAB = ncf_util.o subclo.o
+OBJS_BGC = ncf_util.o subclo.o ncf_dim_coords.o subscn.o bgc_util.o subgeo.o
+OBJS_GR = ncf_util.o subclo.o
+OBJS_TIME = ncf_tutil.o subiso8601.o subdts.o
+OBJS_BGC += $(OBJS_TIME)
 
-EXES = gr gw ncinfo
-EXES = ncinfo ncbgc
+EXES = gr gw ncinfo ncelab
+EXES = ncinfo ncbgc ncelab
 
 DATA = $(HOME)/work/nc2fem/data
 
@@ -72,14 +74,17 @@ default: $(EXES)
 
 all: link $(EXES)
 
-ncinfo: $(OBJS) $(LIBFS) ncinfo.o
-	gfortran -o $@ $@.o $(OBJS) $(LIBGS)
+ncinfo: $(OBJS_INFO) $(LIBFS) ncinfo.o
+	gfortran -o $@ $@.o $(OBJS_INFO) $(LIBGS)
 
-ncbgc: $(OBJSBGC) $(LIBFS) ncbgc.o
-	gfortran -o $@ $@.o $(OBJSBGC) $(LIBGS)
+ncelab: $(OBJS_ELAB) $(LIBFS) ncelab.o
+	gfortran -o $@ $@.o $(OBJS_ELAB) $(LIBGS)
 
-gr: $(OBJS) $(LIBFS) gr.o
-	gfortran -o $@ $@.o $(OBJS) $(LIBGS)
+ncbgc: $(OBJS_BGC) $(LIBFS) ncbgc.o
+	gfortran -o $@ $@.o $(OBJS_BGC) $(LIBGS)
+
+gr: $(OBJS_GR) $(LIBFS) gr.o
+	gfortran -o $@ $@.o $(OBJS_GR) $(LIBGS)
 
 link: data
 data:
@@ -117,7 +122,12 @@ save: clean
 
 #--------------------------------------------------------------
 
+.SUFFIXES: .f90
+
 .f.o:
+	$(F77) -c $(FFLAGS) $<
+
+.f90.o:
 	$(F77) -c $(FFLAGS) $<
 
 #--------------------------------------------------------------
