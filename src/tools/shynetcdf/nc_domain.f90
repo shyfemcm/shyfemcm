@@ -189,16 +189,19 @@
         end do
 	dxx = dxxtot / (ny*(nx-1))
 
-	if( dxmin <= 0 ) then
-	  write(6,*) 'x coords spacing is negative or zero ',dxmin
-	  write(6,*) 'use the follwoing command to invert coords:'
+	if( dxmin == 0 ) then
+	  write(6,*) 'x coords spacing is zero ',dxmin
+	  stop 'error stop check_regular_coords: dx==0'
+        else if( dxmin < 0 ) then
+	  write(6,*) 'x coords spacing is negative ',dxmin
+	  write(6,*) 'use the following command to invert coords:'
 	  write(6,*) 'ncpdq -a "-lon" in.nc out.nc'
 	  write(6,*) '(this assumes that your x-coord is named lon)'
 	  stop 'error stop check_regular_coords: dx<=0'
 	else if( dxmax-dxmin < eps ) then
 	  bregular = .true.
 	else
-	  write(6,*) 'coords not regular...' 
+	  write(6,*) 'coords are irregular...' 
 	  write(6,*) dxmin,dxmax,dxmax-dxmin,eps
 	  bregular = .false.
 	end if
@@ -222,9 +225,12 @@
         end do
 	dyy = dyytot / (nx*(ny-1))
 
-	if( dymin <= 0 ) then
-	  write(6,*) 'y coords spacing is negative or zero ',dymin
-	  write(6,*) 'use the follwoing command to invert coords:'
+	if( dymin == 0 ) then
+	  write(6,*) 'y coords spacing is zero ',dymin
+	  stop 'error stop check_regular_coords: dy==0'
+        else if( dymin < 0 ) then
+	  write(6,*) 'y coords spacing is negative ',dymin
+	  write(6,*) 'use the following command to invert coords:'
 	  write(6,*) 'ncpdq -a "-lat" in.nc out.nc'
 	  write(6,*) '(this assumes that your y-coord is named lat)'
 	  stop 'error stop check_regular_coords: dy<=0'
