@@ -137,6 +137,7 @@
 !*****************************************************************
 
         subroutine check_regular_coords(nx,ny,x,y                       &
+     &                  ,bx_invert,by_invert                            &
      &                  ,bregular,regpar)
 
 ! sets regpar and bregular
@@ -150,6 +151,7 @@
         integer nx,ny
         real x(nx,ny)
         real y(nx,ny)
+	logical bx_invert, by_invert
         logical bregular		!return
         real regpar(9)			!return
 
@@ -163,6 +165,8 @@
 
 	bdebug = .true.
 	bdebug = .false.
+	bx_invert = .false.
+	by_invert = .false.
 
         bregular = .true.
 	epsilon = 1.e-4
@@ -198,6 +202,8 @@
 	  write(6,*) 'ncpdq -a "-lon" in.nc out.nc'
 	  write(6,*) '(this assumes that your x-coord is named lon)'
 	  stop 'error stop check_regular_coords: dx<=0'
+          bx_invert = .true.
+          dxx = -dxx
 	else if( dxmax-dxmin < eps ) then
 	  bregular = .true.
 	else
@@ -205,8 +211,6 @@
 	  write(6,*) dxmin,dxmax,dxmax-dxmin,eps
 	  bregular = .false.
 	end if
-
-	!call invert_coords(1,nx,ny,y)	!test for Nador
 
 	ymin = minval(y)
 	ymax = maxval(y)
@@ -234,10 +238,12 @@
 	  write(6,*) 'ncpdq -a "-lat" in.nc out.nc'
 	  write(6,*) '(this assumes that your y-coord is named lat)'
 	  stop 'error stop check_regular_coords: dy<=0'
+          by_invert = .true.
+          dyy = -dyy
 	else if( dymax-dymin < eps ) then
 	  bregular = .true.
 	else
-	  write(6,*) 'coords not regular...' 
+	  write(6,*) 'coords are irregular...' 
 	  write(6,*) dymin,dymax,dymax-dymin,eps
 	  bregular = .false.
 	end if
@@ -255,6 +261,8 @@
 	  write(6,*) '-------------------------------------------'
 	end if
 
+	call invert_coords(bx_invert,by_invert,nx,ny,x,y)	
+
 	flag = -999.
 	call set_regpar(regpar,nx,ny,dxx,dyy,xmin,ymin,xmax,ymax,flag)
 
@@ -262,33 +270,74 @@
 
 !*****************************************************************
 
-	subroutine invert_coords(ii,nx,ny,coord)
+	subroutine invert_coords(bx,by,nx,ny,x,y)
 
 	implicit none
 
-	integer ii
+        logical bx,by
 	integer nx,ny
-	real coord(nx,ny)
+	real x(nx,ny)
+	real y(nx,ny)
 
-	integer ix,iy,il
+	integer ix,iy,ip
 	real aux
 
-	if( ii == 0 ) then	!x-direction
+	if( bx ) then	!x-direction
 	  do iy=1,ny
 	    do ix=1,nx/2
-	      il = nx+1-ix
-	      aux=coord(ix,iy)
-	      coord(ix,iy) = coord(il,iy)
-	      coord(il,iy) = aux
+	      ip = nx+1-ix
+	      aux=x(ix,iy)
+	      x(ix,iy) = x(ip,iy)
+	      x(ip,iy) = aux
 	    end do
 	  end do
-	else			!y-direction
+        end if
+
+        if( by ) then	!y-direction
 	  do ix=1,nx
 	    do iy=1,ny/2
-	      il = ny+1-iy
-	      aux=coord(ix,iy)
-	      coord(ix,iy) = coord(ix,il)
-	      coord(ix,il) = aux
+	      ip = ny+1-iy
+	      aux=y(ix,iy)
+	      y(ix,iy) = y(ix,ip)
+	      y(ix,ip) = aux
+	    end do
+	  end do
+	end if
+	
+	end
+	
+!*****************************************************************
+
+	subroutine invert_data_2d(bx,by,nxdim,nydim,nx,ny,data)
+
+	implicit none
+
+        logical bx,by
+	integer nxdim,nydim
+	integer nx,ny
+	real data(nxdim,nydim)
+
+	integer ix,iy,ip
+	real aux
+
+	if( bx ) then	!x-direction
+	  do iy=1,ny
+	    do ix=1,nx/2
+	      ip = nx+1-ix
+	      aux=data(ix,iy)
+	      data(ix,iy) = data(ip,iy)
+	      data(ip,iy) = aux
+	    end do
+	  end do
+        end if
+
+        if( by ) then	!y-direction
+	  do ix=1,nx
+	    do iy=1,ny/2
+	      ip = ny+1-iy
+	      aux=data(ix,iy)
+	      data(ix,iy) = data(ix,ip)
+	      data(ix,ip) = aux
 	    end do
 	  end do
 	end if

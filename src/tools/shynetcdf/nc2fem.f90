@@ -138,6 +138,7 @@
 	logical bverb,bcoords,btime,binfo,bvars,bwrite,bdebug,bsilent
 	logical binvertdepth,binvertslm,bunform,bquiet,blist
 	logical bregular,bsingle,babout,btcorrect
+        logical binvert,bx_invert,by_invert
 	logical exists_var
 
 	interface
@@ -355,6 +356,7 @@
 
 	!call handle_unusual_coordinates(nxdim,nydim,xlon,ylat)
         call check_regular_coords(nxdim,nydim,xlon,ylat                 &
+     &                          ,bx_invert,by_invert                    &
      &                          ,bregular,regpar_data)
 	if( bverb ) write(6,*) bregular,regpar_data
 	call handle_domain(bverb,dstring,bregular,regpar_data,regpar)
@@ -368,6 +370,16 @@
 	   if( bverb ) write(6,*) regpar
 	 end if
 	end if
+
+!-----------------------------------------------------------------
+! invert coordinates of special files
+!-----------------------------------------------------------------
+
+        binvert = bx_invert .or. by_invert
+        if( binvert ) then
+          call invert_data_2d(bx_invert,by_invert,nxdim,nydim,nx,ny,bat)
+          call invert_data_2d(bx_invert,by_invert,nxdim,nydim,nx,ny,slm)
+        end if
 
 !-----------------------------------------------------------------
 ! write special files or info
