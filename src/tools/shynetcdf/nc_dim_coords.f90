@@ -46,6 +46,7 @@
 ! 20.06.2022	ggu	look in variable name to find coordinates
 ! 23.10.2022	ggu	new routine handle_exceptions()
 ! 15.11.2024	ggu	use bclip for some coordinates
+! 15.01.2025	ggu	check also if coordinate is without dimension
 !
 ! notes :
 !
@@ -614,32 +615,49 @@
         if( nt > 0 .and. tcoord == ' ' ) then
 	  berror = .true.
 	  write(6,*) '*** t dimension without variable name'
+        else if( nt == 0 .and. tcoord /= ' ' ) then
+	  berror = .true.
+	  write(6,*) '*** t coordinate without dimension name'
         end if
+
         if( nx > 0 .and. xcoord == ' ' ) then
 	  berror = .true.
 	  write(6,*) '*** x dimension without variable name'
+        else if( nx == 0 .and. xcoord /= ' ' ) then
+	  berror = .true.
+	  write(6,*) '*** x coordinate without dimension name'
         end if
+
         if( ny > 0 .and. ycoord == ' ' ) then
 	  berror = .true.
 	  write(6,*) '*** y dimension without variable name'
+        else if( ny == 0 .and. ycoord /= ' ' ) then
+	  berror = .true.
+	  write(6,*) '*** y coordinate without dimension name'
         end if
+
         if( nz > 0 .and. zcoord == ' ' ) then
 	  berror = .true.
 	  write(6,*) '*** z dimension without variable name'
+        else if( nz == 0 .and. zcoord /= ' ' ) then
+	  berror = .true.
+	  write(6,*) '*** z coordinate without dimension name'
         end if
 
 	if( bverb .or. berror ) then
+          write(6,*) 'i  what  dim_size             dim_name   coord_name'
 	  do i=0,3
 	    w = string(i+1:i+1)
-            write(6,*) i,' ',w,'  n = ',idims(2,i)                      &
-     &                          ,' s = ',trim(ccoords(i))
+            write(6,1000) i,w,idims(2,i),trim(cdims(i)),trim(ccoords(i))
 	  end do
 	end if
 
 	if( berror ) then
-          stop 'error stop: dimension(s) without variable name'
+          write(6,*) 'please add missing name to nc_dim_coords.f90' 
+          stop 'error stop: incompatible dimension or variable names'
 	end if
 
+ 1000   format(i2,5x,a1,2x,i8,1x,a20,3x,a)
 	end
 
 !*****************************************************************
@@ -821,6 +839,7 @@
 	call ncnames_add_dim('t','Time')
 	call ncnames_add_dim('t','ocean_time')
 	call ncnames_add_dim('t','time_counter')
+	call ncnames_add_dim('t','valid_time')
 
 	call ncnames_add_dim('x','x')
 	call ncnames_add_dim('x','xpos')

@@ -43,7 +43,7 @@ CheckCommand()
 CreateInputFiles()
 {
 
-cat > test.f <<EOI
+cat > test_nc.f <<EOI
 	include 'netcdf.inc'
         integer ncid,retval
         retval = nf_create('out.nc', nf_clobber, ncid)
@@ -51,7 +51,7 @@ cat > test.f <<EOI
         end
 EOI
 
-cat > test.c <<EOI
+cat > test_x11.c <<EOI
 #include <stdio.h>
 #include <X11/Xlib.h>
 
@@ -67,8 +67,8 @@ echo "quit" > quit.tmp
 
 CleanUp()
 {
-	[ -f test.f ] && rm -f test.f
-	[ -f test.c ] && rm -f test.c
+	[ -f test_nc.f ] && rm -f test_nc.f
+	[ -f test_x11.c ] && rm -f test_x11.c
 	[ -f quit.tmp ] && rm -f quit.tmp
 	[ -f a.out ] && rm -f a.out
 }
@@ -130,7 +130,7 @@ CheckFortranCompiler()
 CheckX11()
 {
   CheckCommand "X11-develop" \
-		"gcc -L/usr/X11/lib -L/usr/X11R6/lib -lXt -lX11 test.c"
+		"gcc -L/usr/X11/lib -L/usr/X11R6/lib -lXt -lX11 test_x11.c"
 
   if [ $status -ne 0 ]; then
     RecommendPackageFull "X11 development package" \
@@ -171,10 +171,10 @@ CheckNetcdf()
 
   if [ $nfconfig -eq 1 ]; then
     CheckCommand netcdf \
-	"$fortran test.f  $(nf-config --flibs) $(nf-config --fflags)"
+	"$fortran test_nc.f  $(nf-config --flibs) $(nf-config --fflags)"
   elif [ $ncdump -eq 1 ]; then
     CheckCommand netcdf \
-	"$fortran -L$netcdflib -I$netcdfdir/include -lnetcdff test.f"
+	"$fortran -L$netcdflib -I$netcdfdir/include -lnetcdff test_nc.f"
   else
     CheckCommand netcdf false
   fi
