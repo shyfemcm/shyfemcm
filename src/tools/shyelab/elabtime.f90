@@ -35,6 +35,7 @@
 ! 21.05.2019	ggu	changed VERS_7_5_62
 ! 21.07.2019	ggu	handle and check time step
 ! 06.03.2020	ggu	some enhancements
+! 17.01.2025	ggu	if time step changes write also old time step
 
 !**************************************************************************
 
@@ -244,11 +245,12 @@
 	end module elabtime
 !================================================================
 
-	subroutine check_timestep(dtime,dt,ichange)
+	subroutine check_timestep(dtime,dttold,dt,ichange)
 
 	implicit none
 
 	double precision dtime		! -1 to get regular time step
+	double precision dttold		! old time step
 	double precision dt		! regular time step, -1 if not reg
 	integer ichange			! dt has changed?
 
@@ -274,8 +276,9 @@
 	double precision, save :: dtmax = 0.
 
 	ichange = 0
+	dttold = dtold
 
-	if( dtime == -1. ) then
+	if( dtime == -1. ) then			!last call
 	  !write(6,*) dtold,dlast,idiff
 	  dt = dtold
 	  if( idiff > 0 ) dt = -1.
@@ -322,23 +325,30 @@
 	logical bcheckdt		! input - have to check?
 	logical bskip			! return - times are not increasing
 
+	logical, save :: bfirst = .true.
 	integer, save :: nrec = 0
 	double precision, save :: atold = 0.
 
-	double precision dt
+	double precision dt,dtold
 	integer ichange
 	character*20 dline
 
 	nrec = nrec + 1
-	call check_timestep(atime,dt,ichange)
+	call check_timestep(atime,dtold,dt,ichange)
 
         bskip = .false.
 
         if( ichange /= 0 ) then
           if( bcheckdt .and. ichange > 0 ) then
             call dts_format_abs_time(atime,dline)
-            write(6,'(a,a,i8,f14.2)') '* change in time step: ' &
-     &                                          ,dline,nrec,dt
+	    if( bfirst ) then
+	      bfirst = .false.
+	      write(6,*) '                      time' // &
+     &			'                   nrec' // &
+     &			'         dtold      dtnew'
+	    end if
+            write(6,'(a,a,i7,2f14.2)') '* change in time step: ' &
+     &                                          ,dline,nrec,dtold,dt
           end if
 
           bskip = ichange < 0
@@ -371,12 +381,12 @@
 	logical bcheckdt		! input - have to check?
 
 	double precision atime
-	double precision dt
+	double precision dt,dtold
 	integer ichange
 	integer idt
 
 	atime = -1
-	call check_timestep(atime,dt,ichange)
+	call check_timestep(atime,dtold,dt,ichange)
 
           if( ichange > 0 ) then
             write(6,*) 'changes in time step: ',ichange

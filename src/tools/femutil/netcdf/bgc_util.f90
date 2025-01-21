@@ -125,7 +125,7 @@
         !call ncf_print_variable_header
         do varid=1,nvars
           call ncf_var_inf(ncid,varid,vitem)
-          !call ncf_print_variable(vitem)
+          !call ncf_print_variable(ncid,vitem)
 	  if( vitem%name == 'longitude' ) ivx = varid
 	  if( vitem%name == 'latitude' ) ivy = varid
 	  if( vitem%name == 'depth' ) ivz = varid
@@ -229,7 +229,7 @@
         !call ncf_print_variable_header
         do varid=1,nvars
           call ncf_var_inf(ncid,varid,vitem)
-          !call ncf_print_variable(vitem)
+          !call ncf_print_variable(ncid,vitem)
 	  if( vitem%name == 'longitude' ) ivx = varid
 	  if( vitem%name == 'latitude' ) ivy = varid
 	  if( vitem%name == 'depth' ) ivz = varid
@@ -321,7 +321,7 @@
         !call ncf_print_variable_header
         do varid=1,nvars
           call ncf_var_inf(ncid,varid,vitem)
-          !call ncf_print_variable(vitem)
+          !call ncf_print_variable(ncid,vitem)
 	  if( vitem%name == 'Bathymetry' ) ivd = varid
         end do
 
@@ -666,10 +666,10 @@
 
         nvars = nitem%nvars
         write(6,*) 'total number of variables: ',nvars
-        call ncf_print_variable_header
+        call ncf_print_variable_header(ncid,nitem)
         do varid=1,nvars
           call ncf_var_inf(ncid,varid,vitem)
-          call ncf_print_variable(vitem)
+          call ncf_print_variable(ncid,vitem)
 	  ndims = vitem%ndims
 	  if( ndims == 4 ) then
 	    call interpolate(nitem,nbox,ivt,varid,vitem,nx,ny &

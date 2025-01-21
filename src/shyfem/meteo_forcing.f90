@@ -109,6 +109,7 @@
 ! 22.09.2024    ggu     read meteo output times and from str file
 ! 13.10.2024    ggu     deal with INTEL_BUG
 ! 13.11.2024    ggu     marked old code with INTEL_BUG_OLD
+! 03.12.2024    lrp     new parameter irain for the coupled model
 !
 ! notes :
 !
@@ -249,6 +250,7 @@
 	integer, save :: iatm = 0
 	integer, save :: iheat = 0
 	integer, save :: iwtype,itdrag
+        integer, save :: ievap,irain
 	integer, save :: irtype
 	integer, save :: ihtype
 	integer, save :: ictype
@@ -1035,10 +1037,23 @@
 	end if
 
         rfact = nint(getpar('rfact'))
+        ievap = nint(getpar('ievap'))
+        irain = nint(getpar('irain'))
 
 !	---------------------------------------------------------
 !	handle rain
 !	---------------------------------------------------------
+
+        if ( iatm == 1 ) then                 !no file but coupling atm-oce
+          if( ievap .eq. 1 ) then
+            write(6,*) 'with atmosphere-ocean coupling'
+            write(6,*) 'take precip/evap from atmosphere model'
+            write(6,*) 'but ievap=1 (compute evap internally)'
+            write(6,*) 'pleae set ievap equal to 0'
+            write(6,*) 'to avoid considering evaporation twice'
+            stop 'error stop meteo_set_rain_data: ievap'
+          end if
+        endif
 
 	call iff_get_var_description(id,1,string)
 

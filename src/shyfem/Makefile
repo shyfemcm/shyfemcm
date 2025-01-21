@@ -32,6 +32,12 @@ ifeq ($(SOLVER),PETSC)
   INCLUDE += -I$(PETSC_DIR)/include
 endif
 
+ifeq ($(NETCDF),true)
+  ifneq ($(NETCDFDIR),)
+    INCLUDE += -I$(NETCDFDIR)/include
+  endif
+endif
+
 ifeq ($(NUOPC),true)
   ifeq ($(FORTRAN_COMPILER),GNU_GFORTRAN)
     ifeq ($(PARALLEL_MPI),NONE)
@@ -124,12 +130,26 @@ ifeq ($(PARTS),METIS)
   LIBG_METIS = -L$(METISDIR)/lib -l$(LIBMETIS)
 endif
 
+#---------------------  PARMETIS   --------------------
+
+ifeq ($(PARTS),PARMETIS)
+  LIBMETIS      = metis
+  LIBPARMETIS   = parmetis
+  LIBG_METIS    = -L$(METISDIR)/lib -l$(LIBMETIS)
+  LIBG_PARMETIS = -L$(PARMETISDIR)/lib -l$(LIBPARMETIS)
+endif
+
+#---------------------  NETCDF   -----------------------
+
+ifeq ($(NETCDF),true)
+  LIB_NETCDF = -L$(NETCDFDIR)/lib -lnetcdf -L$(NETCDFDIR)/lib -lnetcdff
+endif
+
 #---------------------	all libs	-----------------------
 
 LIBF = $(LIBFUM) $(LIBFMP) $(LIBFSU) $(LIBFUT) $(LIBFSP)
-LIBL = $(LIBLUM) $(LIBLMP) $(LIBLSU) $(LIBLUT) $(LIBLGOTM) $(LIBG_METIS)
-LIBL += $(LIBLGOTM) $(LIBG_METIS) $(LIBG_PETSC) $(LIBLSP)
-
+LIBL = $(LIBLUM) $(LIBLMP) $(LIBLSU) $(LIBLUT) $(LIBLGOTM)
+LIBL += $(LIBLGOTM) $(LIBG_PARMETIS) $(LIBG_METIS) $(LIBG_PETSC) $(LIBLSP) $(LIB_NETCDF)
 #$(info ------------------------------ )
 #$(info LIBL = $(LIBL) )
 #$(info LIBLGOTM = $(LIBLGOTM) )
@@ -152,7 +172,7 @@ LAGRANGE_OBJ = \
 HEAT_OBJ = \
       meteo_forcing.o meteo_admin.o \
       icemodel.o ice.o \
-      waves_admin.o ww3_dummy.o \
+      waves_admin.o $(WW3DUMMY) \
       heat_util2.o heat_admin.o heat_admin2.o \
       heat_temp.o heat_mfsbulk.o heat_coare.o heat_gotm.o \
       heat_areg.o heat_gill.o heat_default.o \
@@ -219,7 +239,7 @@ OBJ = \
       concentration.o baroclinic.o def_para.o \
       f_vol.o mkdistance.o conz_admin.o \
       water_ren_time.o atoxi.o toxical.o \
-      befor_after.o iostr.o constants.o \
+      befor_after.o iostr.o const.o \
       test_zeta.o \
 	$(SOLVER_OBJ) \
 	$(HEAT_OBJ) \
@@ -240,15 +260,32 @@ OBSOLETE = \
 	bnd_aux.o bnd_dynamic.o tsfile.o bnd_admin.o \
 	mod_offline.o \
 
+#---------------------  ww3 files   -----------------------
+
+WW3DUMMY = ww3_dummy.o
+ifeq ($(WW3),true)
+  WW3DUMMY =
+  WW3_AUX = ww3.o
+  VPATH = $(WW3DIR)/model/src $(WW3DIR)/model/src/SCRIP $(WW3DIR)/model/src/PDLIB
+  SCRIPFILES = scrip_kindsmod.o scrip_iounitsmod.o scrip_errormod.o scrip_constants.o scrip_timers.o scrip_netcdfmod.o scrip_grids.o scrip_remap_vars.o scrip_remap_conservative.o scrip_remap_write.o scrip_remap_read.o scrip_interface.o
+  #ST4  
+  WW3FILES = constants.o w3meminfo.o w3servmd.o w3gsrumd.o w3gdatmd.o wmscrpmd.o w3idatmd.o w3odatmd.o w3adatmd.o yowdatapool.o yownodepool.o yowelementpool.o yowerr.o \
+yowexchangeModule.o yowfunction.o yowrankModule.o yowsidepool.o yowpdlibmain.o yowpd.o wmmdatmd.o w3parall.o w3wdatmd.o w3dispmd.o w3timemd.o pdlib_field_vec.o w3triamd.o \
+w3uqckmd.o w3pro3md.o w3iorsmd.o w3src4md.o w3snl1md.o w3sdb1md.o w3sbt1md.o w3sln1md.o w3iogrmd.o w3iogomd.o w3iopomd.o w3arrymd.o w3profsmd_pdlib.o wmgridmd.o w3cspcmd.o \
+w3updtmd.o w3iobcmd.o w3nmlmultimd.o wmunitmd.o wminiomd.o w3fldsmd.o w3srcemd.o w3iotrmd.o w3partmd.o w3iosfmd.o w3profsmd.o w3wavemd.o w3nmlshelmd.o w3initmd.o w3wdasmd.o \
+wmiopomd.o wminitmd.o wmupdtmd.o wmfinlmd.o wmwavemd.o w3cplshyfem.o $(WW3_AUX)
+  WW3CFLAGS = -DW3_NOGRB -DW3_DIST -DW3_MPI -DW3_SCRIP -DW3_PR3 -DW3_UQ -DW3_FLX0 -DW3_LN1 -DW3_ST4 -DW3_STAB0 -DW3_NL1 -DW3_BT1 -DW3_DB1 -DW3_MLIM -DW3_TR0 -DW3_BS0 -DW3_IC0 -DW3_IS0 -DW3_REF0 -DW3_WNT2 -DW3_WNX1 -DW3_CRT1 -DW3_CRX1 -DW3_TRKNC -DW3_PDLIB -DW3_O0 -DW3_O1 -DW3_O2 -DW3_O2a -DW3_O2b -DW3_O2c -DW3_O3 -DW3_O4 -DW3_O5 -DW3_O6 -DW3_O7 -DW3_SHYFEM -DW3_DEBUGIOGR #-DW3_MEMCHECK
+  XWW3FFLAGS = $(WW3CFLAGS)
+  XFILES = $(SCRIPFILES) $(WW3FILES)
+endif
+
 #------------------------------------------------------------------------
 
 default: fem
 
 fem: shyfem links nothing
 
-#shyfem: info
-
-shyfem: $(MODULES) $(OBJ) $(LIBF) shyfem.o
+shyfem: $(MODULES) $(OBJ) $(XFILES) $(LIBF) shyfem.o
 	 $(F77) $(FFLAGS) $(INCLUDE) $(LFLAGS) $^ $(LIBL) -o shyfem 
 
 links:
@@ -270,6 +307,9 @@ info:
 	@echo "METIS_HOME: $(METIS_HOME)"
 
 #------------------------------------------------------------------------
+
+%.o: %.F90
+	$(F77) $(XWW3FFLAGS) $(FFLAGS) -c $<
 
 %.o: %.f
 	$(F77) $(FFLAGS) $(INCLUDE) -c $<
@@ -372,7 +412,7 @@ cleanall: clean
 ../../lib/mod/simple_sediments.mod: simple_sedi.o
 ../../lib/mod/stab.mod: stability.o
 ../../lib/mod/subqfx.mod: heat_admin.o
-../../lib/mod/subww3.mod: ww3_dummy.o
+../../lib/mod/mod_ww3.mod: ww3_dummy.o
 ../../lib/mod/tide.mod: tide_utils.o
 baroclinic.o: ../../lib/mod/basin.mod ../../lib/mod/levels.mod \
 		../../lib/mod/mkonst.mod \
@@ -500,7 +540,7 @@ concentration_omp.o: ../../lib/mod/basin.mod \
 		../../lib/mod/mod_layer_thickness.mod \
 		../../lib/mod/mod_subset.mod \
 		../../lib/mod/mod_ts.mod ../../lib/mod/shympi.mod 
-constants.o: ../../lib/mod/basin.mod ../../lib/mod/befor_after.mod \
+const.o: ../../lib/mod/basin.mod ../../lib/mod/befor_after.mod \
 		../../lib/mod/mkonst.mod ../../lib/mod/mod_bnd.mod \
 		../../lib/mod/mod_bound_geom.mod \
 		../../lib/mod/pkonst.mod 
@@ -900,7 +940,7 @@ shyfem_subs.o: ../../lib/mod/basin.mod \
 		../../lib/mod/projection.mod \
 		../../lib/mod/shympi.mod \
 		../../lib/mod/shympi_debug.mod \
-		../../lib/mod/subww3.mod ../../lib/mod/tide.mod 
+		../../lib/mod/mod_ww3.mod ../../lib/mod/tide.mod 
 shypre_noopti.o: ../../lib/mod/basin.mod ../../lib/mod/grd.mod
 shypre_opti.o: ../../lib/mod/basin.mod ../../lib/mod/grd.mod
 shypre_subs.o: ../../lib/mod/basin.mod ../../lib/mod/evgeom.mod \
@@ -1028,4 +1068,3 @@ wetdry.o: ../../lib/mod/basin.mod ../../lib/mod/evgeom.mod \
 		../../lib/mod/mod_hydro_baro.mod \
 		../../lib/mod/mod_info_output.mod \
 		../../lib/mod/shympi.mod 
-

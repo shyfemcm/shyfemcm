@@ -1,7 +1,7 @@
 
 !--------------------------------------------------------------------------
 !
-!    Copyright (C) 2019  Georg Umgiesser
+!    Copyright (C) 2003-2004,2009,2014-2015,2018-2019  Georg Umgiesser
 !
 !    This file is part of SHYFEM.
 !
@@ -23,41 +23,38 @@
 !
 !--------------------------------------------------------------------------
 
-! routines for coupling WW3 model
+! utilities for optimal interpolation
 !
 ! revision log :
 !
-! 04.07.2019    ggu     written from scratch
-! 24.03.2022    ggu     newly started with Aron
-! 06.05.2022    ggu     module renamed to subww3
-! 03.12.2024    lrp     ww3 restored
+! 12.01.2025	ggu	written from scratch
+!
+!****************************************************************
 
-!===========================================================
-        module mod_ww3
-!===========================================================
+	subroutine get_options(nmax,string,ns,values)
+
+! reads maximum n values from string
+! returns number of options in ns and values in values
+! if error ns = -1
 
 	implicit none
 
-	logical, save :: bww3 = .false.
+	integer nmax
+	character*80 string
+	integer ns
+	real values(nmax)
 
-!===========================================================
-        end module mod_ww3
-!===========================================================
+	integer iscanf
 
-!***********************************************************
+	ns = iscanf(string,values,0)
+	if( ns > nmax ) then		!error - too many values
+	  ns = -1
+	  return
+	end if
 
-	subroutine ww3_init
-	end
+	ns = iscanf(string,values,nmax)
 
-!***********************************************************
+	end subroutine
 
-	subroutine ww3_loop
-	end
-
-!***********************************************************
-
-	subroutine ww3_finalize
-	end
-
-!***********************************************************
+!****************************************************************
 

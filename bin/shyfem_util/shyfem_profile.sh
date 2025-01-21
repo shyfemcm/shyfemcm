@@ -16,7 +16,7 @@
 #
 #------------------------------------------------------
 
-dist=shyfem
+dist=shyfemcm
 
 FEMDIR=${SHYFEMDIR:=$HOME/$dist}
 fembin=$FEMDIR/bin

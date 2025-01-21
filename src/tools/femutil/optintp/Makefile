@@ -9,10 +9,10 @@
 
 #--------------------------------------------- 
 
-DIR	= shyparts
+DIR	= optintp
 
 #--------------------------------------------- just for default
-FEMDIR = ../../..
+FEMDIR = ../../../..
 FEMBIN = $(FEMDIR)/bin
 LIBDIR = $(FEMDIR)/lib
 F77    = g77
@@ -24,30 +24,23 @@ include $(FEMDIR)/Rules.make
 
 #--------------------------------------------- libraries
 
-ifeq ($(PARTS),$(filter $(PARTS),METIS PARMETIS))
-  LIBG_METIS = -L$(METISDIR)/lib -lmetis
-endif
-
 LIBUTIL     = util
 LIBSHYUTIL  = shyutil
-LIBSHYMPI   = shympi
 
 LIBL	 = -L$(LIBDIR)
-
-LIBL	+= -l$(LIBSHYMPI)
-LIBF	+= $(LIBDIR)/lib$(LIBSHYMPI).a
-
-LIBL	+= -l$(LIBSHYUTIL)
-LIBF	+= $(LIBDIR)/lib$(LIBSHYUTIL).a
+LIBF	 =
 
 LIBL	+= -l$(LIBUTIL)
 LIBF	+= $(LIBDIR)/lib$(LIBUTIL).a
 
-LIBL	+= $(LIBG_METIS)
+LIBL	+= -l$(LIBSHYUTIL)
+LIBF	+= $(LIBDIR)/lib$(LIBSHYUTIL).a
 
 #--------------------------------------------- macros
 
-EXES	=	shyparts
+EXES	=	optintp
+
+OBJ	=	suboi.o optutil.o
 
 ALL	=	$(OBJ)
 
@@ -59,13 +52,13 @@ MAKEDEPEND = $(FEMBIN)/mkdp.pl
 #--------------------------------------------- EXES
 
 default: fem
-fem:	shyparts links
+fem:	optintp links
 all:	$(EXES)
 
 links:
 	@$(FEMBIN)/symlink $(FEMBIN) $(EXES)
 
-shyparts: $(ALL) $(LIBF) shyparts.o
+optintp: $(ALL) $(LIBF) optintp.o
 	$(LINKER) $(FFLAGS) $(ALL) $@.o $(LIBL) -o $@
 
 #--------------------------------------------- clean
@@ -110,7 +103,7 @@ cleangrd:
 #--------------------------------------------- various
 
 depend:
-	@$(MAKEDEPEND) -moddir=$(MODDIR) *.f90
+	@-$(MAKEDEPEND) -moddir=$(MODDIR) *.f90
 
 list:
 	pwd; ls
@@ -144,11 +137,4 @@ strip:
 #--------------------------------------------- makedepend
 
 # DO NOT DELETE THIS LINE -- make depend depends on it.
-
-../../../lib/mod/mod_shyparts.mod: shyparts.o
-shyparts.o: ../../../lib/mod/basin.mod ../../../lib/mod/clo.mod \
-		../../../lib/mod/evgeom.mod \
-		../../../lib/mod/grd.mod \
-		../../../lib/mod/mod_geom.mod \
-		../../../lib/mod/shympi.mod 
 

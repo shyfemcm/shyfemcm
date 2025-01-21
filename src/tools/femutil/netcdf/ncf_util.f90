@@ -28,6 +28,7 @@
 ! revision log :
 !
 ! 03.03.2023    ggu     created
+! 15.01.2025    ggu     get description for variables
 !
 ! info: 
 !
@@ -107,6 +108,7 @@
 
 	integer retval
 	integer, save :: att_name_length = 0
+	integer, save :: var_name_length = 0
 
         INTERFACE ncf_att_string
         MODULE PROCEDURE ncf_att_name_string,ncf_att_id_string
@@ -452,9 +454,13 @@
 
 	end subroutine ncf_check_dims
 
-!==================================================================
-!        end module ncf
-!==================================================================
+!*****************************************************************
+!*****************************************************************
+!*****************************************************************
+! treating files
+!*****************************************************************
+!*****************************************************************
+!*****************************************************************
 
 	subroutine ncf_open_read(file,ncid)
 
@@ -1082,30 +1088,105 @@
 !*****************************************************************
 !*****************************************************************
 
-	subroutine ncf_print_variable(vitem)
+	subroutine ncf_print_variable(ncid,vitem)
 
 ! prints variable
 
 	implicit none
 
+        integer ncid
 	type(var_item) :: vitem
 
+        integer lmax
+        character*80 :: description
+        character*80 :: varname
+
+        call ncf_get_var_description(ncid,vitem,description)
+
+	lmax = var_name_length
+	varname = vitem%name
+        
         write(6,1000) vitem%id,vitem%xtype,vitem%ndims,vitem%natts &
      &                  ,vitem%len &
-     &                  ,'  ',trim(vitem%name)
- 1000   format(4i5,i10,a,a)
+     &                  ,'  ',varname(1:lmax) &
+     &                  ,'  ',trim(description)
+ 1000   format(4i5,i10,a,a,a,a)
 
 	end
 
 !*****************************************************************
 
-	subroutine ncf_print_variable_header
+        subroutine ncf_get_var_description(ncid,vitem,description)
+
+        implicit none
+
+        integer ncid
+	type(var_item) :: vitem
+        character*(*) :: description
+
+        integer varid
+        character*80 :: string
+
+        varid = vitem%id
+        description = ' '
+
+	call ncf_att_name_string(ncid,varid,'long_name',description)
+        if( description /= ' ' ) return
+
+	call ncf_att_name_string(ncid,varid,'standard_name',description)
+        if( description /= ' ' ) return
+
+	call ncf_att_name_string(ncid,varid,'description',description)
+        if( description /= ' ' ) return
+
+        end
+
+!*****************************************************************
+
+	subroutine ncf_set_var_name_length(ncid,nitem)
+
+        implicit none
+
+        integer ncid
+	type(nc_item) :: nitem
+
+        integer nvars,varid
+        integer len,lmax
+	type(var_item) :: vitem
+
+        nvars = nitem%nvars
+
+        lmax = 0
+        do varid=1,nvars
+          call ncf_var_inf(ncid,varid,vitem)
+	  len = len_trim(vitem%name)
+          lmax = max(lmax,len)
+        end do
+
+	var_name_length = lmax		!this is global
+
+        end
+
+!*****************************************************************
+
+	subroutine ncf_print_variable_header(ncid,nitem)
 
 ! prints variable header
 
 	implicit none
 
-        write(6,'(a)') '   id type dims atts       len  name'
+        integer ncid
+	type(nc_item) :: nitem
+
+        integer lmax
+        character*80 name
+
+	call ncf_set_var_name_length(ncid,nitem)	!sets var_name_length
+
+	lmax = var_name_length
+        name = 'name'
+        write(6,'(a)') '   id type dims atts       len  ' &
+     &                          // name(1:lmax) // '  description'
 
 	end
 
@@ -1282,10 +1363,10 @@
 
 	if( nvars > 0 ) then
           write(6,*) 'variables: ',nvars
-          call ncf_print_variable_header
+          call ncf_print_variable_header(ncid,nitem)
           do varid=1,nvars
             call ncf_var_inf(ncid,varid,vitem)
-            call ncf_print_variable(vitem)
+            call ncf_print_variable(ncid,vitem)
 	    natts = vitem%natts
             if( battribute .and. natts > 0 ) then
               call ncf_print_attribute_header(ncid,varid)

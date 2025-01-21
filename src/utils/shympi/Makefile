@@ -32,7 +32,7 @@ METIS_OBJ = shyparts_dummy.o
 ifeq ($(PARTS),SDDA)
   METIS_OBJ = shyparts_basutil.o shyparts_custom.o shyparts_util.o
 endif
-ifeq ($(PARTS),METIS)
+ifeq ($(PARTS),$(filter $(PARTS),METIS PARMETIS))
   METIS_OBJ = shyparts_basutil.o shyparts_metis.o shyparts_util.o
   LIBG_METIS = -L$(METISDIR)/lib -lmetis
 endif

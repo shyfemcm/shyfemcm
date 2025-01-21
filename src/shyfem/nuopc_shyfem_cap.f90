@@ -16,15 +16,17 @@
 	!! We have added the following preprocessor to selectively decouple the 
         !! ocean component from the rest of the earth system. Disabling all 
 	!! the following macros, will result in an ocean component that does not 
-	!! advertise any importable/exportable Field. Use should you this only if you
+	!! advertise any importable/exportable Field. You should use this only if you
 	!! want to drive the model independently.
         !! You could also couples the ocean component only through
-	!! momentum or heat flux or sst only. This may be useful for
+	!! momentum or heat flux or sst only. These options may be useful for
 	!! debugging and testing for example. In general, all the macros must be defined.
-#undef  WITHFIELDS_MOMENTUMFLUX
-#undef  WITHFIELDS_HEATFLUX
-#undef  WITHFIELDS_MASSFLUX
-#undef  WITHFIELDS_SST
+        !! Switching on/off the different fields is possible through the each model
+        !! configuration file.
+#define WITHFIELDS_MOMENTUMFLUX
+#define WITHFIELDS_HEATFLUX
+#define WITHFIELDS_MASSFLUX
+#define WITHFIELDS_SST
 
 	!! The ocean component is coded into a Fortran module.
         module ocean_shyfem
@@ -192,7 +194,7 @@
 	  !! array. This ordering is beneficial to factorize the code and perform the 
 	  !! many operations of the fields with do loops. You have to keep in mind that, 
 	  !! first we have import fields, and only after we have export fields. 
-	  allocate( SHYFEM_FieldMetadata(11) )
+	  allocate( SHYFEM_FieldMetadata(10) )
 
           !! The field list is defined here. You can modify this part adding new fields.
 	  !! The metadata of each field is filled with a simple constructor statement.
@@ -259,19 +261,12 @@
      &      meshloc=ESMF_MESHLOC_NODE)
 #endif
 #ifdef WITHFIELDS_MASSFLUX
-          !! \item evaporation $E$.
-          num = num + 1
-	  SHYFEM_FieldMetadata(num) = SHYFEM_Metadata( &
-     &      fieldName="evap", &
-     &      longName="evaporation_flux", &
-     &      meshloc=ESMF_MESHLOC_NODE)
-
-          !! \item precipitation $P$.
+          !! \item evaportaion/precipitation rate $P-E$.
           num = num + 1
 	  SHYFEM_FieldMetadata(num) = SHYFEM_Metadata( &
      &      fieldName="prec", &
      &      longName="precipitation_flux", &
-     &      meshloc=ESMF_MESHLOC_NODE) &
+     &      meshloc=ESMF_MESHLOC_NODE)
 #endif
           SHYFEM_numOfImportFields = num
 #ifdef WITHFIELDS_SST
@@ -860,14 +855,16 @@
 
 	  rc = ESMF_SUCCESS
 
-          !call SHYFEM_ConvertMeshToEsmf(ShyfemToEsmf_Mesh)
+!          call SHYFEM_ConvertMeshToEsmf(ShyfemToEsmf_Mesh)
 
 	  !! We save the number of nodes and the number of elements
 	  !! We got this from the well known global variables \textsf{nkn}
 	  !! and \textsf{nel} of SHYFEM. These are available into the module
 	  !! \textsf{grid} which is nested into \textsf{mod\_shyfem}
-	  SHYFEM_numberOfNodes    = nkn_local !ShyfemToEsmf_Mesh%nkn_ghost
-          SHYFEM_numberOfElements = nel_local !nel_unique
+	  SHYFEM_numberOfNodes    = nkn_local
+!     &     ShyfemToEsmf_Mesh%nkn_ghost
+          SHYFEM_numberOfElements = nel_local
+!     &     nel_unique
 
           allocate( SHYFEM_nodeIds(SHYFEM_numberOfNodes) )
           allocate( SHYFEM_nodeMask(SHYFEM_numberOfNodes) )
@@ -910,8 +907,10 @@
 	  !! $\{x_1,\,y_1,\,...,\,x_9,\,y_9\}$. 
 	  !SHYFEM_nodeOwners = 0
           do i=1,SHYFEM_numberOfNodes
-            SHYFEM_nodeOwners(i) = id_node(i)!ShyfemToEsmf_Mesh%id_node_ghost(i)
-            SHYFEM_nodeIds(i) = ipv(i)!ShyfemToEsmf_Mesh%ipv_ghost(i)
+            SHYFEM_nodeOwners(i) = id_node(i)
+!     &        ShyfemToEsmf_Mesh%id_node_ghost(i)
+            SHYFEM_nodeIds(i) = ipv(i)
+!     &        ShyfemToEsmf_Mesh%ipv_ghost(i)
             SHYFEM_nodeMask(i) = 0
             SHYFEM_nodeCoords(i*SHYFEM_spatialDim-1) = xgv(i)
 !     &        ShyfemToEsmf_Mesh%xgv_ghost(i)
@@ -1521,9 +1520,6 @@
             case ("rlns")
               metcc(1:nkn_inner) = fieldPtr(1:nkn_inner)
 	      call shympi_exchange_2d_node(metcc)
-	    case ("evap")
-	      evapv(1:nkn_inner) = fieldPtr(1:nkn_inner)
-	      call shympi_exchange_2d_node(evapv)
 	    case ("prec")
 	      metrain(1:nkn_inner) = fieldPtr(1:nkn_inner)
 	      call shympi_exchange_2d_node(metrain)
