@@ -186,6 +186,7 @@
 ! 13.10.2024    ggu     more debug output for *.dbg files, reordered
 ! 15.11.2024    ggu     flush iuinfo before stopping
 ! 23.11.2024    ggu     introduced check_partition_quality()
+! 03.12.2024    lrp     ww3 restored
 !
 !*****************************************************************
 !
@@ -240,9 +241,6 @@
 	use befor_after
 	use mod_trace_point
 	use mod_quad_tree
-#ifdef W3_SHYFEM
-	use subww3
-#endif
 
 	implicit none
 

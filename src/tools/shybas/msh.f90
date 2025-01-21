@@ -74,6 +74,7 @@
 ! 16.06.2022	ggu	new routine write_grd_file() for simplified writing
 ! 13.12.2022	ggu	new routine write_grd_file_with_depth()
 ! 18.10.2023	ggu	extracted gr3 and msh routines to this file
+! 03.12.2024    lrp     ww3 restored
 !
 !**********************************************************
 
@@ -449,7 +450,7 @@
 	deallocate(nextern)
 
 	return
- 1000	format(i10,3f16.8)
+ 1000	format(i10,3f19.8)
  2000	format(7i10)
    99	continue
 	write(6,*) 'error opening output file'
