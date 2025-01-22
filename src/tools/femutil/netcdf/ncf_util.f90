@@ -30,7 +30,7 @@
 ! 03.03.2023    ggu     created
 ! 15.01.2025    ggu     get description for variables
 !
-! info: 
+! info : 
 !
 ! https://www.unidata.ucar.edu/software/netcdf/netcdf-4/newdocs/netcdf-f77/
 ! https://www.unidata.ucar.edu/software/netcdf/examples/programs/

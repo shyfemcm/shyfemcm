@@ -71,14 +71,17 @@ $has_date = 0;
 
 foreach $line (@new) {
  
-  if( is_file_name($line) ) {
+  if( is_file_name($line) ) {		# line with file name
     if( $has_date ) {
 	push(@rev,@old);
     }
     @old = ();
+    push(@old,"!\n") if @rev;		# insert empty comment line (not first)
     $has_date = 0;
-  } elsif( is_date($line) ) {
+  } elsif( is_date($line) ) {		# revision log with date
     $has_date = 1;
+  } else {				# empty or comment line
+    next;
   }
 
   push(@old,$line);

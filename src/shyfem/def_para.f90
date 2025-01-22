@@ -526,8 +526,8 @@
 ! produced, just set the value of |pqual| higher than the computed
 ! quality index and |shyfem| will run. i
 !
-! The partition can be checked with one of the following commands:
-! |grid -FT partition.np.node.grd| or |grid -FTo partition.np.node.grd|
+! The partition can be checked with either
+! |grid -FT partition.np.node.grd| or also |grid -FTo partition.np.node.grd|
 ! where np is the number of the desired domains.
 !
 ! It is important to note that the
@@ -884,8 +884,9 @@
 
 	call addpar('ievap',0.)		!compute evaporation mass flux
 
-! |irain|       Compute precipitation mass flux (Default 1).
-!		If no precipitation file is given or if |irain|=0, the precipitation rate
+! |irain|	Compute precipitation mass flux (Default 1).
+!		If no precipitation file is given or if |irain|=0, 
+!		the precipitation rate
 !		is set to zero. If a file is found and irain is set to
 !		the default value, then the precipitation rate is considered
 !		into the mass balance. Note that, if some evaporation data is

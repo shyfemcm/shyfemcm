@@ -1,4 +1,19 @@
 
+22.01.2025	VERS_8_2_3	WW3 edition
+
+	many enhancements for MPI 
+		introduce less exchanges and reductions for speed
+		output routines optimized
+		metis allows non contigous areas
+		new gather routine to only gather to root
+		check if arrays have same length for gather
+	WW3 routines updated for new CM version
+	nuopc framework for coupled atmosphere-ocean coupling
+		new params irain
+	finished and tested boxes routines for 3D
+	debug routines for flx and box files
+	more error checks for nc2fem
+
 24.11.2024	VERS_8_2_2	La Salute edition
 
 	new parameters ibasin and pqual for handling basin read/partitioning

@@ -1,5 +1,25 @@
 ============================================================
 
+Wed Jan 22 10:41:17 CET 2025
+
+new version 8.2.3 (WW3)
+
+ LOG                                   | 140 ++++++++++++++++++++++++++++++++++
+ RELEASE_NOTES                         |  15 ++++
+ bin/revision/revisionlog.pl           |   4 +-
+ bin/revision/revisionlog_adjust.pl    |   7 +-
+ docs/final/shyfem.pdf                 | Bin 337226 -> 337638 bytes
+ src/contrib/ecological/bfm/Makefile   |  14 +++-
+ src/shyfem/Makefile                   |  24 +++++-
+ src/shyfem/def_para.f90               |   9 ++-
+ src/tools/femutil/netcdf/ncf_util.f90 |   2 +-
+ src/tools/shyelab/Makefile            |   3 +
+ src/utils/shyutil/version.f90         |  13 ++--
+ var/rules/Rules.dist                  |  55 ++++++++++++-
+ 12 files changed, 265 insertions(+), 21 deletions(-)
+
+============================================================
+
 Sun Nov 24 20:21:31 CET 2024
 
 New version 8_2_2

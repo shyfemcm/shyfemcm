@@ -404,6 +404,8 @@ cleanall: clean
 ../../lib/mod/mod_subset.mod: subset.o
 ../../lib/mod/mod_system_global.mod: simsys_spkaux.o
 ../../lib/mod/mod_test_zeta.mod: test_zeta.o
+../../lib/mod/mod_ww3.mod: ww3.o
+../../lib/mod/mod_ww3.mod: ww3_dummy.o
 ../../lib/mod/ocean_shyfem.mod: nuopc_shyfem_cap.o
 ../../lib/mod/omp_admin.mod: openmp_admin.o
 ../../lib/mod/poisson.mod: poisson.o
@@ -412,7 +414,6 @@ cleanall: clean
 ../../lib/mod/simple_sediments.mod: simple_sedi.o
 ../../lib/mod/stab.mod: stability.o
 ../../lib/mod/subqfx.mod: heat_admin.o
-../../lib/mod/mod_ww3.mod: ww3_dummy.o
 ../../lib/mod/tide.mod: tide_utils.o
 baroclinic.o: ../../lib/mod/basin.mod ../../lib/mod/levels.mod \
 		../../lib/mod/mkonst.mod \
@@ -940,7 +941,7 @@ shyfem_subs.o: ../../lib/mod/basin.mod \
 		../../lib/mod/projection.mod \
 		../../lib/mod/shympi.mod \
 		../../lib/mod/shympi_debug.mod \
-		../../lib/mod/mod_ww3.mod ../../lib/mod/tide.mod 
+		../../lib/mod/tide.mod 
 shypre_noopti.o: ../../lib/mod/basin.mod ../../lib/mod/grd.mod
 shypre_opti.o: ../../lib/mod/basin.mod ../../lib/mod/grd.mod
 shypre_subs.o: ../../lib/mod/basin.mod ../../lib/mod/evgeom.mod \
@@ -1068,3 +1069,22 @@ wetdry.o: ../../lib/mod/basin.mod ../../lib/mod/evgeom.mod \
 		../../lib/mod/mod_hydro_baro.mod \
 		../../lib/mod/mod_info_output.mod \
 		../../lib/mod/shympi.mod 
+ww3.o: ../../lib/mod/basin.mod ../../lib/mod/evgeom.mod \
+		../../lib/mod/levels.mod \
+		../../lib/mod/mod_depth.mod \
+		../../lib/mod/mod_hydro.mod \
+		../../lib/mod/mod_meteo.mod \
+		../../lib/mod/mod_roughness.mod \
+		../../lib/mod/mod_waves.mod \
+		../../lib/mod/pkonst.mod ../../lib/mod/shympi.mod \
+		../../lib/mod/shympi_aux.mod \
+		../../lib/mod/w3cplshyfem.mod \
+		../../lib/mod/w3gdatmd.mod \
+		../../lib/mod/w3idatmd.mod \
+		../../lib/mod/w3odatmd.mod \
+		../../lib/mod/wmfinlmd.mod \
+		../../lib/mod/wminitmd.mod \
+		../../lib/mod/wmwavemd.mod \
+		../../lib/mod/yowdatapool.mod \
+		../../lib/mod/yownodepool.mod 
+

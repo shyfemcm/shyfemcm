@@ -62,7 +62,7 @@ MAKEDEPEND = $(FEMBIN)/mkdp.pl
 #--------------------------------------------- EXES
 
 default: fem
-fem:	$(OBJ) nothing
+fem:	$(BFMPRIVATE) $(OBJ) nothing
 
 nothing:
 	@true
@@ -80,6 +80,9 @@ info:
 
 BFMPRIVATE = bfm_statevars.f90 bfm.f90 bfm_internal.f90
 
+$(BFMPRIVATE):
+	cp -f arc/$@ .
+
 bfmcopy:
 	cp -f arc/*.f90 .
 
@@ -90,7 +93,7 @@ bfmdelete:
 
 cleanall: clean cleanzip cleangrd
 
-clean: cleanobj cleanexe cleanvar cleanlinks
+clean: cleanobj cleanexe cleanvar cleanlinks cleanbfm
 
 cleanobj:
 	-rm -f *.o
@@ -104,6 +107,8 @@ cleanlinks:
 cleanexe:
 	-rm -f $(EXES)
 	-rm -f *.exe
+
+cleanbfm: bfmdelete
 
 cleanvar:
 	-rm -f a.out core
@@ -161,4 +166,9 @@ strip:
 # DO NOT DELETE THIS LINE -- make depend depends on it.
 
 ../../../../lib/mod/mod_bfm.mod: bfm_dummy.o
+bfm_dummy.o: ../../../../lib/mod/levels.mod \
+		../../../../lib/mod/mod_diff_visc_fric.mod \
+		../../../../lib/mod/mod_layer_thickness.mod \
+		../../../../lib/mod/mod_meteo.mod \
+		../../../../lib/mod/mod_ts.mod 
 
