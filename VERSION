@@ -1,3 +1,149 @@
+version  8_2_3    22-01-2025    VERS_8_2_3
+
+========================================================== 22-01-2025 - 8_2_3
+
+! ./src/shyfem/elems_dealing.f90:
+! 01.12.2024    ggu     in masscont() and scalcont() do not exchange
+!
+! ./src/shyfem/explicit.f90:
+! 01.12.2024    ggu     in momentum_advective_stability() do not reduce
+!
+! ./src/shyfem/bnd_routines.f90:
+! 03.12.2024    ggu     run init_flux() only for ibtyp>1
+!
+! ./src/shyfem/boxes.f90:
+! 16.12.2024	ggu	introduced barea3d and bdtarea3d
+! 17.12.2024	ggu	bug fixes for vertical variables, still no 3dmass cons.
+! 20.12.2024	ggu	finished 3d mass conservation check
+!
+! ./src/shyfem/outputd.f90:
+! 04.12.2024    ggu     routines updated, more documentation
+! 10.12.2024    ggu     new routine is_last_output_d()
+!
+! ./src/shyfem/ww3_dummy.f90:
+! 03.12.2024    lrp     ww3 restored
+!
+! ./src/shyfem/intp_tst.f90:
+! 03.12.2024    lrp     new parameter irain for the coupled model
+!
+! ./src/shyfem/flux.f90:
+! 10.12.2024    ggu     only reduce one time, then write
+!
+! ./src/shyfem/const.f90:
+! 03.12.2024    lrp     ww3 restored
+!
+! ./src/shyfem/baroclinic.f90:
+! 03.12.2024    ggu     new info_output framework
+!
+! ./src/shyfem/flxm.f90:
+! 10.12.2024	ggu	new routine flux_file_close(), no wait on barrier
+!
+! ./src/shyfem/shyfem_subs.f90:
+! 03.12.2024    lrp     ww3 restored
+!
+! ./src/shyfem/meteo_admin.f90:
+! 03.12.2024    lrp     irain for the coupled model
+!
+! ./src/shyfem/extra.f90:
+! 04.12.2024	ggu	only do one reduce call for mpi
+! 09.12.2024	ggu	extra finished and tested
+!
+! ./src/shyfem/def_para.f90:
+! 03.12.2024    lrp     new parameter irain for the coupled model
+!
+! ./src/shyfem/ww3.f90:
+! 03.12.2024    lrp     ww3 restored
+!
+! ./src/shyfem/meteo_forcing.f90:
+! 03.12.2024    lrp     new parameter irain for the coupled model
+!
+! ./src/tools/shyplot/supano.f90:
+!  09.01.2025	ggu	avoid divide by zero in scale_legend(): 10 -> 10.
+!
+! ./src/tools/shyelab/dbg_flx.f90:
+! 10.12.2024    ggu     written from scratch
+! 13.12.2024    ggu     error_stop and other small changes
+!
+! ./src/tools/shyelab/elabtime.f90:
+! 17.01.2025	ggu	if time step changes write also old time step
+!
+! ./src/tools/shyelab/dbg_box.f90:
+! 14.12.2024    ggu     written from scratch
+!
+! ./src/tools/shynetcdf/nc_dim_coords.f90:
+! 15.01.2025	ggu	check also if coordinate is without dimension
+!
+! ./src/tools/femutil/optintp/optutil.f90:
+! 12.01.2025	ggu	written from scratch
+!
+! ./src/tools/femutil/netcdf/ncinfo.f90:
+! 15.01.2025    ggu     adjourned
+!
+! ./src/tools/femutil/netcdf/ncf_util.f90:
+! 15.01.2025    ggu     get description for variables
+!
+! ./src/tools/shybas/msh.f90:
+! 03.12.2024    lrp     ww3 restored
+!
+! ./src/utils/shympi/shyparts_basutil.f90:
+! 30.11.2024    ggu     renamed check_color() to check_part_color()
+!
+! ./src/utils/shympi/shyparts_util.f90:
+! 29.11.2024	ggu	compute number of non contiguous areas
+! 30.11.2024	ggu	use color as aux array for flood_fill
+!
+! ./src/utils/shympi/shyparts_metis.f90:
+! 29.11.2024	ggu	option to force contigous areas
+!
+! ./src/utils/shympi/check_shympi_debug.f90:
+! 21.12.2024    ggu     more functionallity, possible dump of data record
+!
+! ./src/utils/shympi/mpi_node.f90:
+! 04.12.2024    ggu     implement bmpi_allgather for gather routines
+! 07.12.2024    ggu     big changes: make sure arrays are same length for reduce
+! 13.12.2024    ggu     error_stop() implemented
+!
+! ./src/utils/shympi/mpi_dummy.f90:
+! 13.12.2024    ggu     error_stop() implemented
+!
+! ./src/utils/shympi/mpi_node_internal.f90:
+! 30.11.2024    ggu     new routine shympi_icomment()
+! 04.12.2024    ggu     new routines shympi_gather_internal_r/i()
+! 05.12.2024    ggu     renamed module from shympi_aux to shympi_internal
+! 07.12.2024    ggu     big changes: check if arrays have same length for gather
+!
+! ./src/utils/generic/chk_NaN.f90:
+! 19.12.2024	ggu	new routines to compute checksum
+!
+! ./src/utils/generic/errorstop.f90:
+! 12.12.2024	ggu	written from scratch
+!
+! ./src/utils/generic/clo.f90:
+! 25.11.2024	ggu	check length of string, use nlen to set max string len
+!
+! ./src/utils/shyutilmpi/bnd_admin.f90:
+! 03.12.2024	ggu	do not complain for holes in zeta boundary
+!
+! ./src/utils/shyutilmpi/shy_util.f90:
+! 04.12.2024    ggu     new framework for not doing gather_all
+! 07.12.2024    ggu     reduce only to root (not all)
+!
+! ./src/utils/shyutilmpi/info_output.f90:
+! 01.12.2024    ggu     written from scratch
+! 03.12.2024    ggu     allow for optional format
+!
+! ./src/utils/shyutil/io_shy.f90:
+! 25.11.2024    ggu     can use shy_[sg]et_simpar() with flexible nsimpar
+! 04.12.2024    ggu     new routine shy_get_status()
+!
+! ./src/utils/shyutil/version.f90:
+! 22.01.2025	ggu	version 8.2.3   WW3 edition
+!
+! ./src/utils/modules/mod_flux.f90:
+! 10.12.2024	ggu	allocation taken out from flux.f90, new name mod_flux
+
+==========================================================
+
 version  8_2_2    24-11-2024    VERS_8_2_2   commit_2025-01-22
 
 version  8_2_2    24-11-2024    VERS_8_2_2
