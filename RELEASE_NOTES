@@ -4,7 +4,7 @@
 	many enhancements for MPI 
 		introduce less exchanges and reductions for speed
 		output routines optimized
-		metis allows non contigous areas
+		metis allows non contiguous areas
 		new gather routine to only gather to root
 		check if arrays have same length for gather
 	WW3 routines updated for new CM version
