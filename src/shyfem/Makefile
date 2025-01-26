@@ -22,8 +22,7 @@ FEMBIN = $(FEMDIR)/bin
 
 #--------------------	EXES	---------------------
 
-EXES = shyfem
-EXES_target = shyfem
+EXES = shyfem rstinf
 
 #----------------------	INCLUDE	----------------------
 
@@ -283,10 +282,13 @@ endif
 
 default: fem
 
-fem: shyfem links nothing
+fem: $(EXES) links nothing
 
 shyfem: $(MODULES) $(OBJ) $(XFILES) $(LIBF) shyfem.o
-	 $(F77) $(FFLAGS) $(INCLUDE) $(LFLAGS) $^ $(LIBL) -o shyfem 
+	 $(F77) $(FFLAGS) $(INCLUDE) $(LFLAGS) $^ $(LIBL) -o $@ 
+
+rstinf: $(MODULES) $(OBJ) $(XFILES) $(LIBF) rstinf.o
+	 $(F77) $(FFLAGS) $(INCLUDE) $(LFLAGS) $^ $(LIBL) -o $@ 
 
 links:
 	@$(FEMBIN)/symlink $(FEMBIN) $(EXES)
@@ -352,6 +354,7 @@ nuopc: nuopc_info nuopc_clean nuopc_shyfem.mk libnuopc
 
 clean:
 	-rm -f *.o
+	-rm -f a.out
 	-rm -f $(EXES)
 	-rm -f $(BINDIR)/$(EXES)
 	-rm -f *.tmp *.bak

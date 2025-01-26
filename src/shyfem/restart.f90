@@ -97,6 +97,7 @@
 ! 14.10.2022	ggu	mpi-version final (gotm, conz)
 ! 28.04.2023    ggu     update function calls for belem
 ! 02.05.2023    ggu     fix mpi bug for nlv==1
+! 26.01.2025    ggu     fix mpi bug for ibfm /= 0 (only master writes)
 !
 ! notes :
 !
@@ -1040,12 +1041,13 @@
 	  call write_restart_mercury(iunit)
         end if
 
-	write(iunit) ibfm
+	call restart_write_value(iunit,ibfm)
 	if( ibfm .gt. 0 ) then
+	  if( bmpi ) write(6,*) 'bfm restart not ready for mpi...'
 	  call write_restart_bfm(iunit)
         end if
 
-	flush(iunit)
+	if( bmaster ) flush(iunit)
 
         end
 
@@ -1446,6 +1448,7 @@
 	    id = id_bfm_rst
 	    read(iunit) ibfm
             if( ibfm .gt. 0 ) then
+	      if( bmpi ) write(6,*) 'bfm restart not ready for mpi...'
 	      call rst_add_flag(id,iflag)
 	      if( rst_want_restart(id) ) then
                 call bfm_init_for_restart()
