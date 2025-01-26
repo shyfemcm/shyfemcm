@@ -61,6 +61,7 @@
 ! 18.05.2014	ggu	new routines d_intp_neville(), rd_intp_neville()
 ! 30.05.2014	ggu	changed VERS_6_1_76
 ! 16.02.2019	ggu	changed VERS_7_5_60
+! 25.01.2025	ggu	new routine buspline() for uniform cubic b-spline
 !
 !**************************************************
 !
@@ -342,6 +343,38 @@
         end do
 
         rd_intp_neville = p(n)
+
+        end
+
+!**********************************************
+
+        subroutine buspline(t,b,value)
+
+! implements uniform b-spline
+!
+! b-spline is cubic
+! values must be ascending in time and equi-spaced
+! the time of interpolation must be between b(1) and b(2)
+!...except for boundary situations... in this case it can be that t<0 or t>1
+
+        implicit none
+
+        double precision t		! relative time for interpolation [0-1]
+        double precision b(0:3)		! values at uniform spaced knots
+        double precision value		! interpolated value
+
+        double precision acum,t1,t2,t3
+
+        !write(6,*) t
+        acum = b(0) + 4*b(1) + b(2)
+        t1 = t
+        acum = acum + t1*(-3*b(0)+3*b(2))
+        t2 = t1*t
+        acum = acum + t2*(3*b(0)-6*b(1)+3*b(2))
+        t3 = t2*t
+        acum = acum + t3*(-b(0)+3*b(1)-3*b(2)+b(3))
+
+        value = acum / 6.D+0
 
         end
 
