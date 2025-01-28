@@ -452,6 +452,7 @@ publish:
 compiler_version:
 	$(F77) $(FINFOFLAGS)
 	$(CC) $(CINFOFLAGS)
+	@echo "major compiler version: $(MAJOR)"
 
 last_commit:
 	@gittags | tail -1

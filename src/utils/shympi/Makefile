@@ -231,7 +231,8 @@ mpi_general.o: ../../../lib/mod/basin.mod \
 		../../../lib/mod/shympi.mod 
 mpi_ghost.o: ../../../lib/mod/basin.mod \
 		../../../lib/mod/shympi.mod 
-mpi_node.o: ../../../lib/mod/basin.mod ../../../lib/mod/levels.mod
+mpi_node.o: ../../../lib/mod/basin.mod ../../../lib/mod/levels.mod \
+		../../../lib/mod/mod_compatibility.mod 
 mpi_node_internal.o: ../../../lib/mod/shympi.mod
 mpi_tripple.o: ../../../lib/mod/basin.mod \
 		../../../lib/mod/levels.mod \

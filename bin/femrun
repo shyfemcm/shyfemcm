@@ -190,7 +190,8 @@ fi
     tmpfil=$tmpdir/hpat/hpat.$aux.$$
     echo "cd $actdir" > $tmpfil
     if [ $mpi -ne 0 ]; then
-      cc="/usr/bin/mpirun -np $mpi $hpfile -mpi"
+      #cc="/usr/bin/mpirun -np $mpi $hpfile -mpi"
+      cc="mpirun -np $mpi $hpfile -mpi"
       command="$prefix nohup $fembat $tmpfil $cc $strfile"
     else
       command="$prefix nohup $fembat $tmpfil $hpfile $strfile"

@@ -644,8 +644,10 @@ ifeq ($(GMV_LE_8),true)
   WNOINIT = -Wno-uninitialized
 endif
 WTABS = -Wno-tabs
+FGNU_allow-argument-mismatch = -fallow-argument-mismatch
 ifeq ($(GMV_LE_4),true)
   WTABS = -Wtabs
+  FGNU_allow-argument-mismatch = 
 endif
 
 # next solves compiler warnings of possible not initialized code (version <= 8)
@@ -748,8 +750,9 @@ ifeq ($(FORTRAN_COMPILER),GNU_G77)
   LINKER	= $(F77)
   LFLAGS	= $(FGNU_OPT) $(FGNU_PROFILE) $(FGNU_OMP)
   FFLAGS	= $(LFLAGS) $(FGNU_NOOPT) $(FGNU_WARNING)
-  FFLAG_SPECIAL	= $(LFLAGS) $(FGNU_WARNING) -fallow-argument-mismatch
+  FFLAG_SPECIAL	= $(LFLAGS) $(FGNU_WARNING) $(FGNU_allow-argument-mismatch)
   FINFOFLAGS	= --version
+  MAJOR 	= $(GMV)
 endif
 
 ifeq ($(FORTRAN_COMPILER),GNU_GFORTRAN)
@@ -764,8 +767,10 @@ ifeq ($(FORTRAN_COMPILER),GNU_GFORTRAN)
   LINKER	= $(F77)
   LFLAGS	= $(FGNU_OPT) $(FGNU_PROFILE) $(FGNU_OMP)
   FFLAGS	= $(LFLAGS) $(FGNU_NOOPT) $(FGNU_WARNING) $(FGNU_GENERAL)
-  FFLAG_SPECIAL	= $(LFLAGS) $(FGNU_WARNING) $(FGNU_GENERAL) -fallow-argument-mismatch
+  FFLAG_SPECIAL	= $(LFLAGS) $(FGNU_WARNING) $(FGNU_GENERAL) \
+				$(FGNU_allow-argument-mismatch)
   FINFOFLAGS	= --version
+  MAJOR 	= $(GMV)
 endif
 
 ##############################################
@@ -1057,6 +1062,7 @@ ifeq ($(FORTRAN_COMPILER),INTEL)
   FFLAGS	= $(LFLAGS) $(FINTEL_NOOPT) $(FINTEL_WARNING) $(FINTEL_GENERAL)
   FFLAG_SPECIAL = $(FINTEL_OMP) $(FINTEL_GENERAL)
   FINFOFLAGS	= -v
+  MAJOR 	= $(IMV)
 endif
 
 ##############################################
