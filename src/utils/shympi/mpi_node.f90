@@ -89,6 +89,7 @@
 ! 04.12.2024    ggu     implement bmpi_allgather for gather routines
 ! 07.12.2024    ggu     big changes: make sure arrays are same length for reduce
 ! 13.12.2024    ggu     error_stop() implemented
+! 28.01.2025    ggu     compatibility for gfortran 4 inserted
 
 !******************************************************************
 
@@ -2291,6 +2292,7 @@
 ! returns internal node number and id of domain given external node number
 
 	use basin
+	use mod_compatibility
 
 	integer, intent(in)  ::  ke	! external node number
 	integer, intent(out) ::  ki	! internal node number
@@ -2304,7 +2306,8 @@
 	  if( ipv(k) == ke ) exit
 	end do
 	if( k > nkn_unique ) k = 0
-	ka = findloc(ipv(1:nkn_unique),ke,1)
+	!ka = findloc(ipv(1:nkn_unique),ke,1)
+	ka = gfindloc(ipv(1:nkn_unique),ke)
 	if( k /= ka ) then
 	  write(6,*) k,ka,nkn_unique,my_id
 	  stop 'error stop shympi_find_node: internal (1)'
@@ -2341,6 +2344,7 @@
 ! returns internal elem number and id of domain given external elem number
 
 	use basin
+	use mod_compatibility
 
 	integer, intent(in)  ::  ieext	! external elem number
 	integer, intent(out) ::  ieint	! internal elem number
@@ -2354,7 +2358,8 @@
 	  if( ipev(ie) == ieext ) exit
 	end do
 	if( ie > nel_unique ) ie = 0
-	iee = findloc(ipev(1:nel_unique),ieext,1)
+	!iee = findloc(ipev(1:nel_unique),ieext,1)
+	iee = gfindloc(ipev(1:nel_unique),ieext)
 	if( ie /= iee ) stop 'error stop shympi_find_elem: internal (1)'
 
 	if( bmpi_skip ) then

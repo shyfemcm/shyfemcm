@@ -75,6 +75,7 @@ OBJ  = \
 	reallocate.o \
 	histogram.o \
 	errorstop.o \
+	compatibility.o \
 
 OBSOLETE = \
 	expand.o \
@@ -196,6 +197,7 @@ zip:	cleanall
 ../../../lib/mod/iso8601.mod: iso8601.o
 ../../../lib/mod/list.mod: list.o
 ../../../lib/mod/mod_color.mod: color.o
+../../../lib/mod/mod_compatibility.mod: compatibility.o
 ../../../lib/mod/mod_connect.mod: connections.o
 ../../../lib/mod/mod_debug.mod: chk_NaN.o
 ../../../lib/mod/mod_error_stop.mod: errorstop.o

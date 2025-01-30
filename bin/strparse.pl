@@ -12,6 +12,7 @@
 #
 # possible command line options: see subroutine FullUsage
 #
+# version       1.9     28.01.2025     option -verbose
 # version       1.8     09.01.2025     tselab, handle error in reduce
 # version       1.7     02.11.2023     -restart implemented
 # version       1.6     11.06.2023     -essential implemented
@@ -35,6 +36,7 @@ use strict;
 #-------------------------------------------------------------
 $::h = 0 unless $::h;
 $::help = 0 unless $::help;
+$::verbose = 0 unless $::verbose;
 $::quiet = 0 unless $::quiet;
 $::bnd = 0 unless $::bnd;
 $::files = 0 unless $::files;
@@ -146,6 +148,7 @@ sub FullUsage {
   print STDERR "Usage: strparse.pl [-h|-help] [-options] str-file\n";
   print STDERR "  options:\n";
   print STDERR "    -h!-help      this help screen\n";
+  print STDERR "    -verbose      be more verbose\n";
   print STDERR "    -quiet        be as quiet as possible\n";
   print STDERR "    -bnd          extract boundary nodes\n";
   print STDERR "    -files        extract names of forcing files\n";
@@ -743,27 +746,28 @@ sub collect_str {
         print STDERR "  reducing ($type) $file to $input as $filename\n";
         my $command = "femelab -tmin $itanf -tmax $itend";
         my $options = "-out -inclusive";
-	print "executing: $command $options $file";
+	print "    executing: $command $options $file\n" if $::verbose;
         system("[ -f out.fem ] && rm -f out.fem");
         system("$command $options $file > /dev/null");
 	if( -f "out.fem" and -s "out.fem" ) {	#file existing and non empty
-	  #print STDERR "moving $file to $input/$filename\n";
+	  print STDERR "    moving $file to $input/$filename\n" if $::verbose;
           system("mv out.fem $input/$filename");
 	} else {
-	  print STDERR "cannot reduce $file... just copying\n";
+	  print STDERR "    *** cannot reduce $file... just copying\n";
           system("cp $file $input/$filename");
 	}
       } elsif( $type eq "TS" ) {
         print STDERR "  reducing ($type) $file to $input as $filename\n";
         my $command = "$::scriptpath/tselab -tmin $itanf -tmax $itend";
         my $options = "-out -inclusive";
+	print "    executing: $command $options $file\n" if $::verbose;
         system("[ -f out.txt ] && rm -f out.txt");
         system("$command $options $file > /dev/null");
 	if( -f "out.txt" and -s "out.txt" ) {	#file existing and non empty
-	  #print STDERR "moving $file to $input/$filename\n";
+	  print STDERR "    moving $file to $input/$filename\n" if $::verbose;
           system("mv out.txt $input/$filename");
 	} else {
-	  print STDERR "cannot reduce $file... just copying\n";
+	  print STDERR "    *** cannot reduce $file... just copying\n";
           system("cp $file $input/$filename");
 	}
       } else {
