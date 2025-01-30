@@ -37,6 +37,7 @@
 ! 16.02.2019	ggu	changed VERS_7_5_60
 ! 21.05.2019	ggu	changed VERS_7_5_62
 ! 24.07.2024	ggu	revisited and omp enabled
+! 29.01.2025	ggu	nomp==-1 uses maximal available procs (OMP_NUM_THREADS)
 
 !***************************************************************
 
@@ -96,6 +97,7 @@
 	if( .not. bomp_init ) call openmp_init
 
 	nomp_use = n
+	if( n < 0 ) nomp_use = nomp_max		!use maximal possible value
 	nomp_use = min(nomp_use,nomp_max)
 	nomp_use = max(nomp_use,1)
 	
