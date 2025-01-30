@@ -106,7 +106,8 @@
 ! make static arrays - new way
 !-------------------------------------------------------------
 
-        call connect_init(nkn,nel,nen3v,ierr)
+        call connect_init(nkn,nel,nen3v,ierr)	!this computes internal arrays
+
 	if( ierr > 0 ) then
 	  if( .not. allocated(kerror) ) allocate(kerror(ierr))
 	  call connect_errors(ierr,kerror)

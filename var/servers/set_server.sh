@@ -101,7 +101,7 @@ SetVars()
     export BFM_HOME=$HOME/georg/lib/bfm
   else
     echo "unknown server: $server"
-    exit 1
+    #exit 1
   fi
 }
 

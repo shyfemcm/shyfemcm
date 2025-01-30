@@ -57,6 +57,7 @@
         integer i,n
 	integer k,kk,kn,kb,k1,k2
 	integer ie,ii
+	integer ie_ext,ien
 	integer id,id_neigh
 	integer ide,idk,nid
 	integer iunit
@@ -74,22 +75,12 @@
 ! make global ibound array
 !-------------------------------------------------------------
 
-	!call write_grd_domain
-
-	!return
-	!write(iunit,*) '-------- set_geom_mpi ----------'
-	!write(iunit,*) 'global: ',nkn_global,nel_global
-	!write(iunit,*) 'local: ',nkn,nel
-	!call link_set_wmpi(.true.)
 	allocate(ibound(nkn_global))
 	allocate(ecgv(3,nel_global))
-	!call make_links(nkn_global,nel_global,nen3v_global,ibound,kerr)
+
         call connect_init(nkn_global,nel_global,nen3v_global,ierr)
         call connect_get_bound(nkn_global,ibound)
         call connect_get_ecv(nel_global,ecgv)
-        !call connect_get_kant(nkn,kant)
-	!call link_set_wmpi(.false.)
-	!stop
 
 !-------------------------------------------------------------
 ! reduce to local
@@ -112,7 +103,7 @@
 	do k=1,nkn
 	  if( iboundv(k) == 0 ) then
 	    kantv(:,k) = 0
-	  else if( .not. shympi_is_inner_node(k) ) then
+	  else if( .not. shympi_is_inner_node(k) ) then		!in other domain
 	    do i=1,2
 	      kk = kantv(i,k)
 	      id = id_node(kk)
@@ -123,6 +114,10 @@
 
 !-------------------------------------------------------------
 ! adjust ieltv (-1 is reserved for OB)
+! > 0  indicates local neighbor of element
+! == 0 indicates material boundary
+! < 0  indicates open boundary
+! <= 1000  indicates other domain
 !-------------------------------------------------------------
 
 	do ie=1,nel
@@ -151,10 +146,28 @@
 	end do
 
 !-------------------------------------------------------------
+! do sanity checks
+!-------------------------------------------------------------
+
+	do ie=1,nel
+	  do ii=1,3
+	    ien = ieltv(ii,ie)
+	    if( ien > 0 ) then
+	      if( count(ieltv(:,ien)==ie) /= 1 ) goto 98
+	    else if( ien <= 1000 ) then
+	      ide = -ien - 1000
+	      ie_ext = ipev(ie)
+	    end if
+	  end do
+	end do
+
+!-------------------------------------------------------------
 ! end of routine
 !-------------------------------------------------------------
 
 	return
+   98	continue
+	stop 'error stop set_geom_mpi: internal error (2)'
    99	continue
 	stop 'error stop set_geom_mpi: internal error (1)'
 	end

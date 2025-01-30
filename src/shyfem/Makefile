@@ -171,7 +171,7 @@ LAGRANGE_OBJ = \
 HEAT_OBJ = \
       meteo_forcing.o meteo_admin.o \
       icemodel.o ice.o \
-      waves_admin.o $(WW3DUMMY) \
+      waves_admin.o waves_spm.o $(WW3DUMMY) \
       heat_util2.o heat_admin.o heat_admin2.o \
       heat_temp.o heat_mfsbulk.o heat_coare.o heat_gotm.o \
       heat_areg.o heat_gill.o heat_default.o \
