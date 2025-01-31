@@ -203,6 +203,8 @@
 	integer,save,allocatable :: ip_sort_elem(:)	!sorted internal elems
 
 	! next are global arrays for external node/elem numbers
+	! ip_ext_node(nkn_global)
+	! ip_ext_elem(nel_global)
 
 	integer,pointer :: ip_ext(:) !pointer to  external nums
 	integer,save,target,allocatable :: ip_ext_node(:) !global external nums

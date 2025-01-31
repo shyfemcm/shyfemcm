@@ -64,6 +64,7 @@
 	integer, allocatable :: ibound(:)
 	integer, allocatable :: ecgv(:,:)	! global ieltv
         integer kerr,ierr
+	integer ival_in(3),ival_out(3)
 
 	integer knext,kbhnd
 
@@ -149,14 +150,22 @@
 ! do sanity checks
 !-------------------------------------------------------------
 
+	return
+
 	do ie=1,nel
 	  do ii=1,3
 	    ien = ieltv(ii,ie)
 	    if( ien > 0 ) then
 	      if( count(ieltv(:,ien)==ie) /= 1 ) goto 98
 	    else if( ien <= 1000 ) then
-	      ide = -ien - 1000
-	      ie_ext = ipev(ie)
+!	      ide = -ien - 1000
+!	      ie_ext = ipev(ie)
+!	      iel = gfindloc(ip_ext_elem,ie_ext)
+!	      if( iel <= 0 ) goto 97
+!	      call shympi_receive(my_id,ide,3,ival_in,ival_out)
+!	      ien = ecgv(ii,iel)	!look up in global index
+!	      ien_ext = ip_ext_elem(ien)
+!	      iel1 = gfindloc(ip_ext_elem,ie_ext)
 	    end if
 	  end do
 	end do
@@ -170,6 +179,54 @@
 	stop 'error stop set_geom_mpi: internal error (2)'
    99	continue
 	stop 'error stop set_geom_mpi: internal error (1)'
+	end
+
+!*****************************************************************
+
+	subroutine check_2id_elements
+
+	use mod_geom
+	use mod_connect
+	use basin
+	use shympi
+
+	implicit none
+
+	integer, parameter :: ndim = 6
+	integer ie,ii,ien
+	integer ie_ext
+	integer nid,ide,ide2
+	integer ip,itot,iint
+	integer buffer_in(nel*ndim)
+	integer buffer_out(nel*ndim)
+
+	ip = 0
+	itot = 0
+	iint = 0
+
+	do ie=1,nel
+	  nid = id_elem(0,ie)			! how many domains
+	  ide = id_elem(1,ie)			! main id of element
+	  if( nid == 3 ) goto 99
+	  if( nid /= 2 ) cycle
+	  ide2 = id_elem(2,ie)			! secondary id of element
+	  do ii=1,3
+	    ien = ieltv(ii,ie)
+	    ie_ext = 0
+	    if( ien > 0 ) ie_ext = ipev(ien)
+	    buffer_in(ip+ii) = ie_ext
+	  end do
+	  buffer_in(ip+4) = ipev(ie)
+	  buffer_in(ip+5) = ide
+	  buffer_in(ip+6) = ide2
+	  ip = ip + ndim
+	  itot = itot + 1
+	  if( my_id == ide ) iint = iint + 1
+	end do
+
+	return
+   99	continue
+	stop 'error stop check_2id_elements: cannot do tripple points yet'
 	end
 
 !*****************************************************************
