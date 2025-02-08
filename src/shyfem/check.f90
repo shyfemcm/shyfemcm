@@ -37,6 +37,8 @@
 ! subroutine mimafem(string)		writes some min/max values to stdout
 ! subroutine mass_conserve		checks mass conservation
 !
+! subroutine check_set_unit(iu)		sets unit for debug output
+! subroutine check_get_unit(iu)		gets unit for debug output
 ! subroutine check_node(k)		debug info on node k
 ! subroutine check_elem(ie)		debug info on element ie
 ! subroutine check_nodes_in_elem(ie)	debug info on nodes in element ie
@@ -112,6 +114,7 @@
 ! 15.03.2024	ggu	new routine debug_write_var()
 ! 10.09.2024	ggu&lrp	bug fix: do not compute mass balance on domain boundary
 ! 10.09.2024    lrp     relax check_values
+! 08.02.2025    ggu     more info in check_* routines
 !
 !*************************************************************
 
@@ -1118,12 +1121,14 @@
 	subroutine check_set_unit(iu)
 
 	use check_unit
+	use shympi
 
 	implicit none
 
 	integer iu
 
 	iucheck = iu
+	if( iu /= 6 ) iucheck = iucheck + my_id
 
 	end
 
@@ -1160,16 +1165,19 @@
 	use mod_diff_visc_fric
 	use mod_hydro_vel
 	use mod_hydro
+	use mod_meteo
 	use levels
 	use basin
 	use mod_hydro_print
         use mod_nohyd
 	use femtime
+	use shympi
 
 	implicit none
 
 	integer k
 
+	logical binner,buniq
 	integer iu
 	integer l,lmax,lmin,kk
 	character*20 aline
@@ -1181,14 +1189,18 @@
         lmin = jlhkv(k)
 	lmax = ilhkv(k)
 	call get_act_timeline(aline)
+	binner = shympi_is_inner_node(k)
+	buniq = shympi_is_unique_node(k)
 
 	write(iu,*) '-------------------------------- check_node'
 	write(iu,*) 'time:            ',aline
+	write(iu,*) 'my,id,inner,uniq:',my_id,id_node(k),binner,buniq
 	write(iu,*) 'it,idt,k,kext:   ',it,idt,k,ipext(k)
 	write(iu,*) 'lmin,lmax,inodv: ',lmin,lmax,inodv(k)
 	write(iu,*) 'xgv,ygv:         ',xgv(k),ygv(k)
 	write(iu,*) 'zov,znv:         ',zov(k),znv(k)
 	write(iu,*) 'hkv,hkv+znv:     ',hkv(k),hkv(k)+znv(k)
+	write(iu,*) 'evapv:           ',evapv(k)
 	write(iu,*) 'hdkov:           ',(hdkov(l,k),l=1,lmax)
 	write(iu,*) 'hdknv:           ',(hdknv(l,k),l=1,lmax)
 	write(iu,*) 'areakv:          ',(areakv(l,k),l=1,lmax)
@@ -1222,11 +1234,13 @@
 	use levels
 	use basin
 	use femtime
+	use shympi
 
 	implicit none
 
 	integer ie
 
+	logical binner,buniq
 	integer iu
 	integer l,lmin,lmax,ii
 	real zmed
@@ -1239,9 +1253,13 @@
 	lmax = ilhv(ie)
 	zmed = sum(zenv(:,ie))/3.
 	call get_act_timeline(aline)
+	binner = shympi_is_inner_elem(ie)
+	buniq = shympi_is_unique_elem(ie)
 
 	write(iu,*) '-------------------------------- check_elem'
 	write(iu,*) 'time:             ',aline
+	write(iu,*) 'my_id,inner,uniq: ',my_id,binner,buniq
+	write(iu,*) 'id_elem:          ',id_elem(:,ie)
 	write(iu,*) 'it,idt,ie,ieext:  ',it,idt,ie,ieext(ie)
 	write(iu,*) 'lmin,lmax:        ',lmin,lmax
         write(iu,*) 'iwegv,iwetv:      ',iwegv(ie),iwetv(ie)

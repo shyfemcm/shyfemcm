@@ -851,6 +851,10 @@ sub create_makefile {
 my $var = <<'EOF';
 
 default:
+	@echo "possible targets:"
+	@echo "  basin               make basin (not necessary)"
+	@echo "  run                 run simulation"
+	@echo "  clean, cleanall     clean directory"
 
 basin:
 	shypre $(BASIN)
@@ -865,6 +869,8 @@ cleanall: clean
 	-rm -f *.bas
 	-rm -f *.shy *.rst *.flx *.ext *.log *.inf
 	-rm -f boxes_*.txt
+	-rm -f partition.*.grd
+	-rm -f partition.*.txt
 
 EOF
 

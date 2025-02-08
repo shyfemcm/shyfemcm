@@ -98,6 +98,7 @@
 ! 06.09.2024    lrp     nuopc-compliant
 ! 13.09.2024    lrp     iatm and coupling with atmospheric model
 ! 21.09.2024    ggu     new handle_skin() for handling skin temperature output
+! 08.02.2025    ggu     some new debug code
 !
 ! notes :
 !
@@ -193,9 +194,9 @@
 
         logical byes
         logical buseice,bicecover
-        integer levdbg,iud,ksd,ksd1
-	integer k,kext
-	integer l,lmax,lmin,kspec
+        integer levdbg,iud,ksd,ksd1,iudbg
+	integer k,kext,kssalt
+	integer l,lmax,lmin,kspec,ilist
 	integer mode
 	integer days,im,ih
 	integer ys(8)
@@ -397,11 +398,27 @@
 !---------------------------------------------------------
 
         ddq = 0.
+	ilist = 0
+	kssalt = 0
 
 	do k=1,nkn
 
+	  kext = ipv(k)
 	  lmax = ilhkv(k)
 	  lmin = jlhkv(k)
+
+	  if( kssalt > 0 .and. saltv(1,k) > 50. ) then
+	    if( ilist == 0 ) write(167,*) aline
+	    ilist = ilist + 1
+	    write(167,*) ilist,k,kext,is_dry_node(k),saltv(1,k)
+	  end if
+	  if( kext == kssalt .and. saltv(1,k) > 50. ) then
+	    iudbg = 170
+	    call check_set_unit(iudbg)
+	    call check_node(k)
+	    call check_elems_around_node(k)
+	  end if
+
 	  if (is_dry_node(k)) then	!do not compute if node is dry
 	    dtw(k)   = 0.
 	    tws(k)   = temp(lmin,k)
@@ -511,7 +528,6 @@
           ! debug output
           !------------------------------------------------
 
-	  kext = ipv(k)
 	  ksd1 = 877
 	  ksd = 1461
 	  ksd1 = 0
