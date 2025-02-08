@@ -160,6 +160,7 @@
 ! 02.04.2023	ggu	min/max of T/S computed correctly for mpi
 ! 09.05.2023    lrp     introduce top layer index variable
 ! 03.12.2024    ggu     new info_output framework
+! 05.02.2025    ggu     new info_format for T/S
 !
 ! notes :
 !
@@ -238,7 +239,7 @@
 	real mass
 	real wsink
 	real robs
-	real array(3)
+	real array(4)
 	real, allocatable :: rho_aux1(:,:)
 	real, allocatable :: rho_aux2(:,:)
 	double precision dtime0,dtime
@@ -247,10 +248,12 @@
 	integer icrst
 	integer ftype
 	real stot,ttot,smin,smax,tmin,tmax,rmin,rmax
+	real saver,taver,vtot
 	double precision v1,v2,mm
 	character*80 file
 	character*20 aline
 	character*4 what
+	character*80 format
 ! functions
 !	real sigma
 	real getpar
@@ -499,29 +502,36 @@
 	end if
 
 	if( binfo ) then
+	  format = '(a,e18.9,3f8.3)'
           if( itemp .gt. 0 ) then
-  	    call tsmass(tempv,+1,nlvdi,ttot) 
+  	    !call tsmass(tempv,+1,nlvdi,ttot) 
+	    call scalar_mass(+1,tempv,ttot,vtot)
       	    call conmima(nlvdi,tempv,tmin,tmax)
 	    ttot = shympi_sum(ttot)
+	    vtot = shympi_sum(vtot)
 	    tmin = shympi_min(tmin)
 	    tmax = shympi_max(tmax)
-	    array = (/ttot,tmin,tmax/)
+	    taver = ttot / vtot
+	    array = (/ttot,tmin,tmax,taver/)
 !$OMP CRITICAL
-	    call info_output('temp','none',3,array,.true.)
+	    call info_output(' temp','none',4,array,.true.,format)
 	    !if( iuinfo > 0 ) then
   	    !  write(iuinfo,*) 'temp: ',aline,ttot,tmin,tmax
 	    !end if
 !$OMP END CRITICAL
 	  end if
           if( isalt .gt. 0 ) then
-  	    call tsmass(saltv,+1,nlvdi,stot) 
+  	    !call tsmass(saltv,+1,nlvdi,stot) 
+	    call scalar_mass(+1,saltv,stot,vtot)
        	    call conmima(nlvdi,saltv,smin,smax)
 	    stot = shympi_sum(stot)
+	    vtot = shympi_sum(vtot)
 	    smin = shympi_min(smin)
 	    smax = shympi_max(smax)
-	    array = (/stot,smin,smax/)
+	    saver = stot / vtot
+	    array = (/stot,smin,smax,saver/)
 !$OMP CRITICAL
-	    call info_output('salt','none',3,array,.true.)
+	    call info_output(' salt','none',4,array,.true.,format)
 	    !if( iuinfo > 0 ) then
   	    !  write(iuinfo,*) 'salt: ',aline,stot,smin,smax
 	    !end if
