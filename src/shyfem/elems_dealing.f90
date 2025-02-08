@@ -130,6 +130,7 @@
 ! 20.03.2024    ggu     bug fix for hlast
 ! 10.05.2024    ggu     new routine check_int_ext_params()
 ! 01.12.2024    ggu     in masscont() and scalcont() do not exchange
+! 05.02.2025    ggu     new routine scalar_mass()
 !
 !****************************************************************
 
@@ -1298,6 +1299,46 @@
 
 	!total = shympi_sum(total)
 	scalcont = total
+
+	end
+
+!***********************************************************
+
+	subroutine scalar_mass(mode,scal,mass,volume)
+
+! computes content of scalar in total domain (inner nodes)
+
+	use levels
+	use basin, only : nkn,nel,ngr,mbw
+	use shympi
+
+        implicit none
+
+	double precision scalcont
+	integer mode
+	real scal(nlvdi,nkn)
+	real mass,volume
+
+	logical, parameter :: bdebug = .false.
+	integer k,l,nlev,flev
+	double precision vol,total,vtotal
+        real volnode
+
+	total = 0.
+	vtotal = 0.
+
+	do k=1,nkn_inner
+	  nlev = ilhkv(k)
+	  flev = jlhkv(k)
+	  do l=flev,nlev
+	    vol = volnode(l,k,mode)
+	    vtotal = vtotal + vol
+	    total = total + vol * scal(l,k)
+	  end do
+	end do
+
+	mass = total
+	volume = vtotal
 
 	end
 

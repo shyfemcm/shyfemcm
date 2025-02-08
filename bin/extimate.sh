@@ -17,6 +17,7 @@
 # 30.05.2018	ggu	more info to terminal (end date)
 # 03.04.2020	ggu	use new time format
 # 01.12.2022	ggu	cleaner output
+# 07.02.2025	ggu	new option -short
 #
 # still to do: command line options:
 #
@@ -28,13 +29,18 @@
 format=1
 
 debug=0
+short=0
 if [ "$1" = "-debug" ]; then
   debug=1
   shift
 fi
+if [ "$1" = "-short" ]; then
+  short=1
+  shift
+fi
 
 if [ $# -eq 0 ]; then
-  echo "Usage: $0 [-debug] log-file(s)"
+  echo "Usage: $0 [-debug|-short] log-file(s)"
   exit 1
 fi
 
@@ -140,6 +146,9 @@ HandleSimulation()
     return 3
   fi
 
+  printfile=$file
+  [ $short -eq 1 ] && printfile=$( basename $file )
+
   GetEndTime $file
   if [ $? -eq 0 ]; then
     HandleFinishedSimulation
@@ -155,7 +164,7 @@ HandleSimulation()
     if [ $format = 0 ]; then
       echo "$file:  error determining iterations... run again"
     else
-      echo "  error determining iterations... run again   $file"
+      echo "  error determining iterations... run again   $printfile"
     fi
     return 5
   fi
@@ -209,12 +218,12 @@ WriteOutput()
 {
     if [ $done = "finished" ]; then
       #echo "  $total  $done  $todo  $file"
-      line="  $total  $done  $todo  $file"
+      line="  $total  $done  $todo  $printfile"
       echo "$line"
       Finished+=( "$line" )
     else
-      echo "  $total  $done  $todo              $file"
-      Running+=( "  $total  $done  $todo              $file" )
+      echo "  $total  $done  $todo              $printfile"
+      Running+=( "  $total  $done  $todo              $printfile" )
     fi
 }
 
