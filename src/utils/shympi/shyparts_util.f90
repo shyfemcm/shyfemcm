@@ -37,6 +37,7 @@
 ! 23.11.2024	ggu	new routine info_partition_quality()
 ! 29.11.2024	ggu	compute number of non contiguous areas
 ! 30.11.2024	ggu	use color as aux array for flood_fill
+! 03.01.2025	ggu	new routine check_tripple_points()
 !
 !****************************************************************
 
@@ -134,9 +135,68 @@
         end do
 	close(1)
 
+	call check_tripple_points(area_node)
+
 	call info_partition_quality(nparts,ne,ni,pquality)
 
 	write(6,*) 'partition quality: ',pquality
+
+	end
+
+!****************************************************************
+
+	subroutine check_tripple_points(area_node)
+
+	use basin
+
+	implicit none
+
+	integer area_node(nkn)
+
+	integer ie,ii,k
+	integer ic,ids
+	integer id_elem(3)
+	integer icount(0:3)
+	integer, allocatable :: ides(:)
+
+	allocate(ides(nel))
+	ides = 0
+
+	do ie=1,nel
+	  do ii=1,3
+	    k = nen3v(ii,ie)
+	    ic = area_node(k)
+	    id_elem(ii) = ic
+	  end do
+	  ids = 0
+	  if( id_elem(1) /= id_elem(2) ) ids = ids + 1
+	  if( id_elem(2) /= id_elem(3) ) ids = ids + 1
+	  if( id_elem(3) /= id_elem(1) ) ids = ids + 1
+	  if( ids == 0 ) ids = 1
+	  ides(ie) = ids
+	end do
+
+	icount = 0
+	do ie=1,nel
+	  ids = ides(ie)
+	  icount(ids) = icount(ids) + 1
+	end do
+
+	write(6,*) 'total ghost elements:'
+	write(6,*) '(elements with 3 colors are tripple points)'
+	write(6,'(a)') '     colors   elements'
+
+	do ids=1,3
+	  ic = icount(ids)
+	  write(6,'(2i11)') ids,ic
+	end do
+	ic = icount(3)
+	if( ic == 0 ) then
+	  write(6,*) 'no tripple points found'
+	else
+	  write(6,*) 'total number of tripple points: ',ic
+	end if
+	write(6,*)
 
 	end
 

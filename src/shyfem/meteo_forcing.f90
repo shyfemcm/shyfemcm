@@ -345,6 +345,8 @@
 ! initialization
 !------------------------------------------------------------------
 
+	call shympi_barrier
+
 	if( icall .eq. 0 ) then
 
 	  write(6,*) 'initialization of meteo forcing fem'

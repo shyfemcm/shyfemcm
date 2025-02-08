@@ -90,6 +90,7 @@
 ! 07.12.2024    ggu     big changes: make sure arrays are same length for reduce
 ! 13.12.2024    ggu     error_stop() implemented
 ! 28.01.2025    ggu     compatibility for gfortran 4 inserted
+! 06.02.2025    ggu     new routines shympi_exchange_fix_node/elem()
 
 !******************************************************************
 
@@ -258,6 +259,14 @@
 !-------------------------------------------------------
 !	exchange ghost node and element information
 !-------------------------------------------------------
+
+        INTERFACE shympi_exchange_fix_node
+        MODULE PROCEDURE  shympi_exchange_fix_node_i
+        END INTERFACE
+
+        INTERFACE shympi_exchange_fix_elem
+        MODULE PROCEDURE  shympi_exchange_fix_elem_i
+        END INTERFACE
 
         INTERFACE shympi_exchange_3d_node
         MODULE PROCEDURE  shympi_exchange_3d_node_r &
@@ -1143,6 +1152,66 @@
      &					,n,val_in,val_out)
 
 	end subroutine shympi_receive_r
+
+!******************************************************************
+!******************************************************************
+!******************************************************************
+
+	subroutine shympi_exchange_fix_node_i(nfix,val)
+
+	use basin
+
+	integer nfix
+	integer val(:,:)
+
+	logical, parameter :: belem = .false.
+	integer ni1,ni2
+	integer ilhkv(nkn)
+
+	if( bmpi_skip ) return
+
+	ni1 = size(val,1)
+	ni2 = size(val,2)
+
+	if( ni1 /= nfix .or. ni2 /= nkn ) then
+	  write(6,*) nfix,nkn,ni1,ni2
+	  stop 'error stop shympi_exchange_fix_node_i: incomp dim'
+	end if
+
+	ilhkv = nfix
+	call shympi_exchange_internal_i(belem,1,nfix,nkn,ilhkv &
+     &			,ghost_nodes_in,ghost_nodes_out,val)
+
+	end subroutine shympi_exchange_fix_node_i
+
+!*******************************
+
+	subroutine shympi_exchange_fix_elem_i(nfix,val)
+
+	use basin
+
+	integer nfix
+	integer val(:,:)
+
+	logical, parameter :: belem = .true.
+	integer ni1,ni2
+	integer ilhv(nel)
+
+	if( bmpi_skip ) return
+
+	ni1 = size(val,1)
+	ni2 = size(val,2)
+
+	if( ni1 /= nfix .or. ni2 /= nel ) then
+	  write(6,*) nfix,nel,ni1,ni2
+	  stop 'error stop shympi_exchange_fix_elem_i: incomp dim'
+	end if
+
+	ilhv = nfix
+	call shympi_exchange_internal_i(belem,1,nfix,nel,ilhv &
+     &			,ghost_elems_in,ghost_elems_out,val)
+
+	end subroutine shympi_exchange_fix_elem_i
 
 !******************************************************************
 !******************************************************************

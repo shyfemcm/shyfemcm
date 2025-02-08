@@ -37,6 +37,7 @@
 ! 29.03.2023    ggu     refactoring
 ! 07.11.2024    ggu     updated to new connection framework
 ! 13.11.2024    ggu     indicate other domain (not yet finished)
+! 04.02.2025    ggu     new routine check_2id_elements() (not yet finished)
 !
 !*****************************************************************
 
@@ -68,7 +69,7 @@
 
 	integer knext,kbhnd
 
-	if( .not. bmpi ) return
+	!if( .not. bmpi ) return
 
 	iunit = 660 + my_id
 
@@ -122,6 +123,7 @@
 !-------------------------------------------------------------
 
 	do ie=1,nel
+	  ie_ext = ipev(ie)
 	  nid = id_elem(0,ie)			! how many domains
 	  ide = id_elem(1,ie)			! main id of element
 	  if( nid == 1 ) cycle			! internal element
@@ -149,6 +151,8 @@
 !-------------------------------------------------------------
 ! do sanity checks
 !-------------------------------------------------------------
+
+	!call check_2id_elements(ecgv)
 
 	return
 
@@ -183,7 +187,7 @@
 
 !*****************************************************************
 
-	subroutine check_2id_elements
+	subroutine check_2id_elements(ecgv)
 
 	use mod_geom
 	use mod_connect
@@ -192,22 +196,124 @@
 
 	implicit none
 
+	integer ecgv(3,nel_global)
+
 	integer, parameter :: ndim = 6
-	integer ie,ii,ien
+	integer ie,ii,ien,ies
 	integer ie_ext
 	integer nid,ide,ide2
-	integer ip,itot,iint
+	integer ip,itot,iint,nit,n
+	integer iu
 	integer buffer_in(nel*ndim)
 	integer buffer_out(nel*ndim)
+	integer ie_tripple(3,n_threads)
+	integer ie_aux(3*n_threads)
+	integer tripple_info(5,n_threads)
+
+	integer, allocatable :: ielt_aux1(:,:)
+	integer, allocatable :: ielt_aux2(:,:)
+	integer, allocatable :: ielt_aux3(:,:)
+	integer, allocatable :: ieltv_global(:,:)
+	integer, allocatable :: aux1(:)
+	integer, allocatable :: aux2(:)
+
+	allocate(ielt_aux1(3,nel))
+	allocate(ielt_aux2(3,nel))
+	allocate(ielt_aux3(3,nel))
+	allocate(ieltv_global(3,nel_global))
+	allocate(aux1(3*nel))
+	allocate(aux2(3*nel))
 
 	ip = 0
 	itot = 0
 	iint = 0
+	iu = 400 + my_id
+	ies = 11311
+	ies = 8667
+	ies = 51799
+
+	ielt_aux1 = 0
+	do ie=1,nel
+	  do ii=1,3
+	    ien = ieltv(ii,ie)
+	    if( ien > 0 ) ien = ipev(ien)
+	    ielt_aux1(ii,ie) = ien
+	  end do
+	end do
+	ielt_aux2 = ielt_aux1
+
+	call shympi_exchange_fix_elem(3,ielt_aux1)
+
+	nit = 0
+	ie_tripple = 0
+	do ie=1,nel
+	  nid = id_elem(0,ie)			! how many domains
+	  ide = id_elem(1,ie)			! main id of element
+	  if( nid == 3 ) then			! adjust for tripple points
+	    nit = nit + 1			! next tripple point
+	    ie_ext = ipev(ie)
+	    ie_tripple(:,nit) = ielt_aux2(:,ie)
+	    tripple_info(1,nit) = ie_ext
+	    tripple_info(2,nit) = ie
+	    tripple_info(3,nit) = ii
+	    write(iu,*) 'tripple: ',nit,my_id
+	    write(iu,*) ie_tripple(:,nit)
+	  end if
+	end do
+
+	ie_aux = reshape(ie_tripple,(/3*n_threads/))
+	call shympi_array_reduce('max',ie_aux)		! only 1d array
+	ie_tripple = reshape(ie_aux,(/3,n_threads/))
+
+	do n=1,nit
+	  write(iu,*) ie_tripple(:,n)
+	  ie = tripple_info(2,n)
+	  ielt_aux1(:,ie) = ie_tripple(:,n)
+	end do
+
+	do ie=1,nel
+	  ie_ext = ipev(ie)
+	  nid = id_elem(0,ie)			! how many domains
+	  ide = id_elem(1,ie)			! main id of element
+	  if( nid == 3 ) then			! adjust for tripple points
+	    do ii=1,3
+	      if( ielt_aux1(ii,ie) <= 1000 ) then
+	        !if( ielt_aux2(ii,ie) <= 1000 ) goto 96
+		ielt_aux1(ii,ie) = ielt_aux2(ii,ie)
+	      end if
+	    end do
+	  end if
+	if( ie_ext == ies ) then
+	  write(iu,*) 'ie: ',ie_ext,ie,my_id
+	  write(iu,*) 'aux1: ',ielt_aux1(:,ie)
+	  write(iu,*) 'aux2: ',ielt_aux2(:,ie)
+	end if
+	end do
+
+	call shympi_l2g_array(ielt_aux1,ieltv_global)
+	do ie=1,nel_global
+	  write(567,*) ie,ieltv_global(:,ie)
+	end do
+
+	iu = 400 + my_id
+	write(iu,*) 'nel... ',nkn,nel,nel_unique
+	do ie=1,nel
+	  ie_ext = ipev(ie)
+	  do ii=1,3
+	    if( ielt_aux1(ii,ie) /= ielt_aux2(ii,ie) ) then
+	      write(iu,*) ie_ext,ie,ii,ielt_aux1(ii,ie),ielt_aux2(ii,ie)
+	    end if
+	  end do
+	end do
 
 	do ie=1,nel
 	  nid = id_elem(0,ie)			! how many domains
 	  ide = id_elem(1,ie)			! main id of element
-	  if( nid == 3 ) goto 99
+	  if( nid == 3 ) then
+	    write(6,*) 'tripple point: ',ipev(ie),my_id,ide
+	    write(iu,*) 'tripple point: ',ipev(ie),my_id,ide
+	    cycle
+	  end if
 	  if( nid /= 2 ) cycle
 	  ide2 = id_elem(2,ie)			! secondary id of element
 	  do ii=1,3
@@ -224,7 +330,28 @@
 	  if( my_id == ide ) iint = iint + 1
 	end do
 
+	call shympi_barrier
+	flush(6)
+	stop 'programmed stop in check_2id_elements'
+
 	return
+   96	continue
+	write(6,*) ie,my_id
+	write(6,*) ielt_aux1(:,ie)
+	write(6,*) ielt_aux2(:,ie)
+	stop 'error stop check_2id_elements: internal error (2)'
+   98	continue
+	iu = 400 + my_id
+	write(iu,*) nkn,nel
+	do ie=1,nel
+	  ie_ext = ipev(ie)
+	  do ii=1,3
+	    if( ielt_aux1(ii,ie) /= ielt_aux3(ii,ie) ) then
+	      write(iu,*) ie_ext,ie,ii,ielt_aux1(ii,ie),ielt_aux3(ii,ie)
+	    end if
+	  end do
+	end do
+	stop 'error stop check_2id_elements: internal error (1)'
    99	continue
 	stop 'error stop check_2id_elements: cannot do tripple points yet'
 	end
