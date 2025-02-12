@@ -47,6 +47,8 @@
 !
 ! notes :
 !
+! format of observation file content:
+!
 ! header_record_1
 ! data_record_1
 ! header_record_2
@@ -55,21 +57,21 @@
 !
 ! where header_record is
 !
-! time,nobs
+! time nobs
 !
 ! and data_record is either:
 !
-! k_1	val_1
-! k_2	val_2
+! k_1		val_1
+! k_2		val_2
 ! ...
-! k_n	val_n
+! k_nobs	val_nobs
 !
 ! or alternatively:
 !
-! x_1 y_1    val_1	[std_val_1]
-! x_2 y_2    val_2	[std_val_2]
+! x_1    y_1       val_1	[std_val_1]
+! x_2    y_2       val_2	[std_val_2]
 ! ...
-! x_n y_n    val_n	[std_val_n]
+! x_nobs y_nobs    val_nobs	[std_val_nobs]
 !
 ! legend:
 !
@@ -78,6 +80,7 @@
 ! k		node (external) of observation in basin
 ! x,y		coordinates of observation
 ! val		value of observation
+! std_val	standard deviation of observation errors
 !
 !****************************************************************
 
@@ -137,12 +140,14 @@
 	real, allocatable :: yback(:)
 	real, allocatable :: zback(:)
 	real, allocatable :: zanal(:)
+	real, allocatable :: zweight(:)
+	real, allocatable :: ztau(:)
 	real, allocatable :: hd(:)
 	integer, allocatable :: ilhkv(:)
 
 	integer nvers,ntype,nvar,nlvdi
 	integer iformat,lmax,np
-	integer iufem,iuobs,iunos
+	integer iufem,iuobs,iuweight,iutau
 	integer jmax,j
 	double precision dtime,dtime0,atime,atime0
 	real hlv(1)
@@ -153,7 +158,7 @@
 
 	character*80 file,basnam
 	logical bcart,breg
-	logical bfem,bloop
+	logical bfem,bloop,bweight
 	logical bdebug
 	integer k,ie,n,ndim
 	integer nobs,nback
@@ -162,18 +167,24 @@
 	integer iexcl
 	integer nx,ny
 	real dxy
+	real x0,y0,x1,y1
 	real zmin,zmax
 	real zomin,zomax
 	real rlact
 	real rmse,rmse1,rmse2
+	real tmin,tmax
 
 	logical is_spherical
 
 	bdebug = .false.
-	bfem = .true.
 	bfem = .false.
-	bloop = .false.
+	bfem = .true.
 	bloop = .true.
+	bloop = .false.
+	bweight = .true.
+
+	tmin = 1
+	tmax = 30
 
 !--------------------------------------------------------------
 ! parameters and command line options
@@ -193,11 +204,16 @@
 	!string = 'temperature [C]'
 	!date = 20100101
 
+	!ivar = 11		!what is in the observations - temperature
+	!string = 'salinity [psu]'
+	!date = 20100101
+
 	ivar = 1		!what is in the observations - water level
 	string = 'water level [m]'
 	date = 20130101
+
 	nrec = 10
-	nrec = 0
+	nrec = 0		!do not read more than this number of records
 
 !-----------------------------------------------------------------
 ! time management
@@ -216,11 +232,7 @@
 	!call ap_set_names(basnam,' ')
 	!call ap_init(.false.,1,0,0)
 
-	allocate(xback(nkn),yback(nkn),zback(nkn),zanal(nkn))
-	allocate(ilhkv(nkn),hd(nkn))
-	ndim = nkn
-
-	call bas_get_minmax(xmin,ymin,xmax,ymax)
+	!call bas_get_minmax(xmin,ymin,xmax,ymax)
 	dxy = max((xmax-xmin),(ymax-ymin))
 
 	if( rl < 0 ) rl = 0.1*dxy
@@ -250,21 +262,34 @@
 ! set up ev and background grid
 !-----------------------------------------------------------------
 
-	call ev_init(nel)
-	call mod_depth_init(nkn,nel)
+	!call ev_init(nel)
+	!call mod_depth_init(nkn,nel)
 
-	call set_ev
-	call check_ev
+	!call set_ev
+	!call check_ev
 
-	bgeo = is_spherical()
-	if( bcart ) bgeo = .false.
+	!bgeo = is_spherical()
+	!if( bcart ) bgeo = .false.
 
 	regpar = 0.
-	nback = nkn
-	call setup_background(ndim,dx,dy,xmin,ymin,xmax,ymax &
-     &			,nback,xback,yback,regpar)
+	nback = 0
+	call setup_background_size(dx,dy,xmin,ymin,xmax,ymax &
+     &			,nback,regpar)
+
+	allocate(xback(nback),yback(nback),zback(nback),zanal(nback))
+	allocate(zweight(nback))
+	allocate(ztau(nback))
+
+	call setup_background_coords(nback,regpar,xback,yback)
+	zback = -999.
+	zanal = -999.
+
 	nx = nint(regpar(1))
 	ny = nint(regpar(2))
+	x0 = regpar(3)
+	y0 = regpar(4)
+	x1 = x0 + nx*dx
+	y1 = y0 + ny*dy
 
 	breg = dx > 0.
 	if( .not. breg ) bloop = .false.
@@ -275,7 +300,8 @@
 	  if( breg ) then
 	    write(6,*) 'nx,ny: ',nx,ny
 	    write(6,*) 'dx,dy: ',dx,dy
-	    write(6,*) 'x0,y0: ',regpar(3),regpar(4)
+	    write(6,*) 'x0,y0: ',x0,y0
+	    write(6,*) 'x1,y1: ',x1,y1
 	  end if
 	end if
 
@@ -298,11 +324,6 @@
 	if( bdebug ) write(6,*) 'ggu 2'
 	it = 0
 	datetime = (/date,0/)
-	if( bdebug ) write(6,*) 'ggu 2'
-	hlv(1) = 10000.
-	if( bdebug ) write(6,*) 'ggu 2'
-	hd = 1.
-	ilhkv = 1
 
 	if( bdebug ) write(6,*) 'ggu 3'
 
@@ -318,16 +339,23 @@
 	  write(6,*) 'trying multiple values for rl: ',rl,drl,jmax
 	end if
 
-	iufem = 20
-	open(iufem,file='optintp.fem',status='unknown',form=format)
-
-	iuobs = 21
+	iuobs = 20
 	open(iuobs,file=file,status='old',form='formatted')
 	write(6,*) 'file with observations: ',trim(file)
 
+	iufem = 21
+	open(iufem,file='optintp.fem',status='unknown',form=format)
+
+	if( bweight ) then
+	  iuweight = 22
+	  open(iuweight,file='optweight.fem',status='unknown',form=format)
+	  iutau = 23
+	  open(iutau,file='opttau.fem',status='unknown',form=format)
+	end if
+
 	iuse = 1
 	nobs = nobdim
-	call read_use_file(nobs,iuse)
+	call read_use_file(nobs,iuse)		!what observations to use
 	where( iuse == 0 ) rra = 100.*rr
 
 !-----------------------------------------------------------------
@@ -339,13 +367,19 @@
 
 	iexcl = 0
 
+!-----------------------------------------------------------------
+! loop over observations
+!-----------------------------------------------------------------
+
 	do
 
-	if ( nrec > 0 .and. irec == nrec ) exit
+	if ( nrec > 0 .and. irec == nrec ) exit		!maximum records reached
 
 	nobs = nobdim
 	call read_observations(iuobs &
      &				,dtime,nobs,xobs,yobs,zobs)
+
+	write(6,*) 'observations read: ',nobs,irec,nrec
 
 	if( nobs <= 0 ) exit
 
@@ -361,7 +395,7 @@
 ! interpolate
 !-----------------------------------------------------------------
 
-	do j=-jmax,jmax
+	do j=-jmax,jmax			!this loops over rl if jmax>0
 	  rlact = rl + j*drl
           call opt_intp(nobs,xobs,yobs,zobs,bobs &
      &                  ,nback,bback,xback,yback,zback &
@@ -384,6 +418,28 @@
      &                          ,string &
      &                          ,ilhkv,hd &
      &                          ,nlvdi,zanal)
+	  end if
+	  if( bweight .and. irec == 1 ) then
+	    call make_weight(nobs,xobs,yobs,rlact,nback,xback,yback,zweight)
+	    call fem_file_write_header(iformat,iuweight,dtime0 &
+     &                          ,nvers,np,lmax &
+     &                          ,nvar,ntype &
+     &                          ,nlvdi,hlv,datetime,regpar)
+            call fem_file_write_data(iformat,iuweight &
+     &                          ,nvers,np,lmax &
+     &                          ,string &
+     &                          ,ilhkv,hd &
+     &                          ,nlvdi,zweight)
+	    call make_tau(tmin,tmax,nback,zweight,ztau)
+	    call fem_file_write_header(iformat,iutau,dtime0 &
+     &                          ,nvers,np,lmax &
+     &                          ,nvar,ntype &
+     &                          ,nlvdi,hlv,datetime,regpar)
+            call fem_file_write_data(iformat,iutau &
+     &                          ,nvers,np,lmax &
+     &                          ,string &
+     &                          ,ilhkv,hd &
+     &                          ,nlvdi,ztau)
 	  end if
 	  if( bloop ) then
 	    call compute_rmse(nobs,xobs,yobs,zobs,nx,ny,regpar &
@@ -410,6 +466,10 @@
 	  dtime = dtime + 1
 	end do
 
+!-----------------------------------------------------------------
+! end of loop over observations
+!-----------------------------------------------------------------
+
 	end do
 
 	write(6,*) 'total number of records treated: ',irec
@@ -425,71 +485,54 @@
 
 !****************************************************************
 
-	subroutine setup_background(ndim,dx,dy,xmin,ymin,xmax,ymax &
-     &			,nback,xback,yback,regpar)
+	subroutine setup_background_size(dx,dy,xmin,ymin,xmax,ymax &
+     &			,nback,regpar)
 
-	use basin
+! computes the limits and the size of the background grid
 
 	implicit none
 
-	!include 'param.h'
-
-	integer ndim
-	real dx,dy
-	real xmin,ymin,xmax,ymax
-	integer nback
-	real xback(ndim)
-	real yback(ndim)
-	real regpar(7)
+	real, intent(in) ::	 dx,dy
+	real, intent(in) ::	 xmin,ymin,xmax,ymax
+	integer, intent(out) ::	 nback			!size of background grid
+	real, intent(out) ::	 regpar(7)		!values of grid
 
 	integer k,i,j
 	integer nx,ny
-	real x0,y0
+	real x0,y0,x1,y1
 	real diff,flag
 
-	x0 = 0.
-	y0 = 0.
+	if( dx <= 0. .or. dy <= 0. ) goto 96
+	if( xmin >= xmax ) goto 96
+	if( ymin >= ymax ) goto 96
+
 	regpar = 0.
 	flag = -999.
 
-	if( dx <= 0. ) then
-	  nx = 0
-	  ny = 0
-	  nback = nkn
-	  if( nback > ndim ) goto 99
-	  do k=1,nback
-	    xback(k) = xgv(k)
-	    yback(k) = ygv(k)
-	  end do
-	else
-	  if( dy <= 0. ) stop 'error stop setup_background: dy'
-	  nx = 1 + (xmax - xmin) / dx
-	  ny = 1 + (ymax - ymin) / dy
-	  diff = nx * dx - (xmax-xmin)
-	  x0 = xmin - diff/2.
-	  diff = ny * dy - (ymax-ymin)
-	  y0 = ymin - diff/2.
-	  k = 0
-	  do j=0,ny
-	    do i=0,nx
-	      k = k + 1
-	      if( k > ndim ) goto 99
-	      xback(k) = x0 + i*dx
-	      yback(k) = y0 + j*dy
-	    end do
-	  end do
-	  nx = nx + 1
-	  ny = ny + 1
-	  nback = nx*ny
-	  if( nback .ne. k ) goto 98
-	  regpar(1) = nx
-	  regpar(2) = ny
-	  regpar(3) = x0
-	  regpar(4) = y0
-	  regpar(5) = dx
-	  regpar(6) = dy
-	  regpar(7) = flag
-	end if
+	nx = 1 + (xmax - xmin) / dx
+	ny = 1 + (ymax - ymin) / dy
+
+	diff = nx * dx - (xmax-xmin)
+	diff = ny * dy - (ymax-ymin)
+
+	x0 = xmin - diff/2.
+	y0 = ymin - diff/2.
+
+	x1 = x0 + nx*dx
+	y1 = y0 + ny*dy
+
+	if( x0 > xmin .or. x1 < xmax ) goto 95
+	if( y0 > ymin .or. y1 < ymax ) goto 95
+
+	nback = nx*ny
+
+	regpar(1) = nx
+	regpar(2) = ny
+	regpar(3) = x0
+	regpar(4) = y0
+	regpar(5) = dx
+	regpar(6) = dy
+	regpar(7) = flag
 
 	if( nx > 0. ) then
 	  call write_reg_grid(nx,ny,x0,y0,dx,dy)
@@ -497,12 +540,59 @@
 	end if
 
 	return
-   98	continue
-	write(6,*) nx,ny,nback,k,ndim
-	stop 'error stop setup_background: internal error (1)'
+   95	continue
+	write(6,*) x0,x1,xmin,xmax
+	write(6,*) y0,y1,ymin,ymax
+	stop 'error stop setup_background: internal error (3)'
+   96	continue
+	write(6,*) 'dx,dy: ',dx,dy
+	write(6,*) 'xmin,xmax: ',xmin,xmax
+	write(6,*) 'ymin,ymax: ',ymin,ymax
+	stop 'error stop setup_background: error in parameters'
+	end
+
+!****************************************************************
+
+	subroutine setup_background_coords(nback,regpar &
+     &			,xback,yback)
+
+	implicit none
+
+	integer nback
+	real regpar(7)
+	real xback(nback)
+	real yback(nback)
+
+	integer n,i,j
+	integer nx,ny
+	real x0,y0,x1,y1,dx,dy
+
+	nx = regpar(1)
+	ny = regpar(2)
+	x0 = regpar(3)
+	y0 = regpar(4)
+	dx = regpar(5)
+	dy = regpar(6)
+
+	x1 = x0 + nx*dx
+	y1 = y0 + ny*dy
+
+	n = 0
+	do j=0,ny-1
+	  do i=0,nx-1
+	    n = n + 1
+	    if( n > nback ) goto 99
+	    xback(n) = x0 + i*dx
+	    yback(n) = y0 + j*dy
+	  end do
+	end do
+
+	if( nback .ne. n ) goto 99
+
+	return
    99	continue
-	write(6,*) nx,ny,nback,k,ndim
-	stop 'error stop setup_background: dimension ndim'
+	write(6,*) nx,ny,nx*ny,nback,n
+	stop 'error stop setup_background_coords: internal error (1)'
 	end
 
 !****************************************************************
@@ -528,19 +618,71 @@
 
 !****************************************************************
 
+	subroutine make_weight(nobs,xobs,yobs,rl,nback,xback,yback,zweight)
+
+	implicit none
+
+	integer nobs
+	real xobs(nobs)
+	real yobs(nobs)
+	real rl
+	integer nback
+	real xback(nback)
+	real yback(nback)
+	real zweight(nback)
+
+	integer j,i
+	real xi,yi,xj,yj
+	real dist2,z,rl2
+
+	rl2 = rl**2
+
+        do j=1,nback
+          xj = xback(j)
+          yj = yback(j)
+	  z = 0
+          do i=1,nobs
+            xi = xobs(i)
+            yi = yobs(i)
+            dist2 = (xi-xj)**2 + (yi-yj)**2
+            z = z + exp( -dist2/rl2 )
+          end do
+	  z = min(1.,z)
+          zweight(j) = z
+        end do
+
+	end
+
+!****************************************************************
+
+	subroutine make_tau(tmin,tmax,nback,zweight,ztau)
+
+	implicit none
+
+	real tmin,tmax
+	integer nback
+	real zweight(nback)
+	real ztau(nback)
+
+	integer j
+	real z,t
+
+        do j=1,nback
+	  z = zweight(j)
+	  t = tmin + (1.-z)*(tmax-tmin)
+	  ztau(j) = t
+	end do
+
+	end
+
+!****************************************************************
+
 	subroutine read_observations(iuobs &
      &				,dtime,nobs,xobs,yobs,zobs)
 
 ! reads boundary conditions from file and sets up array
 !
 ! file must be made like this:
-!
-!	k1, val1
-!	k2, val2
-!	...
-!	kn, valn
-!
-! or
 !
 !	x1, y1, val1 [,stdval1]
 !	x2, y2, val2 [,stdval2]
@@ -553,11 +695,11 @@
 	implicit none
 
 	integer iuobs			!unit to be read from
-	double precision dtime
-	integer nobs
-	real xobs(nobs)
-	real yobs(nobs)
-	real zobs(nobs)
+	double precision dtime		!relative time
+	integer nobs			!number of observations
+	real xobs(nobs)			!x-coordinate
+	real yobs(nobs)			!y-coordinate
+	real zobs(nobs)			!value of observation
 
 	character*80 line
 	logical bdebug
@@ -859,6 +1001,8 @@
 !******************************************************************
 
 	subroutine read_use_file(nobs,iuse)
+
+! read use.txt that indicates what observations to use
 
 	implicit none
 
