@@ -217,6 +217,8 @@
 	real ik1,ik2
 	real tice,u,v,uv
 
+	real, parameter :: epsice = 1.e-5
+
 	double precision ddq
 	double precision atime
 	character*20 aline
@@ -412,7 +414,8 @@
 	  tm = temp(lmin,k)
 	  salt = saltv(lmin,k)
 	  call get_ice_cover(k,cice)
-	  if( cice < 0. .or. cice > 1. ) goto 98
+	  !if( cice < 0. .or. cice > 1. ) goto 98
+	  if( cice < -epsice .or. cice > 1.+epsice ) goto 98
 	  fice_cover = aice*cice
 	  fice_free  = 1. - fice_cover
 	  bicecover = fice_cover > 0.
