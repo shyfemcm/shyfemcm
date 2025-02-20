@@ -85,16 +85,50 @@
 
 	end function
 
+!************************************************************
+
+	subroutine compiler(string)
+
+	implicit none
+
+	character*(*) string
+
+	integer nvers
+	character*40 version
+
+#if defined(__GFORTRAN__)
+	write(6,*) 'gfortran compiler'
+	nvers = __GNUC__
+	version = __VERSION__
+	string = 'gfortran (' // trim(version) // ')'
+	!write(6,*) 'version = ',trim(version)
+	!write(6,*) 'major version = ',nvers
+#elif defined(__INTEL_COMPILER)
+	write(6,*) 'intel compiler'
+	nvers = __INTEL_COMPILER
+	string = 'INTEL (' // __INTEL_COMPILER // ')'
+	!write(6,*) 'version = ',nvers
+	!write(6,*) 'major version = ',nvers/100
+#else
+	write(6,*) 'compiler not recognized'
+	string = 'unknown compiler'
+#endif
+
+	end
+
 !============================================================
 	end module mod_compatibility
 !============================================================
 
 	subroutine sub_test_compatibility
 
+	use mod_compatibility
+
 	implicit none
 
 	integer nvers
 	character*40 version
+	character*80 string
 
 #if defined(__GFORTRAN__)
 	write(6,*) 'gfortran compiler'
@@ -110,11 +144,15 @@
 #else
 	write(6,*) 'compiler not recognized'
 #endif
+
+	call compiler(string)
+	write(6,*) 'compiler: ',trim(string)
+
 	end
 
 !************************************************************
-!	program main_test_compatibility
-!	call sub_test_compatibility
-!	end program
+	program main_test_compatibility
+	call sub_test_compatibility
+	end program
 !************************************************************
 

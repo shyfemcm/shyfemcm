@@ -1000,6 +1000,7 @@ ifeq ($(BOUNDS),true)
 endif
 
 FINTEL_NOOPT = -g -traceback
+FINTEL_NOOPT = 
 ifeq ($(DEBUG),true)
   FINTEL_TRAP = -fp-trap-all=common
   FINTEL_TRAP = -ftrapuv -debug all -fpe0
