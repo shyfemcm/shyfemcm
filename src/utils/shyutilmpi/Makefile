@@ -44,6 +44,7 @@ OBJ  = \
 	io_off.o \
 	trace_point.o \
 	info_output.o \
+	mod_restart.o \
 
 OBSOLETE = \
 	evgeom.o \

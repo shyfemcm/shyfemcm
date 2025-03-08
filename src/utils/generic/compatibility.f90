@@ -30,6 +30,7 @@
 ! revision log :
 !
 ! 28.01.2025    ggu     written from scratch
+! 08.03.2025    ggu     added compiler information
 
 ! notes :
 !
@@ -151,8 +152,8 @@
 	end
 
 !************************************************************
-	program main_test_compatibility
-	call sub_test_compatibility
-	end program
+!	program main_test_compatibility
+!	call sub_test_compatibility
+!	end program
 !************************************************************
 
