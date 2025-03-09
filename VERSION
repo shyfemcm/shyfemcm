@@ -1,3 +1,81 @@
+version  8_2_4    09-03-2025    VERS_8_2_4
+
+========================================================== 09-03-2025 - 8_2_4
+
+! ./src/shyfem/restart.f90:
+! 26.01.2025    ggu     fix mpi bug for ibfm /= 0 (only master writes)
+! 08.03.2025    ggu     extracted mod_restart in its own file
+! 09.03.2025    ggu     call shympi_barrier after finishing restart file
+!
+! ./src/shyfem/heat_admin2.f90:
+! 08.02.2025    ggu     some new debug code
+!
+! ./src/shyfem/openmp_admin.f90:
+! 29.01.2025	ggu	nomp==-1 uses maximal available procs (OMP_NUM_THREADS)
+!
+! ./src/shyfem/boxes.f90:
+! 09.03.2025	ggu	avoid access out of bounds in finalize_nslayers()
+!
+! ./src/shyfem/shyfem_subs.f90:
+! 08.03.2025    ggu	write compiler information
+! 09.03.2025    ggu	write compiler profile
+!
+! ./src/shyfem/lnkmpi.f90:
+! 04.02.2025    ggu     new routine check_2id_elements() (not yet finished)
+!
+! ./src/shyfem/check.f90:
+! 08.02.2025    ggu     more info in check_* routines
+!
+! ./src/shyfem/meteo_forcing.f90:
+! 25.01.2025    ggu     tentative cubic interpolation for wind (bbspline)
+!
+! ./src/tools/shyplot/supsim.f90:
+!  08.03.2025	ggu	plot nodal code
+!
+! ./src/tools/femutil/optintp/optintp.f90:
+! 20.02.2025	ggu	completely restructured
+!
+! ./src/tools/femutil/optintp/suboi.f90:
+! 20.02.2025	ggu	some refactoring
+!
+! ./src/contrib/ecological/bfm/arc/bfm_internal.f90:
+! 08.03.2025	ggu	bug fix in restart routines (now only master writes)
+!
+! ./src/utils/shympi/mpi_node.f90:
+! 28.01.2025    ggu     compatibility for gfortran 4 inserted
+! 06.02.2025    ggu     new routines shympi_exchange_fix_node/elem()
+!
+! ./src/utils/shympi/mpi_dummy.f90:
+! 06.02.2025    ggu     new routines shympi_exchange_fix_node/elem()
+!
+! ./src/utils/generic/grd.f90:
+! 08.03.2025	ggu	in grd_init() make sure that lines are allocated
+!
+! ./src/utils/generic/compatibility.f90:
+! 28.01.2025    ggu     written from scratch
+! 08.03.2025    ggu     added compiler information
+! 09.03.2025    ggu     added compiler profile
+!
+! ./src/utils/generic/intp.f90:
+! 25.01.2025	ggu	new routine buspline() for uniform cubic b-spline
+!
+! ./src/utils/shyutilmpi/intp_fem_file.f90:
+! 07.02.2025    ggu     remember vconst as default value
+!
+! ./src/utils/shyutil/regular.f90:
+! 20.02.2025	ggu	new routine create_reg()
+!
+! ./src/utils/shyutil/version.f90:
+! 10.03.2025	ggu	version 8.2.4   bug fix edition
+!
+! ./src/utils/shyutil/sigma.f90:
+! 09.03.2025	ggu	avoid out of bounds access (hlvaux)
+!
+! ./src/utils/shyutil/zadaptutil.f90:
+! 09.03.2025	ggu	avoid out of bounds access (hlvaux)
+
+==========================================================
+
 version  8_2_3    22-01-2025    VERS_8_2_3   commit_2025-03-09
 
 version  8_2_3    22-01-2025    VERS_8_2_3
