@@ -52,6 +52,11 @@ endif
 
 BFMOBJ := $(foreach item,$(OBJ),$(PWD)/$(item))
 
+#$(info ------------------------------ )
+#$(info LIBG_BFM = $(LIBG_BFM) )
+#$(info INCL_BFM = $(INCL_BFM) )
+#$(info ------------------------------ )
+
 ALL	=	$(OBJ)
 
 SPECIAL =       Makefile TODO README

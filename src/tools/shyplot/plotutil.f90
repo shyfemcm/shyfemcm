@@ -242,9 +242,11 @@
 	  stop 'error stop plotutil_get_options: unknown type'
 	end if
 
-        !if( .not. bsilent ) then
-        !  call shyfem_copyright(trim(text))
-	!end if
+        call shyfem_set_short_copyright(bquiet)
+        if( .not. bsilent ) then
+          text = 'shyplot - ploting SHYFEM files '
+          call shyfem_copyright(trim(text))
+        end if
 
 	call bash_verbose(bverb)
 
@@ -256,6 +258,8 @@
         if( bwrite ) bverb = .true.
         if( bsdebug ) bverb = .true.
 	if( bsilent ) bquiet = .true.
+
+	if( bquiet ) call grd_set_write(.false.)
 
         if( count( (/bvarid,bvarnum,bvarname/) ) > 1 ) then
 	  write(6,*) 'You can give only one of varid, varnum and varname'

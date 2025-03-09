@@ -95,7 +95,7 @@
 
 	implicit none
 
-	call shyfem_copyright('shyplot - plotting SHYFEM files')
+	!call shyfem_copyright('shyplot - plotting SHYFEM files')
 
 	call populate_strings
 

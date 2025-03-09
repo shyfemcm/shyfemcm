@@ -187,6 +187,8 @@
 ! 15.11.2024    ggu     flush iuinfo before stopping
 ! 23.11.2024    ggu     introduced check_partition_quality()
 ! 03.12.2024    lrp     ww3 restored
+! 08.03.2025    ggu	write compiler information
+! 09.03.2025    ggu	write compiler profile
 !
 !*****************************************************************
 !
@@ -775,6 +777,7 @@
         use shympi
 	use mod_zeta_system
 	use mod_trace_point
+	use mod_compatibility
 
         implicit none
 
@@ -783,6 +786,8 @@
         logical bquiet,bsilent
 
         character*80 version
+        character*80 scompiler
+        character*80 scprofile
 
 	logical openmp_is_parallel
 
@@ -823,6 +828,9 @@
         call shympi_set_debug(bmpidebug)
 	call set_trace_point(bltrace)
 
+	call compiler(scompiler)
+	call compiler_profile(scprofile)
+
 	if( shympi_is_master() ) then
          call shyfem_set_short_copyright(bquiet)
          if( .not. bsilent ) then
@@ -835,6 +843,8 @@
 	    write(6,*) 'compiled with parallel support: NONE'
 	  end if
 	  write(6,*) 'matrix solver: ',trim(solver_type)
+	  write(6,*) 'compiler: ',trim(scompiler)
+	  write(6,*) 'compiler profile: ',trim(scprofile)
 	  write(6,*)
          end if
 	end if

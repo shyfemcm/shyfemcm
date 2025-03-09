@@ -1759,12 +1759,14 @@
 
 	subroutine correct_regpar(regpar)
 
+! should be only done if geographical coordinates
+
 	implicit none
 
 	real regpar(7)
 
 	if( regpar(3) > 180. ) then
-	  regpar(3) = regpar(3) - 360.
+	  !regpar(3) = regpar(3) - 360.
 	end if
 
 	end

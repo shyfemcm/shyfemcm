@@ -898,10 +898,13 @@
 !
 ! The first value is a keyword that specifies what has to be plotted.
 ! Possible values are |text|, |line|, |vect|, |rect|, |circ|  and also
-! |wid| and |col|. These correspond to different types of information
+! |wid|, |col|, and |ctxt|. These correspond to different types of information
 ! that is inserted into the plot such as text, line, vector, rectangle
 ! or circle (filled or just outline). Moreover, the color and
-! line width of the pen can be controlled by with |wid| and |col|.
+! line width of the pen can be controlled by with |wid| and |col|,
+! and the centering of text can be set with |ctxt hc vc|, where the values
+! -1 mean flush left/bottom (default), 0 mean center, 
+! and +1 mean flush right/top.
 !
 ! In case of |text| the starting position (lower left corner) is given,
 ! then the point size of the font and the text that is inserted. |line|
@@ -958,8 +961,8 @@
 ! A time and date can be assigned to the simulation results. These values
 ! refer to the time 0 of the FEM model. The format for the date is
 ! YYYYMMDD and for the time HHMMSS. 
-!c Please note that the date should not be
-!c given as YYYYMMDD because due to precision problems this will not work. 
+! Please note that the date should not be
+! given as YYYYMMDD because due to precision problems this will not work. 
 ! You can also give a time zone if your time is not referring to 
 ! GMT but to another time zone such as MET. Please note that you have to give
 ! this information only if the simulation does not contain it already.
