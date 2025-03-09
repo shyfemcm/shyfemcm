@@ -177,7 +177,7 @@
 	use mod_meteo
 	use mod_ts
 	use levels
-        use basin, only : xgv,ygv  
+        use basin, only : xgv,ygv,ipv
         use mod_hydro_print  
 	use heat_const
 	use meteo_forcing_module, only : iatm
@@ -193,8 +193,8 @@
 
         logical byes
         logical buseice,bicecover
-        integer levdbg,iud,ksd
-	integer k
+        integer levdbg,iud,ksd,ksd1
+	integer k,kext
 	integer l,lmax,lmin,kspec
 	integer mode
 	integer days,im,ih
@@ -216,6 +216,8 @@
         real uub,vvb        
 	real ik1,ik2
 	real tice,u,v,uv
+
+	real, parameter :: epsice = 1.e-5
 
 	double precision ddq
 	double precision atime
@@ -412,6 +414,8 @@
 	  tm = temp(lmin,k)
 	  salt = saltv(lmin,k)
 	  call get_ice_cover(k,cice)
+	  !if( cice < 0. .or. cice > 1. ) goto 98
+	  if( cice < -epsice .or. cice > 1.+epsice ) goto 98
 	  fice_cover = aice*cice
 	  fice_free  = 1. - fice_cover
 	  bicecover = fice_cover > 0.
@@ -489,6 +493,9 @@
 	    call ice_water_exchange(tm,tice,uv,qice)
 	    if( abs(qice) > 100000. ) goto 99
 	    if( .not. bheat ) qice = 0.
+	  else
+	    tice = 0.
+	    uv = 0.
 	  end if
 
 	  !------------------------------------------------
@@ -507,14 +514,19 @@
           ! debug output
           !------------------------------------------------
 
-	  ksd = 848
+	  kext = ipv(k)
+	  ksd1 = 877
+	  ksd = 1461
+	  ksd1 = 0
 	  ksd = 0
-          if( k == ksd ) then
+          if( kext == ksd .or. kext == ksd1 ) then
             iud = 667
             write(iud,*) '-------------------------'
             write(iud,*) atime
             write(iud,*) aline
-            write(iud,*) fice_free,qice
+            write(iud,*) k,kext
+            write(iud,*) fice_cover,qice,aice,cice
+            write(iud,*) fice_free,fice_pen
             write(iud,*) qlong,qlat,qsens,qss
             write(iud,*) tm,tice,uv,qice
             write(iud,*) tm
@@ -640,6 +652,10 @@
 !---------------------------------------------------------
 
 	return
+   98	continue
+	write(6,*) 'impossible value for cice:'
+	write(6,*) k,ipv(k),cice
+	stop 'error stop qflux3d: impossible value for cice'
    99	continue
 	write(6,*) 'error in heat flux'
 	write(6,*) 'k',k,ipext(k),iheat

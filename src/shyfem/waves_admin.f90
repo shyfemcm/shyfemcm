@@ -1087,14 +1087,14 @@
         real, parameter :: z0 = 5.e-4
         real, parameter :: awice = 1.	!use wave reduction due to ice cover
 
-! --- input variable
+! --- input variable - these are defined on elements
 
         real, save, allocatable :: winds(:) !wind speed at 10m [m/s]
         real, save, allocatable :: windd(:) !wind direction [degree north]
         real, save, allocatable :: fet(:)   !wind fetch length [m]
         real, save, allocatable :: daf(:)   !averaged depth along the fetch [m]
 
-! --- output variable
+! --- output variable - these are defined on elements
 
         real, save, allocatable :: waeh(:)	!wave height [m]
         real, save, allocatable :: waep(:)	!wave period [s]
@@ -1196,7 +1196,7 @@
 !	get wind fetch (fet is fetch on elements)
 !       -------------------------------------------------------------
 
-        call fetch(windd,fet,daf)
+        call compute_fetch(windd,fet,daf)
 
 !       -------------------------------------------------------------------
 !       compute wave values
@@ -1297,6 +1297,7 @@
 	real wis,wid
 	real gh,gx,hg
 	real auxh,auxh1,auxt,auxt1
+	real waeh1,waep1,waed1
 	real hbr			!limiting wave height [m]
 
 	real depele
@@ -1391,6 +1392,17 @@
           end if 
 20        continue
 
+	  call wave_spm(wis,wid,fet(ie),dep,waeh1,waep1,waed1)
+	  if( waeh1 /= waeh(ie) ) goto 99
+	  if( waep1 /= waep(ie) ) goto 99
+	  if( waed1 /= waed(ie) ) goto 99
+
+	return
+   99	continue
+	write(6,*) waeh1 , waeh(ie)
+	write(6,*) waep1 , waep(ie)
+	write(6,*) waed1 , waed(ie)
+	stop 'error stop compute_waves_on_element: error in computation'
         end
 
 !**************************************************************
@@ -1445,7 +1457,7 @@
 
 !**************************************************************
 
-        subroutine fetch(windd,fet,daf)
+        subroutine compute_fetch(windd,fet,daf)
 
 ! This subroutine computes the wind fetch for each element of the
 ! grid given the wind direction.
@@ -1486,15 +1498,15 @@
           wdir = wid / rad		!from deg to rad
 
 	  ierr = 0
-	  call fetch_element(ie,xe,ye,wdir,fff,ddd,ierr)
+	  call compute_fetch_of_element(ie,xe,ye,wdir,fff,ddd,ierr)
 
 	  if( ierr .ge. 1000 ) then
 	    write(6,*) 'warning: iteration exceeded: ',ie
-            stop 'error stop fetch: iterations'
+            stop 'error stop compute_fetch: iterations'
 	  end if
 
-          fet(ie) = fff
-          daf(ie) = ddd
+          fet(ie) = fff			!computed fetch
+          daf(ie) = ddd			!computed average depth over fetch
 	  
 !$OMP END TASK
 
@@ -1508,7 +1520,7 @@
 
 !**************************************************************
 
-        subroutine fetch_element(ie,xein,yein,wdir,fff,ddd,ierr)
+        subroutine compute_fetch_of_element(ie,xein,yein,wdir,fff,ddd,ierr)
 
 ! This subroutine computes the wind fetch for element ie
 ! given the wind direction.

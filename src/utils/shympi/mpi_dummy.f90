@@ -62,6 +62,7 @@
 ! 07.03.2024    ggu     double routines for shympi_l2g_array_fix_d/2d_d
 ! 12.03.2024    ggu     double routines for shympi_g2l_array_fix_ird/2d_d
 ! 13.12.2024    ggu     error_stop() implemented
+! 06.02.2025    ggu     new routines shympi_exchange_fix_node/elem()
 !
 !******************************************************************
 
@@ -212,6 +213,14 @@
 !-------------------------------------------------------
 !       exchange ghost node and element information
 !-------------------------------------------------------
+
+        INTERFACE shympi_exchange_fix_node
+        MODULE PROCEDURE  shympi_exchange_fix_node_i
+        END INTERFACE
+
+        INTERFACE shympi_exchange_fix_elem
+        MODULE PROCEDURE  shympi_exchange_fix_elem_i
+        END INTERFACE
 
         INTERFACE shympi_exchange_3d_node
         MODULE PROCEDURE  shympi_exchange_3d_node_r &
@@ -998,6 +1007,32 @@
 	val_out = val_in
 
 	end subroutine shympi_receive_r
+
+!******************************************************************
+!******************************************************************
+!******************************************************************
+
+	subroutine shympi_exchange_fix_node_i(nfix,val)
+
+	use basin
+
+	integer nfix
+	integer val(:,:)
+	logical, parameter :: belem = .false.
+
+	end subroutine shympi_exchange_fix_node_i
+
+!*******************************
+
+	subroutine shympi_exchange_fix_elem_i(nfix,val)
+
+	use basin
+
+	integer nfix
+	integer val(:,:)
+	logical, parameter :: belem = .true.
+
+	end subroutine shympi_exchange_fix_elem_i
 
 !******************************************************************
 !******************************************************************
