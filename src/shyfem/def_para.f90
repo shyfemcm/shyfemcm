@@ -794,6 +794,8 @@
 	call addpar('wslim',-1.)
 	call addpar('rfact',1.)
 
+	call addpar('ibwind',0.)	!custom - not yet tested
+
 !c------------------------------------------------------------------------
 
 ! DOCS  meteo                      Meteo and heat flux parameters

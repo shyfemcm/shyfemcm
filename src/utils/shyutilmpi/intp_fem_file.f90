@@ -496,6 +496,8 @@
 
 	subroutine iff_set_description(id,ibc,string)
 
+! sets description of file
+
 	integer id
 	integer ibc
 	character*(*) string
@@ -2518,17 +2520,23 @@
 	integer ldim		!vertical dimension of value
 	real value(ldim,ndim)
 
+	logical bbspline
 	integer nintp,lexp,nexp,ilast,node,nn
 	logical bonepoint,bconst,bnodes,b2d,bmulti,bflag
-	integer ipl,lfem,i,l,ip,j,iflag
+	integer ipl,lfem,i,l,ip,j,iflag,iu
 	real val,tr,flag
-	double precision time(pinfo(id)%nintp)
+	double precision tt,time(pinfo(id)%nintp)
 	double precision, parameter :: zero = 0.0d+0
 	!real time(pinfo(id)%nintp)
 	real vals(pinfo(id)%nintp)
+	double precision dval
+	double precision dvals(pinfo(id)%nintp)
 	double precision rd_intp_neville
 	real intp_neville
 	character*80 string
+	character*80 strings(pinfo(id)%nvar)
+
+	real getpar
 
         nintp = pinfo(id)%nintp
         lexp = max(1,pinfo(id)%lexp)
@@ -2545,6 +2553,15 @@
 	iflag = 0
 	nn = 0
 
+	strings = pinfo(id)%strings_file
+	string = strings(1)
+	bbspline = .false.
+	if( string(1:4) == 'wind' .and. nintp == 4 ) then
+	  if( nint(getpar('ibwind')) == 2 ) then
+	    bbspline = .true.
+	  end if
+	end if
+
 	if( bconst .or. bonepoint ) then
 	  if( bconst ) then
 	    val = pinfo(id)%data(1,1,ivar,1)
@@ -2557,6 +2574,26 @@
 	      if( vals(j) == flag ) bflag = .true.
 	    end do
 	    if( .not. bflag ) val = rd_intp_neville(nintp,time,vals,t)
+
+	    if( bbspline .and. .not. bflag ) then
+	      dvals = vals
+	      dval = val
+	      call reorder(nintp,ilast,time)
+	      call compute_relative_time(nintp,time,t,tt)
+	      call reorder(nintp,ilast,dvals)
+	      call buspline(tt,dvals,dval)
+	      val = dval
+	    end if
+
+	if( .false. ) then
+	iu = 80
+	write(iu,*) '------------------'
+	write(iu,*) tt,val,nintp
+	write(iu,*) real(time)
+	write(iu,*) real(dvals)
+	write(iu+10,*) t,val
+	end if
+
 	  end if
 	  do i=1,nexp
 	    do l=1,lexp
@@ -2567,6 +2604,10 @@
 	  end do
 	else
 	  time = pinfo(id)%time
+	  if( bbspline ) then
+	    call reorder(nintp,ilast,time)
+	    call compute_relative_time(nintp,time,t,tt)
+	  end if
 	  value = -888.
 	  if( bdebugs ) call iff_debug(id,zero,'before ttt')
 	  do i=1,nexp
@@ -2599,6 +2640,13 @@
 	        end if
 	      end if
 	      if( .not. bflag ) val = rd_intp_neville(nintp,time,vals,t)
+	    if( bbspline .and. .not. bflag ) then
+	      dvals = vals
+	      dval = val
+	      call reorder(nintp,ilast,dvals)
+	      call buspline(tt,dvals,dval)
+	      val = dval
+	    end if
 	      value(l,i) = val
 	      if( val == flag ) iflag = iflag + 1
 	    end do
@@ -2630,6 +2678,63 @@
 	end if
 
 	end subroutine iff_final_time_interpolate
+
+!****************************************************************
+
+	subroutine compute_relative_time(nintp,time,t,tt)
+
+	implicit none
+
+	integer nintp
+	double precision time(4)
+	double precision t
+	double precision tt
+
+	double precision dt
+
+	dt = time(2) - time(1)
+	if( time(3) - time(2) /= dt ) goto 99
+	if( time(4) - time(3) /= dt ) goto 99
+
+	tt = (t-time(2))/(time(3)-time(2))
+
+	return
+   99	continue
+	write(6,*) 'time values: ',t
+	write(6,*) time
+	write(6,*) time(2) - time(1)
+	write(6,*) time(3) - time(2)
+	write(6,*) time(4) - time(3)
+	stop 'error stop compute_relative_time: time spacing not uniform'
+	end
+
+!****************************************************************
+
+	subroutine reorder(nintp,ilast,dvals)
+
+! reorders the array
+
+	implicit none
+
+	integer nintp
+	integer ilast
+	double precision dvals(0:3)
+
+	integer i,ip
+	double precision daux(0:3)
+
+	if( ilast == 4 ) return		! already ordered
+	ip = ilast - 1			! shift from [1-4] to [0-3]
+
+	daux = dvals
+
+	do i=0,3
+	  ip = mod(ip+1,4)
+	  dvals(i) = daux(ip)
+	end do
+
+	
+	end
 
 !****************************************************************
 

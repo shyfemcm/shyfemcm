@@ -110,6 +110,7 @@
 ! 13.10.2024    ggu     deal with INTEL_BUG
 ! 13.11.2024    ggu     marked old code with INTEL_BUG_OLD
 ! 03.12.2024    lrp     new parameter irain for the coupled model
+! 25.01.2025    ggu     tentative cubic interpolation for wind (bbspline)
 !
 ! notes :
 !
@@ -323,9 +324,18 @@
 	integer nodes(1)
 	logical batm
 
+	logical bbspline	!interpolate wind with 4th order bspline
+	logical bbwrite		!write spline output to file fort.77
+	real getpar
+
 !------------------------------------------------------------------
 ! batm is true if first ocean timestep of coupled atm-oce timestep
 !------------------------------------------------------------------
+
+	bbspline = .false.
+	bbspline = .true.
+	bbwrite = .true.
+	bbwrite = .false.
 
 	batm = iatm == 1 .and. icall_nuopc == 1
 
@@ -359,6 +369,7 @@
           call iff_get_file_nvar(windfile,nvar)
           if( nvar <= 0 ) nvar = 3      !if no file fake 3
           nintp = 2
+          if( bbspline .and. nint(getpar('ibwind')) > 0 ) nintp = 4
           what = 'wind'
           vconst = (/ 0., 0., pstd, 0. /)
 	  call iff_init(dtime0,windfile,nvar,nkn,0,nintp,nodes,vconst,idwind)
@@ -510,6 +521,12 @@
 
 	if( .not. iff_is_constant(idrain) .or. icall == 1 .or. batm ) then
 	  call meteo_convert_rain_data(idrain,nkn,metrain)
+	end if
+
+	if( bbspline ) then
+	  if( bbwrite .and. icall > 1 ) then
+	    write(77,*) dtime,metws(1),wxv(1),wyv(1)
+	  end if
 	end if
 
 !------------------------------------------------------------------
