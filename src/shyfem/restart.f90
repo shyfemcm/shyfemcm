@@ -99,6 +99,7 @@
 ! 02.05.2023    ggu     fix mpi bug for nlv==1
 ! 26.01.2025    ggu     fix mpi bug for ibfm /= 0 (only master writes)
 ! 08.03.2025    ggu     extracted mod_restart in its own file
+! 09.03.2025    ggu     call shympi_barrier after finishing restart file
 !
 ! notes :
 !
@@ -661,6 +662,7 @@
         end if
 
 	if( bmaster ) flush(iunit)
+	call shympi_barrier
 
         end
 

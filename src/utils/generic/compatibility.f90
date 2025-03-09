@@ -31,6 +31,7 @@
 !
 ! 28.01.2025    ggu     written from scratch
 ! 08.03.2025    ggu     added compiler information
+! 09.03.2025    ggu     added compiler profile
 
 ! notes :
 !
@@ -53,6 +54,8 @@
 !============================================================
 
 	implicit none
+
+	logical, parameter :: comp_debug = .false.
 
         INTERFACE gfindloc
         MODULE PROCEDURE         gfindloc_i1
@@ -98,22 +101,48 @@
 	character*40 version
 
 #if defined(__GFORTRAN__)
-	write(6,*) 'gfortran compiler'
+	if( comp_debug ) write(6,*) 'gfortran compiler'
 	nvers = __GNUC__
 	version = __VERSION__
 	string = 'gfortran (' // trim(version) // ')'
 	!write(6,*) 'version = ',trim(version)
 	!write(6,*) 'major version = ',nvers
 #elif defined(__INTEL_COMPILER)
-	write(6,*) 'intel compiler'
+	if( comp_debug ) write(6,*) 'intel compiler'
 	nvers = __INTEL_COMPILER
 	string = 'INTEL (' // __INTEL_COMPILER // ')'
 	!write(6,*) 'version = ',nvers
 	!write(6,*) 'major version = ',nvers/100
 #else
-	write(6,*) 'compiler not recognized'
+	if( comp_debug ) write(6,*) 'compiler not recognized'
 	string = 'unknown compiler'
 #endif
+
+	end
+
+!************************************************************
+
+	subroutine compiler_profile(string)
+
+	implicit none
+
+	character*(*) string
+
+	integer nvers
+	character*40 cprofile
+
+#if defined(SHYFEM_NORMAL)
+	cprofile = 'normal'
+#elif defined(SHYFEM_CHECK)
+	cprofile = 'check'
+#elif defined(SHYFEM_SPEED)
+	cprofile = 'speed'
+#else
+	cprofile = 'unknown'
+#endif
+
+	if( comp_debug ) write(6,*) 'compiler profile: ',trim(cprofile)
+	string = cprofile
 
 	end
 
@@ -129,6 +158,7 @@
 
 	integer nvers
 	character*40 version
+	character*40 cprofile
 	character*80 string
 
 #if defined(__GFORTRAN__)
@@ -145,6 +175,18 @@
 #else
 	write(6,*) 'compiler not recognized'
 #endif
+
+#if defined(SHYFEM_NORMAL)
+	cprofile = 'normal'
+#elif defined(SHYFEM_CHECK)
+	cprofile = 'check'
+#elif defined(SHYFEM_SPEED)
+	cprofile = 'speed'
+#else
+	cprofile = 'unknown'
+#endif
+	write(6,*) 'compiler profile: ',trim(cprofile)
+	stop
 
 	call compiler(string)
 	write(6,*) 'compiler: ',trim(string)
