@@ -352,17 +352,19 @@ nuopc: nuopc_info nuopc_clean nuopc_shyfem.mk libnuopc
 
 #------------------------------------------------------------------------
 
-clean:
+clean: cleanlinks
 	-rm -f *.o
 	-rm -f a.out
 	-rm -f $(EXES)
-	-rm -f $(BINDIR)/$(EXES)
 	-rm -f *.tmp *.bak
 
 cleanall: clean
 	-rm -f $(MODDIR)/*.mod
 	-rm -f $(LIBDIR)/libshy.a 
 	-rm -f $(LIBDIR)/lib$(LIBNUOPC).a
+
+cleanlinks:
+	@$(FEMBIN)/symlink -remove $(FEMBIN) $(EXES)
 
 #update:
 #	cp $(EXES) /home/georg/work/shyfem_repo/shyfem-mpi/bin
@@ -401,7 +403,6 @@ cleanall: clean
 ../../lib/mod/mod_nudge.mod: nudge.o
 ../../lib/mod/mod_parwaves.mod: waves_admin.o
 ../../lib/mod/mod_renewal_time.mod: water_ren_time.o
-../../lib/mod/mod_restart.mod: restart.o
 ../../lib/mod/mod_sedtrans05.mod: sedim_util.o
 ../../lib/mod/mod_shyfem.mod: shyfem_subs.o
 ../../lib/mod/mod_subset.mod: subset.o
@@ -875,7 +876,14 @@ restart.o: ../../lib/mod/basin.mod ../../lib/mod/levels.mod \
 		../../lib/mod/mod_geom_dynamic.mod \
 		../../lib/mod/mod_hydro.mod \
 		../../lib/mod/mod_hydro_vel.mod \
+		../../lib/mod/mod_restart.mod \
 		../../lib/mod/mod_ts.mod ../../lib/mod/shympi.mod 
+rstinf.o: ../../lib/mod/basin.mod ../../lib/mod/clo.mod \
+		../../lib/mod/levels.mod \
+		../../lib/mod/mod_geom_dynamic.mod \
+		../../lib/mod/mod_hydro.mod \
+		../../lib/mod/mod_hydro_vel.mod \
+		../../lib/mod/mod_ts.mod 
 sedim_admin.o: ../../lib/mod/basin.mod ../../lib/mod/evgeom.mod \
 		../../lib/mod/intp_fem_file.mod \
 		../../lib/mod/levels.mod ../../lib/mod/mkonst.mod \
@@ -912,6 +920,7 @@ shyfem_subs.o: ../../lib/mod/basin.mod \
 		../../lib/mod/mod_bound_dynamic.mod \
 		../../lib/mod/mod_bound_geom.mod \
 		../../lib/mod/mod_bstress.mod \
+		../../lib/mod/mod_compatibility.mod \
 		../../lib/mod/mod_conz.mod \
 		../../lib/mod/mod_debug.mod \
 		../../lib/mod/mod_depth.mod \

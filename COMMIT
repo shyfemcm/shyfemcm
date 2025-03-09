@@ -1,5 +1,19 @@
 ============================================================
 
+Sun Mar  9 23:09:56 CET 2025
+
+new version 8.2.4
+
+ LOG                           |  72 ++++++++++++++++++++++++++++++++++++++++++
+ RELEASE_NOTES                 |   8 +++++
+ docs/final/shyfem.pdf         | Bin 337638 -> 337852 bytes
+ src/shyfem/Makefile           |  15 +++++++--
+ src/utils/shyutil/version.f90 |  11 ++++---
+ src/utils/shyutilmpi/Makefile |   2 ++
+ 6 files changed, 100 insertions(+), 8 deletions(-)
+
+============================================================
+
 Wed Jan 22 10:42:12 CET 2025
 
 New version 8_2_3
