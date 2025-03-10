@@ -420,6 +420,7 @@
 
         character*10, parameter :: version = '8.2.4'
         character*10, parameter :: commit  = '2025-03-09'
+        character*50, parameter :: lcommit  = ''
         character*17, parameter :: text    = 'SHYFEM VERSION = '
 
         character*40, parameter :: string = text//version//'  '//commit
@@ -481,6 +482,22 @@
 	character*(*) comm
 
 	comm = commit
+
+	end
+
+!*****************************************************************
+
+        subroutine get_shyfem_local_commit(lcomm)
+
+! returns local commit of model
+
+	use shyfem_version
+
+	implicit none
+
+	character*(*) lcomm
+
+	lcomm = lcommit
 
 	end
 
