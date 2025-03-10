@@ -147,6 +147,7 @@
 ! 01.04.2020	ggu	new routine make_reg_box()
 ! 11.04.2022	ggu	new routine condense_valid_coordinates for single nodes
 ! 25.11.2022	ggu	new routine recollocate_nodes() and ipg array
+! 20.02.2025	ggu	new routine create_reg()
 !
 ! notes :
 !
@@ -275,6 +276,57 @@
 	end
 
 !******************************************************
+!******************************************************
+!******************************************************
+
+	subroutine create_reg(dx,dy,xmin,ymin,xmax,ymax,regpar)
+
+	implicit none
+
+	real, intent(in) :: dx,dy
+	real, intent(in) :: xmin,ymin,xmax,ymax
+	real, intent(out) :: regpar(7)
+
+	integer nx,ny
+	real x0,y0,x1,y1
+	real flag
+
+        if( dx <= 0. .or. dy <= 0. ) goto 96
+        if( xmin >= xmax ) goto 96
+        if( ymin >= ymax ) goto 96
+
+        x0 = int(xmin/dx)*dx
+        y0 = int(ymin/dy)*dy
+
+        nx = 2 + (xmax - xmin) / dx
+        x1 = x0 + (nx-1)*dx
+        if( x1 < xmax ) nx = nx + 1
+        x1 = x0 + (nx-1)*dx
+
+        ny = 2 + (ymax - ymin) / dy
+        y1 = y0 + (ny-1)*dy
+        if( y1 < ymax ) ny = ny + 1
+        y1 = y0 + (ny-1)*dy
+
+        if( x0 > xmin .or. x1 < xmax ) goto 95
+        if( y0 > ymin .or. y1 < ymax ) goto 95
+
+	call getgeoflag(flag)
+	call setreg(regpar,nx,ny,x0,y0,dx,dy,flag)
+
+	return
+   95   continue
+        write(6,*) x0,xmin,xmax,x1
+        write(6,*) y0,ymin,ymax,y1
+        stop 'error stop create_reg: internal error (1)'
+   96   continue
+        write(6,*) 'dx,dy: ',dx,dy
+        write(6,*) 'xmin,xmax: ',xmin,xmax
+        write(6,*) 'ymin,ymax: ',ymin,ymax
+        stop 'error stop create_reg: error in input parameters'
+	end
+
+!******************************************************
 
 	subroutine setreg(regpar,nx,ny,x0,y0,dx,dy,flag)
 
@@ -331,11 +383,89 @@
 
         x1 = x0 + (nx-1)*dx
         y1 = y0 + (ny-1)*dy
-        write(6,'(4x,a,2i12)') 'nx,ny: ',nx,ny
-        write(6,'(4x,a,2f12.4)') 'x0,y0: ',x0,y0
-        write(6,'(4x,a,2f12.4)') 'x1,y1: ',x1,y1
-        write(6,'(4x,a,2f12.4)') 'dx,dy: ',dx,dy
-        write(6,'(4x,a,2f12.4)') 'flag : ',flag
+        write(6,'(4x,a,2i16)') 'nx,ny: ',nx,ny
+        write(6,'(4x,a,2f16.6)') 'x0,y0: ',x0,y0
+        write(6,'(4x,a,2f16.6)') 'x1,y1: ',x1,y1
+        write(6,'(4x,a,2f16.6)') 'dx,dy: ',dx,dy
+        write(6,'(4x,a,2f16.6)') 'flag : ',flag
+
+	end
+
+!******************************************************
+
+	subroutine extend_reg(next,nx,ny,zreg)
+
+	implicit none
+
+	integer next
+	integer nx,ny
+	real zreg(nx,ny)
+
+	integer n,nflag
+	real flag
+
+	n = 0
+	do
+	  n = n + 1
+	  if( next > 0 .and. n > next ) exit		!done with extension
+	  call extend_reg_by_one(nx,ny,zreg,nflag)
+	  if( nflag == 0 ) exit				!no more flagged values
+	end do
+
+	end
+
+!******************************************************
+
+	subroutine extend_reg_by_one(nx,ny,zreg,nflag)
+
+	implicit none
+
+	integer nx,ny
+	real zreg(nx,ny)
+	integer nflag
+
+	integer n,ix,iy,ixx,iyy
+	double precision accum
+	real, allocatable :: zaux(:,:)
+	real flag
+
+	call getgeoflag(flag)
+
+	allocate(zaux(nx,ny))
+	zaux = zreg
+	nflag = 0
+
+	do iy=1,ny
+	  do ix=1,nx
+	    if( zreg(ix,iy) /= flag ) cycle
+	    nflag = nflag + 1
+	    n = 0
+	    accum = 0.
+	    ixx = ix-1
+	    if( ixx >= 1 .and. zreg(ixx,iy) /= flag ) then
+	      n = n + 1
+	      accum = accum + zreg(ixx,iy)
+	    end if
+	    ixx = ix+1
+	    if( ixx <= nx .and. zreg(ixx,iy) /= flag ) then
+	      n = n + 1
+	      accum = accum + zreg(ixx,iy)
+	    end if
+	    iyy = iy-1
+	    if( iyy >= 1 .and. zreg(ix,iyy) /= flag ) then
+	      n = n + 1
+	      accum = accum + zreg(ix,iyy)
+	    end if
+	    iyy = iy+1
+	    if( iyy <= ny .and. zreg(ix,iyy) /= flag ) then
+	      n = n + 1
+	      accum = accum + zreg(ix,iyy)
+	    end if
+	    if( n > 0 ) zaux(ix,iy) = accum / n
+	  end do
+	end do
+
+	zreg = zaux
 
 	end
 
@@ -1377,7 +1507,8 @@
 
 !****************************************************************
 
-	subroutine intp_reg( nx, ny, x0, y0, dx, dy, flag, regval, np, xp, yp, femval, ierr )
+	subroutine intp_reg( nx, ny, x0, y0, dx, dy, flag &
+     &			, regval, np, xp, yp, femval, ierr )
 
 ! interpolation of regular array onto fem grid - general routine
 !

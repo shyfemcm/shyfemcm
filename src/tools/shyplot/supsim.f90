@@ -144,6 +144,7 @@
 !  13.07.2021	ggu	better box plotting
 !  21.10.2021	ggu	allow for vertical velocity overlay
 !  01.02.2023	ggu	use real area in plobox()
+!  08.03.2025	ggu	plot nodal code
 ! 
 !  notes :
 ! 
@@ -783,7 +784,7 @@
 
 ! **********************************************************
 
-	subroutine ploarea(nel,area,title)
+	subroutine ploarea(n,area,mode,title)
 
 !  plots element type values
 
@@ -791,15 +792,16 @@
 
 	implicit none
 
-	integer nel
-	integer area(nel)
+	integer n
+	integer area(n)
+	integer mode		!2: node  3: elem
         character*(*) title
 
 	logical bmincol
 	integer iamax,iamin
 	real pmin,pmax,flag
-	integer color(nel)
-	real pa(nel)
+	integer color(n)
+	real pa(n)
 	real getpar
 
 	bmincol = .true.
@@ -816,13 +818,13 @@
 
 	iamin = minval(color)
 	iamax = maxval(color)
-        if( bminmax ) write(6,*) 'min/max: ',nel,iamin,iamax
+        if( bminmax ) write(6,*) 'min/max: ',n,iamin,iamax
 	call colset_reg(iamin,iamax)
 
 	pa = color
 
         call qcomm('Plotting area of '//trim(title))
-        call isoline(pa,nel,0.,3)			!plot on elements
+        call isoline(pa,n,0.,mode)			!plot on elements
         !call colsh
 
 	call bash(4)	! overlays grid
@@ -1596,14 +1598,14 @@
 	call adjust_no_plot_area
 	call make_dry_node_mask(bwater,bkwater)
 
-!  only boundary line
+!  only boundary line (plot 1)
 
 	call qstart
 	call bash(0)
 	call bash(2)
 	call qend
 
-!  grid with black
+!  grid with black (plot 2)
 
 	call qstart
 	call bash(0)
@@ -1611,7 +1613,7 @@
 	call bash(2)
 	call qend
 
-!  grid with gray
+!  grid with gray (plot 3)
 
 	call qstart
 	call bash(0)
@@ -1619,7 +1621,7 @@
 	call bash(2)
 	call qend
 
-!  bathymetry (gray or color)
+!  bathymetry (gray or color) (plot 4)
 
 	if( belem ) then
 	  call ploeval(nkn,hev,'basin')
@@ -1627,7 +1629,7 @@
 	  call ploval(nkn,hkv,'basin')
 	end if
 
-!  bathymetry with grid (black)
+!  bathymetry with overlay grid (black) (plot 5)
 
 	call qstart
 	call bash(0)
@@ -1645,7 +1647,7 @@
 	call bash(2)
 	call qend
 
-!  bathymetry with grid (gray)
+!  bathymetry with overlay grid (gray) (plot 6)
 
 	call qstart
 	call bash(0)
@@ -1663,19 +1665,24 @@
 	call bash(2)
 	call qend
 
-!  element code
+!  element code (plot 7)
 
 	if( maxval(iarv) > 0 ) then
-	  write(6,*) 'plotting element code...'
-	  call ploarea(nel,iarv,'element code')
+	  write(6,*) 'plotting element code... ',maxval(iarv)
+	  call ploarea(nel,iarv,3,'element code')
 	  if( bbox ) call plobox('box information')
 	end if
 
-!  partition
+!  nodal code (plot 8)
 
-	call plot_partition
+	if( maxval(iarnv) > 0 ) then
+	  write(6,*) 'plotting nodal code... ',maxval(iarnv)
+	  call ploarea(nkn,iarnv,2,'nodal code')
+	end if
 
-!  boundary line with regular overview grid
+	!call plot_partition
+
+!  boundary line with regular overview grid (plot 9)
 
 	call qstart
 	call bash(0)
@@ -1739,7 +1746,7 @@
 
 	if( nep > 0 ) then
 	  write(6,*) 'plotting element partition...'
-	  call ploarea(nel,area_elem,'element partition')
+	  call ploarea(nel,area_elem,3,'element partition')
 	end if
 
 	if( nnp > 0 ) then
@@ -1755,7 +1762,7 @@
 	    if( bunique ) values(ie) = 1
 	  end do
 	  write(6,*) 'plotting node partition...'
-	  call ploarea(nel,values,'node partition')
+	  call ploarea(nel,values,3,'node partition')
 	end if
 
 	end

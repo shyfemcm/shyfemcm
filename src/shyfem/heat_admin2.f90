@@ -98,6 +98,7 @@
 ! 06.09.2024    lrp     nuopc-compliant
 ! 13.09.2024    lrp     iatm and coupling with atmospheric model
 ! 21.09.2024    ggu     new handle_skin() for handling skin temperature output
+! 08.02.2025    ggu     some new debug code
 !
 ! notes :
 !
@@ -177,7 +178,7 @@
 	use mod_meteo
 	use mod_ts
 	use levels
-        use basin, only : xgv,ygv  
+        use basin, only : xgv,ygv,ipv
         use mod_hydro_print  
 	use heat_const
 	use meteo_forcing_module, only : iatm
@@ -193,9 +194,9 @@
 
         logical byes
         logical buseice,bicecover
-        integer levdbg,iud,ksd
-	integer k
-	integer l,lmax,lmin,kspec
+        integer levdbg,iud,ksd,ksd1,iudbg
+	integer k,kext,kssalt
+	integer l,lmax,lmin,kspec,ilist
 	integer mode
 	integer days,im,ih
 	integer ys(8)
@@ -216,6 +217,8 @@
         real uub,vvb        
 	real ik1,ik2
 	real tice,u,v,uv
+
+	real, parameter :: epsice = 1.e-5
 
 	double precision ddq
 	double precision atime
@@ -397,11 +400,27 @@
 !---------------------------------------------------------
 
         ddq = 0.
+	ilist = 0
+	kssalt = 0
 
 	do k=1,nkn
 
+	  kext = ipv(k)
 	  lmax = ilhkv(k)
 	  lmin = jlhkv(k)
+
+	  if( kssalt > 0 .and. saltv(1,k) > 50. ) then
+	    if( ilist == 0 ) write(167,*) aline
+	    ilist = ilist + 1
+	    write(167,*) ilist,k,kext,is_dry_node(k),saltv(1,k)
+	  end if
+	  if( kext == kssalt .and. saltv(1,k) > 50. ) then
+	    iudbg = 170
+	    call check_set_unit(iudbg)
+	    call check_node(k)
+	    call check_elems_around_node(k)
+	  end if
+
 	  if (is_dry_node(k)) then	!do not compute if node is dry
 	    dtw(k)   = 0.
 	    tws(k)   = temp(lmin,k)
@@ -412,6 +431,8 @@
 	  tm = temp(lmin,k)
 	  salt = saltv(lmin,k)
 	  call get_ice_cover(k,cice)
+	  !if( cice < 0. .or. cice > 1. ) goto 98
+	  if( cice < -epsice .or. cice > 1.+epsice ) goto 98
 	  fice_cover = aice*cice
 	  fice_free  = 1. - fice_cover
 	  bicecover = fice_cover > 0.
@@ -489,6 +510,9 @@
 	    call ice_water_exchange(tm,tice,uv,qice)
 	    if( abs(qice) > 100000. ) goto 99
 	    if( .not. bheat ) qice = 0.
+	  else
+	    tice = 0.
+	    uv = 0.
 	  end if
 
 	  !------------------------------------------------
@@ -507,14 +531,18 @@
           ! debug output
           !------------------------------------------------
 
-	  ksd = 848
+	  ksd1 = 877
+	  ksd = 1461
+	  ksd1 = 0
 	  ksd = 0
-          if( k == ksd ) then
+          if( kext == ksd .or. kext == ksd1 ) then
             iud = 667
             write(iud,*) '-------------------------'
             write(iud,*) atime
             write(iud,*) aline
-            write(iud,*) fice_free,qice
+            write(iud,*) k,kext
+            write(iud,*) fice_cover,qice,aice,cice
+            write(iud,*) fice_free,fice_pen
             write(iud,*) qlong,qlat,qsens,qss
             write(iud,*) tm,tice,uv,qice
             write(iud,*) tm
@@ -640,6 +668,10 @@
 !---------------------------------------------------------
 
 	return
+   98	continue
+	write(6,*) 'impossible value for cice:'
+	write(6,*) k,ipv(k),cice
+	stop 'error stop qflux3d: impossible value for cice'
    99	continue
 	write(6,*) 'error in heat flux'
 	write(6,*) 'k',k,ipext(k),iheat

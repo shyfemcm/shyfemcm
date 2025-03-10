@@ -144,7 +144,7 @@ PARALLEL_MPI = NONE
 PARTS = NONE
 #PARTS = METIS
 #PARTS = PARMETIS
-METISDIR =
+METISDIR = 
 METISDIR = ${METIS_HOME}
 #METISDIR = /usr/local
 #METISDIR = $(HOME)/lib/metis
@@ -401,7 +401,7 @@ ESMFDIR = ${ESMF_HOME}
 # DEFINE VERSION
 ##############################################
 
-RULES_MAKE_VERSION = 1.10
+RULES_MAKE_VERSION = 1.11
 DISTRIBUTION_TYPE = experimental
 
 ##############################################
@@ -563,6 +563,7 @@ ifeq ($(COMPILER_PROFILE),NORMAL)
   OPTIMIZE = MEDIUM
   WARNING = true
   BOUNDS = false
+  XFLAG = -DSHYFEM_NORMAL
 endif
 
 ifeq ($(COMPILER_PROFILE),CHECK)
@@ -572,6 +573,7 @@ ifeq ($(COMPILER_PROFILE),CHECK)
   OPTIMIZE = NONE
   WARNING = true
   BOUNDS = true
+  XFLAG = -DSHYFEM_CHECK
 endif
 
 ifeq ($(COMPILER_PROFILE),SPEED)
@@ -581,6 +583,7 @@ ifeq ($(COMPILER_PROFILE),SPEED)
   OPTIMIZE = HIGH
   WARNING = false
   BOUNDS = false
+  XFLAG = -DSHYFEM_SPEED
 endif
 
 ifeq ($(CPROF),false)
@@ -644,8 +647,10 @@ ifeq ($(GMV_LE_8),true)
   WNOINIT = -Wno-uninitialized
 endif
 WTABS = -Wno-tabs
+FGNU_allow-argument-mismatch = -fallow-argument-mismatch
 ifeq ($(GMV_LE_4),true)
   WTABS = -Wtabs
+  FGNU_allow-argument-mismatch = 
 endif
 
 # next solves compiler warnings of possible not initialized code (version <= 8)
@@ -665,6 +670,7 @@ FGNU_GENERAL = -cpp -std=f95
 ifdef MODDIR
   FGNU_GENERAL = -cpp -J$(MODDIR)
 endif
+FGNU_GENERAL += $(XFLAG)
 
 FGNU_PROFILE = 
 ifeq ($(PROFILE),true)
@@ -748,8 +754,9 @@ ifeq ($(FORTRAN_COMPILER),GNU_G77)
   LINKER	= $(F77)
   LFLAGS	= $(FGNU_OPT) $(FGNU_PROFILE) $(FGNU_OMP)
   FFLAGS	= $(LFLAGS) $(FGNU_NOOPT) $(FGNU_WARNING)
-  FFLAG_SPECIAL	= $(LFLAGS) $(FGNU_WARNING) -fallow-argument-mismatch
+  FFLAG_SPECIAL	= $(LFLAGS) $(FGNU_WARNING) $(FGNU_allow-argument-mismatch)
   FINFOFLAGS	= --version
+  MAJOR 	= $(GMV)
 endif
 
 ifeq ($(FORTRAN_COMPILER),GNU_GFORTRAN)
@@ -764,8 +771,10 @@ ifeq ($(FORTRAN_COMPILER),GNU_GFORTRAN)
   LINKER	= $(F77)
   LFLAGS	= $(FGNU_OPT) $(FGNU_PROFILE) $(FGNU_OMP)
   FFLAGS	= $(LFLAGS) $(FGNU_NOOPT) $(FGNU_WARNING) $(FGNU_GENERAL)
-  FFLAG_SPECIAL	= $(LFLAGS) $(FGNU_WARNING) $(FGNU_GENERAL) -fallow-argument-mismatch
+  FFLAG_SPECIAL	= $(LFLAGS) $(FGNU_WARNING) $(FGNU_GENERAL) \
+				$(FGNU_allow-argument-mismatch)
   FINFOFLAGS	= --version
+  MAJOR 	= $(GMV)
 endif
 
 ##############################################
@@ -782,6 +791,7 @@ FPGI_GENERAL =
 ifdef MODDIR
   FPGI_GENERAL = -module $(MODDIR)
 endif
+FPGI_GENERAL += $(XFLAG)
 
 FPGI_OMP   =
 ifeq ($(PARALLEL_OMP),true)
@@ -846,6 +856,7 @@ FIBM_PROFILE =
 ifeq ($(PROFILE),true)
   FIBM_PROFILE = 
 endif
+FIBM_GENERAL += $(XFLAG)
 
 FIBM_WARNING = 
 ifeq ($(WARNING),true)
@@ -877,7 +888,7 @@ ifeq ($(FORTRAN_COMPILER),IBM)
   F77		= $(FIBM)
   F95		= xlf_r
   LINKER	= $(FIBM)
-  FFLAGS	= $(FIBM_OMP)
+  FFLAGS	= $(FIBM_OMP) $(FIBM_GENERAL)
   FFLAG_SPECIAL	= $(FFLAGS)
   LFLAGS	= $(FIBM_OMP) -qmixed  -b64 -bbigtoc -bnoquiet -lpmapi -lessl -lmass -lmassvp4
 endif
@@ -892,6 +903,7 @@ FPG_PROFILE =
 ifeq ($(PROFILE),true)
   FPG_PROFILE = -Mprof=func
 endif
+FPG_GENERAL += $(XFLAG)
 
 FPG_WARNING = 
 ifeq ($(WARNING),true)
@@ -925,7 +937,7 @@ ifeq ($(FORTRAN_COMPILER),PORTLAND)
   F95		= $(FPG95)
   LINKER	= $(F77)
   LFLAGS	= $(FPG_OPT) $(FPG_PROFILE) $(FPG_OMP)
-  FFLAGS	= $(LFLAGS) $(FPG_NOOPT) $(FPG_WARNING)
+  FFLAGS	= $(LFLAGS) $(FPG_NOOPT) $(FPG_WARNING) $(FPG_GENERAL)
   FFLAG_SPECIAL	= $(FFLAGS)
   FINFOFLAGS	= -v
 endif
@@ -976,6 +988,7 @@ FINTEL_GENERAL = -fpp
 ifdef MODDIR
   FINTEL_GENERAL = -fpp -module $(MODDIR) -diag-disable=10448
 endif
+FINTEL_GENERAL += $(XFLAG)
 
 FINTEL_PROFILE = 
 ifeq ($(PROFILE),true)
@@ -995,6 +1008,7 @@ ifeq ($(BOUNDS),true)
 endif
 
 FINTEL_NOOPT = -g -traceback
+FINTEL_NOOPT = 
 ifeq ($(DEBUG),true)
   FINTEL_TRAP = -fp-trap-all=common
   FINTEL_TRAP = -ftrapuv -debug all -fpe0
@@ -1057,6 +1071,7 @@ ifeq ($(FORTRAN_COMPILER),INTEL)
   FFLAGS	= $(LFLAGS) $(FINTEL_NOOPT) $(FINTEL_WARNING) $(FINTEL_GENERAL)
   FFLAG_SPECIAL = $(FINTEL_OMP) $(FINTEL_GENERAL)
   FINFOFLAGS	= -v
+  MAJOR 	= $(IMV)
 endif
 
 ##############################################

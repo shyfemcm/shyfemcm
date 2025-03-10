@@ -44,6 +44,7 @@ OBJ  = \
 	io_off.o \
 	trace_point.o \
 	info_output.o \
+	mod_restart.o \
 
 OBSOLETE = \
 	evgeom.o \
@@ -168,6 +169,7 @@ zip:	cleanall
 ../../../lib/mod/intp_fem_file.mod: intp_fem_file.o
 ../../../lib/mod/mod_info_output.mod: info_output.o
 ../../../lib/mod/mod_offline.mod: io_off.o
+../../../lib/mod/mod_restart.mod: mod_restart.o
 ../../../lib/mod/mod_trace_point.mod: trace_point.o
 ../../../lib/mod/shyutil.mod: shy_util1.o
 bnd_admin.o: ../../../lib/mod/mod_bnd.mod \
@@ -184,6 +186,7 @@ intp_fem_file.o: ../../../lib/mod/shympi.mod
 io_off.o: ../../../lib/mod/basin.mod \
 		../../../lib/mod/mod_trace_point.mod \
 		../../../lib/mod/shympi.mod 
+mod_restart.o: ../../../lib/mod/shympi.mod
 shy_util.o: ../../../lib/mod/basin.mod ../../../lib/mod/levels.mod \
 		../../../lib/mod/mod_trace_point.mod \
 		../../../lib/mod/shyfile.mod \

@@ -89,6 +89,8 @@
 ! 04.12.2024    ggu     implement bmpi_allgather for gather routines
 ! 07.12.2024    ggu     big changes: make sure arrays are same length for reduce
 ! 13.12.2024    ggu     error_stop() implemented
+! 28.01.2025    ggu     compatibility for gfortran 4 inserted
+! 06.02.2025    ggu     new routines shympi_exchange_fix_node/elem()
 
 !******************************************************************
 
@@ -202,6 +204,8 @@
 	integer,save,allocatable :: ip_sort_elem(:)	!sorted internal elems
 
 	! next are global arrays for external node/elem numbers
+	! ip_ext_node(nkn_global)
+	! ip_ext_elem(nel_global)
 
 	integer,pointer :: ip_ext(:) !pointer to  external nums
 	integer,save,target,allocatable :: ip_ext_node(:) !global external nums
@@ -255,6 +259,14 @@
 !-------------------------------------------------------
 !	exchange ghost node and element information
 !-------------------------------------------------------
+
+        INTERFACE shympi_exchange_fix_node
+        MODULE PROCEDURE  shympi_exchange_fix_node_i
+        END INTERFACE
+
+        INTERFACE shympi_exchange_fix_elem
+        MODULE PROCEDURE  shympi_exchange_fix_elem_i
+        END INTERFACE
 
         INTERFACE shympi_exchange_3d_node
         MODULE PROCEDURE  shympi_exchange_3d_node_r &
@@ -1140,6 +1152,66 @@
      &					,n,val_in,val_out)
 
 	end subroutine shympi_receive_r
+
+!******************************************************************
+!******************************************************************
+!******************************************************************
+
+	subroutine shympi_exchange_fix_node_i(nfix,val)
+
+	use basin
+
+	integer nfix
+	integer val(:,:)
+
+	logical, parameter :: belem = .false.
+	integer ni1,ni2
+	integer ilhkv(nkn)
+
+	if( bmpi_skip ) return
+
+	ni1 = size(val,1)
+	ni2 = size(val,2)
+
+	if( ni1 /= nfix .or. ni2 /= nkn ) then
+	  write(6,*) nfix,nkn,ni1,ni2
+	  stop 'error stop shympi_exchange_fix_node_i: incomp dim'
+	end if
+
+	ilhkv = nfix
+	call shympi_exchange_internal_i(belem,1,nfix,nkn,ilhkv &
+     &			,ghost_nodes_in,ghost_nodes_out,val)
+
+	end subroutine shympi_exchange_fix_node_i
+
+!*******************************
+
+	subroutine shympi_exchange_fix_elem_i(nfix,val)
+
+	use basin
+
+	integer nfix
+	integer val(:,:)
+
+	logical, parameter :: belem = .true.
+	integer ni1,ni2
+	integer ilhv(nel)
+
+	if( bmpi_skip ) return
+
+	ni1 = size(val,1)
+	ni2 = size(val,2)
+
+	if( ni1 /= nfix .or. ni2 /= nel ) then
+	  write(6,*) nfix,nel,ni1,ni2
+	  stop 'error stop shympi_exchange_fix_elem_i: incomp dim'
+	end if
+
+	ilhv = nfix
+	call shympi_exchange_internal_i(belem,1,nfix,nel,ilhv &
+     &			,ghost_elems_in,ghost_elems_out,val)
+
+	end subroutine shympi_exchange_fix_elem_i
 
 !******************************************************************
 !******************************************************************
@@ -2291,6 +2363,7 @@
 ! returns internal node number and id of domain given external node number
 
 	use basin
+	use mod_compatibility
 
 	integer, intent(in)  ::  ke	! external node number
 	integer, intent(out) ::  ki	! internal node number
@@ -2304,7 +2377,8 @@
 	  if( ipv(k) == ke ) exit
 	end do
 	if( k > nkn_unique ) k = 0
-	ka = findloc(ipv(1:nkn_unique),ke,1)
+	!ka = findloc(ipv(1:nkn_unique),ke,1)
+	ka = gfindloc(ipv(1:nkn_unique),ke)
 	if( k /= ka ) then
 	  write(6,*) k,ka,nkn_unique,my_id
 	  stop 'error stop shympi_find_node: internal (1)'
@@ -2341,6 +2415,7 @@
 ! returns internal elem number and id of domain given external elem number
 
 	use basin
+	use mod_compatibility
 
 	integer, intent(in)  ::  ieext	! external elem number
 	integer, intent(out) ::  ieint	! internal elem number
@@ -2354,7 +2429,8 @@
 	  if( ipev(ie) == ieext ) exit
 	end do
 	if( ie > nel_unique ) ie = 0
-	iee = findloc(ipev(1:nel_unique),ieext,1)
+	!iee = findloc(ipev(1:nel_unique),ieext,1)
+	iee = gfindloc(ipev(1:nel_unique),ieext)
 	if( ie /= iee ) stop 'error stop shympi_find_elem: internal (1)'
 
 	if( bmpi_skip ) then

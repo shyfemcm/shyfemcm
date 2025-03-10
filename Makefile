@@ -32,7 +32,7 @@ include ./Rules.make
 
 #---------------------------------------------------------------
 
-RULES_MAKE_EXPECTED = 1.10
+RULES_MAKE_EXPECTED = 1.11
 RULES_MAKE_COMPATIBILITY = RULES_MAKE_OK
 ifneq ($(RULES_MAKE_VERSION),"0.0")
   ifneq ($(RULES_MAKE_VERSION),$(RULES_MAKE_EXPECTED))
@@ -452,6 +452,7 @@ publish:
 compiler_version:
 	$(F77) $(FINFOFLAGS)
 	$(CC) $(CINFOFLAGS)
+	@echo "major compiler version: $(MAJOR)"
 
 last_commit:
 	@gittags | tail -1

@@ -125,6 +125,7 @@ src/tools/mesh/exgrd
 src/tools/hcbs/tvis
 src/tools/hcbs/xhcbs
 
+nuopc_shyfem.mk
 tmp_compile
 demopost
 

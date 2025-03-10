@@ -36,6 +36,7 @@
 ! 03.04.2018	ggu	changed VERS_7_5_43
 ! 16.02.2019	ggu	changed VERS_7_5_60
 ! 22.11.2020	ggu	some more comments
+! 20.02.2025	ggu	some refactoring
 !
 ! notes :
 !
@@ -46,39 +47,52 @@
      &                  ,rl,rlmax,sigma,rr,zanal)
 
 ! computes optimal interpolation
+!
+! normally only zanal is computed and returned
+! however, if bobs is .true. (background grid is given) then
+! bobs and zback are initialized to average values and returned back
+!
+! values of zobs == flag indicate no observation available
+! in this case the error covariance is increased by a factor of fact
+! (flag == -999 and fact == 100.)
 
 	implicit none
 
-	integer nobs		!size of observations
-	real xobs(nobs)		!x-coordinates of observations
-	real yobs(nobs)		!y-coordinates of observations
-	real zobs(nobs)		!values of observations
-	real bobs(nobs)		!background values at observation points
-	integer nback		!size of background field
-	logical bback		!background values are given
-	real xback(nback)	!x-coordinates of background
-	real yback(nback)	!y-coordinates of background
-	real zback(nback)	!values of background
-	real rl			!length scale for covariance
-	real rlmax		!max radius to be considered
-	real sigma(nobs)	!std of observations
-	real rr(nobs)		!std of observation error matrix
-	real zanal(nback)	!analysis on return
+	integer,intent(in):: nobs	!size of observations
+	real,intent(in):: xobs(nobs)	!x-coordinates of observations
+	real,intent(in):: yobs(nobs)	!y-coordinates of observations
+	real,intent(in):: zobs(nobs)	!values of observations
+	real,intent(inout):: bobs(nobs)	!background values at observation points
+	integer,intent(in):: nback	!size of background field
+	logical,intent(in):: bback	!background values are given
+	real,intent(in):: xback(nback)	!x-coordinates of background
+	real,intent(in):: yback(nback)	!y-coordinates of background
+	real,intent(inout):: zback(nback)	!values of background
+	real,intent(in):: rl(nobs)	!length scale for covariance
+	real,intent(in):: rlmax(nobs)	!max radius to be considered
+	real,intent(in):: sigma(nobs)	!std of background on obs points
+	real,intent(in):: rr(nobs)	!std of observation error matrix
+	real,intent(out):: zanal(nback)	!analysis on return
 
 	integer ivec(nobs)		!aux vector (n)
 	double precision dobs(nobs)	!increments at obs points (z-h(x^b))
 	double precision rvec(nobs)	!aux vector (n)
 	double precision rr2(nobs)	!square of observation error (n)
 	double precision sigma2(nobs)	!square of background field (n)
+	double precision rl2(nobs)	!square of background field (n)
+	double precision rlmax2(nobs)	!square of background field (n)
 	double precision rmat(nobs,nobs)!aux matrix (nxn)
 
 	double precision ani,ano,anr,cond
 	double precision rorig(nobs,nobs)!aux matrix (nxn)
 	double precision rind(nobs,nobs)!aux matrix (nxn)
+	double precision zobs1(nobs)	!zobserved changed internally
 
 	logical bcheck,bverbose
-	integer i,j,ki,kj,k,n,iacu
-	double precision rl2,rlmax2,rmean
+	integer i,j,ki,kj,k,n,iacu,no
+	double precision, parameter :: flag = -999.
+	double precision, parameter :: fact = 100.
+	double precision rmean
 	double precision xi,yi,xj,yj,xk,yk
 	double precision dist2,r,acu
 
@@ -87,13 +101,15 @@
 !	------------------------------------------
 
 	bverbose = .true.		!writes infomation to terminal
+	bverbose = .false.		!writes infomation to terminal
 	bcheck = .true.			!computes and writes some checks
 	n = nobs
-	rl2 = rl**2
-	rlmax2 = rlmax**2
 
+	rl2(:) = rl(:)**2
+	rlmax2(:) = rlmax(:)**2
 	sigma2(:) = sigma(:)**2
-	rr2(:) = rr(:)**2				!this is a vector
+	rr2(:) = rr(:)**2
+	zobs1 = zobs			!save zobs to not alter input value
 
 !	------------------------------------------
 !	if background not given create it
@@ -101,25 +117,41 @@
 
 	if( .not. bback ) then
 
-	  if( bverbose ) then
-	    write(6,*) 'no background field given... using mean'
-	  end if
-
 	  !------------------------------------------
 	  !compute mean of observations - set background to mean
 	  !------------------------------------------
 
-	  rmean = sum(zobs)/n
+	  no = 0
+	  rmean = 0.
+	  do i=1,n
+	    if( zobs(i) /= flag ) then
+	      no = no + 1
+	      rmean = rmean + zobs(i)
+	    else
+	      rr2(i) = ( fact*rr(i) )**2
+	    end if
+	  end do
+	  if( no == 0 ) stop 'error stop: no observations left'
+
+	  rmean = rmean/no
 	  zback = rmean
 	  bobs = rmean
 
+	  where( zobs1 == flag ) zobs1 = rmean
+
+	  if( bverbose ) then
+	    write(6,*) 'no background field given... using mean: ',rmean
+	  end if
+
 	end if
+
+	!write(6,*) bback,rmean
 
 !	------------------------------------------
 !	create observational innovation vector
 !	------------------------------------------
 
-	dobs = zobs - bobs
+	dobs = zobs1 - bobs
 
 !	------------------------------------------
 !	set up covariance matrix H P^b H^T
@@ -129,21 +161,21 @@
 	  write(6,*) 'setting up covariance matrix'
 	end if
 
+	rmat = 0.
 	do j=1,n
+	  if( zobs(j) == flag ) cycle
 	  xj = xobs(j)
 	  yj = yobs(j)
 	  do i=1,n
+	    if( zobs(i) == flag ) cycle
 	    xi = xobs(i)
 	    yi = yobs(i)
 	    dist2 = (xi-xj)**2 + (yi-yj)**2
 	    r = 0.
-	    if( dist2 <= rlmax2 ) r = sigma2(i) * exp( -dist2/rl2 )
+	    if( dist2 <= rlmax2(i) ) r = sigma2(i) * exp( -dist2/rl2(i) )
 	    rmat(i,j) = r
 	  end do
 	end do
-
-	!write(6,*) 'obs cor'
-	!write(6,*) rmat
 
 !	------------------------------------------
 !	add observation error matrix
@@ -152,9 +184,6 @@
 	do j=1,n
 	  rmat(j,j) = rmat(j,j) + rr2(j)
 	end do
-
-	!write(6,*) 'obs + err cor'
-	!write(6,*) rmat
 
 !	------------------------------------------
 !	invert matrix
@@ -166,9 +195,6 @@
 
 	if( bcheck ) rorig = rmat
 	call dmatinv(rmat,ivec,rvec,n,n)
-
-	!write(6,*) 'inverted'
-	!write(6,*) rmat
 
 	if( bcheck ) then
 	  call dmatnorm(ani,rmat,n,n)
@@ -187,6 +213,7 @@
 !	------------------------------------------
 
 	do i=1,n
+	  if( zobs(i) == flag ) cycle
 	  acu = 0.
 	  do j=1,n
 	    acu = acu + rmat(i,j) * dobs(j)
@@ -204,17 +231,18 @@
 	  iacu = 0
 	  acu = 0.
 	  do j=1,n
+	    if( zobs(j) == flag ) cycle
 	    xj = xobs(j)
 	    yj = yobs(j)
 	    dist2 = (xk-xj)**2 + (yk-yj)**2
 	    r = 0.
-	    if( dist2 .le. rlmax2 ) then
+	    if( dist2 .le. rlmax2(j) ) then
 	      iacu = iacu + 1
-	      r = sigma2(j) * exp( -dist2/rl2 )
+	      r = sigma2(j) * exp( -dist2/rl2(j) )
 	    end if
 	    acu = acu + r * rvec(j)
 	  end do
-	  if( iacu == 0 ) goto 99
+	  !if( iacu == 0 ) goto 99
 	  zanal(k) = zback(k) + acu
 	end do
 
@@ -224,8 +252,8 @@
 
 	return
    99	continue
-	write(6,*) acu,rl,rlmax
-	write(6,*) 'radius for rlmax too small: no pints inside'
+	write(6,*) j,acu,rl(j),rlmax(j)
+	write(6,*) 'radius for rlmax too small: no points inside'
 	stop 'error stop opt_intp: rlmax'
 	end
 
@@ -252,11 +280,12 @@
 	logical bback
 	integer i,j,ib
 	real x,y,dx,dy
-	real rl,rlmax
 	real xobs(nobs)
 	real yobs(nobs)
 	real zobs(nobs)
 	real bobs(nobs)
+	real rl(nobs)
+	real rlmax(nobs)
 	real rr(nobs)
 	real sigma(nobs)
 	real xback(nback)
@@ -324,12 +353,13 @@
 	logical bback
 	integer i,j,ib
 	real x,y,dx,dy
-	real rl,rlmax
 	double precision rms
 	real xobs(nobs)
 	real yobs(nobs)
 	real zobs(nobs)
 	real bobs(nobs)
+	real rl(nobs)
+	real rlmax(nobs)
 	real rr(nobs)
 	real sigma(nobs)
 	real xback(nback)

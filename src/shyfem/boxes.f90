@@ -107,6 +107,7 @@
 ! 16.12.2024	ggu	introduced barea3d and bdtarea3d
 ! 17.12.2024	ggu	bug fixes for vertical variables, still no 3dmass cons.
 ! 20.12.2024	ggu	finished 3d mass conservation check
+! 09.03.2025	ggu	avoid access out of bounds in finalize_nslayers()
 !
 ! notes :
 !
@@ -3666,7 +3667,15 @@
 	  nbs = nslayers(is)
 	  ib1 = isects(3,is)
 	  ib2 = isects(4,is)
-	  nb1 = nblayers(ib1)
+	  !write(6,*) is,nbs,ib1,ib2
+	end do
+
+	do is=1,nsect
+	  nbs = nslayers(is)
+	  ib1 = isects(3,is)
+	  ib2 = isects(4,is)
+	  if( ib1 > 0 ) nb1 = nblayers(ib1)
+	  if( ib2 <= 0 ) goto 99
 	  nb2 = nblayers(ib2)
 	  !write(6,*) is,ib1,ib2,nbs,nb1,nb2
 	  if( ib1 <= 0 ) nb1 = nb2	!do not use nb1
@@ -3698,6 +3707,15 @@
 	end do
 
 	stop 'stop debug_nslayers'
+   99	continue
+	write(6,*) 'info on sections:'
+	do is=1,nsect
+	  nbs = nslayers(is)
+	  ib1 = isects(3,is)
+	  ib2 = isects(4,is)
+	  write(6,*) is,nbs,ib1,ib2
+	end do
+	stop 'error stop finalize_nslayers: ib2 <= 0'
 	end
 
 !******************************************************************

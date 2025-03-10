@@ -12,8 +12,9 @@
 #
 #########################################################
 
-version=2.05
+version=2.06
 
+# 2.06	01.02.2025	bug fix for parsing time in date string
 # 2.05	17.10.2024	lt for dash substituted with dt
 # 2.04	06.05.2024	debug option and ParseTime()
 # 2.03	07.03.2024	adjust paths for helper routines
@@ -505,9 +506,9 @@ ParseTime()
   fi
     
   if [ -n "$time" ]; then
-    hour=$( echo $date | cut -d: -f1 )
-    minute=$( echo $date | cut -d: -f2 )
-    second=$( echo $date | cut -d: -f3 )
+    hour=$( echo $time | cut -d: -f1 )
+    minute=$( echo $time | cut -d: -f2 )
+    second=$( echo $time | cut -d: -f3 )
   fi
 
   [ -z "$hour" ] && hour="00"

@@ -896,7 +896,7 @@
 
 	subroutine tvd_exchange_single
 
-! exchanges upwind values - one by one - should be used only for bedug
+! exchanges upwind values - one by one - should be used only for debug
 
 	use shympi
 	use shympi_tvd

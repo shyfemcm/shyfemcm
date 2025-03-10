@@ -190,7 +190,6 @@ zip:	cleanall
 ../../../lib/mod/flxfile.mod: io_flx.o
 ../../../lib/mod/heat_const.mod: heat_const.o
 ../../../lib/mod/levels.mod: levels.o
-../../../lib/mod/link_structure.mod: links.o
 ../../../lib/mod/mkonst.mod: mkonst.o
 ../../../lib/mod/mod_bnd.mod: bnd.o
 ../../../lib/mod/mod_bnd_aux.mod: bnd_aux.o
@@ -218,7 +217,6 @@ find.o: ../../../lib/mod/basin.mod ../../../lib/mod/evgeom.mod \
 		../../../lib/mod/mod_geom.mod 
 grdutil.o: ../../../lib/mod/basin.mod ../../../lib/mod/grd.mod
 line_util.o: ../../../lib/mod/basin.mod
-links.o: ../../../lib/mod/basin.mod ../../../lib/mod/mod_geom.mod
 lnku.o: ../../../lib/mod/basin.mod ../../../lib/mod/mod_geom.mod
 quad_tree.o: ../../../lib/mod/basin.mod ../../../lib/mod/stack.mod
 regular.o: ../../../lib/mod/basin.mod

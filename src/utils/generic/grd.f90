@@ -120,6 +120,7 @@
 ! 18.10.2023	ggu	deleted routines dealing with gr3 and msh files
 ! 10.05.2024	ggu	handles isphe given in grd file (FEM-SPHER)
 ! 07.11.2024	ggu	in write_grd_file_with_detail() also write zoom window
+! 08.03.2025	ggu	in grd_init() make sure that lines are allocated
 !
 !**********************************************************
 
@@ -194,7 +195,7 @@
 
 	if( bdebug ) write(6,*) 'nk: ',nk,nk_grd,nk_grd_alloc
 
-	if( nk .ne. nk_grd ) then
+	if( nk .ne. nk_grd .or. nk == 0 ) then
 	  if( allocated(ippnv) ) then
 	    deallocate(ippnv,ianv,hhnv,xv,yv)
 	  end if
@@ -207,7 +208,7 @@
 
 	if( bdebug ) write(6,*) 'ne: ',ne,ne_grd,ne_grd_alloc
 
-	if( ne .ne. ne_grd ) then
+	if( ne .ne. ne_grd .or. ne == 0 ) then
 	  if( allocated(ippev) ) then
 	    deallocate(ippev,iaev,hhev)
 	  end if
@@ -223,7 +224,7 @@
 
 	if( bdebug ) write(6,*) 'nl: ',nl,nl_grd,nl_grd_alloc
 
-	if( nl .ne. nl_grd_alloc ) then
+	if( nl .ne. nl_grd .or. nl == 0 ) then
 	  if( allocated(ipplv) ) then
 	    deallocate(ipplv,ialv,hhlv)
 	  end if
@@ -239,7 +240,7 @@
 
 	if( bdebug ) write(6,*) 'nne: ',nne,nne_grd,nne_grd_alloc
 
-	if( nne .ne. nne_grd_alloc ) then
+	if( nne .ne. nne_grd_alloc .or. nne == 0 ) then
 	  if( allocated(inodev) ) then
 	    deallocate(inodev)
 	  end if
@@ -252,7 +253,7 @@
 
 	if( bdebug ) write(6,*) 'nnl: ',nnl,nnl_grd,nnl_grd_alloc
 
-	if( nnl .ne. nnl_grd_alloc ) then
+	if( nnl .ne. nnl_grd_alloc .or. nnl == 0 ) then
 	  if( allocated(inodlv) ) then
 	    deallocate(inodlv)
 	  end if
