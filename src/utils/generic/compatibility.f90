@@ -76,16 +76,16 @@
 	!gfindloc_i1 = findloc(array,val,1)
 	!return
 
-#if defined(__GFORTRAN__) && __GNUC__ == 4
+!#if defined(__GFORTRAN__) && __GNUC__ == 4
 	n = size(array)
 	do i=1,n
 	  if( array(i) == val ) exit
 	end do
 	if( i > n ) i = 0
 	gfindloc_i1 = i
-#else
-	gfindloc_i1 = findloc(array,val,1)
-#endif
+!#else
+!	gfindloc_i1 = findloc(array,val,1)
+!#endif
 
 	end function
 
