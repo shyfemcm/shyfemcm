@@ -13,7 +13,7 @@
 #------------------------------------------------------------------
 
 FEMDIR=${SHYFEMDIR:=$HOME/shyfem}
-BINDIR=$FEMDIR/fembin
+BINDIR=$FEMDIR/bin
 
 #exgrd=$BINDIR/exgrd
 exgrd=$FEMDIR/mesh/exgrd

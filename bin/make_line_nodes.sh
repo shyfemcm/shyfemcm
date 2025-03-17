@@ -12,7 +12,7 @@
 
 FEMDIR=${SHYFEMDIR:=$HOME/shyfem}
 
-BINDIR=$FEMDIR/fembin
+BINDIR=$FEMDIR/bin
 PLOTDIR=$FEMDIR/femplot
 
 prog=$PLOTDIR/line_nodes

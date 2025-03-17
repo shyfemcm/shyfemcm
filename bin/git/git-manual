@@ -26,8 +26,8 @@ if [ $# -ne 1 ]; then
   exit 0
 fi
 
-if [ -f ./fembin/git-util.sh ]; then
-  . ./fembin/git-util.sh
+if [ -f ./bin/git-util.sh ]; then
+  . ./bin/git-util.sh
 else
   echo "...not in base dir"
   exit

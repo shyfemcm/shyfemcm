@@ -8,7 +8,7 @@
 #
 #------------------------------------------------------------------------
 #
-# cleans path from old fembin entries
+# cleans path from old bin entries
 #
 #-----------------------------------------------------
 
@@ -19,9 +19,8 @@ my @new = ();
 
 foreach my $dir (@path) {
 
-  next if $dir =~ /fembin/;
+  next if $dir =~ /bin/;
   next if $dir =~ /shyfem/;
-  next if $dir =~ /\/fem\/bin/;		#for old versions
 
   push(@new,$dir);
 }

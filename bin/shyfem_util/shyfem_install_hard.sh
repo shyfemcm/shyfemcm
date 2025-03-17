@@ -35,7 +35,7 @@ echo "      using directory: $dir"
 echo "      using option:    $option"
 echo "========================================================="
 
-cd fembin
+cd bin
 
 files=`ls -d *`
 

@@ -19,18 +19,18 @@
 dist=shyfemcm
 
 FEMDIR=${SHYFEMDIR:=$HOME/$dist}
-fembin=$FEMDIR/bin
+FEMBIN=$FEMDIR/bin
 
 FEMDIR_INSTALL=${SHYFEM_INSTALL:=$HOME/$dist}
-fembin_install=$FEMDIR_INSTALL/bin
+FEMBIN_install=$FEMDIR_INSTALL/bin
 
 # set PATH ----------------------------------------
 
-binutil=$fembin_install
-[ -d $fembin_install/shyfem_util ] && binutil=$fembin_install/shyfem_util
+binutil=$FEMBIN_install
+[ -d $FEMBIN_install/shyfem_util ] && binutil=$FEMBIN_install/shyfem_util
 
 path=$( $binutil/shyfem_path.pl $PATH )
-export PATH=$path:$fembin
+export PATH=$path:$FEMBIN
 
 # set aliases ----------------------------------------
 

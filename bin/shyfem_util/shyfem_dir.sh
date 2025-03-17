@@ -28,12 +28,12 @@
 dist=shyfemcm
 
 FEMDIR=${SHYFEMDIR:=$HOME/$dist}
-fembin=$FEMDIR/bin
+FEMBIN=$FEMDIR/bin
 
 #FEMDIR_INSTALL=${SHYFEM_INSTALL:=$HOME/$dist}
 #FEMDIR_INSTALL=${SHYFEM_INSTALL:=$FEMDIR}
 FEMDIR_INSTALL=${FEMDIR}
-fembin_install=$FEMDIR_INSTALL/bin
+FEMBIN_install=$FEMDIR_INSTALL/bin
 
 GetVersion()
 {
@@ -49,9 +49,9 @@ GetVersion()
   echo $version
 }
 
-shyutil=$fembin_install
-if [ -d $fembin_install/shyfem_util ]; then
-  shyutil=$fembin_install/shyfem_util
+shyutil=$FEMBIN_install
+if [ -d $FEMBIN_install/shyfem_util ]; then
+  shyutil=$FEMBIN_install/shyfem_util
 fi
 
 # command line options ----------------------------
@@ -81,10 +81,10 @@ if [ -n "$1" ]; then
   else
     export SHYFEMDIR=$dir
     FEMDIR=${SHYFEMDIR:=$HOME/$dist}
-    fembin=$FEMDIR/bin
+    FEMBIN=$FEMDIR/bin
 
     path=$( $shyutil/shyfem_path.pl $PATH )
-    export PATH=$fembin:$path
+    export PATH=$FEMBIN:$path
   fi
 
 fi

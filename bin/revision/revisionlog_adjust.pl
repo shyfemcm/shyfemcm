@@ -8,7 +8,7 @@
 #
 #------------------------------------------------------------------------
 
-use lib ("$ENV{SHYFEMDIR}/bin/revision","$ENV{HOME}/shyfem/fembin");
+use lib ("$ENV{SHYFEMDIR}/bin/revision");
 
 #print  join(" ",@INC); exit 1;
 
