@@ -32,6 +32,8 @@
 ! 28.01.2025    ggu     written from scratch
 ! 08.03.2025    ggu     added compiler information
 ! 09.03.2025    ggu     added compiler profile
+! 09.03.2025    ggu     added compiler profile
+! 12.03.2025    clc     fixed bug for INTEL compiler in compiler information
 
 ! notes :
 !
@@ -76,16 +78,16 @@
 	!gfindloc_i1 = findloc(array,val,1)
 	!return
 
-!#if defined(__GFORTRAN__) && __GNUC__ == 4
+#if defined(__GFORTRAN__) && __GNUC__ == 4
 	n = size(array)
 	do i=1,n
 	  if( array(i) == val ) exit
 	end do
 	if( i > n ) i = 0
 	gfindloc_i1 = i
-!#else
-!	gfindloc_i1 = findloc(array,val,1)
-!#endif
+#else
+	gfindloc_i1 = findloc(array,val,1)
+#endif
 
 	end function
 
@@ -108,9 +110,12 @@
 	!write(6,*) 'version = ',trim(version)
 	!write(6,*) 'major version = ',nvers
 #elif defined(__INTEL_COMPILER)
+#define STRINGIFY(x) #x
+#define TOSTRING(x) STRINGIFY(x)
+#define AT __FILE__ ":" TOSTRING(__LINE__)
 	if( comp_debug ) write(6,*) 'intel compiler'
 	nvers = __INTEL_COMPILER
-	string = 'INTEL (' // __INTEL_COMPILER // ')'
+	string = 'INTEL (' // TOSTRING(__INTEL_COMPILER) // ')'
 	!write(6,*) 'version = ',nvers
 	!write(6,*) 'major version = ',nvers/100
 #else
