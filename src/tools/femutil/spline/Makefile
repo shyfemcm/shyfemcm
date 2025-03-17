@@ -12,7 +12,7 @@
 DIR =	spline
 
 FEMDIR = ../..
-FEMBIN = $(FEMDIR)/fembin
+FEMBIN = $(FEMDIR)/bin
 
 include ../../Rules.make
 

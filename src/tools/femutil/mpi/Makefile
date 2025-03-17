@@ -9,7 +9,7 @@
 
 
 FEMDIR    = ..
-FEMBIN    = $(FEMDIR)/fembin
+FEMBIN    = $(FEMDIR)/bin
 
 FEMDIRS   = mpi
 

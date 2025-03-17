@@ -11,7 +11,7 @@
 DIR = examples
 
 FEMDIR = ..
-FEMBIN = ../fembin
+FEMBIN = ../bin
 
 SUBDIRS = mar_menor
 
