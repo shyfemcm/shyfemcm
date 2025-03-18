@@ -19,7 +19,7 @@ my @new = ();
 
 foreach my $dir (@path) {
 
-  next if $dir =~ /bin/;
+  #next if $dir =~ /bin/;
   next if $dir =~ /shyfem/;
 
   push(@new,$dir);
