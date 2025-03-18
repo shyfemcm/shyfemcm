@@ -14,13 +14,13 @@
 
 FEMDIR=${SHYFEMDIR:=$HOME/shyfem}
 
-fembin=$FEMDIR/fembin
+FEMBIN=$FEMDIR/bin
 
 shyfemdir="0B742mznAzyDPbGF2em5NMjZYdHc"
 link="https://drive.google.com/folderview?id=$shyfemdir&usp=sharing"
 gitlink="https://github.com/SHYFEM-model/shyfem"
 tmpfile=tmp.tmp
-#fembin=./fembin
+#FEMBIN=./bin
 
 emails="gmail shyfem_g shyfem_d shyfem_u"
 

@@ -74,11 +74,11 @@ if [ $what = "ALL" ]; then
   CheckDir fem3d		| tee -a $check
   CheckDir femadj		| tee -a $check
   CheckDir femanim		| tee -a $check
-  CheckDir fembin		| tee -a $check
+  CheckDir bin			| tee -a $check
   CheckDir femcheck		| tee -a $check
   CheckDir femdoc		| tee -a $check
   CheckDir femdummy		| tee -a $check
-  CheckDir femlib		| tee -a $check
+  CheckDir lib			| tee -a $check
   CheckDir femplot		| tee -a $check
   CheckDir femregress		| tee -a $check
   CheckDir femutil		| tee -a $check
@@ -98,13 +98,13 @@ fi
 cp $check $check_orig
 
 CleanLog ./color			#femplot
-CleanLog ./perl/modules			#femlib
-CleanLog ./perl/codepage		#femlib
-CleanLog ./perl/GD			#femlib
-CleanLog ./python			#femlib
+CleanLog ./perl/modules			#lib
+CleanLog ./perl/codepage		#lib
+CleanLog ./perl/GD			#lib
+CleanLog ./python			#lib
 CleanLog ./mar_menor/INPUT		#examples
 CleanLog ./mar_menor/GRID		#examples
-CleanLog ./logo				#fembin
+CleanLog ./logo				#bin
 CleanLog ./tmp				#fem3d
 
 ElabLog

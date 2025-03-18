@@ -178,5 +178,5 @@ strip:	$(EXES)
 
 # DO NOT DELETE THIS LINE -- make depend depends on it.
 
-../../femlib/mod/mod_testdash.mod: testdash.o
+../../lib/mod/mod_testdash.mod: testdash.o
 

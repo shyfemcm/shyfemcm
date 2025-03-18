@@ -10,7 +10,7 @@
 #
 # git utilities... not to be used standalone
 #
-# use with ". $fembin/git-util.sh"
+# use with ". bin/git/git-util.sh"
 #
 #-----------------------------------------------------------
 

@@ -31,6 +31,7 @@
 ! 05.06.2023    lrp     introduce z-star
 ! 18.07.2023	lrp	rzmov read from shy
 ! 20.07.2023	lrp	new parameter nzadapt
+! 09.03.2025	ggu	avoid out of bounds access (hlvaux)
 !
 ! notes:
 ! this file is used also in:      
@@ -212,13 +213,17 @@
 
         integer l
         real rgridmov
+	real hlvaux(0:lmax)
 
         call get_rzmov_info(rgridmov)
         
+	hlvaux(0) = 0.
+	hlvaux(1:lmax) = hlv
+
 	nadapt = 0		!no adapation -> all to zero
 	do l=lmin,lmax-1 	!-1 to skip bottom layer
 
-          if(z.le.(-hlv(l)+rgridmov*(hlv(l)-hlv(l-1)))) then
+          if(z.le.(-hlvaux(l)+rgridmov*(hlvaux(l)-hlvaux(l-1)))) then
             nadapt = l+1
           else
             exit
@@ -276,7 +281,8 @@
 ! compute nzad, hzad
 !--------------------------------------------------------- 
 
-        hzad = hlv(levmax)
+	hzad = 0
+        if( levmax > 0 ) hzad = hlv(levmax)	!hlvaux
         nzad = max(0,levmax-lmin+1) !+1 (min 2 adaptive layer)
 
 	end
@@ -309,12 +315,16 @@
 	integer l,ii,levmax,lmine,nsigma,nzadapt,nlev
 	real hsigma,htop,hbot
 	real den,check
+	real hlvaux(0:nlv)
         logical bsigma,bzstandard
 
 	nadapt = 0         !no adaptation -> all to zero
 	ladapt = 0	   !no adaptation -> all to zero
 	hadapt = 0	   !no adaptation -> all to zero	
 	hdl = 0.           !no adaptation -> all to zero
+
+	hlvaux(0) = 0.
+	hlvaux(1:nlv) = hlv
 
         call get_sigma_info(nlev,nsigma,hsigma)
         bsigma = nsigma .gt. 0		!sigma or sigma+z
@@ -351,8 +361,8 @@
 
     	  if (nadapt(ii).gt.0) then	  
 !	  den = (nsigma(ii)-1.)+r		!freezed
-          den = hadapt(ii)-hlv(lmin(ii)-1) !zstar
-	  if (ladapt(ii).eq.lmax) den = htot(ii)-hlv(lmin(ii)-1)
+          den = hadapt(ii)-hlvaux(lmin(ii)-1) !zstar
+	  if (ladapt(ii).eq.lmax) den = htot(ii)-hlvaux(lmin(ii)-1)
           do l=lmin(ii),ladapt(ii)
 !	    hdl(l,ii) = - 1. / den		!freezed		
 !           hdl(l,ii) = - 1. / nsigma(ii)       !constant

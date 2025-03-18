@@ -34,20 +34,22 @@
 	subroutine get_options(nmax,string,ns,values)
 
 ! reads maximum n values from string
-! returns number of options in ns and values in values
+! returns number of values in ns and values in values
 ! if error ns = -1
 
 	implicit none
 
-	integer nmax
-	character*80 string
-	integer ns
-	real values(nmax)
+	integer, intent(in)	 :: nmax
+	character*80, intent(in) :: string
+	integer, intent(out)	 :: ns
+	real, intent(out)	 :: values(nmax)
 
 	integer iscanf
 
 	ns = iscanf(string,values,0)
-	if( ns > nmax ) then		!error - too many values
+	if( ns < 0 ) then		!read error
+	  return
+	else if( ns > nmax ) then	!error - too many values
 	  ns = -1
 	  return
 	end if

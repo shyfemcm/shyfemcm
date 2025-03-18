@@ -9,7 +9,7 @@
 
 SHYFEMDIR=../..
 
-FEMBIN = $(SHYFEMDIR)/fembin
+FEMBIN = $(SHYFEMDIR)/bin
 
 include $(SHYFEMDIR)/Rules.make
 

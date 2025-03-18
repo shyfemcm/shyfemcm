@@ -14,7 +14,7 @@
 #
 #------------------------------------------------------------
 femdir=.
-fembin=$femdir/bin
+FEMBIN=$femdir/bin
 
 commit_file=./COMMIT
 version_file=./VERSION
@@ -25,7 +25,7 @@ version_fortran=""	# will be filled in later - fortran file with version
 
 GetVersion()
 {
-  local bin=$fembin
+  local bin=$FEMBIN
 
   if [ -x $bin/shyfem_version.pl ]; then
     shyfem_version=$bin/shyfem_version.pl

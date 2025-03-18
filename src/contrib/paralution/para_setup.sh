@@ -50,7 +50,7 @@ echo "file $file adjusted..."
 
 cp $paradir/src/Makefile $paradir/src/Makefile.old
 
-dir1=$parascripts/../fembin
+dir1=$parascripts/../bin
 file1=$parascripts/../Rules.make
 
 cat $parascripts/Makefile.src | sed -e "s=DIR1=$dir1=" | \

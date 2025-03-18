@@ -39,8 +39,8 @@ CheckCommand()
   #($command)
   #$command
 
-  #$command >> $log 2>&1 < ./fembin/CR
-  #$command  < ./fembin/CR
+  #$command >> $log 2>&1 < ./bin/CR
+  #$command  < ./bin/CR
   #$command
 
   status=$?
@@ -89,11 +89,11 @@ CheckCommand exgrd ./mesh/exgrd
 
 #CheckCommand demopost ./post/demopost 
 
-CheckFile libcalp ./femlib/libcalp.a
-CheckFile libfem ./femlib/libfem.a
-#CheckFile libgotm ./femlib/libgotm.a
-CheckFile libgrappa ./femlib/libgrappa.a
-CheckFile libpost ./femlib/libpost.a
+CheckFile libcalp ./lib/libcalp.a
+CheckFile libfem ./lib/libfem.a
+#CheckFile libgotm ./lib/libgotm.a
+CheckFile libgrappa ./lib/libgrappa.a
+CheckFile libpost ./lib/libpost.a
 
 rm -f new*.grd
 rm -f errout.dat

@@ -398,6 +398,7 @@
 ! 09.11.2024	ggu	version 8.2.1   FRAIMA bis edition
 ! 24.11.2024	ggu	version 8.2.2   La Salute edition
 ! 22.01.2025	ggu	version 8.2.3   WW3 edition
+! 10.03.2025	ggu	version 8.2.4   bug fix edition
 !
 !*****************************************************************
 
@@ -407,9 +408,9 @@
 
 ! DOCS	START	P_version
 !
-! \newcommand{\VERSION}{8.2.3}
-! \newcommand{\version}{8\_2\_3}
-! \newcommand{\COMMIT}{2025-01-22}
+! \newcommand{\VERSION}{8.2.4}
+! \newcommand{\version}{8\_2\_4}
+! \newcommand{\COMMIT}{2025-03-09}
 !
 ! DOCS	END
 
@@ -417,8 +418,9 @@
 
 	logical, save		:: bshort = .false.
 
-        character*10, parameter :: version = '8.2.3'
-        character*10, parameter :: commit  = '2025-01-22'
+        character*10, parameter :: version = '8.2.4'
+        character*10, parameter :: commit  = '2025-03-09'
+        character*50, parameter :: lcommit = '8.2.4-ogs-10'
         character*17, parameter :: text    = 'SHYFEM VERSION = '
 
         character*40, parameter :: string = text//version//'  '//commit
@@ -480,6 +482,22 @@
 	character*(*) comm
 
 	comm = commit
+
+	end
+
+!*****************************************************************
+
+        subroutine get_shyfem_local_commit(lcomm)
+
+! returns local commit of model
+
+	use shyfem_version
+
+	implicit none
+
+	character*(*) lcomm
+
+	lcomm = lcommit
 
 	end
 

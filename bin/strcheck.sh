@@ -13,8 +13,8 @@
 #-----------------------------------------------------------------
 
 FEMDIR=${SHYFEMDIR:=$HOME/shyfem}
-fembin=$FEMDIR/fembin
-fem3d=$FEMDIR/fem3d
+FEMBIN=$FEMDIR/bin
+elabdir=$FEMDIR/src/tools/shyelab/
 
 if [ $# -ne 1 ]; then
   echo "Usage: strcheck.sh str-file"
@@ -47,15 +47,15 @@ ElabSTR()
 
 #-----------------------------------------------------------------
 
-itanf=`$fembin/strparse.pl -quiet -value=itanf $str`
-itend=`$fembin/strparse.pl -quiet -value=itend $str`
-date=`$fembin/strparse.pl -quiet -value=date $str`
-idt=`$fembin/strparse.pl -quiet -value=idt $str`
+itanf=`$FEMBIN/strparse.pl -quiet -value=itanf $str`
+itend=`$FEMBIN/strparse.pl -quiet -value=itend $str`
+date=`$FEMBIN/strparse.pl -quiet -value=date $str`
+idt=`$FEMBIN/strparse.pl -quiet -value=idt $str`
 [ "$date" = "" ] && date=0
 
 ElabSTR $itanf $itend $idt
 
-$fembin/strparse.pl -quiet -files $str > tmp.tmp
+$FEMBIN/strparse.pl -quiet -files $str > tmp.tmp
 
 while read line
 do
@@ -67,12 +67,12 @@ do
   [ $what = "grid" ] && continue
   [ $what = "gotmpa" ] && continue
 
-  $fem3d/shyelab -quiet $file > tmp2.tmp
+  $elabdir/shyelab -quiet $file > tmp2.tmp
 
   ElabFile
 
   #echo "checking file $file"
-  #$fembin/strcheck.pl $itanf $itend $date tmp2.tmp
+  #$FEMBIN/strcheck.pl $itanf $itend $date tmp2.tmp
 
 done < tmp.tmp
 

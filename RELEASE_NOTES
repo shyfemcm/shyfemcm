@@ -1,4 +1,12 @@
 
+10.03.2025	VERS_8_2_4	bug fix edition
+
+	optimal interpolation revisited
+	write more info on compiler type and profile
+	bug fix for out-of-bound access
+	bug fix for restart (BFM)
+	cubic interpolation of wind
+
 22.01.2025	VERS_8_2_3	WW3 edition
 
 	many enhancements for MPI 

@@ -52,7 +52,7 @@ fi
 # This is not necessary if '!$' is used in pardiso_solve
 # before 'use omp_lib'
 #if [ -e $INTEL_INCL/omp_lib.mod ]; then
-#   cp $INTEL_INCL/omp_lib.mod ../femlib/mod
+#   cp $INTEL_INCL/omp_lib.mod ../lib/mod
 #else
 #   echo "Module file omp_lib.mod not found"
 #   exit 1
