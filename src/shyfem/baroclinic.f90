@@ -1024,7 +1024,8 @@
 	  !write(6,'(a)') 'ts_nudge: opening file for '//trim(string)
 	  call ts_open(string,file,dtime,nkn,nlv,id)
 	else if( tau < 0. ) then	!no tau given
-	  goto 99
+	  id = -1
+	  !goto 99
 	else				!tau specified - do not read file
 	  id = 0
 	end if

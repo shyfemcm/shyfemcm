@@ -76,6 +76,7 @@
 ! 11.11.2020	ggu	bug fix for nvers < 3 (define lmax in data read)
 ! 23.06.2021	ggu	more documentation
 ! 27.01.2022	ggu	new routine for skipping record, find last record
+! 18.03.2025	ggu	deal with lmax == 0 in writing record
 !
 ! notes :
 !
@@ -250,20 +251,22 @@
 	integer ntype		!type of information contained
 	integer datetime(2)	!date and time information
 
-	integer l,nv
+	integer l,nv,lmax0
 	integer itype(2)
 	integer(kind=8) :: itlong
 
 	nv = nvers
 	if( nv .eq. 0 ) nv = nvmax	!default
 	if( nv .ne. nvmax ) goto 99
-	if( lmax < 1 ) goto 98
+	lmax0 = lmax
+	if( lmax0 == 0 ) lmax0 = 1
+	if( lmax0 < 1 ) goto 98
 
 	if( iformat == 1 ) then
 	  itlong = dtime
-	  write(iunit,1000) itlong,nv,idfem,np,lmax,nvar,ntype
+	  write(iunit,1000) itlong,nv,idfem,np,lmax0,nvar,ntype
 	else
-	  write(iunit) dtime,nv,idfem,np,lmax,nvar,ntype
+	  write(iunit) dtime,nv,idfem,np,lmax0,nvar,ntype
 	end if
 
 	call fem_file_make_type(ntype,2,itype)

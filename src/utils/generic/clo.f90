@@ -53,6 +53,7 @@
 ! 15.07.2021	ggu	reorder structure (double first)
 ! 10.05.2024	ggu	implement no option
 ! 25.11.2024	ggu	check length of string, use nlen to set max string len
+! 18.03.2025	ggu	more documentation
 !
 ! notes :
 !
@@ -68,7 +69,23 @@
 !
 ! usage :
 !
-!	see routine clo_test() at the end of this file
+!       call clo_init(routine,files,version)	!initialize
+!
+!       call clo_add_option(name,value,text)	!add option
+!
+!       call clo_add_info(string)		!general info
+!       call clo_add_sep(text)			!add separator
+!       call clo_add_com(text)			!add comment
+!       call clo_add_extra(string)		!add extra information at end
+!
+!       call clo_parse_options			!parse options
+!
+!       call clo_get_option(name,value)		!get value of single options
+!
+!       nfile = clo_number_of_files()		!number of command line files
+!       if( nfile > 0 ) call clo_get_file(1,infile)	!get file on CL
+!
+!	see also routine clo_test() at the end of this file
 !
 !**************************************************************
 
@@ -1262,6 +1279,7 @@
         call clo_add_sep('other options')
         call clo_add_option('node n',0 &
      &                          ,'process node n')
+        call clo_add_com('  n is node number')
         call clo_add_option('tmin time',-1 &
      &                          ,'only process starting from time')
         call clo_add_option('tmax time',-1 &

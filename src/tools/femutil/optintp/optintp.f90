@@ -45,6 +45,7 @@
 ! 03.04.2018	ggu	changed VERS_7_5_43
 ! 16.02.2019	ggu	changed VERS_7_5_60
 ! 20.02.2025	ggu	completely restructured
+! 18.03.2025	ggu	write new complementary files
 !
 ! notes :
 !
@@ -154,11 +155,12 @@
 	real, allocatable :: ztau(:)
 	real, allocatable :: zweight_old(:)
 	real, allocatable :: ztau_old(:)
+	real, allocatable :: zaux(:)
 	real, allocatable :: hd(:)
 	integer, allocatable :: ilhkv(:)
 
 	integer np
-	integer iufem,iuobs,iuweight,iutau
+	integer iufem,iuobs,iuweight,iutau,iu
 	integer jmax,j
 	double precision dtime,atime,atime_old
 	real hlv(1)
@@ -167,7 +169,7 @@
 	character*80 string,format
 	character*20 aline
 
-	character*80 file,basnam
+	character*80 file,obsfile
 	logical bcart,breg
 	logical bfem,bloop,bweight
 	logical bdebug
@@ -197,7 +199,7 @@
 ! parameters and command line options
 !--------------------------------------------------------------
 
-	call optintp_init(file)
+	call optintp_init(obsfile)
 
 !-----------------------------------------------------------------
 ! set some variables
@@ -269,6 +271,7 @@
 	allocate(xback(nback),yback(nback),zback(nback),zanal(nback))
 	allocate(zweight(nback),ztau(nback))
 	allocate(zweight_old(nback),ztau_old(nback))
+	allocate(zaux(nback))
 
 	call setup_background_coords(nback,regpar,xback,yback)
 	zback = flag
@@ -303,6 +306,37 @@
 	np = nback
 
 !-----------------------------------------------------------------
+! write single fem files
+!-----------------------------------------------------------------
+
+	!if( bfem ) then
+	if( .false. ) then
+	  iu = 3
+	  atime = 0.
+
+	  string = varstring
+	  file = 'back.fem'
+	  zaux = zback
+	  open(iu,file=file,status='unknown',form='formatted')
+	  call write_fem_record(iu,atime,regpar,string,np,zaux)
+	  close(iu)
+
+	  string = 'weight'
+	  file = 'weight.fem'
+	  zaux = 0.
+	  open(iu,file=file,status='unknown',form='formatted')
+	  call write_fem_record(iu,atime,regpar,string,np,zaux)
+	  close(iu)
+
+	  string = 'time scale tau [s]'
+	  file = 'tau.fem'
+	  zaux = tmax
+	  open(iu,file=file,status='unknown',form='formatted')
+	  call write_fem_record(iu,atime,regpar,string,np,zaux)
+	  close(iu)
+	end if
+
+!-----------------------------------------------------------------
 ! open files
 !-----------------------------------------------------------------
 
@@ -315,8 +349,8 @@
 	end if
 
 	iuobs = 20
-	open(iuobs,file=file,status='old',form='formatted')
-	if( .not. bquiet ) write(6,*) 'file with observations: ',trim(file)
+	open(iuobs,file=obsfile,status='old',form='formatted')
+	if( .not. bquiet ) write(6,*) 'file with observations: ',trim(obsfile)
 
 	iufem = 21
 	open(iufem,file='optintp.fem',status='unknown',form=format)
