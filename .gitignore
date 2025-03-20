@@ -83,6 +83,10 @@ src/tools/shyelab/femelab
 bin/femelab
 src/tools/shyelab/femcombine
 bin/femcombine
+src/tools/shyelab/femadd
+bin/femadd
+src/tools/shyelab/femdate
+bin/femdate
 src/tools/shyelab/flxelab
 bin/flxelab
 src/tools/shyelab/lgrelab
