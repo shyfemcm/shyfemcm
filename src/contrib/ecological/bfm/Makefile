@@ -91,6 +91,9 @@ $(BFMPRIVATE):
 bfmcopy:
 	cp -f arc/*.f90 .
 
+bfmsave:
+	cp -f $(BFMPRIVATE) arc
+
 bfmdelete:
 	-rm -f $(BFMPRIVATE)
 
