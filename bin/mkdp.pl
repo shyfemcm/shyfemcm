@@ -30,6 +30,7 @@ use strict;
 			'netcdf.mod'			=> 	1,
 			'ifposix.mod'			=> 	1,
 			'iso_c_binding.mod'		=> 	1,
+			'iso_fortran_env.mod'		=> 	1,
 		    );
 
 %::ignore_define_modules = (

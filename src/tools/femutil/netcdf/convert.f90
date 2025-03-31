@@ -42,6 +42,8 @@
 ! function is_upper(c)				checks if c is upper case
 ! function is_letter(c)				checks if c is letter
 ! function is_alpha(c)				checks if c is alphanumeric
+! function is_whitespace(c)			checks if c is white space
+! function is_integer(string)			checks if string is integer
 ! subroutine to_lower(string)			converts string to lower case
 ! subroutine to_upper(string)			converts string to upper case
 !
@@ -87,6 +89,7 @@
 ! 13.03.2019	ggu	changed VERS_7_5_61
 ! 21.05.2019	ggu	changed VERS_7_5_62
 ! 11.12.2020	ggu	ichafs() and ichanm() moved here from subsss.f
+! 21.09.2024	ggu	new routines is_whitespace() and is_integer()
 !
 !****************************************************************
 
@@ -100,7 +103,7 @@
 	character*1,  parameter :: plus = '+'
 	character*1,  parameter :: minus = '-'
 	character*1,  parameter :: dot = '.'
-	character*4,  parameter :: expont = 'eEdD'
+	character*4,  parameter :: exponent = 'eEdD'
 	character*10, parameter :: number = '1234567890'
 
 !================================================================
@@ -221,7 +224,7 @@
 		else
 			berr=.true.
 		end if
-	else if( icindx(expont,c) .gt. 0 ) then
+	else if( icindx(exponent,c) .gt. 0 ) then
 		if( .not.bexp .and. bnumb ) then
 			bexp=.true.
 		else
@@ -668,6 +671,71 @@
 
 !****************************************************************
 
+	function is_whitespace(c)
+
+! checks if c is white space char
+
+	use scan_string
+
+	implicit none
+
+	logical is_whitespace
+	character*1 c
+
+	is_whitespace = ( c == blank .or. c == tab )
+
+	end
+
+!****************************************************************
+
+	function is_integer(string)
+
+! checks if string is an integer
+
+	use scan_string
+
+	implicit none
+
+	logical is_integer
+	character*(*) string
+
+	integer is,i,ic
+	logical berror
+	character*1 c
+
+	logical is_digit,is_whitespace
+	integer ichafs
+
+	ic = 0
+	berror = .false.
+
+	is = ichafs(string)
+	if( string(is:is) == minus .or. string(is:is) == plus ) is = is + 1
+
+	do i=is,len(string)
+	  c = string(i:i)
+	  if( is_digit(c) ) then
+	    ic = ic + 1
+	  else if( is_whitespace(c) ) then
+	    exit
+	  else
+	    berror = .true.
+	    exit
+	  end if
+	end do
+
+	if( berror ) then
+	  is_integer = .false.
+	else if( ic == 0 ) then
+	  is_integer = .false.
+	else
+	  is_integer = .true.
+	end if
+
+	end
+
+!****************************************************************
+
 	subroutine to_lower(string)
 
 ! converts string to lower case
@@ -816,11 +884,13 @@
 
 ! computes ciphers of number
 !
-! idigit	ciphers of number z with minus sign and
+! idigit	total number of digits of value with minus sign and
 !		...decimal point if necessary (return value)
 ! value		number for which ciphers have to be determined
 ! ndec		positions after the decimal point
 !		(-1 : no decimal point)
+
+	use iso_fortran_env, only: i4=>int32, i8=>int64
 
 	implicit none
 
@@ -828,15 +898,19 @@
 	real value
 	integer ndec
 
-	integer iz,istel
+	integer istel
+	!integer iz
+	integer(kind=i8) iz
+	!integer(kind=int64) iz
+	integer(kind=i8), parameter :: big = huge(0_8)
 
-	istel=0
-
-	if( abs(value) > 1.e8 ) then
-	  write(6,*) 'cannot compute digits... too big: ',value
+	!write(6,*) 'big = ',big
+	if( abs(value) > big ) then
+	  write(6,*) 'cannot compute digits... value too big: ',value
 	  stop 'error stop idigit: internal error (1)'
 	end if
 
+	istel=0
 	iz=abs(value)+0.01
 	if(iz.eq.0) istel=1
 	if(value.lt.0.) istel=istel+1

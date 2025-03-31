@@ -60,6 +60,7 @@
 ! 14	write vertical only for nlv > 1
 ! 15	write gotm arrays
 ! 16	adapted for mpi
+! 17	write bfm restart
 !
 !*********************************************************************
 
@@ -76,7 +77,7 @@
 
 	integer, save :: idfrst = 749652	!id for restart file
 
-	integer, save :: nvmax = 16		!last version of file
+	integer, save :: nvmax = 17		!last version of file
 	integer, parameter :: nidmax = 9
 
 	integer, save :: id_hydro_rst = 1	!1		hydro

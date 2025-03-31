@@ -71,6 +71,9 @@ src/tools/shynetcdf/nc2fem
 bin/nc2fem
 src/tools/shynetcdf/ts2nc
 bin/ts2nc
+src/tools/femutil/netcdf/ncinfo
+src/tools/femutil/netcdf/ncbgc
+src/tools/femutil/netcdf/ncelab
 src/tools/shyplot/shyplot
 bin/shyplot
 src/tools/shyelab/shyelab

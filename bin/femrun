@@ -46,7 +46,7 @@ FullUsage()
   echo "  -mpi n           run MPI process with n sub-domains"
   echo "  -time time-date  run model at given time-date"
   echo ""
-  echo "   p        :  0 or 0,2 or 0-4 or 1,2,4-6
+  echo "   p        :  0 or 0,2 or 0-4 or 1,2,4-6"
   echo "   time     :  HH:MM, midnight, noon, 1am tomorrow"
   echo "   date     :  Dec 12, MMDDYY, MM/DD/YY, DD.MM.YY"
   echo "   relative :  now + # [minutes, hours, days, or weeks]"
@@ -202,7 +202,7 @@ fi
     chmod +x $tmpfil
       status=$?
       echo "executing $tmpfil   status = $status"
-    if [ $attime = "now" ]; then
+    if [ "$attime" = "now" ]; then
       $tmpfil
     else 
       $at -f $tmpfil $attime > /dev/null 2>&1

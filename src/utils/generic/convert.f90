@@ -884,11 +884,13 @@
 
 ! computes ciphers of number
 !
-! idigit	ciphers of number z with minus sign and
+! idigit	total number of digits of value with minus sign and
 !		...decimal point if necessary (return value)
 ! value		number for which ciphers have to be determined
 ! ndec		positions after the decimal point
 !		(-1 : no decimal point)
+
+	use iso_fortran_env, only: i4=>int32, i8=>int64
 
 	implicit none
 
@@ -896,15 +898,19 @@
 	real value
 	integer ndec
 
-	integer iz,istel
+	integer istel
+	!integer iz
+	integer(kind=i8) iz
+	!integer(kind=int64) iz
+	integer(kind=i8), parameter :: big = huge(0_8)
 
-	istel=0
-
-	if( abs(value) > 1.e8 ) then
-	  write(6,*) 'cannot compute digits... too big: ',value
+	!write(6,*) 'big = ',big
+	if( abs(value) > big ) then
+	  write(6,*) 'cannot compute digits... value too big: ',value
 	  stop 'error stop idigit: internal error (1)'
 	end if
 
+	istel=0
 	iz=abs(value)+0.01
 	if(iz.eq.0) istel=1
 	if(value.lt.0.) istel=istel+1

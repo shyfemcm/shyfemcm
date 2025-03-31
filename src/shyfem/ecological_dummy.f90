@@ -78,19 +78,10 @@
         subroutine write_restart_eco(iunit)
         implicit none
 	integer iunit
-	integer nstate,nkn,i
-	nstate = 0
-	nkn = 0
-        write(iunit) nstate,nkn
 	end
         subroutine skip_restart_eco(iunit)
         implicit none
 	integer iunit
-	integer nstate,nkn,i
-        read(iunit) nstate,nkn
-        do i=1,nstate
-          read(iunit)
-        end do
 	end
         subroutine read_restart_eco(iunit)
         implicit none
