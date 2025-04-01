@@ -74,6 +74,7 @@
 ! 05.08.2024	ggu	new routine nc_user_defined_global()
 ! 03.10.2024	ggu	introduced directional variable
 ! 03.10.2024	ggu	new variables added
+! 01.04.2025	ggu	handle variables with no CL description
 !
 ! notes :
 !
@@ -3023,6 +3024,7 @@
 	integer var_id		! id to be used for other operations (return)
 
 	character*80 name,what,std,units
+	character*80 string
 	real cmin,cmax
 
 	if( ivar .eq. 1 ) then		! water level
@@ -3249,10 +3251,20 @@
 	  units = 'kg/ms'
 	  cmin = 0.
 	  cmax = 0.
-	else
+	else if( ivar .eq. 0 ) then	! no variable description
 	  write(6,*) 'unknown variable: ',ivar
-	  write(6,*) 'this variable has no CL description'
-	  stop 'error stop descr_var'
+	  stop 'error stop nc_init_variable'
+	else
+	  write(6,*) 'this variable has no CL description: ',ivar
+	  call make_unknown_variable_name(ivar,string)
+	  !write(string,'(i4)') ivar
+	  !string = adjustl(string)
+	  name = string
+	  what = 'long_name'
+	  std = string
+	  cmin = 0.
+	  cmax = 0.
+	  units = ''
 	end if
 
 	if( .not. bquiet_nc ) then
@@ -3289,6 +3301,52 @@
 !*****************************************************************
 ! auxiliary routines
 !*****************************************************************
+!*****************************************************************
+
+	subroutine make_unknown_variable_name(ivar,string)
+
+	use shyfem_strings
+
+	implicit none
+
+	integer ivar
+	character*(*) string
+
+	integer isub,i
+	character*80 saux
+
+        call strings_get_full_name(ivar,saux,isub)
+	
+	!--------------------------------
+	! get rid of parenthesis
+	!--------------------------------
+
+	i = index(saux,'(')
+	if( i > 0 ) saux(i:) = saux(i+1:)
+	i = index(saux,')')
+	if( i > 0 ) saux(i:) = saux(i+1:)
+
+	!--------------------------------
+	! convert blanks to underscores
+	!--------------------------------
+
+	do i=1,len_trim(saux)
+	  if( saux(i:i) == ' ' ) saux(i:i) = '_'
+	end do
+
+	!--------------------------------
+	! add substring
+	!--------------------------------
+
+        string = saux
+        if( isub > 0 ) then
+          write(saux,'(i4)') isub
+	  saux = adjustl(saux)
+          string = trim(string) // '_' // saux
+        end if
+
+	end
+
 !*****************************************************************
 
 	subroutine nc_set_quiet(bquiet)

@@ -232,6 +232,7 @@
 ! 16.11.2024	ggu	new parameter ibasin
 ! 23.11.2024	ggu	new parameter pqual
 ! 03.12.2024    lrp     new parameter irain for the coupled model
+! 01.04.2025    ggu     new value 5 for ibarcl
 !
 !************************************************************************
 
@@ -1123,6 +1124,8 @@
 !			 |temptaup| and |salttaip| or in spatially and
 !			 temporarily varying fields given in external
 !			 files |temptau| and |salttau|.
+!		\item[5] As for case 4, but no baroclinic mode. It therefore
+!			 is as in case 3, but with nudging.
 !		\end{description}
 
 	call addpar('ibarcl',0.)	!compute baroclinic contributions ?

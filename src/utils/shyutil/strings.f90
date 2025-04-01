@@ -65,6 +65,7 @@
 ! 20.09.2024	ggu	new variable skin temperature (14)
 ! 21.09.2024	ggu	cleaned, some new helper routines
 ! 03.10.2024	ggu	new has_direction_ivar() and is_2d()
+! 01.04.2025	ggu	ivar values and range for BFM model
 !
 ! contents :
 !
@@ -596,7 +597,7 @@
         stop 'error stop strings_check_consistency: ivar/=iv'
    99   continue
         call strings_info(id)
-        write(6,*) 'some parameter has not been set'
+        write(6,*) 'some parameters have not been set'
         stop 'error stop strings_check_consistency: consistency'
         end subroutine strings_check_consistency
 
@@ -1307,6 +1308,9 @@
 	call strings_add_new('concentration',300,100)	!new numbering
 	!call strings_add_new('concentration (multi old)',30,20)
 
+	call strings_add_new('bfm (pelagic)',600,55)
+	call strings_add_new('bfm (benthic)',655,44)
+
 	call strings_add_new('weutro (pelagic)',700,20)
 	call strings_add_new('weutro (sediment)',720,10)
 	call strings_add_new('weutro (shell fish)',730,10)
@@ -1397,6 +1401,9 @@
 
 	call strings_set_short(300,'conc')
 	!call strings_set_short(30,'conc')
+
+	call strings_set_short(600,'bfmpel')
+	call strings_set_short(655,'bfmben')
 
 	call strings_set_short(700,'weutrop')
 	call strings_set_short(720,'weutrosd')

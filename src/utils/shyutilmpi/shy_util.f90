@@ -72,6 +72,7 @@
 ! 22.09.2024    ggu     bug fix in shy_check_nvar() - use also dtime0
 ! 04.12.2024    ggu     new framework for not doing gather_all
 ! 07.12.2024    ggu     reduce only to root (not all)
+! 01.04.2025    ggu     write subrange of variables
 !
 ! contents :
 !
@@ -769,6 +770,7 @@
 	integer ftype
 	integer ivar,n,m,lmax
 	double precision dtime
+	character*5 saux
 
 	ivars = 0
 	strings = ' '
@@ -797,6 +799,11 @@
 	    irec = irec + 1
 	    ivars(irec) = ivar
 	    call ivar2string(ivar,strings(irec),isub)
+	    if( isub > 0 ) then
+	      write(saux,'(i5)') isub
+	      saux = adjustl(saux)
+	      strings(irec) = trim(strings(irec)) // ' ' // trim(saux)
+	    end if
 	    if( irec == nvar ) exit
 	  end do
 	  call shy_back_records(id,nrec,ierr)

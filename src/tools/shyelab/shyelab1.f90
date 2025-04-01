@@ -79,6 +79,7 @@
 ! 20.07.2023    lrp     new paramter nzadapt
 ! 29.09.2023    ggu     new atime0out for correct concatenating of files
 ! 17.10.2024    ggu     for shy_make_basin_aver() allow for percentile
+! 01.04.2025    ggu     better error message
 !
 !**************************************************************
 
@@ -654,21 +655,27 @@
 	stop 'error stop shyelab: general error...'
    75	continue
 	write(6,*) 'error writing header, ierr = ',ierr
+	call shy_get_filename(id,file)
 	write(6,*) 'file = ',trim(file)
 	stop 'error stop shyelab: writing header'
    76	continue
 	write(6,*) 'ftype = ',ftype,'  expecting 1 or 2'
+	call shy_get_filename(id,file)
+	write(6,*) 'file = ',trim(file)
 	stop 'error stop shyelab: ftype'
    77	continue
 	write(6,*) 'error reading header, ierr = ',ierr
+	call shy_get_filename(id,file)
 	write(6,*) 'file = ',trim(file)
 	stop 'error stop shyelab: reading header'
    98	continue
 	write(6,*) 'error reading file, ierr = ',ierr
+	call shy_get_filename(id,file)
 	write(6,*) 'file = ',trim(file)
 	stop 'error stop shyelab: file contains no data'
    99	continue
 	write(6,*) 'error reading file, ierr = ',ierr
+	call shy_get_filename(id,file)
 	write(6,*) 'file = ',trim(file)
 	stop 'error stop shyelab: reading first record'
 	end

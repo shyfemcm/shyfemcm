@@ -94,6 +94,12 @@ bfmcopy:
 bfmsave:
 	cp -f $(BFMPRIVATE) arc
 
+bfmdiff:
+	for file in $(BFMPRIVATE) ; do \
+	  echo $$file ; \
+	  diff arc $$file ; \
+	done
+
 bfmdelete:
 	-rm -f $(BFMPRIVATE)
 
