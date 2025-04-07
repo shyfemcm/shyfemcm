@@ -41,6 +41,7 @@
 ! 16.02.2019	ggu	changed VERS_7_5_60
 ! 23.06.2022	ggu	allow for custom time correction (correct_nc_time*)
 ! 07.02.2024	ggu	changes in clean_time
+! 07.04.2025	ggu	new time_type == 3 (time as string)
 !
 ! notes :
 !
@@ -92,10 +93,10 @@
 
 	if( bdebug ) then
 	  write(6,*) 'setup_nc_time: debug'
-	  write(6,*) trim(time_d)
-	  write(6,*) trim(time_v)
-	  write(6,*) var_id
-	  write(6,*) trim(atext)
+	  write(6,*) 'time dimension name: ',trim(time_d)
+	  write(6,*) 'time variable name: ',trim(time_v)
+	  write(6,*) 'time var_id: ',var_id
+	  write(6,*) 'time units: ',trim(atext)
 	end if
 
 	call parse_time_units(bverb,atext,time_type,datetime0,time_fact)
@@ -135,6 +136,8 @@
           call handle_general_time(t,atime)
 	else if( time_type .eq. 2 ) then
           call handle_warf_time(t,atime)
+	else if( time_type .eq. 3 ) then	!probably string as time
+	  atime = t
 	else
 	  write(6,*) 'time_type: ',time_type
 	  stop 'error stop handle_nc_time: cannot handle'
@@ -187,8 +190,8 @@
 	else if( atext(1:11) .eq. 'Hours since' ) then
 	  off = 13
 	  fact = 3600.
-	else if( atext .eq. ' ' ) then	!no time coordinate
-	  itype = 0
+	else if( atext .eq. ' ' ) then	!no time unit... probably string
+	  itype = 3
 	  fact = 1.
 	else
 	  write(6,*) 'atext: ',trim(atext)

@@ -888,6 +888,7 @@
 
 	call ncnames_add_coord('t','Time')
 	call ncnames_add_coord('t','time')
+	call ncnames_add_coord('t','Times')
 	call ncnames_add_coord('t','time_counter')
 	call ncnames_add_coord('t','ocean_time')
 	call ncnames_add_coord('t','averaged time since initialization')
