@@ -73,6 +73,7 @@
 ! 04.12.2024    ggu     new framework for not doing gather_all
 ! 07.12.2024    ggu     reduce only to root (not all)
 ! 01.04.2025    ggu     write subrange of variables
+! 10.04.2025    ggu     new routine shyfem_init_scalar_fix_file() (nfix)
 !
 ! contents :
 !
@@ -517,6 +518,41 @@
         end
 
 !****************************************************************
+
+        subroutine shyfem_init_scalar_fix_file(type,nvar,nfix,id)
+
+! initializes scalar file with fixed layer structure from str
+
+        use levels
+        use shympi
+	use mod_trace_point
+	use shyfile
+
+        implicit none
+
+        character*(*) type      !type of file, e.g., hydro, ts, wave
+        integer nvar		!total number of scalars to be written
+	integer nfix		!fixed vertical structure
+        integer id		!id for file (return)
+
+        integer ftype,npr,nlg
+        character*80 file,ext,aux
+
+        aux = adjustl(type)
+        ext = '.' // trim(aux) // '.shy'        !no blanks in ext
+        ftype = 2
+        npr = 1
+        nlg = nfix
+
+        call shy_make_output_name(trim(ext),file)
+        call shy_open_output_file(file,npr,nlg,nvar,ftype,id)
+        call shy_set_simul_params(id)
+	call shy_convert_nfix(id,nfix)
+        call shy_make_header(id)
+
+        end
+
+!****************************************************************
 !write shy header
 !copied from shyfem_init_scalar_file
 !nvar not used
@@ -948,7 +984,7 @@
 	real c(nlvdi,m*n)
 
 	logical bdebug,b2d,bopen
-	integer ierr,nn,nl,i,ng
+	integer ierr,nn,nl,i,ng,nfix
 	real, allocatable :: cl(:,:),cg(:,:)
 	real, allocatable :: cl2d(:),cg2d(:)
 	character*80 file
@@ -978,6 +1014,8 @@
 	b2d = ( lmax == 1 )
 
 	ng = nlv_global
+	call shy_get_nfix(id,nfix)
+	if( nfix > 0 ) ng = nfix
 
 	if( belem ) then
 	  nn = nel_global
