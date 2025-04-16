@@ -47,6 +47,7 @@
 ! 22.06.2021	ggu	new parameter bage for age computation
 ! 13.10.2021	ggu	restart for mpi - compatibility with older versions
 ! 28.04.2023	ggu	update function calls for belem
+! 16.04.2025	ggu	contau eliminated, added wsettlv
 !
 !******************************************************************
 
@@ -79,13 +80,14 @@
 
         logical, save :: binfo = .true.
 
-        real, save :: cref,rkpar,difmol,contau
+        real, save :: cref,rkpar,difmol
 
         integer, save, allocatable :: idconz(:)
         double precision, save :: da_out(4)
 
         real, save, allocatable :: cdefs(:)
         real, save, allocatable :: tauv(:)
+        real, save, allocatable :: wsettlv(:)
         real, save, allocatable :: massv(:)
 
 	character*4, save :: what = 'conz'
