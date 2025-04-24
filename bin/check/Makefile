@@ -41,7 +41,7 @@ save:
 clean:
 	-rm -f *.o *.out *.ext
 	-rm -f ggg hhh
-	-rm -f test_*.[cf]
+	-rm -f test*.[cf]
 	-rm -f *.bak *.tmp
 	-rm -f *~
 	@#cd parallel; make clean
