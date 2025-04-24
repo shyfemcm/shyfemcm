@@ -112,6 +112,7 @@
 ! 13.04.2024    ggu     use tripple_point_set_values, also in hydro_stability
 ! 13.10.2024    ggu     bug fix for INTEL_BUG
 ! 01.12.2024    ggu     in momentum_advective_stability() do not reduce
+! 24.04.2025    ggu     handle new value for ibarcl == 5
 !
 ! notes :
 !
@@ -144,7 +145,7 @@
         rlin = getpar('rlin')
         itlin = nint(getpar('itlin'))
         ibarcl = nint(getpar('ibarcl'))
-        bbarcl = ibarcl .gt. 0 .and. ibarcl .ne. 3
+        bbarcl = ibarcl .gt. 0 .and. ibarcl .ne. 3 .and. ibarcl .ne. 5
 	blin = ilin /= 0
 	call nonhydro_get_flag(bnohyd)
 	call get_act_dtime(dtime)

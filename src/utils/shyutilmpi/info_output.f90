@@ -86,7 +86,7 @@
 	character*(*) what
 	integer n
 	real array(n)
-	logical, optional :: btime
+	logical, optional :: btime		!write time string
 	character*(*), optional :: format
 
 	logical bt

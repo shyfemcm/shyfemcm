@@ -33,7 +33,7 @@ LIBF	 =
 LIBL	+= -l$(LIBUTIL)
 LIBF	+= $(LIBDIR)/lib$(LIBUTIL).a
 
-LIBL	+= -l$(LIBSHYUTIL)
+LIBL	+= -l$(LIBSHYUTIL) -l$(LIBUTIL)
 LIBF	+= $(LIBDIR)/lib$(LIBSHYUTIL).a
 
 #--------------------------------------------- macros
