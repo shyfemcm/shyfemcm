@@ -126,7 +126,7 @@ cleanexe:
 	-rm -f $(EXES)
 	-rm -f *.exe
 
-cleanbfm: bfmdelete
+cleanbfm: bfmclean
 
 cleanvar:
 	-rm -f a.out core
