@@ -65,6 +65,8 @@
 ! 20.09.2024	ggu	new variable skin temperature (14)
 ! 21.09.2024	ggu	cleaned, some new helper routines
 ! 03.10.2024	ggu	new has_direction_ivar() and is_2d()
+! 01.04.2025	ggu	ivar values and range for BFM model
+! 24.04.2025	ggu	new entries for sensible, latent and long wave heat flux
 !
 ! contents :
 !
@@ -596,7 +598,7 @@
         stop 'error stop strings_check_consistency: ivar/=iv'
    99   continue
         call strings_info(id)
-        write(6,*) 'some parameter has not been set'
+        write(6,*) 'some parameters have not been set'
         stop 'error stop strings_check_consistency: consistency'
         end subroutine strings_check_consistency
 
@@ -1278,6 +1280,10 @@
 	call strings_add_new('wind stress modulus',45)
 	call strings_add_new('wind stress direction',46)
 
+	call strings_add_new('sensible heat flux',47)
+	call strings_add_new('latent heat flux',48)
+	call strings_add_new('long wave radiation',49)
+
 	call strings_add_new('bottom stress',60)
 	call strings_add_new('general index',75)
 	call strings_add_new('general type',76)
@@ -1306,6 +1312,9 @@
 
 	call strings_add_new('concentration',300,100)	!new numbering
 	!call strings_add_new('concentration (multi old)',30,20)
+
+	call strings_add_new('bfm (pelagic)',600,55)
+	call strings_add_new('bfm (benthic)',655,44)
 
 	call strings_add_new('weutro (pelagic)',700,20)
 	call strings_add_new('weutro (sediment)',720,10)
@@ -1371,6 +1380,10 @@
 	call strings_set_short(45,'wstressmod')
 	call strings_set_short(46,'wstressdir')
 
+	call strings_set_short(47,'qsens')
+	call strings_set_short(48,'qlat')
+	call strings_set_short(49,'qlong')
+
 	call strings_set_short(60,'bstress')
 	call strings_set_short(75,'index')
 	call strings_set_short(76,'type')
@@ -1397,6 +1410,9 @@
 
 	call strings_set_short(300,'conc')
 	!call strings_set_short(30,'conc')
+
+	call strings_set_short(600,'bfmpel')
+	call strings_set_short(655,'bfmben')
 
 	call strings_set_short(700,'weutrop')
 	call strings_set_short(720,'weutrosd')

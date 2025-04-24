@@ -67,6 +67,7 @@ sub write_section {
   print "SHYFEM_PROFILE=\$SHYFEMDIR/bin/shyfem_util/shyfem_profile.sh\n";
   print "[ -f \$SHYFEM_PROFILE ] && . \$SHYFEM_PROFILE\n";
   print "PATH=\$SHYFEMDIR/bin:\$PATH\n";
+  print 'alias shypath=". $SHYFEMDIR/bin/shyfem_util/shypath.sh"' . "\n";
   print "\#--- SHYFEM --- set up end\n";
 }
   

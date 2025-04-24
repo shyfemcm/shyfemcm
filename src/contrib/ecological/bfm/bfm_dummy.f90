@@ -33,27 +33,45 @@
 
 !******************************************************************
 
+!==================================================================
 	module mod_bfm
+!==================================================================
+
+	implicit none
 
 	integer, save :: ibfm = 0
 
+!==================================================================
 	contains
+!==================================================================
 
 	subroutine bfm_init
+	real getpar
+	ibfm = nint(getpar('ibfm'))
+	call bfm_init_internal(ibfm)
 	end
 
 	subroutine bfm_run
 	end
 
+!==================================================================
 	end module mod_bfm
+!==================================================================
 
 !******************************************************************
 
-	subroutine bfm_init_internal
+	subroutine bfm_init_internal(ibfm)
 
-	write(6,*) 'bfm routines have not been linked into shyfem'
-	write(6,*) 'please correct Rules.make file'
-	stop 'error stop bfm_init_internal: no bfm routines'
+	implicit none
+
+	integer ibfm
+
+	if( ibfm > 0 ) then
+	  write(6,*) 'ibfm = ',ibfm
+	  write(6,*) 'bfm routines have not been linked into shyfem'
+	  write(6,*) 'please correct Rules.make file'
+	  stop 'error stop bfm_init_internal: no bfm routines'
+	end if
 
 	end
 

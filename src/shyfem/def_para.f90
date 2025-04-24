@@ -232,6 +232,8 @@
 ! 16.11.2024	ggu	new parameter ibasin
 ! 23.11.2024	ggu	new parameter pqual
 ! 03.12.2024    lrp     new parameter irain for the coupled model
+! 01.04.2025    ggu     new value 5 for ibarcl
+! 16.04.2025    ggu     new parameter wsettl
 !
 !************************************************************************
 
@@ -1123,6 +1125,8 @@
 !			 |temptaup| and |salttaip| or in spatially and
 !			 temporarily varying fields given in external
 !			 files |temptau| and |salttau|.
+!		\item[5] As for case 4, but no baroclinic mode. It therefore
+!			 is as in case 3, but with nudging.
 !		\end{description}
 
 	call addpar('ibarcl',0.)	!compute baroclinic contributions ?
@@ -1212,6 +1216,13 @@
 !		for all concentrations, or |iconz| values have to be given,
 !		one for each concentration.
 !		(Default 0)
+! |wsettl|	Settling rate for concentration if different from 0. In
+!		this case |wsettl| is the sinking velocity in [m/s].
+!		This parameter is also used for multi-concentration runs.
+!		In this case either one value has to be given that is used
+!		for all concentrations, or |iconz| values have to be given,
+!		one for each concentration.
+!		(Default 0)
 ! |idecay|	Type of decay used. If 0 no decay is used.
 !		A value of 1 uses the value of |taupar| as exponential decay.
 !		A value of 2 uses a formulation of Chapra, where the
@@ -1231,6 +1242,7 @@
 
 	call para_deprecate('contau','taupar')	!no contau anymore -> use taupar
 	call para_add_array_value('taupar',0.)	!decay rate [days]
+	call para_add_array_value('wsettl',0.)	!sinking velocities [m/s]
 
 ! |chpar|	Horizontal diffusion parameter for the tracer.
 !		This value overwrites the general parameter for

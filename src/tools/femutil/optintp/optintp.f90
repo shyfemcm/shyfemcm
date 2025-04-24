@@ -132,7 +132,7 @@
 	implicit none
 
 	integer nobdim
-	parameter (nobdim = 29)
+	parameter (nobdim = 5)
 
 	real xobs(nobdim)
 	real yobs(nobdim)

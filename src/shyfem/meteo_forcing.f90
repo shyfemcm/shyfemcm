@@ -186,6 +186,7 @@
 !                        from the east etc.
 !               \item[4] As in 3 but the speed is given in knots
 !               \end{description}
+!
 ! |itdrag|	Formula to compute the drag coefficient. 
 !		\begin{description}
 !		\item[0] constant value given in |dragco|. 
@@ -201,12 +202,13 @@
 !		See the paper and/or the ECMWF report.
 !		\end{description}
 !		(Default 0)
+!
 ! |dragco|	Drag coefficient used in the above formula. (Default 2.5E-3). 
 !		If |itdrag| = 5 this is the Charnock parameter and you should 
-!		use values from 0.01 (swell) to 0.04 (steep young waves). (Default 0.025).
+!		use values from 0.01 (swell) to 0.04 (steep young waves). 
+!		(Default 0.025).
 !		Please note that in case of |iwtype| = 2 this parameter
-!		is of no interest, since the
-!		stress is specified directly.
+!		is of no interest, since the stress is specified directly.
 !
 ! |wsmax|	Maximum wind speed allowed in [m/s]. This is in order to avoid
 !		errors if the wind data is given in a different format

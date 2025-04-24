@@ -74,6 +74,8 @@
 ! 05.08.2024	ggu	new routine nc_user_defined_global()
 ! 03.10.2024	ggu	introduced directional variable
 ! 03.10.2024	ggu	new variables added
+! 01.04.2025	ggu	handle variables with no CL description
+! 07.04.2025	ggu	new routine handle_time_string()
 !
 ! notes :
 !
@@ -126,6 +128,9 @@
 
 	character*80, save :: time_dim = ' '	!dimension name of time
 	character*80, save :: time_var = ' '	!variable name of time
+
+	integer, save :: ntime_recs = 0		!how many time records
+	logical, save :: btime_is_char = .false. !time is a string ... special
 
 	logical, save :: bdebug_nc = .false.
 	logical, save :: bquiet_nc = .false.
@@ -1231,6 +1236,10 @@
 	integer itime
 	real rtime
 	double precision dtime
+	logical bdebug
+
+	bdebug = .true.
+	bdebug = .false.
 
 	retval = nf_inq_nvars(ncid,nvars)
 	call nc_handle_err(retval,'get_time_rec')
@@ -1246,6 +1255,8 @@
 	retval = nf_inq_vartype(ncid,time_id,xtype)
 	call nc_handle_err(retval,'get_time_rec')
 	!write(6,*) 'time_id: ',time_id,xtype
+
+	!write(6,*) 'types: ',NF_INT,NF_FLOAT,NF_DOUBLE,NF_CHAR
 
 	istart = irec
 	icount = 1
@@ -1264,18 +1275,143 @@
 	  retval = nf_get_vara_double(ncid,time_id,istart,icount,dtime)
 	  call nc_handle_err(retval,'get_time_rec')
 	  t = dtime
+	else if( xtype .eq. NF_CHAR ) then
+	  !write(6,*) 'time is char.........'
+	  call handle_time_string(ncid,irec,t)
 	else if( xtype .eq. 10 ) then	!has no name
 	  !write(6,*) 'time is int64.........'
 	  retval = nf_get_vara_double(ncid,time_id,istart,icount,dtime)
 	  call nc_handle_err(retval,'get_time_rec')
 	  t = dtime
-	  !write(6,*) 'ggguuu: ',t,dtime
 	else
 	  write(6,*) 'unknown type for variable time'
 	  write(6,*) 'xtype = ',xtype
 	  stop 'error stop nc_get_time_rec: cannot read time'
 	end if
 
+	end
+
+!*****************************************************************
+
+	subroutine handle_time_string(ncid,irec,t)
+
+	use netcdf_params
+
+	implicit none
+
+	integer ncid,irec
+	double precision t
+
+	logical bdebug
+	integer retval
+	character*80 time,time_d,time_v
+	character*80 name
+	integer i,time_id
+	integer xtype
+	integer itime
+	integer ndims,natts
+	integer dimid,len,dimlen
+	integer iu,it,ierr
+	integer, save :: clen,crecs
+	integer, allocatable, save :: dimids(:),dimlens(:)
+	integer, save :: icall = 0
+	double precision atime
+	character(len=:), allocatable, save :: ctimes(:)
+	character*20 string
+
+	bdebug = .true.
+	bdebug = .false.
+
+	call nc_get_time_name(time_d,time_v)
+	time = time_v
+
+	call nc_get_var_id(ncid,time,time_id)
+	if( time_id .eq. 0 ) then
+	  stop 'error stop handle_time_string: cannot find time variable'
+	end if
+
+	retval = nf_inq_vartype(ncid,time_id,xtype)
+	call nc_handle_err(retval,'get_time_rec')
+	if( xtype /= NF_CHAR ) then
+	  write(6,*) 'can only handle strings for time: ',xtype
+	  stop 'error stop handle_time_string: only time strings'
+	end if
+
+	retval =  NF_INQ_VARNDIMS(ncid,time_id,ndims)
+	call nc_handle_err(retval,'get_time_rec')
+	if( ndims /= 2 ) then
+	  write(6,*) 'can only handle time strings with 2 dimensions:', ndims
+	  stop 'error stop handle_time_string: ndims /= 2'
+	end if
+
+	if( icall == 0 ) then
+	  allocate(dimids(ndims),dimlens(ndims))
+	  retval = NF_INQ_VAR(ncid,time_id,name,xtype,ndims,dimids,natts)
+	  call nc_handle_err(retval,'get_time_rec')
+	  do i=1,ndims
+	    dimid = dimids(i)
+	    retval =  NF_INQ_DIMLEN(NCID,DIMID,len)
+	    dimlens(i) = len
+	  end do
+	  clen = dimlens(1)
+	  crecs = dimlens(2)
+	  allocate(character(LEN=clen) ::  ctimes(crecs))
+
+	  retval = nf_get_var_text(ncid,time_id,ctimes)
+	  call nc_handle_err(retval,'get_time_rec')
+
+	  ntime_recs = crecs
+	  btime_is_char = .true.
+
+	end if
+	icall = icall + 1
+
+	if( bdebug ) then
+	  retval = NF_INQ_VAR(ncid,time_id,name,xtype,ndims,dimids,natts)
+	  call nc_handle_err(retval,'get_time_rec')
+	  write(6,*) 'time info: '
+	  write(6,*) time_id
+	  write(6,*) trim(name)
+	  write(6,*) xtype
+	  write(6,*) ndims
+	  write(6,*) dimids
+	  do i=1,ndims
+	    dimid = dimids(i)
+	    dimlen = dimlens(i)
+	    write(6,*) 'dimension: ',i,dimid,dimlen
+	  end do
+	  write(6,*) natts
+	  write(6,*) 'time records found: ',crecs
+	  do i=1,crecs
+	    write(6,*) 'ctimes: ',i,ctimes(i)
+	  end do
+	end if
+
+	t = 0
+	if( irec == 0 ) return
+
+	string = ctimes(irec)
+	iu = index(string,'_')
+	it = index(string,'T')
+	if( iu > 0 ) then
+	  string = string(:iu-1) // '::' // string(iu+1:)
+	else if( it > 0 ) then
+	  string = string(:it-1) // '::' // string(it+1:)
+	end if
+
+	if( bdebug ) then
+	  write(6,*) 'time string: ',string
+	end if
+	
+	call dts_string2time(string,atime,ierr)
+	if( ierr /= 0 ) then
+	  write(6,*) 'cannot parse string: ',string
+	  stop 'error stop handle_time_string: cannot parse string'
+	end if
+
+	t = atime
+
+	!stop 'forced stop in handle_time_string'
 	end
 
 !*****************************************************************
@@ -1293,8 +1429,20 @@
 	character*80 name
 	character*80 time,time_d,time_v
 	integer retval
+	double precision t
 
 	trecs = 0
+
+	if( ntime_recs > 0 ) then	!we already know
+	  trecs = ntime_recs
+	  return
+	end if
+
+	if( btime_is_char ) then
+	  call handle_time_string(ncid,0,t)	!only to set up data structure
+	  trecs = ntime_recs
+	  return
+	end if
 
 	call nc_get_time_name(time_d,time_v)
 	if( time_d == ' ' .or. time_v == ' ' ) return
@@ -1304,6 +1452,7 @@
 	if( dim_id .gt. 0 ) then
 	  retval = nf_inq_dim(ncid,dim_id,time_d,len)
 	  call nc_handle_err(retval,'get_time_recs')
+	  ntime_recs = len
 	  trecs = len
 	end if
 
@@ -3023,6 +3172,7 @@
 	integer var_id		! id to be used for other operations (return)
 
 	character*80 name,what,std,units
+	character*80 string
 	real cmin,cmax
 
 	if( ivar .eq. 1 ) then		! water level
@@ -3249,10 +3399,20 @@
 	  units = 'kg/ms'
 	  cmin = 0.
 	  cmax = 0.
-	else
+	else if( ivar .eq. 0 ) then	! no variable description
 	  write(6,*) 'unknown variable: ',ivar
-	  write(6,*) 'this variable has no CL description'
-	  stop 'error stop descr_var'
+	  stop 'error stop nc_init_variable'
+	else
+	  write(6,*) 'this variable has no CL description: ',ivar
+	  call make_unknown_variable_name(ivar,string)
+	  !write(string,'(i4)') ivar
+	  !string = adjustl(string)
+	  name = string
+	  what = 'long_name'
+	  std = string
+	  cmin = 0.
+	  cmax = 0.
+	  units = ''
 	end if
 
 	if( .not. bquiet_nc ) then
@@ -3289,6 +3449,52 @@
 !*****************************************************************
 ! auxiliary routines
 !*****************************************************************
+!*****************************************************************
+
+	subroutine make_unknown_variable_name(ivar,string)
+
+	use shyfem_strings
+
+	implicit none
+
+	integer ivar
+	character*(*) string
+
+	integer isub,i
+	character*80 saux
+
+        call strings_get_full_name(ivar,saux,isub)
+	
+	!--------------------------------
+	! get rid of parenthesis
+	!--------------------------------
+
+	i = index(saux,'(')
+	if( i > 0 ) saux(i:) = saux(i+1:)
+	i = index(saux,')')
+	if( i > 0 ) saux(i:) = saux(i+1:)
+
+	!--------------------------------
+	! convert blanks to underscores
+	!--------------------------------
+
+	do i=1,len_trim(saux)
+	  if( saux(i:i) == ' ' ) saux(i:i) = '_'
+	end do
+
+	!--------------------------------
+	! add substring
+	!--------------------------------
+
+        string = saux
+        if( isub > 0 ) then
+          write(saux,'(i4)') isub
+	  saux = adjustl(saux)
+          string = trim(string) // '_' // saux
+        end if
+
+	end
+
 !*****************************************************************
 
 	subroutine nc_set_quiet(bquiet)

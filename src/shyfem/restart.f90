@@ -130,6 +130,7 @@
 ! 14	write vertical only for nlv > 1
 ! 15	write gotm arrays
 ! 16	adapted for mpi
+! 17	write bfm restart
 !
 !	integer, save :: id_hydro_rst = 1	!1		hydro
 !	integer, save :: id_depth_rst = 2	!10		depth
@@ -179,10 +180,6 @@
 	iflag_want_rst = nint(getpar('flgrst'))
         call getfnm('restrt',name)
         if(name.eq.' ') return
-
-	!if( shympi_is_parallel() ) then
-	!  stop 'error stop rst_perform_restart: not ready for MPI'
-	!end if
 
         date = nint(dgetpar('date'))
         time = nint(dgetpar('time'))
@@ -508,10 +505,6 @@
 	    da_out(4) = iunit
 	  end if
 
-	  !if( shympi_is_parallel() ) then
-	  !  stop 'error stop rst_perform_restart: not ready for MPI'
-	  !end if
-
         end if
 
 !-----------------------------------------------------
@@ -534,7 +527,7 @@
 	  close(iunit)
 	else
 	  if( bdebug .and. bmpi_master ) then
-	    write(6,*) 'writing multiple new restart records'
+	    write(6,*) 'writing restart record'
 	  end if
 	  iunit = nint(da_out(4))
           call rst_write_record(atime,iunit)
@@ -599,6 +592,7 @@
         time = nint(dgetpar('time'))
 
 	ieco = ibio + ibfm
+	ieco = ibio
 
 	if( bmaster ) then
           write(iunit) idfrst,nvers,1
@@ -645,19 +639,16 @@
 
 	call restart_write_value(iunit,ieco)
 	if( ieco .gt. 0 ) then
-	  if( bmpi ) write(6,*) 'eco restart not ready for mpi...'
 	  call write_restart_eco(iunit)
         end if
 
 	call restart_write_value(iunit,imerc)
 	if( imerc .gt. 0 ) then
-	  if( bmpi ) write(6,*) 'mercury restart not ready for mpi...'
 	  call write_restart_mercury(iunit)
         end if
 
 	call restart_write_value(iunit,ibfm)
 	if( ibfm .gt. 0 ) then
-	  if( bmpi ) write(6,*) 'bfm restart not ready for mpi...'
 	  call write_restart_bfm(iunit)
         end if
 
@@ -833,7 +824,6 @@
 	  id = id_eco_rst
           read(iunit) ieco
           if( ieco .gt. 0 ) then
-	    if( bmpi ) write(6,*) 'eco restart not ready for mpi...'
 	    call rst_add_flag(id,iflag)
 	    call skip_restart_eco(iunit)
           end if
@@ -843,13 +833,12 @@
 	  id = id_merc_rst
           read(iunit) imerc
           if( imerc .gt. 0 ) then
-	    if( bmpi ) write(6,*) 'mercury restart not ready for mpi...'
 	    call rst_add_flag(id,iflag)
 	    call skip_restart_mercury(iunit)
           end if
         end if
 
-	if( nvers .ge. 15 ) then
+	if( nvers .ge. 17 ) then
 	  id = id_bfm_rst
           read(iunit) ibfm
           if( ibfm .gt. 0 ) then
@@ -865,11 +854,12 @@
 	ierr = -1
 	return
     3	continue
-	write(6,*) 'rst_skip: error in reading restart file'
+	write(6,*) 'rst_skip_record: error in reading restart file'
 	ierr = 1
 	return
     7	continue
-	write(6,*) 'skip_rst: error in idfrst... no restart format'
+	write(6,*) 'idfile,idfrst: ',idfile,idfrst
+	write(6,*) 'rst_skip_record: error in idfrst... no restart format'
 	ierr = 7
 	return
 	end
@@ -1033,7 +1023,6 @@
 	    read(iunit) ieco
 	    ieco_rst = ieco
             if( ieco .gt. 0 ) then
-	      if( bmpi ) write(6,*) 'eco restart not ready for mpi...'
 	      call rst_add_flag(id,iflag)
 	      if( rst_want_restart(id) ) then
 	        call read_restart_eco(iunit)
@@ -1048,7 +1037,6 @@
 	    read(iunit) imerc
 	    imerc_rst = imerc
             if( imerc .gt. 0 ) then
-	      if( bmpi ) write(6,*) 'mercury restart not ready for mpi...'
 	      call rst_add_flag(id,iflag)
 	      if( rst_want_restart(id) ) then
 	        call read_restart_mercury(iunit)
@@ -1059,11 +1047,10 @@
           end if
 
 
-	  if( nvers .ge. 15 ) then
+	  if( nvers .ge. 17 ) then
 	    id = id_bfm_rst
 	    read(iunit) ibfm
             if( ibfm .gt. 0 ) then
-	      if( bmpi ) write(6,*) 'bfm restart not ready for mpi...'
 	      call rst_add_flag(id,iflag)
 	      if( rst_want_restart(id) ) then
                 call bfm_init_for_restart()
@@ -1079,6 +1066,9 @@
 	write(6,*) 'rst_read_record: error in idfrst... ' // 'no restart format'
 	ierr = 7
 	return
+   96   continue
+        write(6,*) 'error reading header of restart file...'
+        stop 'error stop rst_read_record: cannot read header'
    97   continue
         ierr = -1
         return

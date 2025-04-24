@@ -217,8 +217,10 @@ extelab1.o: ../../../lib/mod/basin.mod ../../../lib/mod/clo.mod \
 		../../../lib/mod/levels.mod \
 		../../../lib/mod/mod_depth.mod \
 		../../../lib/mod/shyfem_strings.mod 
+femadd.o: ../../../lib/mod/clo.mod ../../../lib/mod/fem_util.mod
 femcombine.o: ../../../lib/mod/clo.mod \
 		../../../lib/mod/fem_util.mod 
+femdate.o: ../../../lib/mod/clo.mod ../../../lib/mod/fem_util.mod
 femelab1.o: ../../../lib/mod/clo.mod ../../../lib/mod/elabtime.mod \
 		../../../lib/mod/elabutil.mod \
 		../../../lib/mod/iso8601.mod \

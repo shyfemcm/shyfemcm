@@ -91,8 +91,21 @@ $(BFMPRIVATE):
 bfmcopy:
 	cp -f arc/*.f90 .
 
-bfmdelete:
+bfmsave:
+	cp -f $(BFMPRIVATE) arc
+
+bfmdiff:
+	for file in $(BFMPRIVATE) ; do \
+	  echo $$file ; \
+	  diff arc $$file ; \
+	done
+
+bfmzip:
+	zip bfm.zip $(BFMPRIVATE)
+
+bfmclean: 
 	-rm -f $(BFMPRIVATE)
+	-rm -f bfm.zip
 
 #--------------------------------------------- clean
 
