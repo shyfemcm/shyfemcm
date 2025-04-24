@@ -124,6 +124,7 @@ all: shyfem doc
 nuopc: fem
 	@$(FEMBIN)/recursivemake $@ $(FEMSRC)/shyfem
 
+compile: shyfem
 fem: shyfem
 shyfem: checkv libmod
 	cd src; make
@@ -228,6 +229,7 @@ help:
 	@echo "install             installs the model"
 	@echo "configure           configures the model"
 	@echo "fem                 compiles everything"
+	@echo "compile             compiles everything (same as fem)"
 	@echo "bfm_compile         sets up BFM module"
 	@echo "nograph             compiles everything except graphics"
 	@echo "compat              compiles compatibility routines"
