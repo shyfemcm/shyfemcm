@@ -83,6 +83,14 @@ SetVars()
     export PARMETIS_HOME=
     export PETSC_HOME=$HOME/lib/petsc
     export BFM_HOME=$HOME/work/shyfem_repo/bfm-for-shyfem-private
+  elif [ $server = "lagoon" ]; then
+    export NETCDF_C_HOME=
+    export NETCDF_FORTRAN_HOME=
+    export NETCDFDIR=
+    export METIS_HOME=$HOME/lib/metis
+    export PARMETIS_HOME=
+    export PETSC_HOME=$HOME/lib/petsc
+    export BFM_HOME=$HOME/lib/bfm
   elif [ $server = "tide" ]; then
     export NETCDF_C_HOME=
     export NETCDF_FORTRAN_HOME=

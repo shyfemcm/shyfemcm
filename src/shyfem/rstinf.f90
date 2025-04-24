@@ -112,6 +112,7 @@
 	end do
 
 	if( ierr > 0 ) stop 'error stop rstinf: error reading record'
+	if( nread == 0 ) stop 'error stop rstinf: no data in file'
 
 !-------------------------------------------------------------------
 ! final message

@@ -161,6 +161,7 @@
 ! 09.05.2023    lrp     introduce top layer index variable
 ! 03.12.2024    ggu     new info_output framework
 ! 05.02.2025    ggu     new info_format for T/S
+! 24.04.2025    ggu     new value for ibarcl: ibercl == 5
 !
 ! notes :
 !
@@ -304,16 +305,17 @@
 
 		ibarcl=iround(getpar('ibarcl'))
 		if(ibarcl.le.0) icall = -1
-		if(ibarcl.gt.4) then
+		if(ibarcl.gt.5) then
 		  write(6,*) 'Value of ibarcl not allowed: ',ibarcl
 	          stop 'error stop barocl: ibarcl'
 		end if
 		if(icall.eq.-1) return
 
-		bdiag = ibarcl .eq. 2		!diagnostic run
-		badvect = .not. bdiag		!must advect T/S
-		bbarcl = ibarcl .ne. 3		!baroclinic run
-		bobs = ibarcl .eq. 4		!nudging
+		bdiag = ibarcl .eq. 2			!diagnostic run
+		badvect = .not. bdiag			!must advect T/S
+		bobs = ibarcl .eq. 4 .or. ibarcl .eq. 5	!nudging
+		bbarcl = ibarcl .ne. 3			!baroclinic run
+		if( ibarcl .eq. 5 ) bbarcl = .false.
 
 		salref=getpar('salref')
 		temref=getpar('temref')
