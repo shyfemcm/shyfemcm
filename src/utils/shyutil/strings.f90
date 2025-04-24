@@ -66,6 +66,7 @@
 ! 21.09.2024	ggu	cleaned, some new helper routines
 ! 03.10.2024	ggu	new has_direction_ivar() and is_2d()
 ! 01.04.2025	ggu	ivar values and range for BFM model
+! 24.04.2025	ggu	new entries for sensible, latent and long wave heat flux
 !
 ! contents :
 !
@@ -1279,6 +1280,10 @@
 	call strings_add_new('wind stress modulus',45)
 	call strings_add_new('wind stress direction',46)
 
+	call strings_add_new('sensible heat flux',47)
+	call strings_add_new('latent heat flux',48)
+	call strings_add_new('long wave radiation',49)
+
 	call strings_add_new('bottom stress',60)
 	call strings_add_new('general index',75)
 	call strings_add_new('general type',76)
@@ -1374,6 +1379,10 @@
 	call strings_set_short(44,'shum')
 	call strings_set_short(45,'wstressmod')
 	call strings_set_short(46,'wstressdir')
+
+	call strings_set_short(47,'qsens')
+	call strings_set_short(48,'qlat')
+	call strings_set_short(49,'qlong')
 
 	call strings_set_short(60,'bstress')
 	call strings_set_short(75,'index')

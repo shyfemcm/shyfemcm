@@ -479,7 +479,8 @@
 	  else if( iheat .eq. 7 ) then
 	    qsens = ta
 	    qlat  = ur
-	    qlong = -cc	  !change sign of long wave radiation given by ISAC
+	    !qlong = -cc  !change sign of long wave radiation given by ISAC
+	    qlong = abs(cc)
 	    evap  = qlat / (2.5008e6 - 2.3e3 * tm)	!pom, gill, gotm
           else if( iheat .eq. 8 ) then
             ddlon = xgv(k)    
@@ -516,7 +517,10 @@
 	  end if
 
 	  !------------------------------------------------
-	  ! final heat exchange - qrad, qss, qtot positive from air to sea
+	  ! final heat exchange 
+	  ! qlong, qlat, qsens are positive from sea to air
+	  ! qss (solar radiation) is positive from air to sea
+	  ! qrad, qss, qtot are positive from air to sea
 	  !------------------------------------------------
 
 	  qlong = fice_free * qlong
