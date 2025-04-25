@@ -47,6 +47,7 @@
 ! 23.10.2022	ggu	new routine handle_exceptions()
 ! 15.11.2024	ggu	use bclip for some coordinates
 ! 15.01.2025	ggu	check also if coordinate is without dimension
+! 24.04.2025	ggu	new routine ncnames_get_dim_coord_info()
 !
 ! notes :
 !
@@ -543,6 +544,36 @@
 
 !*****************************************************************
 
+	subroutine ncnames_get_dim_coord_info(what,dim_size,dim_name,coord_name)
+
+	implicit none
+
+	character*(*) what
+	integer dim_size
+	character*(*) dim_name
+	character*(*) coord_name
+	
+	character*1 w
+	integer i
+	character*4, save :: string = 'txyz'
+
+	dim_size = 0
+	dim_name = ' '
+	coord_name = ' '
+
+	do i=0,3
+	  w = string(i+1:i+1)
+	  if( w == what ) then
+            dim_size = idims(2,i)
+            dim_name = trim(cdims(i))
+            coord_name = trim(ccoords(i))
+	  end if
+	end do
+
+	end
+
+!*****************************************************************
+
 	subroutine handle_exceptions(ncid,var_id,bexcept)
 
 	implicit none
@@ -1007,6 +1038,14 @@
      &                  ,'surface_downwelling_shortwave_flux_in_air')
         call ncnames_add_var('srad'                                     &
      &                  ,'surface_solar_radiation_downwards')
+        call ncnames_add_var('srad'                                     &
+     &                  ,'surface_net_downward_shortwave_flux')
+        call ncnames_add_var('qsens'                                    &
+     &                  ,'surface_upward_sensible_heat_flux')
+        call ncnames_add_var('qlat'                                     &
+     &                  ,'surface_upward_latent_heat_flux')
+        call ncnames_add_var('qlong'                                    &
+     &                  ,'surface_net_upward_longwave_flux')
 	call ncnames_add_var('rain','large_scale_precipitation_amount')
 	call ncnames_add_var('rain','accumulated_precipitation_amount')
         call ncnames_add_var('rain'                                     &
