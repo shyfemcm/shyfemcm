@@ -52,6 +52,7 @@
 ! 23.06.2022	ggu	allowing offset given by user (-offset) 
 ! 23.06.2022    ggu     possible time correction for SMHI data (-tcorrect)
 ! 23.06.2022    ggu     more debug output with bwrite
+! 25.04.2025    ggu     new option -rfact
 !
 ! notes :
 !
@@ -103,7 +104,7 @@
         character*132 file
         character*80 var_name,files,sfile
         character*80 name,xcoord,ycoord,zcoord,tcoord,bathy,slmask
-        character*80 varline,descrpline,factline,offline
+        character*80 varline,descrpline,factline,rfactline,offline
         character*80 text,fulltext,dstring
         character*80, allocatable :: vars(:)
         character*80, allocatable :: descrps(:)
@@ -203,6 +204,8 @@
      &          ,'use this description for variables')
         call clo_add_option('fact facts',' '                            &
      &          ,'scale vars with these factors')
+        call clo_add_option('rfact facts',' '                            &
+     &          ,'scale vars with the inverse of these factors')
         call clo_add_option('offset offsets',' '                        &
      &          ,'add offsets to vars')
         call clo_add_option('single file',' '                           &
@@ -218,7 +221,7 @@
         call clo_add_sep('additional information')
         call clo_add_com('  var is name of variable in nc file')
         call clo_add_com('  facts is list of factors for'               &
-     &                          // ' multiplication of vars')
+     &                          // ' multiplication/division of vars')
         call clo_add_com('  offsets is list of constants to'            &
      &                          // ' be added to vars')
         call clo_add_com('  text is list of variables and descriptions' &
@@ -252,6 +255,7 @@
 	call clo_get_option('domain',dstring)
 	call clo_get_option('regexpand',regexpand)
 	call clo_get_option('fact',factline)
+	call clo_get_option('rfact',rfactline)
 	call clo_get_option('offset',offline)
 
 	call clo_get_option('invertdepth',binvertdepth)
@@ -426,12 +430,23 @@
 
 	allocate(facts(nd),offs(nd),flags(nd))
 
-	call parse_strings(factline,nd,sfacts)
 	facts = 1.
-	call setup_facts(nd,sfacts,facts)
+	if( factline /= ' ' .and. rfactline /= ' ' ) then
+	  write(6,*) 'only one of -fact and -rfact can be given'
+	  write(6,*) 'fact:  ',trim(factline)
+	  write(6,*) 'rfact: ',trim(rfactline)
+	  stop 'error stop nc2fem: error in option'
+	else if( factline /= ' ' ) then
+	  call parse_strings(factline,nd,sfacts)
+	  call setup_facts(nd,sfacts,facts)
+	else if( rfactline /= ' ' ) then
+	  call parse_strings(rfactline,nd,sfacts)
+	  call setup_facts(nd,sfacts,facts)
+	  facts = 1. / facts
+	end if
 
-	call parse_strings(offline,nd,soffs)
 	offs = 0.
+	call parse_strings(offline,nd,soffs)
 	call setup_facts(nd,soffs,offs)
 
 !-----------------------------------------------------------------
