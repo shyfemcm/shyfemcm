@@ -75,6 +75,11 @@ buttons="--extra-button --extra-label edit \
 
 choice=0
 
+if [ $n -eq 0 ]; then
+  echo "no changes found... exiting"
+  exit 0
+fi
+
 #------------------------------------------------------------
 # diff:0  edit:3  exit:1
 #------------------------------------------------------------
