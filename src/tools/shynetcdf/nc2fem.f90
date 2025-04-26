@@ -299,7 +299,7 @@
 
 	call ncnames_init
 
-        call get_dims_and_coords(ncid,bwrite                            &
+        call ncnames_get_dims_and_coords(ncid,bwrite                    &
      &                  ,nt,nx,ny,nz                                    &
      &                  ,tcoord,xcoord,ycoord,zcoord)
 

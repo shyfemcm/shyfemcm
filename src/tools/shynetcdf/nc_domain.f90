@@ -147,7 +147,7 @@
 ! if it is .false. dx,dy are average values, x0,y0,x1,y1 are min/max values
 ! also for regular grid, dx,dy are average values
 
-	use ncnames
+	!use ncnames
 
         implicit none
 
