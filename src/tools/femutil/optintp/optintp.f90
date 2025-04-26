@@ -106,7 +106,7 @@
 	real, save :: ymax = 0.
 	real, save :: tmin = 0.
 	real, save :: tmax = 0.
-	real, save :: baver = flag
+	real, save :: backvalue = flag
 	double precision, save :: atime0 = 0.
 
 	character*80, save :: sdxy = ' '
@@ -114,6 +114,7 @@
 	character*80, save :: stau = ' '
 	character*80, save :: varstring = 'unknown'
 	character*80, save :: date0 = ' '
+	character*80, save :: backfile = ' '
 
 !================================================================
 	end module mod_optintp
@@ -274,11 +275,14 @@
 	allocate(zaux(nback))
 
 	call setup_background_coords(nback,regpar,xback,yback)
+
+	call read_background_values(backfile,nback,zback)
+
 	zback = flag
 	zanal = flag
 	if( bback ) then
-	  zback = baver
-	  bobs = baver
+	  zback = backvalue
+	  bobs = backvalue
 	end if
 
 	nx = nint(regpar(1))
@@ -546,51 +550,6 @@
 	end if
 
 	return
-
-! next part can be deleted
-
-	if( dx <= 0. .or. dy <= 0. ) goto 96
-	if( xmin >= xmax ) goto 96
-	if( ymin >= ymax ) goto 96
-
-	regpar = 0.
-	flag = -999.
-
-	x0 = int(xmin/dx)*dx
-	y0 = int(ymin/dy)*dy
-
-	nx = 2 + (xmax - xmin) / dx
-	x1 = x0 + (nx-1)*dx
-	if( x1 < xmax ) nx = nx + 1
-	x1 = x0 + (nx-1)*dx
-
-	ny = 2 + (ymax - ymin) / dy
-	y1 = y0 + (ny-1)*dy
-	if( y1 < ymax ) ny = ny + 1
-	y1 = y0 + (ny-1)*dy
-
-	if( x0 > xmin .or. x1 < xmax ) goto 95
-	if( y0 > ymin .or. y1 < ymax ) goto 95
-
-	nback = nx*ny
-
-	regpar(1) = nx
-	regpar(2) = ny
-	regpar(3) = x0
-	regpar(4) = y0
-	regpar(5) = dx
-	regpar(6) = dy
-	regpar(7) = flag
-
-	if( nx > 0. .and. .not. bquiet ) then
-	  write(6,*) 'background grid: ',nx,dx,dy
-	  write(6,*) '   x0,x1:        ',x0,x1
-	  write(6,*) '   y0,y1:        ',y0,y1
-	  call write_reg_grid(nx,ny,x0,y0,dx,dy)
-	  call write_box_grid(nx,ny,x0,y0,dx,dy)
-	end if
-
-	return
    95	continue
 	write(6,*) x0,xmin,xmax,x1
 	write(6,*) y0,ymin,ymax,y1
@@ -646,6 +605,101 @@
 	stop 'error stop setup_background_coords: internal error (1)'
 	end
 
+!****************************************************************
+
+	subroutine read_background_size(file,nback,regpar)
+
+! reads grid and returns characteristics
+
+	implicit none
+
+	character*(*) file
+	integer nback
+	real regpar(7)
+
+	integer iformat,iunit
+	integer nvers,np,lmax,nvar,ntype,ierr
+	integer datetime(2)
+	real hlv(1)
+	double precision dtime
+
+	call fem_file_read_open(file,0,iformat,iunit)
+
+        call fem_file_read_params(iformat,iunit,dtime,nvers,np,lmax    &
+                           &              ,nvar,ntype,datetime,ierr)
+
+	if( ierr /= 0 ) goto 99
+	if( lmax > 1 ) goto 99
+	if( nvar > 1 ) goto 99
+
+	call fem_file_read_2header(iformat,iunit,ntype,lmax,hlv,regpar,ierr)
+
+	if( ierr /= 0 ) goto 99
+
+	close(iunit)
+	nback = np
+
+	return
+   99	continue
+	write(6,*) 'errors in background file'
+	write(6,*) 'ierr,lmax,nvar: ',ierr,lmax,nvar
+	stop 'error stop read_background_size: parameter errors'
+	end
+
+!****************************************************************
+
+	subroutine read_background_values(file,nback,zback)
+
+! reads grid and returns characteristics
+
+	implicit none
+
+	character*(*) file
+	integer nback
+	real zback(nback)
+
+	integer iformat,iunit
+	integer nlvddi
+	integer nvers,np,lmax,nvar,ntype,ierr
+	integer datetime(2)
+	real regpar(7)
+	real hlv(1)
+	real hd(1)
+	integer ilhkv(1)
+	double precision dtime
+	character*80 string
+
+	nlvddi = 1
+
+	call fem_file_read_open(file,0,iformat,iunit)
+
+        call fem_file_read_params(iformat,iunit,dtime,nvers,np,lmax    &
+                           &              ,nvar,ntype,datetime,ierr)
+
+	if( ierr /= 0 ) goto 99
+	if( lmax > 1 ) goto 99
+	if( nvar > 1 ) goto 99
+	if( np /= nback ) goto 99
+
+	call fem_file_read_2header(iformat,iunit,ntype,lmax,hlv,regpar,ierr)
+
+	if( ierr /= 0 ) goto 99
+
+        call fem_file_read_data(iformat,iunit,nvers,np,lmax   &
+                  &        ,string,ilhkv,hd,nlvddi,zback,ierr)
+
+	close(iunit)
+
+	return
+   99	continue
+	write(6,*) 'errors in background file'
+	write(6,*) 'ierr,lmax,nvar: ',ierr,lmax,nvar
+	write(6,*) 'np,nback: ',np,nback
+	stop 'error stop read_background_size: parameter errors'
+	end
+
+!****************************************************************
+!****************************************************************
 !****************************************************************
 
 	subroutine limit_values(nback,zback,zomin,zomax)
@@ -1300,12 +1354,14 @@
      &		,'std of background field')
         call clo_add_option('dxy dx[,dy]',' ' &
      &		,'dx,dy for regular field')
-        call clo_add_option('baver val',flag &
-     &		,'use val as average background value')
-        call clo_add_option('tau tmin,tmax',' ' &
-     &		,'tmin,tmax for time scale')
         call clo_add_option('minmax xmin,ymin,xmax,ymax',' ' &
      &		,'min/max for regular field')
+        call clo_add_option('backval val',flag &
+     &		,'use val as average background value')
+        call clo_add_option('backfile file',' ' &
+     &		,'use file as background grid')
+        call clo_add_option('tau tmin,tmax',' ' &
+     &		,'tmin,tmax for time scale')
         call clo_add_option('date0 date',' ' &
      &		,'date for time 0 if relative time')
         call clo_add_option('variable varstring',' ' &
@@ -1333,10 +1389,11 @@
         call clo_get_option('ss',ss)
         call clo_get_option('dxy',sdxy)
         call clo_get_option('minmax',sminmax)
+        call clo_get_option('backvalue',backvalue)
+        call clo_get_option('backfile',backfile)
         call clo_get_option('tau',stau)
-        call clo_get_option('baver',baver)
-        call clo_get_option('variable',varstring)
         call clo_get_option('date0',date0)
+        call clo_get_option('variable',varstring)
 
 	!call clo_info()
 
@@ -1348,25 +1405,28 @@
 
 	if( bsilent ) bquiet = .true.
 
-	call get_options(2,sdxy,ns,f)
-	if( ns < 1 .or. ns > 2 ) then
-	  stop 'error stop: no dx,dy given or error'
-	end if
-	dx = f(1)
-	dy = dx
-	if( ns == 2 ) dy = f(2)
-	if( dx*dy == 0 ) stop 'error stop: dx or dy is 0'
+	if( backfile /= ' ' ) then		!background file given
+	else
+	  call get_options(2,sdxy,ns,f)
+	  if( ns < 1 .or. ns > 2 ) then
+	    stop 'error stop: no dx,dy given or error'
+	  end if
+	  dx = f(1)
+	  dy = dx
+	  if( ns == 2 ) dy = f(2)
+	  if( dx*dy == 0 ) stop 'error stop: dx or dy is 0'
 
-	call get_options(4,sminmax,ns,f)
-	if( ns < 1 .or. ns > 4 ) then
-	  stop 'error stop: no minmax given or error'
-	end if
-	xmin = f(1)
-	ymin = f(2)
-	xmax = f(3)
-	ymax = f(4)
-	if( xmin >= xmax .or. ymin >= ymax ) then
-	  stop 'error stop: min >= max in minmax'
+	  call get_options(4,sminmax,ns,f)
+	  if( ns < 1 .or. ns > 4 ) then
+	    stop 'error stop: no minmax given or error'
+	  end if
+	  xmin = f(1)
+	  ymin = f(2)
+	  xmax = f(3)
+	  ymax = f(4)
+	  if( xmin >= xmax .or. ymin >= ymax ) then
+	    stop 'error stop: min >= max in minmax'
+	  end if
 	end if
 
 	if( stau /= ' ' ) then
@@ -1387,8 +1447,15 @@
 	  end if
 	end if
 
-	bback = .false.
-	if( baver /= flag ) bback = .true.
+	if( backfile /= ' ' .and. backvalue /= flag ) then
+	  write(6,*) 'only one of backfile or backvalue can be given'
+	  write(6,*) 'backfile : ',trim(backfile)
+	  write(6,*) 'backvalue : ',backvalue
+	  stop 'error stop: error in backfile and backvalue'
+	end if
+
+	bback = ( backvalue /= flag )
+	bfile = ( backfile /= ' ' )
 
 !-------------------------------------------------------------
 ! end of routine
