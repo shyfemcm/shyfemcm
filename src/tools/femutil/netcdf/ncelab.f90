@@ -99,7 +99,7 @@
 !---------------------------------------------------------------------
 
 !	call ncnames_init
-!	call get_dims_and_coords(ncid,bverbose
+!	call ncnames_get_dims_and_coords(ncid,bverbose
 !     +				,nt,nx,ny,nz
 !     +				,tcoord,xcoord,ycoord,zcoord)
 

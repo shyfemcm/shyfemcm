@@ -56,6 +56,8 @@ LIBFS      = $(LIBF_NETCDF)
 
 #--------------------------------------------------------------
 
+# nc_dim_coords.f90 should be converted to ncf_dim_coords.f90
+
 OBJS = ncf_util.o subclo.o ncf_dim_coords.o convert.o
 OBJS_BASE = ncf_util.o ncf_dim_coords.o subclo.o convert.o
 OBJS_INFO = ncf_util.o subclo.o

@@ -37,6 +37,7 @@
 ! 13.07.2018	ggu	changed VERS_7_4_1
 ! 16.02.2019	ggu	changed VERS_7_5_60
 ! 22.10.2019	ggu	check in check_regular_coords() for negative vals
+! 25.04.2025	ggu	use ncnames_get_dim_coord_info() to find coord name
 !
 !*****************************************************************
 !*****************************************************************
@@ -146,6 +147,8 @@
 ! if it is .false. dx,dy are average values, x0,y0,x1,y1 are min/max values
 ! also for regular grid, dx,dy are average values
 
+	!use ncnames
+
         implicit none
 
         integer nx,ny
@@ -162,6 +165,8 @@
 	real dxmin,dxmax,dymin,dymax
 	real flag,epsilon
 	double precision dxxtot,dyytot
+	integer dim_size
+	character*80 dim_name,coord_name
 
 	bdebug = .true.
 	bdebug = .false.
@@ -197,10 +202,11 @@
 	  write(6,*) 'x coords spacing is zero ',dxmin
 	  stop 'error stop check_regular_coords: dx==0'
         else if( dxmin < 0 ) then
+	  call ncnames_get_dim_coord_info('x',dim_size,dim_name,coord_name)
 	  write(6,*) 'x coords spacing is negative ',dxmin
 	  write(6,*) 'use the following command to invert coords:'
-	  write(6,*) 'ncpdq -a "-lon" in.nc out.nc'
-	  write(6,*) '(this assumes that your x-coord is named lon)'
+	  write(6,*) 'ncpdq -a "-'//trim(coord_name)//'" in.nc out.nc'
+	  !write(6,*) '(this assumes that your x-coord is named lon)'
 	  stop 'error stop check_regular_coords: dx<=0'
           bx_invert = .true.
           dxx = -dxx
@@ -233,10 +239,11 @@
 	  write(6,*) 'y coords spacing is zero ',dymin
 	  stop 'error stop check_regular_coords: dy==0'
         else if( dymin < 0 ) then
+	  call ncnames_get_dim_coord_info('y',dim_size,dim_name,coord_name)
 	  write(6,*) 'y coords spacing is negative ',dymin
 	  write(6,*) 'use the following command to invert coords:'
-	  write(6,*) 'ncpdq -a "-lat" in.nc out.nc'
-	  write(6,*) '(this assumes that your y-coord is named lat)'
+	  write(6,*) 'ncpdq -a "-'//trim(coord_name)//'" in.nc out.nc'
+	  !write(6,*) '(this assumes that your y-coord is named lat)'
 	  stop 'error stop check_regular_coords: dy<=0'
           by_invert = .true.
           dyy = -dyy
