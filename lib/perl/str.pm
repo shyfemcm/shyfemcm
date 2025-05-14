@@ -678,12 +678,16 @@ sub write_sections {
     die "this should be bound: $bound\n" if $bound ne "bound";
     my $bound_sections = $self->{bound_sections};
     splice(@$sequence, $ibound, 1, @$bound_sections);
+    print "\n"; # no comments - insert blank line
   }
 
   foreach my $section (@$sequence) {
 	  my $sect = $sections->{$section};
-	  $self->print_section($sect,1) if $sect;
-	  $self->write_section($sect) if $sect;
+	  if( $sect ) {
+	    #$self->print_section($sect,1);
+	    $self->write_section($sect);
+	    print "\n" if $self->{order}; # no comments - insert blank line
+	  }
   }
 
 }
@@ -907,6 +911,7 @@ sub write_array {
     print "   $item";
     if( $item == 0 or $i == $nval ) {
       print "\n";
+      print "\t" if $extra;		#indent more
       $i = 0;
     }
   }
