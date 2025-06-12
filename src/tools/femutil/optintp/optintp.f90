@@ -46,6 +46,7 @@
 ! 16.02.2019	ggu	changed VERS_7_5_60
 ! 20.02.2025	ggu	completely restructured
 ! 18.03.2025	ggu	write new complementary files
+! 12.06.2025	ggu	minor changes
 !
 ! notes :
 !
@@ -90,6 +91,7 @@
 	logical, save :: bgeo
 	logical, save :: blimit
 	logical, save :: bback = .false.
+	logical, save :: bfile = .false.
 
 	real, parameter :: flag = -999
 
@@ -315,7 +317,8 @@
 !-----------------------------------------------------------------
 
 	!if( bfem ) then
-	if( .false. ) then
+	!if( .false. ) then
+	if( .true. ) then
 	  iu = 3
 	  atime = 0.
 
@@ -406,7 +409,8 @@
 	  write(6,*) 'observation read: ',trim(aline),irec,nobs,nobs_valid
 	end if
 
-	call mima(zobs,nobs,zomin,zomax)
+	!call mima(zobs,nobs,zomin,zomax)
+	call mima_flag(nobs,zobs,flag,zomin,zomax)
 	!write(6,*) 'observations min/max: ',zomin,zomax
 
 	if( irec == 1 ) then
@@ -511,6 +515,10 @@
 	    write(6,*) 'limiting records treated to: ',nrec
 	  end if
 	end if
+
+	open(1,file='success.txt',status='new',form='formatted')
+	write(1,*) 'optintp finished with success'
+	close(1)
 
 !-----------------------------------------------------------------
 ! end of routine
@@ -1277,8 +1285,8 @@
 	    xobs(i) = f(2)
 	    yobs(i) = f(3)
 	    zobs(i) = f(4)
-	    if( ianz >= 5 ) rra(i) = f(5)	!optional rr
-	    if( ianz >= 6 ) rla(i) = f(6)	!optional rl
+	    if( ianz >= 5 .and. f(5) > 0. ) rra(i) = f(5)	!optional rr
+	    if( ianz >= 6 .and. f(6) > 0. ) rla(i) = f(6)	!optional rl
 	end do
 
 	if( nobs_orig == 0 ) nobs_orig = nobs
@@ -1359,7 +1367,7 @@
      &		,'dx,dy for regular field')
         call clo_add_option('minmax xmin,ymin,xmax,ymax',' ' &
      &		,'min/max for regular field')
-        call clo_add_option('backval val',flag &
+        call clo_add_option('backvalue val',flag &
      &		,'use val as average background value')
         call clo_add_option('backfile file',' ' &
      &		,'use file as background grid')
