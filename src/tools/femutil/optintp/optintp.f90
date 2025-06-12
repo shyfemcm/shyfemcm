@@ -274,12 +274,13 @@
 	allocate(zweight_old(nback),ztau_old(nback))
 	allocate(zaux(nback))
 
+	zback = flag
+	zanal = flag
+
 	call setup_background_coords(nback,regpar,xback,yback)
 
 	call read_background_values(backfile,nback,zback)
 
-	zback = flag
-	zanal = flag
 	if( bback ) then
 	  zback = backvalue
 	  bobs = backvalue
@@ -669,6 +670,8 @@
 	double precision dtime
 	character*80 string
 
+	if( file == ' ' ) return
+
 	nlvddi = 1
 
 	call fem_file_read_open(file,0,iformat,iunit)
@@ -695,7 +698,7 @@
 	write(6,*) 'errors in background file'
 	write(6,*) 'ierr,lmax,nvar: ',ierr,lmax,nvar
 	write(6,*) 'np,nback: ',np,nback
-	stop 'error stop read_background_size: parameter errors'
+	stop 'error stop read_background_values: parameter errors'
 	end
 
 !****************************************************************

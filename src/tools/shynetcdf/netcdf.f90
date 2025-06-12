@@ -3350,6 +3350,27 @@
 	  units = 'm'
 	  cmin = 0.
 	  cmax = 100.
+	else if( ivar .eq. 231 ) then	! significant wave height
+	  name = 'significant_wave_height'
+	  what = 'long_name'
+	  std = 'sea_surface_wind_wave_significant_height'
+	  units = 'm'
+	  cmin = 0.
+	  cmax = 100.
+	else if( ivar .eq. 232 ) then	! significant wave period
+	  name = 'significant_wave_period'
+	  what = 'long_name'
+	  std = 'sea_surface_wave_significant_period'
+	  units = 's'
+	  cmin = 0.
+	  cmax = 100.
+	else if( ivar .eq. 233 ) then	! wave direction
+	  name = 'wave_direction'
+	  what = 'long_name'
+	  std = 'sea_surface_wave_to_direction'
+	  units = 'degree'
+	  cmin = 0.
+	  cmax = 360.
 	else if( ivar > 300 .and. ivar < 400 ) then	! concentration
 	  name = 'concentration'
 	  what = 'long_name'
