@@ -11,10 +11,18 @@
 # creates *.tex documentation files from *.f files
 
 FEMDIR=..
-BINDIR=$FEMDIR/fem3d		#directory where fortran files reside
+SHYDIR=$FEMDIR/src/shyfem
+BIODIR=$FEMDIR/src/contrib/ecological/weutro
+UTIDIR=$FEMDIR/src/utils/shyutil
+UTMDIR=$FEMDIR/src/utils/shyutilmpi
+TOLDIR=$FEMDIR/src/tools/shyplot
 
 Proc()
 {
+  if [ ! -f $1 ]; then
+    echo "*** no such file: $1\n";
+    exit 3
+  fi
   ./femdoc.pl $1
   if [ $? -ne 0 ]; then
     echo "*** (femdoc.pl) Error in processing file $1"
@@ -24,16 +32,16 @@ Proc()
 
 #---------------------------------------------------------
 
-Proc $BINDIR/subsys.f
-Proc $BINDIR/subbnd.f
-#Proc $BINDIR/subwin.f
-Proc $BINDIR/submeteo2.f
-Proc $BINDIR/subn35.f
-Proc $BINDIR/subver.f
-Proc $BINDIR/bio3d.f
-Proc $BINDIR/sedi3d.f
-Proc $BINDIR/subwaves.f
-Proc $BINDIR/subtide.f
+Proc $SHYDIR/def_para.f90
+Proc $TOLDIR/def_para_post.f90
+Proc $UTMDIR/bnd_admin.f90
+Proc $SHYDIR/meteo_forcing.f90
+Proc $SHYDIR/chezy.f90
+Proc $UTIDIR/version.f90
+Proc $BIODIR/bio3d.f90
+Proc $SHYDIR/sedim_admin.f90
+Proc $SHYDIR/waves_admin.f90
+Proc $SHYDIR/tidef.f90
 
 #---------------------------------------------------------
 

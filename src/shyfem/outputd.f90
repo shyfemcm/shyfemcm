@@ -24,10 +24,9 @@
 !
 !--------------------------------------------------------------------------
 
-! time management routines
+! time management routines (double precision)
 !
 ! contents :
-!
 !
 ! revision log :
 !
@@ -103,6 +102,8 @@
 ! 22.04.2020    ggu     write text for info_output
 ! 30.03.2021    ggu     bug fix in info_output_d()
 ! 18.03.2022    ggu     bug fix in increase_output_d() itend -> dtend
+! 04.12.2024    ggu     routines updated, more documentation
+! 10.12.2024    ggu     new routine is_last_output_d()
 !
 ! info :
 !
@@ -110,6 +111,47 @@
 !       da_out(2) = itmout      ! first output
 !       da_out(3) = itout       ! next output
 !       da_out(4) = 0           ! unit or shyfem file id (optional)
+!
+! procedure calls:
+!
+! init_output_d('itm___','idt___',da_out)	initializes da_out
+!
+! increase_output_d(da_out)	make sure no output for t == tstart
+! has_output_d(da_out)		is there any output to do?
+! is_over_output_d(da_out)	are we in output period?
+! next_output_d(da_out)		do we have to output now? (increase of itout)
+! must_output_d(da_out)		do we have to output now? (no increase of itout)
+!
+! assure_initial_output_d(da_out)	do output on initial step
+! is_first_output_d(da_out)		is this the first output?
+! is_last_output_d(da_out)		is this the last output?
+!
+! info_output_d(text,da_out)	writes info to terminal
+!
+! difference between next_output_d() and must_output_d():
+!
+!	next_output_d()		this might return true or false
+!	next_output_d()		this always returns false
+!
+!	must_output_d()		this might return true or false
+!	must_output_d()		this returns the same as above
+!
+! calling sequence:
+!
+!	call init_output_d('itm___','idt___',da_out)
+!	[ call call increase_output_d(da_out) ] if no initial output needed
+!	if( .not. has_output_d(da_out) ) then
+!	  no output ever needed
+!	end if
+!	if( is_first_output_d(da_out) ) initialize
+!
+!	do
+!	  if( .not. is_over_output_d(da_out) ) return	not in output phase
+!	  if( next_output_d(da_out) ) then
+!	    do output here
+!	  end if
+!	  if( is_last_output_d(da_out) ) close file
+!	end do
 !
 !**********************************************************************
 !**********************************************************************
@@ -248,18 +290,18 @@
 
 !********************************************************************
 
-	function is_in_output_d(da_out)
+	function is_last_output_d(da_out)
 
-! checks if we arrived at output phase (it >= itmout)
+! checks if we are at last output (itout > itend)
 
 	use femtime
 
 	implicit none
 
-	logical is_in_output_d
+	logical is_last_output_d
 	double precision da_out(4)
 
-	is_in_output_d = ( t_act >= da_out(2) )
+	is_last_output_d = ( da_out(3) > dtend )
 
 	end
 
@@ -280,9 +322,35 @@
 
 !********************************************************************
 
+	function must_output_d(da_out)
+
+! checks if time has come for output - does not increase itout
+
+	use femtime
+
+	implicit none
+
+	logical must_output_d
+	double precision da_out(4)
+
+	double precision idtout,itout
+
+	must_output_d = .false.
+	idtout = da_out(1)
+	itout  = da_out(3)
+
+	if( idtout .le. 0 ) return
+	if( itout .gt. t_act ) return
+
+	must_output_d = .true.
+
+	end
+
+!********************************************************************
+
 	function next_output_d(da_out)
 
-! checks if time has come for output
+! checks if time has come for output and increases itout
 
 	use femtime
 

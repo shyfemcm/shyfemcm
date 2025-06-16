@@ -53,6 +53,7 @@
 ! 10.07.2017	ggu	new projection LCC
 ! 16.02.2019	ggu	changed VERS_7_5_60
 ! 21.05.2019	ggu	changed VERS_7_5_62
+! 01.08.2024	ggu	new routines s2i_proj() and i2s_proj()
 !
 ! usage :
 !
@@ -760,7 +761,7 @@
         double precision :: e1
 
         call proj_init
-!call utm_set_zone(zone)	!done outside
+!	call utm_set_zone(zone)	!done outside
 
         k0 = 0.9996
 
@@ -1152,7 +1153,7 @@
 
         double precision :: k
 
-        k0 = k
+        if( k > 0 ) k0 = k
 
         end subroutine proj_set_scale_factor
 
@@ -1321,6 +1322,61 @@
         end module projection
 !==================================================================
 
+	subroutine s2i_proj(sproj,iproj)
+
+	implicit none
+
+	character*(*) sproj
+	integer iproj
+
+	character*80 saux
+
+	saux = sproj
+	call to_upper(saux)
+
+	if( saux == 'GB' ) then
+	  iproj = 1
+	else if( saux == 'UTM' ) then
+	  iproj = 2
+	else if( saux == 'EC' ) then
+	  iproj = 3
+	else if( saux == 'UTM-NONSTD' ) then
+	  iproj = 4
+	else if( saux == 'LCC' ) then
+	  iproj = 5
+	else
+	  iproj = 0
+	end if
+	
+	end
+
+!*******************************************************************
+
+	subroutine i2s_proj(iproj,sproj)
+
+	implicit none
+
+	integer iproj
+	character*(*) sproj
+
+	if( iproj == 1 ) then
+	  sproj = 'GB'
+	else if( iproj == 2 ) then
+	  sproj = 'UTM'
+	else if( iproj == 3 ) then
+	  sproj = 'EC'
+	else if( iproj == 4 ) then
+	  sproj = 'UTM-nonstd'
+	else if( iproj == 5 ) then
+	  sproj = 'LCC'
+	else
+	  sproj = ' '
+	end if
+	
+	end
+
+!*******************************************************************
+
         subroutine init_coords(iproj,c_param)
 
 ! initialization of transformation routines
@@ -1361,7 +1417,7 @@
 
         select case (iproj)
           case ( 0 )                     !no projection
-          case ( 1 )                     !Guass-Boaga
+          case ( 1 )                     !GB - Gauss-Boaga
             fuse = nint( c_param(1) )     !fuse for gauss-boaga
             xtrans = c_param(2)           !extra shift in x [m]
             ytrans = c_param(3)           !extra shift in y [m]
@@ -1373,12 +1429,12 @@
             ytrans = c_param(3)           !extra shift in y [m]
             call utm_init(zone)
             call utm_trans(xtrans,ytrans)
-          case ( 3 )               	!equidistant cylindrical
+          case ( 3 )               	!EC - equidistant cylindrical
             phi  = c_param(1)             !central latitude
             lon0 = c_param(2)             !longitude of origin
             lat0 = c_param(3)             !latitude of origin
             call cpp_init(lon0,lat0,phi)
-          case ( 4 )              	!UTM (non standard)
+          case ( 4 )              	!UTM-nonstd - UTM (non standard)
             lambda = c_param(1)           !central meridian for UTM
             xtrans = c_param(2)           !extra shift in x [m]
             ytrans = c_param(3)           !extra shift in y [m]
@@ -1386,7 +1442,7 @@
             call utm_init_nonstd(lambda)
             call utm_set_scale_factor(k)
             call utm_trans(xtrans,ytrans)
-          case ( 5 )              	!LCC
+          case ( 5 )              	!LCC - Lambert conformal conic
             lon0 = c_param(1)             !longitude of origin
             lat0 = c_param(2)             !latitude of origin
             lat1 = c_param(3)             !latitude of first std parallel

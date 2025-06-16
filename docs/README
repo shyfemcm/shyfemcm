@@ -89,26 +89,3 @@ This is the README file for the SHYFEM model
 Directory structure
 ===================
 
-fem3d		FEM model and utility routines
-femadj		Routines for the adjustment of the grid after the
-		automatic mesh generation. The program to run
-		is adjele
-femanim		Routines to generate animations from postscript files
-fembin		Binaries used by the model
-femcheck	Routines to set up and check the installation
-femdoc		Documentation, manual, etc.
-femersem	Routines for BFM (ERSEM) ecological model
-femgotm		Routines for GOTM turbulence clousre model
-femlib		Library routines (filled during compilation)
-femplot		Plotting routines for post processing. The routine
-		to run is plotsim, but this routine is more
-		conveniently run through the command plots
-femregres	Routines to do regression testing. Developers only.
-femspline	Programs to smooth and reduce lines. These programs
-		are used to change the resolution of the boundary
-		line before running the automatic mesh generator.
-		Please use the routine gridr.
-grid		Visualization routine for GRD files
-hcbs		Outdated files for plotting to monitor
-mesh		Automatic mesh generator
-post		Library for plotting to Postscript files.

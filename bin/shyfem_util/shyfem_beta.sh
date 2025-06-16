@@ -12,13 +12,13 @@
 #
 #--------------------------------------------------------------
 
-fembin=./fembin
+FEMBIN=./bin
 
 version_file=VERSION
 
 #-----------------------------------------
 
-line=`$fembin/shyfem_version.pl -noextra $version_file`
+line=`$FEMBIN/shyfem_version.pl -noextra $version_file`
 extra=beta_`date +"%Y-%m-%d"`
 
 echo "$line   $extra"                    > ver.tmp

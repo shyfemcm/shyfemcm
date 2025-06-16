@@ -228,6 +228,7 @@
 ! 15.02.2022	ggu	new parameters for limiting_scalar
 ! 20.07.2023    lrp     new parameter nzadapt
 ! 21.10.2023    ggu     only post processing parameters
+! 18.09.2024    ggu     new parameters lgrcol, lgrtyp, rfaccol
 !
 !************************************************************************
 
@@ -535,7 +536,14 @@
 !
 ! |ianopl|	Area code for which no plot has to be produced. Normally 
 !		the whole basin is plotted, but with this parameter some
-!		areas can be excluded. (Default -1)
+!		areas can be excluded. 
+!		Only one of |ianopl| and |iadopl| can be used.
+!		(Default -1)
+! |iadopl|	Area code for which a plot has to be produced. Normally 
+!		the whole basin is plotted, but with this parameter only
+!		elements with this area code will be plotted.
+!		Only one of |ianopl| and |iadopl| can be used.
+!		(Default -1)
 ! |bgray|	Gray value used for the finite element grid when plotting
 !		the bathymetry. (Default 0.8)
 ! |bbgray|	Gray value used for the boundary of the finite element grid.
@@ -546,6 +554,7 @@
 !		the grid (Default -1.0)
 
         call addpar('ianopl',-1.)      !do not plot these areas
+        call addpar('iadopl',-1.)      !plot only these areas
 	call addpar('bgray',0.8)       !gray value for bathymetry
 	call addpar('bbgray',0.0)      !gray value for boundary
 	call addpar('bsgray',-1.0)     !gray value for plotting maps
@@ -561,7 +570,7 @@
 !		With the value of 0 no mean pos/traj are created, 1
 !		plot mean pos/traj together with single values, 
 !		2 plot only mean pos/trajs, 3 as 2 but the first
-!		trajectory is plot in tichk line. (Default 0)
+!		trajectory is plot in thick line. (Default 0)
 
 	call addpar('lgmean',0.)	!lagrangian mean pos/trajs
 
@@ -690,6 +699,9 @@
 ! |faccol|	Factor for the values that are written to the 
 !		color bar legend. This enables you, e.g., to give water level
 !		results in mm (|faccol = 1000|). (Default 1)
+! |rfaccol|	Same as |faccol| but inverse factor. This allows you to
+!		lower the values easily, e.g., giving times in days
+!		instead of seconds (|rfaccol = 86400|). (Default 1)
 ! |ndccol|	Decimals after the decimal point for the values
 !		written to the color bar legend. Use the value |-1|
 !		to not write the decimal point. A value of 0 automatically
@@ -698,6 +710,7 @@
 !		is written above the color bar.
 
 	call addpar('faccol',1.)	!factor for color bar
+	call addpar('rfaccol',1.)	!inverse factor for color bar
 	call addpar('ndccol',-1.)	!decimals after point
 	call addfnm('legcol'," ")	!legend for colorbar
 
@@ -793,6 +806,20 @@
         call addpar('isolin',0.)       !plot isolines with color ?
         call addpar('isoinp',1.)       !interpolate inside elements
 
+! Next parameters are for the lagrangian model and the way
+! how to plot the particles.
+
+! |lgrtyp|	Type of plot desired. The value of 0 indicates just
+!		to plot particles with the same color. A value of 1
+!		uses the color information to plot the time that the
+!		particles is in the basin. (Default 0)
+! |lgrcol|	Color [0-1] to be used to plot the particles when |lgrtyp|
+!		is 0. The actual color depends on the color table chosen.
+!		(Default 0)
+
+        call addpar('lgrtyp',0.)       !type of plot
+        call addpar('lgrcol',0.)       !default color
+
 ! DOCS	END
 
 	end
@@ -879,10 +906,13 @@
 !
 ! The first value is a keyword that specifies what has to be plotted.
 ! Possible values are |text|, |line|, |vect|, |rect|, |circ|  and also
-! |wid| and |col|. These correspond to different types of information
+! |wid|, |col|, and |ctxt|. These correspond to different types of information
 ! that is inserted into the plot such as text, line, vector, rectangle
 ! or circle (filled or just outline). Moreover, the color and
-! line width of the pen can be controlled by with |wid| and |col|.
+! line width of the pen can be controlled by with |wid| and |col|,
+! and the centering of text can be set with |ctxt hc vc|, where the values
+! -1 mean flush left/bottom (default), 0 mean center, 
+! and +1 mean flush right/top.
 !
 ! In case of |text| the starting position (lower left corner) is given,
 ! then the point size of the font and the text that is inserted. |line|
@@ -939,8 +969,8 @@
 ! A time and date can be assigned to the simulation results. These values
 ! refer to the time 0 of the FEM model. The format for the date is
 ! YYYYMMDD and for the time HHMMSS. 
-!c Please note that the date should not be
-!c given as YYYYMMDD because due to precision problems this will not work. 
+! Please note that the date should not be
+! given as YYYYMMDD because due to precision problems this will not work. 
 ! You can also give a time zone if your time is not referring to 
 ! GMT but to another time zone such as MET. Please note that you have to give
 ! this information only if the simulation does not contain it already.

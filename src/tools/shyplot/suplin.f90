@@ -82,6 +82,7 @@
 !  18.12.2018	ggu	changed VERS_7_5_52
 !  13.03.2019	ggu	changed VERS_7_5_61
 !  16.05.2019	ggu	wrong call to insert_between_layers()
+!  18.09.2024	ggu	new parameter rfaccol
 ! 
 !  notes :
 ! 
@@ -148,7 +149,7 @@
 	real h1,h2,yb1,yb2,yt1,yt2,yt,yb
 	real ytaux,ymid
 	real xcm,ycm
-	real fact,r
+	real fact,rfact,r
 	real xscale,yscale
 	integer ndec,nctick,ipllog
 	integer isphe
@@ -229,6 +230,9 @@
 	  ryscal = getpar('ryscal')	!y scale for reference vector
 
 	  faccol = getpar('faccol')	!factor for velocity (for legend)
+          rfact = getpar('rfaccol')
+          if( faccol == 1. .and. rfact /= 1. ) faccol = 1. / rfact
+
 	  dxmin = getpar('dxmin')	!minimum distance for arrwos
 	end if
 
@@ -644,6 +648,9 @@
 	!call pbox(xrmin,yrmin,xrmax,yrmax)	!for debug
 
         fact = getpar('faccol')
+        rfact = getpar('rfaccol')
+        if( fact == 1. .and. rfact /= 1. ) fact = 1. / rfact
+
         ndec = nint(getpar('ndccol'))
         nctick = nint(getpar('nctick'))
         ipllog = nint(getpar('ipllog'))

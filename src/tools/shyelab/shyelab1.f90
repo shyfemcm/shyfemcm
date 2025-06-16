@@ -78,6 +78,8 @@
 ! 07.06.2023    ggu     array simpar introduced
 ! 20.07.2023    lrp     new paramter nzadapt
 ! 29.09.2023    ggu     new atime0out for correct concatenating of files
+! 17.10.2024    ggu     for shy_make_basin_aver() allow for percentile
+! 01.04.2025    ggu     better error message
 !
 !**************************************************************
 
@@ -130,6 +132,7 @@
 	integer id,idout,iddiff
 	integer n,m,nndim,nn
 	integer naccum
+	integer nzadapt
 	character*80 title,name,file
 	character*80 basnam,simnam
 	character*20 aline
@@ -220,9 +223,10 @@
 	call shympi_set_hlv(nlv,hlv)
 
 	call ev_set_verbose(.not.bquiet)
-        call ev_init(nel)
+        !call ev_init(nel)
 	call set_ev
 
+	if( .not. bquiet ) call bas_info
 	!if( bverb ) write(6,*) 'hlv: ',nlv,hlv
 
 	!--------------------------------------------------------------
@@ -269,7 +273,8 @@
 	call shyutil_init(nkn,nel,nlv)
 
 	call init_sigma_info(nlv,hlv)
-	call init_rzmov_info(nlv,nint(simpar(3)),hlv,rzmov)
+	nzadapt = nint(simpar(3))
+	call init_rzmov_info(nlv,nzadapt,hlv,rzmov)
 
 	call shy_make_area
 	!call shy_check_area
@@ -470,6 +475,10 @@
 
 	  cv3(:,:) = cv3all(:,:,iv)
 
+	  if( bsmooth ) then
+	    call shy_smooth(nlvdi,nn,cv3,salpha,sloop)
+	  end if
+
 	  if( bverb .and. iv == 1 ) then
 	    call shy_write_time(.true.,dtime,atime,0)
 	  end if
@@ -490,7 +499,7 @@
      &						,1,1,cv2)
 	  else if( bsumvar .or. binfluencemap .or. bvorticity ) then
 	    ! only write at end of loop over variables
-	  else
+	  else		! this handles normal (3D) output
 	    call shyelab_record_output(id,idout,dtime,ivar,iv &
      &						,belem,n,m &
      &						,lmax,nlvdi,cv3)
@@ -498,7 +507,7 @@
 
 	  if( baverbas .and. bscalar ) then
 	    call shy_assert(nndim==nkn,'shyelab internal error (123)')
-	    call shy_make_basin_aver(idims(:,iv),nlv,nndim,cv3,ikflag &
+	    call shy_make_basin_aver(idims(:,iv),nlv,nndim,cv3,ikflag,perc &
      &                          ,cmin,cmax,cmed,cstd,atot,vtot)
 	    call shy_write_aver(aline,nvar,iv,ivar &
      &				,cmin,cmax,cmed,cstd,atot,vtot)
@@ -511,7 +520,7 @@
 	 !--------------------------------------------------------------
 
 	 if( baverbas .and. bhydro ) then
-           call shy_make_hydro_aver(aline,nndim,cv3all,ikflag &
+           call shy_make_hydro_aver(aline,nndim,cv3all,ikflag,perc &
      &                  ,znv,uprv,vprv,sv,dv)
 	 end if
 
@@ -538,7 +547,8 @@
            call write_nodes(atime,ftype,nndim,nvar,ivars,cv3all)
 	 end if
  
-	 ! bsumvar is also handled in here
+	 ! this handles hydro files - bsumvar is also handled in here
+
 	 call shyelab_post_output(id,idout,dtime,nvar,n,m,nndim &
      &                                  ,lmax,nlvdi,cv3all)
 
@@ -645,21 +655,27 @@
 	stop 'error stop shyelab: general error...'
    75	continue
 	write(6,*) 'error writing header, ierr = ',ierr
+	call shy_get_filename(id,file)
 	write(6,*) 'file = ',trim(file)
 	stop 'error stop shyelab: writing header'
    76	continue
 	write(6,*) 'ftype = ',ftype,'  expecting 1 or 2'
+	call shy_get_filename(id,file)
+	write(6,*) 'file = ',trim(file)
 	stop 'error stop shyelab: ftype'
    77	continue
 	write(6,*) 'error reading header, ierr = ',ierr
+	call shy_get_filename(id,file)
 	write(6,*) 'file = ',trim(file)
 	stop 'error stop shyelab: reading header'
    98	continue
 	write(6,*) 'error reading file, ierr = ',ierr
+	call shy_get_filename(id,file)
 	write(6,*) 'file = ',trim(file)
 	stop 'error stop shyelab: file contains no data'
    99	continue
 	write(6,*) 'error reading file, ierr = ',ierr
+	call shy_get_filename(id,file)
 	write(6,*) 'file = ',trim(file)
 	stop 'error stop shyelab: reading first record'
 	end
@@ -668,7 +684,7 @@
 !***************************************************************
 !***************************************************************
 
-        subroutine shy_make_hydro_aver(aline,nndim,cv3all,ikflag &
+        subroutine shy_make_hydro_aver(aline,nndim,cv3all,ikflag,perc &
      &                  ,znv,uprv,vprv,sv,dv)
 
         use basin
@@ -685,6 +701,7 @@
         integer idims(4,nvar)
         real cv3all(nlvdi,nndim,0:nvar)
 	integer ikflag(nkn)
+	real perc
         real znv(nkn)
         real uprv(nlvdi,nkn)
         real vprv(nlvdi,nkn)
@@ -700,7 +717,7 @@
 	iv = 1
         ivar = 1
         idim = (/nkn,1,1,ivar/)
-        call shy_make_basin_aver(idim,1,nkn,znv,ikflag &
+        call shy_make_basin_aver(idim,1,nkn,znv,ikflag,perc &
      &                          ,cmin,cmax,cmed,cstd,atot,vtot)
         call shy_write_aver(aline,nvar,iv,ivar &
      &				,cmin,cmax,cmed,cstd,atot,vtot)
@@ -708,13 +725,13 @@
 	iv = 2
         ivar = 2
         idim = (/nkn,1,nlv,ivar/)
-        call shy_make_basin_aver(idim,nlv,nkn,uprv,ikflag &
+        call shy_make_basin_aver(idim,nlv,nkn,uprv,ikflag,perc &
      &                          ,cmin,cmax,cmed,cstd,atot,vtot)
         call shy_write_aver(aline,nvar,iv,ivar &
      &				,cmin,cmax,cmed,cstd,atot,vtot)
 
 	iv = 3
-        call shy_make_basin_aver(idim,nlv,nkn,vprv,ikflag &
+        call shy_make_basin_aver(idim,nlv,nkn,vprv,ikflag,perc &
      &                          ,cmin,cmax,cmed,cstd,atot,vtot)
         call shy_write_aver(aline,nvar,iv,ivar &
      &				,cmin,cmax,cmed,cstd,atot,vtot)
@@ -722,7 +739,7 @@
 	iv = 4
         ivar = 6
         idim = (/nkn,1,nlv,ivar/)
-        call shy_make_basin_aver(idim,nlv,nkn,sv,ikflag &
+        call shy_make_basin_aver(idim,nlv,nkn,sv,ikflag,perc &
      &                          ,cmin,cmax,cmed,cstd,atot,vtot)
 	!vtot = 0.
         call shy_write_aver(aline,nvar,iv,ivar &

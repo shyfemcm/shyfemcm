@@ -91,6 +91,7 @@
 ! 29.03.2022	ggu	eliminated error with profile=check
 ! 02.04.2023    ggu     only master writes to iuinfo
 ! 19.04.2023    ggu     init tracer file output only once, syncronize
+! 16.04.2025    ggu     variable sinking (wsettlv) introduced
 !
 !*********************************************************************
 
@@ -156,22 +157,25 @@
 
 	call get_act_dtime(dtime)
 	nvar = iconz
-	allocate(tauv(nvar),cdefs(nvar),massv(nvar))
+	allocate(tauv(nvar),cdefs(nvar),massv(nvar),wsettlv(nvar))
 	cdefs = cref
 
-	call para_get_array_size('taupar',n)
-	if( n > 1 .and. n /= nvar ) then
-	  write(6,*) 'array has wrong size: ','taupar'
-	  write(6,*) 'size should be 1 or ',nvar
-	  write(6,*) 'size from STR file is ',n
-	  allocate(aux(n))
-	  call para_get_array_value('taupar',n,n,aux)
-          write(6,*) aux
-	  stop 'error stop tracer_init: wrong array size'
-	end if
-	call para_get_array_value('taupar',nvar,n,tauv)
-	contau = tauv(1)
-	if( n == 1 ) tauv(:) = contau
+	call set_var_array('wsettl',nvar,wsettlv)
+	call set_var_array('taupar',nvar,tauv)
+
+	!call para_get_array_size('taupar',n)
+	!if( n > 1 .and. n /= nvar ) then
+	!  write(6,*) 'array has wrong size: ','taupar'
+	!  write(6,*) 'size should be 1 or ',nvar
+	!  write(6,*) 'size from STR file is ',n
+	!  allocate(aux(n))
+	!  call para_get_array_value('taupar',n,n,aux)
+        !  write(6,*) aux
+	!  stop 'error stop tracer_init: wrong array size'
+	!end if
+	!call para_get_array_value('taupar',nvar,n,tauv)
+	!contau = tauv(1)
+	!if( n == 1 ) tauv(:) = contau
 
 	if( idecay == 0 ) then 
 	  write(6,*) 'no decay for tracer used'
@@ -228,6 +232,38 @@
 	if( level .le. 0 ) iprogr = 0
 
 	call shympi_exchange_3d_node(cnv)
+
+	end
+
+!*********************************************************************
+
+	subroutine set_var_array(name,nvar,array)
+
+	use para
+
+	implicit none
+
+	character*(*) name
+	integer nvar
+	real array(nvar)
+
+	integer n
+	real, allocatable :: aux(:)
+
+	call para_get_array_size(name,n)
+
+	if( n > 1 .and. n /= nvar ) then
+	  write(6,*) 'array has wrong size: ',trim(name)
+	  write(6,*) 'size should be 1 or ',nvar
+	  write(6,*) 'size from STR file is ',n
+	  allocate(aux(n))
+	  call para_get_array_value(name,n,n,aux)
+          write(6,*) aux
+	  stop 'error stop set_var_array: wrong array size'
+	end if
+
+	call para_get_array_value(name,nvar,n,array)
+	if( n == 1 ) array(:) = array(1)
 
 	end
 
@@ -305,7 +341,7 @@
 	implicit none
 
 	logical bfirst
-	real wsink
+	real wsink,contau
 	real dt
 	double precision dtime
 
@@ -322,11 +358,13 @@
 ! normal call
 !-------------------------------------------------------------
 
-	wsink = 0.
+	wsink = wsettlv(1)
 	call get_act_dtime(dtime)
 	call get_timestep(dt)
 
 	call bnds_read_new(what,idconz,dtime)
+
+	!write(6,*) 'single conz - wsink = ',wsink
 
         call scal_adv(what,0 &
      &                          ,cnv,idconz &
@@ -338,9 +376,11 @@
 !-------------------------------------------------------------
 
 	if( idecay == 1 ) then
+	  contau = tauv(1)
           call decay_conz(dt,contau,cnv)
-	else if( idecay == 2 ) then
-          call decay_conz_chapra(dt,1.,cnv)
+	else if( idecay == 2 ) then		!is computed internally
+	  contau = 1.
+          call decay_conz_chapra(dt,contau,cnv)
 	end if
 
 !-------------------------------------------------------------
@@ -395,7 +435,6 @@
 !-------------------------------------------------------------
 
 	nvar = iconz
-	wsink = 0.
 	call get_act_dtime(dtime)
 	call get_timestep(dt)
 	blinfo = binfo
@@ -404,9 +443,12 @@
 
 	do i=1,nvar
 
+	  wsink = wsettlv(i)
+	  !write(6,*) 'multi conz - ivar,wsink = ',i,wsink
+
 !$OMP  TASK FIRSTPRIVATE(i,rkpar,wsink,difhv,difv,difmol,idconz,what,   &
 !$OMP& dt,nlvdi,idecay,blinfo,bage)                                     &
-!OMP&  SHARED(conzv,tauv,massv) DEFAULT(NONE)
+!$OMP&  SHARED(conzv,tauv,massv) DEFAULT(NONE)
  
           call scal_adv(what,i &
      &                          ,conzv(1,1,i),idconz &

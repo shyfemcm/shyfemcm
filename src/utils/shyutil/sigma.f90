@@ -64,6 +64,7 @@
 ! 29.04.2022	ggu	in compute_sigma_info() check for nlv<1
 ! 09.05.2023    lrp     introduce top layer index variable
 ! 05.06.2023    lrp     introduce z-star
+! 09.03.2025	ggu	avoid out of bounds access (hlvaux)
 !
 ! notes :
 !
@@ -256,6 +257,7 @@
 	integer ii,l
 	real zmed
 	real htot,hsig,hzad,htop,hbot,den
+	real hlvaux(0:lmax)
 
 	bdebug = .true.
 	bdebug = .false.
@@ -283,17 +285,20 @@
 ! compute level structure of z-surface-adaptive levels
 !---------------------------------------------------------
 
+	hlvaux(0) = 0.
+	hlvaux(1:lmax) = hlv
+
         hzad = hadapt + zmed
-	den  = hadapt - hlv(lmin-1)		!zstar def
+	den  = hadapt - hlvaux(lmin-1)		!zstar def
 	if (nadapt+lmin-1.eq.lmax) then 
 	  hzad = htot + zmed
-          den  = htot - hlv(lmin-1)	
+          den  = htot - hlvaux(lmin-1)	
 	end if
 
         hbot = 0.	
         do l=lmin,lmin+nadapt-1
           htop = hbot
-          hbot = hlv(l)
+          hbot = hlvaux(l)
 	  if( l .eq. lmax ) hbot = htot 
           hdl(l) = hzad * (hbot-htop)/den
         end do
@@ -316,7 +321,7 @@
 	    do l=nsigma+nadapt+lmin,lmax
 	      if( hbot == htot ) exit	!no more layers
 	      htop = hbot
-	      hbot = hlv(l)
+	      hbot = hlvaux(l)
 	      if( bdebug ) write(6,*) l,htop,hbot,htot
 	      if( hbot .gt. htot ) hbot = htot	!last layer
 	      hdl(l) = hbot - htop

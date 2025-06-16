@@ -163,8 +163,8 @@
 	kn1=kphv(ipa1)			!kleinerer index
 	kn2=kphv(ipa2)			!groesserer index
         if(kn1.gt.kn2) then
-          call iswap(kn1,kn2)
-          call iswap(ipa1,ipa2)
+          call iiswap(kn1,kn2)
+          call iiswap(ipa1,ipa2)
         end if
 	mh=kn2-kn1			!bandbreite
 	if(mh.lt.m) goto 90		!naechstes paar
@@ -316,7 +316,7 @@
 
 !******************************************************************
 
-        subroutine iswap(a,b)
+        subroutine iiswap(a,b)
 
 ! swaps two integers
 

@@ -9,8 +9,55 @@
 
 code for implementing mpi support
 
-these routines proved module shympi
-these routines need modules basin abd levels
+these routines provide module shympi
+these routines need modules basin and levels
+
+features still not working with mpi:
+	- lagrangian model
+	- tilting
+	- barrier closing
+	- parameteric wave simulations
+
+features that have to be checked
+	- residence time
+	- sediment simulations
+
+#------------------------------------------------------------------------
+
+problems with INTEL compiler:
+
+#------------------------------------------------------------------------
+major changes for INTEL compiler: (search for bextra_exchange)
+#------------------------------------------------------------------------
+
+hydrodynamic.f90
+	exchange utlnv, vtlnv after call to hydro_transports_final()
+
+initialize.f90
+	echange fcorv, use ie_mpi for loop
+
+turbulence.f90
+	shympi_exchange: taub, buoyf2, shearf2
+	lots of shympi_check_2d_node, shympi_check_3d_node
+
+meteo_forcing.f90
+	exchange tauxnv, tauynv
+
+bnd_routines.f90
+	exchange mfluxv
+
+#------------------------------------------------------------------------
+# next changes are needed
+#------------------------------------------------------------------------
+
+mpi_node_internal.f90
+	lots of changes in shympi_exchange_internal_r()
+	be sure that exchanged arrays have same dimension
+	introduced nvert and nlv_global
+
+mpi_node.f90
+	shympi_check_3d_elem_r() -> allocate aux
+	compute nghost_max_global
 
 #------------------------------------------------------------------------
 

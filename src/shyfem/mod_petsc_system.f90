@@ -31,6 +31,7 @@
 ! 20.04.2021	clr	alternative implementation to replace pragma directives use_PETSc/SPK/AmgX
 ! 19.05.2022	ggu	comment PetscObjectSetName() to avoid compiler error
 ! 31.05.2022	ggu	replace NO_FILE_GIVEN with empty string
+! 24.05.2025	clr&ccf	replace PETSC_NULL_INTEGER with PETSC_NULL_OPTIONS 
 !
 ! notes :
 !
@@ -147,7 +148,7 @@
            write(6,*) 'reading petscrc file : ',petscconfig
            call PetscOptionsInsertFILE( &
      &                     new_system%PETSC_COMM, &
-     &                     PETSC_NULL_INTEGER, &
+     &                     PETSC_NULL_OPTIONS, &
      &                     petscconfig,  &
      &                     PETSC_TRUE, &
      &                     perr )

@@ -43,6 +43,7 @@ exitcode=0
 compiler=$1
 compexe=$compiler
 [ $compiler = intel ] && compexe=ifort
+intel_option="-diag-disable=10448"
 
 prog=$( which $compexe 2> /dev/null )
 
@@ -53,6 +54,7 @@ if [ -n "$prog" ]; then
       mversion=$( echo $version | sed -e 's/\..*//' )
     fi
   elif [ $compiler = intel ]; then
+    prog="$prog $intel_option"
     version=$( $prog -v 2>&1 | sed -e 's/.*version *//' )
     if [ -n "$version" ]; then
       mversion=$( echo $version | sed -e 's/\..*//' )

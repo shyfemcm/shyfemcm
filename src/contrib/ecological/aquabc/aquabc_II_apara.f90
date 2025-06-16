@@ -83,7 +83,7 @@
 !**************************************************************
 
 !==================================================================
-	module para_aqua
+	module aquabc_II_para_aqua
 !==================================================================
 
 ! itype =  1	value
@@ -540,7 +540,7 @@
 	end subroutine para_put_string
 
 !==================================================================
-	end module para_aqua
+	end module aquabc_II_para_aqua
 !==================================================================
 
 
@@ -556,7 +556,7 @@
 ! All these commented routines are located in subpara3.f:
 
 ! 	function getpar(name)
-! 	use para_aqua
+! 	use aquabc_II_para_aqua
 ! 	implicit none
 ! 	real getpar
 ! 	character*(*) name
@@ -566,7 +566,7 @@
 ! 	end
 ! 
 ! 	function dgetpar(name)
-! 	use para_aqua
+! 	use aquabc_II_para_aqua
 ! 	implicit none
 ! 	double precision dgetpar
 ! 	character*(*) name
@@ -576,7 +576,7 @@
 ! 	end
 ! 
 ! 	subroutine getfnm(name,string)
-! 	use para_aqua
+! 	use aquabc_II_para_aqua
 ! 	implicit none
 ! 	character*(*) name,string
 ! 	call para_get_string(name,string)
@@ -585,7 +585,7 @@
 ! c**************************************************************
 ! 
 ! 	subroutine putpar(name,value)
-! 	use para_aqua
+! 	use aquabc_II_para_aqua
 ! 	implicit none
 ! 	character*(*) name
 ! 	real value
@@ -595,7 +595,7 @@
 ! 	end
 ! 
 ! 	subroutine dputpar(name,value)
-! 	use para_aqua
+! 	use aquabc_II_para_aqua
 ! 	implicit none
 ! 	character*(*) name
 ! 	double precision value
@@ -603,7 +603,7 @@
 ! 	end
 ! 
 ! 	subroutine putfnm(name,string)
-! 	use para_aqua
+! 	use aquabc_II_para_aqua
 ! 	implicit none
 ! 	character*(*) name,string
 ! 	call para_put_string(name,string)
@@ -612,7 +612,7 @@
 ! c**************************************************************
 ! 
 ! 	subroutine addpar(name,value)
-! 	use para_aqua
+! 	use aquabc_II_para_aqua
 ! 	implicit none
 ! 	character*(*) name
 ! 	real value
@@ -622,7 +622,7 @@
 ! 	end
 ! 
 ! 	subroutine daddpar(name,value)
-! 	use para_aqua
+! 	use aquabc_II_para_aqua
 ! 	implicit none
 ! 	character*(*) name
 ! 	double precision value
@@ -630,7 +630,7 @@
 ! 	end
 ! 
 ! 	subroutine addfnm(name,string)
-! 	use para_aqua
+! 	use aquabc_II_para_aqua
 ! 	implicit none
 ! 	character*(*) name,string
 ! 	call para_add_string(name,string)
@@ -646,7 +646,7 @@
 ! c**************************************************************
 ! 
 ! 	subroutine delete_section(section)
-! 	use para_aqua
+! 	use aquabc_II_para_aqua
 ! 	implicit none
 ! 	character*(*) section
 ! 	call para_delete_section(section)
@@ -657,7 +657,7 @@
 ! c**************************************************************
 ! 
 ! 	function itspar(name)
-! 	use para_aqua
+! 	use aquabc_II_para_aqua
 ! 	implicit none
 ! 	integer itspar
 ! 	character*(*) name
@@ -665,7 +665,7 @@
 ! 	end
 ! 
 ! 	function itsfnm(name)
-! 	use para_aqua
+! 	use aquabc_II_para_aqua
 ! 	implicit none
 ! 	integer itsfnm
 ! 	character*(*) name
@@ -673,7 +673,7 @@
 ! 	end
 ! 
 ! 	function iscpar(name,section)
-! 	use para_aqua
+! 	use aquabc_II_para_aqua
 ! 	implicit none
 ! 	integer iscpar
 ! 	character*(*) name,section
@@ -681,7 +681,7 @@
 ! 	end
 ! 
 ! 	function iscfnm(name,section)
-! 	use para_aqua
+! 	use aquabc_II_para_aqua
 ! 	implicit none
 ! 	integer iscfnm
 ! 	character*(*) name,section
@@ -691,14 +691,14 @@
 ! c***********************************************************
 ! 
 ! 	subroutine sctpar(section)
-! 	use para_aqua
+! 	use aquabc_II_para_aqua
 ! 	implicit none
 ! 	character*(*) section
 ! 	call para_set_default_section(section)
 ! 	end
 ! 
 ! 	subroutine sctfnm(section)
-! 	use para_aqua
+! 	use aquabc_II_para_aqua
 ! 	implicit none
 ! 	character*(*) section
 ! 	call para_set_default_section(section)
@@ -707,7 +707,7 @@
 ! c**************************************************************
 ! 
 ! 	subroutine get_sect_of(name,section)
-! 	use para_aqua
+! 	use aquabc_II_para_aqua
 ! 	implicit none
 ! 	character*(*) name,section
 ! 	call para_find_section_to_name(name,section)
@@ -726,7 +726,7 @@
 ! 
 ! c prints info on parameter values
 ! 
-! 	use para_aqua
+! 	use aquabc_II_para_aqua
 ! 
 ! 	implicit none
 ! 
@@ -776,7 +776,7 @@
 ! 
 ! c prints parameter values
 ! 
-! 	use para_aqua
+! 	use aquabc_II_para_aqua
 ! 
 !         implicit none
 ! 
@@ -806,7 +806,7 @@
 ! 
 ! c prints parameter values
 ! 
-! 	use para_aqua
+! 	use aquabc_II_para_aqua
 ! 
 ! 	implicit none
 ! 
@@ -875,7 +875,7 @@
 ! 
 ! c prints parameter values
 ! 
-! 	use para_aqua
+! 	use aquabc_II_para_aqua
 ! 
 !         implicit none
 ! 
@@ -907,7 +907,7 @@
 ! 
 ! 	subroutine chkparam(iunit)
 ! 
-! 	use para_aqua
+! 	use aquabc_II_para_aqua
 ! 
 ! 	implicit none
 ! 
@@ -947,7 +947,7 @@
 ! 
 ! 	subroutine check_parameter_values(text)
 ! 
-! 	use para_aqua
+! 	use aquabc_II_para_aqua
 ! 
 ! 	implicit none
 ! 

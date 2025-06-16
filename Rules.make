@@ -75,6 +75,9 @@ C_COMPILER = GNU_GCC
 #C_COMPILER = IBM
 #C_COMPILER = PGI
 
+INTEL_VERSION = IFORT
+#INTEL_VERSION = IFX
+
 ##############################################
 # Parallel compilation
 ##############################################
@@ -110,7 +113,7 @@ PARALLEL_OMP = false
 #PARALLEL_OMP = true
 
 PARALLEL_MPI = NONE
-PARALLEL_MPI = NODE
+#PARALLEL_MPI = NODE
 #PARALLEL_MPI = ELEM
 
 ##############################################
@@ -138,14 +141,19 @@ PARALLEL_MPI = NODE
 #
 ##############################################
 
-#PARTS = NONE
-PARTS = METIS
+PARTS = NONE
+#PARTS = METIS
 #PARTS = PARMETIS
-#METISDIR = /zeus/opt/intel20.1/metis/5.1.0
+METISDIR = 
+METISDIR = ${METIS_HOME}
+#METISDIR = /usr/local
+#METISDIR = $(HOME)/lib/metis
 #METISDIR = $(LD_LIBRARY_PATH)
+PARMETISDIR = 
+PARMETISDIR = ${PARMETIS_HOME}
 #PARMETISDIR = /usr/local
-METISDIR = $(HOME)/lib/metis
 #PARMETISDIR = $(HOME)/lib/parmetis
+#PARMETISDIR = $(LD_LIBRARY_PATH)
 
 ##############################################
 # Solver for matrix solution
@@ -190,7 +198,8 @@ SOLVER = SPARSKIT
 
 # PETSC_DIR it the path to the PETSc installation folder, it is 
 # needed for both the PETSc and the PETSc_AmgX solvers
-#PETSC_DIR =/zeus/opt/impi20.1/petsc/3.13.2
+PETSC_DIR =
+PETSC_DIR =${PETSC_HOME}
 
 # The next 4 paths must be filled in for the PETSc_AmgX solver only.
 
@@ -255,9 +264,10 @@ GPU=NONE
 ##############################################
 
 NETCDF = false
-NETCDF = true
-NETCDFDIR = $(NETCDF_PATH)
-NETCDFFDIR =$(NETCDFF_PATH)
+#NETCDF = true
+#NETCDFDIR =
+NETCDFDIR = ${NETCDF_C_HOME}
+NETCDFFDIR =${NETCDF_FORTRAN_HOME}
 
 ##############################################
 # GOTM library
@@ -288,28 +298,30 @@ GOTM = true
 # ERSEM, AQUABC, and BFM.
 # The BFM model is still experimental.
 #
+# The mercury module can be used by setting MERCURY = true
+#
 ##############################################
 
 ECOLOGICAL = NONE
 #ECOLOGICAL = EUTRO
-#ECOLOGICAL = ERSEM
 #ECOLOGICAL = AQUABC
 #ECOLOGICAL = BFM
+
+MERCURY = false
+#MERCURY = true
 
 ##############################################
 #
 # BFM model - in order to use the BFM model
-# please see the README file in fembfm
+# please see the README file in src/contrib/ecological/bfm
 # and set the BFMDIR directory below.
 #
 # this feature is still experimental - no support
 #
 ##############################################
 
-#BFMDIR = /gpfs/work/OGS18_PRACE_P_0/SHYFEM_BFM/bfm
-#BFMDIR = /home/georg/appl/donata/bfm/bfmv5
-#BFMDIR = /home/georg/appl/donata/bfm/BiogeochemicalFluxModel-5.1.0
-#BFMDIR = $(HOME)/BFM
+BFMDIR =
+BFMDIR=$(BFM_HOME)
 
 ##############################################
 # WW3 wave model
@@ -328,7 +340,8 @@ ECOLOGICAL = NONE
 
 WW3 = false
 #WW3 = true
-#WW3DIR = $(HOME)/WW3
+WW3DIR = ${WW3_HOME}
+#WW3DIR = /path/to/WW3
 
 ##############################################
 # Experimental features
@@ -336,6 +349,41 @@ WW3 = false
 
 FLUID_MUD = false
 #FLUID_MUD = true
+
+##############################################
+# ESMF-NUOPC
+##############################################
+#
+# The model can be coupled with other earth
+# components, e.g. atmospheric, hydrological
+# or land models. This is realized thanks to
+# the ESMF integrated system which must be
+# already compiled and installed on your
+# machine. If NUOPC is true, the code can be
+# compiled as a library with with entry points
+# that are coded in a "cap layer",
+# see ESMF-NUOPC jargon. The cap layer
+# contains subroutines to initialize, run and
+# finalize SHYFEM. The cap layer is called by
+# the coupler, that lunches the SHYFEM from
+# "outside".
+#
+# Please specify if NUOPC is active and the
+# base directory where ESMF library has been
+# installed.
+#
+# The call:
+# >> make nuopc
+# generates the NUOPC-compliant SHYFEM library
+# and produce a Makefile fragment call
+# "src/shyfem/nuop_shyfem.mk" which exchanges
+# useful variables to compile the coupler.
+#
+##############################################
+
+NUOPC = false
+ESMFDIR = ${ESMF_HOME}
+#ESMFDIR = /path/to/esmf-8.6.0
 
 ##############################################
 # end of user defined parameters and flags
@@ -353,17 +401,16 @@ FLUID_MUD = false
 # DEFINE VERSION
 ##############################################
 
-RULES_MAKE_VERSION = 1.10
+RULES_MAKE_VERSION = 1.11
 DISTRIBUTION_TYPE = experimental
 
 ##############################################
-# DEFINE DIRECTORIES
+# DEFINE DIRECTORIES (FEMDIR is defined in calling Makefile)
 ##############################################
 
 DEFDIR  = $(HOME)
 LIBDIR  = $(FEMDIR)/lib
 BINDIR  = $(FEMDIR)/bin
-MODDIR  = 
 MODDIR  = $(LIBDIR)/mod
 
 LIBX = -L/usr/X11R6/lib -L/usr/X11/lib -L/usr/lib/X11  -lX11
@@ -420,6 +467,13 @@ ifeq ($(SOLVER),PARALUTION)
   endif
 endif
 
+ifeq ($(SOLVER),PETSC)
+  ifeq ($(PETSC_DIR),)
+    RULES_MAKE_PARAMETERS = RULES_MAKE_PARAMETER_ERROR
+    RULES_MAKE_MESSAGE = "PETSC_DIR directory is empty"
+  endif
+endif
+
 ifeq ($(C_COMPILER),INTEL)
   ifneq ($(FORTRAN_COMPILER),INTEL)
     RULES_MAKE_PARAMETERS = RULES_MAKE_PARAMETER_ERROR
@@ -438,16 +492,35 @@ ifeq ($(ECOLOGICAL),BFM)
   endif
 endif
 
-ifneq ($(PARALLEL_MPI),NONE)
+ifeq ($(PARALLEL_MPI),NODE)
   ifeq ($(PARALLEL_OMP),true)
     RULES_MAKE_PARAMETERS = RULES_MAKE_PARAMETER_ERROR
     RULES_MAKE_MESSAGE = "OMP and MPI parallelization are incompatible"
+  endif
+  ifeq ($(PARTS),NONE)
+    RULES_MAKE_PARAMETERS = RULES_MAKE_PARAMETER_ERROR
+    RULES_MAKE_MESSAGE = "MPI parallelization PARTS = METIS"
   endif
 endif
 
 ifeq ($(PARALLEL_MPI),ELEM)
   RULES_MAKE_PARAMETERS = RULES_MAKE_PARAMETER_ERROR
   RULES_MAKE_MESSAGE = "MPI on element partition is not yet ready"
+endif
+
+ifeq ($(WW3),true)
+  ifneq ($(PARTS),PARMETIS)
+    RULES_MAKE_PARAMETERS = RULES_MAKE_PARAMETER_ERROR
+    RULES_MAKE_MESSAGE = "Please set PARTS = PARMETIS"
+  endif
+  ifneq ($(PARALLEL_MPI),NODE)
+    RULES_MAKE_PARAMETERS = RULES_MAKE_PARAMETER_ERROR
+    RULES_MAKE_MESSAGE = "PARALLEL_MPI must be set to NODE"
+  endif
+  ifneq ($(NETCDF),true)
+    RULES_MAKE_PARAMETERS = RULES_MAKE_PARAMETER_ERROR
+    RULES_MAKE_MESSAGE = "WW3 model needs NETCDF support"
+  endif
 endif
 
 ##############################################
@@ -490,6 +563,7 @@ ifeq ($(COMPILER_PROFILE),NORMAL)
   OPTIMIZE = MEDIUM
   WARNING = true
   BOUNDS = false
+  XFLAG = -DSHYFEM_NORMAL
 endif
 
 ifeq ($(COMPILER_PROFILE),CHECK)
@@ -499,6 +573,7 @@ ifeq ($(COMPILER_PROFILE),CHECK)
   OPTIMIZE = NONE
   WARNING = true
   BOUNDS = true
+  XFLAG = -DSHYFEM_CHECK
 endif
 
 ifeq ($(COMPILER_PROFILE),SPEED)
@@ -508,6 +583,7 @@ ifeq ($(COMPILER_PROFILE),SPEED)
   OPTIMIZE = HIGH
   WARNING = false
   BOUNDS = false
+  XFLAG = -DSHYFEM_SPEED
 endif
 
 ifeq ($(CPROF),false)
@@ -571,8 +647,10 @@ ifeq ($(GMV_LE_8),true)
   WNOINIT = -Wno-uninitialized
 endif
 WTABS = -Wno-tabs
+FGNU_allow-argument-mismatch = -fallow-argument-mismatch
 ifeq ($(GMV_LE_4),true)
   WTABS = -Wtabs
+  FGNU_allow-argument-mismatch = 
 endif
 
 # next solves compiler warnings of possible not initialized code (version <= 8)
@@ -590,8 +668,9 @@ endif
 
 FGNU_GENERAL = -cpp -std=f95
 ifdef MODDIR
-  FGNU_GENERAL = -cpp -J$(MODDIR) 
+  FGNU_GENERAL = -cpp -J$(MODDIR)
 endif
+FGNU_GENERAL += $(XFLAG)
 
 FGNU_PROFILE = 
 ifeq ($(PROFILE),true)
@@ -675,8 +754,9 @@ ifeq ($(FORTRAN_COMPILER),GNU_G77)
   LINKER	= $(F77)
   LFLAGS	= $(FGNU_OPT) $(FGNU_PROFILE) $(FGNU_OMP)
   FFLAGS	= $(LFLAGS) $(FGNU_NOOPT) $(FGNU_WARNING)
-  FFLAG_SPECIAL	= $(LFLAGS) $(FGNU_WARNING)
+  FFLAG_SPECIAL	= $(LFLAGS) $(FGNU_WARNING) $(FGNU_allow-argument-mismatch)
   FINFOFLAGS	= --version
+  MAJOR 	= $(GMV)
 endif
 
 ifeq ($(FORTRAN_COMPILER),GNU_GFORTRAN)
@@ -691,8 +771,10 @@ ifeq ($(FORTRAN_COMPILER),GNU_GFORTRAN)
   LINKER	= $(F77)
   LFLAGS	= $(FGNU_OPT) $(FGNU_PROFILE) $(FGNU_OMP)
   FFLAGS	= $(LFLAGS) $(FGNU_NOOPT) $(FGNU_WARNING) $(FGNU_GENERAL)
-  FFLAG_SPECIAL	= $(LFLAGS) $(FGNU_WARNING) $(FGNU_GENERAL)
+  FFLAG_SPECIAL	= $(LFLAGS) $(FGNU_WARNING) $(FGNU_GENERAL) \
+				$(FGNU_allow-argument-mismatch)
   FINFOFLAGS	= --version
+  MAJOR 	= $(GMV)
 endif
 
 ##############################################
@@ -709,6 +791,7 @@ FPGI_GENERAL =
 ifdef MODDIR
   FPGI_GENERAL = -module $(MODDIR)
 endif
+FPGI_GENERAL += $(XFLAG)
 
 FPGI_OMP   =
 ifeq ($(PARALLEL_OMP),true)
@@ -773,6 +856,7 @@ FIBM_PROFILE =
 ifeq ($(PROFILE),true)
   FIBM_PROFILE = 
 endif
+FIBM_GENERAL += $(XFLAG)
 
 FIBM_WARNING = 
 ifeq ($(WARNING),true)
@@ -804,7 +888,7 @@ ifeq ($(FORTRAN_COMPILER),IBM)
   F77		= $(FIBM)
   F95		= xlf_r
   LINKER	= $(FIBM)
-  FFLAGS	= $(FIBM_OMP)
+  FFLAGS	= $(FIBM_OMP) $(FIBM_GENERAL)
   FFLAG_SPECIAL	= $(FFLAGS)
   LFLAGS	= $(FIBM_OMP) -qmixed  -b64 -bbigtoc -bnoquiet -lpmapi -lessl -lmass -lmassvp4
 endif
@@ -819,6 +903,7 @@ FPG_PROFILE =
 ifeq ($(PROFILE),true)
   FPG_PROFILE = -Mprof=func
 endif
+FPG_GENERAL += $(XFLAG)
 
 FPG_WARNING = 
 ifeq ($(WARNING),true)
@@ -852,7 +937,7 @@ ifeq ($(FORTRAN_COMPILER),PORTLAND)
   F95		= $(FPG95)
   LINKER	= $(F77)
   LFLAGS	= $(FPG_OPT) $(FPG_PROFILE) $(FPG_OMP)
-  FFLAGS	= $(LFLAGS) $(FPG_NOOPT) $(FPG_WARNING)
+  FFLAGS	= $(LFLAGS) $(FPG_NOOPT) $(FPG_WARNING) $(FPG_GENERAL)
   FFLAG_SPECIAL	= $(FFLAGS)
   FINFOFLAGS	= -v
 endif
@@ -901,8 +986,9 @@ FINTEL_ERSEM = $(DEFINES)
 
 FINTEL_GENERAL = -fpp
 ifdef MODDIR
-  FINTEL_GENERAL = -fpp -module $(MODDIR)
+  FINTEL_GENERAL = -fpp -module $(MODDIR) -diag-disable=10448
 endif
+FINTEL_GENERAL += $(XFLAG)
 
 FINTEL_PROFILE = 
 ifeq ($(PROFILE),true)
@@ -922,6 +1008,7 @@ ifeq ($(BOUNDS),true)
 endif
 
 FINTEL_NOOPT = -g -traceback
+FINTEL_NOOPT = 
 ifeq ($(DEBUG),true)
   FINTEL_TRAP = -fp-trap-all=common
   FINTEL_TRAP = -ftrapuv -debug all -fpe0
@@ -971,13 +1058,20 @@ ifeq ($(FORTRAN_COMPILER),INTEL)
   ifneq ($(PARALLEL_MPI),NONE)
     FINTEL      = mpiifort
   endif
+  ifeq ($(INTEL_VERSION),IFX)
+    FINTEL	= ifx
+    ifneq ($(PARALLEL_MPI),NONE)
+      FINTEL      = mpiifort -fc=ifx
+    endif
+  endif
   F77		= $(FINTEL)
   F95     	= $(F77)
   LINKER	= $(F77)
   LFLAGS	= $(FINTEL_OPT) $(FINTEL_PROFILE) $(FINTEL_OMP)
   FFLAGS	= $(LFLAGS) $(FINTEL_NOOPT) $(FINTEL_WARNING) $(FINTEL_GENERAL)
-  FFLAG_SPECIAL	= $(FFLAGS)
+  FFLAG_SPECIAL = $(FINTEL_OMP) $(FINTEL_GENERAL)
   FINFOFLAGS	= -v
+  MAJOR 	= $(IMV)
 endif
 
 ##############################################
@@ -1005,6 +1099,9 @@ endif
 
 ifeq ($(C_COMPILER),INTEL)
   CC     = icc
+  ifeq ($(INTEL_VERSION),IFX)
+    CC	= icx
+  endif
   CFLAGS = -O -g -traceback -check-uninit
   CFLAGS = -O -g -traceback
   LCFLAGS = -O 

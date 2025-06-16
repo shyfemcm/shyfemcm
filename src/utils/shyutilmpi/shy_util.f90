@@ -69,6 +69,11 @@
 ! 28.04.2023    ggu     update function calls for belem
 ! 07.06.2023    ggu     array simpar introduced
 ! 20.07.2023    lrp     new paramter nzadapt
+! 22.09.2024    ggu     bug fix in shy_check_nvar() - use also dtime0
+! 04.12.2024    ggu     new framework for not doing gather_all
+! 07.12.2024    ggu     reduce only to root (not all)
+! 01.04.2025    ggu     write subrange of variables
+! 10.04.2025    ggu     new routine shyfem_init_scalar_fix_file() (nfix)
 !
 ! contents :
 !
@@ -157,6 +162,7 @@
 	use basin
 	use shyfile
 	use shympi
+	use mod_trace_point
 
 	implicit none
 
@@ -172,7 +178,7 @@
 	bdebug = .true.					!mpi_debug_ggguuu
 	bdebug = .false.				!mpi_debug_ggguuu
 
-	call shympi_bdebug('starting shy_copy_basin_to_shy')
+	call trace_point('starting shy_copy_basin_to_shy')
 	!get parameters - nk,ne,nl are global values
 	call shy_get_params(id,nk,ne,np,nl,nvar)
 	!write(6,*) 'shy_copy_basin_to_shy: ',my_id,ne,nk,nl
@@ -184,22 +190,28 @@
 
 	call shy_set_elemindex(id,nen3v_global)
 
+	call trace_point('before xgv')
 	call shympi_l2g_array(xgv,xg)
+	call trace_point('before ygv')
 	call shympi_l2g_array(ygv,yg)
+	call trace_point('after x/ygv')
 	call shy_set_coords(id,xg,yg)
 
+	call trace_point('before hm3v')
 	call shympi_l2g_array(3,hm3v,hm3)
 	call shy_set_depth(id,hm3)
 
+	call trace_point('before ipev')
 	call shympi_l2g_array(ipev,ie)
 	call shympi_l2g_array(ipv,in)
 	call shy_set_extnumbers(id,ie,in)
 
+	call trace_point('before iarv')
 	call shympi_l2g_array(iarv,ie)
 	call shympi_l2g_array(iarnv,in)
 	call shy_set_areacode(id,ie,in)
 
-	call shympi_bdebug('finished shy_copy_basin_to_shy')
+	call trace_point('finished shy_copy_basin_to_shy')
 
 	if( .not. bdebug ) return
 
@@ -475,6 +487,7 @@
 
         use levels
         use shympi
+	use mod_trace_point
 
         implicit none
 
@@ -493,12 +506,49 @@
         nlg = nlv_global
         if( b2d ) nlg = 1
 
-	call shympi_bdebug('start shyfem_init_scalar_file')
+	call trace_point('start shyfem_init_scalar_file')
+        call shy_make_output_name(trim(ext),file)
+	call trace_point('start open file')
+        call shy_open_output_file(file,npr,nlg,nvar,ftype,id)
+	call trace_point('start set params')
+        call shy_set_simul_params(id)
+        call shy_make_header(id)
+	call trace_point('end shyfem_init_scalar_file')
+
+        end
+
+!****************************************************************
+
+        subroutine shyfem_init_scalar_fix_file(type,nvar,nfix,id)
+
+! initializes scalar file with fixed layer structure from str
+
+        use levels
+        use shympi
+	use mod_trace_point
+	use shyfile
+
+        implicit none
+
+        character*(*) type      !type of file, e.g., hydro, ts, wave
+        integer nvar		!total number of scalars to be written
+	integer nfix		!fixed vertical structure
+        integer id		!id for file (return)
+
+        integer ftype,npr,nlg
+        character*80 file,ext,aux
+
+        aux = adjustl(type)
+        ext = '.' // trim(aux) // '.shy'        !no blanks in ext
+        ftype = 2
+        npr = 1
+        nlg = nfix
+
         call shy_make_output_name(trim(ext),file)
         call shy_open_output_file(file,npr,nlg,nvar,ftype,id)
         call shy_set_simul_params(id)
+	call shy_convert_nfix(id,nfix)
         call shy_make_header(id)
-	call shympi_bdebug('end shyfem_init_scalar_file')
 
         end
 
@@ -600,8 +650,8 @@
 	integer id
 
 	integer date,time
-	real simpar(3)
-	real hzmin,hzoff,nzadapt
+	real simpar(4)
+	real hzmin,hzoff,nzadapt,dtaver
 	character*80 title
 	character*80 femver
 	double precision dgetpar
@@ -613,10 +663,11 @@
 	hzmin = dgetpar('hzmin')
 	hzoff = dgetpar('hzoff')
 	nzadapt = dgetpar('nzadapt')
+	dtaver = 0.
         title = descrp
         call get_shyfem_version_and_commit(femver)
 
-	simpar = (/hzmin,hzoff,nzadapt/)
+	simpar = (/hzmin,hzoff,nzadapt,dtaver/)
 
         call shy_set_date(id,date,time)
         call shy_set_title(id,title)
@@ -647,6 +698,7 @@
 	use basin
 	use shyfile
 	use shympi
+	use mod_trace_point
 
 	implicit none
 
@@ -677,12 +729,16 @@
 ! initialize data structure
 !-----------------------------------------------------
 
+	call trace_point('shy_open_output_file')
 	call shy_set_params(id,nkn_global,nel_global,npr,nlg,nvar)
         call shy_set_ftype(id,ftype)
 
 	call shy_alloc_arrays(id)
+	call trace_point('after alloc')
 	call shy_copy_basin_to_shy(id)
+	call trace_point('after shy_copy_basin_to_shy')
 	call shy_copy_levels_to_shy(id)
+	call trace_point('after shy_copy_levels_to_shy')
 
 	if( bopen ) then
 	  write(6,*) 'initialized shy file ',trim(file)
@@ -750,6 +806,7 @@
 	integer ftype
 	integer ivar,n,m,lmax
 	double precision dtime
+	character*5 saux
 
 	ivars = 0
 	strings = ' '
@@ -778,6 +835,11 @@
 	    irec = irec + 1
 	    ivars(irec) = ivar
 	    call ivar2string(ivar,strings(irec),isub)
+	    if( isub > 0 ) then
+	      write(saux,'(i5)') isub
+	      saux = adjustl(saux)
+	      strings(irec) = trim(strings(irec)) // ' ' // trim(saux)
+	    end if
 	    if( irec == nvar ) exit
 	  end do
 	  call shy_back_records(id,nrec,ierr)
@@ -808,7 +870,7 @@
 	integer ftype
 	integer ivar,n,m,lmax,ivar_first
 	integer nkn,nel,npr,nlv
-	double precision dtime
+	double precision dtime,dtime0
 	character*80 string
 
 	if( id <= 0 ) return
@@ -832,21 +894,22 @@
 	  call shy_skip_record(id,dtime,ivar,n,m,lmax,ierr)
 	  if( ierr /= 0 ) exit
 	  nrec = nrec + 1
-	  if( ivar == ivar_first ) exit
-	  if( ivar_first == -999 ) ivar_first = ivar
+	  if( ivar == ivar_first .and. dtime /= dtime0 ) exit	!new time record
+	  if( ivar_first == -999 ) then
+	    dtime0 = dtime
+	    ivar_first = ivar
+	  end if
 	  if( ivar < 0 ) cycle
 	  irec = irec + 1
 	end do
 
-	!write(6,*) 'ffffffff ',irec,nrec,ierr,ivar_first
+	dtime0 = dtime
 	if( ierr /= 0 ) then
 	  call shy_back_one(id,ierr)	!this skips over EOF
-	  !write(6,*) 'back1',ierr
 	  if( ierr /= 0 ) goto 97
 	end if
 
 	call shy_back_records(id,nrec,ierr)
-	!write(6,*) 'back2',ierr
 	if( ierr /= 0 ) goto 97
 	if( irec == nvar ) return
 
@@ -902,8 +965,11 @@
      &					,belem,n,m,lmax &
      &					,nlvdi,c)
 
+! low level routine to write out a record to a shy file
+
 	use shyfile
 	use shympi
+	use mod_trace_point
 
 	implicit none
 
@@ -917,8 +983,8 @@
 	integer nlvdi			!local vertical dimension
 	real c(nlvdi,m*n)
 
-	logical bdebug,b2d
-	integer ierr,nn,nl,i,ng
+	logical bdebug,b2d,bopen
+	integer ierr,nn,nl,i,ng,nfix
 	real, allocatable :: cl(:,:),cg(:,:)
 	real, allocatable :: cl2d(:),cg2d(:)
 	character*80 file
@@ -948,6 +1014,8 @@
 	b2d = ( lmax == 1 )
 
 	ng = nlv_global
+	call shy_get_nfix(id,nfix)
+	if( nfix > 0 ) ng = nfix
 
 	if( belem ) then
 	  nn = nel_global
@@ -960,7 +1028,6 @@
           stop 'error stop shy_write_output_record: nlvdi>1 & m>1'
 	end if
 
-	!if( nlvdi > lmax ) then
 	if( nlvdi > lmax .and. lmax > 1 ) then
 	  write(6,*) 'error in vertical structure: ',nlvdi,lmax
 	  stop 'error stop shy_write_output_record: nlvdi>lmax'
@@ -991,8 +1058,15 @@
 	  cg = 0.
 	end if
 
-	!call shympi_syncronize
-	!write(6,*) 'exchanging... ',m,lmax,nl,ng,n,nn	!GGURST
+	call shy_get_status(id,bopen)
+	if( bopen .and. .not. bmpi_master ) then
+	  write(6,*) 'debug shyfile ',dtime,bopen,id,my_id
+	  stop 'error stop shy_write_output_record: file opened and no master'
+	end if
+
+	call trace_point('before shy_write_record')
+
+	call shympi_operate_all(.false.)
 
 	if( m > 1 ) then
 	  call shympi_l2g_array(m,cl,cg)
@@ -1001,26 +1075,13 @@
 	  call shympi_l2g_array(cl2d,cg2d)
 	  call shy_write_record(id,dtime,ivar,belem,nn,1,1,1,cg2d,ierr)
 	else
-	  !write(6,*) 'start exchanging',nl,ng,n,nn
 	  call shympi_l2g_array(cl,cg)
-	  !write(6,*) 'end exchanging',nl
 	  call shy_write_record(id,dtime,ivar,belem,nn,1,lmax,ng,cg,ierr)
 	end if
 
-	if( bdebug .and. .false. ) then
-	 if( shympi_is_master() ) then		!mpi_debug_ggguuu
-	  if( ivar == 1 .and. m == 1 ) then
-	    write(700,*) ivar,nn,m,lmax
-	    write(700,*) cg
-	  else if( ivar == 1 .and. m == 3 ) then
-	    write(701,*) ivar,nn,m,lmax
-	    write(701,*) cg
-	  else
-	    write(703,*) ivar,nn,m,lmax
-	    write(703,*) cg
-	  end if
-	 end if
-	end if
+	call shympi_operate_all(.true.)
+
+	call trace_point('after shy_write_record')
 
 	if( ierr /= 0 ) then
 	  write(6,*) 'error writing output file ',ierr
@@ -1148,6 +1209,7 @@
 
 	subroutine shy_write_hydro_records(id,dtime,nlvddi,z,ze,u,v)
 
+	use mod_trace_point
 	use basin
 	use shyfile
 	use shympi
@@ -1168,17 +1230,24 @@
 
 	if( id <= 0 ) return
 
+	call trace_point('call shy_get_params')
 	call shy_get_params(id,iaux,iaux,iaux,nlv,iaux)	!nlv is global here
 	!nlv = min(nlv,nlvddi)
 
 	ivar = 1
+	call trace_point('call shy_write_output_record z')
 	call shy_write_output_record(id,dtime,ivar,bn,nkn,1,1,1,z)
+	call trace_point('call shy_write_output_record ze')
 	call shy_write_output_record(id,dtime,ivar,be,nel,3,1,1,ze)
 	ivar = 3
+	call trace_point('call shy_write_output_record u/v')
 	call shy_write_output_record(id,dtime,ivar,be,nel,1,nlv,nlvddi,u)
+	call trace_point('finished shy_write_hydro_records u')
 	call shy_write_output_record(id,dtime,ivar,be,nel,1,nlv,nlvddi,v)
+	call trace_point('finished shy_write_hydro_records v')
 
 	call shy_sync(id)
+	call trace_point('finished shy_write_hydro_records')
 
 	end
 

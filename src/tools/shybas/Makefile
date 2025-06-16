@@ -50,6 +50,8 @@ LIBF = $(LIBFUM) $(LIBFMP) $(LIBFSU) $(LIBFUT)
 EXES = shybas
 EXELINKS =      $(FEMBIN) $(EXES)
 
+MAKEDEPEND = $(FEMBIN)/mkdp.pl
+
 #----------------------------------------------------------------------------
 
 OBJ := \
@@ -63,6 +65,8 @@ OBJ := \
 	basutil_interp.o \
 	basutil_hsigma.o \
 	basutil_part.o \
+	basutil_fastfind.o \
+	basutil_layers.o \
 
 #----------------------------------------------------------------------------
 
@@ -77,7 +81,10 @@ $(EXES): $(OBJ) $(LIBF) $(EXES).o
 
 #----------------------------------------------------------------------------
 
-clean: cleanobj cleanlinks cleanexe
+clean: cleanobj cleanlinks cleanexe cleanvar
+
+cleanvar:
+	-rm -f *.tmp *.bak
 
 cleanobj:
 	-rm -f *.o
@@ -94,6 +101,11 @@ cleanall: clean
 
 #----------------------------------------------------------------------------
 
+depend:
+	@-$(MAKEDEPEND) -moddir=$(MODDIR) *.f90
+
+#----------------------------------------------------------------------------
+
 %.o:%.f
 	${F77} $(FFLAGS) $(INCLUDE) -c $< -o $@
 
@@ -104,4 +116,19 @@ cleanall: clean
 	${CC} $(CFLAGS) $(INCLUDE) -c $< -o $@
 
 #----------------------------------------------------------------------------
+
+# DO NOT DELETE THIS LINE -- make depend depends on it.
+
+../../../lib/mod/basutil.mod: basutil.o
+basutil.o: ../../../lib/mod/basin.mod ../../../lib/mod/clo.mod \
+		../../../lib/mod/mod_depth.mod 
+basutil_fastfind.o: ../../../lib/mod/basin.mod \
+		../../../lib/mod/mod_fast_find.mod \
+		../../../lib/mod/mod_quad_tree.mod 
+basutil_layers.o: ../../../lib/mod/basin.mod \
+		../../../lib/mod/evgeom.mod \
+		../../../lib/mod/levels.mod \
+		../../../lib/mod/mod_depth.mod 
+msh.o: ../../../lib/mod/grd.mod \
+		../../../lib/mod/mod_geom_dynamic.mod 
 

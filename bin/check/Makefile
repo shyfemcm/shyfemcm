@@ -41,12 +41,12 @@ save:
 clean:
 	-rm -f *.o *.out *.ext
 	-rm -f ggg hhh
-	-rm -f test.*
+	-rm -f test*.[cf]
 	-rm -f *.bak *.tmp
 	-rm -f *~
-	cd parallel; make clean
-	cd copyright; make clean
-	cd netcdf; make clean
+	@#cd parallel; make clean
+	@#cd copyright; make clean
+	@#cd netcdf; make clean
 
 cleanall: clean
 

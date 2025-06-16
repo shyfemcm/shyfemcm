@@ -104,6 +104,8 @@
 ! 30.05.2022	ggu	more changes for mpi
 ! 18.05.2023	ggu	in flx_write() call flx_collect_3d()
 ! 22.05.2023	ggu	need fluxes_r for write
+! 23.10.2024    ggu     module definition taken out to mod_flux.f90
+! 10.12.2024    ggu     only reduce one time, then write
 !
 ! notes :
 !
@@ -173,52 +175,9 @@
 !******************************************************************
 !******************************************************************
 
-!==================================================================
-        module flux
-!==================================================================
-
-        implicit none
-
-	integer, save :: nl_flux = 0
-	integer, save :: ns_flux = 0
-
-        logical, save :: bflxinit = .false.
-        logical, save :: bflxalloc = .false.
-        integer, save :: nsect = -1
-        integer, save :: kfluxm = 0
-        integer, save, allocatable :: kflux(:)
-        integer, save, allocatable :: kflux_ext(:)
-        integer, save, allocatable :: iflux(:,:)
-        integer, save, allocatable :: itable(:,:)
-        character*80, save, allocatable :: chflx(:)
-        double precision, save :: da_out(4) = 0.
-
-        integer, save :: nlmax
-        integer, save, allocatable :: nlayers(:)
-        integer, save, allocatable :: nlayers_global(:)
-
-        double precision, save, allocatable :: fluxes(:,:,:)
-        double precision, save, allocatable :: flux0d(:)
-
-        double precision, save, allocatable :: masst(:,:,:)
-        double precision, save, allocatable :: saltt(:,:,:)
-        double precision, save, allocatable :: tempt(:,:,:)
-        double precision, save, allocatable :: conzt(:,:,:)
-        double precision, save, allocatable :: ssctt(:,:,:)
-
-        real, save, allocatable :: fluxes_r(:,:,:)
-
-!==================================================================
-        contains
-!==================================================================
-
-!==================================================================
-        end module flux
-!==================================================================
-
         subroutine flx_read_section(n,ns)
 
-        use flux
+        use mod_flux
         use nls
 
         integer n,ns
@@ -248,9 +207,9 @@
 
 !******************************************************************
 
-        subroutine flx_alloc_arrays(nl,ns)
+        subroutine flx_alloc_arrays0(nl,ns)
 
-	use flux
+	use mod_flux
 
 	implicit none
 
@@ -270,7 +229,6 @@
 
 	if( ns_flux > 0 ) then
           deallocate(nlayers)
-          deallocate(nlayers_global)
           deallocate(fluxes)
           deallocate(fluxes_r)
           deallocate(flux0d)
@@ -287,7 +245,6 @@
 	if( ns == 0 ) return
 
         allocate(nlayers(ns))
-        allocate(nlayers_global(ns))
         allocate(fluxes(0:nl,3,ns))
         allocate(fluxes_r(0:nl,3,ns))
         allocate(flux0d(ns))
@@ -343,7 +300,7 @@
 
         subroutine rdflxa
 
-	use flux
+	use mod_flux
 
         implicit none
 
@@ -366,7 +323,7 @@
 
 ! converts external to internal nodes
 
-	use flux
+	use mod_flux
 
         implicit none
 
@@ -382,7 +339,7 @@
 
 	subroutine prflxa
 
-	use flux
+	use mod_flux
 
 	implicit none
 
@@ -417,7 +374,7 @@
 
 	subroutine tsflxa
 
-	use flux
+	use mod_flux
 
 	implicit none
 
@@ -438,7 +395,7 @@
 
 	subroutine get_barotropic_flux(is,flux0)
 
-	use flux
+	use mod_flux
 
 	implicit none
 
@@ -465,12 +422,16 @@
 	use mod_ts
 	use mod_sediment, only : tcn
 	use levels, only : nlvdi,nlv
-	use flux
+	use mod_flux
+	use shympi
+	use mod_trace_point
 
 	implicit none
 
 	integer j,i,l,lmax,ivar,nvers,nsaux
-	integer idtflx,ierr,iv,is
+	integer idtflx,ierr,iv,is,n,ns
+	integer ip,ipstart,ipend,np
+	integer nl,nlg
 	integer nbflx
 	integer iunit6
 	real az,azpar,dt
@@ -479,7 +440,13 @@
 	integer ifemop,ipext
 	real getpar
 	double precision dgetpar
-	logical has_output_d,next_output_d,is_over_output_d
+	logical has_output_d,next_output_d,is_over_output_d,is_last_output_d
+
+        double precision, allocatable, save :: array(:)
+        double precision, allocatable, save :: flux_global(:,:,:)
+        double precision, allocatable, save :: fluxes_global(:,:)
+        integer, allocatable, save :: ivinfo(:,:)
+        integer, allocatable, save :: nlayersg(:)
 
         double precision, save :: trm,trs,trt,trc,trsc
 	logical, save :: btemp,bsalt,bconz,bsedi
@@ -497,6 +464,7 @@
 !-----------------------------------------------------------------
 
         if( icall .eq. 0 ) then
+		call trace_point('initializing flux')
 
 		icall = 1
 
@@ -523,10 +491,15 @@
 		bflxinit = .true.
 
        		call flx_alloc_arrays(nlvdi,nsect)
-	!write(6,*) 'ggguuu1:'	!GGUFLUX
-	!write(6,*) nlvdi,nsect,kfluxm
 		call flux_initialize(kfluxm,kflux,iflux,nsect,nlayers,nlmax)
-	!write(6,*) nlmax,nlayers
+
+		nlayers_global = nlayers
+		call shympi_array_reduce('max',nlayers_global)
+		if( any(nlayers_global /= nlayers) ) then
+		  write(6,'(10i5)') nlmax,nlayers
+		  write(6,'(10i5)') nlmax,nlayers_global
+		  stop 'error stop wrflxa: nlayers_global /= nlayers'
+		end if
 
 		call fluxes_init_d(nlvdi,nsect,nlayers,trm,masst)
 		if( bsalt ) then
@@ -543,6 +516,15 @@
 		end if
 
 		call flx_file_open(nvar)
+
+		allocate(ivinfo(3,nvar))
+		allocate(array((nlv_global+1)*3*ns_flux*nvar))
+		allocate(flux_global(0:nlv_global,3*ns_flux,nvar))
+		allocate(fluxes_global(0:nlv_global,3*ns_flux))
+		ivinfo = 0
+		array = 0.
+		flux_global = 0.
+		fluxes_global = 0.
 
 !               here we could also compute and write section in m**2
 
@@ -596,6 +578,8 @@
 
         if( .not. next_output_d(da_out) ) return
 
+	call trace_point('writing flux')
+
         nbflx = nint(da_out(4))
         call get_absolute_act_time(atime)
 
@@ -604,38 +588,82 @@
 !	-------------------------------------------------------
 
 	ierr = 0
+	ip = 0
+	iv = 0
+	nl = nl_flux
+	nlg = nlv_global
+	ns = ns_flux
+	n = 3 * ns_flux
 
 	ivar = 0
-	iv = 1
+	iv = iv + 1
+	ipstart = ip
 	call fluxes_aver_d(nlvdi,nsect,nlayers,trm,masst,fluxes)
-	call flx_write(atime,ivar,fluxes)
+        call add_to_flx_array(ip,nl,nlg,ns,fluxes,array)
+	ivinfo(:,iv) = (/ivar,ipstart,ip/)
+	!call flx_collect_3d(nl,n,fluxes,flux_global(:,:,iv))
 
 	if( bsalt ) then
 	  ivar = 11
 	  iv = iv + 1
+	  ipstart = ip
 	  call fluxes_aver_d(nlvdi,nsect,nlayers,trs,saltt,fluxes)
-	  call flx_write(atime,ivar,fluxes)
+          call add_to_flx_array(ip,nl,nlg,ns,fluxes,array)
+	  ivinfo(:,iv) = (/ivar,ipstart,ip/)
+	  !call flx_collect_3d(nl,n,fluxes,flux_global(:,:,iv))
 	end if
 	if( btemp ) then
 	  ivar = 12
 	  iv = iv + 1
+	  ipstart = ip
 	  call fluxes_aver_d(nlvdi,nsect,nlayers,trt,tempt,fluxes)
-	  call flx_write(atime,ivar,fluxes)
+          call add_to_flx_array(ip,nl,nlg,ns,fluxes,array)
+	  ivinfo(:,iv) = (/ivar,ipstart,ip/)
+	  !call flx_collect_3d(nl,n,fluxes,flux_global(:,:,iv))
 	end if
 	if( bconz ) then
 	  ivar = 10
 	  iv = iv + 1
+	  ipstart = ip
 	  call fluxes_aver_d(nlvdi,nsect,nlayers,trc,conzt,fluxes)
-	  call flx_write(atime,ivar,fluxes)
+          call add_to_flx_array(ip,nl,nlg,ns,fluxes,array)
+	  ivinfo(:,iv) = (/ivar,ipstart,ip/)
+	  !call flx_collect_3d(nl,n,fluxes,flux_global(:,:,iv))
 	end if
 	if( bsedi ) then
 	  ivar = 800
 	  iv = iv + 1
+	  ipstart = ip
 	  call fluxes_aver_d(nlvdi,nsect,nlayers,trsc,ssctt,fluxes)
-	  call flx_write(atime,ivar,fluxes)
+          call add_to_flx_array(ip,nl,nlg,ns,fluxes,array)
+	  ivinfo(:,iv) = (/ivar,ipstart,ip/)
+	  !call flx_collect_3d(nl,n,fluxes,flux_global(:,:,iv))
 	end if
 
 	if( iv /= nvar ) goto 91
+
+!	-------------------------------------------------------
+!	global reduce and write
+!	-------------------------------------------------------
+
+        call shympi_operate_all(.false.)
+        call shympi_array_reduce('sum',array(1:ip))
+        call shympi_operate_all(.true.)
+
+	if( bmpi_master ) then
+	do iv=1,nvar
+	  !write(6,*) 'writing fluxes for iv,nvar: ',iv,nvar
+	  ivar = ivinfo(1,iv)
+	  ipstart = ivinfo(2,iv)
+	  ipend = ivinfo(3,iv)
+	  np = ipend-ipstart
+	  n = 3 * ns_flux
+          call flx_array_to_vals(np,array(ipstart+1:ipend) &
+     &			,nlg,n,fluxes_global)
+	  !if( any( fluxes_global /= flux_global(:,:,iv) ) ) goto 92
+	  call flx_write_global(atime,ivar,fluxes_global(:,:))
+	end do
+	end if
 
 !	-------------------------------------------------------
 !	reset variables
@@ -658,6 +686,10 @@
 	  call fluxes_init_d(nlvdi,nsect,nlayers,trsc,ssctt)
 	end if
 
+        if( is_last_output_d(da_out) ) then
+	  call flux_file_close(da_out)
+	end if
+
 !-----------------------------------------------------------------
 ! end of routine
 !-----------------------------------------------------------------
@@ -667,6 +699,17 @@
         write(6,*) 'iv,nvar: ',iv,nvar
         write(6,*) 'iv is different from nvar'
         stop 'error stop wrflxa: internal error (1)'
+   92   continue
+        write(6,*) 'arrays are different'
+	write(6,*) 'nvar,iv: ',nvar,iv
+	write(6,*) 'ns_flux: ',ns_flux
+	write(6,*) 'ivinfo: ',ivinfo(:,iv)
+	do n=1,ns_flux*3
+	  do l=0,nlv_global
+	    write(6,*) l,n,fluxes_global(l,n),flux_global(l,n,iv)
+	  end do
+	end do
+        stop 'error stop wrflxa: arrays are different'
    99   continue
         write(6,*) 'Error opening FLX file :'
         stop 'error stop wrflxa: opening flx file'
@@ -699,7 +742,7 @@
 !
 	use levels, only : nlvdi,nlv
 	use basin, only : nkn
-	use flux
+	use mod_flux
 	use simul
 
 	implicit none
@@ -865,7 +908,7 @@
 
 	subroutine flx_file_open(nvar)
 
-	use flux
+	use mod_flux
 
 	implicit none
 
@@ -880,7 +923,7 @@
 
 	subroutine flx_write(atime,ivar,flux_local)
 
-	use flux
+	use mod_flux
 	use shympi
 
 	implicit none
@@ -905,6 +948,87 @@
 	end
 
 !******************************************************************
+
+	subroutine flx_write_global(atime,ivar,flux_global)
+
+	use mod_flux
+	use shympi
+
+	implicit none
+
+	double precision atime
+	integer ivar
+	double precision flux_global(0:nlv_global,3,ns_flux)
+
+	integer nbflx,nl,ng,ns,n
+
+	nbflx = da_out(4)
+	nl = nl_flux
+	ng = nlv_global
+	ns = ns_flux
+	n = 3*ns
+
+        call flux_write(nbflx,atime,ivar,ng,ns &
+     &                          ,nlayers,flux_global)
+
+	end
+
 !******************************************************************
+!******************************************************************
+!******************************************************************
+
+        subroutine add_to_flx_array(ip,nl,nlg,ns,val,array)
+
+        use basin
+
+        implicit none
+
+        integer ip
+        integer k
+        integer nl,nlg,ns
+        double precision val(0:nl,3,ns)
+        double precision array(*)
+
+	integer ntot,nend
+	integer n,m
+
+	ntot = (nlg+1)*3*ns
+	nend = ip + ntot
+        array(ip+1:ip+ntot) = 0.
+
+	do n=1,ns
+	  do m=1,3
+            array(ip+1:ip+nl+1) = val(0:nl,m,n)
+            ip = ip + nlg + 1
+	  end do
+	end do
+
+	if( nend /= ip ) stop 'error stop add_to_flx_array: internal error'
+
+        end
+
+!******************************************************************
+
+        subroutine flx_array_to_vals(np,array,nlg,n,vals)
+
+        implicit none
+
+        integer np
+        double precision array(np)
+        integer nlg,n
+        double precision vals(0:nlg,n)
+
+        integer ip,j,k,i
+
+        ip = 0
+	do i=1,n
+          vals(0:nlg,i) = array(ip+1:ip+nlg+1)
+          ip = ip + nlg + 1
+        end do
+
+	if( ip /= np ) stop 'error stop flx_array_to_vals: internal'
+
+        end
+
 !******************************************************************
 

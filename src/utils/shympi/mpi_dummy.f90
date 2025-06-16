@@ -59,6 +59,10 @@
 ! 27.03.2023    ggu     new shympi_l2g_array_fix_i, shympi_gather_array_fix_i
 ! 03.05.2023    ggu     new routine shympi_bdebug()
 ! 09.06.2023    ggu     new routine error_stop()
+! 07.03.2024    ggu     double routines for shympi_l2g_array_fix_d/2d_d
+! 12.03.2024    ggu     double routines for shympi_g2l_array_fix_ird/2d_d
+! 13.12.2024    ggu     error_stop() implemented
+! 06.02.2025    ggu     new routines shympi_exchange_fix_node/elem()
 !
 !******************************************************************
 
@@ -75,44 +79,50 @@
 
 	public
 
-	logical, save :: bmpi = .false.
+	logical, parameter :: blocal_shympi_debug = .false. !write debug
 	logical, save :: bmpi_debug = .false.
+	logical, save :: bmpi_debug_txt = .false.       !writes mpi_debug_*.txt
+        logical, save :: bmpi_unit = .false.            !write debug to my_unit
+
+        logical, save :: bmpi_skip = .false.
+        logical, save :: bextra_exchange = .false.
+
+	integer, save :: ierr_code = 33
+
+!       ---------------------------------
+!       next variables are set internally
+!       ---------------------------------
+
+	logical, save :: bmpi = .false.
 	logical, save :: bmpi_master = .true.
 	logical, save :: bmpi_support = .false.
-        logical, save :: bmpi_unit = .false.            !write debug to my_unit
-        logical, save :: bmpi_allgather = .true.        !do allgather
+	logical, save :: bmpi_alloper = .true.
 
-	logical, parameter :: blocal_shympi_debug = .false. !write debug
+	integer, save :: n_threads = 1
+	integer, save :: my_id = 0
+	integer, save :: my_unit = 0
 
-	integer,save :: n_threads = 1
-	integer,save :: my_id = 0
-	integer,save :: my_unit = 0
+        integer, save :: status_size = 0
 
-        integer,save :: status_size = 0
+        integer, save :: ngr_global = 0		!ngr of total basin
+        integer, save :: nlv_global = 0		!nlv of total basin
 
-        integer,save :: ngr_global = 0		!ngr of total basin
-        integer,save :: nlv_global = 0		!nlv of total basin
+        integer, save :: nlv_local = 0		!nlv of this partition
 
-        integer,save :: nlv_local = 0		!nlv of this partition
+	integer, save :: nkn_global = 0		!total basin
+	integer, save :: nel_global = 0
+	integer, save :: nkn_local = 0		!this domain
+	integer, save :: nel_local = 0
+	integer, save :: nkn_unique = 0		!this domain unique
+	integer, save :: nel_unique = 0
+	integer, save :: nkn_inner = 0		!only proper, no ghost
+	integer, save :: nel_inner = 0
 
-	integer,save :: nkn_global = 0		!total basin
-	integer,save :: nel_global = 0
-	integer,save :: nkn_local = 0		!this domain
-	integer,save :: nel_local = 0
-	integer,save :: nkn_unique = 0		!this domain unique
-	integer,save :: nel_unique = 0
-	integer,save :: nkn_inner = 0		!only proper, no ghost
-	integer,save :: nel_inner = 0
+        integer, save :: nk_max = 0              !max of nkn of all domains
+        integer, save :: ne_max = 0              !max of nel of all domains
+        integer, save :: nn_max = 0              !max of nkn/nel of all domains
 
-        integer,save :: nk_max = 0              !max of nkn of all domains
-        integer,save :: ne_max = 0              !max of nel of all domains
-        integer,save :: nn_max = 0              !max of nkn/nel of all domains
-
-	integer,save :: n_ghost_areas = 0
-	integer,save :: n_ghost_nodes_max = 0
-	integer,save :: n_ghost_elems_max = 0
-	integer,save :: n_ghost_max = 0
-	integer,save :: n_buffer = 0
+! total number of nodes/elems in domains
 
         integer,save,pointer :: n_domains(:)
         integer,save,target,allocatable :: nkn_domains(:)	!local total
@@ -123,14 +133,29 @@
         integer,save,allocatable :: nel_cum_domains(:)
         integer,save,allocatable :: nlv_domains(:)
 
+! information on ghost areas (nodes and elements)
+
+	integer, save :: n_ghost_areas = 0
+	integer, save :: n_ghost_nodes_max = 0
+	integer, save :: n_ghost_elems_max = 0
+	integer, save :: n_ghost_max = 0
+	integer, save :: n_ghost_max_global = 0
+	integer, save :: n_buffer = 0
+
+! arrays for ghost nodes/elems
+
 	integer,save,allocatable :: ghost_areas(:,:)
 	integer,save,allocatable :: ghost_nodes_in(:,:)
 	integer,save,allocatable :: ghost_nodes_out(:,:)
 	integer,save,allocatable :: ghost_elems_in(:,:)
 	integer,save,allocatable :: ghost_elems_out(:,:)
 
+! id of nodes and elems
+
 	integer,save,allocatable :: id_node(:)		!domain (id) of node
 	integer,save,allocatable :: id_elem(:,:)	!domain (id) of elem
+
+        ! sorted node/elem numbering as in total domain
 
         integer,save,allocatable :: ip_sort_node(:)     !sorted external nodes
         integer,save,allocatable :: ip_sort_elem(:)     !sorted external elems
@@ -151,8 +176,16 @@
         integer,save,target,allocatable :: ip_int_nodes(:,:) !global int nums
         integer,save,target,allocatable :: ip_int_elems(:,:)
 
+        ! nen3v and hlv index of global domain
+
         integer,save,allocatable :: nen3v_global(:,:)	!global element index
 	real,save,allocatable :: hlv_global(:)		!global layer depths
+
+        ! quality index of partition
+
+        real, save :: pquality = 0.
+
+        ! communication structures
 
         type communication_info
           integer, public :: numberID
@@ -180,6 +213,14 @@
 !-------------------------------------------------------
 !       exchange ghost node and element information
 !-------------------------------------------------------
+
+        INTERFACE shympi_exchange_fix_node
+        MODULE PROCEDURE  shympi_exchange_fix_node_i
+        END INTERFACE
+
+        INTERFACE shympi_exchange_fix_elem
+        MODULE PROCEDURE  shympi_exchange_fix_elem_i
+        END INTERFACE
 
         INTERFACE shympi_exchange_3d_node
         MODULE PROCEDURE  shympi_exchange_3d_node_r &
@@ -324,11 +365,6 @@
 !       general and special reduce routines
 !-------------------------------------------------------
 
-        INTERFACE shympi_reduce
-        MODULE PROCEDURE shympi_reduce_r
-!     +                   ,shympi_reduce_i
-        END INTERFACE
-
         INTERFACE shympi_min
         MODULE PROCEDURE   shympi_min_r  & 
      &			  ,shympi_min_i            &
@@ -356,34 +392,43 @@
       &			  ,shympi_sum_0_d    
         END INTERFACE
 
-!-------------------------------------------------------
-!       exchanges array to get one global array
-!-------------------------------------------------------
-
-        INTERFACE shympi_exchange_array                 !old name - do not use
-        MODULE PROCEDURE   shympi_l2g_array_2d_r &
-     &                    ,shympi_l2g_array_2d_i &
-     &                    ,shympi_l2g_array_3d_r &
-     &                    ,shympi_l2g_array_3d_i &
-     &                    ,shympi_l2g_array_3d_d
+        INTERFACE shympi_array_reduce
+        MODULE PROCEDURE   shympi_array_reduce_i &
+     &                    ,shympi_array_reduce_r &
+     &                    ,shympi_array_reduce_d
         END INTERFACE
+
+        INTERFACE shympi_reduce
+        MODULE PROCEDURE shympi_reduce_r
+!     +                   ,shympi_reduce_i
+        END INTERFACE
+
+!-------------------------------------------------------
+!       copies local to global arrays and viceversa
+!-------------------------------------------------------
 
         INTERFACE shympi_l2g_array
         MODULE PROCEDURE   shympi_l2g_array_2d_r &
      &                    ,shympi_l2g_array_2d_i &
+     &                    ,shympi_l2g_array_2d_d &
      &                    ,shympi_l2g_array_3d_r &
      &                    ,shympi_l2g_array_3d_i &
      &                    ,shympi_l2g_array_3d_d &
      &                    ,shympi_l2g_array_fix_i &
-     &                    ,shympi_l2g_array_fix_r
+     &                    ,shympi_l2g_array_fix_r &
+     &                    ,shympi_l2g_array_fix_d
         END INTERFACE
 
         INTERFACE shympi_g2l_array
         MODULE PROCEDURE   shympi_g2l_array_2d_r &
      &                    ,shympi_g2l_array_2d_i &
+     &                    ,shympi_g2l_array_2d_d &
      &                    ,shympi_g2l_array_3d_r &
      &                    ,shympi_g2l_array_3d_i &
-     &                    ,shympi_g2l_array_3d_d
+     &                    ,shympi_g2l_array_3d_d &
+     &                    ,shympi_g2l_array_fix_i &
+     &                    ,shympi_g2l_array_fix_r &
+     &                    ,shympi_g2l_array_fix_d
         END INTERFACE
 
 !-------------------------------------------------------
@@ -435,7 +480,8 @@
         INTERFACE error_stop
         MODULE PROCEDURE  error_stop_2 &
      &                  , error_stop_1 &
-     &                  , error_stop_0
+     &                  , error_stop_0 &
+     &                  , error_stop_i0
         END INTERFACE
 
 !-------------------------------------------------------
@@ -449,11 +495,12 @@
         contains
 !==================================================================
 
-	subroutine shympi_init(b_want_mpi)
+	subroutine shympi_init(b_want_mpi, b_want_mpi_init)
 
 	use basin
 
 	logical b_want_mpi
+        logical, optional :: b_want_mpi_init
 
 	logical bstop
 	integer ierr,size
@@ -581,8 +628,6 @@
 
 	integer nk,ne
 
-	!write(6,*) 'shympi_alloc_id: ',nk,ne
-
 	allocate(id_node(nk))
 	allocate(id_elem(0:3,ne))
 
@@ -602,13 +647,8 @@
 	if( allocated(ip_sort_node) ) deallocate(ip_sort_node)
 	if( allocated(ip_sort_elem) ) deallocate(ip_sort_elem)
 
-!	write(6,*) 'allocating sort arrays: ',nk,ne
-
         allocate(ip_sort_node(nk))
         allocate(ip_sort_elem(ne))
-
-!	write(6,*) 'allocated sort arrays: '
-!     +			,size(ip_sort_node),size(ip_sort_elem)
 
         ip_sort_node = 0
         ip_sort_elem = 0
@@ -659,6 +699,12 @@
 	use basin
 
 	integer n
+
+        if( allocated(ghost_areas) ) then
+          deallocate(ghost_areas)
+          deallocate(ghost_nodes_out,ghost_nodes_in)
+          deallocate(ghost_elems_out,ghost_elems_in)
+        end if
 
 	allocate(ghost_areas(5,n_ghost_areas))
         allocate(ghost_nodes_out(n,n_ghost_areas))
@@ -966,6 +1012,32 @@
 !******************************************************************
 !******************************************************************
 
+	subroutine shympi_exchange_fix_node_i(nfix,val)
+
+	use basin
+
+	integer nfix
+	integer val(:,:)
+	logical, parameter :: belem = .false.
+
+	end subroutine shympi_exchange_fix_node_i
+
+!*******************************
+
+	subroutine shympi_exchange_fix_elem_i(nfix,val)
+
+	use basin
+
+	integer nfix
+	integer val(:,:)
+	logical, parameter :: belem = .true.
+
+	end subroutine shympi_exchange_fix_elem_i
+
+!******************************************************************
+!******************************************************************
+!******************************************************************
+
 	subroutine shympi_exchange_3d_node_i(val)
 
 	use basin
@@ -1241,6 +1313,14 @@
 !******************************************************************
 !******************************************************************
 
+        subroutine shympi_operate_all(balloper)
+
+        logical balloper
+
+        end subroutine shympi_operate_all
+
+!******************************************************************
+
 	subroutine shympi_gather_scalar_i(val,vals)
 
 	integer val
@@ -1269,12 +1349,6 @@
         real vals(size(val),n_threads)
 
 	integer ni,no
-
-	!normally this error goes away by recompiling everything
-	!ni = size(val)
-	!no = size(vals,1)
-	!write(6,*) 'shympi_gather_array_2d_r: ',ni,no,n_threads
-	!flush(6)
 
 	vals(:,1) = val(:)
 
@@ -1484,27 +1558,6 @@
 
         end subroutine shympi_find_node
 
-!*******************************
-
-	subroutine shympi_reduce_r(what,vals,val)
-
-	character*(*) what
-	real vals(:)
-	real val
-
-	if( what == 'min' ) then
-	  val = MINVAL(vals)
-	else if( what == 'max' ) then
-	  val = MAXVAL(vals)
-	else if( what == 'sum' ) then
-	  val = SUM(vals)
-	else
-	  write(6,*) 'what = ',what
-	  stop 'error stop shympi_reduce_r: not ready'
-	end if
-
-	end subroutine shympi_reduce_r
-
 !******************************************************************
 !******************************************************************
 !******************************************************************
@@ -1574,6 +1627,39 @@
 
 !*******************************
 
+        subroutine shympi_l2g_array_2d_r(vals,val_out)
+
+        real vals(:)
+        real val_out(:)
+
+	val_out = vals
+
+        end subroutine shympi_l2g_array_2d_r
+
+!*******************************
+
+        subroutine shympi_l2g_array_2d_i(vals,val_out)
+
+        integer vals(:)
+        integer val_out(:)
+
+	val_out = vals
+
+        end subroutine shympi_l2g_array_2d_i
+
+!*******************************
+
+        subroutine shympi_l2g_array_2d_d(vals,val_out)
+
+        double precision vals(:)
+        double precision val_out(:)
+
+	val_out = vals
+
+        end subroutine shympi_l2g_array_2d_d
+
+!*******************************
+
         subroutine shympi_l2g_array_fix_i(nfix,vals,val_out)
 
 	integer nfix
@@ -1598,25 +1684,15 @@
 
 !*******************************
 
-        subroutine shympi_l2g_array_2d_r(vals,val_out)
+        subroutine shympi_l2g_array_fix_d(nfix,vals,val_out)
 
-        real vals(:)
-        real val_out(:)
-
-	val_out = vals
-
-        end subroutine shympi_l2g_array_2d_r
-
-!*******************************
-
-        subroutine shympi_l2g_array_2d_i(vals,val_out)
-
-        integer vals(:)
-        integer val_out(:)
+	integer nfix
+        double precision vals(:,:)
+        double precision val_out(:,:)
 
 	val_out = vals
 
-        end subroutine shympi_l2g_array_2d_i
+        end subroutine shympi_l2g_array_fix_d
 
 !******************************************************************
 !******************************************************************
@@ -1641,6 +1717,17 @@
         val_l = val_g
 
         end subroutine shympi_g2l_array_2d_i
+
+!*******************************
+
+        subroutine shympi_g2l_array_2d_d(val_g,val_l)
+
+        double precision val_g(:)
+        double precision val_l(:)
+
+        val_l = val_g
+
+        end subroutine shympi_g2l_array_2d_d
 
 !*******************************
 
@@ -1674,6 +1761,42 @@
         val_l = val_g
 
         end subroutine shympi_g2l_array_3d_d
+
+!*******************************
+
+        subroutine shympi_g2l_array_fix_i(nfix,val_g,val_l)
+
+	integer nfix 
+        integer val_g(:,:)
+        integer val_l(:,:)
+
+        val_l = val_g
+
+        end subroutine shympi_g2l_array_fix_i
+
+!*******************************
+
+        subroutine shympi_g2l_array_fix_r(nfix,val_g,val_l)
+
+	integer nfix 
+        real val_g(:,:)
+        real val_l(:,:)
+
+        val_l = val_g
+
+        end subroutine shympi_g2l_array_fix_r
+
+!*******************************
+
+        subroutine shympi_g2l_array_fix_d(nfix,val_g,val_l)
+
+	integer nfix 
+        double precision val_g(:,:)
+        double precision val_l(:,:)
+
+        val_l = val_g
+
+        end subroutine shympi_g2l_array_fix_d
 
 !******************************************************************
 !******************************************************************
@@ -1944,6 +2067,44 @@
 	end function shympi_sum_0_i
 
 !******************************************************************
+
+        subroutine shympi_array_reduce_i(what,vals)
+        character*(*) what
+        integer vals(:)
+        end subroutine shympi_array_reduce_i
+
+        subroutine shympi_array_reduce_r(what,vals)
+        character*(*) what
+        real vals(:)
+        end subroutine shympi_array_reduce_r
+
+        subroutine shympi_array_reduce_d(what,vals)
+        character*(*) what
+        double precision vals(:)
+        end subroutine shympi_array_reduce_d
+
+!******************************************************************
+
+	subroutine shympi_reduce_r(what,vals,val)
+
+	character*(*) what
+	real vals(:)
+	real val
+
+	if( what == 'min' ) then
+	  val = MINVAL(vals)
+	else if( what == 'max' ) then
+	  val = MAXVAL(vals)
+	else if( what == 'sum' ) then
+	  val = SUM(vals)
+	else
+	  write(6,*) 'what = ',what
+	  stop 'error stop shympi_reduce_r: not ready'
+	end if
+
+	end subroutine shympi_reduce_r
+
+!******************************************************************
 !******************************************************************
 !******************************************************************
 
@@ -2207,6 +2368,8 @@
         end subroutine shympi_bdebug
 
 !******************************************************************
+!******************************************************************
+!******************************************************************
 
         subroutine error_stop_2(routine,text)
 
@@ -2214,7 +2377,7 @@
 
         character*(*) routine,text
 
-        write(6,*) 'error stop ',routine,': ',text
+        write(6,*) 'error stop '//trim(routine)//': ',trim(text)
         flush(6)
         call shympi_abort
 
@@ -2228,7 +2391,7 @@
 
         character*(*) text
 
-        write(6,*) 'error stop: ',text
+        write(6,*) 'error stop: ',trim(text)
         flush(6)
         call shympi_abort
 
@@ -2245,6 +2408,32 @@
         call shympi_abort
 
         end subroutine error_stop_0
+
+!******************************************************************
+
+        subroutine error_stop_i0(ierr)
+
+        implicit none
+
+	integer ierr
+
+        write(6,*) 'error stop'
+        flush(6)
+	ierr_code = ierr
+        call shympi_abort
+
+        end subroutine error_stop_i0
+
+!******************************************************************
+
+        subroutine success
+
+        implicit none
+
+	ierr_code = 0
+        call shympi_abort
+
+        end subroutine success
 
 !==================================================================
         end module shympi
@@ -2356,75 +2545,75 @@
 !******************************************************************
 !******************************************************************
 
-        subroutine shympi_reduce_r_internal(what,val)
-        implicit none
-        character*(*) what
-        real val
-        end subroutine shympi_reduce_r_internal
+        !subroutine shympi_reduce_r_internal(what,val)
+        !implicit none
+        !character*(*) what
+        !real val
+        !end subroutine shympi_reduce_r_internal
 
 !******************************************************************
 
-        subroutine shympi_reduce_i_internal(what,val)
-        implicit none
-        character*(*) what
-        integer val
-        end subroutine shympi_reduce_i_internal
-
-
-!******************************************************************
-
-        subroutine shympi_ex_3d_nodes_sum_r_internal(array)
-        implicit none
-        real array(:,:)
-        end subroutine
+        !subroutine shympi_reduce_i_internal(what,val)
+        !implicit none
+        !character*(*) what
+        !integer val
+        !end subroutine shympi_reduce_i_internal
 
 !******************************************************************
 
-        subroutine shympi_ex_3d_nodes_sum_d_internal(array)
-        implicit none
-        double precision array(:,:)
-        end subroutine
-
-!******************************************************************
-        subroutine shympi_ex_2d_nodes_sum_r_internal(array)
-        implicit none
-        real array(:)
-        end subroutine
+        !subroutine shympi_ex_3d_nodes_sum_r_internal(array)
+        !implicit none
+        !real array(:,:)
+        !end subroutine
 
 !******************************************************************
 
-        subroutine shympi_ex_2d_nodes_sum_d_internal(array)
-        implicit none
-        double precision array(:)
-        end subroutine
+        !subroutine shympi_ex_3d_nodes_sum_d_internal(array)
+        !implicit none
+        !double precision array(:,:)
+        !end subroutine
 
 !******************************************************************
 
-        subroutine shympi_ex_2d_nodes_min_i_internal(array)
-        implicit none
-        integer array(:)
-        end subroutine
+        !subroutine shympi_ex_2d_nodes_sum_r_internal(array)
+        !implicit none
+        !real array(:)
+        !end subroutine
 
 !******************************************************************
 
-        subroutine shympi_ex_2d_nodes_min_r_internal(array)
-        implicit none
-        real array(:)
-        end subroutine
+        !subroutine shympi_ex_2d_nodes_sum_d_internal(array)
+        !implicit none
+        !double precision array(:)
+        !end subroutine
 
 !******************************************************************
 
-        subroutine shympi_ex_2d_nodes_max_i_internal(array)
-        implicit none
-        integer array(:)
-        end subroutine
+        !subroutine shympi_ex_2d_nodes_min_i_internal(array)
+        !implicit none
+        !integer array(:)
+        !end subroutine
 
 !******************************************************************
 
-        subroutine shympi_ex_2d_nodes_max_r_internal(array)
-        implicit none
-        real array(:)
-        end subroutine
+        !subroutine shympi_ex_2d_nodes_min_r_internal(array)
+        !implicit none
+        !real array(:)
+        !end subroutine
+
+!******************************************************************
+
+        !subroutine shympi_ex_2d_nodes_max_i_internal(array)
+        !implicit none
+        !integer array(:)
+        !end subroutine
+
+!******************************************************************
+
+        !subroutine shympi_ex_2d_nodes_max_r_internal(array)
+        !implicit none
+        !real array(:)
+        !end subroutine
 
 !*****************************************************************
 

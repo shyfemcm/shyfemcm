@@ -27,9 +27,12 @@ while( $_ = pop(@header) )
 {
   unless( /^.\s*$/ || /^.\**$/ || /^\s*$/ ) {
     push(@header,$_);
-    push(@header,"c\n");
+    push(@header,"!\n");
     last;
   }
 }
 
 print @header;
+
+#------------------------------------------------------------------------
+

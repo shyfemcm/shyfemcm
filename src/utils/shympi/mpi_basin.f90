@@ -39,6 +39,8 @@
 ! 20.03.2023	ggu	ghost node calls transferred to submpi_ghost.f
 ! 20.03.2023	ggu	call to write_grd_domain() at end of shympi_setup()
 ! 12.04.2023	ggu	protect from nkn == nel
+! 21.11.2024	ggu	new call to check_partition() and write_partition()
+! 23.11.2024	ggu	eliminate error stop in handle_partition()
 
 ! notes :
 !
@@ -83,6 +85,7 @@
 	integer n,nn
 	integer n_lk,n_le
 	integer nkn_tot,nel_tot
+	integer err_id
 	integer nodes(nkn)
 	integer elems(nel)
 	integer nindex(nkn)
@@ -132,11 +135,13 @@
 
 	nc = maxval(area_node)
 	if( nc+1 /= n_threads ) then
+	  err_id = my_id
 	  if( shympi_is_master() ) then
+	    write(6,*) 'domain            = ',err_id
 	    write(6,*) 'number of threads = ',n_threads
 	    write(6,*) 'number of domains = ',nc+1
 	  end if
-	  call shympi_stop('error stop: thread/domain mismatch')
+	  call shympi_stop('shympi_setup: thread/domain mismatch')
 	end if
 
 !	-----------------------------------------------------
@@ -822,7 +827,7 @@
 !	create new basin and copy
 !	----------------------------------
 
-	call basin_init(n_lk,n_le)
+	call basin_init(n_lk,n_le)  !here we re-allocate basin data structures
 
 	nen3v = nen3v_aux
 	ipev = ipev_aux
@@ -1104,6 +1109,11 @@
 	integer area_elem(nel)
 	integer ierr1,ierr2
 
+	logical, save :: bwritegrd = .true.
+	logical, save :: bdebug_grd = .false.
+	real pqual
+	character*80, save :: grdname = 'partition'
+
 	ierr1 = 0
 	ierr2 = 0
 
@@ -1122,7 +1132,9 @@
 	    write(6,*) 'we will do partitioning for domains: ',nparts
 	  end if
 	  call do_partition(nkn,nel,nen3v,nparts,area_node,area_elem)
-	  call check_partition(area_node,area_elem,ierr1,ierr2)
+	  call check_partition(area_node,area_elem,bdebug_grd,ierr1,ierr2)
+	  call write_partition_to_grd(grdname,bdebug_grd &
+     &				,nparts,area_node,area_elem)
 	  area_node = area_node - 1	!gives back 1-nparts
 	else if( nnp == nparts ) then
 	  if( shympi_is_master() ) then
@@ -1146,13 +1158,13 @@
 	  !write(6,*) nmin,nmax
 	  write(6,*) 'domains: ',nmin,nmax
 
-	  call info_partition(nparts,area_node)
+	  call info_partition(nparts,area_node,pqual)
 	end if
 
-	if( ierr1 /= 0 .or. ierr2 /= 0 ) then
-	  write(6,*) 'error in partitioning: ',ierr1,ierr2
-	  stop 'error stop handle_partition: partitioning error'
-	end if
+	!if( ierr1 /= 0 .or. ierr2 /= 0 ) then
+	!  write(6,*) 'error in partitioning: ',ierr1,ierr2
+	!  stop 'error stop handle_partition: partitioning error'
+	!end if
 
 	end
 

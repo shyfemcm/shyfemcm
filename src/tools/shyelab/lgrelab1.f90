@@ -199,7 +199,7 @@
         call shympi_set_hlv(nlv,hlv)
 
         call ev_set_verbose(.not.bquiet)
-        call ev_init(nel)
+        !call ev_init(nel)
         call set_ev
         call get_coords_ev(isphe)
         bsphe = isphe .eq. 1
@@ -594,7 +594,7 @@
 	logical, parameter		:: belem = .false.
 	integer				:: n,m,ix,iy
         character*60 string
-	integer iunit,ncid,nvers,var_id
+	integer iunit,ncid,nvers,var_id,var_dim
         integer ie,ii,k,l,lmax,np,ll
         integer ic,i,ivar,ktot
         real area_node,aage,dtot,dens,etot
@@ -783,8 +783,9 @@
         else if( outformat == 'nc' ) then
           ncid = idout
 	  do i=1,nvar
-            var_id = var_ids(i)
-            call nc_output_record(ncid,var_id,np,density(:,:,i))
+	    call nc_output_get_var_id(i,var_id)
+	    call nc_output_get_var_dim(i,var_dim)
+            call nc_output_record(ncid,var_id,var_dim,np,density(:,:,i))
 	  end do
         else if( outformat == 'off' ) then
           ! nothing to be done

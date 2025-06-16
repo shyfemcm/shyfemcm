@@ -124,7 +124,7 @@ $color speed
 	niso = 50  nisomx = 50  nctick = 6
 $end
 
-$color dir
+$color direction
         legcol = 'current direction [deg North]'
         ndccol = -1  faccol = 1.
         icolor = 1
@@ -198,7 +198,7 @@ $color air temperature
 	niso = 50  nisomx = 50  nctick = 6
 $end
 
-$color humidity
+$color rhumidity
 	legcol = 'Humidity [%]'
 	ndccol = -1  faccol = 1
 	icolor = 1
@@ -207,13 +207,24 @@ $color humidity
 	niso = 50  nisomx = 50  nctick = 6
 $end
 
-$color ivar99
+$color residence time
 	legcol = 'Residence time [days]'
 	ndccol = -1  faccol = 1.
 	icolor = 1
 	colmin = 0.2  colmax = 0.9
 	valmin = 1   valmax = 500
 	niso = 50  nisomx = 50  nctick = 5
+	ipllog = 1
+$end
+
+$color lagrangian
+	legcol = 'Particles'
+	ndccol = -1  faccol = 1.
+	icolor = 1
+	colmin = 0.2  colmax = 0.9
+	valmin = 10   valmax = 200000
+	niso = 50  nisomx = 50  nctick = 3
+	lgrcol = 0.    lgrtyp = 1
 	ipllog = 1
 $end
 

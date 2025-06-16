@@ -14,7 +14,7 @@
 
 #---------------------------------------------------------------
 FEMDIR=${SHYFEMDIR:=$HOME/shyfem}
-BINDIR=$FEMDIR/fembin
+BINDIR=$FEMDIR/bin
 #---------------------------------------------------------------
 fembat="$BINDIR/fembat"
 fembatch="$BINDIR/fembatch"
@@ -42,10 +42,11 @@ FullUsage()
   echo "  -h|-help         this help"
   echo "  -batch           run in batch mode"
   echo "  -exe executable  use executable to run model (default shyfem)"
-  echo "  -num n           run on processor n with numactl"
-  echo "  -mpi n           run MPI process with n domains"
+  echo "  -num p           run on processor p with numactl"
+  echo "  -mpi n           run MPI process with n sub-domains"
   echo "  -time time-date  run model at given time-date"
   echo ""
+  echo "   p        :  0 or 0,2 or 0-4 or 1,2,4-6"
   echo "   time     :  HH:MM, midnight, noon, 1am tomorrow"
   echo "   date     :  Dec 12, MMDDYY, MM/DD/YY, DD.MM.YY"
   echo "   relative :  now + # [minutes, hours, days, or weeks]"
@@ -190,7 +191,8 @@ fi
     tmpfil=$tmpdir/hpat/hpat.$aux.$$
     echo "cd $actdir" > $tmpfil
     if [ $mpi -ne 0 ]; then
-      cc="/usr/bin/mpirun -np $mpi $hpfile -mpi"
+      #cc="/usr/bin/mpirun -np $mpi $hpfile -mpi"
+      cc="mpirun -np $mpi $hpfile -mpi"
       command="$prefix nohup $fembat $tmpfil $cc $strfile"
     else
       command="$prefix nohup $fembat $tmpfil $hpfile $strfile"
@@ -200,7 +202,7 @@ fi
     chmod +x $tmpfil
       status=$?
       echo "executing $tmpfil   status = $status"
-    if [ $attime = "now" ]; then
+    if [ "$attime" = "now" ]; then
       $tmpfil
     else 
       $at -f $tmpfil $attime > /dev/null 2>&1

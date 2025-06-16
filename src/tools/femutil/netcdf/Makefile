@@ -13,12 +13,13 @@ DIR = ncf
 
 #--------------------------------------------------------------
 
+FEMDIR = ../../../..
 F77 = gfortran
 FFLAGS = -g
 FFLAGS = -fcheck=all -g
 FFLAGS = -g -O
 
-MAKEDEPEND = ../../bin/mkdp.pl
+MAKEDEPEND = $(FEMDIR)/bin/mkdp.pl
 
 #--------------------------------------------------------------
 # please adjust directory where to look for libnetcdff.a
@@ -55,14 +56,19 @@ LIBFS      = $(LIBF_NETCDF)
 
 #--------------------------------------------------------------
 
-OBJS = ncf_util.o subclo.o ncf_dim_coords.o subscn.o
-OBJS = ncf_util.o subclo.o
-OBJSBGC = ncf_util.o subclo.o ncf_dim_coords.o subscn.o bgc_util.o subgeo.o
-OBJSTIME = ncf_tutil.o subiso8601.o subdts.o
-OBJSBGC += $(OBJSTIME)
+# nc_dim_coords.f90 should be converted to ncf_dim_coords.f90
 
-EXES = gr gw ncinfo
-EXES = ncinfo ncbgc
+OBJS = ncf_util.o subclo.o ncf_dim_coords.o convert.o
+OBJS_BASE = ncf_util.o ncf_dim_coords.o subclo.o convert.o
+OBJS_INFO = ncf_util.o subclo.o
+OBJS_ELAB = ncf_util.o subclo.o
+OBJS_BGC = ncf_util.o ncf_dim_coords.o subclo.o convert.o bgc_util.o subgeo.o
+OBJS_GR = ncf_util.o subclo.o
+OBJS_TIME = ncf_tutil.o subiso8601.o subdts.o
+OBJS_BGC += $(OBJS_TIME)
+
+EXES = gr gw ncinfo ncelab
+EXES = ncinfo ncbgc ncelab
 
 DATA = $(HOME)/work/nc2fem/data
 
@@ -72,14 +78,17 @@ default: $(EXES)
 
 all: link $(EXES)
 
-ncinfo: $(OBJS) $(LIBFS) ncinfo.o
-	gfortran -o $@ $@.o $(OBJS) $(LIBGS)
+ncinfo: $(OBJS_INFO) $(LIBFS) ncinfo.o
+	gfortran -o $@ $@.o $(OBJS_INFO) $(LIBGS)
 
-ncbgc: $(OBJSBGC) $(LIBFS) ncbgc.o
-	gfortran -o $@ $@.o $(OBJSBGC) $(LIBGS)
+ncelab: $(OBJS_ELAB) $(LIBFS) ncelab.o
+	gfortran -o $@ $@.o $(OBJS_ELAB) $(LIBGS)
 
-gr: $(OBJS) $(LIBFS) gr.o
-	gfortran -o $@ $@.o $(OBJS) $(LIBGS)
+ncbgc: $(OBJS_BGC) $(LIBFS) ncbgc.o
+	gfortran -o $@ $@.o $(OBJS_BGC) $(LIBGS)
+
+gr: $(OBJS_GR) $(LIBFS) gr.o
+	gfortran -o $@ $@.o $(OBJS_GR) $(LIBGS)
 
 link: data
 data:
@@ -92,7 +101,7 @@ compile_test:
 	./compile_test.sh
 
 depend:
-	@$(MAKEDEPEND) *.f
+	@$(MAKEDEPEND) *.f90
 
 #--------------------------------------------------------------
 
@@ -117,7 +126,12 @@ save: clean
 
 #--------------------------------------------------------------
 
+.SUFFIXES: .f90
+
 .f.o:
+	$(F77) -c $(FFLAGS) $<
+
+.f90.o:
 	$(F77) -c $(FFLAGS) $<
 
 #--------------------------------------------------------------
@@ -130,15 +144,17 @@ clo.mod: subclo.o
 dts.mod: subdts.o
 gr.o: ncf.mod
 iso8601.mod: subiso8601.o
-mod_ncinfo.mod: ncbgc.o
+mod_ncbgc.mod: ncbgc.o
+mod_ncinfo.mod: ncelab.o
 mod_ncinfo.mod: ncinfo.o
 nc_time.mod: ncf_tutil.o
 ncbgc.o: clo.mod ncf.mod
+ncelab.o: clo.mod ncf.mod
 ncf.mod: ncf_util.o
 ncf_dim_coords.o: ncf.mod
 ncf_tutil.o: iso8601.mod ncf.mod
 ncf_util.o: netcdf.inc
 ncinfo.o: clo.mod ncf.mod
 ncnames.mod: ncf_dim_coords.o
-scan_string.mod: subscn.o
+scan_string.mod: convert.o
 

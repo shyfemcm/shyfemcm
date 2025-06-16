@@ -97,6 +97,9 @@
 ! 14.10.2022	ggu	mpi-version final (gotm, conz)
 ! 28.04.2023    ggu     update function calls for belem
 ! 02.05.2023    ggu     fix mpi bug for nlv==1
+! 26.01.2025    ggu     fix mpi bug for ibfm /= 0 (only master writes)
+! 08.03.2025    ggu     extracted mod_restart in its own file
+! 09.03.2025    ggu     call shympi_barrier after finishing restart file
 !
 ! notes :
 !
@@ -127,406 +130,21 @@
 ! 14	write vertical only for nlv > 1
 ! 15	write gotm arrays
 ! 16	adapted for mpi
+! 17	write bfm restart
+!
+!	integer, save :: id_hydro_rst = 1	!1		hydro
+!	integer, save :: id_depth_rst = 2	!10		depth
+!	integer, save :: id_barcl_rst = 3	!100		t/s/rho
+!	integer, save :: id_conz_rst  = 4	!1000		tracer
+!	integer, save :: id_wvert_rst = 5	!10000		vertical vel.
+!	integer, save :: id_eco_rst   = 6	!100000		ecology
+!	integer, save :: id_merc_rst  = 7	!1000000	mercury
+!	integer, save :: id_gotm_rst  = 8	!10000000	gotm
+!	integer, save :: id_bfm_rst   = 9	!100000000	bfm
 !
 !*********************************************************************
 
-!=====================================================================
-	module mod_restart
-!=====================================================================
-
-	implicit none
-
-	logical, save :: bok_rst = .false.	!restart file has been read
-	integer, save :: nvers_rst = 0
-	integer, save :: iflag_want_rst  = -1
-	integer, save :: iflag_avail_rst = -1
-
-	integer, save :: idfrst = 749652	!id for restart file
-
-	integer, save :: nvmax = 16		!last version of file
-	integer, parameter :: nidmax = 8
-
-	integer, save :: id_hydro_rst = 1	!1		hydro
-	integer, save :: id_depth_rst = 2	!10		depth
-	integer, save :: id_barcl_rst = 3	!100		t/s/rho
-	integer, save :: id_conz_rst  = 4	!1000		tracer
-	integer, save :: id_wvert_rst = 5	!10000		vertical vel.
-	integer, save :: id_eco_rst   = 6	!100000		ecology
-	integer, save :: id_merc_rst  = 7	!1000000	mercury
-	integer, save :: id_gotm_rst  = 8	!10000000	gotm
-
-	integer, save :: ibarcl_rst = 0
-	integer, save :: iconz_rst  = 0
-	integer, save :: iwvert_rst = 0
-	integer, save :: ieco_rst   = 0
-	integer, save :: imerc_rst  = 0
-	integer, save :: iturb_rst  = 0
-
-	character*20, save :: descript_rst(nidmax) = (/    &
-     &		 'hydrodynamics       '    &
-     &		,'depth               '    &
-     &		,'T/S/rho             '    &
-     &		,'tracer concentration'    &
-     &		,'vertical velocities '    &
-     &		,'ecological model    '    &
-     &		,'mercury model       '    &
-     &		,'gotm turb model     '    &
-     &						/)
-
-	real, save, allocatable :: hlvrst(:)
-	integer, save, allocatable :: ilhrst(:)
-	integer, save, allocatable :: ilhkrst(:)
-
-	logical, save :: bmaster = .false.
-
-        INTERFACE restart_write_value
-        MODULE PROCEDURE   restart_write_value_scalar_i  &
-     &                    ,restart_write_value_2d_i      &
-     &                    ,restart_write_value_2d_r      &
-     &                    ,restart_write_value_3d_r      &
-     &                    ,restart_write_value_3d_d      &
-     &                    ,restart_write_value_fix_r
-        END INTERFACE
-
-        INTERFACE restart_read_value
-        MODULE PROCEDURE   restart_read_value_2d_i    &
-     &                    ,restart_read_value_2d_r    &
-     &                    ,restart_read_value_3d_r    &
-     &                    ,restart_read_value_3d_d    &
-     &                    ,restart_read_value_fix_r
-        END INTERFACE
-
-!=====================================================================
-	contains
-!=====================================================================
-
-	function get_nv_global(nv_local)
-
-	use shympi
-
-	integer get_nv_global
-	integer nv_local
-
-	integer nv_global
-
-	nv_global = nlv_global
-        if( nv_local /= nlv_local ) then
-          if( nv_local == nlv_local+1 ) then
-            nv_global = nv_global + 1
-          else
-	    write(6,*) nv_local,nlv_local
-            stop 'error stop get_nv_global: nv incompatible'
-          end if
-        end if
-
-	get_nv_global = nv_global
-
-	end function
-	
-!--------------------------------
-
-	function get_nn_global(belem,nn)
-
-	use shympi
-
-	integer get_nn_global
-	logical belem
-	integer nn
-
-	integer nn_global
-
-        if( belem ) then
-	  nn_global = nel_global
-          if( nn /= nel_local ) goto 99
-        else
-	  nn_global = nkn_global
-          if( nn /= nkn_local ) goto 99
-        end if
-
-	get_nn_global = nn_global
-
-        return
-   99   continue
-        write(6,*) belem,nn,nel_local,nkn_local
-        stop 'error stop get_nn_global: internal error'
-	end function
-	
-!--------------------------------
-
-	subroutine restart_write_value_scalar_i(iu,ival)
-
-	integer iu
-	integer ival
-
-	if( bmaster ) write(iu) ival
-
-	end subroutine
-
-!--------------------------------
-
-	subroutine restart_write_value_2d_i(iu,belem,array)
-
-	use shympi
-
-	integer iu
-	logical belem
-	integer array(:)
-
-	integer nn_global,nn
-	integer, allocatable :: garray(:)
-
-	if( bmpi ) then
-	  nn = size(array)
-	  nn_global = get_nn_global(belem,nn)
-	  allocate(garray(nn_global))
-	  call shympi_l2g_array(array,garray)
-	  if( bmaster ) write(iu) garray
-	else
-	  write(iu) array
-	end if
-
-	end subroutine
-
-!--------------------------------
-
-	subroutine restart_write_value_2d_r(iu,belem,array)
-
-	use shympi
-
-	integer iu
-	logical belem
-	real array(:)
-
-	integer nn_global,nn
-	real, allocatable :: garray(:)
-
-	if( bmpi ) then
-	  nn = size(array)
-	  nn_global = get_nn_global(belem,nn)
-	  allocate(garray(nn_global))
-	  call shympi_l2g_array(array,garray)
-	  if( bmaster ) write(iu) garray
-	else
-	  write(iu) array
-	end if
-
-	end subroutine
-
-!--------------------------------
-
-	subroutine restart_write_value_3d_r(iu,belem,array)
-
-	use shympi
-
-	integer iu
-	logical belem
-	real array(:,:)
-
-	integer nn_global,nv_global,nn
-	real, allocatable :: garray(:,:)
-
-	if( bmpi ) then
-	  nn = size(array,2)
-	  nv_global = get_nv_global(size(array,1))
-	  nn_global = get_nn_global(belem,nn)
-	  allocate(garray(nv_global,nn_global))
-	  call shympi_l2g_array(array,garray)
-	  if( bmaster ) write(iu) garray
-	else
-	  write(iu) array
-	end if
-
-	end subroutine
-
-!--------------------------------
-
-	subroutine restart_write_value_3d_d(iu,belem,array)
-
-	use shympi
-
-	integer iu
-	logical belem
-	double precision array(:,:)
-
-	integer nn_global,nv_global,nn
-	double precision, allocatable :: garray(:,:)
-
-	if( bmpi ) then
-	  nn = size(array,2)
-	  nv_global = get_nv_global(size(array,1))
-	  nn_global = get_nn_global(belem,nn)
-	  allocate(garray(nv_global,nn_global))
-	  call shympi_l2g_array(array,garray)
-	  if( bmaster ) write(iu) garray
-	else
-	  write(iu) array
-	end if
-
-	end subroutine
-
-!--------------------------------
-
-	subroutine restart_write_value_fix_r(iu,belem,nfix,array)
-
-	use shympi
-
-	integer iu
-	logical belem
-	integer nfix
-	real array(:,:)
-
-	integer nn_global,nv_global,nn
-	real, allocatable :: garray(:,:)
-
-	if( bmpi ) then
-	  if( size(array,1) /= nfix ) then
-	    stop 'error stop restart_write_value_fix: nv incompatible'
-	  end if
-	  nn = size(array,2)
-	  nn_global = get_nn_global(belem,nn)
-	  allocate(garray(nfix,nn_global))
-	  call shympi_l2g_array(nfix,array,garray)
-	  if( bmaster ) write(iu) garray
-	else
-	  write(iu) array
-	end if
-
-	end subroutine
-
-!--------------------------------
-
-	subroutine restart_read_value_2d_i(iu,belem,array)
-
-	use shympi
-
-	integer iu
-	logical belem
-	integer array(:)
-
-	integer nn_global,nn
-	integer, allocatable :: garray(:)
-
-	if( bmpi ) then
-	  nn = size(array)
-	  nn_global = get_nn_global(belem,nn)
-	  allocate(garray(nn_global))
-	  read(iu) garray
-	  call shympi_g2l_array(garray,array)
-	else
-	  read(iu) array
-	end if
-
-	end subroutine
-
-!--------------------------------
-
-	subroutine restart_read_value_2d_r(iu,belem,array)
-
-	use shympi
-
-	integer iu
-	logical belem
-	real array(:)
-
-	integer nn_global,nn
-	real, allocatable :: garray(:)
-
-	if( bmpi ) then
-	  nn = size(array)
-	  nn_global = get_nn_global(belem,nn)
-	  allocate(garray(nn_global))
-	  read(iu) garray
-	  call shympi_g2l_array(garray,array)
-	else
-	  read(iu) array
-	end if
-
-	end subroutine
-
-!--------------------------------
-
-	subroutine restart_read_value_3d_r(iu,belem,array)
-
-	use shympi
-
-	integer iu
-	logical belem
-	real array(:,:)
-
-	integer nn_global,nv_global,nn
-	real, allocatable :: garray(:,:)
-
-	if( bmpi ) then
-	  nn = size(array,2)
-	  nv_global = get_nv_global(size(array,1))
-	  nn_global = get_nn_global(belem,nn)
-	  allocate(garray(nv_global,nn_global))
-	  read(iu) garray
-	  call shympi_g2l_array(garray,array)
-	else
-	  read(iu) array
-	end if
-
-	end subroutine
-
-!--------------------------------
-
-	subroutine restart_read_value_3d_d(iu,belem,array)
-
-	use shympi
-
-	integer iu
-	logical belem
-	double precision array(:,:)
-
-	integer nn_global,nv_global,nn
-	double precision, allocatable :: garray(:,:)
-
-	if( bmpi ) then
-	  nn = size(array,2)
-	  nv_global = get_nv_global(size(array,1))
-	  nn_global = get_nn_global(belem,nn)
-	  allocate(garray(nv_global,nn_global))
-	  read(iu) garray
-	  call shympi_g2l_array(garray,array)
-	else
-	  read(iu) array
-	end if
-
-	end subroutine
-
-!--------------------------------
-
-	subroutine restart_read_value_fix_r(iu,belem,nfix,array)
-
-	use shympi
-
-	integer iu
-	logical belem
-	integer nfix
-	real array(:,:)
-
-	integer nn_global,nv_global,nn
-	real, allocatable :: garray(:,:)
-
-	if( bmpi ) then
-	  if( size(array,1) /= nfix ) then
-	    stop 'error stop restart_read_value_fix: nv incompatible'
-	  end if
-	  nn = size(array,2)
-	  nn_global = get_nn_global(belem,nn)
-	  allocate(garray(nfix,nn_global))
-	  read(iu) garray
-	  call shympi_g2l_array(garray,array)
-	else
-	  read(iu) array
-	end if
-
-	end subroutine
-
-!=====================================================================
-	end module mod_restart
-!=====================================================================
+! mod_restart is defined in own file
 
 !*********************************************************************
 
@@ -562,10 +180,6 @@
 	iflag_want_rst = nint(getpar('flgrst'))
         call getfnm('restrt',name)
         if(name.eq.' ') return
-
-	!if( shympi_is_parallel() ) then
-	!  stop 'error stop rst_perform_restart: not ready for MPI'
-	!end if
 
         date = nint(dgetpar('date'))
         time = nint(dgetpar('time'))
@@ -891,10 +505,6 @@
 	    da_out(4) = iunit
 	  end if
 
-	  !if( shympi_is_parallel() ) then
-	  !  stop 'error stop rst_perform_restart: not ready for MPI'
-	  !end if
-
         end if
 
 !-----------------------------------------------------
@@ -917,7 +527,7 @@
 	  close(iunit)
 	else
 	  if( bdebug .and. bmpi_master ) then
-	    write(6,*) 'writing multiple new restart records'
+	    write(6,*) 'writing restart record'
 	  end if
 	  iunit = nint(da_out(4))
           call rst_write_record(atime,iunit)
@@ -982,6 +592,7 @@
         time = nint(dgetpar('time'))
 
 	ieco = ibio + ibfm
+	ieco = ibio
 
 	if( bmaster ) then
           write(iunit) idfrst,nvers,1
@@ -1028,17 +639,21 @@
 
 	call restart_write_value(iunit,ieco)
 	if( ieco .gt. 0 ) then
-	  if( bmpi ) write(6,*) 'eco restart not ready for mpi...'
 	  call write_restart_eco(iunit)
         end if
 
 	call restart_write_value(iunit,imerc)
 	if( imerc .gt. 0 ) then
-	  if( bmpi ) write(6,*) 'mercury restart not ready for mpi...'
 	  call write_restart_mercury(iunit)
         end if
 
-	flush(iunit)
+	call restart_write_value(iunit,ibfm)
+	if( ibfm .gt. 0 ) then
+	  call write_restart_bfm(iunit)
+        end if
+
+	if( bmaster ) flush(iunit)
+	call shympi_barrier
 
         end
 
@@ -1059,7 +674,7 @@
 	integer iuout
 	integer iunit,nvers,nrec,nkn,nel,nlv,iflag,ierr
 	double precision atime
-	integer ibarcl,iconz,iwvert,ieco,imerc,iturb
+	integer ibarcl,iconz,iwvert,ieco,imerc,iturb,ibfm
 	integer idfile
 	integer date,time,it,id
 
@@ -1209,7 +824,6 @@
 	  id = id_eco_rst
           read(iunit) ieco
           if( ieco .gt. 0 ) then
-	    if( bmpi ) write(6,*) 'eco restart not ready for mpi...'
 	    call rst_add_flag(id,iflag)
 	    call skip_restart_eco(iunit)
           end if
@@ -1219,9 +833,17 @@
 	  id = id_merc_rst
           read(iunit) imerc
           if( imerc .gt. 0 ) then
-	    if( bmpi ) write(6,*) 'mercury restart not ready for mpi...'
 	    call rst_add_flag(id,iflag)
 	    call skip_restart_mercury(iunit)
+          end if
+        end if
+
+	if( nvers .ge. 17 ) then
+	  id = id_bfm_rst
+          read(iunit) ibfm
+          if( ibfm .gt. 0 ) then
+	    call rst_add_flag(id,iflag)
+	    call skip_restart_bfm(iunit)
           end if
         end if
 
@@ -1232,11 +854,12 @@
 	ierr = -1
 	return
     3	continue
-	write(6,*) 'rst_skip: error in reading restart file'
+	write(6,*) 'rst_skip_record: error in reading restart file'
 	ierr = 1
 	return
     7	continue
-	write(6,*) 'skip_rst: error in idfrst... no restart format'
+	write(6,*) 'idfile,idfrst: ',idfile,idfrst
+	write(6,*) 'rst_skip_record: error in idfrst... no restart format'
 	ierr = 7
 	return
 	end
@@ -1270,7 +893,7 @@
         integer ii,l,ie,k,i
         integer nvers,nversaux,nrec
         integer nknaux,nelaux,nlvaux
-	integer ibarcl,iconz,iwvert,ieco,imerc,iturb
+	integer ibarcl,iconz,iwvert,ieco,imerc,iturb,ibfm
 	integer date,time
 	real, allocatable :: hlvaux(:)
 
@@ -1400,7 +1023,6 @@
 	    read(iunit) ieco
 	    ieco_rst = ieco
             if( ieco .gt. 0 ) then
-	      if( bmpi ) write(6,*) 'eco restart not ready for mpi...'
 	      call rst_add_flag(id,iflag)
 	      if( rst_want_restart(id) ) then
 	        call read_restart_eco(iunit)
@@ -1415,7 +1037,6 @@
 	    read(iunit) imerc
 	    imerc_rst = imerc
             if( imerc .gt. 0 ) then
-	      if( bmpi ) write(6,*) 'mercury restart not ready for mpi...'
 	      call rst_add_flag(id,iflag)
 	      if( rst_want_restart(id) ) then
 	        call read_restart_mercury(iunit)
@@ -1425,11 +1046,29 @@
 	    end if
           end if
 
+
+	  if( nvers .ge. 17 ) then
+	    id = id_bfm_rst
+	    read(iunit) ibfm
+            if( ibfm .gt. 0 ) then
+	      call rst_add_flag(id,iflag)
+	      if( rst_want_restart(id) ) then
+                call bfm_init_for_restart()
+	        call read_restart_bfm(iunit)
+	      else
+	        call skip_restart_bfm(iunit)
+	      end if
+	    end if
+          end if
+
         return
     7	continue
 	write(6,*) 'rst_read_record: error in idfrst... ' // 'no restart format'
 	ierr = 7
 	return
+   96   continue
+        write(6,*) 'error reading header of restart file...'
+        stop 'error stop rst_read_record: cannot read header'
    97   continue
         ierr = -1
         return

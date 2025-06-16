@@ -22,6 +22,7 @@ git checkout develop			#goes back to develop
 git merge new_branch			#merges new_branch into develop
 
 git push --set-upstream origin new_branch	#pushes new branch to remote
+git push -u myrepo HEAD			#sets up tracking with remote
 
 git fetch				#get info on new branch
 git checkout --track remote/origin/new_branch	#now git push works

@@ -13,6 +13,7 @@ DIR	= shyutil
 
 #--------------------------------------------- just for default
 FEMDIR = ../../..
+FEMBIN = $(FEMDIR)/bin
 F77    = g77
 FFLAGS =  -O -Wall -g
 LINKER = $(F77)
@@ -46,7 +47,7 @@ OBJ  = \
 	expand.o \
 	geom.o \
 	levels.o \
-	links.o \
+	link_dummy.o \
 	lnku.o \
 	bnd.o \
 	bnd_aux.o \
@@ -59,17 +60,28 @@ OBJ  = \
 	io_ext.o \
 	io_flx.o \
 	io_lgr.o \
-	io_off.o \
 	zadaptutil.o \
 	submask.o \
 	topological.o \
 	pkonst.o \
 	mkonst.o \
 	heat_const.o \
+	evgeom.o \
+	tvd.o \
+	find.o \
+	fast_find.o \
+	quad_tree.o \
+	shyaver.o \
+
+OBJ_OBSOLETE = \
+	links.o \
+	link_dummy.o \
 
 ALL = $(MOD) $(OBJ)
 
 SPECIAL =       Makefile
+
+MAKEDEPEND = $(FEMBIN)/mkdp.pl
 
 #--------------------------------------------- EXES
 
@@ -77,7 +89,8 @@ LIB = $(LIBDIR)/lib$(LIBNAME).a
 
 default: lib
 all:	lib
-fem: lib
+fem: shyfem
+shyfem: lib
 lib:	$(LIB) nothing
 
 nothing:
@@ -132,9 +145,12 @@ cleanlib:
 
 #--------------------------------------------- various
 
+depend:
+	@-$(MAKEDEPEND) -moddir=$(MODDIR) *.f90
+
 check:
-	~/shyfem/fem3d/bin/compile.sh -single *.f90
-	~/shyfem/fem3d/bin/usemod.pl *.f90
+	$(FEMBIN)/fem3d/compile.sh -single *.f90
+	$(FEMBIN)/fem3d/usemod.pl *.f90
 
 list:
 	pwd; ls
@@ -165,4 +181,50 @@ zip:	cleanall
 #--------------------------------------------- makedepend
 
 # DO NOT DELETE THIS LINE -- make depend depends on it.
+
+../../../lib/mod/basin.mod: basin.o
+../../../lib/mod/default_names.mod: defnames.o
+../../../lib/mod/evgeom.mod: evgeom.o
+../../../lib/mod/extfile.mod: io_ext.o
+../../../lib/mod/fem_util.mod: femfile_util.o
+../../../lib/mod/flxfile.mod: io_flx.o
+../../../lib/mod/heat_const.mod: heat_const.o
+../../../lib/mod/levels.mod: levels.o
+../../../lib/mod/mkonst.mod: mkonst.o
+../../../lib/mod/mod_bnd.mod: bnd.o
+../../../lib/mod/mod_bnd_aux.mod: bnd_aux.o
+../../../lib/mod/mod_bound_dynamic.mod: bnd_dynamic.o
+../../../lib/mod/mod_bound_geom.mod: bnd_geom.o
+../../../lib/mod/mod_depth.mod: depth.o
+../../../lib/mod/mod_fast_find.mod: fast_find.o
+../../../lib/mod/mod_geom.mod: geom.o
+../../../lib/mod/mod_geom_dynamic.mod: geom_dynamic.o
+../../../lib/mod/mod_quad_tree.mod: quad_tree.o
+../../../lib/mod/mod_shyaver.mod: shyaver.o
+../../../lib/mod/mod_tvd.mod: tvd.o
+../../../lib/mod/pkonst.mod: pkonst.o
+../../../lib/mod/regular.mod: regular.o
+../../../lib/mod/shyfem_strings.mod: strings.o
+../../../lib/mod/shyfem_version.mod: version.o
+../../../lib/mod/shyfile.mod: io_shy.o
+../../../lib/mod/sigma.mod: sigma.o
+../../../lib/mod/simul.mod: simul.o
+../../../lib/mod/zadapt.mod: zadaptutil.o
+evgeom.o: ../../../lib/mod/basin.mod
+fast_find.o: ../../../lib/mod/basin.mod ../../../lib/mod/stack.mod
+fem_util.o: ../../../lib/mod/basin.mod
+find.o: ../../../lib/mod/basin.mod ../../../lib/mod/evgeom.mod \
+		../../../lib/mod/mod_geom.mod 
+grdutil.o: ../../../lib/mod/basin.mod ../../../lib/mod/grd.mod
+line_util.o: ../../../lib/mod/basin.mod
+lnku.o: ../../../lib/mod/basin.mod ../../../lib/mod/mod_geom.mod
+quad_tree.o: ../../../lib/mod/basin.mod ../../../lib/mod/stack.mod
+regular.o: ../../../lib/mod/basin.mod
+shyaver.o: ../../../lib/mod/basin.mod
+submask.o: ../../../lib/mod/basin.mod
+topological.o: ../../../lib/mod/basin.mod \
+		../../../lib/mod/mod_connect.mod \
+		../../../lib/mod/mod_geom.mod 
+zadaptutil.o: ../../../lib/mod/basin.mod \
+		../../../lib/mod/levels.mod 
 

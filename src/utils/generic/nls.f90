@@ -78,6 +78,7 @@
 ! 18.12.2018	ggu	changed VERS_7_5_52
 ! 16.02.2019	ggu	changed VERS_7_5_60
 ! 12.03.2019	ggu	before namelist read clean arrays
+! 16.09.2024	ggu	new routine nls_read_string() to read extra information
 !
 ! notes :
 !
@@ -567,7 +568,8 @@
 
 ! now look for extra information
 
-	if( nls_read_name(name) ) extra = name
+	!if( nls_read_name(name) ) extra = name
+	if( nls_read_string(name) ) extra = name
 
 ! copy optional arguments
 
@@ -722,6 +724,40 @@
 	bdummy = nls_skip_whitespace_on_line(.false.)
 
 	end function nls_read_name
+
+!******************************************************************
+
+	function nls_read_string(string)
+
+! reads any string until the end of the line
+
+	character*(*) string
+
+	logical nls_read_string
+	integer i,itype
+	character*1 c
+
+	logical bdummy,is_alpha
+
+	string = ' '
+	nls_read_string = .false.
+
+	i = ioff
+	if( i < 1 .or. i > length ) return
+	do while( i < length )
+	  i = i + 1
+	  c = line(i:i)
+	  !if( .not. is_alpha(c) ) exit
+	end do
+
+	if( i - ioff < 1 ) return
+	nls_read_string = .true.
+	string = trim(line(ioff:i-1))
+	ioff = i
+
+	bdummy = nls_skip_whitespace_on_line(.false.)
+
+	end function nls_read_string
 
 !******************************************************************
 

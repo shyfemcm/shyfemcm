@@ -14,7 +14,7 @@
 #
 # #!/usr/bin/env perl
 #
-# use lib ("$ENV{SHYFEMDIR}/femlib/perl","$ENV{HOME}/shyfem/femlib/perl");
+# use lib ("$ENV{SHYFEMDIR}/lib/perl","$ENV{HOME}/shyfem/lib/perl");
 # use mail;
 # 
 # $file = $ARGV[0];

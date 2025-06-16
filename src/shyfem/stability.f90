@@ -71,6 +71,7 @@
 ! 02.04.2023    ggu     only master writes to iuinfo
 ! 09.05.2023    lrp     introduce top layer index variable
 ! 24.05.2023    ggu     debug section introduced in hydro_internal_stability()
+! 01.12.2023    ggu     gindex not reduced in here
 !
 !*****************************************************************
 !*****************************************************************
@@ -397,6 +398,7 @@
 	use levels
 	use basin, only : nkn,nel,ngr,mbw
 	use shympi
+	use mod_info_output
 
         implicit none
 
@@ -411,6 +413,7 @@
         real rkpar,azpar,ahpar,rlin
 	real dindex,aindex,tindex,sindex,gindex
 	real rmax
+	real array(4)
 
 	logical openmp_in_parallel
 
@@ -483,38 +486,29 @@
 	dindex = dindex*dt
 	gindex = gindex*dt
 
-	tindex = shympi_max(tindex)
+	array = (/tindex,aindex,dindex,gindex/)
+	call shympi_array_reduce('max',array)
+	call info_output('rindex','none',4,array,.false.)
 
 	if( mode .eq. 1 ) then		!error output
 	  write(6,*) 'hydro_internal_stability: '
 	  write(6,*) 'tindex,aindex,dindex,gindex: '
-	  write(6,*) tindex,aindex,dindex,gindex
+	  write(6,*) array
 	  call output_errout_stability(dt,sauxe)
 	end if
 
-	rindex = tindex
+	rindex = array(1)
 
 	deallocate(sauxe1,sauxe2,sauxe3,sauxe)
 
-	bdebug = .false.
-	if( bdebug ) then
-	  icall = icall + 1
-	  iu = 230 + my_id
-	  !write(iu,*) icall,my_id,tindex,aindex,dindex,gindex
-	  write(iu,*) icall,my_id,tindex,aindex,dindex
-	  flush(iu)
-	  if( my_id == 0 ) then
-	  write(220,*) icall,my_id,tindex,aindex,dindex
-	  flush(220)
-	  end if
-	end if
+	!if( iuinfo > 0 ) then
+	!  write(iuinfo,*) 'rindex: ',array
+	!end if
 
-	if( iuinfo > 0 ) then
-	  write(iuinfo,*) 'rindex: ',tindex,aindex,dindex,gindex
-	end if
+	!array = (/tindex,aindex,dindex,gindex/)
+	!call info_output('rindex','max',4,array,.false.)
 
-	!iu = 450 + my_id
-	!write(iu,*) 'rindex: ',tindex,aindex,dindex,gindex
+	icall = icall + 1
 
         end
 
@@ -572,80 +566,6 @@
 
 !*****************************************************************
 
-        subroutine output_stability_node(dt,cwrite)
-
-! outputs stability index for hydro timestep (internal)
-
-	use levels
-	use basin
-
-        implicit none
-
-        real dt
-	real cwrite(nlvdi,nkn)
-
-	real, save, allocatable :: smax(:)
-
-	logical bnos
-	integer ie,ii,k,l,lmax
-	integer ia,id,idc,nvar
-	real sindex,smin
-	real dtorig
-	double precision dtime
-	logical next_output_d,has_output_d,is_over_output_d
-
-	integer, save :: icall = 0
-	double precision, save :: da_out(4)
-
-	real getpar
-
-	if( icall .lt. 0 ) return
-
-	if( icall .eq. 0 ) then
-	  call init_output_d('itmsti','idtsti',da_out)
-	  call increase_output_d(da_out)
-	  if( .not. has_output_d(da_out) ) icall = -1
-	  if( icall .lt. 0 ) return
-	  nvar = 1
-          call shyfem_init_scalar_file('stb',nvar,.true.,id)
-          da_out(4) = id
-	  allocate(smax(nkn))
-	  smax = 0.
-	end if
-
-	icall = icall + 1
-
-	if( .not. is_over_output_d(da_out) ) return 
-
-	do k=1,nkn
-	  lmax = ilhkv(k)
-	  do l=1,lmax
-	    sindex = cwrite(l,k)
-	    if( sindex .gt. smax(k) ) smax(k) = sindex
-	  end do
-	end do
-
-	if( next_output_d(da_out) ) then
-	  call get_orig_timestep(dtorig)
-	  do k=1,nkn				!convert to time step
-	    if( smax(k) > 0 ) then
-	      smax(k) = 1./smax(k)
-	      if( smax(k) > dtorig ) smax(k) = dtorig
-	    else
-	      smax(k) = dtorig
-	    end if 
-	  end do
-	  call get_act_dtime(dtime)
-	  id = nint(da_out(4))
-          idc = 778
-          call shy_write_scalar_record2d(id,dtime,idc,smax)
-	  smax = 0.
-	end if
-
-	end
-
-!*****************************************************************
-
         subroutine output_stability(dt,sauxe)
 
 ! outputs stability index for hydro timestep (internal)
@@ -674,10 +594,6 @@
 
 	real getpar
 
-!	idtsti = 3600
-!	idtsti = 0
-!	itmsti = -1
-
 	if( icall .lt. 0 ) return
 
 	if( icall .eq. 0 ) then
@@ -694,8 +610,6 @@
 
 	icall = icall + 1
 
-	!write(111,*) 'sti: ',it,t_act,ia_out
-
 	if( .not. is_over_output_d(da_out) ) return 
 
 	do ie=1,nel
@@ -704,7 +618,7 @@
 	    sindex = sauxe(l,ie)
 	    do ii=1,3
 	      k = nen3v(ii,ie)
-	      if( sindex .gt. smax(k) ) smax(k) = sindex
+	      smax(k) = max(smax(k),sindex)
 	    end do
 	  end do
 	end do
@@ -721,7 +635,7 @@
 	  end do
 	  call get_act_dtime(dtime)
 	  id = nint(da_out(4))
-          idc = 779
+          idc = 95
           call shy_write_scalar_record2d(id,dtime,idc,smax)
 	  smax = 0.
 	end if
@@ -804,7 +718,7 @@
 	  garray(ie) = ri
 	end do
 
-	gindex = shympi_max(gindex)
+	!gindex = shympi_max(gindex)
 
 	!write(6,*) nel,gindex,1./gindex
 	!stop

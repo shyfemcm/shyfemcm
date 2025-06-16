@@ -12,8 +12,14 @@
 #
 #########################################################
 
-version=2.00
+version=2.06
 
+# 2.06	01.02.2025	bug fix for parsing time in date string
+# 2.05	17.10.2024	lt for dash substituted with dt
+# 2.04	06.05.2024	debug option and ParseTime()
+# 2.03	07.03.2024	adjust paths for helper routines
+# 2.02	03.03.2024	use absolute paths in calling other scripts
+# 2.01	27.01.2024	new option -solid
 # 2.00	09.09.2023	can accept 24 hours date (GetSecs)
 # 1.99	29.11.2022	use -u if given for 2 data column
 # 1.98	19.02.2022	bug fix for option -labels
@@ -52,15 +58,17 @@ version=2.00
 
 ######################################################### defaults
 
-FEMDIR=${SHYFEMDIR:=$HOME/shyfem}
-FEMDIR=$HOME/shyfem
-
-fembin=$FEMDIR/fembin
+script=$(realpath $0)
+FEMBIN=$(dirname $script)
 
 gpversion=$( gnuplot --version | sed -e 's/ *patchlevel.*//' \
 			| sed -e 's/gnuplot *//' )
 gpmajor=$( echo $gpversion | sed -e 's/\..*//' )
 #echo $gpversion $gpmajor
+
+debug="YES"
+debug="NO"
+[ $debug = "YES" ] && echo "debug = $debug" >&2
 
 title="Timeseries"
 type="monochrome"
@@ -85,24 +93,26 @@ xfact="1"		# scaling of x axis
 yfact="1"		# scaling of y axis
 style=""
 color=""
+solid=""
 width=""
 xtics=""
 outfile=""
 ghost='gv'
 
 logo="0"
-logo_file=$fembin/logo/logo.eps			#file to be included as logo
+logo_file=$FEMBIN/logo/logo.eps			#file to be included as logo
 logo_where="0.92 0.92 0 0.99"			#position of included file
 
 ######################################################### programs
 
 gnuplot="/usr/bin/gnuplot"
-psgnu="$fembin/psgnu"
-extractcol="$fembin/extractcol"
-scalecol="$fembin/scalecol"
-range="$fembin/range"
-xrange_pl="$fembin/xrange.pl"
-gpsmerge="$fembin/gpsmerge"
+psgnu="$FEMBIN/gps/psgnu.pl"
+extractcol="$FEMBIN/col/extractcol.pl"
+scalecol="$FEMBIN/col/scalecol.pl"
+xrange_pl="$FEMBIN/xrange.pl"
+gpsmerge="$FEMBIN/gps/gpsmerge.pl"
+gpsinsert="$FEMBIN/gps/gpsinsert.sh"
+gpgnustyle="$FEMBIN/gpgnustyle.pl"
 
 ######################################################### copyright
 
@@ -145,6 +155,7 @@ FullUsage()
   echo "  -xlog|-ylog      use logarithmic scaling for x/y axis"
   echo "  -style style     sets line style for following files"
   echo "  -color color     sets line color for following files"
+  echo "  -solid solid     transparency for line filling [0-1]"
   echo "  -width width     sets line width (integer) for following files"
   echo "  -dash dash       sets dash style (integer) for following files"
   echo "  -xtics xtics     sets tics style for x-axis"
@@ -266,6 +277,7 @@ HandleFiles()
     afiles[$n]=$file
     astyles[$n]=$style
     acolors[$n]=$color
+    asolids[$n]=$solid
     awidths[$n]=$width
     aaxes[$n]=$axes
     adash[$n]=$dash
@@ -277,6 +289,7 @@ InsertFiles()
 {
   local s=${astyles[0]}
   local c=${acolors[0]}
+  local t=${asolids[0]}
   local w=${awidths[0]}
   local x=${aaxes[0]}
   local d=${adash[0]}
@@ -289,6 +302,7 @@ InsertFiles()
     afiles[$n]=$file
     astyles[$n]=$s
     acolors[$n]=$c
+    asolids[$n]=$t
     awidths[$n]=$w
     aaxes[$n]=$x
     adash[$n]=$d
@@ -308,10 +322,11 @@ ShowFiles()
      f=${afiles[$m]}
      s=${astyles[$m]}
      c=${acolors[$m]}
+     t=${asolids[$m]}
      w=${awidths[$m]}
      x=${aaxes[$m]}
      d=${adash[$m]}
-     echo "$mm/$n $f $s $c $w $x $d"
+     echo "$mm/$n $f $s $c $t $w $x $d"
      ((m++))
      ((mm++))
   done
@@ -323,8 +338,15 @@ ShowFiles()
 GetFirstAndLastDataLine()
 {
   file=${afiles[0]}	#we only look at first file
-  first_data_line=$( grep --max-count 1 -E -v '^\s*#' $file )
-  last_data_line=$( tac $file | grep --max-count 1 -E -v '^\s*#' )
+  first_data_line=$( cat $file | grep -v '^\s*$' | grep  -v '^\s*#' | head -1 )
+  last_data_line=$( tac $file | grep -v '^\s*$' | grep  -v '^\s*#' | head -1 )
+  if [ $debug = "YES" ]; then
+    echo "first/last data line:"	>&2
+    echo "  $first_data_line"		>&2
+    echo "  $last_data_line"		>&2
+  fi
+  #first_data_line=$( grep --max-count 1 -E -v '^\s*#' $file )
+  #last_data_line=$( tac $file | grep --max-count 1 -E -v '^\s*#' )
 }
 
 CheckForDate()
@@ -354,7 +376,6 @@ HandleXaxis()
   # this tries to see in what format the x-axis has to be written
   # it sets variable $xformat
 
-  local debug="NO"
   local sec1 sec2 secs hours days months years
 
   [ -n "$xformat" ] && return	#return if already given
@@ -363,7 +384,7 @@ HandleXaxis()
   #first_line=`head -1 $file`
 
   first_line=$first_data_line
-  last_line=`tail -1 $file`
+  last_line=$last_data_line
 
   first_time=`echo $first_line | sed -E 's/^\s+//' | sed -E 's/\s+.*//'`
   last_time=`echo $last_line | sed -E 's/^\s+//' | sed -E 's/\s+.*//'`
@@ -372,14 +393,15 @@ HandleXaxis()
   [ -n "$xhigh" ] && last_time=$xhigh
 
   if [ $debug = "YES" ]; then
-    echo "HandleXaxis:"
-    echo $first_line
-    echo $first_time
-    echo $last_line
-    echo $last_time
-    echo "$xrange"
+    echo "HandleXaxis:"							>&2
+    echo "  first_data_line=$first_data_line"				>&2
+    echo "  last_data_line=$last_data_line"				>&2
+    echo "  first_time=$last_time"					>&2
+    echo "  last_time=$last_time"					>&2
+    echo "  xrange=$xrange"						>&2
   fi
 
+  ParseTime $first_time
   #GetSecs $first_time
 
   sec1=$( GetSecs $first_time )
@@ -387,7 +409,7 @@ HandleXaxis()
   #sec1=$( busybox date -D "%Y-%m-%d::%H:%M:%S" -d $first_time +%s )
   #sec2=$( busybox date -D "%Y-%m-%d::%H:%M:%S" -d $last_time +%s )
   secs=$(( $sec2 - $sec1 ))
-  [ $debug = "YES" ] && echo "time window: $secs seconds"
+  [ $debug = "YES" ] && echo "time window: $secs seconds" >&2
 
   xformat="%Y-%m-%d::%H:%M:%S"	#complete format - not used
 
@@ -430,26 +452,83 @@ HandleXaxis()
     return
   fi
 
-  [ $debug = "YES" ] && echo "automatically determined xformat: $xformat"
+  [ $debug = "YES" ] && echo "automatically determined xformat: $xformat" >&2
 }
 
 GetSecs()
 {
-  local date=$1
+  local string=$1
 
-  date=$( echo $date | sed -e 's/::/ /' )
+  ParseTime $string
 
-  local d=$( echo $date | sed -e 's/::/ /' | sed -e 's/:/ /g' )
-  local hour=$( echo $d | cut -d " " -f 2 )
-  local day=$( echo $d | cut -d " " -f 1 )
+  date=$fulldate
 
-  #echo "GetSecs $1 $date"
+  if [ "$debug" = "YES" ]; then
+    echo "GetSecs:"					>&2
+    echo "  $string $date $hour $day $d"		>&2
+  fi
 
-  [ "$hour" = "" ] && hour=0
-  if [ "$hour" -eq 24 ]; then		# roll to next day
-    date --date="$day +1 day" +%s
+  date --date="$isodate" +%s
+}
+
+ParseTime()
+{
+  local string=$1
+
+  local year month day hour minute second
+  local date time
+
+  if [[ $string =~ "::" ]]; then	# have both date and time
+    date=$( echo $string | sed -E 's/::.*$//' )
+    time=$( echo $string | sed -E 's/^.*:://' )
+  elif [[ $string =~ "-" ]]; then	# has only date
+    date=$string
+  elif [[ $string =~ ":" ]]; then	# has only time
+    time=$string
+    echo "no date in string: $string ... cannot parse"	>&2
+    exit 1
   else
-    date --date="$date" +%s
+    echo "cannot parse: $string"		>&2
+    exit 1
+  fi
+
+  if [ $debug == "YES" ]; then
+    echo "ParseTime:"				>&2
+    echo "  string = $string"			>&2
+    echo "  date = $date"			>&2
+    echo "  time = $time"			>&2
+  fi
+
+  if [ -n "$date" ]; then
+    year=$( echo $date | cut -d- -f1 )
+    month=$( echo $date | cut -d- -f2 )
+    day=$( echo $date | cut -d- -f3 )
+  fi
+    
+  if [ -n "$time" ]; then
+    hour=$( echo $time | cut -d: -f1 )
+    minute=$( echo $time | cut -d: -f2 )
+    second=$( echo $time | cut -d: -f3 )
+  fi
+
+  [ -z "$hour" ] && hour="00"
+  [ -z "$minute" ] && minute="00"
+  [ -z "$second" ] && second="00"
+  
+  onlydate=$year-$month-$day
+
+  if [ "$hour" -eq 24 ]; then		# roll to next day
+    onlydate=$( date --date="$onlydate +1 day" +%Y-%m-%d )
+    hour=00
+  fi
+
+  onlytime=$hour:$minute:$second
+  fulldate=$onlydate::$onlytime
+  isodate=${onlydate}T${onlytime}
+
+  if [ $debug == "YES" ]; then
+    echo "ParseTime 2:"				>&2
+    echo "  fulldate = $fulldate"		>&2
   fi
 }
 
@@ -468,6 +547,7 @@ Plotting()
     file=${afiles[$1]}
     style=${astyles[$1]}
     color=${acolors[$1]}
+    solid=${asolids[$1]}
     width=${awidths[$1]}
     axes=${aaxes[$1]}
     dash=${adash[$1]}
@@ -475,7 +555,8 @@ Plotting()
     with=""
     lc=""
     lw=""
-    lt=""
+    dt=""
+    fs=""
     use=$using
     if [ -n "$style" ]; then
       with="w $style"
@@ -494,26 +575,29 @@ Plotting()
         [ $usinggiven = "NO" ] && use="using 1:2:3"
       elif [ $style = "fill" ]; then	#needs two data columns
         [ $usinggiven = "NO" ] && use="using 1:2:3"
-        with="w filledcu"
+        with="w filledcurves"
       fi
     fi
     if [ -n "$axes" ]; then
       axes="axes $axes"
     fi
     if [ -n "$dash" ]; then
-      lt="lt $dash"
+      dt="dt $dash"
     fi
-    if [ -n "$color" ]; then
+    if [ -n "$color" -a "$color" != "none" ]; then
       lc="lc rgb '$color'"
     fi
     if [ -n "$width" ]; then
       lw="lw $width"
     fi
+    if [ -n "$solid" -a "$solid" != "none" ]; then
+      fs="fs transparent solid $solid"
+    fi
 
     [ -z "$2" ] && eol=' '
 
     legend=`MakeLegend $file`
-    line="     \"$file\" $use $axes title \"$legend\" $with $lt $lc $lw"
+    line="     \"$file\" $use $axes title \"$legend\" $with $dt $fs $lc $lw"
     echo "$cont $line $eol" >> gnu.tmp
     cont=', '
 
@@ -544,7 +628,7 @@ PlotFiles()
     indices=""
     special="NO"
 
-    for f in `$range $ppp`
+    for f in `seq $ppp`
     do
       file=${afiles[$index]}
       fnames="$fnames $file"
@@ -595,7 +679,7 @@ AdjustSpecial()
   #for some reason special must always be last option -> color problems
   laststyle=`grep '^LT' out.ps | tail -1`
   echo "adjusting special style: $laststyle"
-  gpgnustyle.pl $1 out.ps > out.tmp
+  $gpgnustyle $1 out.ps > out.tmp
   mv out.tmp out.ps
 }
 
@@ -692,6 +776,7 @@ InsertLabels()
 declare -a afiles		#must be global
 declare -a astyles
 declare -a acolors
+declare -a asolids
 declare -a awidths
 declare -a aaxes
 declare -a adash
@@ -710,6 +795,7 @@ do
 	-xtics)		xtics=$2; shift;;
 	-style)		style=$2; shift;;
 	-color)		color=$2; shift;;
+	-solid)		solid=$2; shift;;
 	-width)		width=$2; shift;;
 	-dash)		dash=$2; shift;;
 	-xlog)		xlog="YES";;
@@ -765,6 +851,7 @@ fi
 if [ "$date" = "YES" ]; then
   HandleXrange		#splits and quotes
   HandleXaxis
+  [ $debug == "YES" ] && echo "xformat: $xformat" >&2
 fi
 
 ######################################################### write header
@@ -949,7 +1036,7 @@ PlotFiles
 ######################################################### insert logo
 
 if [ $logo -ne 0 ]; then
-  $fembin/gpsinsert -relative "$logo_where" $logo_file out.ps
+  $gpsinsert -relative "$logo_where" $logo_file out.ps
   mv incl_out.ps out.ps
 fi
 

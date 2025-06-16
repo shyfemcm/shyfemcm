@@ -118,6 +118,9 @@
 ! 16.06.2022	ggu	new routine write_grd_file() for simplified writing
 ! 13.12.2022	ggu	new routine write_grd_file_with_depth()
 ! 18.10.2023	ggu	deleted routines dealing with gr3 and msh files
+! 10.05.2024	ggu	handles isphe given in grd file (FEM-SPHER)
+! 07.11.2024	ggu	in write_grd_file_with_detail() also write zoom window
+! 08.03.2025	ggu	in grd_init() make sure that lines are allocated
 !
 !**********************************************************
 
@@ -133,6 +136,7 @@
 	character*80, save :: title_grd = ' '
 	real, save :: dcor_grd = 0.
 	real, save :: dirn_grd = 0.
+	integer, save :: sphe_grd = -1
 
         integer, save :: nin_grd,iline_grd,ianz_grd
         real, save :: f_grd(81)
@@ -160,7 +164,7 @@
 
 	logical, save :: bcdepth = .true.	!needs complete set of depth
 
-	logical, save :: berror = .true.	!writes error if found
+	logical, save :: bgrderror = .true.	!writes error if found
 	logical, save :: bgrdwrite = .true.	!writes information messages
 
 !==============================================================
@@ -191,7 +195,7 @@
 
 	if( bdebug ) write(6,*) 'nk: ',nk,nk_grd,nk_grd_alloc
 
-	if( nk .ne. nk_grd ) then
+	if( nk .ne. nk_grd .or. nk == 0 ) then
 	  if( allocated(ippnv) ) then
 	    deallocate(ippnv,ianv,hhnv,xv,yv)
 	  end if
@@ -204,7 +208,7 @@
 
 	if( bdebug ) write(6,*) 'ne: ',ne,ne_grd,ne_grd_alloc
 
-	if( ne .ne. ne_grd ) then
+	if( ne .ne. ne_grd .or. ne == 0 ) then
 	  if( allocated(ippev) ) then
 	    deallocate(ippev,iaev,hhev)
 	  end if
@@ -220,7 +224,7 @@
 
 	if( bdebug ) write(6,*) 'nl: ',nl,nl_grd,nl_grd_alloc
 
-	if( nl .ne. nl_grd_alloc ) then
+	if( nl .ne. nl_grd .or. nl == 0 ) then
 	  if( allocated(ipplv) ) then
 	    deallocate(ipplv,ialv,hhlv)
 	  end if
@@ -236,7 +240,7 @@
 
 	if( bdebug ) write(6,*) 'nne: ',nne,nne_grd,nne_grd_alloc
 
-	if( nne .ne. nne_grd_alloc ) then
+	if( nne .ne. nne_grd_alloc .or. nne == 0 ) then
 	  if( allocated(inodev) ) then
 	    deallocate(inodev)
 	  end if
@@ -249,7 +253,7 @@
 
 	if( bdebug ) write(6,*) 'nnl: ',nnl,nnl_grd,nnl_grd_alloc
 
-	if( nnl .ne. nnl_grd_alloc ) then
+	if( nnl .ne. nnl_grd_alloc .or. nnl == 0 ) then
 	  if( allocated(inodlv) ) then
 	    deallocate(inodlv)
 	  end if
@@ -290,7 +294,7 @@
 
 	logical berr
 
-	berror = berr
+	bgrderror = berr
 
 	end subroutine grd_set_error
 
@@ -304,7 +308,7 @@
 
 	logical grd_write_error
 
-	grd_write_error = berror
+	grd_write_error = bgrderror
 
 	end function grd_write_error
 
@@ -1124,15 +1128,17 @@
 ! (FEM-SCALE)	scale in x/y/z for basin	default: 1.,1.,1.
 ! (FEM-LATID)	latitude of basin (degrees)	default: 0.
 ! (FEM-NORTH)	true north of basin (degrees) 	default: 0.
+! (FEM-SPHER)	coordinates are lat/lon 	default: -1 (must be determined)
 !
 ! all entries are optional
 !
-! example (c of fortran comment must be deleted, line starts with 0) :
+! example (! of fortran comment must be deleted, line starts with 0) :
 !
 ! 0 (FEM-TITLE) test basin
 ! 0 (FEM-SCALE) 0.5 0.5 2.
 ! 0 (FEM-LATID) 45.0
 ! 0 (FEM-NORTH) 90.0
+! 0 (FEM-SPHER) 0
 !
 	use grd
 	!use basin
@@ -1143,13 +1149,21 @@
 
 	integer i,j,n
 	integer ifstch,iscanf
-	logical btitle
+	logical, save :: btitle = .false.
+	logical berror
 
-	save btitle
-	data btitle /.false./
+!----------------------------------------------------
+! initialize parameters
+!----------------------------------------------------
+
+	berror = .false.
 
 	i=ifstch(gline)
 	n=len(gline)
+
+!----------------------------------------------------
+! check comments for FEM information
+!----------------------------------------------------
 
 	if( i.gt.0 .and. i+10.lt.n ) then
 	  if( gline(i:i+10) .eq. '(FEM-TITLE)' ) then
@@ -1165,6 +1179,7 @@
 		  write(6,*) 'error reading (FEM-SCALE) :',j
 		  write(6,*) gline
 		  write(6,*) gline(i+11:)
+		  berror = .true.
 		end if
 	  else if( gline(i:i+10) .eq. '(FEM-LATID)' ) then
 		j=iscanf(gline(i+11:),f_grd,2)
@@ -1173,6 +1188,7 @@
 		else
 		  write(6,*) 'error reading (FEM-LATID) :'
 		  write(6,*) gline
+		  berror = .true.
 		end if
 	  else if( gline(i:i+10) .eq. '(FEM-NORTH)' ) then
 		j=iscanf(gline(i+11:),f_grd,2)
@@ -1181,16 +1197,55 @@
 		else
 		  write(6,*) 'error reading (FEM-NORTH) :'
 		  write(6,*) gline
+		  berror = .true.
+		end if
+	  else if( gline(i:i+10) .eq. '(FEM-SPHER)' ) then
+		j=iscanf(gline(i+11:),f_grd,2)
+		if(j.eq.1) then
+		  sphe_grd=f_grd(1)
+		else
+		  write(6,*) 'error reading (FEM-SPHER) :'
+		  write(6,*) gline
+		  berror = .true.
 		end if
 	  end if
 	end if
 
+!----------------------------------------------------
+! check parameters read
+!----------------------------------------------------
+
+	if( dcor_grd < -90. .or. dcor_grd > 90. ) then
+	  write(6,*) 'value for FEM-LATID out of range: ',dcor_grd
+	  berror = .true.
+	else if( dirn_grd < -360. .or. dirn_grd > 360. ) then
+	  write(6,*) 'value for FEM-NORTH out of range: ',dirn_grd
+	  berror = .true.
+	else if( sphe_grd < -1 .or. sphe_grd > 1. ) then
+	  write(6,*) 'value for FEM-SPHER out of range: ',sphe_grd
+	  berror = .true.
+	end if
+	
+!----------------------------------------------------
+! error handling
+!----------------------------------------------------
+
+	if( berror ) then
+	  stop 'error stop fempar: error reading FEM comments'
+	end if
+
+!----------------------------------------------------
 ! use first comment as title
+!----------------------------------------------------
 
 	if( i.gt.0 .and. .not.btitle ) then
 		title_grd=gline(i:)
 		btitle=.true.
 	end if
+
+!----------------------------------------------------
+! end of routine
+!----------------------------------------------------
 
 	end
 
@@ -2284,6 +2339,196 @@
 	end do
 
 	close(nout)
+
+	end
+
+!*****************************************************************
+
+	subroutine write_grd_file_with_detail(file &
+     &			,text,nk,ne,xg,yg,index &
+     &			,inext,ieext,intype,ietype &
+     &			,kcext,window)
+
+! writes grd file with depth information
+
+	implicit none
+
+	character*(*) file		!file name
+	character*(*) text		!text string
+	integer nk,ne			!total nodes and elements
+	real xg(nk),yg(nk)		!coordinates
+	integer index(3,ne)		!element index (internal numbers)
+	integer inext(nk),ieext(ne)	!external nodes and element numbers
+	integer intype(nk),ietype(ne)	!node and element type
+	integer kcext			!central node (external number)
+	real window			!window around node (fact)
+
+	integer nout
+	integer k,ie,ii,itype,kext,eext,n,i
+	integer nen3v(3)
+	real depth,x,y
+	real, parameter :: flag = -999.
+	character*80 zoom
+
+	integer, parameter :: ndim = 100
+	integer kn(3*ndim)
+	real xn(3*ndim),yn(3*ndim)	!be sure the array is big enough
+	integer kc,ksum
+	real xmin,ymin,xmax,ymax,dx,dy
+	integer, allocatable :: kin(:),ein(:)
+
+!---------------------------------------------------------
+! determine min/max of detail
+!---------------------------------------------------------
+
+	do k=1,nk
+	  if( inext(k) == kcext ) exit
+	end do
+	kc = k
+	if( kc > nk ) then
+	  write(6,*) 'kcext = ',kcext
+	  stop 'error stopwrite_grd_file_with_detail: no such node'
+	end if
+
+	!write(6,*) 'node (ext/int) : ',kcext,kc
+
+	n = 0
+	do ie=1,ne
+	  if( all( index(:,ie) /= kc ) ) cycle
+	  if( n+3 > ndim ) stop 'error stop write_grd_file_with_detail: ndim'
+	  do ii=1,3
+	    n = n + 1
+	    k = index(ii,ie)
+	    kn(n) = k
+	    xn(n) = xg(k)
+	    yn(n) = yg(k)
+	  end do
+	end do
+
+	xmin = minval(xn(1:n))
+	ymin = minval(yn(1:n))
+	xmax = maxval(xn(1:n))
+	ymax = maxval(yn(1:n))
+	dx = xmax - xmin
+	dy = ymax - ymin
+	xmin = xmin - window*dx
+	ymin = ymin - window*dy
+	xmax = xmax + window*dx
+	ymax = ymax + window*dy
+
+	allocate(kin(nk))
+	allocate(ein(ne))
+	kin = 0
+	ein = 0
+
+	do k=1,nk
+	  x = xg(k)
+	  y = yg(k)
+	  if( x < xmin .or. x > xmax ) cycle
+	  if( y < ymin .or. y > ymax ) cycle
+	  kin(k) = 1
+	end do
+
+	do ie=1,ne
+	  ksum = 0
+	  do ii=1,3
+	    k = index(ii,ie)
+	    ksum = ksum + kin(k)
+	  end do
+	  if( ksum == 3 ) ein(ie) = 1
+	end do
+
+!---------------------------------------------------------
+! now write grd
+!---------------------------------------------------------
+	
+	depth = flag
+
+	nout = 1
+	open(nout,file=file,status='unknown',form='formatted')
+
+	depth = flag
+
+	if( text /= ' ' ) then
+	  write(nout,*)
+	  write(nout,'(a,a)') '0 ',trim(text)
+	  write(nout,*)
+	end if
+
+	do k=1,nk
+	  if( kin(k) == 0 ) cycle
+	  kext = inext(k)
+	  itype = intype(k)
+	  x = xg(k)
+	  y = yg(k)
+	  call grd_write_node(nout,kext,itype,x,y,depth)
+	end do
+
+	n = 3
+	do ie=1,ne
+	  if( ein(ie) == 0 ) cycle
+	  eext = ieext(ie)
+	  itype = ietype(ie)
+	  do ii=1,n
+	    k = index(ii,ie)
+	    nen3v(ii) = inext(k)
+	  end do
+          call grd_write_item(nout,2,eext,itype,n,nen3v,depth)
+	end do
+
+	close(nout)
+
+	zoom = 'zoom_' // trim(file)
+	open(nout,file=zoom,status='unknown',form='formatted')
+	call make_rect(nout,1.,xmin,ymin,xmax,ymax)
+	call make_rect(nout,0.5,xmin,ymin,xmax,ymax)
+	call make_rect(nout,0.25,xmin,ymin,xmax,ymax)
+	close(nout)
+
+	end
+
+!*****************************************************************
+
+	subroutine make_rect(nout,fact,xmin,ymin,xmax,ymax)
+
+	implicit none
+
+	integer nout
+	real fact
+	real xmin,ymin,xmax,ymax
+
+	integer, save :: n = 0
+	integer, save :: l = 0
+	integer, save :: itype = 0
+	real, parameter :: flag = -999.
+	integer nodes(5)
+
+	real dx,dy,x0,y0
+	real xmin0,ymin0,xmax0,ymax0
+	real depth
+
+	depth = flag
+
+	dx = xmax-xmin
+	dy = ymax-ymin
+	x0 = 0.5*(xmin+xmax)
+	y0 = 0.5*(ymin+ymax)
+
+	xmin0 = x0 - 0.5*fact*dx
+	ymin0 = y0 - 0.5*fact*dy
+	xmax0 = x0 + 0.5*fact*dx
+	ymax0 = y0 + 0.5*fact*dy
+
+	call grd_write_node(nout,n+1,itype,xmin0,ymin0,depth)
+	call grd_write_node(nout,n+2,itype,xmin0,ymax0,depth)
+	call grd_write_node(nout,n+3,itype,xmax0,ymax0,depth)
+	call grd_write_node(nout,n+4,itype,xmax0,ymin0,depth)
+	
+	l = l + 1
+	nodes = (/n+1,n+2,n+3,n+4,n+1/)
+        call grd_write_item(nout,3,l,itype,5,nodes,depth)
+
+	n = n + 4
 
 	end
 

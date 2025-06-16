@@ -44,6 +44,7 @@
 ! 05.11.2015	ggu	changed VERS_7_3_12
 ! 05.12.2017	ggu	changed VERS_7_5_39
 ! 16.02.2019	ggu	changed VERS_7_5_60
+! 05.04.2024	ggu	more documentation
 !
 !****************************************************************
 
@@ -140,10 +141,13 @@
         write(6,*) 'mode  = ',mode
         write(6,*) 'iproj = ',iproj
 
+	write(6,*) 'xgv:'
         write(6,1000) (xgv(i),i=1,5)
         write(6,1000) (ygv(i),i=1,5)
+	write(6,*) 'xgeov:'
         write(6,1000) (xgeov(i),i=1,5)
         write(6,1000) (ygeov(i),i=1,5)
+	write(6,*) 'xcartv:'
         write(6,1000) (xcartv(i),i=1,5)
         write(6,1000) (ycartv(i),i=1,5)
 
@@ -197,10 +201,13 @@
         write(6,*) 'mode  = ',mode
         write(6,*) 'iproj = ',iproj
 
+	write(6,*) 'xgv:'
         write(6,1000) (xgv(i),i=1,5)
         write(6,1000) (ygv(i),i=1,5)
+	write(6,*) 'xgeov:'
         write(6,1000) (xgeov(i),i=1,5)
         write(6,1000) (ygeov(i),i=1,5)
+	write(6,*) 'xcartv:'
         write(6,1000) (xcartv(i),i=1,5)
         write(6,1000) (ycartv(i),i=1,5)
 
@@ -289,12 +296,19 @@
 	write(6,*) 'bspheric,iproj: ',bspheric,iproj
 
         if( bspheric ) then	!lat/lon -> cartesian
-            call proj_geo2cart
+	  write(6,*) 'coordinates are cartesian'
+          call proj_geo2cart
         else			!cartesian -> lat/lon
-            call proj_cart2geo
+	  write(6,*) 'coordinates are geographical'
+          call proj_cart2geo
         end if
 
 ! check results - values must be equal over domains
+
+	!call shympi_exchange_2d_node(xgeov)
+	!call shympi_exchange_2d_node(ygeov)
+	!call shympi_exchange_2d_node(xcartv)
+	!call shympi_exchange_2d_node(ycartv)
 
 	call shympi_check_2d_node(xgeov,'xgeov')
 	call shympi_check_2d_node(ygeov,'ygeov')

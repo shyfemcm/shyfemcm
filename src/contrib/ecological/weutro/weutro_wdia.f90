@@ -172,7 +172,7 @@
 	write(6,*) '  pelagic 1 2 3 4 7 8'
         write(*,*) SUM(e(:,:,1)),SUM(e(:,:,2)), &
      &                   SUM(e(:,:,3)),SUM(e(:,:,4)), &
-     &                   SUM(e(:,:,7)),SUM(e(:,:,8)),
+     &                   SUM(e(:,:,7)),SUM(e(:,:,8))
 	write(6,*) '  ulva 1 2'
 	write(6,*) SUM(eul(:,1)),SUM(eul(:,2))
 

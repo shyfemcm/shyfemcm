@@ -87,6 +87,10 @@
 ! 05.12.2022    ggu     -facts and -offset working with TS files
 ! 09.03.2023    ggu     setting -facts, -offset in one subroutine
 ! 10.03.2023    ggu     map renamed to influencemap
+! 18.04.2024    ggu     new option convsec to convert time to seconds
+! 05.08.2024    ggu     new option ncglobal
+! 17.10.2024    ggu     new option percentile
+! 24.10.2024    ggu     new option smooth
 !
 !************************************************************
 
@@ -137,6 +141,11 @@
 
 	character*80, save :: sdate0		= ' '
 	logical, save :: bconvert		= .false.
+	logical, save :: bconvsec		= .false.
+
+	logical, save :: bconvwindxy		= .false.
+	logical, save :: bconvwindsd		= .false.
+
 	logical, save :: bcheckdt		= .false.
 	logical, save :: bcheckrain		= .false.
 
@@ -172,8 +181,15 @@
 	logical, save :: b2d			= .false.
 	logical, save :: bvorticity		= .false.
 
+	real, save :: perc			= -1.		!percentile
+
 	logical, save :: bdiff			= .false.
 	real, save :: deps			= 0.
+
+	logical, save :: bsmooth		= .false.
+        character*80, save :: ssmooth		= ' '
+	real, save :: salpha			= 0.
+	integer, save :: sloop			= 0
 
         character*80, save :: areafile		= ' '
         character*80, save :: datefile		= ' '
@@ -188,6 +204,8 @@
         character*80, save :: snode		= ' '
         character*80, save :: scoord		= ' '
         character*80, save :: sextract		= ' '
+
+        character*80, save :: sncglobal		= ' '
 
 	integer, save :: istep			= 0
 	integer, save :: avermode		= 0
@@ -396,9 +414,16 @@
         call clo_add_option('proj projection',' ' &
      &                          ,'projection of coordinates')
         call clo_add_com('    projection is string consisting of '// &
-     &                          'mode,proj,params')
-        call clo_add_com('    mode: +1: cart to geo,  -1: geo to cart')
-        call clo_add_com('    proj: 1:GB, 2:UTM, 3:CPP')
+     &                          'proj,params')
+        call clo_add_com('    proj is one of: GB UTM EC UTM-nonstd LCC')
+        call clo_add_com('    for params see help of shyproj routine')
+
+        call clo_add_sep('options for netcdf files')
+
+        call clo_add_option('ncglobal file',' ' &
+     &		,'file containing extra global options for netcdf files')
+
+        call clo_add_com('    file contains lines with "key: text" information')
 
 	end subroutine elabutil_set_out_options
 
@@ -461,6 +486,8 @@
           call clo_add_sep('time series options')
           call clo_add_option('convert',.false. &
      &			,'convert time column to ISO string')
+          call clo_add_option('convsec',.false. &
+     &			,'convert ISO time column to seconds')
           call clo_add_option('date0',' ' &
      &			,'reference date for conversion of time column')
 	end if
@@ -487,6 +514,21 @@
 
 !************************************************************
 
+	subroutine elabutil_set_convert_options
+
+	use clo
+
+	if( clo_has_option('convwindxy') ) return
+
+        call clo_add_option('convwindxy',.false. &
+     &			,'convert wind to x/y-components')
+        call clo_add_option('convwindsd',.false. &
+     &			,'convert wind to speed/direction format')
+
+	end subroutine elabutil_set_convert_options
+
+!************************************************************
+
 	subroutine elabutil_set_ts_options
 
 	use clo
@@ -494,6 +536,7 @@
 	if( .not. bshowall .and. .not. btsfile ) return
 
 	call elabutil_set_facts_options
+	!call elabutil_set_convert_options
 
 	end subroutine elabutil_set_ts_options
 
@@ -524,6 +567,7 @@
      &                  //' empty for no change')
 
 	call elabutil_set_facts_options
+	call elabutil_set_convert_options
 
 	end subroutine elabutil_set_fem_options
 
@@ -574,6 +618,8 @@
         call clo_add_option('sumvar',.false.,'sum over variables')
 	call clo_add_option('threshold t',flag &
      &				,'compute records over threshold t')
+	call clo_add_option('percentile p',perc &
+     &		,'compute percentile p [%] instead of average (averbas)')
 	call clo_add_option('fact fact',1.,'multiply values by fact')
 	call clo_add_option('freq n',0. &
      &			,'frequency for aver/sum/min/max/std/rms')
@@ -581,6 +627,9 @@
 	call clo_add_option('2d',.false.,'average vertically to 2d field')
 	call clo_add_option('vorticity',.false. &
      &			,'compute vorticity for hydro file')
+
+	call clo_add_option('smooth alpha,loop',ssmooth &
+     &			,'smooths field with alpha and loop')
 
 	end subroutine elabutil_set_shy_options
 
@@ -705,6 +754,7 @@
         call clo_get_option('out',bout)
         call clo_get_option('outformat',outformat)
         call clo_get_option('catmode',catmode)
+        call clo_get_option('ncglobal',sncglobal)
 
         call clo_get_option('split',bsplit)
 	if( bshowall .or. bflxfile .or. bextfile ) then
@@ -724,6 +774,7 @@
 
 	if( bshowall .or. btsfile ) then
           call clo_get_option('convert',bconvert)
+          call clo_get_option('convsec',bconvsec)
           call clo_get_option('date0',sdate0)
           call clo_get_option('facts',factstring)
           call clo_get_option('offset',offstring)
@@ -737,6 +788,8 @@
           call clo_get_option('nodei',snode)
           call clo_get_option('coord',scoord)
           call clo_get_option('newstring',newstring)
+          call clo_get_option('convwindxy',bconvwindxy)
+          call clo_get_option('convwindsd',bconvwindsd)
           call clo_get_option('facts',factstring)
           call clo_get_option('offset',offstring)
 	end if
@@ -762,6 +815,8 @@
           call clo_get_option('freq',ifreq)
           call clo_get_option('2d',b2d)
           call clo_get_option('vorticity',bvorticity)
+          call clo_get_option('smooth',ssmooth)
+          call clo_get_option('percentile',perc)
 	end if
 
 	if( bshowall .or. bshyfile ) then
@@ -821,6 +876,21 @@
         !call ap_set_names(' ',infile)
 
 !-------------------------------------------------------------------
+! check command line options
+!-------------------------------------------------------------------
+
+	if( bconvwindxy .and. bconvwindsd ) then
+	  write(6,*) 'cannot give both -bconvwindxy and -bconvwindsd'
+	  stop 'error stop: convert wind'
+	end if
+
+!-------------------------------------------------------------------
+! elab some options
+!-------------------------------------------------------------------
+
+	call handle_smooth_option
+
+!-------------------------------------------------------------------
 ! set dependent parameters
 !-------------------------------------------------------------------
 
@@ -841,6 +911,8 @@
         boutput = boutput .or. bresample
         boutput = boutput .or. newstring /= ' '
         boutput = boutput .or. sextract /= ' '
+        boutput = boutput .or. bconvwindxy .or. bconvwindsd
+        boutput = boutput .or. bsmooth
 
         !btrans is added later
 	!if( bsumvar ) boutput = .false.
@@ -861,6 +933,30 @@
 	if( bsplitall ) bsplit = .true.
 
 	end subroutine elabutil_get_options
+
+!************************************************************
+
+	subroutine handle_smooth_option
+
+	integer ic
+	double precision d(2)
+
+	integer iscand
+
+	if( ssmooth == ' ' ) return
+
+	ic = iscand(ssmooth,d,2)
+	if( ic /= 2 ) then
+	  write(6,*) 'cannot parse smooth parameters: ',trim(ssmooth)
+	  stop 'error stop handle_smooth_option: cannot parse'
+	end if
+
+	salpha = d(1)
+	sloop = nint(d(2))
+
+	if( salpha > 0. .and. sloop > 0 ) bsmooth = .true.
+
+	end
 
 !************************************************************
 
@@ -943,6 +1039,33 @@
 !====================================================
 	end module elabutil
 !====================================================
+
+	function elabutil_is_silent()
+	use elabutil
+	implicit none
+	logical elabutil_is_silent
+	elabutil_is_silent = bsilent
+	end
+
+!***************************************************************
+
+	function elabutil_is_quiet()
+	use elabutil
+	implicit none
+	logical elabutil_is_quiet
+	elabutil_is_quiet = bquiet
+	end
+
+!***************************************************************
+
+	function elabutil_is_verbose()
+	use elabutil
+	implicit none
+	logical elabutil_is_verbose
+	elabutil_is_verbose = bverb
+	end
+
+!***************************************************************
 
         subroutine outfile_make_depth(nkn,nel,nen3v,hm3v,hev,hkv)
 
@@ -1066,6 +1189,8 @@
 
 ! writes basin average to file
 
+	use elabutil
+
         implicit none
 
 	character*20 aline
@@ -1087,9 +1212,15 @@
           call ivar2filename(ivar,filename)
           call make_iunit_name(filename,'','0d',0,iu)
           ius(iv) = iu
-          write(iu,'(a)') '#      date_and_time    minimum'// &
+	  if( perc > 0. ) then
+            write(iu,'(a)') '#      date_and_time    minimum'// &
+     &                  ' percentile    maximum        std'// &
+     &                  '         total'
+	  else
+            write(iu,'(a)') '#      date_and_time    minimum'// &
      &                  '    average    maximum        std'// &
      &                  '         total'
+	  end if
 	  if( iv == 1 ) then
             !call ivar2filename(0,filename)
 	    filename = 'volume_and_area'

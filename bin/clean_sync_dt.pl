@@ -7,7 +7,7 @@
 while(<>) {
 
   @f = split;
-  next if $f[3];		# 1 indicates syncronization time step
+  next if $f[3] != 0;		# 1 indicates syncronization time step
   print;
 }
 

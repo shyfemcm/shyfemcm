@@ -85,10 +85,10 @@ module aquabc_II_layers_data
     
    type(SAVED_OUTPUT_MATRIX_DS), dimension(:), allocatable :: SAVED_OUTPUTS_IN_LAYERS 
     
-!ontains
+contains
 
     subroutine ALLOC_SAVED_OUTPUTS_IN_LAYERS &
-               (NUM_SHYFEM_LAYERS, NUM_WC_SAVED_OUTPUTS, NUM_NODES_IN_LAYERS)
+     &         (NUM_SHYFEM_LAYERS, NUM_WC_SAVED_OUTPUTS, NUM_NODES_IN_LAYERS)
         
         ! INPUT ARGUMENTS
         integer, intent(in) :: NUM_SHYFEM_LAYERS     ! Number of layers in SHYFEM grid
@@ -215,7 +215,7 @@ end module aquabc_II_layers_data
  subroutine sed_properties_first(bsedim)
  
  use aquabc_II_vars
- use aquabc_pel_state_var_indexes
+ use aquabc_II_pel_state_var_indexes
  use basin, only: nkndi
  
  ! Sediment properties initialization before the first time step
@@ -400,11 +400,12 @@ end module aquabc_II_layers_data
 !  Note:
 !   noslay is not equal to nlbdim in sediment transport
 
-       use para_aqua
+       use aquabc_II_para_aqua
        use aquabc_II_vars  
        
        use levels, only: nlvdi,ilhkv  
        use basin,  only: nkndi,ipv
+	use femtime
        
        use mod_sediment, only: nlbdim, tcn, tmsus, bdens, bleve
        ! Meaning:
@@ -418,15 +419,6 @@ end module aquabc_II_layers_data
        
        implicit none
        
-       !include 'aquabc_II.h'
-       !include 'param.h'
-       include 'femtime.h'
-       !include 'levels.h'
-       !include 'basin.h'   !ipv is used from there
-       
-       !integer ipv(nkndi)	!external node numbers
-       !common  /ipv/ipv
-
       logical bsedim
       
       real getpar !function for obtaining parameters values defined in *.str file
@@ -799,14 +791,11 @@ end module aquabc_II_layers_data
 ! Recalculates initial NH4 and PO4 as  concentrations in porewater
 ! to concentrations in total sediments (pore water + solids)
        
-        use para_aqua
+        use aquabc_II_para_aqua
         use aquabc_II_vars 
         use basin
         
         implicit none
-        
-        !include 'aquabc_II.h'
-        !include 'nbasin.h'
         
         real, intent(inout) :: es        (noslay,nkn,nsstate)  
 !        real, intent(inout) :: sed_output(noslay,nkn,nsoutput)
@@ -865,14 +854,11 @@ end module aquabc_II_layers_data
 ! Recalculates NH4 and PO4 from total concentrations insediments (in pore water + solids)
 ! to solute concentrations in porewater
  
-        use para_aqua
+        use aquabc_II_para_aqua
         use aquabc_II_vars 
         use basin
                   
         implicit none
-        
-        !include 'aquabc_II.h'
-        !include 'nbasin.h'
         
         real, intent(inout) :: es(noslay,nkn,nsstate)  
 !        real sed_output(NOSLAY,nkn,nsoutput)

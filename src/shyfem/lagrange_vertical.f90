@@ -170,9 +170,11 @@
 	real hl(lmax)		!layer thickness (return)
 	real htot,htotz		!total depth without and with zeta (return)
 
-	integer nlev,nsigma,nadapt(4),ii,lmax_act
-	real hsigma,hadapt(4)
+	integer nlev,nsigma,ii,lmax_act
+	real hsigma
 	real z,h
+	integer nadapt(4)
+	real hadapt(4)
 
         !call compute_sigma_info(nlev,hlv,nsigma,hsigma)
 	call get_sigma_info(nlev,nsigma,hsigma)

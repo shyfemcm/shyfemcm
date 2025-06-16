@@ -6,7 +6,7 @@
 
 petsc_dir=/usr/lib/petscdir/petsc3.10/x86_64-linux-gnu-real
 shyfem_dir=~/shyfem
-mod_dir=$shyfem_dir/femlib/mod
+mod_dir=$shyfem_dir/lib/mod
 
 if [ ! -d $petsc_dir ]; then
   echo "*** cannot find directory $petsc_dir"

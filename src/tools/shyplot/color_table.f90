@@ -48,7 +48,7 @@
 !  19.04.2018	ggu	changed VERS_7_5_45
 !  25.10.2018	ggu	changed VERS_7_5_51
 !  18.12.2018	ggu	changed VERS_7_5_52
-!  21.05.2019	ggu	changed VERS_7_5_62
+!  18.09.2024	ggu	new g/set_default_color(), icolor renamed to icoltab
 ! 
 ! ************************************************************
 
@@ -468,21 +468,56 @@
 ! ************************************************************
 ! ************************************************************
 
-	subroutine set_default_color_table( ictab )
+	subroutine set_default_color( rcolor )
+
+!  sets default color of the actual color table
+
+	use color
+
+	implicit none
+
+	real rcolor
+
+	color_def = rcolor
+	call qsetc(rcolor)
+
+	end
+
+! ************************************************************
+
+	subroutine get_default_color( rcolor )
+
+!  gets default color of the actual color table
+
+	use color
+
+	implicit none
+
+	real rcolor
+
+	rcolor = color_def
+
+	end
+
+! ************************************************************
+! ************************************************************
+! ************************************************************
+
+	subroutine set_default_color_table( icoltab )
 
 !  sets default color table
 
 	implicit none
 
-	integer ictab
+	integer icoltab
 
-	call qtdef(ictab)
+	call qtdef(icoltab)
 
 	end
 
 ! *****************************************************************
 
-	subroutine get_color_table( icolor )
+	subroutine get_color_table( icoltab )
 
 !  gets color table used
 
@@ -490,15 +525,15 @@
 
 	implicit none
 
-	integer icolor
+	integer icoltab
 
-	icolor = icol_def
+	icoltab = icoltab_def
 
 	end
 
 ! *****************************************************************
 
-	subroutine set_color_table( icolor )
+	subroutine set_color_table( icoltab )
 
 !  sets color table to be used
 
@@ -506,9 +541,9 @@
 
 	implicit none
 
-	integer icolor
+	integer icoltab
 
-	icol_def = icolor
+	icoltab_def = icoltab
 	call qsetc(0.) 		!try if color table exists
 
 	end
@@ -523,7 +558,7 @@
 
 	implicit none
 
-	call set_color_table( icol_def )
+	call set_color_table( icoltab_def )
 
 	end
 
@@ -537,8 +572,8 @@
 
 	implicit none
 
-	write(6,*) 'color table: actual = ',icol_def
-	!write(666,*) 'color table: actual = ',icol_def
+	write(6,*) 'color table: actual = ',icoltab_def
+	!write(666,*) 'color table: actual = ',icoltab_def
 
 	end
 
@@ -562,32 +597,32 @@
 
 	real col
 
-	integer icol
+	integer icoltab
 
-	icol = icol_def
+	icoltab = icoltab_def
 
-	if( icol .eq. -1 ) then
+	if( icoltab .eq. -1 ) then
 	  call qcolor(col)
-	else if( icol .eq. 0 ) then
+	else if( icoltab .eq. 0 ) then
 	  call qgray(col)
-	else if( icol .eq. 1 ) then
+	else if( icoltab .eq. 1 ) then
 	  call qhue(col)
-	else if( icol .eq. 2 ) then
+	else if( icoltab .eq. 2 ) then
 	  call white_blue( col )
-	else if( icol .eq. 3 ) then
+	else if( icoltab .eq. 3 ) then
 	  call white_red( col )
-	else if( icol .eq. 4 ) then
+	else if( icoltab .eq. 4 ) then
 	  call blue_white_red( col )
-	else if( icol .eq. 5 ) then
+	else if( icoltab .eq. 5 ) then
 	  call blue_black_red( col )
-	else if( icol .eq. 6 ) then
+	else if( icoltab .eq. 6 ) then
 	  call hue_sqrt( col )
-	else if( icol .eq. 7 ) then
+	else if( icoltab .eq. 7 ) then
 	  call hue_pow2( col )
-	else if( icol .eq. 8 ) then
+	else if( icoltab .eq. 8 ) then
 	  call col_cust( col )
 	else
-	  write(6,*) 'icol = ',icol
+	  write(6,*) 'icoltab = ',icoltab
 	  stop 'error stop qsetc: no such color table'
 	end if
 

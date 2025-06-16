@@ -159,6 +159,9 @@
 ! 15.10.2022	ggu	bpresv deleted
 ! 02.04.2023	ggu	min/max of T/S computed correctly for mpi
 ! 09.05.2023    lrp     introduce top layer index variable
+! 03.12.2024    ggu     new info_output framework
+! 05.02.2025    ggu     new info_format for T/S
+! 24.04.2025    ggu     new value for ibarcl: ibercl == 5
 !
 ! notes :
 !
@@ -205,6 +208,8 @@
 	use shympi
 	use pkonst
 	use mkonst
+	use mod_trace_point
+	use mod_info_output
 
 	implicit none
 !
@@ -215,7 +220,6 @@
 ! local
 	logical debug
 	logical bgdebug
-        logical binfo
         logical bstop
 	logical binitial_nos
 	logical boff
@@ -236,6 +240,7 @@
 	real mass
 	real wsink
 	real robs
+	real array(4)
 	real, allocatable :: rho_aux1(:,:)
 	real, allocatable :: rho_aux2(:,:)
 	double precision dtime0,dtime
@@ -244,14 +249,16 @@
 	integer icrst
 	integer ftype
 	real stot,ttot,smin,smax,tmin,tmax,rmin,rmax
+	real saver,taver,vtot
 	double precision v1,v2,mm
 	character*80 file
 	character*20 aline
 	character*4 what
+	character*80 format
 ! functions
 !	real sigma
 	real getpar
-	double precision scalcont,dq
+	double precision dq
 	integer iround
 	integer nbnds
 	logical rst_use_restart
@@ -284,7 +291,6 @@
 
 	levdbg = nint(getpar('levdbg'))
 	debug = levdbg .ge. 3
-	binfo = .true.
         bgdebug = .false.
 	binitial_nos = .true.
 
@@ -294,20 +300,22 @@
 
 	if(icall.eq.0) then	!first time
 
+		call trace_point('initalizing barocl')
 		call shympi_bdebug('initalizing barocl')
 
 		ibarcl=iround(getpar('ibarcl'))
 		if(ibarcl.le.0) icall = -1
-		if(ibarcl.gt.4) then
+		if(ibarcl.gt.5) then
 		  write(6,*) 'Value of ibarcl not allowed: ',ibarcl
 	          stop 'error stop barocl: ibarcl'
 		end if
 		if(icall.eq.-1) return
 
-		bdiag = ibarcl .eq. 2		!diagnostic run
-		badvect = .not. bdiag		!must advect T/S
-		bbarcl = ibarcl .ne. 3		!baroclinic run
-		bobs = ibarcl .eq. 4		!nudging
+		bdiag = ibarcl .eq. 2			!diagnostic run
+		badvect = .not. bdiag			!must advect T/S
+		bobs = ibarcl .eq. 4 .or. ibarcl .eq. 5	!nudging
+		bbarcl = ibarcl .ne. 3			!baroclinic run
+		if( ibarcl .eq. 5 ) bbarcl = .false.
 
 		salref=getpar('salref')
 		temref=getpar('temref')
@@ -323,6 +331,7 @@
 !		--------------------------------------------
 
 		call get_first_dtime(dtime0)
+		call trace_point('initalizing S/T')
 
 		if( .not. rst_use_restart(3) ) then   !no restart of T/S values
 		  saltv = 0.
@@ -355,6 +364,8 @@
 !		initialize open boundary conditions
 !		--------------------------------------------
 
+		call trace_point('initalizing OBC of S/T')
+
 		nbc = nbnds()
 		allocate(idtemp(nbc))
 		allocate(idsalt(nbc))
@@ -375,6 +386,8 @@
 !		initialize rhov
 !		--------------------------------------------
 
+		call trace_point('initalizing rhov')
+
 !		rhov depends on pressure and viceversa
 !		-> we iterate to the real solution
 
@@ -389,7 +402,10 @@
 !		initialize output files
 !		--------------------------------------------
 
+		call trace_point('initalizing T/S output')
+
 		call bcl_open_output(da_out,itemp,isalt,irho)
+		call trace_point('writing T/S output')
 		call bcl_write_output(dtime0,da_out,itemp,isalt,irho)
 
 		if( shympi_is_master() ) then
@@ -402,6 +418,8 @@
 	icall=icall+1
 
 	if(mode.eq.0) return
+
+	call trace_point('barocl normal call')
 
 !----------------------------------------------------------
 ! normal call
@@ -445,9 +463,9 @@
 	  
 	  !call ts_dia('before T/D')
 
-!$OMP TASK PRIVATE(what,dtime) FIRSTPRIVATE(thpar,wsink,robs,itemp) 
-!$OMP&     SHARED(idtemp,tempv,difhv,difv,difmol,tobsv,ttauv)
-!$OMP&     DEFAULT(NONE)
+!$OMP TASK PRIVATE(what,dtime) FIRSTPRIVATE(thpar,wsink,robs,itemp) &
+!$OMP&     SHARED(idtemp,tempv,difhv,difv,difmol,tobsv,ttauv) &
+!$OMP&     DEFAULT(NONE) &
 !$OMP&     IF(itemp > 0)
 
           if( itemp .gt. 0 ) then
@@ -464,9 +482,9 @@
 !	  call openmp_get_thread_num(tid)
 !	  !write(6,*) 'number of thread of salt: ',tid
 
-!$OMP TASK PRIVATE(what,dtime) FIRSTPRIVATE(shpar,wsink,robs,isalt) 
-!$OMP&     SHARED(idsalt,saltv,difhv,difv,difmol,sobsv,stauv)
-!$OMP&     DEFAULT(NONE)
+!$OMP TASK PRIVATE(what,dtime) FIRSTPRIVATE(shpar,wsink,robs,isalt) &
+!$OMP&     SHARED(idsalt,saltv,difhv,difv,difmol,sobsv,stauv) &
+!$OMP&     DEFAULT(NONE) &
 !$OMP&     IF(isalt > 0)
 
           if( isalt .gt. 0 ) then
@@ -486,26 +504,39 @@
 	end if
 
 	if( binfo ) then
+	  format = '(a,e18.9,3f8.3)'
           if( itemp .gt. 0 ) then
-  	    call tsmass(tempv,+1,nlvdi,ttot) 
+  	    !call tsmass(tempv,+1,nlvdi,ttot) 
+	    call scalar_mass(+1,tempv,ttot,vtot)
       	    call conmima(nlvdi,tempv,tmin,tmax)
+	    ttot = shympi_sum(ttot)
+	    vtot = shympi_sum(vtot)
 	    tmin = shympi_min(tmin)
 	    tmax = shympi_max(tmax)
+	    taver = ttot / vtot
+	    array = (/ttot,tmin,tmax,taver/)
 !$OMP CRITICAL
-	    if( iuinfo > 0 ) then
-  	      write(iuinfo,*) 'temp: ',aline,ttot,tmin,tmax
-	    end if
+	    call info_output(' temp','none',4,array,.true.,format)
+	    !if( iuinfo > 0 ) then
+  	    !  write(iuinfo,*) 'temp: ',aline,ttot,tmin,tmax
+	    !end if
 !$OMP END CRITICAL
 	  end if
           if( isalt .gt. 0 ) then
-  	    call tsmass(saltv,+1,nlvdi,stot) 
+  	    !call tsmass(saltv,+1,nlvdi,stot) 
+	    call scalar_mass(+1,saltv,stot,vtot)
        	    call conmima(nlvdi,saltv,smin,smax)
+	    stot = shympi_sum(stot)
+	    vtot = shympi_sum(vtot)
 	    smin = shympi_min(smin)
 	    smax = shympi_max(smax)
+	    saver = stot / vtot
+	    array = (/stot,smin,smax,saver/)
 !$OMP CRITICAL
-	    if( iuinfo > 0 ) then
-  	      write(iuinfo,*) 'salt: ',aline,stot,smin,smax
-	    end if
+	    call info_output(' salt','none',4,array,.true.,format)
+	    !if( iuinfo > 0 ) then
+  	    !  write(iuinfo,*) 'salt: ',aline,stot,smin,smax
+	    !end if
 !$OMP END CRITICAL
 	  end if
 	end if
@@ -995,7 +1026,8 @@
 	  !write(6,'(a)') 'ts_nudge: opening file for '//trim(string)
 	  call ts_open(string,file,dtime,nkn,nlv,id)
 	else if( tau < 0. ) then	!no tau given
-	  goto 99
+	  id = -1
+	  !goto 99
 	else				!tau specified - do not read file
 	  id = 0
 	end if
@@ -1099,6 +1131,7 @@
 ! opens output of T/S
 
 	use levels
+	use mod_trace_point
 
 	implicit none
 
@@ -1118,7 +1151,9 @@
 	call init_output_d('itmcon','idtcon',da_out)
 
 	if( has_output_d(da_out) ) then
+	  call trace_point('initalizing scalar file of T/S')
 	  call shyfem_init_scalar_file('ts',nvar,b2d,id)
+	  call trace_point('finished initalizing scalar file of T/S')
 	  da_out(4) = id
 	end if
 

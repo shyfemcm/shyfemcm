@@ -74,6 +74,24 @@
 ! subroutine dts2dt(it,year,month,day,hour,min,sec) converts it to date and time
 ! subroutine dts2it(it,year,month,day,hour,min,sec) converts date and time to it
 
+! subroutine dts_to_abs_time(date,time,atime)
+! subroutine dts_from_abs_time(date,time,atime)
+! subroutine dts_from_abs_time_to_ys(atime,ys)
+! subroutine dts_from_abs_time_to_days_in_year(atime,days)
+! 
+! subroutine dts_format_abs_time(atime,line)
+! subroutine dts_string2time(string,atime,ierr)
+! 
+! function dts_is_atime(dtime)
+! subroutine dts_to_atime(dtime,atime)
+! subroutine dts_to_dtime(atime,dtime)
+! 
+! subroutine dts_convert_to_atime(datetime,dtime,atime)
+! subroutine dts_convert_from_atime(datetime,dtime,atime)
+! 
+! subroutine weekday(atime,idw)
+! subroutine week_of_year(atime,iw)
+
 !==================================================================
         module dts
 !==================================================================

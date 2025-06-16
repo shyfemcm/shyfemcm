@@ -1,5 +1,1356 @@
 ============================================================
 
+Sun Jun 15 12:22:27 CEST 2025
+
+New version 8_1_1
+
+
+============================================================
+
+Sun Jun 15 12:21:01 CEST 2025
+
+new stable version 8.1.1
+
+ RELEASE_NOTES                 |  4 ++++
+ src/utils/shyutil/version.f90 | 13 +++++++------
+ 2 files changed, 11 insertions(+), 6 deletions(-)
+
+============================================================
+
+Thu Jun 12 18:44:34 CEST 2025
+
+New version 8_2_5
+
+
+============================================================
+
+Thu Jun 12 18:43:02 CEST 2025
+
+new version 8.2.5
+
+ LOG                           |  92 ++++++++++++++++++++++++++++++++++++++++++
+ RELEASE_NOTES                 |  13 ++++++
+ docs/final/shyfem.pdf         | Bin 337852 -> 338422 bytes
+ src/utils/shyutil/version.f90 |  14 ++++---
+ 4 files changed, 113 insertions(+), 6 deletions(-)
+
+============================================================
+
+Sun Mar  9 23:11:04 CET 2025
+
+New version 8_2_4
+
+
+============================================================
+
+Sun Mar  9 23:09:56 CET 2025
+
+new version 8.2.4
+
+ LOG                           |  72 ++++++++++++++++++++++++++++++++++++++++++
+ RELEASE_NOTES                 |   8 +++++
+ docs/final/shyfem.pdf         | Bin 337638 -> 337852 bytes
+ src/shyfem/Makefile           |  15 +++++++--
+ src/utils/shyutil/version.f90 |  11 ++++---
+ src/utils/shyutilmpi/Makefile |   2 ++
+ 6 files changed, 100 insertions(+), 8 deletions(-)
+
+============================================================
+
+Wed Jan 22 10:42:12 CET 2025
+
+New version 8_2_3
+
+
+============================================================
+
+Wed Jan 22 10:41:17 CET 2025
+
+new version 8.2.3 (WW3)
+
+ LOG                                   | 140 ++++++++++++++++++++++++++++++++++
+ RELEASE_NOTES                         |  15 ++++
+ bin/revision/revisionlog.pl           |   4 +-
+ bin/revision/revisionlog_adjust.pl    |   7 +-
+ docs/final/shyfem.pdf                 | Bin 337226 -> 337638 bytes
+ src/contrib/ecological/bfm/Makefile   |  14 +++-
+ src/shyfem/Makefile                   |  24 +++++-
+ src/shyfem/def_para.f90               |   9 ++-
+ src/tools/femutil/netcdf/ncf_util.f90 |   2 +-
+ src/tools/shyelab/Makefile            |   3 +
+ src/utils/shyutil/version.f90         |  13 ++--
+ var/rules/Rules.dist                  |  55 ++++++++++++-
+ 12 files changed, 265 insertions(+), 21 deletions(-)
+
+============================================================
+
+Sun Nov 24 20:21:31 CET 2024
+
+New version 8_2_2
+
+
+============================================================
+
+Sun Nov 24 20:20:44 CET 2024
+
+new version, ibasin and pqual
+
+ LOG                           |  84 ++++++++++++++++++++++++++++++++++++++++++
+ RELEASE_NOTES                 |   7 ++++
+ docs/final/shyfem.pdf         | Bin 336364 -> 337226 bytes
+ src/tools/shybas/Makefile     |   4 ++
+ src/utils/shympi/mpi_node.f90 |   2 +-
+ src/utils/shyutil/version.f90 |  11 +++---
+ 6 files changed, 102 insertions(+), 6 deletions(-)
+
+============================================================
+
+Sat Nov  9 12:04:17 CET 2024
+
+New version 8_2_1
+
+
+============================================================
+
+Fri Nov  8 10:37:09 CET 2024
+
+New version 8_2_0
+
+
+============================================================
+
+Fri Nov  8 10:36:02 CET 2024
+
+new develop version started
+
+ RELEASE_NOTES                 |   5 +++++
+ docs/final/shyfem.pdf         | Bin 334857 -> 334825 bytes
+ src/utils/shyutil/version.f90 |   7 ++++---
+ 3 files changed, 9 insertions(+), 3 deletions(-)
+
+============================================================
+
+Fri Nov  8 10:27:03 CET 2024
+
+New version 8_1_0
+
+
+============================================================
+
+Fri Nov  8 10:25:23 CET 2024
+
+new stable version
+
+ RELEASE_NOTES                 |   5 +++++
+ docs/final/shyfem.pdf         | Bin 334850 -> 334857 bytes
+ src/utils/shyutil/version.f90 |  11 ++++++-----
+ 3 files changed, 11 insertions(+), 5 deletions(-)
+
+============================================================
+
+Mon Oct 14 18:15:32 CEST 2024
+
+New version 8_0_10
+
+
+============================================================
+
+Mon Oct 14 18:14:22 CEST 2024
+
+new version VERS_8_0_10
+
+ docs/final/shyfem.pdf | Bin 334823 -> 334850 bytes
+ 1 file changed, 0 insertions(+), 0 deletions(-)
+
+============================================================
+
+Tue Oct  8 11:55:39 CEST 2024
+
+New version 8_0_9
+
+
+============================================================
+
+Tue Oct  8 11:54:18 CEST 2024
+
+last changes for new version
+
+ LOG                           |  88 ++++++++++++++++++++++++++++++++++++++++++
+ RELEASE_NOTES                 |  11 ++++++
+ docs/femdoc.pl                |   2 +
+ docs/final/shyfem.pdf         | Bin 334806 -> 334823 bytes
+ docs/waves_ww3.tex            |  36 +++++++++--------
+ src/utils/shyutil/version.f90 |  11 +++---
+ 6 files changed, 127 insertions(+), 21 deletions(-)
+
+============================================================
+
+Thu Oct  3 12:21:11 CEST 2024
+
+netcdf output for meteo variables
+
+ src/tools/shyelab/shyelab1.f90        |   5 +-
+ src/tools/shyelab/shyelab_output.f90  |   8 +-
+ src/tools/shynetcdf/elab_nc.f90       |  72 ++++++++++++++---
+ src/tools/shynetcdf/elab_nc_dummy.f90 |   3 +-
+ src/tools/shynetcdf/netcdf.f90        | 140 ++++++++++++++++++++++++----------
+ src/utils/shyutil/strings.f90         |  52 ++++++++++++-
+ 6 files changed, 221 insertions(+), 59 deletions(-)
+
+============================================================
+
+Fri Sep 20 16:49:46 CEST 2024
+
+New version 8_0_8
+
+
+============================================================
+
+Fri Sep 20 16:48:28 CEST 2024
+
+NUOPC final framework
+
+ LOG                           |  23 +++++++++++++++++++++++
+ RELEASE_NOTES                 |   5 +++++
+ Rules.make                    |  34 ----------------------------------
+ bin/check/test_compile.sh     |   5 +++++
+ bin/getheader.pl              |   5 ++++-
+ bin/revision/revision_last.sh |   4 +++-
+ bin/revision/revisionlog.pl   |   2 +-
+ docs/final/shyfem.pdf         | Bin 334915 -> 334915 bytes
+ src/shyfem/Makefile           |  11 +++++++++--
+ src/utils/shyutil/version.f90 |  11 ++++++-----
+ var/rules/Rules.dist          |   2 +-
+ 11 files changed, 57 insertions(+), 45 deletions(-)
+
+============================================================
+
+Fri Sep 13 16:35:28 CEST 2024
+
+changed implementation for OMP
+
+ bin/git/git_info/git_info_merge.txt |  22 ++++
+ src/shyfem/hydrodynamic.f90         |  50 ++++-----
+ src/shyfem/lagrange_main.f90        |  29 ++----
+ src/shyfem/openmp_admin.f90         | 202 +++++++++++++++++++++++++++++++++++-
+ src/shyfem/shyfem.f90               |   2 +-
+ src/shyfem/tvd_admin.f90            |   2 +
+ 6 files changed, 254 insertions(+), 53 deletions(-)
+ new file:
+   bin/git/git_info/git_info_merge.txt
+
+============================================================
+
+Fri Sep 13 11:42:14 CEST 2024
+
+changes from branch mpi integrated
+
+ src/shyfem/Makefile                    |  3 +-
+ src/utils/shympi/mpi_node.f90          | 25 ++++++---
+ src/utils/shympi/mpi_node_internal.f90 |  2 +
+ src/utils/shyutil/Makefile             |  2 +
+ src/{shyfem => utils/shyutil}/tvd.f90  |  0
+ src/utils/shyutilmpi/find.f90          | 99 +++++++++++++++++++++++++++++++++-
+ 6 files changed, 120 insertions(+), 11 deletions(-)
+ renamed:
+    src/shyfem/tvd.f90 -> src/utils/shyutil/tvd.f90
+
+============================================================
+
+Thu Sep 12 17:48:32 CEST 2024
+
+New version 8_0_7
+
+
+============================================================
+
+Thu Sep 12 17:47:07 CEST 2024
+
+release notes
+
+ RELEASE_NOTES                         | 7 +++++++
+ bin/git/git-tag                       | 8 +++++---
+ bin/git/git_info/git_info_general.txt | 2 +-
+ bin/revision/revision_last.sh         | 6 ++++--
+ bin/revision/revisionlog.pl           | 2 +-
+ bin/revision/revisionlog.sh           | 4 +++-
+ bin/revision/revisionlog_adjust.pl    | 2 +-
+ 7 files changed, 22 insertions(+), 9 deletions(-)
+
+============================================================
+
+Thu Sep 12 17:30:14 CEST 2024
+
+starting release for nuopc framework
+
+ bin/git/git_info/git_info_general.txt |   2 +-
+ docs/final/shyfem.pdf                 | Bin 334911 -> 334915 bytes
+ src/shyfem/Makefile                   |   1 +
+ src/tools/shyelab/Makefile            |   3 +++
+ src/tools/shynetcdf/Makefile          |   2 +-
+ src/utils/shyutil/version.f90         |   7 ++++---
+ 6 files changed, 10 insertions(+), 5 deletions(-)
+
+============================================================
+
+Thu Sep 12 13:39:24 CEST 2024
+
+unique names for WRF conflicts
+
+ Makefile                          |  3 +-
+ src/shyfem/custom_admin.f90       | 13 ++++----
+ src/shyfem/lagrange_dif.f90       | 27 ++++++++--------
+ src/utils/generic/color_utils.f90 |  2 +-
+ src/utils/generic/random_gen.f90  | 66 +++++++++++++++++++--------------------
+ 5 files changed, 57 insertions(+), 54 deletions(-)
+
+============================================================
+
+Thu Sep 12 10:46:19 CEST 2024
+
+flush bas file before closing
+
+ src/shyfem/shypre_subs.f90 | 2 ++
+ 1 file changed, 2 insertions(+)
+
+============================================================
+
+Tue Sep 10 16:59:49 CEST 2024
+
+mass balance for mpi adjusted
+
+ src/shyfem/check.f90 | 21 +++++++++++++++------
+ 1 file changed, 15 insertions(+), 6 deletions(-)
+
+============================================================
+
+Tue Sep 10 10:52:27 CEST 2024
+
+bug fix for shyplot
+
+ src/tools/shyplot/shyplot.f90 | 5 ++++-
+ 1 file changed, 4 insertions(+), 1 deletion(-)
+
+============================================================
+
+Thu Sep  5 16:02:23 CEST 2024
+
+still compiler errors with intel (fixed)
+
+ src/shyfem/check.f90                  | 4 ++--
+ src/tools/shyelab/femelab1.f90        | 4 ++--
+ src/tools/shyelab/femelab2.f90        | 4 ++--
+ src/tools/shynetcdf/elab_nc_dummy.f90 | 7 +++----
+ src/tools/shynetcdf/nc_util.f90       | 6 +++---
+ 5 files changed, 12 insertions(+), 13 deletions(-)
+
+============================================================
+
+Thu Sep  5 14:24:47 CEST 2024
+
+compiler errors with intel fixed
+
+ src/tools/shyelab/lgrelab1.f90        |  2 +-
+ src/tools/shyelab/shyelab_output.f90  |  2 +-
+ src/tools/shynetcdf/elab_nc.f90       |  2 +-
+ src/tools/shynetcdf/elab_nc_dummy.f90 | 11 +++++++++++
+ src/tools/shynetcdf/ts2nc.f90         |  4 +++-
+ 5 files changed, 17 insertions(+), 4 deletions(-)
+
+============================================================
+
+Thu Sep  5 11:48:37 CEST 2024
+
+more on tvd mpi
+
+ src/shyfem/tvd.f90           |  18 ++++---
+ src/shyfem/tvd_admin.f90     |  87 ++++++-------------------------
+ src/utils/shympi/mpi_tvd.f90 | 119 ++++++++++++++++++++++++++++++++++++++++---
+ 3 files changed, 138 insertions(+), 86 deletions(-)
+
+============================================================
+
+Wed Aug 28 14:21:32 CEST 2024
+
+first part of tvd finished
+
+ Rules.make                    |  15 ++--
+ src/shyfem/tvd_admin.f90      |  81 ++++++++++++++++--
+ src/utils/shympi/mpi_node.f90 |  18 ++--
+ src/utils/shympi/mpi_tvd.f90  | 187 +++++++++++++++++++++++++++++++++++-------
+ src/utils/shyutilmpi/find.f90 |  79 ++++++++++++++++++
+ 5 files changed, 330 insertions(+), 50 deletions(-)
+
+============================================================
+
+Mon Aug  5 14:54:48 CEST 2024
+
+new option ncglobal, error when reading nc-4 files
+
+ src/tools/shyelab/elabutil.f90       | 11 ++++++
+ src/tools/shyelab/shyelab_output.f90 |  2 +-
+ src/tools/shynetcdf/elab_nc.f90      |  7 +++-
+ src/tools/shynetcdf/netcdf.f90       | 75 +++++++++++++++++++++++++++++++++++-
+ 4 files changed, 90 insertions(+), 5 deletions(-)
+
+============================================================
+
+Sun Aug  4 20:37:42 CEST 2024
+
+started tvd mpi
+
+ src/shyfem/tvd.f90           |   3 +
+ src/shyfem/tvd_admin.f90     |  18 ++--
+ src/utils/shympi/Makefile    |   1 +
+ src/utils/shympi/mpi_tvd.f90 | 215 +++++++++++++++++++++++++++++++++++++++++++
+ 4 files changed, 231 insertions(+), 6 deletions(-)
+ new file:
+   src/utils/shympi/mpi_tvd.f90
+
+============================================================
+
+Fri Aug  2 10:16:15 CEST 2024
+
+cf_role eliminated
+
+ src/tools/shynetcdf/netcdf.f90 | 5 +++--
+ 1 file changed, 3 insertions(+), 2 deletions(-)
+
+============================================================
+
+Thu Aug  1 18:24:31 CEST 2024
+
+update netcdf, projection in shyelab
+
+ src/tools/shyelab/elabutil.f90               |   6 +-
+ src/tools/shyelab/lgrelab1.f90               |   2 +-
+ src/tools/shyelab/shyelab1.f90               |   1 +
+ src/tools/shyelab/shyelab_output.f90         |   4 +-
+ src/tools/shyelab/shyelab_proj.f90           |  74 +++++--
+ src/tools/shyelab/{shyproj.f => shyproj.f90} |  28 +--
+ src/tools/shynetcdf/elab_nc.f90              |  23 +-
+ src/tools/shynetcdf/netcdf.f90               | 311 ++++++++++++++++++++++++++-
+ src/tools/shynetcdf/ts2nc.f90                |   3 +-
+ src/utils/generic/projection.f90             |  68 +++++-
+ src/utils/shyutil/basin.f90                  |  25 ++-
+ 11 files changed, 490 insertions(+), 55 deletions(-)
+ renamed:
+    src/tools/shyelab/shyproj.f -> src/tools/shyelab/shyproj.f90
+
+============================================================
+
+Tue Jul 30 17:33:14 CEST 2024
+
+started tvd
+
+ src/shyfem/hydrodynamic.f90   |  50 ++++-------
+ src/shyfem/lagrange_main.f90  |  29 +++---
+ src/shyfem/openmp_admin.f90   | 202 +++++++++++++++++++++++++++++++++++++++++-
+ src/shyfem/shyfem.f90         |   2 +-
+ src/shyfem/tvd_admin.f90      | 146 +++++++++++++++++++++++++-----
+ src/utils/shyutilmpi/find.f90 |  20 ++++-
+ 6 files changed, 373 insertions(+), 76 deletions(-)
+
+============================================================
+
+Wed Jul 24 11:31:43 CEST 2024
+
+minor
+
+ bin/git/git-release               |  6 ++-
+ docs/howto/SHYFEM_QUICK_START.txt | 94 +++++++++++++++++++++++++++++++++++++++
+ 2 files changed, 98 insertions(+), 2 deletions(-)
+ new file:
+   docs/howto/SHYFEM_QUICK_START.txt
+
+============================================================
+
+Thu Jun 27 21:03:32 CEST 2024
+
+RELEASE_NOTES
+
+ RELEASE_NOTES | 6 ++++++
+ 1 file changed, 6 insertions(+)
+
+============================================================
+
+Thu Jun 27 21:00:18 CEST 2024
+
+New version 8_0_6
+
+
+============================================================
+
+Thu Jun 27 20:59:27 CEST 2024
+
+new version
+
+ docs/final/shyfem.pdf         | Bin 334907 -> 334911 bytes
+ src/utils/shyutil/version.f90 |   7 ++++---
+ 2 files changed, 4 insertions(+), 3 deletions(-)
+
+============================================================
+
+Thu Jun 27 14:52:35 CEST 2024
+
+new documentation for netcdf (nc2fem)
+
+ docs/howto/HOWTO_FEM_FILES.txt | 82 ++++++++++++++++++++++++++++++++++++++++++
+ 1 file changed, 82 insertions(+)
+ new file:
+   docs/howto/HOWTO_FEM_FILES.txt
+
+============================================================
+
+Thu Jun 27 14:22:24 CEST 2024
+
+netcdf updates, shyplot debugged
+
+ src/tools/shynetcdf/Makefile                       |   2 +-
+ src/tools/shynetcdf/{nc2fem.f => nc2fem.f90}       | 336 ++++++++++-----------
+ .../{nc_dim_coords.f => nc_dim_coords.f90}         | 148 ++++-----
+ src/tools/shynetcdf/{nc_domain.f => nc_domain.f90} |   8 +-
+ src/tools/shynetcdf/{nc_tutil.f => nc_tutil.f90}   |  72 ++---
+ src/tools/shynetcdf/{nc_util.f => nc_util.f90}     | 140 ++++-----
+ src/tools/shynetcdf/netcdf.f90                     |  46 ++-
+ src/tools/shyplot/shyplot.f90                      |  20 +-
+ src/utils/shyutil/strings.f90                      |   2 +-
+ 9 files changed, 411 insertions(+), 363 deletions(-)
+ renamed:
+    src/tools/shynetcdf/nc2fem.f -> src/tools/shynetcdf/nc2fem.f90
+    src/tools/shynetcdf/nc_dim_coords.f -> src/tools/shynetcdf/nc_dim_coords.f90
+    src/tools/shynetcdf/nc_domain.f -> src/tools/shynetcdf/nc_domain.f90
+    src/tools/shynetcdf/nc_tutil.f -> src/tools/shynetcdf/nc_tutil.f90
+    src/tools/shynetcdf/nc_util.f -> src/tools/shynetcdf/nc_util.f90
+
+============================================================
+
+Mon Jun 24 14:24:05 CEST 2024
+
+Makefiles updated
+
+ Makefile                       | 11 ++++++-----
+ bin/fem3d/compare_f90f.sh      | 34 ++++++++++++++++++++++++++++++++++
+ bin/fem3d/f902f.pl             | 29 +++++++++++++++++++++++++++--
+ docs/howto/HOWTO_GIT_REPO.txt  |  6 +++++-
+ src/Makefile                   |  9 ++++++---
+ src/contrib/Makefile           |  2 ++
+ src/external/Makefile          |  5 +++--
+ src/external/gotm/Makefile     |  3 ++-
+ src/external/sparskit/Makefile |  3 ++-
+ src/shyfem/Makefile            | 12 +++++++++---
+ src/tools/Makefile             |  1 +
+ src/utils/Makefile             |  5 +++--
+ src/utils/generic/Makefile     |  3 ++-
+ src/utils/shympi/Makefile      |  3 ++-
+ src/utils/shyutil/Makefile     |  3 ++-
+ src/utils/shyutilmpi/Makefile  |  3 ++-
+ 16 files changed, 108 insertions(+), 24 deletions(-)
+ new file:
+   bin/fem3d/compare_f90f.sh
+
+============================================================
+
+Mon May 13 18:29:04 CEST 2024
+
+final shypre
+
+ src/shyfem/Makefile              |    5 +-
+ src/shyfem/constants.f90         |    3 +-
+ src/shyfem/shypre_opti.f90       | 1107 ++++++++++++++++++++++++++++++++++++++
+ src/tools/shypre/Makefile        |    8 +-
+ src/tools/shypre/rosen.f90       |    6 +-
+ src/tools/shypre/shypre_opti.f90 | 1107 ++++++++++++++++++++++++++++++++++++++
+ src/utils/shyutil/basin.f90      |    4 +-
+ 7 files changed, 2231 insertions(+), 9 deletions(-)
+ new file:
+   src/shyfem/shypre_opti.f90
+   src/tools/shypre/shypre_opti.f90
+
+============================================================
+
+Sat May 11 08:30:45 CEST 2024
+
+temporary commit for shypre
+
+ src/shyfem/shypre_noopti.f90          |   89 ++
+ src/shyfem/shypre_subs.f90            | 1460 +++++++++++++++++++++++
+ src/tools/shypre/shypre_noopti.f90    |  182 +++
+ src/tools/shypre/shypre_opti_subs.f90 |  411 +++++++
+ src/tools/shypre/shypre_orig.f90      | 2065 +++++++++++++++++++++++++++++++++
+ 5 files changed, 4207 insertions(+)
+ new file:
+   src/shyfem/shypre_noopti.f90
+   src/shyfem/shypre_subs.f90
+   src/tools/shypre/shypre_noopti.f90
+   src/tools/shypre/shypre_opti_subs.f90
+   src/tools/shypre/shypre_orig.f90
+
+============================================================
+
+Sat May 11 08:29:59 CEST 2024
+
+first (incomplete commit) for shypre
+
+ .gitignore                                   |  212 +--
+ bin/fem3d/usemod.pl                          |   14 +-
+ bin/gp                                       |  116 +-
+ bin/shyfind.sh                               |    9 +-
+ bin/shypath.sh                               |   11 +-
+ src/shyfem/Makefile                          |    7 +
+ src/shyfem/constants.f90                     |  136 +-
+ src/shyfem/elems_dealing.f90                 |   44 +
+ src/shyfem/hydrodynamic.f90                  |    5 +
+ src/shyfem/initialize.f90                    |    4 +
+ src/shyfem/shyfem.f90                        |   19 +-
+ src/tools/shybas/shybas.f                    |  106 +-
+ src/tools/shyelab/lgrelab1.f90               |    2 +-
+ src/tools/shyelab/shyelab1.f90               |    2 +-
+ src/tools/shyplot/shyplot.f90                |   11 +-
+ src/tools/shypre/Makefile                    |   35 +-
+ src/tools/shypre/shypre.f90                  | 1854 +-------------------------
+ src/utils/generic/Makefile                   |    3 +
+ src/utils/generic/clo.f90                    |  240 +++-
+ src/utils/generic/grd.f90                    |   67 +-
+ src/utils/shyutil/Makefile                   |    3 +
+ src/utils/shyutil/basin.f90                  |   82 +-
+ src/utils/shyutil/defnames.f90               |   87 ++
+ src/utils/{shyutilmpi => shyutil}/evgeom.f90 |  146 +-
+ src/utils/shyutil/grdutil.f90                |   23 +-
+ src/utils/shyutilmpi/Makefile                |    6 +-
+ 26 files changed, 969 insertions(+), 2275 deletions(-)
+ renamed:
+    src/utils/shyutilmpi/evgeom.f90 -> src/utils/shyutil/evgeom.f90
+
+============================================================
+
+Tue Apr 23 14:57:03 CEST 2024
+
+conversion routines (time and wind) in fem/ts-elab
+
+ bin/average.pl                 |  12 ++--
+ src/tools/shyelab/elabutil.f90 |  38 +++++++++++
+ src/tools/shyelab/femelab1.f90 | 152 ++++++++++++++++++++++++++++++++++++++++-
+ src/tools/shyelab/tselab1.f90  |  16 ++++-
+ src/utils/generic/tsfile.f90   |  57 ++++++++++++++++
+ 5 files changed, 266 insertions(+), 9 deletions(-)
+
+============================================================
+
+Sat Apr 13 16:24:31 CEST 2024
+
+mpi_tripple reviewed
+
+ bin/fem3d/usemod.pl                          |   6 +-
+ bin/shypath.sh                               |   5 +
+ src/shyfem/Makefile                          |   8 +-
+ src/shyfem/explicit.f90                      |  31 +++---
+ src/shyfem/shyfem.f90                        |   2 +-
+ src/utils/generic/flood.f90                  |  73 ++++++++++--
+ src/utils/generic/queue.f90                  |  11 +-
+ src/utils/shympi/Makefile                    |   9 +-
+ src/{shyfem => utils/shympi}/mpi_tripple.f90 | 102 +++++++++++++----
+ src/utils/shympi/shyparts_custom.f90         | 160 +++++++++++++++++++++++++--
+ src/utils/shympi/shyparts_util.f90           |  17 +++
+ 11 files changed, 361 insertions(+), 63 deletions(-)
+ renamed:
+    src/shyfem/mpi_tripple.f90 -> src/utils/shympi/mpi_tripple.f90
+
+============================================================
+
+Thu Apr 11 13:45:24 CEST 2024
+
+changes to howto files
+
+ docs/howto/{HOWTO_BUG => HOWTO_BUG.txt}           |  0
+ docs/howto/{HOWTO_GIT => HOWTO_GIT.txt}           | 11 ++++++-----
+ docs/howto/{HOWTO_GIT_REPO => HOWTO_GIT_REPO.txt} |  0
+ docs/howto/{HOWTO_MPI => HOWTO_MPI.txt}           |  0
+ docs/howto/{HOWTO_NETCDF => HOWTO_NETCDF.txt}     |  0
+ docs/howto/{HOWTO_PETSC => HOWTO_PETSC.txt}       |  2 +-
+ docs/howto/{INFO_INSTALL => INFO_INSTALL.txt}     |  0
+ docs/howto/Makefile                               |  8 ++++++++
+ 8 files changed, 15 insertions(+), 6 deletions(-)
+ new file:
+   docs/howto/Makefile
+ renamed:
+    docs/howto/HOWTO_BUG -> docs/howto/HOWTO_BUG.txt
+    docs/howto/HOWTO_GIT -> docs/howto/HOWTO_GIT.txt
+    docs/howto/HOWTO_GIT_REPO -> docs/howto/HOWTO_GIT_REPO.txt
+    docs/howto/HOWTO_MPI -> docs/howto/HOWTO_MPI.txt
+    docs/howto/HOWTO_NETCDF -> docs/howto/HOWTO_NETCDF.txt
+    docs/howto/HOWTO_PETSC -> docs/howto/HOWTO_PETSC.txt
+    docs/howto/INFO_INSTALL -> docs/howto/INFO_INSTALL.txt
+
+============================================================
+
+Thu Apr 11 10:54:56 CEST 2024
+
+New version 8_0_5
+
+
+============================================================
+
+Thu Apr 11 10:54:01 CEST 2024
+
+new version 8.0.5
+
+ RELEASE_NOTES                 |   6 ++++++
+ docs/final/shyfem.pdf         | Bin 334907 -> 334907 bytes
+ src/shyfem/Makefile           |  12 ++++++++++--
+ src/tools/shyelab/Makefile    |  10 ++--------
+ src/utils/shympi/Makefile     |   5 ++++-
+ src/utils/shyutil/version.f90 |   7 ++++---
+ src/utils/shyutilmpi/Makefile |   4 +++-
+ 7 files changed, 29 insertions(+), 15 deletions(-)
+
+============================================================
+
+Thu Apr 11 09:29:07 CEST 2024
+
+finished offline
+
+ src/shyfem/offline_data.f90          |  36 ++-
+ src/shyfem/ous_admin.f90             |   3 +-
+ src/shyfem/shyfem.f90                | 129 +++++++++-
+ src/tools/femutil/dstruc/queue.f90   |   9 +-
+ src/utils/generic/Makefile           |   6 +
+ src/utils/generic/connections.f90    |   7 +
+ src/utils/generic/flood.f90          | 202 +++++++++++++++
+ src/utils/generic/queue.f90          | 434 ++++++++++++++++++++++++++++++++
+ src/utils/shympi/Makefile            |   8 +-
+ src/utils/shympi/shyparts_custom.f90 | 465 +++++++++++++++++++++++++++++++++--
+ src/utils/shympi/shyparts_metis.f90  |   2 +-
+ src/utils/shympi/shyparts_util.f90   |  32 ++-
+ src/utils/shyutil/defnames.f90       |  25 ++
+ src/utils/shyutilmpi/io_off.f90      | 173 ++++++++++---
+ src/utils/shyutilmpi/trace_point.f90 |  13 +-
+ 15 files changed, 1476 insertions(+), 68 deletions(-)
+ new file:
+   src/utils/generic/flood.f90
+   src/utils/generic/queue.f90
+
+============================================================
+
+Sat Apr  6 21:48:17 CEST 2024
+
+check_shympi_debug.f90
+
+ src/utils/shympi/Makefile               |   21 +-
+ src/utils/shympi/check_shympi_debug.f90 | 1269 +++++++++++++++++++++++++++++++
+ 2 files changed, 1286 insertions(+), 4 deletions(-)
+ new file:
+   src/utils/shympi/check_shympi_debug.f90
+
+============================================================
+
+Sat Apr  6 17:55:14 CEST 2024
+
+debugging intel mpi compiler (not yet finished)
+
+ Rules.make                             |  4 +--
+ bin/git/git-gui                        |  7 ++--
+ src/external/sparskit/Makefile         |  7 +++-
+ src/shyfem/elems_dealing.f90           |  4 +++
+ src/shyfem/hydrodynamic.f90            | 11 ++++++
+ src/shyfem/initialize.f90              | 12 +++++--
+ src/shyfem/meteo_forcing.f90           |  4 +++
+ src/shyfem/mpi_assert.f90              | 19 +++++++++++
+ src/shyfem/shyfem.f90                  | 11 ++++--
+ src/shyfem/turbulence.f90              | 61 ++++++++++++++++++++++------------
+ src/utils/shympi/Makefile              |  3 ++
+ src/utils/shympi/README                | 28 ++++++++++++++++
+ src/utils/shympi/mpi_debug.f90         | 39 ++++++++++++++++++++++
+ src/utils/shympi/mpi_dummy.f90         |  1 +
+ src/utils/shympi/mpi_ghost.f90         | 46 ++++++++++++++++++-------
+ src/utils/shympi/mpi_node.f90          | 45 +++++++++++++++++--------
+ src/utils/shympi/mpi_node_internal.f90 | 47 +++++++++++++++++++++-----
+ src/utils/shyutilmpi/coordinates.f90   | 18 ++++++++--
+ src/utils/shyutilmpi/trace_point.f90   |  2 +-
+ var/rules/Rules.dist                   |  4 +--
+ 20 files changed, 304 insertions(+), 69 deletions(-)
+
+============================================================
+
+Wed Apr  3 11:35:38 CEST 2024
+
+MPI debugging (aux arrays to make dims equal) real commit
+
+ src/shyfem/boxes.f90                   |  3 +-
+ src/utils/shympi/mpi_node.f90          |  8 ++++-
+ src/utils/shympi/mpi_node_internal.f90 | 65 ++++++++++++++++++++++------------
+ src/utils/shyutilmpi/trace_point.f90   |  2 +-
+ 4 files changed, 52 insertions(+), 26 deletions(-)
+
+============================================================
+
+Wed Apr  3 11:34:47 CEST 2024
+
+MPI debugging (aux arrays to make dims equal)
+
+
+============================================================
+
+Wed Mar 27 12:44:03 CET 2024
+
+more on trace_points
+
+ src/shyfem/baroclinic.f90              |  15 ++
+ src/shyfem/shyfem.f90                  |   9 ++
+ src/tools/shyelab/elab_nc.f90          | 246 ---------------------------------
+ src/tools/shyelab/elab_nc_dummy.f90    | 112 ---------------
+ src/tools/shynetcdf/elab_nc_dummy.f90  |   3 +-
+ src/utils/shympi/mpi_node_internal.f90 |   7 +-
+ src/utils/shyutilmpi/io_off.f90        |   8 ++
+ src/utils/shyutilmpi/shy_util.f90      |  23 ++-
+ src/utils/shyutilmpi/trace_point.f90   |   4 +-
+ 9 files changed, 62 insertions(+), 365 deletions(-)
+ deleted:
+    src/tools/shyelab/elab_nc.f90
+    src/tools/shyelab/elab_nc_dummy.f90
+
+============================================================
+
+Wed Mar 27 09:57:56 CET 2024
+
+more on mpi bug
+
+ .gitignore                    |   2 +
+ bin/strparse.pl               |   3 ++
+ src/tools/shyelab/Makefile    |   5 +-
+ src/tools/shyelab/shyfile.f90 | 112 ++++++++++++++++++++++++++++++++++++++++++
+ src/utils/shympi/mpi_node.f90 |   9 ++--
+ 5 files changed, 127 insertions(+), 4 deletions(-)
+ new file:
+   src/tools/shyelab/shyfile.f90
+
+============================================================
+
+Thu Mar 21 14:55:08 CET 2024
+
+intermediate - mpi bug not yet resolved
+
+ Rules.make                             |  2 +-
+ bin/shypath.sh                         | 23 ++++++++-
+ src/shyfem/elems_dealing.f90           |  4 +-
+ src/shyfem/iostr.f90                   |  4 ++
+ src/shyfem/ous_admin.f90               |  5 ++
+ src/shyfem/shyfem.f90                  |  5 ++
+ src/tools/shyplot/supout.f90           |  9 ++--
+ src/utils/shympi/Makefile              |  5 ++
+ src/utils/shympi/mpi_node.f90          | 68 +++++++++++++++++++-------
+ src/utils/shympi/mpi_node_internal.f90 |  7 ++-
+ src/utils/shyutilmpi/Makefile          |  5 ++
+ src/utils/shyutilmpi/io_off.f90        |  7 ++-
+ src/utils/shyutilmpi/shy_util.f90      |  8 +++
+ src/utils/shyutilmpi/trace_point.f90   | 89 ++++++++++++++++++++++++++++++++++
+ var/rules/Rules.dist                   |  2 +-
+ 15 files changed, 214 insertions(+), 29 deletions(-)
+ new file:
+   src/utils/shyutilmpi/trace_point.f90
+
+============================================================
+
+Tue Mar 19 13:13:24 CET 2024
+
+more on offline, turbulence implemented
+
+ bin/colors.sh                   |   4 +
+ src/shyfem/check.f90            | 129 +++++++++++++++++++++++
+ src/shyfem/offline_data.f90     |  75 +++++++++-----
+ src/shyfem/shyfem.f90           |   4 +
+ src/utils/shyutilmpi/io_off.f90 | 221 ++++++++++++++++++++++++++--------------
+ 5 files changed, 333 insertions(+), 100 deletions(-)
+
+============================================================
+
+Wed Mar 13 14:59:25 CET 2024
+
+mpi g2l routines added, bmpi_skip
+
+ bin/shyfind.sh                  |   6 +-
+ docs/howto/HOWTO_GIT            |  21 +-
+ docs/howto/HOWTO_GIT_REPO       |  84 ++++++++
+ docs/howto/HOWTO_NETCDF         |   2 +-
+ src/shyfem/discharge_flux.f90   |  13 +-
+ src/shyfem/offline_data.f90     |  29 +--
+ src/utils/shympi/mpi_dummy.f90  | 137 ++++++++-----
+ src/utils/shympi/mpi_node.f90   | 440 +++++++++++++++++++++++++++++++++++++---
+ src/utils/shyutilmpi/io_off.f90 | 218 ++++++++++++++++----
+ 9 files changed, 813 insertions(+), 137 deletions(-)
+ new file:
+   docs/howto/HOWTO_GIT_REPO
+
+============================================================
+
+Tue Mar 12 11:20:34 CET 2024
+
+upgraded README
+
+ Makefile              |   7 ++----
+ README                |  58 +++++++++++++++++++++++++++++++++++++-------------
+ docs/final/shyfem.pdf | Bin 334911 -> 334907 bytes
+ 3 files changed, 45 insertions(+), 20 deletions(-)
+
+============================================================
+
+Mon Mar 11 13:43:27 CET 2024
+
+finished first part of offline (mpi-mode)
+
+ bin/colors.sh                          |  32 +++++
+ bin/git/git-commit                     |   3 +-
+ bin/recursivemake                      |   2 +
+ src/shyfem/Makefile                    |   2 +-
+ src/shyfem/offline_data.f90            | 229 +++++++++++++-------------------
+ src/shyfem/shyfem.f90                  |   8 +-
+ src/utils/shyutilmpi/intp_fem_file.f90 |   4 +-
+ src/utils/shyutilmpi/io_off.f90        | 233 ++++++++++++++++++++++++++-------
+ var/rules/rules.sh                     |   4 +-
+ 9 files changed, 325 insertions(+), 192 deletions(-)
+ new file:
+   bin/colors.sh
+
+============================================================
+
+Thu Mar  7 19:14:49 CET 2024
+
+started offline with mpi
+
+ bin/git/git-commit              |  14 +++-
+ src/utils/shympi/mpi_dummy.f90  |  28 +++++++-
+ src/utils/shympi/mpi_node.f90   | 134 +++++++++++++++++++++++++++++++++++++-
+ src/utils/shyutilmpi/io_off.f90 | 141 ++++++++++++++++++++++++++++------------
+ 4 files changed, 271 insertions(+), 46 deletions(-)
+
+============================================================
+
+Thu Mar  7 08:12:34 CET 2024
+
+offline file renamed, other small stuff
+
+ bin/gp                                       | 16 ++++++++--------
+ src/shyfem/offline_data.f90                  |  4 ++++
+ src/utils/shyutil/Makefile                   |  2 --
+ src/utils/shyutilmpi/Makefile                |  2 ++
+ src/utils/{shyutil => shyutilmpi}/io_off.f90 |  0
+ 5 files changed, 14 insertions(+), 10 deletions(-)
+ renamed:
+    src/utils/shyutil/io_off.f90 -> src/utils/shyutilmpi/io_off.f90
+
+============================================================
+
+Wed Mar  6 17:38:45 CET 2024
+
+info
+
+ bin/git/git_info/git_info_branch.txt | 1 +
+ 1 file changed, 1 insertion(+)
+
+============================================================
+
+Wed Mar  6 17:22:15 CET 2024
+
+missing lib/mod fixed
+
+ Makefile     | 12 ++++++++----
+ src/Makefile |  6 +++++-
+ 2 files changed, 13 insertions(+), 5 deletions(-)
+
+============================================================
+
+Wed Mar  6 14:34:12 CET 2024
+
+minor
+
+ bin/git/git-release                   | 4 +++-
+ bin/git/git_info/git_info_version.txt | 2 +-
+ 2 files changed, 4 insertions(+), 2 deletions(-)
+
+============================================================
+
+Wed Mar  6 14:21:14 CET 2024
+
+New version 8_0_4
+
+
+============================================================
+
+Wed Mar  6 14:20:16 CET 2024
+
+new release 8.0.4
+
+ RELEASE_NOTES                 | 12 ++++--------
+ src/utils/shyutil/version.f90 |  7 ++++---
+ 2 files changed, 8 insertions(+), 11 deletions(-)
+
+============================================================
+
+Wed Mar  6 13:55:16 CET 2024
+
+helper routines
+
+ .gitignore                            |   8 +++----
+ bin/git/git-info                      |   2 +-
+ bin/git/git_info/git_info_version.txt |   2 ++
+ bin/shyfem_util/shyfem_dir.sh         |  42 +++++++++++++++++++++++++---------
+ bin/shyfem_util/shyfem_profile.sh     |  21 ++++++++++-------
+ bin/shyfem_util/shyfem_version.sh     |  15 +++++++++---
+ bin/shypath.sh                        |   8 +++++--
+ docs/final/shyfem.pdf                 | Bin 334911 -> 334911 bytes
+ 8 files changed, 69 insertions(+), 29 deletions(-)
+
+============================================================
+
+Tue Mar  5 17:44:11 CET 2024
+
+last minute changes
+
+ bin/shypath.sh                 |   4 ++++
+ docs/final/shyfem.pdf          | Bin 334914 -> 334911 bytes
+ src/tools/shynetcdf/netcdf.f90 |   2 +-
+ 3 files changed, 5 insertions(+), 1 deletion(-)
+
+============================================================
+
+Tue Mar  5 15:58:00 CET 2024
+
+bug fixes, gp and gps routines
+
+ bin/Makefile                   |   2 +-
+ bin/gp                         |  29 +-
+ bin/{ps => gps}/epsextract.pl  |   0
+ bin/gps/gps.sh                 |  35 +-
+ bin/gps/gps2pdf.sh             |   2 +-
+ bin/gps/gpsinsert.sh           |   9 +-
+ bin/gps/gpswrite.sh            |   9 +-
+ bin/{parr => gps/parr.pl}      |   0
+ bin/{ps => gps}/pschange.pl    |   0
+ bin/{ps => gps}/pscolor.pl     |   0
+ bin/{ps => gps}/psgnu.pl       |   0
+ bin/{ps => gps}/pslands.pl     |   0
+ bin/{ps => gps}/psmakebb.sh    |   0
+ bin/{ps => gps}/pspages.pl     |   0
+ bin/{ps => gps}/pspages.sh     |   0
+ bin/{ps => gps}/psportr.pl     |   0
+ bin/{ps => gps}/psresetbb.sh   |   0
+ bin/shyfind.sh                 |  19 +-
+ bin/shypath.sh                 | 105 +++++
+ src/shyfem/initialize.f90      |   7 +-
+ src/tools/shynetcdf/netcdf.f90 | 872 ++++++++++++++++++++++-------------------
+ 21 files changed, 646 insertions(+), 443 deletions(-)
+ new file:
+   bin/shypath.sh
+ renamed:
+    bin/ps/epsextract.pl -> bin/gps/epsextract.pl
+    bin/parr -> bin/gps/parr.pl
+    bin/ps/pschange.pl -> bin/gps/pschange.pl
+    bin/ps/pscolor.pl -> bin/gps/pscolor.pl
+    bin/ps/psgnu.pl -> bin/gps/psgnu.pl
+    bin/ps/pslands.pl -> bin/gps/pslands.pl
+    bin/ps/psmakebb.sh -> bin/gps/psmakebb.sh
+    bin/ps/pspages.pl -> bin/gps/pspages.pl
+    bin/ps/pspages.sh -> bin/gps/pspages.sh
+    bin/ps/psportr.pl -> bin/gps/psportr.pl
+    bin/ps/psresetbb.sh -> bin/gps/psresetbb.sh
+
+============================================================
+
+Sun Mar  3 18:12:22 CET 2024
+
+fem3d/bin routines to bin/fem3d
+
+ {src/obsolete/fem3d/bin => bin/fem3d}/README            | 0
+ {src/obsolete/fem3d/bin => bin/fem3d}/check_h.sh        | 0
+ {src/obsolete/fem3d/bin => bin/fem3d}/check_header.pl   | 0
+ {src/obsolete/fem3d/bin => bin/fem3d}/check_include.pl  | 0
+ {src/obsolete/fem3d/bin => bin/fem3d}/check_revlog.pl   | 0
+ {src/obsolete/fem3d/bin => bin/fem3d}/check_revlog.sh   | 0
+ {src/obsolete/fem3d/bin => bin/fem3d}/check_utils.sh    | 0
+ {src/obsolete/fem3d/bin => bin/fem3d}/check_various.sh  | 0
+ {src/obsolete/fem3d/bin => bin/fem3d}/clean.pl          | 0
+ {src/obsolete/fem3d/bin => bin/fem3d}/commonproc.pl     | 0
+ {src/obsolete/fem3d/bin => bin/fem3d}/compile.sh        | 0
+ {src/obsolete/fem3d/bin => bin/fem3d}/compile_all.sh    | 0
+ {src/obsolete/fem3d/bin => bin/fem3d}/compile_stats.sh  | 0
+ {src/obsolete/fem3d/bin => bin/fem3d}/compile_test.sh   | 0
+ {src/obsolete/fem3d/bin => bin/fem3d}/depend.sh         | 0
+ {src/obsolete/fem3d/bin => bin/fem3d}/depend_compile.sh | 0
+ {src/obsolete/fem3d/bin => bin/fem3d}/dependency.pl     | 0
+ {src/obsolete/fem3d/bin => bin/fem3d}/dependency.sh     | 0
+ {src/obsolete/fem3d/bin => bin/fem3d}/diff.sh           | 0
+ {src/obsolete/fem3d/bin => bin/fem3d}/elab_freq.pl      | 0
+ {src/obsolete/fem3d/bin => bin/fem3d}/elab_freq1.pl     | 0
+ {src/obsolete/fem3d/bin => bin/fem3d}/ext.sh            | 0
+ {src/obsolete/fem3d/bin => bin/fem3d}/f2f90.pl          | 0
+ {src/obsolete/fem3d/bin => bin/fem3d}/f902f.pl          | 0
+ {src/obsolete/fem3d/bin => bin/fem3d}/fct.pl            | 0
+ {src/obsolete/fem3d/bin => bin/fem3d}/fhead.pl          | 0
+ {src/obsolete/fem3d/bin => bin/fem3d}/find_pardlib.sh   | 0
+ {src/obsolete/fem3d/bin => bin/fem3d}/fortinf.pl        | 0
+ {src/obsolete/fem3d/bin => bin/fem3d}/fortran.pm        | 0
+ {src/obsolete/fem3d/bin => bin/fem3d}/getlog.sh         | 0
+ {src/obsolete/fem3d/bin => bin/fem3d}/handle_common.sh  | 0
+ {src/obsolete/fem3d/bin => bin/fem3d}/ht_struct.sh      | 0
+ {src/obsolete/fem3d/bin => bin/fem3d}/i2m.pl            | 0
+ {src/obsolete/fem3d/bin => bin/fem3d}/i2m.sh            | 0
+ {src/obsolete/fem3d/bin => bin/fem3d}/include.pl        | 0
+ {src/obsolete/fem3d/bin => bin/fem3d}/incstats.pl       | 0
+ {src/obsolete/fem3d/bin => bin/fem3d}/incstats.sh       | 0
+ {src/obsolete/fem3d/bin => bin/fem3d}/mkexport.sh       | 0
+ {src/obsolete/fem3d/bin => bin/fem3d}/mklahey.sh        | 0
+ {src/obsolete/fem3d/bin => bin/fem3d}/mklmake.pl        | 0
+ {src/obsolete/fem3d/bin => bin/fem3d}/nemunas-git.sh    | 0
+ {src/obsolete/fem3d/bin => bin/fem3d}/nemunas_adjust.pl | 0
+ {src/obsolete/fem3d/bin => bin/fem3d}/nemunas_adjust.sh | 0
+ {src/obsolete/fem3d/bin => bin/fem3d}/newstruct.pl      | 0
+ {src/obsolete/fem3d/bin => bin/fem3d}/newsubst.pl       | 0
+ {src/obsolete/fem3d/bin => bin/fem3d}/rcsauto.sh        | 0
+ {src/obsolete/fem3d/bin => bin/fem3d}/search.pl         | 0
+ {src/obsolete/fem3d/bin => bin/fem3d}/show_routines.pl  | 0
+ {src/obsolete/fem3d/bin => bin/fem3d}/struct.pl         | 0
+ {src/obsolete/fem3d/bin => bin/fem3d}/struct_wasp.pl    | 0
+ {src/obsolete/fem3d/bin => bin/fem3d}/uncomment.pl      | 0
+ {src/obsolete/fem3d/bin => bin/fem3d}/unix2other.pl     | 0
+ {src/obsolete/fem3d/bin => bin/fem3d}/usemod.pl         | 0
+ {src/obsolete/fem3d/bin => bin/fem3d}/warning.sh        | 0
+ 54 files changed, 0 insertions(+), 0 deletions(-)
+ renamed:
+    src/obsolete/fem3d/bin/README -> bin/fem3d/README
+    src/obsolete/fem3d/bin/check_h.sh -> bin/fem3d/check_h.sh
+    src/obsolete/fem3d/bin/check_header.pl -> bin/fem3d/check_header.pl
+    src/obsolete/fem3d/bin/check_include.pl -> bin/fem3d/check_include.pl
+    src/obsolete/fem3d/bin/check_revlog.pl -> bin/fem3d/check_revlog.pl
+    src/obsolete/fem3d/bin/check_revlog.sh -> bin/fem3d/check_revlog.sh
+    src/obsolete/fem3d/bin/check_utils.sh -> bin/fem3d/check_utils.sh
+    src/obsolete/fem3d/bin/check_various.sh -> bin/fem3d/check_various.sh
+    src/obsolete/fem3d/bin/clean.pl -> bin/fem3d/clean.pl
+    src/obsolete/fem3d/bin/commonproc.pl -> bin/fem3d/commonproc.pl
+    src/obsolete/fem3d/bin/compile.sh -> bin/fem3d/compile.sh
+    src/obsolete/fem3d/bin/compile_all.sh -> bin/fem3d/compile_all.sh
+    src/obsolete/fem3d/bin/compile_stats.sh -> bin/fem3d/compile_stats.sh
+    src/obsolete/fem3d/bin/compile_test.sh -> bin/fem3d/compile_test.sh
+    src/obsolete/fem3d/bin/depend.sh -> bin/fem3d/depend.sh
+    src/obsolete/fem3d/bin/depend_compile.sh -> bin/fem3d/depend_compile.sh
+    src/obsolete/fem3d/bin/dependency.pl -> bin/fem3d/dependency.pl
+    src/obsolete/fem3d/bin/dependency.sh -> bin/fem3d/dependency.sh
+    src/obsolete/fem3d/bin/diff.sh -> bin/fem3d/diff.sh
+    src/obsolete/fem3d/bin/elab_freq.pl -> bin/fem3d/elab_freq.pl
+    src/obsolete/fem3d/bin/elab_freq1.pl -> bin/fem3d/elab_freq1.pl
+    src/obsolete/fem3d/bin/ext.sh -> bin/fem3d/ext.sh
+    src/obsolete/fem3d/bin/f2f90.pl -> bin/fem3d/f2f90.pl
+    src/obsolete/fem3d/bin/f902f.pl -> bin/fem3d/f902f.pl
+    src/obsolete/fem3d/bin/fct.pl -> bin/fem3d/fct.pl
+    src/obsolete/fem3d/bin/fhead.pl -> bin/fem3d/fhead.pl
+    src/obsolete/fem3d/bin/find_pardlib.sh -> bin/fem3d/find_pardlib.sh
+    src/obsolete/fem3d/bin/fortinf.pl -> bin/fem3d/fortinf.pl
+    src/obsolete/fem3d/bin/fortran.pm -> bin/fem3d/fortran.pm
+    src/obsolete/fem3d/bin/getlog.sh -> bin/fem3d/getlog.sh
+    src/obsolete/fem3d/bin/handle_common.sh -> bin/fem3d/handle_common.sh
+    src/obsolete/fem3d/bin/ht_struct.sh -> bin/fem3d/ht_struct.sh
+    src/obsolete/fem3d/bin/i2m.pl -> bin/fem3d/i2m.pl
+    src/obsolete/fem3d/bin/i2m.sh -> bin/fem3d/i2m.sh
+    src/obsolete/fem3d/bin/include.pl -> bin/fem3d/include.pl
+    src/obsolete/fem3d/bin/incstats.pl -> bin/fem3d/incstats.pl
+    src/obsolete/fem3d/bin/incstats.sh -> bin/fem3d/incstats.sh
+    src/obsolete/fem3d/bin/mkexport.sh -> bin/fem3d/mkexport.sh
+    src/obsolete/fem3d/bin/mklahey.sh -> bin/fem3d/mklahey.sh
+    src/obsolete/fem3d/bin/mklmake.pl -> bin/fem3d/mklmake.pl
+    src/obsolete/fem3d/bin/nemunas-git.sh -> bin/fem3d/nemunas-git.sh
+    src/obsolete/fem3d/bin/nemunas_adjust.pl -> bin/fem3d/nemunas_adjust.pl
+    src/obsolete/fem3d/bin/nemunas_adjust.sh -> bin/fem3d/nemunas_adjust.sh
+    src/obsolete/fem3d/bin/newstruct.pl -> bin/fem3d/newstruct.pl
+    src/obsolete/fem3d/bin/newsubst.pl -> bin/fem3d/newsubst.pl
+    src/obsolete/fem3d/bin/rcsauto.sh -> bin/fem3d/rcsauto.sh
+    src/obsolete/fem3d/bin/search.pl -> bin/fem3d/search.pl
+    src/obsolete/fem3d/bin/show_routines.pl -> bin/fem3d/show_routines.pl
+    src/obsolete/fem3d/bin/struct.pl -> bin/fem3d/struct.pl
+    src/obsolete/fem3d/bin/struct_wasp.pl -> bin/fem3d/struct_wasp.pl
+    src/obsolete/fem3d/bin/uncomment.pl -> bin/fem3d/uncomment.pl
+    src/obsolete/fem3d/bin/unix2other.pl -> bin/fem3d/unix2other.pl
+    src/obsolete/fem3d/bin/usemod.pl -> bin/fem3d/usemod.pl
+    src/obsolete/fem3d/bin/warning.sh -> bin/fem3d/warning.sh
+
+============================================================
+
+Thu Feb 29 16:46:19 CET 2024
+
+New version 8_0_3
+
+
+============================================================
+
+Thu Feb 29 16:45:15 CET 2024
+
+documentation etc..
+
+ .gitignore                                         |  24 ++++++++---------
+ Makefile                                           |   6 ++---
+ bin/git/git_info/git_info_version.txt              |   2 +-
+ docs/femdoc.sh                                     |  30 +++++++++++++--------
+ docs/final/shyfem.pdf                              | Bin 333920 -> 334914 bytes
+ .../fem3d => contrib/ecological/bio3d}/bio3d.f90   |   0
+ src/utils/shyutil/version.f90                      |   9 ++++---
+ 7 files changed, 40 insertions(+), 31 deletions(-)
+ renamed:
+    src/obsolete/fem3d/bio3d.f90 -> src/contrib/ecological/bio3d/bio3d.f90
+
+============================================================
+
+Thu Feb 29 14:20:43 CET 2024
+
+make depend implemented, other fixes
+
+ Makefile                                        |   2 +-
+ bin/check/check_var.sh                          |  11 ++-
+ src/Makefile                                    |   3 +-
+ src/external/Makefile                           |   1 +
+ src/external/sparskit/Makefile                  |   2 +
+ src/shyfem/Makefile                             |   2 +
+ src/tools/Makefile                              |   1 +
+ src/tools/shyadj/Makefile                       |  25 +++++-
+ src/tools/shybas/Makefile                       |  15 ++++
+ src/tools/shyelab/Makefile                      | 105 ++++++++++++++++++++++++
+ src/tools/shynetcdf/Makefile                    |  69 ++++++++++++++--
+ src/tools/shyparts/Makefile                     |   9 +-
+ src/tools/shyparts/{shyparts.f => shyparts.f90} |   4 +-
+ src/tools/shyplot/Makefile                      |  90 ++++++++++++++++++++
+ src/tools/shypre/Makefile                       |  17 +++-
+ src/utils/Makefile                              |   1 +
+ src/utils/generic/Makefile                      |  29 +++++++
+ src/utils/shympi/Makefile                       |  37 +++++++++
+ src/utils/shyutil/Makefile                      |  43 ++++++++++
+ src/utils/shyutilmpi/Makefile                   |  37 +++++++++
+ 20 files changed, 485 insertions(+), 18 deletions(-)
+ renamed:
+    src/tools/shyparts/shyparts.f -> src/tools/shyparts/shyparts.f90
+
+============================================================
+
+Thu Feb 29 09:32:10 CET 2024
+
+some last bug fixes
+
+ Makefile                                   |  91 +++++++++++++----------------
+ Rules.make                                 |  25 ++++----
+ bin/check/test_compile.sh                  |  47 +++++++++++----
+ bin/subst_make.pl                          |  14 ++++-
+ bin/tabs2space.pl                          |  34 +++++++++++
+ src/external/sparskit/Makefile             |   5 ++
+ src/shyfem/baroclinic.f90                  |  12 ++--
+ src/shyfem/concentration_omp.f90           |  18 +++---
+ src/shyfem/conz_admin.f90                  |   2 +-
+ src/shyfem/subset.f90                      |   6 +-
+ src/shyfem/tidef.f90                       |  14 ++---
+ src/shyfem/tvd_admin.f90                   |   2 +-
+ src/shyfem/waves_admin.f90                 |  16 ++---
+ src/tools/shybas/shybas                    | Bin 1923888 -> 0 bytes
+ src/tools/shyelab/Makefile                 |   5 +-
+ src/tools/shynetcdf/Makefile               |  15 +++--
+ src/tools/{shyelab => shynetcdf}/ts2nc.f90 |   0
+ src/tools/shyparts/shyparts                | Bin 1398816 -> 0 bytes
+ src/utils/shympi/shyparts_dummy.f90        |  29 +++++++--
+ var/rules/Rules.dist                       |  20 ++++---
+ {bin => var/rules}/rules.sh                |   0
+ 21 files changed, 219 insertions(+), 136 deletions(-)
+ new file:
+   bin/tabs2space.pl
+ deleted:
+    src/tools/shybas/shybas
+    src/tools/shyparts/shyparts
+ renamed:
+    src/tools/shyelab/ts2nc.f90 -> src/tools/shynetcdf/ts2nc.f90
+    bin/rules.sh -> var/rules/rules.sh
+
+============================================================
+
+Wed Feb 28 11:56:27 CET 2024
+
+some more new files (bin, lib, docs)
+
+ docs/mwr/discret2d.tex                  | 515 +++++++++++++++++++++++++++
+ docs/mwr/discret3d.tex                  | 604 ++++++++++++++++++++++++++++++++
+ lib/perl/Makefile                       |  38 ++
+ lib/perl/histo.pm                       | 149 ++++++++
+ lib/perl/regress.pl                     | 404 +++++++++++++++++++++
+ lib/perl/regress.sh                     |  31 ++
+ src/obsolete/fem3d/bin/check_various.sh |  87 +++++
+ src/obsolete/fem3d/bin/f902f.pl         |  18 +
+ src/obsolete/fem3d/bin/i2m.pl           | 102 ++++++
+ src/obsolete/fem3d/bin/i2m.sh           |  29 ++
+ 10 files changed, 1977 insertions(+)
+ new file:
+   docs/mwr/discret2d.tex
+   docs/mwr/discret3d.tex
+   lib/perl/Makefile
+   lib/perl/histo.pm
+   lib/perl/regress.pl
+   lib/perl/regress.sh
+   src/obsolete/fem3d/bin/check_various.sh
+   src/obsolete/fem3d/bin/f902f.pl
+   src/obsolete/fem3d/bin/i2m.pl
+   src/obsolete/fem3d/bin/i2m.sh
+
+============================================================
+
+Wed Feb 28 11:41:05 CET 2024
+
+new routines in bin
+
+ COMMIT                            |  38 ++++++++++++++
+ VERSION                           |   4 +-
+ bin/git/git-commit                |  62 ++++++++++++++++++++---
+ bin/joincol                       | 102 ++++++++++++++++++++++++++++++++++++++
+ bin/rename.sh                     |  36 ++++++++++++++
+ bin/shyfem_util/shyfem_version.pl |   2 +-
+ bin/splitcol                      |   1 +
+ src/utils/shyutil/version.f90     |   4 +-
+ 8 files changed, 236 insertions(+), 13 deletions(-)
+ new file:
+   bin/joincol
+   bin/rename.sh
+   bin/splitcol
+
+============================================================
+
+Wed Feb 28 10:35:25 CET 2024
+
+last changes from old repository included
+
+ bin/average.pl                     |  34 +++
+ bin/find_pattern.sh                |   8 +
+ bin/gp                             |  24 +-
+ bin/recursivemake                  |  20 +-
+ bin/shyfind.sh                     |  61 ++--
+ bin/strparse.pl                    |   4 +-
+ docs/mwr/Makefile                  |  23 ++
+ lib/perl/date.pm                   |  34 ++-
+ lib/perl/spline.pm                 |   2 +-
+ src/obsolete/fem3d/bin/f2f90.pl    |  80 +++++-
+ src/obsolete/fem3d/bin/usemod.pl   |  27 +-
+ src/obsolete/fem3d/new36.f         |   6 +-
+ src/obsolete/var/volume.f90        |  70 +++--
+ src/shyfem/Makefile                |  23 +-
+ src/shyfem/bnd_routines.f90        |  86 ++++++
+ src/shyfem/boxes.f90               | 562 ++++++++++++++++++++++++++-----------
+ src/shyfem/discharge_flux.f90      | 320 ++++++++++++++++++---
+ src/shyfem/heat_areg.f90           |   4 +
+ src/shyfem/iostr.f90               |   6 +-
+ src/shyfem/lagrange_vertical.f90   |   6 +-
+ src/shyfem/shyfem.f90              |  99 +++++--
+ src/shyfem/time_admin.f90          |  19 +-
+ src/shyfem/waves_admin.f90         | 262 ++++++++++-------
+ src/tools/Makefile                 |   4 -
+ src/tools/shybas/shybas            | Bin 1922272 -> 1923888 bytes
+ src/tools/shynetcdf/nc_tutil.f     |  10 +-
+ src/tools/shypre/shypre.f90        |  15 +-
+ src/utils/Makefile                 |   1 +
+ src/utils/generic/iso8601.f90      |   9 +-
+ src/utils/shyutil/femfile_util.f90 |  29 +-
+ 30 files changed, 1415 insertions(+), 433 deletions(-)
+
+============================================================
+
 Thu Sep 28 11:50:21 CEST 2023
 
 Rules.make

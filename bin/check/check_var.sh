@@ -17,7 +17,12 @@ except="Makefile INFO_INSTALL README CR copyright_notice.txt"
 CheckExe()
 {
   pushd $1 > /dev/null
-  echo "checking directory `pwd`"
+  if [ $? -ne 0 ]; then
+    echo "*** cannot cd to directory $1 ...aborting"
+    return
+  else
+    echo "checking directory `pwd`"
+  fi
 
   files=`ls`
 
@@ -40,6 +45,6 @@ CheckExe()
 
 #pwd
 
-CheckExe fembin
-CheckExe femcheck
+CheckExe bin
+CheckExe bin/check
 

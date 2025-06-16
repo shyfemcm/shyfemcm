@@ -87,6 +87,7 @@
 ! 06.11.2019	ggu	eliminated femtime
 ! 23.05.2023	ggu	in setznv() loop over ie_mpi
 ! 07.06.2023	ggu	new routine compute_dry_elements()
+! 24.04.2025	ggu	write out dry elements and nodes
 !
 !*****************************************************************
 
@@ -785,25 +786,41 @@
 	use mod_geom_dynamic
 	use basin
 	use shympi
+	use mod_info_output
 
         implicit none
 
 	integer iloop
 
-        integer ie,idry
+        integer ie,k,idry,iedry,ikdry
 	integer, save :: iuinfo = 0
+	real array(3)
+	character*80 format
+
+	if( .not. binfo ) return
 
 	idry = 0
         do ie=1,nel_unique
           if( iwegv(ie) /= 0 ) idry = idry + 1
 	end do
 
-	idry = shympi_sum(idry)
+	iedry = shympi_sum(idry)
 
-        if( iuinfo .le. 0 ) call getinfo(iuinfo)
-        if(shympi_is_master()) then
-          write(iuinfo,*) 'dry_elems: ',iloop,idry
-        end if
+	idry = 0
+	do k=1,nkn_unique
+	  if( inodv(k) == -2 ) idry = idry + 1
+	end do
+
+	ikdry = shympi_sum(idry)
+
+        !if( iuinfo .le. 0 ) call getinfo(iuinfo)
+        !if(shympi_is_master()) then
+        !  write(iuinfo,*) 'dry_elems: ',iloop,idry
+        !end if
+	format = '(1x,a,3f8.0)'
+	array = (/real(iloop),real(iedry),real(ikdry)/)
+	!call info_output('wet_and_dry','none',3,array,.false.)
+	call info_output('wet_and_dry','none',3,array,.true.,format)
 
 	end
 

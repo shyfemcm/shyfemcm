@@ -64,6 +64,7 @@
 !  25.10.2018	ggu	changed VERS_7_5_51
 !  18.12.2018	ggu	changed VERS_7_5_52
 !  21.05.2019	ggu	changed VERS_7_5_62
+!  18.09.2024	ggu	new variable bcolplot
 ! 
 ! **********************************************************
 
@@ -164,7 +165,7 @@
 
 ! **********************************************************
 
-        subroutine plo_part(n,xlag,ylag,rlag,iplot,title)
+        subroutine plo_part(n,xlag,ylag,rlag,iplot,bcolplot,title)
 
 	use plotutil
 
@@ -175,6 +176,7 @@
         real ylag(n)
         real rlag(n)            !variable to plot
         integer iplot(n)
+	logical bcolplot	!use color in rlag to plot particles
         character*(*) title
 
         real pmin,pmax,flag
@@ -190,8 +192,8 @@
           if (bverb) write(6,*) 'min/max: ',n,pmin,pmax 
           call colauto(pmin,pmax)
           call qcomm('Plotting particles')
-          call plo_xy_new(n,xlag,ylag,rlag,iplot)
-          call colsh
+          call plo_xy_new(n,xlag,ylag,rlag,iplot,bcolplot)
+          if( bcolplot ) call colsh
         end if
 
         call bash(2)
@@ -229,7 +231,7 @@
 
 ! **********************************************************
 
-        subroutine plo_xy_new(n,xlag,ylag,rlag,iplot)
+        subroutine plo_xy_new(n,xlag,ylag,rlag,iplot,bcolplot)
 
         use color
 
@@ -240,17 +242,21 @@
         real ylag(n)
         real rlag(n)
         integer iplot(n)
+	logical bcolplot	! use color given in rlag to plot particles
 
         integer i
         real x,y,r
         logical bplot
         integer icsave
-        real col
+        real col,rdefcol
         real get_color
 
         call get_color_table(icsave)
+	call get_default_color(rdefcol)
         !call set_color_table(-1)
         call qlwidth(0.065)             !particle size
+        call qsetc(0.)
+        call qsetc(rdefcol)
 
 !todo assign color defined in the apn and in function of variable to plot zlag
 
@@ -262,13 +268,15 @@
           y = ylag(i)
           r = rlag(i)
 
-          col = get_color(r,isoanz+1,ciso,fiso)
+	  if( bcolplot ) then
+            col = get_color(r,isoanz+1,ciso,fiso)
+            call qsetc(col)
+	  end if
 
-          call qsetc(col)
           call plot_single_particle(x,y)
         end do
-        call set_color_table(icsave)
 
+        call set_color_table(icsave)
         call qlwidth(0.010)
         call qgray(0.)
 

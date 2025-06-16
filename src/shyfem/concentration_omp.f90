@@ -58,6 +58,7 @@
 ! 16.02.2019	ggu	changed VERS_7_5_60
 ! 13.03.2019	ggu	changed VERS_7_5_61
 ! 09.05.2023    lrp     introduce top layer index variable
+! 24.09.2024    ggu     introduced tvd mpi (bmpi)
 !
 !**************************************************************
 
@@ -150,7 +151,7 @@
 	real,dimension(0:nlvddi,nkn),intent(in) :: difv,wsinkv
         !double precision,dimension(nlvddi,nkn),intent(out) :: cn
         
-	logical :: btvdv
+	logical :: btvdv,btvd2
 	integer :: ie,k,ilevel,ibase,ii,l,n,i,j,x,ies,iend,kl,kend,ntot
 	integer :: myid,numthreads,j_init,j_end,knod,k_end,jel
 	integer,allocatable,dimension(:) :: subset_l
@@ -173,6 +174,13 @@
         double precision,dimension(:,:),allocatable :: cdiag
 	double precision,dimension(:,:),allocatable :: clow
 	double precision,dimension(:,:),allocatable :: chigh
+
+	! here debug code ------------------------
+	logical, save :: bdebug = .false.
+	double precision dtime
+	integer iudb,ks,lmax
+	integer ipint,ipext
+	! here debug code ------------------------
 
         if(nlv.ne.nlev) stop 'error stop conz3d_omp: nlv/=nlev'
 	
@@ -217,6 +225,9 @@
 	  stop 'error stop conz3d: vertical tvd scheme'
 	end if
 
+	btvd2 = itvd == 2
+	if( btvd2 ) call tvd_mpi_run(cn1)
+
         cn=0.
 	co=cn1
         cdiag=0.
@@ -238,14 +249,16 @@
 !!!$OMP TASKGROUP 
        do jel=1,subset_el(i),nchunk
 
-!$OMP TASK FIRSTPRIVATE(jel,i) DEFAULT(NONE)
-!$OMP& PRIVATE(j,ie)
-!$OMP& SHARED(nlvddi,nlev,itvd,itvdv,istot,isact,aa,nchunk)
-!$OMP& SHARED(difmol,robs,wsink,rload,ddt,rkpar,az,ad)
-!$OMP& SHARED(an,ant)
-!$OMP& SHARED(azt,adt,aat,rso,rsn,rsot,rsnt,dt,nkn)
-!$OMP& SHARED(cn,co,cdiag,clow,chigh,subset_el,cn1,co1) 
-!$OMP& SHARED(subset_num,indipendent_subset) 
+!$OMP TASK &
+!$OMP& DEFAULT(NONE) &
+!$OMP& FIRSTPRIVATE(jel,i) &
+!$OMP& PRIVATE(j,ie) &
+!$OMP& SHARED(nlvddi,nlev,itvd,itvdv,istot,isact,aa,nchunk) &
+!$OMP& SHARED(difmol,robs,wsink,rload,ddt,rkpar,az,ad) &
+!$OMP& SHARED(an,ant) &
+!$OMP& SHARED(azt,adt,aat,rso,rsn,rsot,rsnt,dt,nkn) &
+!$OMP& SHARED(cn,co,cdiag,clow,chigh,subset_el,cn1,co1) &
+!$OMP& SHARED(subset_num,indipendent_subset) &
 !$OMP& SHARED(difhv,cbound,gradxv,gradyv,cobs,rtauv,load,difv,wsinkv)
 
        do j=jel,jel+nchunk-1 	! loop over elements in subset
@@ -305,10 +318,22 @@
 !!!$OMP END TASKGROUP
 !$OMP TASKWAIT       
 
-	!cn1 = 0.
-	!cn1 = cn
-	cn1 = real(cn)
+	cn1 = real(cn)		!here happens INTEL_BUG
 	
+	if (bdebug ) then
+	  iudb = 990 + my_id
+	  ks = 2314
+	  k = ipint(ks)
+	  call get_act_dtime(dtime)
+	  if( k > 0 .and. dtime == 1500. ) then
+	    lmax = ilhkv(k)
+	    write(iudb,*) 'after: ',dtime,ipext(k)
+	    do l=1,lmax
+	      write(iudb,*) l,cn(l,k),cn1(l,k)
+	    end do
+	  end if
+	end if
+
 	DEALLOCATE(cn)
 	DEALLOCATE(co)
 	DEALLOCATE(cdiag)
@@ -644,7 +669,7 @@
 	end if
 
 ! 	----------------------------------------------------------------
-! 	horizontal TVD scheme start
+! 	horizontal TVD scheme start - compute fluxes fl, otherwise leave as is
 ! 	----------------------------------------------------------------
 
         if( btvd ) then
@@ -768,6 +793,10 @@
 	double precision, parameter :: r_tiny = tiny(1.)
       
 ! ----------------------------------------------------------------
+!  debug code
+! ----------------------------------------------------------------
+
+! ----------------------------------------------------------------
 !  handle boundary (flux) conditions
 ! ----------------------------------------------------------------
 
@@ -802,7 +831,7 @@
             else					!erosion
               cn(l,k) = cn(l,k) + dt*loading
             end if
- 
+
 	  end do
 
 ! ----------------------------------------------------------------

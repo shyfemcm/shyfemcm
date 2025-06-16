@@ -95,6 +95,7 @@
 !  18.12.2018	ggu	changed VERS_7_5_52
 !  21.05.2019	ggu	changed VERS_7_5_62
 !  21.10.2023	ggu	many unsued routines deleted
+!  02.04.2025	ggu	adjust adjust_no_plot_area() to only plot in some areas
 ! 
 ! **********************************************************
 ! **********************************************************
@@ -217,22 +218,43 @@
 
         implicit none
 
+	logical bset
         integer ie,ii,k
-        integer ianopl
+        integer ianopl,iadopl,ia
 	real getpar
 
-        ianopl = nint(getpar('ianopl'))
-	if( ianopl < 0 ) return
+        ianopl = nint(getpar('ianopl'))		!do not plot here
+        iadopl = nint(getpar('iadopl'))		!only plot here
 
-        !write(6,*) 'applying no plot mask for area code = ',ianopl
+	if( ianopl < 0 .and. iadopl < 0 ) return
+	if( ianopl >= 0 .and. iadopl >= 0 ) then
+	  write(6,*) 'ianopl,iadopl: ',ianopl,iadopl
+	  write(6,*) 'only one of ianopl,iadopl can be given'
+	  stop 'error stop adjust_no_plot_area: ianopl,iadopl'
+	end if
+
+	if( iadopl >= 0 ) then
+	  ia = iadopl
+	  bset = .true.
+	  bwater = .false.
+	  bplot = .false.
+	  bkplot = .false.
+	end if
+	if( ianopl >= 0 ) then
+	  ia = ianopl
+	  bset = .false.
+	  bwater = .true.
+	  bplot = .true.
+	  bkplot = .true.
+	end if
 
         do ie=1,nel
-          if( iarv(ie) == ianopl ) then
-	    bwater(ie) = .false.
-	    bplot(ie) = .false.
+          if( iarv(ie) == ia ) then
+	    bwater(ie) = bset
+	    bplot(ie) = bset
 	    do ii=1,3
 	      k = nen3v(ii,ie)
-	      bkplot(k) = .false.
+	      bkplot(k) = bset
 	    end do
 	  end if
         end do
@@ -387,15 +409,18 @@
         implicit none
         end
 
-        function nosnext(it)
+        function nosnext(it,ivaria,nlvdi,p3)
+	use basin
         implicit none
 	logical nosnext
-	integer it
+	integer it,ivaria,nlvdi
+	real p3(nlvdi,nel)
 	nosnext = .false.
         end
 
-	subroutine nosopen
+	subroutine nosopen(type)
 	implicit none
+	character*(*) type
 	stop 'error stop nosopen: no more NOS files'
         end
 

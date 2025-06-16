@@ -104,6 +104,13 @@
 ! 08.07.2022	ggu	avoid divide by zero when computing dice
 ! 06.12.2022	ggu	rfact for rain introduced
 ! 02.04.2023    ggu     only master writes to iuinfo
+! 06.09.2024    lrp     nuopc-compliant
+! 13.09.2024    lrp     iatm and coupling with atmospheric model
+! 22.09.2024    ggu     read meteo output times and from str file
+! 13.10.2024    ggu     deal with INTEL_BUG
+! 13.11.2024    ggu     marked old code with INTEL_BUG_OLD
+! 03.12.2024    lrp     new parameter irain for the coupled model
+! 25.01.2025    ggu     tentative cubic interpolation for wind (bbspline)
 !
 ! notes :
 !
@@ -179,6 +186,7 @@
 !                        from the east etc.
 !               \item[4] As in 3 but the speed is given in knots
 !               \end{description}
+!
 ! |itdrag|	Formula to compute the drag coefficient. 
 !		\begin{description}
 !		\item[0] constant value given in |dragco|. 
@@ -194,12 +202,13 @@
 !		See the paper and/or the ECMWF report.
 !		\end{description}
 !		(Default 0)
+!
 ! |dragco|	Drag coefficient used in the above formula. (Default 2.5E-3). 
 !		If |itdrag| = 5 this is the Charnock parameter and you should 
-!		use values from 0.01 (swell) to 0.04 (steep young waves). (Default 0.025).
+!		use values from 0.01 (swell) to 0.04 (steep young waves). 
+!		(Default 0.025).
 !		Please note that in case of |iwtype| = 2 this parameter
-!		is of no interest, since the
-!		stress is specified directly.
+!		is of no interest, since the stress is specified directly.
 !
 ! |wsmax|	Maximum wind speed allowed in [m/s]. This is in order to avoid
 !		errors if the wind data is given in a different format
@@ -238,12 +247,13 @@
 	integer, save :: idwind,idheat,idrain,idice
 
 	integer, save :: ndbgfreq = 0			!debug output
-	double precision, save :: itmmet = -1		!minimum meteo output
-	double precision, save :: idtmet = 0		!dt of meteo output
 	double precision, save, private :: da_out(4) = 0
 	double precision, save, private :: da_met(4) = 0
 
+	integer, save :: iatm = 0
+	integer, save :: iheat = 0
 	integer, save :: iwtype,itdrag
+        integer, save :: ievap,irain
 	integer, save :: irtype
 	integer, save :: ihtype
 	integer, save :: ictype
@@ -296,6 +306,7 @@
 	use mod_depth
 	use levels
 	use basin, only : nkn,nel,ngr,mbw
+	use shympi
 
 	character*60 windfile,heatfile,rainfile,icefile
 	character*4 what
@@ -313,12 +324,30 @@
 
 	real vconst(4)
 	integer nodes(1)
+	logical batm
+
+	logical bbspline	!interpolate wind with 4th order bspline
+	logical bbwrite		!write spline output to file fort.77
+	real getpar
+
+!------------------------------------------------------------------
+! batm is true if first ocean timestep of coupled atm-oce timestep
+!------------------------------------------------------------------
+
+	bbspline = .false.
+	bbspline = .true.
+	bbwrite = .true.
+	bbwrite = .false.
+
+	batm = iatm == 1 .and. icall_nuopc == 1
 
 	if( icall .lt. 0 ) return
 
 !------------------------------------------------------------------
 ! initialization
 !------------------------------------------------------------------
+
+	call shympi_barrier
 
 	if( icall .eq. 0 ) then
 
@@ -344,6 +373,7 @@
           call iff_get_file_nvar(windfile,nvar)
           if( nvar <= 0 ) nvar = 3      !if no file fake 3
           nintp = 2
+          if( bbspline .and. nint(getpar('ibwind')) > 0 ) nintp = 4
           what = 'wind'
           vconst = (/ 0., 0., pstd, 0. /)
 	  call iff_init(dtime0,windfile,nvar,nkn,0,nintp,nodes,vconst,idwind)
@@ -475,7 +505,7 @@
 !	treat wind data
 !	---------------------------------------------------------
 
-	if( .not. iff_is_constant(idwind) .or. icall == 1 ) then
+	if( .not. iff_is_constant(idwind) .or. icall == 1 .or. batm ) then
 	  call meteo_convert_wind_data(idwind,nkn,wxv,wyv     &
       &			,windcd,tauxnv,tauynv,metws,ppv,metice)
 	end if
@@ -484,7 +514,7 @@
 !	treat heat data
 !	---------------------------------------------------------
 
-        if( .not. iff_is_constant(idheat) .or. icall == 1 ) then
+        if( .not. iff_is_constant(idheat) .or. icall == 1 .or. batm ) then
           call meteo_convert_heat_data(idheat,nkn                 &
       &                       ,metaux,mettair,metcc,ppv,methum)
         end if
@@ -493,8 +523,14 @@
 !	treat rain data
 !	---------------------------------------------------------
 
-	if( .not. iff_is_constant(idrain) .or. icall == 1 ) then
+	if( .not. iff_is_constant(idrain) .or. icall == 1 .or. batm ) then
 	  call meteo_convert_rain_data(idrain,nkn,metrain)
+	end if
+
+	if( bbspline ) then
+	  if( bbwrite .and. icall > 1 ) then
+	    write(77,*) dtime,metws(1),wxv(1),wyv(1)
+	  end if
 	end if
 
 !------------------------------------------------------------------
@@ -503,6 +539,11 @@
 
 	call output_debug_data
 	call output_meteo_data
+
+	if( bextra_exchange ) then
+	  call shympi_exchange_2d_node(tauxnv)
+	  call shympi_exchange_2d_node(tauynv)
+	end if
 
 !------------------------------------------------------------------
 ! end of routine
@@ -548,25 +589,54 @@
 
 	subroutine output_meteo_data
 
+	use basin
 	use mod_meteo
+	use shympi
 
 	integer			:: id
 	integer			:: nvar_act
+	integer, save		:: imetout
 	double precision 	:: dtime
-	integer, parameter	:: nvar = 1
+	integer, save		:: nvar = 0
 	logical, save 		:: b2d = .true.
+	logical, save		:: bwind,bheat,brain,bice
+        real, parameter		:: zconv = 86400. / 1000. !convert m/s to mm/day
+	real, allocatable	:: maux(:)
 
 	logical has_output_d,next_output_d
+	integer bit10_extract_value
+	real getpar
 
 	if( da_met(4) < 0 ) return
 
 	if( da_met(4) == 0 ) then
-	  call set_output_frequency_d(itmmet,idtmet,da_met)
+	  call init_output_d('itmmet','idtmet',da_met)
 	  if( .not. has_output_d(da_met) ) da_met(4) = -1	!no output
+	  if( da_met(4) < 0 ) return
+
+	  imetout = getpar('imetout')	!what type of meteo output
+	  bwind = ( bit10_extract_value(imetout,1) > 0 )
+	  bheat = ( bit10_extract_value(imetout,2) > 0 )
+	  brain = ( bit10_extract_value(imetout,3) > 0 )
+	  bice  = ( bit10_extract_value(imetout,4) > 0 )
+	  bwind = bwind .and. iff_has_file(idwind)
+	  bheat = bheat .and. iff_has_file(idheat)
+	  brain = brain .and. iff_has_file(idrain)
+	  bice  = bice  .and. iff_has_file(idice)
+
+	  nvar = 0
+	  if( bwind ) nvar = nvar + 4
+	  if( bheat ) nvar = nvar + 4
+	  if( brain ) nvar = nvar + 1
+	  if( bice  ) nvar = nvar + 1
+	  if( nvar == 0 ) da_met(4) = -1
 	  if( da_met(4) < 0 ) return
 
           call shyfem_init_scalar_file('meteo',nvar,b2d,id)
           da_met(4) = id
+
+	  write(6,*) 'meteo output: ',imetout,nvar,bwind,bheat,brain,bice,my_id
+
 	end if
 
         if( .not. next_output_d(da_met) ) return
@@ -575,8 +645,28 @@
         id = nint(da_met(4))
 
 	call shy_reset_nvar_act(id)
-        call shy_write_scalar_record2d(id,dtime,85,metice)
-	!call shy_write_scalar_record2d(id,dtime,28,metws)
+
+	if( bwind ) then
+	  call shy_write_scalar_record2d(id,dtime,21,wxv)
+	  call shy_write_scalar_record2d(id,dtime,21,wyv)
+	  call shy_write_scalar_record2d(id,dtime,28,metws)
+	  call shy_write_scalar_record2d(id,dtime,20,ppv)
+	end if
+	if( bheat ) then
+          call shy_write_scalar_record2d(id,dtime,22,metrad)
+          call shy_write_scalar_record2d(id,dtime,23,mettair)
+          call shy_write_scalar_record2d(id,dtime,24,methum)
+          call shy_write_scalar_record2d(id,dtime,25,metcc)
+	end if
+	if( brain ) then
+	  allocate(maux(nkn))
+	  maux = metrain * zconv
+          call shy_write_scalar_record2d(id,dtime,26,maux)
+	end if
+	if( bice ) then
+          call shy_write_scalar_record2d(id,dtime,85,metice)
+	end if
+
 	call shy_get_nvar_act(id,nvar_act)
 
 	if( nvar /= nvar_act ) then
@@ -584,6 +674,8 @@
 	  write(6,*) 'number of variables written differs from nvar'
 	  stop 'error stop output_meteo_data: nvar /= nvar_act'
 	end if
+
+	call shy_sync(id)
 
 	end subroutine output_meteo_data
 
@@ -621,6 +713,7 @@
 	 end if
 	end if
 
+        iatm = nint(getpar('iatm'))
         iwtype = nint(getpar('iwtype'))
         itdrag = nint(getpar('itdrag'))
         wsmax = getpar('wsmax')
@@ -639,11 +732,19 @@
 	call iff_get_var_description(id,1,string1)
 	call iff_get_var_description(id,2,string2)
 
-	if( .not. iff_has_file(id) ) then
+	if( .not. iff_has_file(id) ) then	!no wind file
 
-	  iwtype = 0
+	  if ( iatm == 1 ) then			!no file but coupling atm-oce
+            if( iwtype .ne. 0 .and. iwtype .ne. 2 ) then
+              write(6,*) 'atmosphere-ocean coupling but no wind type'
+              write(6,*) 'set iwtype = 0 or iwtype = 2'
+	      stop 'error stop meteo_set_wind_data: iwtype'
+            end if
+	  else
+            iwtype = 0                          !no file and no coupling atm-oce
+	  end if
 
-	else if( string1 == ' ' ) then	!TS file or constant
+	else if( string1 == ' ' ) then		!TS file or constant
 
 	  if( iff_has_file(id) ) then
 	    if( iwtype .le. 0 ) then
@@ -762,6 +863,9 @@
 
 	subroutine meteo_convert_wind_data(id,n,wx,wy,cdv,tx,ty,ws,pp,cice)
 
+	use basin
+	use shympi
+
 	integer id
 	integer n
 	real wx(n),wy(n)
@@ -775,7 +879,10 @@
 	integer k
 	real cd,wxymax,txy,wspeed,wdir,fact,fice,aice,ach
 	real pmin,pmax
+	real wparam
+	double precision dwxy		!INTEL_BUG
 	character*80 string
+	double precision dtime
 
 	bnowind = iwtype == 0
 	bstress = iwtype == 2
@@ -784,6 +891,8 @@
 	ach = dragco       !Charnock parameter (ireib=5)
 	wxymax = 0.
 	aice = amice       !ice cover for momentum: 1: use  0: do not use
+	
+	call get_act_dtime(dtime)
 	
 !	---------------------------------------------------------
 !	convert wind
@@ -803,7 +912,7 @@
             tx(k) = fice * wfact * wx(k)
             ty(k) = fice * wfact * wy(k)
             txy = sqrt( tx(k)**2 + ty(k)**2 )
-            wspeed = sqrt(txy/cd)
+            wspeed = sqrt(txy/(cd*wfact*roluft))
             wxymax = max(wxymax,wspeed)
             wx(k) = tx(k) / (cd*wspeed)
             wy(k) = ty(k) / (cd*wspeed)
@@ -819,7 +928,9 @@
 	    end do
 	  else				!data is wind velocity [m/s]
             do k=1,n
-              wspeed = sqrt( wx(k)**2 + wy(k)**2 )
+	      dwxy = dble(wx(k))**2 + dble(wy(k))**2
+              wspeed = sqrt( dwxy )			!INTEL_BUG
+	      !wspeed = sqrt( wx(k)**2 + wy(k)**2 )	!INTEL_BUG_OLD
 	      ws(k) = wspeed
 	    end do
 	  end if
@@ -834,8 +945,9 @@
       &          .or. itdrag == 2 .or. itdrag == 5 )) then
 		call get_drag(itdrag,wspeed,cd,ach)
 	    end if
-            tx(k) = fice * wfact * cd * wspeed * wx(k)
-            ty(k) = fice * wfact * cd * wspeed * wy(k)
+	    wparam = fice * wfact * cd * wspeed		!INTEL_BUG_OLD
+            tx(k) = wparam * wx(k)
+            ty(k) = wparam * wy(k)
           end do
         end if
 
@@ -946,10 +1058,23 @@
 	end if
 
         rfact = nint(getpar('rfact'))
+        ievap = nint(getpar('ievap'))
+        irain = nint(getpar('irain'))
 
 !	---------------------------------------------------------
 !	handle rain
 !	---------------------------------------------------------
+
+        if ( iatm == 1 ) then                 !no file but coupling atm-oce
+          if( ievap .eq. 1 ) then
+            write(6,*) 'with atmosphere-ocean coupling'
+            write(6,*) 'take precip/evap from atmosphere model'
+            write(6,*) 'but ievap=1 (compute evap internally)'
+            write(6,*) 'pleae set ievap equal to 0'
+            write(6,*) 'to avoid considering evaporation twice'
+            stop 'error stop meteo_set_rain_data: ievap'
+          end if
+        endif
 
 	call iff_get_var_description(id,1,string)
 
@@ -1105,6 +1230,7 @@
 	use evgeom
 	use basin
 	use shympi
+	use mod_info_output
 
 	integer id
 	integer n
@@ -1112,6 +1238,7 @@
 
 	integer k,ie,ii,ia,nflag,nice
 	real rarea,rnodes
+	real array(3)
 	double precision dacu,dice,darea,area
 	character*20 aline
 
@@ -1124,10 +1251,15 @@
           if(shympi_is_master()) call getinfo(iuinfo)
         end if
 
+	if( n /= nkn_local ) then
+	  write(6,*) n,nkn_local
+	  stop 'error stop meteo_convert_ice_data: n/=nkn_local'
+	end if
+
 	nflag = 0
 	nice = 0
 
-	do k=1,n
+	do k=1,nkn_inner
 	  if( r(k) == flag ) then
 	    nflag = nflag + 1
 	    r(k) = 0
@@ -1173,11 +1305,13 @@
 
 	rarea = dice
 	rnodes = dacu
-	call get_act_timeline(aline)
+	!call get_act_timeline(aline)
+	!if( iuinfo > 0 ) then
+	!  write(iuinfo,*) 'ice: ',aline,rarea,rnodes,nflag
+	!end if
 
-	if( iuinfo > 0 ) then
-	  write(iuinfo,*) 'ice: ',aline,rarea,rnodes,nflag
-	end if
+	array = (/rarea,rnodes,real(nflag)/)
+	call info_output('ice','sum',3,array,.true.)
 
 	end subroutine meteo_convert_ice_data
 
@@ -1218,12 +1352,21 @@
 !	handle heat
 !	---------------------------------------------------------
 
+
+	if ( iatm == 1 ) then			!no file but coupling atm-oce
+          if( iheat .ne. 0 .and. iheat .ne. 7 ) then
+            write(6,*) 'atmosphere-ocean coupling but the heat type is not available'
+            write(6,*) 'set iheat = 0 or iheat = 7'
+	    stop 'error stop meteo_set_heat_data: heat'
+          end if
+	end if
+
 	do i=1,nvar
 	  call iff_get_var_description(id,i,strings(i))
 	end do
 	call adjust_humidity_string(strings(3))		!FIXME
 
-        ihtype = nint(getpar('ihtype'))  
+        ihtype = nint(getpar('ihtype'))
 	if( ihtype == 1 ) then
 	  vapor = rhum
 	else if( ihtype == 2 ) then
@@ -1323,9 +1466,9 @@
         if( bnoheat ) then              !no heat
 	  !nothing to be done
         else
-	  call meteo_convert_temperature(n,mettair)
-	  call meteo_convert_cloudcover(n,metcc)
-	  call meteo_convert_vapor(ihtype,n,metaux,mettair,ppv,methum)
+	  call meteo_convert_temperature(n,mettair)	!kelvin -> C
+	  call meteo_convert_cloudcover(n,metcc)	!% -> [0-1]
+	  call meteo_convert_vapor(ihtype,n,metaux,mettair,ppv,methum) !rhum
 
 	  !if( ihtype == 1 ) methum = metaux	!done in meteo_convert_vapor()
 	  !if( ihtype == 2 ) metwbt = metaux
@@ -1344,6 +1487,7 @@
 ! converts percent to fraction
 
 	use mod_meteo
+	use shympi
 
 	implicit none
 
@@ -1353,6 +1497,7 @@
 	real maxcc
 	integer, save :: icall = 0
 	integer, save :: ncall = 1
+	integer, save :: ncall_max = 100
 
 	if( any( cc > 1.5 ) ) then
 	  maxcc = maxval(cc)
@@ -1360,7 +1505,9 @@
 	  icall = icall + 1
 	  if( mod(icall,ncall) == 0 ) then
 	    ncall = ncall * 2
-	    write(6,*) 'cloudcover in %... must convert to fraction',maxcc
+	    if( bmpi_master .and. ncall <= ncall_max ) then
+	      write(6,*) 'cloudcover in %... converting to fraction',maxcc
+	    end if
 	  end if
 	end if
 
@@ -1412,7 +1559,7 @@
 	  val = aux(i)
 	  ta = tav(i)
 	  pp = pav(i)/100.			!pressure in mbar
-	  if( mode .eq. 1 ) then		!val is humidity
+	  if( mode .eq. 1 ) then		!val is relative humidity
 	      rh = val
 	  else if( mode .eq. 2 ) then		!val is wet bulb
 	    call wb2rh(ta,pp,val,rh)
@@ -1513,6 +1660,7 @@
 ! pressure is returned in [mb]
 
 	use mod_meteo
+	use meteo_forcing_module, only: iheat
 
 	implicit none
 
@@ -1531,15 +1679,17 @@
 	uw = metws(k)
 	cc = metcc(k)
 
-	cc = max(0.,cc)
-	cc = min(1.,cc)
-	rh = max(0.,rh)
-	rh = min(100.,rh)
+	if (iheat .ne. 7) then				  !skip, if we read fluxes
+	  cc = max(0.,cc)
+	  cc = min(1.,cc)
+	  rh = max(0.,rh)
+	  rh = min(100.,rh)
 
-	p = ppv(k)
-	p = 0.01 * p					  !Pascal to mb
+	  p = ppv(k)
+	  p = 0.01 * p					  !Pascal to mb
 
-	call rh2wb(ta,p,rh,twb)
+	  call rh2wb(ta,p,rh,twb)
+	endif
 
 	end subroutine meteo_get_heat_values
 
@@ -1703,3 +1853,16 @@
 
 !*********************************************************************
 
+	subroutine set_iheat(iheat_local)
+
+        use meteo_forcing_module
+
+        implicit none
+
+	integer iheat_local
+
+	iheat = iheat_local
+
+	end
+
+!*********************************************************************

@@ -33,6 +33,7 @@
 ! 19.01.2023	ggu	new routine gather_sum_d3()
 ! 21.04.2023	ggu	problems in gather_sum_d3() ... not yet solved
 ! 18.05.2023	ggu	flux_write() changed, new routine flx_collect_3d()
+! 10.12.2024	ggu	new routine flux_file_close(), no wait on barrier
 !
 !******************************************************************
 !******************************************************************
@@ -275,8 +276,6 @@
 	  if( ierr /= 0 ) goto 97
 	end if
 
-	call shympi_barrier
-
 	return
    97   continue
         write(6,*) 'Error writing file FLX'
@@ -284,6 +283,24 @@
         stop 'error stop flux_write: writing flx record'
 	end
 
+!******************************************************************
+
+	subroutine flux_file_close(da_out)
+	
+	implicit none
+
+	double precision da_out(4)
+
+	integer nb
+
+	nb = nint(da_out(4))
+	if( nb > 0 ) close(nb)
+	da_out = 0
+
+	end
+
+!******************************************************************
+!******************************************************************
 !******************************************************************
 
 	subroutine flx_collect_2d(n,flux2d)

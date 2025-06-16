@@ -39,7 +39,7 @@
 ! subroutine impini		initializes parameters for semi-implicit time
 ! function bimpli(it)		checks if semi-implicit time-step is active
 ! function getimp		gets weight for semi-implicit time-step
-! subroutine setimp(it,aweigh)	sets parameters for semi-implicit time-step
+! subroutine setimp(dtime,aweigh) sets parameters for semi-implicit time-step
 !
 ! revision log :
 !
@@ -162,6 +162,8 @@
 ! 06.11.2019	ggu	femtime eliminated
 ! 16.02.2020	ggu	femtime finally eliminated
 ! 18.03.2020	ggu	admrst() substituted with rst_write_restart()
+! 13.09.2024    lrp     iatm and coupling with atmospheric model
+! 15.11.2024    ggu     double for energy introduced
 !
 !************************************************************
 
@@ -326,12 +328,16 @@
 
 ! to do before time loop
 
+	use mod_trace_point
 	use befor_after
 
 	implicit none
 
+	call trace_point('calling wrboxa')
 	call wrboxa
+	call trace_point('calling wrousa')
 	call wrousa
+	call trace_point('finished do_init')
 
 	end
 
@@ -435,6 +441,8 @@
                 else if(section.eq.'sedtr')then         !sediment
                         call readsed
                 else if(section.eq.'waves')then         !wave
+                        call nrdins(section)
+                else if(section.eq.'atm')then           !atmosphere
                         call nrdins(section)
                 else if(section.eq.'mudsec')then        !fluid mud
                         call readmud			!ARON
@@ -583,9 +591,9 @@
 ! routines for handling semi-implicit time-step
 !
 ! the only routines that should be necessary to be called are
-! setimp(it,weight) and getazam(az,am)
+! setimp(dtime,weight) and getazam(az,am)
 !
-! setimp sets the implicit parameter until time it to weight
+! setimp sets the implicit parameter until dtime to weight
 ! getazam returns az,am with the actual weight
 !
 ! usage: call setimp in a program that would like to change the
@@ -795,15 +803,20 @@
 ! writes info on total energy to info file
 
 	use shympi
+	use mod_info_output
 
 	implicit none
 
-	real kenergy,penergy,tenergy,ksurf,paux
-	real energy(3)
+	!real kenergy,penergy,tenergy,ksurf
+	double precision kenergy,penergy,tenergy,ksurf
 	character*20 aline
+	character*80 format
 	logical debug
+	real array(4)
 
 	integer, save :: iuinfo = 0
+
+	if( .not. binfo ) return
 
 	debug = .false.
 
@@ -814,20 +827,31 @@
 	call energ3d(kenergy,penergy,ksurf,-1)
 	!call energ3d(kenergy,penergy,ksurf,0)
 
+	array(1) = kenergy
+	array(2) = penergy
+	array(3) = ksurf
+	array(1:3) = (/real(kenergy),real(penergy),real(ksurf)/)
+	call shympi_array_reduce('sum',array(1:3))
+
 	if( debug ) write(6,*) 'penergy: ',my_id,penergy
-	kenergy = shympi_sum(kenergy)
-	penergy = shympi_sum(penergy)
-	ksurf = shympi_sum(ksurf)
+!	kenergy = shympi_sum(kenergy)
+!	penergy = shympi_sum(penergy)
+!	ksurf = shympi_sum(ksurf)
 	if( debug ) write(6,*) 'penergy total: ',my_id,penergy
 
 	tenergy = kenergy + penergy
 
-	if(shympi_is_master()) then
-	  call get_act_timeline(aline)
-	  write(iuinfo,1000) ' energy: ',aline &
-     &				,kenergy,penergy,tenergy,ksurf
- 1000	  format(a,a20,4e12.4)
-	end if
+!	if(shympi_is_master()) then
+!	  call get_act_timeline(aline)
+!	  write(iuinfo,1000) ' energy: ',aline &
+!     &				,kenergy,penergy,tenergy,ksurf
+! 1000	  format(a,a20,4e12.4)
+!	end if
+	
+	array(4) = array(3)
+	array(3) = array(1) + array(2)
+	format = '(a,4e12.5)'
+	call info_output(' energy','none',4,array,.true.,format)
 
 	end
 

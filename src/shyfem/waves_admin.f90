@@ -71,6 +71,7 @@
 ! 20.03.2022	ggu	converted convert_time -> convert_time_d
 ! 30.03.2022	ggu	bug: in write_wwm nlev was not set before call
 ! 09.05.2023    lrp     introduce top layer index variable
+! 25.01.2024    ggu     in parwaves() introduced OMP parallelization
 !
 !**************************************************************
 ! DOCS  START   S_wave
@@ -144,7 +145,6 @@
 ! to Roland et al. \cite{roland:coupled09} and Ferrarin et al. 
 ! \cite{ferrarin:morpho08}.
 ! DOCS  END
-
 
 !**************************************************************
 
@@ -556,7 +556,7 @@
 
         implicit none
 
-	real, allocatable	:: ddl(:,:) !3D layer depth (in the middle of layer)
+	real, allocatable	:: ddl(:,:) !3D layer depth (mid-layer)
 	real, allocatable 	:: h(:)
         integer it              !time [s]
         integer k,l,nlev,flev,lmax
@@ -1087,14 +1087,14 @@
         real, parameter :: z0 = 5.e-4
         real, parameter :: awice = 1.	!use wave reduction due to ice cover
 
-! --- input variable
+! --- input variable - these are defined on elements
 
         real, save, allocatable :: winds(:) !wind speed at 10m [m/s]
         real, save, allocatable :: windd(:) !wind direction [degree north]
         real, save, allocatable :: fet(:)   !wind fetch length [m]
         real, save, allocatable :: daf(:)   !averaged depth along the fetch [m]
 
-! --- output variable
+! --- output variable - these are defined on elements
 
         real, save, allocatable :: waeh(:)	!wave height [m]
         real, save, allocatable :: waep(:)	!wave period [s]
@@ -1123,35 +1123,12 @@
 ! --- local variable
 
 	logical debug
-        real depele             !element depth function [m]
-        real hbr		!limiting wave height [m]
-        real dep,depe
-        real gh,gx,hg
-	real wis,wid
-	real wmin,wmax
-	real wx,wy,fice
-        real auxh,auxh1,auxt,auxt1
-        integer ie,icount,ii,k
-	integer id,nvar,czero,hzero
+        !integer ie,icount,ii,k
+	integer id,nvar
 	double precision dtime
 
-        real, parameter :: g = 9.81		!gravity acceleration [m2/s]
-
-        real ah1,ah2,ah3,eh1,eh2,eh3,eh4
-        real at1,at2,at3,et1,et2,et3,et4
-!------------------------------------------------------ Hurdle and Stive
-!        parameter(ah1=0.25,ah2=0.6,eh1=0.75)
-!        parameter(eh2=0.5,ah3=4.3e-05,eh3=1.,eh4=2.)
-!        parameter(at1=8.3,at2=0.76,et1=0.375)
-!        parameter(et2=1./3.,at3=4.1e-05,et3=1.,et4=3.)
-!------------------------------------------------------ SPM
-        parameter(ah1=0.283,ah2=0.53,eh1=3./4.)
-        parameter(eh2=1.,ah3=0.00565,eh3=1./2.,eh4=1.)
-        parameter(at1=7.54,at2=0.833,et1=3./8.)
-        parameter(et2=1.,at3=0.0379,et3=1./3.,et4=1.)
-!------------------------------------------------------
-
         real getpar
+        real depele             !element depth function [m]
 
         logical has_output_d,next_output_d
 
@@ -1213,41 +1190,117 @@
 !	get wind speed and direction
 !       -------------------------------------------------------------
 
-	do ie=1,nel
-	  wx = 0.
-	  wy = 0.
-	  do ii=1,3
-	    k = nen3v(ii,ie)
-	    fice = 1. - awice*icecover(k)
-	    wx = wx + fice * wxv(k)
-	    wy = wy + fice * wyv(k)
-	  end do
-	  wx = wx / 3.
-	  wy = wy / 3.
-          call c2p(wx,wy,winds(ie),windd(ie))
-	end do
+	call compute_wind_values(icecover)
 
 !       -------------------------------------------------------------
 !	get wind fetch (fet is fetch on elements)
 !       -------------------------------------------------------------
 
-        call fetch(windd,fet,daf)
+        call compute_fetch(windd,fet,daf)
 
-	if( debug ) then
-	  write(155,*) '----------------------------------------'
-	  do ie=1,nel,nel/10
-	    write(155,*) ipev(ie),fet(ie),daf(ie),winds(ie),windd(ie)
-	  end do
-	  ie = 1743
-	  write(155,*) ipev(ie),fet(ie),daf(ie),winds(ie),windd(ie)
-	  write(155,*) '----------------------------------------'
+!       -------------------------------------------------------------------
+!       compute wave values
+!       -------------------------------------------------------------------
+
+        call compute_wave_parameters
+
+!       -------------------------------------------------------------------
+!       copy to global values
+!       -------------------------------------------------------------------
+
+        call e2n2d(waeh,waveh,v1v)
+        call e2n2d(waep,wavep,v1v)
+        call e2n2d(waed,waved,v1v)
+
+	wavepp = wavep                  !peak period is not computed
+
+!       -------------------------------------------------------------------
+!       write results to file (WAV)
+!       -------------------------------------------------------------------
+
+        if( next_output_d(da_wav) ) then
+	  id = nint(da_wav(4))
+	  call get_act_dtime(dtime)
+	  call shy_write_scalar_record2d(id,dtime,231,waveh)
+	  call shy_write_scalar_record2d(id,dtime,232,wavep)
+	  call shy_write_scalar_record2d(id,dtime,233,waved)
+	  call shy_sync(id)
 	end if
 
 !       -------------------------------------------------------------------
-!       start loop on elements
+!       end of routine
 !       -------------------------------------------------------------------
 
-        do ie = 1,nel
+        end
+
+!**************************************************************
+!**************************************************************
+!**************************************************************
+
+        subroutine compute_wave_parameters
+
+        use basin
+
+        implicit none
+
+        integer ie
+        integer nchunk
+
+!$OMP PARALLEL 
+!$OMP SINGLE
+
+        call omp_compute_chunk(nel,nchunk)
+
+        do ie=1,nel
+!$OMP TASK FIRSTPRIVATE(ie) &
+!$OMP&     SHARED(nchunk) &
+!$OMP&     DEFAULT(NONE)
+          call compute_waves_on_element(ie)
+!$OMP END TASK
+        end do
+
+!$OMP END SINGLE
+!$OMP TASKWAIT  
+!$OMP END PARALLEL      
+
+        end
+
+!**************************************************************
+
+	subroutine compute_waves_on_element(ie)
+
+	use basin
+	use mod_meteo
+	use mod_parwaves
+
+	implicit none
+
+	integer ie
+
+        real ah1,ah2,ah3,eh1,eh2,eh3,eh4
+        real at1,at2,at3,et1,et2,et3,et4
+!------------------------------------------------------ Hurdle and Stive
+!        parameter(ah1=0.25,ah2=0.6,eh1=0.75)
+!        parameter(eh2=0.5,ah3=4.3e-05,eh3=1.,eh4=2.)
+!        parameter(at1=8.3,at2=0.76,et1=0.375)
+!        parameter(et2=1./3.,at3=4.1e-05,et3=1.,et4=3.)
+!------------------------------------------------------ SPM
+        parameter(ah1=0.283,ah2=0.53,eh1=3./4.)
+        parameter(eh2=1.,ah3=0.00565,eh3=1./2.,eh4=1.)
+        parameter(at1=7.54,at2=0.833,et1=3./8.)
+        parameter(et2=1.,at3=0.0379,et3=1./3.,et4=1.)
+
+        real, parameter :: g = 9.81		!gravity acceleration [m2/s]
+
+	integer icount
+	real dep,depe
+	real wis,wid
+	real gh,gx,hg
+	real auxh,auxh1,auxt,auxt1
+	real waeh1,waep1,waed1
+	real hbr			!limiting wave height [m]
+
+	real depele
 
           icount = 1
 
@@ -1339,44 +1392,72 @@
           end if 
 20        continue
 
-        end do
+	  call wave_spm(wis,wid,fet(ie),dep,waeh1,waep1,waed1)
+	  if( waeh1 /= waeh(ie) ) goto 99
+	  if( waep1 /= waep(ie) ) goto 99
+	  if( waed1 /= waed(ie) ) goto 99
 
-	!wmin = minval(winds)
-	!wmax = maxval(winds)
-	!czero = count( winds == 0. )
-	!hzero = count( waeh == 0. )
-	!write(6,*) 'wmin/wmax: ',wmin,wmax,czero,hzero
-
-!       -------------------------------------------------------------------
-!       copy to global values and write of results (file WAV)
-!       -------------------------------------------------------------------
-
-        call e2n2d(waeh,waveh,v1v)
-        call e2n2d(waep,wavep,v1v)
-        call e2n2d(waed,waved,v1v)
-
-	wavepp = wavep
-
-        if( next_output_d(da_wav) ) then
-	  id = nint(da_wav(4))
-	  call get_act_dtime(dtime)
-	  call shy_write_scalar_record2d(id,dtime,231,waveh)
-	  call shy_write_scalar_record2d(id,dtime,232,wavep)
-	  call shy_write_scalar_record2d(id,dtime,233,waved)
-	  call shy_sync(id)
-	end if
-
-!       -------------------------------------------------------------------
-!       end of routine
-!       -------------------------------------------------------------------
-
+	return
+   99	continue
+	write(6,*) waeh1 , waeh(ie)
+	write(6,*) waep1 , waep(ie)
+	write(6,*) waed1 , waed(ie)
+	stop 'error stop compute_waves_on_element: error in computation'
         end
 
 !**************************************************************
-!**************************************************************
+
+	subroutine compute_wind_values(icecover)
+
+	use basin
+	use mod_meteo
+	use mod_parwaves
+
+	implicit none
+
+	real icecover(nkn)
+	
+	integer ie,ii,k
+        integer nchunk
+	real wx,wy,fice
+	
+!$OMP PARALLEL 
+!$OMP SINGLE
+
+        call omp_compute_chunk(nel,nchunk)
+
+	do ie=1,nel
+
+!$OMP TASK FIRSTPRIVATE(ie) &
+!$OMP&     PRIVATE(wx,wy,ii,k,fice) &
+!$OMP&     SHARED(nel,nchunk,icecover,nen3v,wxv,wyv,winds,windd) &
+!$OMP&     DEFAULT(NONE)
+
+	  wx = 0.
+	  wy = 0.
+	  do ii=1,3
+	    k = nen3v(ii,ie)
+	    fice = 1. - awice*icecover(k)
+	    wx = wx + fice * wxv(k)
+	    wy = wy + fice * wyv(k)
+	  end do
+	  wx = wx / 3.
+	  wy = wy / 3.
+          call c2p(wx,wy,winds(ie),windd(ie))
+
+!$OMP END TASK
+
+	end do
+
+!$OMP END SINGLE
+!$OMP TASKWAIT  
+!$OMP END PARALLEL      
+
+	end
+
 !**************************************************************
 
-        subroutine fetch(windd,fet,daf)
+        subroutine compute_fetch(windd,fet,daf)
 
 ! This subroutine computes the wind fetch for each element of the
 ! grid given the wind direction.
@@ -1393,56 +1474,53 @@
         real xe,ye		!element point coordinates [m]
 	real fff,ddd
         real rad,wdir,wid
-	double precision wddir
-        integer ie,ierr
-	integer iespecial
-	integer icaver,icmax
+        integer ie,ierr,nchunk
 
         rad = 45. / atan (1.)
-	iespecial = 1743
-	iespecial = 0
-	icaver = 0
-	icmax = 0
 
 ! --- loop over elements
 
+!$OMP PARALLEL 
+!$OMP SINGLE
+
+        call omp_compute_chunk(nel,nchunk)
+
         do ie = 1,nel
           
+!$OMP TASK FIRSTPRIVATE(ie,rad) &
+!$OMP&     PRIVATE(xe,ye,wid,wdir,ierr,fff,ddd) &
+!$OMP&     SHARED(nel,nchunk,windd,fet,daf) &
+!$OMP&     DEFAULT(NONE)
+        
           call baric_cart(ie,xe,ye)
 
 	  wid = windd(ie)
           wdir = wid / rad		!from deg to rad
 
 	  ierr = 0
-	  if( ie == iespecial ) ierr = 1			!debug mode
-	  call fetch_element(ie,xe,ye,wdir,fff,ddd,ierr)
-	  icaver = icaver + ierr
-	  icmax = max(icmax,ierr)
+	  call compute_fetch_of_element(ie,xe,ye,wdir,fff,ddd,ierr)
 
 	  if( ierr .ge. 1000 ) then
 	    write(6,*) 'warning: iteration exceeded: ',ie
-	    ierr = 1
-	    wddir = wdir
-	    write(156,*) 'iterations in parametric wave model: '
-	    write(156,*) 0,0
-	    write(156,*) ie,wddir
-	    call fetch_element(ie,xe,ye,wdir,fff,ddd,ierr)
+            stop 'error stop compute_fetch: iterations'
 	  end if
 
-          fet(ie) = fff
-          daf(ie) = ddd
+          fet(ie) = fff			!computed fetch
+          daf(ie) = ddd			!computed average depth over fetch
 	  
-	end do
+!$OMP END TASK
 
-	icaver = icaver/nel
+        end do
 
-	!write(156,*) 'stats parametric wave model: ',icaver,icmax
+!$OMP END SINGLE
+!$OMP TASKWAIT  
+!$OMP END PARALLEL      
 
 	end
 
 !**************************************************************
 
-        subroutine fetch_element(ie,xein,yein,wdir,fff,ddd,ierr)
+        subroutine compute_fetch_of_element(ie,xein,yein,wdir,fff,ddd,ierr)
 
 ! This subroutine computes the wind fetch for element ie
 ! given the wind direction.

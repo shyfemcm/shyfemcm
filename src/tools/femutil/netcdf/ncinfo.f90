@@ -20,6 +20,13 @@
 ! 
 ! **************************************************************************
 
+! routine to write information on nc files
+!
+! revision log :
+!
+! 03.03.2023    ggu     created
+! 15.01.2025    ggu     adjourned
+
 !===================================================================
 	module mod_ncinfo
 !===================================================================
@@ -99,7 +106,7 @@
 !---------------------------------------------------------------------
 
 !	call ncnames_init
-!	call get_dims_and_coords(ncid,bverbose
+!	call ncnames_get_dims_and_coords(ncid,bverbose
 !     +				,nt,nx,ny,nz
 !     +				,tcoord,xcoord,ycoord,zcoord)
 
@@ -108,12 +115,13 @@
 !---------------------------------------------------------------------
 
 	if( binfo ) then
+          call ncf_set_var_name_length(ncid,nitem)
 	  nvars = nitem%nvars
 	  write(6,*) 'variables: ',nvars
-	  call ncf_print_variable_header
+	  call ncf_print_variable_header(ncid,nitem)
 	  do varid=1,nvars
 	    call ncf_var_inf(ncid,varid,vitem)
-	    call ncf_print_variable(vitem)
+	    call ncf_print_variable(ncid,vitem)
 	    if( bverbose ) then
 	      call ncf_natts(vitem,natts)
 	      if( natts > 0 ) then
@@ -138,9 +146,9 @@
 	      end if
 	      if( attid > 0 ) then
 	        if( bwrite ) then
-	          call ncf_print_variable_header
+	          call ncf_print_variable_header(ncid,nitem)
 	          call ncf_var_inf(ncid,varid,vitem)
-	          call ncf_print_variable(vitem)
+	          call ncf_print_variable(ncid,vitem)
 	          call ncf_att_inf(ncid,varid,attid,aitem)
 	          call ncf_print_attribute_header(ncid,varid)
 	          call ncf_print_attribute(aitem)
@@ -153,9 +161,9 @@
 	    else
 	      if( bwrite ) then
 	        write(6,*) 'varid = ',varid
-	        call ncf_print_variable_header
+	        call ncf_print_variable_header(ncid,nitem)
 	        call ncf_var_inf(ncid,varid,vitem)
-	        call ncf_print_variable(vitem)
+	        call ncf_print_variable(ncid,vitem)
 	        call ncf_print_attribute_header(ncid,varid)
 	        call ncf_print_attributes(ncid,vitem)
 	      end if

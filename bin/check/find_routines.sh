@@ -15,8 +15,8 @@
 #
 #---------------------------------------------------------
 
-dirs="fembin fem3d femplot femanim femcheck femdoc femregres"
-dirs=femlib
+dirs="bin fem3d femplot femanim femcheck femdoc femregres"
+dirs="lib"
 
 #---------------------------------------------------------
 

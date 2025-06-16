@@ -32,6 +32,10 @@
 ! 22.04.2021	ggu	resolve bound check error (not yet finished)
 ! 11.04.2022	ggu	prepare for online partitioning
 ! 12.04.2022	ggu	bug fix: iarnv and iarv were not saved
+! 15.10.2024	ggu	set array tpwgts (which is real, not dble) (IFX bug)
+! 21.11.2024	ggu	call check_partition() with bdebug flag
+! 23.11.2024	ggu	code cleaned
+! 29.11.2024	ggu	option to force contigous areas
 !
 !****************************************************************
 
@@ -39,6 +43,8 @@
 
 ! partitions grd file using the METIS library
 ! requires metis-5.1.0.tar.gz
+
+	use shympi
 
 	implicit none
 
@@ -49,14 +55,19 @@
 	integer epart(nel)
 
 	integer		      :: ie,ii,l
-	integer, allocatable  :: eptr(:) 		!index for eind
-	integer, allocatable  :: eind(:) 		!nodelist in elements
-	integer, pointer      :: vwgt(:)=>null() 	!weights of vertices
-        integer, pointer      :: vsize(:)=>null()	!size of the nodes
-        real(kind=8), pointer :: tpwgts(:)=>null()	!desired weight 
+	integer, allocatable  :: eptr(:) 	!index for eind
+	integer, allocatable  :: eind(:) 	!nodelist in elements
+	integer, allocatable  :: vwgt(:) 	!weights of vertices
+        integer, allocatable  :: vsize(:)	!size of the nodes
+        real, allocatable     :: tpwgts(:)	!desired partition weight 
 
         integer               :: objval		!edge-cut or total comm vol
 	integer               :: options(40)	!metis options
+
+	logical bcontig
+	integer iu,nfill,i
+
+	bcontig = .false.	!want contigous areas?
 
 !-----------------------------------------------------------------
 ! initialiaze arrays
@@ -68,6 +79,14 @@
         allocate(eptr(nel+1))
         allocate(eind(nel*3))
 
+        allocate(vwgt(nkn))
+        allocate(vsize(nkn))
+	vwgt = 1
+	vsize = 1
+
+        allocate(tpwgts(nparts))
+	tpwgts = 1./dble(nparts)
+
 !-----------------------------------------------------------------
 ! set up METIS eptr and eind arrays structures
 !-----------------------------------------------------------------
@@ -75,7 +94,7 @@
         eptr(1)=1
         do ie = 1,nel
           do ii = 1,3
-            l = eptr(ie) + ii -1
+            l = eptr(ie) + ii - 1
             eind(l) = nen3v(ii,ie)
           end do
           eptr(ie+1) = eptr(ie) + 3
@@ -89,16 +108,18 @@
 
         call METIS_SetDefaultOptions(options)
 
-        options(1) = 1		!PTYPE (0=rb,1=kway)
-        options(2) = 1		!OBJTYPE (0=cut,1=vol)
-        options(12) = 1		!CONTIG (0=defoult,1=force contiguous)
+        !options(1) = 1		!PTYPE (0=rb,1=kway)
+        !options(2) = 1		!OBJTYPE (0=cut,1=vol)
+        !options(12) = 1	!CONTIG (0=defoult,1=force contiguous)
         options(18) = 1		!NUMBERING (0 C-style, 1 Fortran-style)
+
+	if( bcontig ) options(12) = 1
 
 !-----------------------------------------------------------------
 ! Call METIS for patitioning on nodes
 !-----------------------------------------------------------------
 
-	!write(6,*) 'partitioning with METIS...'
+	write(6,*) 'partitioning with METIS...'
         call METIS_PartMeshNodal(nel, nkn, eptr, eind, vwgt, vsize,  &
      &       nparts, tpwgts, options, objval, epart, npart)
 
@@ -110,7 +131,7 @@
 
 !*******************************************************************
 
-        subroutine check_partition(npart,epart,ierr1,ierr2)
+        subroutine check_partition(npart,epart,bdebug,ierr1,ierr2)
 
 ! check partition
 
@@ -121,6 +142,7 @@
 
         integer npart(nkn)
         integer epart(nel)
+	logical bdebug
         integer ierr1,ierr2
 
         integer :: nsave(nkn)
@@ -131,7 +153,6 @@
 	ierr1 = 0
 	ierr2 = 0
 
-        call mod_geom_init(nkn,nel,ngr)
         call set_geom
 
         call link_set_stop(.false.)     !do not stop after error
@@ -142,8 +163,8 @@
 
         iarnv = npart
         iarv = epart
-        call check_connectivity(ierr1)
-        call check_connections(ierr2)
+        call check_connectivity(bdebug,ierr1)
+        call check_connections(bdebug,ierr2)
         npart = iarnv
         epart = iarv
 
@@ -152,7 +173,7 @@
 
         call link_set_stop(.true.)
 
-        call mod_geom_init(0,0,0)
+	call mod_geom_release
 
         end
 

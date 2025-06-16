@@ -63,6 +63,7 @@
 
 ! writes and administers ous file
 
+	use mod_trace_point
 	use mod_depth
 	use mod_hydro
 	use levels
@@ -103,6 +104,7 @@
 	if( icall .eq. -1 ) return
 
 	if( icall .eq. 0 ) then
+		call trace_point('init hydro_file in wrousa')
 		da_out = 0.
 		call init_output_d('itmout','idtout',da_out)
 
@@ -118,10 +120,12 @@
 	icall = icall + 1
 
 	if( next_output_d(da_out) ) then
+	  call trace_point('writing hydro_records in wrousa')
 	  id = nint(da_out(4))
 	  call get_act_dtime(dtime)
 	  call shy_write_hydro_records(id,dtime,nlvdi,znv,zenv &
      &					,utlnv,vtlnv)
+	  call trace_point('finished writing hydro_records in wrousa')
 	end if
 
 	return

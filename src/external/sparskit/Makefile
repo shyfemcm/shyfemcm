@@ -52,7 +52,8 @@ LIB = $(LIBDIR)/lib$(LIBNAME).a
 
 default: lib
 all:	lib
-fem: lib
+fem: shyfem
+shyfem: lib
 lib:	$(LIB) nothing
 
 nothing:
@@ -113,9 +114,21 @@ check_utils:
 list:
 	pwd; ls
 
+depend: nothing
+
 save:   zip
 zip:	cleanall
 	-zip $(DIR) $(SAVEFILES)
+
+#--------------------------------------------- special
+
+LEGACY = ""
+ifeq ($(FORTRAN_COMPILER),GNU_GFORTRAN)
+  LEGACY = "-std=legacy"
+endif
+
+submir.o: submir.f90
+	$(F77) -c $(FFLAGS) $(LEGACY) $<
 
 #--------------------------------------------- rules
 

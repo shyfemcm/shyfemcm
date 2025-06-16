@@ -23,16 +23,40 @@
 # gifsicle	(gifsicle)
 #
 # 02.05.2013    ggu     allow for single pages to be extracted
+# 11.01.2025    ggu     some minor changes for usability
 #
 ######################################################### copyright
 
 copy2="gps - shell for generation of plot files"
-copy3="Copyright (c) 1998-2002 Georg Umgiesser - ISDGM/CNR"
-copy4="e-mail: georg@isdgm.ve.cnr.it"
+copy3="Copyright (c) 1998-2025 Georg Umgiesser - ISMAR-CNR"
+copy4="e-mail: georg.umgiesser@cnr.it"
 
 ######################################################### help - usage
 
-Copy()
+script=$(realpath $0)
+scriptdir=$(dirname $script)
+
+gps2eps=$scriptdir/gps2eps.pl
+psresetbb=$scriptdir/psresetbb.sh
+parr=$scriptdir/parr.pl
+ps2pdf=/usr/bin/ps2pdf
+
+#--------------------------------------------------------
+
+CheckExec()
+{
+  for r in $*
+  do
+    if [ ! -x $r ]; then
+      echo "No such executable: $r"
+      exit 1
+    fi
+  done
+}
+
+#--------------------------------------------------------
+
+Copyright()
 {
   echo "$copy2"
   echo "$copy3"
@@ -40,22 +64,23 @@ Copy()
 
 Usage()
 {
-  echo "Usage: gps [ -h | -help ] [ -options ] file[s]"
+  echo "Usage: gps.sh [ -h | -help ] [ -options ] file[s]"
 }
 
 FullUsage()
 {
   echo ""
 
-  Copy
+  Copyright
   echo ""
   Usage
 
   echo ""
   echo "Available options:"
   echo "  -h|-help         this help"
-  echo "  -verbose         be verbose"
   echo "  -quiet           be quiet"
+  echo "  -verbose         be verbose"
+  echo "  -debug           write some debug messages"
   echo "  -split           split ps file into single pages"
   echo "  -pages range     extract single pages (range: 1,3,4-8)"
   echo "  -eps             convert ps files into eps files"
@@ -66,6 +91,13 @@ FullUsage()
   echo "  -bmp             convert files into bmp files"
   echo "  -dpi #           for raster files use this resolution in dpi"
   echo ""
+}
+
+Debug()
+{
+  echo "SHYFEMDIR: $SHYFEMDIR"
+  echo "scriptname: $script"
+  echo "scriptdir: $scriptdir"
 }
 
 ErrorOption()
@@ -229,7 +261,7 @@ ConvertPDF()
 
     [ $quiet = "NO" ] && echo "$source  ->  $target"
 
-    epstopdf $source
+    $ps2pdf $source
   done
 }
 
@@ -243,8 +275,9 @@ ConvertPDF()
 
 ######################################################### defaults
 
-verbose="NO"
 quiet="NO"
+verbose="NO"
+debug="NO"
 split="NO"
 pages=""
 eps="NO"
@@ -262,6 +295,7 @@ do
    case $1 in
 	-quiet)		quiet="YES";;
 	-verbose)	verbose="YES";;
+	-debug)		debug="YES";;
 	-split)		split="YES";;
 	-pages)		pages=$2; shift;;
 	-eps)		eps="YES";;
@@ -280,6 +314,10 @@ done
 
 ######################################################### no file -> write help
 
+CheckExec $gps2eps $psresetbb $parr $ps2pdf
+
+[ $debug = "YES" ] && Debug
+
 if [ $# -le 0 ]; then
   Usage
   exit 1;
@@ -295,9 +333,9 @@ if [ $split = "YES" -o -n "$pages" ]; then
     filename=`basename $file .ps`
     rm -f $filename.[0-9]*.ps
     if [ $split = "YES" ]; then
-      parr -A $file
+      $parr -A $file
     else
-      parr -A -o $pages $file
+      $parr -A -o $pages $file
     fi
     newfile=`ls -m $filename.[0-9]*.ps`
     [ $quiet = "NO" ] && echo "$file -> $newfile"
@@ -338,8 +376,8 @@ if [ $eps = "YES" ]; then
     [ $quiet = "NO" ] && echo "$psfile  ->  $epsfile"
 
     #ps2eps $psfile -o$epsfile  2> /dev/null
-    gps2eps $psfile > $epsfile
-    psresetbb.sh $epsfile
+    $gps2eps $psfile > $epsfile
+    $psresetbb $epsfile
     auxfiles="$auxfiles $epsfile"
   done
   newfiles=$auxfiles

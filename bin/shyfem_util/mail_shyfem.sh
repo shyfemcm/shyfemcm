@@ -14,7 +14,7 @@
 
 FEMDIR=${SHYFEMDIR:=$HOME/shyfem}
 
-fembin=$FEMDIR/fembin
+FEMBIN=$FEMDIR/bin
 
 subject="new SHYFEM release"
 shyfemdir="0B742mznAzyDPbGF2em5NMjZYdHc"
@@ -79,7 +79,7 @@ MakeLetter()
   echo "Click on \"releases\" and choose the desired version"	>> $tmpfile
   echo ""							>> $tmpfile
   echo "Release notes:"						>> $tmpfile
-  $fembin/extract_release.pl $FEMDIR/RELEASE_NOTES		>> $tmpfile
+  $FEMBIN/extract_release.pl $FEMDIR/RELEASE_NOTES		>> $tmpfile
   echo "Other relevant information can be found in:"		>> $tmpfile
   echo "    RELEASE_NOTES, LOG, COMMIT, VERSION, BUG"		>> $tmpfile
   echo ""							>> $tmpfile

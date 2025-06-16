@@ -63,6 +63,10 @@
 ! 15.10.2021    ggu     some checks for vertical dim in shy_write_record()
 ! 28.04.2023    ggu     update function calls for belem
 ! 07.06.2023    ggu     new version 13 - simpar introduced
+! 22.09.2024    ggu     increase nvar_act earlier (bug)
+! 25.11.2024    ggu     can use shy_[sg]et_simpar() with flexible nsimpar
+! 04.12.2024    ggu     new routine shy_get_status()
+! 10.04.2025    ggu     new nfix introduced for fixed vertical structure
 !
 !**************************************************************
 !**************************************************************
@@ -210,6 +214,7 @@
 !	11	stable version
 !	12	insert empty record after header
 !	13	new values simpar
+!	14	new nfix for fixed vertical values
 
 !==================================================================
 	module shyfile
@@ -220,7 +225,7 @@
 	integer, parameter, private :: idshy = 1617
 
 	integer, parameter, private :: minvers = 11
-	integer, parameter, private :: maxvers = 13
+	integer, parameter, private :: maxvers = 14
 
 	integer, parameter, private ::  no_type = 0
 	integer, parameter, private :: ous_type = 1
@@ -229,7 +234,12 @@
 	integer, parameter, private :: ext_type = 4
 	integer, parameter, private :: flx_type = 5
 
-	integer, parameter :: nsimpar = 3		!size of simpar array
+	integer, parameter :: nsimpar = 4	!size of auxiliary simpar array
+
+	! simpar(1)		hzmin
+	! simpar(2)		hzoff
+	! simpar(3)		nzadapt
+	! simpar(4)		dtaver
 
 	type, private :: entry
 
@@ -237,6 +247,7 @@
 	  integer :: nvers
 	  integer :: ftype
 	  integer :: nkn,nel,npr,nlv,nvar
+	  integer :: nfix
 	  integer :: date,time
 	  integer :: nsimpar
 	  real :: simpar(nsimpar)
@@ -333,6 +344,7 @@
 	pentry(id)%npr = 0
 	pentry(id)%nlv = 0
 	pentry(id)%nvar = 0
+	pentry(id)%nfix = 0
 	pentry(id)%date = 0
 	pentry(id)%time = 0
 	pentry(id)%nsimpar = nsimpar
@@ -569,6 +581,7 @@
 	if( pentry(id1)%nlv /= pentry(id2)%nlv ) goto 99 
 	if( pentry(id1)%npr /= pentry(id2)%npr ) goto 99 
 	if( pentry(id1)%nvar /= pentry(id2)%nvar ) goto 99 
+	if( pentry(id1)%nfix /= pentry(id2)%nfix ) goto 99 
 	!if( pentry(id1)%date /= pentry(id2)%date ) goto 99 
 	!if( pentry(id1)%time /= pentry(id2)%time ) goto 99 
 
@@ -717,11 +730,13 @@
         write(6,*) 'npr:      ',pentry(id)%npr
         write(6,*) 'nlv:      ',pentry(id)%nlv
         write(6,*) 'nvar:     ',pentry(id)%nvar
+        write(6,*) 'nfix:     ',pentry(id)%nfix
         write(6,*) 'date:     ',pentry(id)%date
         write(6,*) 'time:     ',pentry(id)%time
         write(6,*) 'nsimpar:  ',pentry(id)%nsimpar
         write(6,*) 'hzmin/off:',pentry(id)%simpar(1:2)
         write(6,*) 'nzadapt:  ',nint(pentry(id)%simpar(3))        
+        write(6,*) 'dtaver :  ',pentry(id)%simpar(4)        
 	write(6,*) 'title:    ',trim(pentry(id)%title)
         write(6,*) 'femver:   ',trim(pentry(id)%femver)
 
@@ -868,8 +883,6 @@
 
 	end function shy_is_lgr_file_by_unit
 
-
-
 !************************************************************
 !************************************************************
 !************************************************************
@@ -891,6 +904,28 @@
 
 !************************************************************
 
+	subroutine shy_convert_nfix(id,nfix)
+
+	integer id,nfix
+
+	integer i
+
+	deallocate(pentry(id)%hlv)
+	allocate(pentry(id)%hlv(nfix))
+
+	do i=1,nfix
+	  pentry(id)%hlv(i) = i
+	end do
+
+	pentry(id)%nlv = nfix
+	pentry(id)%nfix = nfix
+	pentry(id)%ilhv = nfix
+	pentry(id)%ilhkv = nfix
+
+	end subroutine shy_convert_nfix
+
+!************************************************************
+
 	subroutine shy_convert_1var(id)
 
 	integer id
@@ -905,6 +940,14 @@
 
 !************************************************************
 !************************************************************
+!************************************************************
+
+	subroutine shy_get_status(id,bopen)
+	integer id
+	logical bopen
+	bopen = pentry(id)%is_opened
+	end subroutine shy_get_status
+
 !************************************************************
 
 	subroutine shy_get_iunit(id,iunit)
@@ -985,6 +1028,20 @@
 
 !************************************************************
 
+	subroutine shy_get_nfix(id,nfix)
+	integer id
+	integer nfix
+	nfix = pentry(id)%nfix
+	end subroutine shy_get_nfix
+
+	subroutine shy_set_nfix(id,nfix)
+	integer id
+	integer nfix
+	pentry(id)%nfix = nfix
+	end subroutine shy_set_nfix
+
+!************************************************************
+
 	subroutine shy_get_date(id,date,time)
 	integer id
 	integer date,time
@@ -1016,21 +1073,23 @@
 !************************************************************
 
 	subroutine shy_get_simpar(id,simpar)
-	integer id
-	real simpar(:)
-	integer nsp
+	integer, intent(in) :: id
+	real, intent(out) :: simpar(:)
+	integer nsp,n
 	nsp = size(simpar)
-	if( nsp /= nsimpar ) stop 'error stopshy_get_simpar: nsp/=nsimpar'
-	simpar(:) = pentry(id)%simpar(:)
+	n = min(nsp,nsimpar)
+	simpar = 0.
+	simpar(1:n) = pentry(id)%simpar(1:n)
 	end subroutine shy_get_simpar
 
 	subroutine shy_set_simpar(id,simpar)
-	integer id
-	real simpar(:)
-	integer nsp
+	integer, intent(in) :: id
+	real, intent(in) :: simpar(:)
+	integer nsp,n
 	nsp = size(simpar)
-	if( nsp /= nsimpar ) stop 'error stopshy_set_simpar: nsp/=nsimpar'
-	pentry(id)%simpar(:) = simpar(:)
+	n = min(nsp,nsimpar)
+	pentry(id)%simpar(:) = 0.
+	pentry(id)%simpar(1:n) = simpar(1:n)
 	end subroutine shy_set_simpar
 
 !************************************************************
@@ -1202,6 +1261,7 @@
 	integer ntype,nvers
 	integer ftype
 	integer nkn,nel,npr,nlv,nvar
+	integer nfix
 	integer date,time
 	integer nsp
 	real simpar(nsimpar)
@@ -1230,6 +1290,13 @@
 	if( ios /= 0 ) return
 	call shy_set_params(id,nkn,nel,npr,nlv,nvar)
 
+        if( nvers >= 14 ) then          !nfix
+        ierr = 33
+        read(iunit,iostat=ios) nfix
+        if( ios /= 0 ) return
+        call shy_set_nfix(id,nfix)
+	end if
+
 	ierr = 4
         read(iunit,iostat=ios) date,time
 	if( ios /= 0 ) return
@@ -1239,7 +1306,7 @@
         ierr = 5
         read(iunit,iostat=ios) nsp
         if( ios /= 0 ) return
-        if( nsp /= nsimpar ) return
+	simpar = 0.
         read(iunit,iostat=ios) simpar(1:nsp)
         if( ios /= 0 ) return
         call shy_set_simpar(id,simpar)
@@ -1337,10 +1404,12 @@
 	integer iunit
 	integer i,k,ie,l,j,nlin
 	integer nkn,nel
+	integer nfix
 	integer, allocatable :: il(:)
 	real, allocatable :: rlin(:)
 
 	iunit = pentry(id)%iunit
+	nfix = pentry(id)%nfix
 
 	ierr = 55
 	if( .not. pentry(id)%is_allocated ) return
@@ -1357,6 +1426,9 @@
 	  nkn = pentry(id)%nkn
 	  if( n /= nkn ) stop 'error stop shy_read_record: n/=nkn'
 	  il = pentry(id)%ilhkv
+	end if
+	if( nfix > 0 ) then
+	  il = nfix
 	end if
 
 	if( lmax <= 1 ) then
@@ -1483,6 +1555,7 @@
 	integer ntype,nvers
 	integer ftype
 	integer nkn,nel,npr,nlv,nvar
+	integer nfix
 	integer date,time
 	real simpar(nsimpar)
 	character*80 title
@@ -1496,6 +1569,7 @@
 
 	call shy_get_ftype(id,ftype)
 	call shy_get_params(id,nkn,nel,npr,nlv,nvar)
+	call shy_get_nfix(id,nfix)
 	call shy_get_date(id,date,time)
 	call shy_get_title(id,title)
 	call shy_get_femver(id,femver)
@@ -1504,6 +1578,7 @@
         write(iunit,err=99) idshy,nvers
         write(iunit,err=99) ftype
         write(iunit,err=99) nkn,nel,npr,nlv,nvar
+        write(iunit,err=99) nfix
         write(iunit,err=99) date,time
         write(iunit,err=99) nsimpar
         write(iunit,err=99) simpar(:)
@@ -1548,13 +1623,17 @@
 	integer iunit
 	integer i,k,ie,l,j,nlin
 	integer nkn,nel
+	integer nfix
 	integer, allocatable :: il(:)
 	real, allocatable :: rlin(:)
 
 	ierr = 0
+	pentry(id)%nvar_act = pentry(id)%nvar_act + 1
+
 	if( .not. pentry(id)%is_opened ) return
 
 	iunit = pentry(id)%iunit
+	nfix = pentry(id)%nfix
 
 	write(iunit,iostat=ierr) dtime,ivar,n,m,lmax
 	if( ierr /= 0 ) return
@@ -1572,6 +1651,9 @@
 	    if( n /= nkn ) stop 'error stop shy_read_record: n/=nkn'
 	    il = pentry(id)%ilhkv
 	  end if
+	  if( nfix > 0 ) then
+	    il = nfix
+	  end if
 	end if
 
 	if( .not. b3d ) then
@@ -1579,15 +1661,9 @@
 	else if( m == 1 ) then
 	  nlin = nlvddi*n
 	  allocate(rlin(nlin))
-	  !write(601,*) 'before vals2linear...'
-	  !write(601,*) id,ivar,n
-	  !write(601,*) lmax,nlvddi
 	  if( lmax /= nlvddi ) goto 99
           call vals2linear(lmax,n,m,il,c,rlin,nlin)
 	  write(iunit,iostat=ierr) ( rlin(i),i=1,nlin )
-!	  write(iunit,iostat=ierr) (( c(l,i)
-!     +			,l=1,il(i) )
-!     +			,i=1,n )
 	else
 	  write(6,*) lmax,m
 	  stop 'error stop shy_write_record: m and lmax > 1'
@@ -1595,8 +1671,6 @@
      &			,l=1,il(1+(i-1)/m) ) &
      &			,i=1,n*m )
 	end if
-
-	pentry(id)%nvar_act = pentry(id)%nvar_act + 1
 
 	if( b3d ) deallocate(il)
 

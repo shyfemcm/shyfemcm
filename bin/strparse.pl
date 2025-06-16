@@ -12,6 +12,9 @@
 #
 # possible command line options: see subroutine FullUsage
 #
+# version       1.10    08.05.2025     option -order and -compare
+# version       1.9     28.01.2025     option -verbose
+# version       1.8     09.01.2025     tselab, handle error in reduce
 # version       1.7     02.11.2023     -restart implemented
 # version       1.6     11.06.2023     -essential implemented
 # version       1.5     09.06.2023     handle flux/extra section with descrip
@@ -23,7 +26,7 @@
 #
 #--------------------------------------------------------
 
-use lib ("$ENV{SHYFEMDIR}/femlib/perl","$ENV{HOME}/shyfem/femlib/perl");
+use FindBin qw($Bin); use lib "$Bin/../lib/perl"; 
 
 use str;
 use grd;
@@ -34,6 +37,7 @@ use strict;
 #-------------------------------------------------------------
 $::h = 0 unless $::h;
 $::help = 0 unless $::help;
+$::verbose = 0 unless $::verbose;
 $::quiet = 0 unless $::quiet;
 $::bnd = 0 unless $::bnd;
 $::files = 0 unless $::files;
@@ -41,6 +45,8 @@ $::extra = 0 unless $::extra;
 $::flux = 0 unless $::flux;
 $::zip = 0 unless $::zip;
 $::rewrite = 0 unless $::rewrite;
+$::compare = 0 unless $::compare;
+$::order = 0 unless $::order;
 $::restart = 0 unless $::restart;
 $::essential = 0 unless $::essential;
 $::sect = "" unless $::sect;
@@ -69,13 +75,19 @@ $::reduce = "" unless $::reduce;
 #-------------------------------------------------------------
 
 my $file = $ARGV[0];
+my $file2 = $ARGV[1];	# needed for compare
 
 $::scriptpath = ScriptPath();
 
 my $str = new str;
 $str->{quiet} = $::quiet;
+$str->{verbose} = $::verbose;
 $str->{nocomment} = $::essential;
+$str->{order} = $::order;
 $str->read_str($file) if $file;
+
+my $str2 = new str;
+$str2->read_str($file2) if $file2;
 
 if( $::h or $::help ) {
   FullUsage();
@@ -93,6 +105,13 @@ if( $::h or $::help ) {
   my $files = show_files($str);
   push(@$files,$file);		#add str-file to archive
   zip_files($files);
+} elsif( $::compare ) {
+  die "compare option needs two files\n" unless $file2;
+  $str->{order} = 1;
+  $str->write_str("new1.str");;
+  $str2->{order} = 1;
+  $str2->write_str("new2.str");;
+  print STDERR "files to be compared are in new1.str new2.str\n";
 } elsif( $::rewrite ) {
   #$str->print_sections();;
   $str->write_str("new.str");;
@@ -128,6 +147,7 @@ if( $::h or $::help ) {
   print STDERR "copy simulation of str file into directory $::collect\n";
   collect_str($str,$::collect);
 } else {
+  print STDERR "no action specified...\n";
   Usage();
 }
 
@@ -135,15 +155,16 @@ if( $::h or $::help ) {
 
 sub Usage {
 
-  print STDERR "Usage: strparse.pl [-h|-help] [-options] str-file\n";
+  print STDERR "Usage: strparse.pl [-h|-help] [-options] str-file [str-file2]\n";
   exit 0;
 }
 
 sub FullUsage {
 
-  print STDERR "Usage: strparse.pl [-h|-help] [-options] str-file\n";
+  print STDERR "Usage: strparse.pl [-h|-help] [-options] str-file [str-file2]\n";
   print STDERR "  options:\n";
   print STDERR "    -h!-help      this help screen\n";
+  print STDERR "    -verbose      be more verbose\n";
   print STDERR "    -quiet        be as quiet as possible\n";
   print STDERR "    -bnd          extract boundary nodes\n";
   print STDERR "    -files        extract names of forcing files\n";
@@ -151,8 +172,10 @@ sub FullUsage {
   print STDERR "    -flux         extract flux nodes\n";
   print STDERR "    -zip          zips forcing files, grid, str in one file\n";
   print STDERR "    -rewrite      rewrite the str file\n";
+  print STDERR "    -compare      rewrite the str files for comparison\n";
   print STDERR "    -restart      create a restart from the str file\n";
   print STDERR "    -essential    only write active sections, no comments\n";
+  print STDERR "    -order        write sections and variables ordered\n";
   print STDERR "    -value=var    show value of var ([sect:]var)\n";
   print STDERR "    -replace=val  replace value of var with val and rewrite\n";
   print STDERR "    -simtime      prints start and end time of simulation\n";
@@ -161,6 +184,7 @@ sub FullUsage {
   #print STDERR "    -sect=sect    writes contents of section\n";
   print STDERR "    -txt          write nodes as text and not in grd format\n";
   print STDERR "  if -replace is given also -value must be specified\n";
+  print STDERR "  if -compare is given two str-files must be specified\n";
   print STDERR "  using -collect=dir -reduce choses minimal data for sim\n";
   exit 0;
 }
@@ -497,7 +521,15 @@ sub show_files {
 
   my $basin = $str->get_basin();
   $basin =~ s/^\s+//;
-  if( file_exists("$basin.grd") ) {
+  if( file_exists("$basin") ) {
+    if( file_has_extension("$basin",".grd") ) {
+      # ok
+    } elsif( file_has_extension("$basin",".bas") ) {
+      # ok
+    } else {
+      die "*** basin file $basin needs extension .grd or .bas";
+    }
+  } elsif( file_exists("$basin.grd") ) {
     $basin .= ".grd";
   } elsif( file_exists("$basin.bas") ) {
     $basin .= ".bas";
@@ -724,6 +756,8 @@ sub collect_str {
       print STDERR "  copying file $file to $input\n";
       system("cp $file $input");
       $item->{"newdir"} = "$newinput/";
+    } elsif( $file =~ /^\s*$/ ) {		# empty file path
+      $item->{"newdir"} = "";
     } else {
       my $type = `$::scriptpath/shyfile $file`;
       chomp($type);
@@ -731,16 +765,30 @@ sub collect_str {
         print STDERR "  reducing ($type) $file to $input as $filename\n";
         my $command = "femelab -tmin $itanf -tmax $itend";
         my $options = "-out -inclusive";
+	print "    executing: $command $options $file\n" if $::verbose;
         system("[ -f out.fem ] && rm -f out.fem");
         system("$command $options $file > /dev/null");
-        system("mv out.fem $input/$filename");
+	if( -f "out.fem" and -s "out.fem" ) {	#file existing and non empty
+	  print STDERR "    moving $file to $input/$filename\n" if $::verbose;
+          system("mv out.fem $input/$filename");
+	} else {
+	  print STDERR "    *** cannot reduce $file... just copying\n";
+          system("cp $file $input/$filename");
+	}
       } elsif( $type eq "TS" ) {
         print STDERR "  reducing ($type) $file to $input as $filename\n";
-        my $command = "tselab -tmin $itanf -tmax $itend";
+        my $command = "$::scriptpath/tselab -tmin $itanf -tmax $itend";
         my $options = "-out -inclusive";
-        system("[ -f out.txt ] && rm -f out.fem");
+	print "    executing: $command $options $file\n" if $::verbose;
+        system("[ -f out.txt ] && rm -f out.txt");
         system("$command $options $file > /dev/null");
-        system("mv out.txt $input/$filename");
+	if( -f "out.txt" and -s "out.txt" ) {	#file existing and non empty
+	  print STDERR "    moving $file to $input/$filename\n" if $::verbose;
+          system("mv out.txt $input/$filename");
+	} else {
+	  print STDERR "    *** cannot reduce $file... just copying\n";
+          system("cp $file $input/$filename");
+	}
       } else {
         print STDERR "  cannot reduce type $type $file ...copying\n";
         system("cp $file $input");
@@ -765,6 +813,8 @@ sub collect_str {
       $filename =~ s/\.grd//;
       $basin = $filename;
       $str->set_basin($filename);
+    } elsif( $section eq "none" ) {
+      #nothing
     } else {
       replace_value($str,$varname,"'$newdir$filename'",$section);
     }
@@ -781,7 +831,8 @@ sub collect_str {
   print STDERR "  zip -r $dir.zip $dir/*\n";
   print STDERR "  tar cvzf $dir.tar.gz $dir\n";
   print STDERR "you can run the simulation by doing the following:\n";
-  print STDERR "  cd $dir; make basin; make run\n";
+  print STDERR "  cd $dir; make run\n";
+  print STDERR "(you might have to specify where to find shyfem)\n";
 }
 
 sub file_exists {
@@ -789,6 +840,17 @@ sub file_exists {
   my $file = shift;
 
   if( -e $file ) {
+    return 1;
+  } else {
+    return 0;
+  }
+}
+
+sub file_has_extension {
+
+  my ($file,$ext) = @_;
+
+  if( $file =~ /$ext$/ ) {
     return 1;
   } else {
     return 0;
@@ -808,6 +870,10 @@ sub create_makefile {
 my $var = <<'EOF';
 
 default:
+	@echo "possible targets:"
+	@echo "  basin               make basin (not necessary)"
+	@echo "  run                 run simulation"
+	@echo "  clean, cleanall     clean directory"
 
 basin:
 	shypre $(BASIN)
@@ -822,6 +888,8 @@ cleanall: clean
 	-rm -f *.bas
 	-rm -f *.shy *.rst *.flx *.ext *.log *.inf
 	-rm -f boxes_*.txt
+	-rm -f partition.*.grd
+	-rm -f partition.*.txt
 
 EOF
 

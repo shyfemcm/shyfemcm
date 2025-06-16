@@ -12,7 +12,7 @@
 #
 # example of usage:
 #
-# use lib ("$ENV{SHYFEMDIR}/femlib/perl","$ENV{HOME}/shyfem/femlib/perl");
+# use lib ("$ENV{SHYFEMDIR}/lib/perl","$ENV{HOME}/shyfem/lib/perl");
 # use ascii;
 # 
 # my $ascii = new ascii;

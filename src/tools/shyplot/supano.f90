@@ -90,6 +90,8 @@
 !  06.07.2018	ggu	changed VERS_7_5_48
 !  18.12.2018	ggu	changed VERS_7_5_52
 !  21.05.2019	ggu	changed VERS_7_5_62
+!  18.09.2024	ggu	new parameter rfaccol, new log colorbar
+!  09.01.2025	ggu	avoid divide by zero in scale_legend(): 10 -> 10.
 ! 
 !  notes :
 ! 
@@ -546,6 +548,7 @@
 	real x0s,y0s		!starting point of scale bar
 	real h			!height of scale bar
 	real dd			!length of scale bar
+	real lblank		!factor for blanking
 	real scale
 	integer is,i0
 	integer ndec,ntics
@@ -557,13 +560,14 @@
 	logical bblank
 
 	bblank = .true.		!blanking for scale legend
-	bblank = nint(getpar('lblank')) > 0
+	lblank = getpar('lblank')
+	bblank = lblank > 0
 
 	!write(6,*) '===================== legend =============='
 
 !  blanking of window
 
-	if( bblank ) call blank_window(x0,y0,x1,y1)
+	if( bblank ) call blank_window(lblank,x0,y0,x1,y1)
 
 !  extension of window
 
@@ -595,7 +599,7 @@
 !  find leading digit (must be 1,2,3,4,5,8)
 
 	is = istell(dd)
-	i0 = iround( dd / 10**is )
+	i0 = iround( dd / 10.0**is )
 
 	if( i0 .eq. 2 .or. i0 .eq. 4 .or. i0 .eq. 8 ) then
 		ntics = 4
@@ -657,7 +661,7 @@
 	integer ndec
 	integer nctick,ipllog
 	logical bhoriz
-	real fact
+	real fact,rfact
 	real x0,y0,x1,y1
 
 	integer iround
@@ -673,6 +677,8 @@
 
 	bhoriz = .true.
 	fact = getpar('faccol')
+        rfact = getpar('rfaccol')
+        if( fact == 1. .and. rfact /= 1. ) fact = 1. / rfact
 	ndec = iround(getpar('ndccol'))
 	nctick = iround(getpar('nctick'))
 	ipllog = iround(getpar('ipllog'))
@@ -713,7 +719,7 @@
 
 	character*80 line
 	integer i,imax,nw
-	integer ntk
+	integer ntk,ntks
 	integer nmin,nmax
 	integer icsave
 	integer idec
@@ -731,6 +737,7 @@
 	real ylow,yhigh,dyc,dxy
 	real xcm,ycm,dxtick,dytick
 	real amin,amax
+	real cblank			!factor for blanking
 	integer idiv,ntkl
 	integer it
 
@@ -747,7 +754,8 @@
 	bdebug = .true.
 	bdebug = .false.
 	bblank = .true.		!blanking for color bar
-	bblank = nint(getpar('cblank')) > 0
+	cblank = getpar('cblank')
+	bblank = cblank > 0
 	!bhoriz = .false.
 	!bhoriz = .true.
 	brotate = .true.	!rotate numbers for vertical color bar
@@ -763,7 +771,7 @@
 
 !  blanking of window
 
-	if( bblank ) call blank_window(xmin,ymin,xmax,ymax)
+	if( bblank ) call blank_window(cblank,xmin,ymin,xmax,ymax)
 
 !  determine min/max
 
@@ -872,7 +880,8 @@
 	  amin = getcolval(1.)
 	  amax = getcolval(float(isoanz))
 	  ntk = ndim
-	  call logvals(amin,amax,idiv,ntk,rval,aval)
+	  ntks = nticks
+	  call logvals(amin,amax,idiv,ntk,ntks,rval,aval)
 	  !write(6,*) 'amin,amax: ',amin,amax
 	  !write(6,*) 'idiv,ntk: ',idiv,ntk
 	end if
@@ -894,6 +903,7 @@
 	do i=1,ntk
 	  rit = 1. + (i-1)*dtick
 	  value = getcolval(rit)
+	  if( value > 2.00E+09 ) goto 99
 	  if( blog ) value = aval(i)
 	  value = fact * value
 	  idec = ndec
@@ -939,6 +949,9 @@
 
 	return
  1000	format(i5,4f14.4,5x,a10)
+   99	continue
+	write(6,*) 'value = ',value
+	stop 'error stop colbar: value too big to handle'
 	end
 
 ! ************************************************************
@@ -1623,6 +1636,7 @@
 	real val,val1,val2,value
 	real width,height
 	real sfact,afact,xt
+	real ablank			!factor for blanking
 
 	integer iround,istell,ialfa
 	real rnext
@@ -1631,13 +1645,14 @@
 	logical bblank,bdebug
 
 	bblank = .true.		!blanking for velocity arrow
-	bblank = nint(getpar('ablank')) > 0
+	ablank = getpar('ablank')
+	bblank = ablank > 0
 	bdebug = .true.
 	bdebug = .false.
 
 !  blanking of window
 
-	if( bblank ) call blank_window(x0,y0,x1,y1)
+	if( bblank ) call blank_window(ablank,x0,y0,x1,y1)
 
 !  extension of window
 
@@ -2215,18 +2230,45 @@
 
 ! ******************************************************************
 
-        subroutine blank_window(x0,y0,x1,y1)
+        subroutine blank_window(rf,x0,y0,x1,y1)
 
 !  blanks window given by coordinates
 
         implicit none
 
+	real rf
         real x0,y0,x1,y1
+
+	real dx,dy,xm,ym
+        real x0aux,y0aux,x1aux,y1aux
+
+	if( rf <= 0 ) return
+
+	if( rf /= 1. ) then
+	  xm = 0.5 * (x1 + x0)
+	  ym = 0.5 * (y1 + y0)
+	  dy = y1 - y0
+	  dx = x1 - x0
+	  dy = y1 - y0
+	  dx = 0.5 * dx * rf
+	  dy = 0.5 * dy * rf
+	  x0aux = xm - dx
+	  x1aux = xm + dx
+	  y0aux = ym - dy
+	  y1aux = ym + dy
+
+	  !write(6,*) x0,y0,x1,y1
+	  !write(6,*) x0aux,y0aux,x1aux,y1aux
+	end if
 
         call qcomm('Start blanking window')
 	call qwhite(.true.)
-	call qgray(1.)
-	call qrfill(x0,y0,x1,y1)
+	call qgray(1.)	!color is white
+	if( rf /= 1. ) then
+	  call qrfill(x0aux,y0aux,x1aux,y1aux)
+	else
+	  call qrfill(x0,y0,x1,y1)
+	end if
 	call qgray(0.)
 	call qwhite(.false.)
         call qcomm('End blanking window')

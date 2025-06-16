@@ -50,16 +50,16 @@ sub install_fem {
       $change = 1;
       print "SHYFEMDIR=$dir        # ggu_hard_install\n";
       print STDERR "$ARGV ($dir) (shell): $_" if $::verbose;
-    } elsif( /^use lib/ and /femlib\/perl/ ) {
+    } elsif( /^use lib/ and /lib\/perl/ ) {
       $change = 1;
       print "#ggu_hard_install $_";		# write old first
-      print "use lib (\"$dir/femlib/perl\");     # ggu_hard_install\n";
-      print STDERR "$ARGV ($dir) (femlib/perl): $_" if $::verbose;
+      print "use lib (\"$dir/lib/perl\");     # ggu_hard_install\n";
+      print STDERR "$ARGV ($dir) (lib/perl): $_" if $::verbose;
       next;
-    } elsif( /^use lib/ and /ENV/ and /fembin/ ) {
+    } elsif( /^use lib/ and /ENV/ and /bin/ ) {
       $change = 1;
       print "#ggu_hard_install $_";		# write old first
-      print "use lib (\"$dir/fembin\");     # ggu_hard_install\n";
+      print "use lib (\"$dir/bin\");     # ggu_hard_install\n";
       print STDERR "$ARGV ($dir) (perl): $_" if $::verbose;
       next;
     } else {

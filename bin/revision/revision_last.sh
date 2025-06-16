@@ -15,6 +15,8 @@
 version_file="VERSION"
 compare_file=$version_file
 
+bindir=$SHYFEMDIR/bin/revision
+
 tmpfile=tmp0.tmp
 tmpfile1=tmp1.tmp
 tmpfile2=tmp2.tmp
@@ -110,10 +112,12 @@ echo "using compare date $comparedate"
 # find files
 #------------------------------------------------------------
 
-files=`find . -name "*.[cfFh]"`
+files=`find . -name "*.f90"`
+#files=`find . -name "*.[cfFh]"`
+#echo "looking for files: $files"
 
-revisionlog.sh -after $comparedate $files > $tmpfile
-revisionlog_adjust.pl $tmpfile $version_file > $tmpfile2
+$bindir/revisionlog.sh -after $comparedate $files > $tmpfile
+$bindir/revisionlog_adjust.pl $tmpfile $version_file > $tmpfile2
 
 cat $tmpfile2
 

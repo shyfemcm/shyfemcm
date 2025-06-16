@@ -14,9 +14,10 @@ SUBDIRS = gotm sparskit
 
 #------------------------------------------------------------------------
 
-default: fem
+default: shyfem
 
-fem: nothing
+fem: shyfem
+shyfem: nothing
 	@$(BINDIR)/recursivemake $@ $(SUBDIRS)
 
 test: nothing
@@ -30,6 +31,7 @@ list:
 	pwd; ls
 
 depend: nothing
+	@$(BINDIR)/recursivemake $@ $(SUBDIRS)
 
 clean: nothing
 	@$(BINDIR)/recursivemake $@ $(SUBDIRS)

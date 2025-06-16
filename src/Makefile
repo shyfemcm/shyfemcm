@@ -9,14 +9,15 @@
 
 FEMDIR = ..
 BINDIR = $(FEMDIR)/bin
-SUBDIRS = external utils shyfem tools
+SUBDIRS = external utils contrib shyfem tools 
 
 #------------------------------------------------------------------------
 
-default: fem
+default: shyfem
 
-fem: nothing
-	@$(BINDIR)/recursivemake $@ $(SUBDIRS)
+fem: shyfem
+shyfem: libmod nothing
+	@$(BINDIR)/recursivemake fem $(SUBDIRS)
 
 test: nothing
 	@$(BINDIR)/recursivemake $@ $(SUBDIRS)
@@ -28,13 +29,20 @@ status: nothing
 list:
 	pwd; ls
 
+libmod: $(FEMDIR)/lib/mod
+$(FEMDIR)/lib/mod:
+	mkdir -p $(FEMDIR)/lib/mod
+
 depend: nothing
+	@$(BINDIR)/recursivemake $@ $(SUBDIRS)
 
 clean: nothing
 	@$(BINDIR)/recursivemake $@ $(SUBDIRS)
+	-rm -f *.tmp *.bak
 
 cleanall: nothing
 	@$(BINDIR)/recursivemake $@ $(SUBDIRS)
+	-rm -f *.tmp *.bak
 
 save: nothing
 

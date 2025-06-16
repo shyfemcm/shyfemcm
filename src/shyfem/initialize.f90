@@ -132,6 +132,8 @@
 ! 20.07.2021	ggu	test if file has been opened for velocities
 ! 21.10.2022	ggu	in init_vertical() bug fix - update sigma_info (GGUBS)
 ! 28.04.2023	ggu	possible nkn=nel bug flagged with GGU_NKN_NEL
+! 03.03.2024	ggu	bug fix in init_file_uv() - reset np
+! 10.05.2024	ggu	set spherical in bas file
 !
 ! notes :
 !
@@ -1223,7 +1225,7 @@
 	parameter ( rearth = 6371000. )
 
 	logical bgeo
-	integer k,ie,ii
+	integer k,ie,ii,ie_mpi,iu
 	integer icor
 	integer isphe
 	real yc,ym,y,ymin,ymax,dlat
@@ -1276,6 +1278,10 @@
 
 	if( bgeo ) dlat = yc		! get directly from basin
 
+	!iu = 670 + my_id
+	!write(iu,*) my_id,icor,bgeo,isphe
+	!write(iu,'(i10,3f16.10)') my_id,ymin,ymax,yc
+
 	aux1 = 0.
 	aux2 = 0.
 
@@ -1294,7 +1300,9 @@
 	write(6,*) 'f_0, beta    : ',aux1,aux2
 	write(6,*) 'yc,ymin,ymax : ',yc,ymin,ymax
 
-	do ie=1,nel
+	do ie_mpi=1,nel
+          ie = ip_sort_elem(ie_mpi)
+
 	  ym=0.
 	  do ii=1,3
 	    ym=ym+yaux(nen3v(ii,ie))
@@ -1311,6 +1319,10 @@
 	    stop 'error stop init_coriolis: value for isphe not allowed'
 	  end if
 	end do
+
+	if( bextra_exchange ) then
+	  call shympi_exchange_2d_elem(fcorv)
+	end if
 
 	end
 
@@ -1597,9 +1609,9 @@
         nodes = 0
         nvar = 2
         nintp = 2
-        np = nkn			!velocities must be on node - relax later
+        np = nkn		!velocities must be on node - relax later
         lmax = nlvdi
-        ibc = 0                         !no lateral boundary
+        ibc = 0                 !no lateral boundary
         what = 'uv init'
         uvconst = 0.
 
@@ -1624,6 +1636,8 @@
 	  write(6,*) 'read error from file ',trim(name)
 	  stop 'error stop init_file_uv: np'
 	end if
+
+        np = nkn		!velocities must be on node - relax later
 
         call iff_init(dtime,name,nvar,np,lmax,nintp &
      &                          ,nodes,uvconst,idvel)
@@ -1677,6 +1691,9 @@
 	real getpar
 
 	isphe = nint(getpar('isphe'))
+	if( isphe == -1 ) return	!no info given
+
+	call bas_set_spherical(isphe)
 	call set_coords_ev(isphe)
 
 	end

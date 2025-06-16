@@ -236,6 +236,7 @@
 	use mod_ts
 	use mod_roughness
 	use mod_diff_visc_fric
+	use mod_layer_thickness
 	use mod_hydro_print
 	use levels, only : nlvdi,nlv
 	use basin
@@ -315,6 +316,7 @@
 	if( icall .lt. 0 ) return
 
 	kdebug = 8
+	kdebug = 2100
 	kdebug = -1
 	iudeb = 0
 	iwhat = 0
@@ -370,7 +372,19 @@
 	call bnstress(czdef,taub)
 
 	!call shympi_comment('exchanging taub')
-	call shympi_exchange_2d_node(taub)
+
+	if( bextra_exchange ) then
+	  call shympi_exchange_2d_node(taub)
+	end if
+
+	!call shympi_check_2d_node(taub,'taub')
+	!call shympi_check_3d_node(uprv,'uprv')
+	!call shympi_check_3d_node(vprv,'vprv')
+	!call shympi_check_2d_node(tauxnv,'tauxnv')
+	!call shympi_check_2d_node(tauynv,'tauynv')
+	!call shympi_check_3d_node(rhov,'rhov')
+	!call shympi_check_3d_node(hdkov,'hdkov')
+	!call shympi_check_3d_node(hdknv,'hdknv')
 
 !------------------------------------------------------
 ! set up buoyancy frequency and shear frequency
@@ -379,6 +393,12 @@
 	shearf2 = 0.
  	buoyf2 = 0.
 	call setm2n2(nlvdi,buoyf2,shearf2)
+	if( bextra_exchange ) then
+	  call shympi_exchange_3d_node(buoyf2)
+	  call shympi_exchange_3d_node(shearf2)
+	end if
+	!call shympi_check_3d_node(buoyf2,'buoyf2')
+	!call shympi_check_3d_node(shearf2,'shearf2')
 
 	!write(6,*) 'm2n2: ',maxval(buoyf2),maxval(shearf2)
 
@@ -396,7 +416,7 @@
 	    call save_gotm_set_debug(bdeb)
 
 	    nlev = nlvdi
-	    call dep3dnod(k,+1,flev,nlev,h)		!here nlev,flev is passed back
+	    call dep3dnod(k,+1,flev,nlev,h)	!here nlev,flev is passed back
             numOfLev = nlev-flev+1
 
 	    if( count( h(flev:nlev) <= 0. ) > 0 ) goto 97
@@ -533,13 +553,12 @@
 		nltot = nltot + 1
 		bwrite = .true.
 	      end if
-
 	    end do
 
 	    iudbg = 489
 	    iudbg = 0
-	    bwrite = .false.
 	    bwrite = ( iudbg > 0 .and. k == 1659 .and. it > 14400 )
+	    bwrite = .false.
 
 	    if( bwrite ) then
 
@@ -583,17 +602,9 @@
     1     continue
 	end do
 
-	call shympi_exchange_3d0_node(visv)
-	call shympi_exchange_3d0_node(difv)
-
-	iudbg = 654
-	iudbg = 0
-	if( iudbg > 0 ) then
-	  k=2201
-	  nlev = nlvdi
-	  call dep3dnod(k,+1,flev,nlev,h)
-	  write(iudbg,*) 'shell: ',it,k,nlev,numv_gotm(:,k)
-	  !write(iudbg,*) 'depth: ',k,nlev,h(1:nlev)
+	if( bextra_exchange ) then
+	  call shympi_exchange_3d0_node(visv)
+	  call shympi_exchange_3d0_node(difv)
 	end if
 
 	if( levdbg >= 2 ) call checka(nlvdi,shearf2,buoyf2,taub)
@@ -996,6 +1007,7 @@
 	use basin, only : nkn,nel,ngr,mbw
 	use shympi
 	use pkonst
+	use mod_info_output
 
 	implicit none
 
@@ -1003,31 +1015,43 @@
 	real buoyf2(nldim,nkn)
 	real shearf2(nldim,nkn)
 
-
+	logical bdebug
 	integer k,l,nlev,flev
 	real aux,dh,du,dv,m2,dbuoy
 	real h(nldim)
 	real cnpar			!numerical "implicitness" parameter
 	real n2max,n2
 	real nfreq,nperiod
+	real array(3)
 
-	integer iuinfo
-	save iuinfo
-	data iuinfo / 0 /
+	integer, save :: iuinfo = 0
+
+	integer kint,kext,iudbg
+	integer ipint
  
         aux = -grav / rowass
 	cnpar = 1
 	n2max = 0.
  
+	iudbg = 854 + my_id
+	kint = 0
+	kext = 2100
+	kext = 0
+	!kint = ipint(kext)
+
         do k=1,nkn
+	  bdebug = ( k == kint .and. iudbg > 0 )
 	  nlev = nldim
           call dep3dnod(k,+1,flev,nlev,h)
+	  if( bdebug ) write(iudbg,*) kext,nlev,flev
+	  if( bdebug ) write(iudbg,*) h(1:nlev)
           do l=flev,nlev-1
             dh = 0.5 * ( h(l) + h(l+1) )
             dbuoy = aux * ( rhov(l,k) - rhov(l+1,k) )
             n2 = dbuoy / dh
 	    n2max = max(n2max,n2)
             buoyf2(l,k) = n2
+	    if( bdebug ) write(iudbg,*) l,n2
 
             du = 0.5*(                                   &
      &       (cnpar*abs((uprv(l+1,k)-uprv(l,k))          &
@@ -1061,15 +1085,19 @@
           end do
         end do
 
+	if( .not. binfo ) return
+
 	n2max = shympi_max(n2max)
 
 	nfreq = sqrt(n2max)
 	nperiod = 0.
 	if( nfreq .gt. 0. ) nperiod = 1. / nfreq
-	if( iuinfo .le. 0 ) call getinfo(iuinfo)
-	if(shympi_is_master()) then
-	  write(iuinfo,*) 'n2max: ',n2max,nfreq,nperiod
-	end if
+	!if( iuinfo .le. 0 ) call getinfo(iuinfo)
+	!if(shympi_is_master()) then
+	!  write(iuinfo,*) 'n2max: ',n2max,nfreq,nperiod
+	!end if
+	array = (/n2max,nfreq,nperiod/)
+	call info_output('n2max',' ',3,array,.false.)
 
 	end
 
@@ -1410,11 +1438,13 @@
         double precision :: ken(0:nlev), dis(0:nlev)
         double precision :: len(0:nlev)
 
-	integer ndim,l
+	integer ndim,l,kext
+	integer ipext
 
 	ndim = nlev
+	kext = ipext(k)
 
-	write(iu,*) iwhat,k,nlev
+	write(iu,*) iwhat,k,kext,nlev
 	write(iu,*) dt,depth
 	write(iu,*) u_taus,u_taub
 	write(iu,*) z0s,z0b
@@ -1450,11 +1480,13 @@
         double precision :: ken(0:nlev), dis(0:nlev)
         double precision :: len(0:nlev)
 
-	integer ndim,l
+	integer ndim,l,kext
+	integer ipext
 
 	ndim = nlev
+	kext = ipext(k)
 
-	write(iu) iwhat,k,nlev
+	write(iu) iwhat,k,kext,nlev
 	write(iu) dt,depth
 	write(iu) u_taus,u_taub
 	write(iu) z0s,z0b

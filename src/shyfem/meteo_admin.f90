@@ -53,6 +53,8 @@
 ! 16.02.2019	ggu	changed VERS_7_5_60
 ! 16.02.2019	ggu	get_ice() -> get_ice_cover(), new set_ice_cover()
 ! 02.05.2022	ggu	in convert_distributed() use ie_mpi
+! 13.10.2024	ggu	in convert_distributed() exchange rqdsv
+! 03.12.2024    lrp     irain for the coupled model
 !
 !*********************************************************************
 
@@ -87,6 +89,8 @@
 	do k=1,nkn
 	  rqdsv(k) = rqdsv(k) * v1v(k)
 	end do
+
+	call shympi_exchange_2d_node(rqdsv)
 
 	end
 
@@ -123,14 +127,15 @@
 
 	implicit none
 
-	integer k,ievap
+	integer k,ievap,irain
         double precision racum,eacum
 	real getpar
 
 	ievap = nint(getpar('ievap'))
+        irain = nint(getpar('irain'))
 
 	do k=1,nkn
-	  rqdsv(k) = rqdsv(k) + metrain(k) - ievap*evapv(k)
+	  rqdsv(k) = rqdsv(k) + irain*metrain(k) - ievap*evapv(k)
 	end do
 
         !racum = sum(metrain) / nkn

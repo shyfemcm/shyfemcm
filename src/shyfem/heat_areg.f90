@@ -340,6 +340,10 @@
 !
 !---------------------------------------------------------------------
 
+	use heat_const
+
+	!implicit none
+
       parameter ( pstd = 1013.25 )
       parameter (const = 0.622/pstd)
       parameter (cgs = 1.e-4/4.19)

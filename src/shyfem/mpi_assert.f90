@@ -48,6 +48,7 @@
 
 	subroutine shympi_assert_coriolis
 
+	use mod_internal
 	use shympi
 
 	implicit none
@@ -65,6 +66,8 @@
 	    stop 'error stop shympi_assert_coriolis: isphe'
 	  end if
 	end if
+
+	call shympi_check_2d_elem(fcorv,'fcorv')
 
 	end
 
@@ -87,8 +90,8 @@
 
 	call shympi_assert_all
 	call shympi_check_all_static
-	call shympi_check_all_dynamic
 	call shympi_check_all_scalar
+	call shympi_check_all_dynamic
 
 	if( bdebug ) then
 	  write(6,*) 'arrays ok at iwhat = ',iwhat
@@ -159,6 +162,8 @@
 
 	integer i
 	real aux(nel)
+	integer ie,iee,ieee,iei,ieext,ieint
+	logical bunique
 
 	call shympi_check_2d_node(zov,'zov')
 	call shympi_check_2d_node(znv,'znv')
@@ -170,15 +175,32 @@
 	  call shympi_check_2d_elem(aux,'zenv')
 	end do
 
-	call shympi_check_3d_elem(utlnv,'utlnv')
-	call shympi_check_3d_elem(vtlnv,'vtlnv')
-	call shympi_check_3d_elem(utlov,'utlov')
-	call shympi_check_3d_elem(vtlov,'vtlov')
+	!write(6,*) nlv_global,nkn_global,nel_global,nel,my_id
+	!write(6,*) 'nel: ',nel,nel_unique,nel_inner,my_id
+	!if( my_id == 2 ) then
+	!  ie = 132106
+	!  iee = ieext(ie)
+	!  write(6,*) 'ieext: ',ie,iee
+	!end if
+	!ieee = 159344
+	ieee = 0
+
+	iei = ieint(ieee)
+	if( iei /= 0 ) then
+	  bunique = shympi_is_unique_elem(iei)
+	  write(6,*) ieee,iei,utlnv(1,iei),my_id
+	  write(6,*) bunique,id_elem(:,iei),my_id
+	end if
 
 	call shympi_check_3d_elem(hdeov,'hdeov')
-	call shympi_check_3d_elem(hdenv,'hdenv')
 	call shympi_check_3d_node(hdkov,'hdkov')
+	call shympi_check_3d_elem(hdenv,'hdenv')
 	call shympi_check_3d_node(hdknv,'hdknv')
+
+	call shympi_check_3d_elem(utlov,'utlov')
+	call shympi_check_3d_elem(vtlov,'vtlov')
+	call shympi_check_3d_elem(utlnv,'utlnv')
+	call shympi_check_3d_elem(vtlnv,'vtlnv')
 
 	end
 

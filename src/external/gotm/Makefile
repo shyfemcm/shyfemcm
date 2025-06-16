@@ -151,7 +151,8 @@ distclean: realclean
 
 #------------------------------------------------------------
 
-fem: all nothing
+fem: shyfem
+shyfem: all nothing
 
 nothing:
 	@true

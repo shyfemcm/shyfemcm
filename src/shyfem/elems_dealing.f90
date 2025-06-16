@@ -127,6 +127,10 @@
 ! 02.04.2023	ggu	to compute total mass only run over nkn_inner
 ! 09.05.2023    lrp     introduce top layer index variable
 ! 05.06.2023    lrp     introduce z-star
+! 20.03.2024    ggu     bug fix for hlast
+! 10.05.2024    ggu     new routine check_int_ext_params()
+! 01.12.2024    ggu     in masscont() and scalcont() do not exchange
+! 05.02.2025    ggu     new routine scalar_mass()
 !
 !****************************************************************
 
@@ -684,6 +688,8 @@
 	  end do
 	end do
 
+	!write(6,*) 'ggguuu set_area before: ',my_id
+
 	if( shympi_partition_on_elements() ) then
           !call shympi_comment('shympi_elem: exchange areakv')
           call shympi_exchange_and_sum_3d_nodes(areakv)
@@ -691,6 +697,8 @@
 	  !call shympi_comment('exchanging areakv')
 	  call shympi_exchange_3d_node(areakv)
 	end if
+
+	!write(6,*) 'ggguuu set_area after: ',my_id
 
 	!call shympi_barrier
 
@@ -1035,8 +1043,9 @@
 		  hl(lmink,ii) = hl(lmink,ii) + z
 		  hdkn(lmink,k) = hdkn(lmink,k) + areafv * z
 		end if
-		hl(lmax,ii) = htot - hlv(lmax-1)
+	        hlast = htot - hlv(lmax-1)
 		if( hlast .lt. 0. ) goto 77
+	        hl(lmax,ii) = hlast
 	        hdkn(lmax,k) = hdkn(lmax,k) + areafv * hl(lmax,ii)
 	      end if
 	    end if
@@ -1157,9 +1166,8 @@
 !----------------------------------------------------------------
 
 	if( shympi_partition_on_nodes() ) then
-	  !call shympi_comment('exchanging hdkn')
+	  call shympi_comment('exchanging hdkn')
 	  call shympi_exchange_3d_node(hdkn)
-	  !call shympi_barrier
 	end if
 
 !----------------------------------------------------------------
@@ -1207,8 +1215,51 @@
 	  end do
 	end do
 
-	total = shympi_sum(total)
+	!total = shympi_sum(total)
 	masscont = total
+
+	!call check_int_ext_params
+
+	end
+
+!***********************************************************
+
+	subroutine check_int_ext_params
+
+
+	use levels
+	use basin, only : nkn,nel,ngr,mbw,ipv
+	use shympi
+	use mod_sort
+	use mod_depth
+	use mod_hydro
+
+        implicit none
+
+	integer k,l,nlev,flev
+	double precision total
+        real volnode
+
+	integer ipint
+	integer index(nkn)
+	integer i,ke
+	integer mode
+
+	mode = 1
+
+	call sort(nkn,ipv,index)
+
+	do i=1,nkn
+	  ke = ipv(index(i))
+	  k = ipint(ke)
+	  nlev = ilhkv(k)
+          flev = jlhkv(k)
+	  write(567,*) i,ke,k,flev,nlev
+	  write(567,*) znv(k),hkv(k)
+	  do l=flev,nlev
+	    write(567,*) l,volnode(l,k,mode)
+	  end do
+	end do
 
 	end
 
@@ -1246,8 +1297,48 @@
 	  end do
 	end do
 
-	total = shympi_sum(total)
+	!total = shympi_sum(total)
 	scalcont = total
+
+	end
+
+!***********************************************************
+
+	subroutine scalar_mass(mode,scal,mass,volume)
+
+! computes content of scalar in total domain (inner nodes)
+
+	use levels
+	use basin, only : nkn,nel,ngr,mbw
+	use shympi
+
+        implicit none
+
+	double precision scalcont
+	integer mode
+	real scal(nlvdi,nkn)
+	real mass,volume
+
+	logical, parameter :: bdebug = .false.
+	integer k,l,nlev,flev
+	double precision vol,total,vtotal
+        real volnode
+
+	total = 0.
+	vtotal = 0.
+
+	do k=1,nkn_inner
+	  nlev = ilhkv(k)
+	  flev = jlhkv(k)
+	  do l=flev,nlev
+	    vol = volnode(l,k,mode)
+	    vtotal = vtotal + vol
+	    total = total + vol * scal(l,k)
+	  end do
+	end do
+
+	mass = total
+	volume = vtotal
 
 	end
 

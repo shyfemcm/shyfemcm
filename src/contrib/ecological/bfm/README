@@ -1,0 +1,57 @@
+
+#------------------------------------------------------------------------
+#
+#    Copyright (C) 1985-2018  Georg Umgiesser
+#
+#    This file is part of SHYFEM.
+#
+#------------------------------------------------------------------------
+
+
+this directory contains scripts and files for BFM
+they are used to configure and compile the BFM model
+
+this directory must be called fembfm and must be in the shyfem base directory
+the shyfem base directory is the one that contains Rules.make and VERSION files
+
+the file BFM0D needs customization depending on the BFM version
+the default is to use the stable 5.1 version
+
+==================================================================
+Howto:
+==================================================================
+
+to integrate the BFM model the following has to be done:
+
+to get started:
+
+  1) download the BFM model from the official sources
+     (https://www.bfm-community.eu)
+  2) unpack in a directory of your choice
+  3) goto to the shyfem base directory
+
+in the Rules.make file:
+
+  4) set "NETCDF = true" (BFM needs NETCDF)
+  5) set "ECOLOGICAL = BFM" 
+  6) set BFMDIR to the directory where BFM has been installed (point 2 above)
+
+compile BFM:
+
+  7) "make bfm_compile"
+
+if everything is ok, SHYFEM can be compiled with BFM support:
+
+  8) "make fem"
+
+clean
+
+  9) "make bfm_clean"
+==================================================================
+
+Please remember that steps 1-7 only have to be done once.
+If the version of BFM does not change it is enough to only execute "make fem"
+in order to compile SHYFEM with BFM support.
+
+==================================================================
+

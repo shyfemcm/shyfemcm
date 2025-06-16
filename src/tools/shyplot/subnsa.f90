@@ -77,6 +77,7 @@
 ! 19.04.2018	ggu	changed VERS_7_5_45
 ! 16.02.2019	ggu	changed VERS_7_5_60
 ! 13.03.2019	ggu	changed VERS_7_5_61
+! 16.09.2024	ggu	better debug and verbose messages
 !
 !**********************************************
 !
@@ -102,7 +103,7 @@
 	integer nrdsec,nrdlin,ichanm
 	integer iv_in,iv_read,isub
 	integer iunit
-	character*80 str_read,str_in
+	character*80 str_read,str_in,str_file
 	real getpar
 
 	logical compare_svars
@@ -118,6 +119,11 @@
 
 	if( iu > 0 ) call nrdini(iu)
 	iunit = abs(iu)
+	call filna(iunit,str_file)
+	if( bdebug .or. bverbose ) then
+	  write(6,'(a,i3,a,a)') 'reading sections in nlsa with iv_want = ' &
+     &			,iv_in,' from str-file ',trim(str_file)
+	end if
 
 ! loop over sections %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
@@ -134,14 +140,13 @@
 		bread = bread_iv .or. bread_str
 		if( bread ) call setsec(section,num)
 
-		if( bverbose .or. bdebug ) then
-		  if( bdebug ) then
-		    write(6,*) 'section: ',trim(section),' ',trim(extra)
-		    write(6,*) 'nlsa : ',bread,iv_in,iv_read
-		  end if
-		  if( bread ) then
-		    write(6,*) 'reading ',trim(section),' ',trim(extra)
-		  end if
+		if( bdebug ) then
+		  write(6,'(a,l1,a,i3,a,i3,4a)') 'reading: ',bread &
+     &			,' iv_want = ',iv_in,' iv_read = ',iv_read &
+     &			,' section: ',trim(section),' ',trim(extra) 
+		end if
+		if( bverbose .and. bread ) then
+		  write(6,*) 'reading section ',trim(section),' ',trim(extra)
 		end if
 
 		if( .not. bread ) then
@@ -152,7 +157,6 @@
 			call nrdins(section)
 		else if(section.eq.'color') then
 			call nrdins(section)
-			!call colrd
 		else if(section.eq.'arrow') then
 			call nrdins(section)
 		else if(section.eq.'legvar') then

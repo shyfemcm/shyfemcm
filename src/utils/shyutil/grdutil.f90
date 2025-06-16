@@ -48,6 +48,7 @@
 ! 13.10.2020	ggu	write grid with constant bathymetry on nodes
 ! 12.02.2022	ggu	subroutine to work with uncomplete depth
 ! 14.02.2022	ggu	extra helper routines
+! 10.05.2024	ggu	exchange spherical info between basin and grd
 !
 ! contents :
 !
@@ -96,6 +97,7 @@
 
 	dcorbas = dcor_grd
 	dirnbas = dirn_grd
+	sphebas = sphe_grd
 	descrr = title_grd
 
 !--------------------------------------------------------
@@ -142,18 +144,24 @@
 	end do
 
 	if( nhe > 0 .and. nhn > 0 ) then
-	  write(6,*) 'nhe,nhn: ',nhe,nhn
+	  if( bgrdwrite ) write(6,*) 'nhe,nhn: ',nhe,nhn
 	  if( nhe == nel .and. nhn == nkn ) then
-	    write(6,*) 'can use both depths...'
-	    write(6,*) '... using element values'
+	    if( bgrdwrite ) then
+	      write(6,*) 'can use both depths...'
+	      write(6,*) '... using element values'
+	    end if
 	    nhn = 0
 	  else if( nhe == nel ) then
-	    write(6,*) 'depth on nodes incomplete...'
-	    write(6,*) '... using element values'
+	    if( bgrdwrite ) then
+	      write(6,*) 'depth on nodes incomplete...'
+	      write(6,*) '... using element values'
+	    end if
 	    nhn = 0
 	  else if( nhn == nkn ) then
-	    write(6,*) 'depth on elements incomplete...'
-	    write(6,*) '... using nodal values'
+	    if( bgrdwrite ) then
+	      write(6,*) 'depth on elements incomplete...'
+	      write(6,*) '... using nodal values'
+	    end if
 	    nhe = 0
 	  else
 	    write(6,*) 'depth values are incomplete...'
@@ -240,6 +248,7 @@
 
 	dcor_grd = dcorbas
 	dirn_grd = dirnbas
+	sphe_grd = sphebas
 	title_grd = descrr
 
 !--------------------------------------------------------

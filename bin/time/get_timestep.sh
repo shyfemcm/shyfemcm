@@ -13,7 +13,7 @@
 #----------------------------------------------------------
 
 FEMDIR=${SHYFEMDIR:=$HOME/shyfem}
-fembin=$FEMDIR/fembin
+FEMBIN=$FEMDIR/bin
 
 show="NO"
 if [ "$1" = "-show" ]; then
@@ -31,8 +31,8 @@ file=$1
 name=`basename $file .inf`
 file=$name.inf
 
-$fembin/getkey.pl  timestep  $file  > aaa.tmp
-$fembin/clean_sync_dt.pl aaa.tmp > bbb.tmp
+$FEMBIN/getkey.pl  timestep  $file  > aaa.tmp
+$FEMBIN/clean_sync_dt.pl aaa.tmp > bbb.tmp
 mv bbb.tmp timestep.txt
 
 gp -u 1:5 timestep.txt

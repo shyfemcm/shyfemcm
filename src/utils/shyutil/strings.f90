@@ -62,6 +62,11 @@
 ! 17.04.2020	ggu	new routine strings_meteo_convention()
 ! 18.05.2020	ggu	do not attach direction to file name
 ! 22.04.2021	ggu	new routines checking and populating strings
+! 20.09.2024	ggu	new variable skin temperature (14)
+! 21.09.2024	ggu	cleaned, some new helper routines
+! 03.10.2024	ggu	new has_direction_ivar() and is_2d()
+! 01.04.2025	ggu	ivar values and range for BFM model
+! 24.04.2025	ggu	new entries for sensible, latent and long wave heat flux
 !
 ! contents :
 !
@@ -232,6 +237,23 @@
 
 !******************************************************************
 !******************************************************************
+!******************************************************************
+
+	subroutine strings_get_ivar_and_names(id,ivar,short,full)
+
+	integer id
+	integer ivar
+	character*(*) short,full
+
+	ivar = 0
+	if( id < 1 .or. id > idlast ) return
+
+	ivar = pentry(id)%ivar
+	short = pentry(id)%short
+	full = pentry(id)%full
+
+	end subroutine strings_get_ivar_and_names
+
 !******************************************************************
 
 	function strings_get_id_by_name(name)
@@ -576,7 +598,7 @@
         stop 'error stop strings_check_consistency: ivar/=iv'
    99   continue
         call strings_info(id)
-        write(6,*) 'some parameter has not been set'
+        write(6,*) 'some parameters have not been set'
         stop 'error stop strings_check_consistency: consistency'
         end subroutine strings_check_consistency
 
@@ -657,24 +679,34 @@
 
 !****************************************************************
 
-        subroutine srings_get_ivarmax(ivar_max)
+        subroutine strings_get_ivarmax(ivar_max)
 
         integer ivar_max
 
         ivar_max = ivarmax
 
-        end subroutine srings_get_ivarmax
+        end subroutine strings_get_ivarmax
 
 !****************************************************************
 
-        function srings_exists_id(id)
+        function strings_exists_id(id)
 
-        logical srings_exists_id
+        logical strings_exists_id
         integer id
 
-        srings_exists_id = ( id >= 1 .and. id <= idlast )
+        strings_exists_id = ( id >= 1 .and. id <= idlast )
 
-        end function srings_exists_id
+        end function strings_exists_id
+
+!****************************************************************
+
+        function strings_filling()
+
+        integer strings_filling
+
+        strings_filling = idlast
+
+        end function strings_filling
 
 !****************************************************************
 
@@ -682,7 +714,7 @@
 
 	if( .not. bpopulated ) then
 	  write(6,*) 'strings have not been set up'
-	  write(6,*) 'call populate_strings() needed'
+	  write(6,*) 'need to call populate_strings()'
 	  stop 'error stop check_populate: not populated'
 	end if
 
@@ -973,7 +1005,7 @@
 
 	function has_direction(name)
 
-! check if directional variable
+! check name if directional variable
 
 	use shyfem_strings
 
@@ -983,15 +1015,58 @@
 	character*(*) name
 
 	integer ivar
+	logical has_direction_ivar
 
 	call strings_get_ivar(name,ivar)
 
-	has_direction = (       &
-      &			  ivar == 2          &		!velocity &
+	has_direction = has_direction_ivar(ivar)
+
+	end
+
+!****************************************************************
+
+	function has_direction_ivar(ivar)
+
+! check ivar if directional variable
+
+	use shyfem_strings
+
+	implicit none
+
+	logical has_direction_ivar
+	integer ivar
+
+	has_direction_ivar = (          &
+      &			  ivar == 2     &		!velocity &
       &		     .or. ivar == 3     &		!transport &
       &		     .or. ivar == 21    &		!wind &
       &		     .or. ivar == 42    &		!wind stress &
-      &			)
+      &			     )
+
+	end
+
+!****************************************************************
+
+	function is_2d(ivar)
+
+! checks if variable is 2d variable
+
+	use shyfem_strings
+
+	implicit none
+
+	logical is_2d
+	integer ivar
+
+	is_2d = .false.
+
+	if( ivar == 1 ) then				!water level
+	  is_2d = .true.
+	else if( ivar >= 20 .and. ivar <= 29 ) then	!meteo
+	  is_2d = .true.
+	else if( ivar >= 85 .and. ivar <= 86 ) then	!ice
+	  is_2d = .true.
+	end if
 
 	end
 
@@ -1079,6 +1154,64 @@
         end
 
 !****************************************************************
+
+	subroutine stats_strings
+
+	use shyfem_strings
+
+	implicit none
+
+	integer ivar_max,count_max
+	integer id,ivar,ic,ivar0
+	integer idlast
+	character*80 short,full
+	integer, allocatable :: count(:), fcount(:)
+
+	idlast = strings_filling()
+	call strings_get_ivarmax(ivar_max)
+
+	allocate(count(0:ivar_max))
+	count = 0
+	count_max = 0
+	ivar0 = 0
+
+	do id=1,idlast
+	  call strings_get_ivar_and_names(id,ivar,short,full)
+	  if( ivar < 0 ) stop 'error stop stats_strings: ivar<0'
+	  if( ivar > ivar_max ) stop 'error stop stats_strings: ivar>ivar_max'
+	  count(ivar) = count(ivar) + 1
+	  count_max = max(count_max,count(ivar))
+	end do
+
+	write(6,*) 'ivar_max = ',ivar_max
+	write(6,*) 'count_max = ',count_max
+
+	allocate(fcount(count_max))
+	fcount = 0
+
+	do ivar=1,ivar_max
+	  ic = count(ivar)
+	  if( ic > 0 ) fcount(ic) = fcount(ic) + 1
+	end do
+
+	do ic=1,count_max
+	  write(6,*) ic,fcount(ic)
+	end do
+
+	write(6,*) 'non unique names:'
+	do ic=2,count_max
+	  if( fcount(ic) > 0 ) write(6,*) '  count = ',ic
+	  do id=1,idlast
+	    call strings_get_ivar_and_names(id,ivar,short,full)
+	    if( count(ivar) == ic ) then
+	      write(6,'(i5,a10,a50)') ivar,trim(short),trim(full)
+	    end if
+	  end do
+	end do
+
+        end
+
+!****************************************************************
 !****************************************************************
 !****************************************************************
 
@@ -1102,8 +1235,8 @@
 	call strings_add_new('level',1)
 	call strings_add_new('velocity',2)
 	call strings_add_new('transport',3)
-	call strings_add_new('bathymetry',5)
 	call strings_add_new('depth',5)
+	call strings_add_new('bathymetry',5)
 	call strings_add_new('current speed',6)
 	call strings_add_new('speed',6)
 	call strings_add_new('current direction',7)
@@ -1114,10 +1247,12 @@
 	call strings_add_new('salinity',11)
 	call strings_add_new('temperature',12)
 	call strings_add_new('density',13)
+	call strings_add_new('skin temperature',14)
 	call strings_add_new('oxygen',15)
 	call strings_add_new('discharge',16)
-	call strings_add_new('rms velocity',18)
+	call strings_add_new('w velocity',17)
 	call strings_add_new('rms speed',18)
+	call strings_add_new('rms velocity',18)
 	call strings_add_new('current vorticity',19)
 
 	call strings_add_new('atmospheric pressure',20)
@@ -1128,7 +1263,6 @@
 	call strings_add_new('solar radiation',22)
 	call strings_add_new('sradiation',22)
 	call strings_add_new('air temperature',23)
-	call strings_add_new('tair',23)
 	call strings_add_new('humidity (relative)',24)
 	call strings_add_new('rhumidity',24)
 	call strings_add_new('cloud cover',25)
@@ -1141,16 +1275,20 @@
 	call strings_add_new('dew point temperature',41)
 	call strings_add_new('wind stress',42)
 	call strings_add_new('mixing ratio',43)
-	call strings_add_new('mixrat',43)
 	call strings_add_new('humidity (specific)',44)
 	call strings_add_new('shumidity',44)
 	call strings_add_new('wind stress modulus',45)
 	call strings_add_new('wind stress direction',46)
 
+	call strings_add_new('sensible heat flux',47)
+	call strings_add_new('latent heat flux',48)
+	call strings_add_new('long wave radiation',49)
+
 	call strings_add_new('bottom stress',60)
 	call strings_add_new('general index',75)
 	call strings_add_new('general type',76)
 	call strings_add_new('general distance',77)
+	call strings_add_new('lagrangian',80)
 	call strings_add_new('lagrangian (general)',80)
 	call strings_add_new('lagrangian age',81)
 	call strings_add_new('lagrangian depth',82)
@@ -1174,6 +1312,9 @@
 
 	call strings_add_new('concentration',300,100)	!new numbering
 	!call strings_add_new('concentration (multi old)',30,20)
+
+	call strings_add_new('bfm (pelagic)',600,55)
+	call strings_add_new('bfm (benthic)',655,44)
 
 	call strings_add_new('weutro (pelagic)',700,20)
 	call strings_add_new('weutro (sediment)',720,10)
@@ -1212,8 +1353,10 @@
 	call strings_set_short(11,'salt')
 	call strings_set_short(12,'temp')
 	call strings_set_short(13,'rho')
+	call strings_set_short(14,'tskin')
 	call strings_set_short(15,'oxy')
 	call strings_set_short(16,'disch')
+	call strings_set_short(17,'wvel')
 	call strings_set_short(18,'rms')
 	call strings_set_short(19,'vorticity')
 
@@ -1236,6 +1379,10 @@
 	call strings_set_short(44,'shum')
 	call strings_set_short(45,'wstressmod')
 	call strings_set_short(46,'wstressdir')
+
+	call strings_set_short(47,'qsens')
+	call strings_set_short(48,'qlat')
+	call strings_set_short(49,'qlong')
 
 	call strings_set_short(60,'bstress')
 	call strings_set_short(75,'index')
@@ -1263,6 +1410,9 @@
 
 	call strings_set_short(300,'conc')
 	!call strings_set_short(30,'conc')
+
+	call strings_set_short(600,'bfmpel')
+	call strings_set_short(655,'bfmben')
 
 	call strings_set_short(700,'weutrop')
 	call strings_set_short(720,'weutrosd')
@@ -1306,7 +1456,7 @@
 
 	call populate_strings
 
-        call srings_get_ivarmax(ivar_max)
+        call strings_get_ivarmax(ivar_max)
 
 	do ivar=0,ivar_max
 	  if( ivar == 30 ) cycle		!old name - do not use

@@ -34,6 +34,7 @@
 ! 11.10.2022    ggu     new routines to deal with fixed first dimension
 ! 28.04.2023    ggu     update function calls for belem
 ! 07.06.2023    ggu     make sure shympi_write_debug_init() is called
+! 05.04.2024    ggu     new routines shympi_print_elem_...()
 !
 !******************************************************************
 
@@ -76,6 +77,12 @@
      &			,shympi_write_debug_elem_3d_r &
      &			,shympi_write_debug_elem_3d_d &
      &			,shympi_write_debug_elem_fix_r
+        END INTERFACE
+
+        INTERFACE shympi_print_elem
+       	MODULE PROCEDURE shympi_print_elem_2d_r &
+     &			,shympi_print_elem_3dl_r &
+     &			,shympi_print_elem_3d_r 
         END INTERFACE
 
 !==================================================================
@@ -129,6 +136,7 @@
 	if( .not. shympi_is_master() ) return
 
 	write(iu_debug) 0,0,0
+	flush(iu_debug)
 
 	end
 
@@ -521,6 +529,38 @@
 	write(6,*) trim(text)
 	write(6,*) belem,nn,nel_local,nkn_local
 	stop 'error stop shympi_check_belem: internal error'
+	end
+
+!-----------------------------------------------------------
+
+       	subroutine shympi_print_elem_2d_r(iee,val)
+	use shympi
+	integer iee
+	real val(:)
+	integer ie,ieint
+	ie = ieint(iee)
+	if( ie <= 0) return
+	write(6,*) my_id,ie,iee,val(ie)
+	end
+
+       	subroutine shympi_print_elem_3dl_r(iee,l,val)
+	use shympi
+	integer iee,l
+	real val(:,:)
+	integer ie,ieint
+	ie = ieint(iee)
+	if( ie <= 0) return
+	write(6,*) my_id,l,ie,iee,val(l,ie)
+	end
+
+       	subroutine shympi_print_elem_3d_r(iee,val)
+	use shympi
+	integer iee
+	real val(:,:)
+	integer ie,ieint
+	ie = ieint(iee)
+	if( ie <= 0) return
+	write(6,*) my_id,ie,iee,val(:,ie)
 	end
 
 !==================================================================

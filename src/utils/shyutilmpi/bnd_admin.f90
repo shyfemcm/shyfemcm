@@ -144,6 +144,7 @@
 ! 13.03.2019	ggu	changed VERS_7_5_61
 ! 20.03.2023	ggu	relax condition of no holes for ibtyp == 3
 ! 24.05.2023	ggu	in ckbnds() more debug, new boundary_debug()
+! 03.12.2024	ggu	do not complain for holes in zeta boundary
 !
 !************************************************************************
 
@@ -787,9 +788,10 @@
              else if( istop == krtot-kmtot ) then
                write(6,*) 'boundary in more than one domain... ok'
              else
-	       if( ibtyp == 1 .or. ibtyp == 2 ) then	!no holes allowed
+	       !if( ibtyp == 1 .or. ibtyp == 2 ) then	!no holes allowed
+	       if( ibtyp == 2 ) then	!no holes allowed
 	         write(6,*) my_id,krtot,kmtot,istop,krtot-kmtot
-	         write(6,*) 'there are holes in the node list'
+	         write(6,*) '*** there are holes in the node list'
 	         call boundary_debug(ibc)
 		 call error_stop('ckbnds','internal error (1)')
 	       end if

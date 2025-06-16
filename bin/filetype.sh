@@ -10,9 +10,8 @@
 
 FEMDIR=${SHYFEMDIR:=$HOME/shyfem}
 
-fembin=$FEMDIR/fembin
-fem3d=$FEMDIR/fem3d
+elabdir=$FEMDIR/src/tools/shyelab
 
-$fem3d/filetype $*
+$elabdir/filetype $*
 
 

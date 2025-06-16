@@ -84,6 +84,7 @@
 ! 16.02.2019	ggu	changed VERS_7_5_60
 ! 29.09.2020	ggu	added dimension check in get_nodes/elems_around()
 ! 22.04.2022	ggu	new locator functions using passed nen3v
+! 07.11.2024	ggu	new framework for connection
 !
 !****************************************************************
 !****************************************************************
@@ -402,7 +403,7 @@
 !****************************************************************
 !****************************************************************
 
-        subroutine link_fill(n)
+        subroutine link_fill0(n)
 
 ! returns filling of linkv
 
@@ -530,13 +531,19 @@
 
         implicit none
 
-        integer k               !central node
-        integer ndim            !dimension of elems()
-        integer n               !total number of elems around k (return)
-        integer elems(ndim)     !elems around k (return)
+        integer, intent(in) :: k               !central node
+        integer, intent(in) :: ndim            !dimension of elems()
+        integer, intent(out) :: n              !total number of elems around k
+        integer, intent(out) :: elems(ndim)    !elems around k
 
 	integer i,ibase
+	integer aux(size(elems))
 
+	n = elist(0,k)
+	if( n > ndim ) stop 'error stop get_elems_around: n>ndim'
+	elems(1:n) = elist(1:n,k)
+	if( .not. buselink ) return
+	
 	n = ilinkv(k+1)-ilinkv(k)
 	ibase = ilinkv(k)
 
@@ -545,8 +552,16 @@
 	if( n > ndim ) stop 'error stop get_elems_around: n>ndim'
 
 	do i=1,n
-	  elems(i) = lenkv(ibase+i)
+	  aux(i) = lenkv(ibase+i)
 	end do
+
+	if( any( aux(1:n) /= elems(1:n) ) ) then
+	  write(6,*) 'k = ',k
+	  write(6,*) elist(0,k),n
+	  write(6,*) elist(1:n,k)
+	  write(6,*) aux(1:n)
+	  stop 'error stop get_elems_around: icompatibility'
+	end if
 
 	end
 
@@ -560,21 +575,35 @@
 
         implicit none
 
-        integer k               !central node
-        integer ndim            !dimension of nodes()
-        integer n               !total number of nodes around k (return)
-        integer nodes(ndim)     !nodes around k (return)
+        integer, intent(in) :: k               !central node
+        integer, intent(in) :: ndim            !dimension of elems()
+        integer, intent(out) :: n              !total number of elems around k
+        integer, intent(out) :: nodes(ndim)    !nodes around k
 
 	integer i,ibase
+	integer aux(size(nodes))
 
+	n = nlist(0,k)
+	if( n > ndim ) stop 'error stop get_nodes_around: n>ndim'
+	nodes(1:n) = nlist(1:n,k)
+	if( .not. buselink ) return
+	
 	n = ilinkv(k+1)-ilinkv(k)
 	ibase = ilinkv(k)
 
 	if( n > ndim ) stop 'error stop get_nodes_around: n>ndim'
 
 	do i=1,n
-	  nodes(i) = linkv(ibase+i)
+	  aux(i) = linkv(ibase+i)
 	end do
+
+	if( any( aux(1:n) /= nodes(1:n) ) ) then
+	  write(6,*) 'k = ',k
+	  write(6,*) nlist(0,k),n
+	  write(6,*) nlist(1:n,k)
+	  write(6,*) aux(1:n)
+	  stop 'error stop get_nodes_around: icompatibility'
+	end if
 
 	end
 
@@ -592,36 +621,80 @@
 ! if boundary segment only one ie is set, the other is zero
 ! if no such segment, both ie are zero
 
+	use basin
 	use mod_geom
 
 	implicit none
 
-! arguments
-        integer k1,k2,ie1,ie2
+        integer, intent(in)  :: k1,k2
+        integer, intent(out) :: ie1,ie2
 
         integer k,ipf,ipl,ip,ip2
+	integer i,iee1,iee2,n
+
+	ie1 = 0
+	ie2 = 0
+	
+	n = nlist(0,k1)
+	do i=1,n
+	  k = nlist(i,k1)
+	  if( k .eq. k2 ) then
+	    ie1 = elist(i,k)
+	    if( i == 1 ) then
+	      ie2 = elist(n,k)		!last element - if border is 0
+	    else
+	      ie2 = elist(i-1,k)	!previous element
+	    end if
+	    exit
+	  end if
+	end do
+
+	if( ie1 == 0 .and. ie2 /= 0 ) then	!node with more boundaries
+	  ie1 = ie2
+	  ie2 = 0
+	end if
+
+	if( .not. buselink ) return
 
 	k = k1
         ipf=ilinkv(k)+1
         ipl=ilinkv(k+1)
 
-	ie1 = 0
-	ie2 = 0
+	iee1 = 0
+	iee2 = 0
 
 	do ip=ipf,ipl
 	  k = linkv(ip)
 	  if( k .eq. k2 ) then
-	    ie1 = lenkv(ip)
+	    iee1 = lenkv(ip)
 	    if( ip .eq. ipf ) then
 		ip2 = ipl		!this sets it to 0
 	    else
 		ip2 = ip - 1		!previous element	!BUGip2
 	    end if
-	    ie2 = lenkv(ip2)
-	    return
+	    iee2 = lenkv(ip2)
+	    exit
 	  end if
 	end do
 
+	if( ie1 /= iee1 .or. ie2 /= iee2 ) then
+	  write(6,*) ie1,iee1,ie2,iee2
+	  stop 'error stop find_elems_to_segment: icompatibility'
+	end if
+
+	if( .not. any(k1==nen3v(:,ie1)) ) goto 99
+	if( .not. any(k2==nen3v(:,ie1)) ) goto 99
+	if( ie2 == 0 ) return
+	if( .not. any(k1==nen3v(:,ie2)) ) goto 99
+	if( .not. any(k2==nen3v(:,ie2)) ) goto 99
+
+	return
+   99	continue
+	write(6,*) k1,k2
+	write(6,*) ie1,ie2
+	write(6,*) nen3v(:,ie1)
+	if( ie2 /= 0 ) write(6,*) nen3v(:,ie2)
+	stop 'error stop find_elems_to_segment: nodes not found'
 	end
 
 !****************************************************************

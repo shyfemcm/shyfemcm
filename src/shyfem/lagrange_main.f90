@@ -121,6 +121,7 @@
 ! 23.08.2018	ccf	including particle beaching
 ! 25.10.2018	ggu	changed VERS_7_5_51
 ! 16.02.2019	ggu	changed VERS_7_5_60
+! 25.07.2024	ggu	new implementation of OMP
 !
 !****************************************************************            
 
@@ -475,7 +476,7 @@
 	implicit none
 
 	double precision dtime	
-	integer nf,i,ii,n
+	integer nf,i,it,nuse
 	integer chunk
 	real dt
 
@@ -483,9 +484,7 @@
 	parameter(ndim=100)
 	integer ic(0:ndim)
 
-        integer iuinfo
-        save iuinfo
-        data iuinfo / 0 /
+        integer, save :: iuinfo = 0
 
         double precision tempo
         double precision openmp_get_wtime
@@ -494,30 +493,24 @@
           call getinfo(iuinfo)  !unit number of info file
         end if
 
-	chunk = 100
-        nf=0
+        nf = 0
+	ic = 0
 	call get_timestep(dt)		!time to advect
 
-	call openmp_get_max_threads(n)
-	if( n .gt. ndim ) stop 'error stop drogue: too many processes'
-
-	do ii=0,n
-	  ic(ii) = 0
-	end do
+	call openmp_get_num_threads(nuse)
+	if( nuse .gt. ndim ) stop 'error stop drogue: too many processes'
 
         tempo = openmp_get_wtime()
 
-!$OMP PARALLEL DEFAULT(SHARED) PRIVATE(i,ii)
-!$OMP DO SCHEDULE(DYNAMIC,chunk)
+!$OMP PARALLEL DO DEFAULT(SHARED) PRIVATE(i,it)
 
 	do i=1,nbdy
-	  call openmp_get_thread_num(ii)
-	  ic(ii) = ic(ii) + 1
+	  call openmp_get_thread_num(it)
+	  ic(it) = ic(it) + 1
 	  call track_single(i,dt,dtime)
 	end do
 
-!$OMP END DO NOWAIT
-!$OMP END PARALLEL
+!$OMP END PARALLEL DO
 
         tempo = openmp_get_wtime() - tempo
 !        write(88,*) 'tempo = ',tempo

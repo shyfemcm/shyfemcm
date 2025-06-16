@@ -33,9 +33,7 @@
 
 !**************************************************************************
 
-!********************************************************************
-
-	subroutine nc_output_init(ncid,title,nvar,ivars)
+	subroutine nc_output_init(ncid,title,nvar,ivars,b2d,sncglobal)
 
 	implicit none
 
@@ -43,6 +41,8 @@
 	character*(*) title		!name of simulation
 	integer nvar			!total number of variables to be written
 	integer ivars(nvar)		!variable id of SHYFEM
+	logical b2d			!should write 2d fields
+	character*(*) sncglobal		!file name of extra global values
 
 	write(6,*) 'Cannot initialize NETCDF module'
 	write(6,*) 'NETCDF support has not been enabled'
@@ -55,7 +55,7 @@
 
 !********************************************************************
 
-	subroutine nc_output_record(ncid,var_id,np,cv3)
+	subroutine nc_output_record(ncid,var_id,var_dim,np,cv3)
 
 	use basin
 	use levels
@@ -64,6 +64,7 @@
 
 	integer ncid
 	integer var_id
+	integer var_dim
 	integer np
 	real cv3(nlvdi,np)
 
@@ -121,6 +122,28 @@
         real :: y(ny)
 
 	end
+
+!********************************************************************
+
+        subroutine nc_output_get_var_id(iv,var_id)
+
+        implicit none
+
+        integer :: iv
+        integer :: var_id
+
+        end
+
+!********************************************************************
+
+        subroutine nc_output_get_var_dim(iv,var_dim)
+
+        implicit none
+
+        integer :: iv
+        integer :: var_dim
+
+        end
 
 !********************************************************************
 

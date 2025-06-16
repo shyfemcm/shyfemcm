@@ -55,10 +55,16 @@
 ! 17.02.2020	ggu	femtime eliminated
 ! 28.04.2020	ggu	routines dealing with records in new file mod_offline.f
 ! 20.03.2022	ggu	upgraded to suboutputd.f
+! 15.03.2024	ggu	time to iitime; prepared for turbulence (bturb)
+! 10.04.2024	ggu	finished offline
+!
+! notes :
+!
+!	uses still time as integer -> pass to double
 !
 !****************************************************************
 
-	subroutine offline(mode)
+	subroutine handle_offline(mode)
 
 ! handles offline version
 
@@ -81,6 +87,7 @@
 !	idtoff = -4	uses offline turbulence results
 !
 ! combinations are possible: -3,-7
+! everything is used by idtoff = -7
 !
 !-----------------------------------------------------
 
@@ -93,16 +100,20 @@
 
 	integer mode
 
-	integer itstart,it
+	logical bwrite
+	integer itstart,it,itime_first
 	integer ierr,ig,iu
 	double precision dtime
 	real dt
 	character*60 name
 	double precision dtoff,tmoff,toff
+	integer, save :: iwhat = 0
         integer ifemop, ifileo
 	real getpar
 
 	if( icall .lt. 0 ) return
+
+	bwrite = shympi_is_master()
 
 !-------------------------------------------------------------
 ! initialize
@@ -123,7 +134,9 @@
 	  itoff = nint(toff)
 	  itoff = itmoff + idtoff
 
-	  write(6,*) 'offline init:',itmoff,idtoff,it,itoff
+	  if( bwrite ) then
+	    write(6,*) 'offline init:',itmoff,idtoff,it,itoff
+	  end if
 
   	  if( idtoff .eq. 0 ) iwhat = 0		!nothing
 	  if( idtoff .gt. 0 ) iwhat = 1		!write
@@ -135,54 +148,71 @@
 	  if( idtoff .eq. 0 ) icall = -1
 	  if( icall .lt. 0 ) return
 
-	  if( shympi_is_parallel() ) then
-	    stop 'error stop offline: not ready for mpi'
-	  end if
+	  ioff_mode = iwhat
+
+	  !if( shympi_is_parallel() ) then
+	  !  stop 'error stop offline: not ready for mpi'
+	  !end if
 
 	  call mod_offline_init(nkn,nel,nlvdi)
 	  call off_init_vertical(nkn,nel,ilhv,ilhkv)
-	  call off_init
+	  call off_reset
 
-	  if( iwhat .eq. 1 ) then
-            iu = ifemop('.off','unform','new') !writing offline
+	  if( iwhat .eq. 1 ) then		! writing offline
+            iu = ifemop('.off','unform','new')
             if( iu .le. 0 ) then
               write(6,*) 'iu = ',iu
-              stop 'error stop offline: cannot open output file'
+              stop 'error stop handle_offline: cannot open output file'
             end if
 	    iuoff = iu
-	    write(6,*) 'Start writing offline file'
-	  else
+	    if( bwrite ) write(6,*) 'Start writing offline file'
+	  else					! reading offline
+	    !if( shympi_is_parallel() ) then
+	    !  stop 'error stop offline: reading not ready for mpi'
+	    !end if
             call getfnm('offlin',name)
 	    if( name == ' ' ) then
               write(6,*) '*** No offline file given'
-              stop 'error stop offline: cannot open input file'
+              write(6,*) '*** please specify offlin in section $name'
+              stop 'error stop handle_offline: cannot open input file'
 	    end if
             iu = ifileo(0,name,'unformatted','old')
             if( iu .le. 0 ) then
               write(6,*) '*** Cannot find offline file: '
               write(6,*) trim(name)
-              stop 'error stop offline: cannot open input file'
+              stop 'error stop handle_offline: cannot open input file'
             end if
 	    iuoff = iu
-            write(6,*) '---------------------------------------------'
-            write(6,*) '... performing offline from file: '
-            write(6,*) name
-            write(6,*) '---------------------------------------------'
+	    if( bwrite ) then
+              write(6,*) '--------------------------------------'
+              write(6,*) 'reading offline from file: ',trim(name)
+              write(6,*) '--------------------------------------'
+	    end if
 	  end if
 
 	  ioffline = -idtoff
+
+	  if( ioffline >= 4 ) then
+	    write(6,*) 'warning offline'
+	    write(6,*) 'requested reading of turbulence'
+	    write(6,*) 'ioffline = ',ioffline
+	    write(6,*) 'cannot yet do turbulence from offline'
+	    !stop 'error stop handle_offline: no turbulence'
+	    ioffline = ioff_max
+	  end if
+	  
 	  bfirst = .false.
 	end if
 
 	if( it < itmoff ) return
 
 !-------------------------------------------------------------
-! do different modes
+! do different modes (iwhat is 1 for write and 2 for read)
 !-------------------------------------------------------------
 
 	if( mode .ne. iwhat ) return
 
-	if( mode .eq. 1 ) then
+	if( mode .eq. 1 ) then			! writing
 
 !	  -------------------------------------------------------------
 !	  accumulate and write data
@@ -192,10 +222,9 @@
 	  call off_accum(dt)
 
 	  if( icall .eq. 0 ) then	!write first record
-	    if( bdebug ) write(6,*) 'offline writing: ',itmoff,mode,icall
 	    call off_aver
 	    call off_write(iuoff,itmoff)
-	    call off_init
+	    call off_reset
 	    icall = 1
 	  end if
 
@@ -203,10 +232,10 @@
 
 	  call off_aver
 	  call off_write(iuoff,it)
-	  call off_init
+	  call off_reset
 	  itoff = itoff + idtoff
 
-	else if( mode .eq. 2 ) then
+	else if( mode .eq. 2 ) then		! reading
 
 !	  -------------------------------------------------------------
 !	  read data and put into hydro structures
@@ -218,7 +247,8 @@
 	      if( ierr .ne. 0 ) goto 97
 	    end do
 	    call can_do_offline
-	    if( it .lt. time(1) ) goto 99
+	    itime_first = iitime(1)		!first time available in file
+	    if( it .lt. itime_first ) goto 99
 	    call get_timestep(dt)
 	    if( it .eq. itmoff ) then
 	      itstart = it
@@ -241,7 +271,7 @@
 !	  -------------------------------------------------------------
 
 	  write(6,*) 'mode = ',mode,'  iwhat = ',iwhat
-	  stop 'error stop offline: value for mode not allowed'
+	  stop 'error stop handle_offline: value for mode not allowed'
 
 	end if
 
@@ -251,77 +281,12 @@
 
 	return
    97	continue
-	write(6,*) time
+	write(6,*) iitime
 	write(6,*) nintp,ig
-	stop 'error stop offline: read error at start'
+	stop 'error stop handle_offline: read error at start'
    99	continue
-	write(6,*) it,time
-	stop 'error stop offline: no time available'
-	end
-
-!****************************************************************
-
-	subroutine is_offline(type,boff)
-
-! type: 1 hydro, 2 T/S, 4 turb, combinations are possible: 3,7
-! type == 0 -> any offline
-
-	use mod_offline
-
-	implicit none
-
-	integer type	!should we use this offline data?
-	logical boff	!data is available and should be used (return)
-
-	integer ineed
-
-	ineed = ioffline		!this is what we want (from idtoff)
-
-	if( ineed .le. 0 ) then		!no offline
-	  boff = .false.
-	else if( type .eq. 0 ) then	!general
-	  boff = .true.
-	  !boff = ineed .gt. 0
-	else if( type .eq. 1 ) then	!hydro
-	  boff = mod(ineed/1,2) .ne. 0
-	else if( type .eq. 2 ) then	!T/S
-	  boff = mod(ineed/2,2) .ne. 0
-	else if( type .eq. 4 ) then	!turbulence
-	  boff = mod(ineed/4,2) .ne. 0
-	else
-	  write(6,*) 'value for type not allowed: ',type
-	  stop 'error stop is_offline: type'
-	end if
-	  
-	end
-
-!****************************************************************
-
-	subroutine can_do_offline
-
-	use mod_offline
-
-	implicit none
-
-	logical bneed,bread
-	integer ineed,i
-
-	ineed = ioffline	!this is what we want
-
-	i = 1
-	do while( i .le. 4 )
-	  bneed = mod(ineed/i,2) .ne. 0
-	  bread = mod(iread/i,2) .ne. 0
-	  if( bneed .and. .not. bread ) goto 99
-	  i = i * 2
-	end do
-
-	return
-   99	continue
-	write(6,*) 'iread = ',iread,'  iwhat = ',iwhat
-	write(6,*) 'type = ',i
-	write(6,*) 'offline data requested has not been read'
-	stop 'error stop can_do_offline: no such data'
+	write(6,*) it,iitime
+	stop 'error stop handle_offline: no time available'
 	end
 
 !****************************************************************
@@ -333,23 +298,23 @@
 	use mod_ts
 	use mod_hydro_vel
 	use mod_hydro
+	use mod_diff_visc_fric
 	use levels
 	use basin, only : nkn,nel,ngr,mbw
 	use mod_offline
+	use mod_trace_point
 
 	implicit none
 
 	integer iu
 	integer it
 
-	logical boff,bhydro,bts
+	logical boff,bhydro,bts,bturb
 	integer ierr
 	integer ip,i,itnext
 	integer ilhkw(nkn)
 
-	integer ieof
-	save ieof
-	data ieof / 0 /
+	integer, save :: ieof = 0
 
 !	---------------------------------------------------------
 !	initialize
@@ -360,21 +325,24 @@
 
 	call is_offline(1,bhydro)		!hydro
 	call is_offline(2,bts)			!T/S
+	call is_offline(4,bturb)		!turbulence
+
+	!if( btrace ) write(6,*) 'trace offline: ',bhydro,bts,bturb
 
 !	---------------------------------------------------------
 !	find new records for time
 !	---------------------------------------------------------
 
-	do while( ieof .eq. 0 .and. it .gt. time(ip) )
-	  call off_next_record(iu,itnext,ieof)
+	do while( ieof .eq. 0 .and. it .gt. iitime(ip) )
+	  call off_peek_next_record(iu,itnext,ieof)
 	  if( ieof .ne. 0 ) exit
 	  call off_copy
 	  call off_read(iu,nintp,ierr)
 	end do
 
-	if( it .gt. time(nintp) ) goto 99
+	if( it .gt. iitime(nintp) ) goto 99
 
-	!write(67,*) it,(time(i),i=1,nintp)
+	!write(67,*) it,(iitime(i),i=1,nintp)
 	!write(6,*) it,bhydro,bts,iwhat
 
 !	---------------------------------------------------------
@@ -390,27 +358,27 @@
 !	interpolation
 !	---------------------------------------------------------
 
-	!if( nintp .eq. 2 ) then
-	!  call off_intp2(it,time,ut,vt,ze,wn,zn,sn,tn)
-	!else if( nintp .eq. 4 ) then
-	!  call off_intp4(it,time,ut,vt,ze,wn,zn,sn,tn)
-	!else
-	!  write(6,*) 'nintp = ',nintp
-	!  stop 'error stop off_intp_all: nintp not possible'
-	!end if
+	ilhkw = ilhkv + 1	!one more vertical value for wn
 
 	if( bhydro ) then
-	  ilhkw = ilhkv + 1	!one more vertical value for wn
-	  call off_intp(nintp,it,time,nlvdi,nel,ilhv,nel,ut,utlnv)
-	  call off_intp(nintp,it,time,nlvdi,nel,ilhv,nel,vt,vtlnv)
-	  call off_intp(nintp,it,time,1,3*nel,ilhv,3*nel,ze,zenv)
-	  call off_intp(nintp,it,time,nlvdi+1,nkn,ilhkw,nkn,wn,wlnv)
-	  call off_intp(nintp,it,time,1,nkn,ilhkv,nkn,zn,znv)
+	  !call trace_point('offline interpolating hydro')
+	  call off_intp(nintp,it,iitime,nlvdi,nel,ilhv,nel,ut,utlnv)
+	  call off_intp(nintp,it,iitime,nlvdi,nel,ilhv,nel,vt,vtlnv)
+	  call off_intp(nintp,it,iitime,1,3*nel,ilhv,3*nel,ze,zenv)
+	  call off_intp(nintp,it,iitime,nlvdi+1,nkn,ilhkw,nkn,wn,wlnv)
+	  call off_intp(nintp,it,iitime,1,nkn,ilhkv,nkn,zn,znv)
 	end if
 
 	if( bts ) then
-	  call off_intp(nintp,it,time,nlvdi,nkn,ilhkv,nkn,sn,saltv)
-	  call off_intp(nintp,it,time,nlvdi,nkn,ilhkv,nkn,tn,tempv)
+	  !call trace_point('offline interpolating T/S')
+	  call off_intp(nintp,it,iitime,nlvdi,nkn,ilhkv,nkn,sn,saltv)
+	  call off_intp(nintp,it,iitime,nlvdi,nkn,ilhkv,nkn,tn,tempv)
+	end if
+
+	if( bturb ) then
+	  !call trace_point('offline interpolating turbulence')
+	  call off_intp(nintp,it,iitime,nlvdi+1,nkn,ilhkw,nkn,vd,visv)
+	  call off_intp(nintp,it,iitime,nlvdi+1,nkn,ilhkw,nkn,dd,difv)
 	end if
 
 !	---------------------------------------------------------
@@ -436,7 +404,7 @@
    99	continue
 	write(6,*) 'time to interpolate: it = ',it
 	write(6,*) 'time values available in time(): '
-	write(6,*) (time(i),i=1,nintp)
+	write(6,*) (iitime(i),i=1,nintp)
 	stop 'error stop off_intp_all: no such time'
 	end
 
@@ -487,10 +455,12 @@
 
 	subroutine off_intp4(it)
 
+! not used
+
 	use mod_hydro_vel
 	use mod_hydro
-	use levels
-	use basin, only : nkn,nel,ngr,mbw
+	!use levels
+	!use basin, only : nkn,nel,ngr,mbw
 	use mod_offline
 
 	implicit none
@@ -506,11 +476,11 @@
 
 	t = it
 	do i=1,nintpol
-	  x(i) = time(i)
+	  x(i) = iitime(i)
 	end do
 	
-	do ie=1,nel
-	  lmax = ilhv(ie)
+	do ie=1,nel_off
+	  lmax = ile(ie)
 	  do l=1,lmax
 	    do i=1,nintpol
 	      y(i) = ut(l,ie,i)
@@ -529,8 +499,8 @@
 	  end do
 	end do
 
-	do k=1,nkn
-	  lmax = ilhkv(k)
+	do k=1,nkn_off
+	  lmax = ilk(k)
 	  do l=0,lmax
 	    do i=1,nintpol
 	      y(i) = wn(l,k,i)
@@ -549,10 +519,12 @@
 
 	subroutine off_intp2(it)
 
+! not used
+
 	use mod_hydro_vel
 	use mod_hydro
-	use levels
-	use basin, only : nkn,nel,ngr,mbw
+	!use levels
+	!use basin, only : nkn,nel,ngr,mbw
 	use mod_offline
 
 	implicit none
@@ -563,15 +535,15 @@
 	integer it1,it2
 	double precision rr,rt
 
-	it1 = time(1)
-	it2 = time(2)
+	it1 = iitime(1)
+	it2 = iitime(2)
 
 	rr = 0.
 	if( it2 .gt. it1 ) rr = float(it-it1)/float(it2-it1)
 	rt = 1. - rr
 	
-	do ie=1,nel
-	  lmax = ilhv(ie)
+	do ie=1,nel_off
+	  lmax = ile(ie)
 	  do l=1,lmax
 	    utlnv(l,ie) = rt*ut(l,ie,1) + rr*ut(l,ie,2)
 	    vtlnv(l,ie) = rt*vt(l,ie,1) + rr*vt(l,ie,2)
@@ -581,8 +553,8 @@
 	  end do
 	end do
 
-	do k=1,nkn
-	  lmax = ilhkv(k)
+	do k=1,nkn_off
+	  lmax = ilk(k)
 	  do l=0,lmax
 	    wlnv(l,k) = rt*wn(l,k,1) + rr*wn(l,k,2)
 	  end do
@@ -597,8 +569,8 @@
 
 	subroutine off_copy
 
-	use levels
-	use basin, only : nkn,nel,ngr,mbw
+	!use levels
+	!use basin, only : nkn,nel,ngr,mbw
 	use mod_offline
 
 	implicit none
@@ -610,7 +582,7 @@
 
 	  ifrom = ito + 1
 
-	  time(ito) = time(ifrom)
+	  iitime(ito) = iitime(ifrom)
 
 	  ut(:,:,ito) = ut(:,:,ifrom)
 	  vt(:,:,ito) = vt(:,:,ifrom)
@@ -620,6 +592,8 @@
 	  wn(:,:,ito) = wn(:,:,ifrom)
 	  sn(:,:,ito) = sn(:,:,ifrom)
 	  tn(:,:,ito) = tn(:,:,ifrom)
+	  vd(:,:,ito) = vd(:,:,ifrom)
+	  dd(:,:,ito) = dd(:,:,ifrom)
 	  
 	end do
 
@@ -627,10 +601,10 @@
 
 !****************************************************************
 	
-	subroutine off_init
+	subroutine off_reset
 
-	use levels
-	use basin, only : nkn,nel,ngr,mbw
+	!use levels
+	!use basin, only : nkn,nel,ngr,mbw
 	use mod_offline
 
 	implicit none
@@ -646,6 +620,8 @@
 	wn(:,:,1) = 0.
 	sn(:,:,1) = 0.
 	tn(:,:,1) = 0.
+	vd(:,:,1) = 0.
+	dd(:,:,1) = 0.
 
 	end
 
@@ -658,8 +634,9 @@
 	use mod_ts
 	use mod_hydro_vel
 	use mod_hydro
-	use levels
-	use basin, only : nkn,nel,ngr,mbw
+	use mod_diff_visc_fric
+	!use levels
+	!use basin, only : nkn,nel,ngr,mbw
 	use mod_offline
 
 	implicit none
@@ -673,34 +650,38 @@
 	dtr = dtr + dtt
 	dtr = 1.
 
-	do ie=1,nel
-	  lmax = ilhv(ie)
+	do ie=1,nel_off
+	  lmax = ile(ie)
 	  do l=1,lmax
-	    ut(l,ie,1) = ut(l,ie,1) + utlnv(l,ie) * dtt
-	    vt(l,ie,1) = vt(l,ie,1) + vtlnv(l,ie) * dtt
+	    !ut(l,ie,1) = ut(l,ie,1) + utlnv(l,ie) * dtt
+	    !vt(l,ie,1) = vt(l,ie,1) + vtlnv(l,ie) * dtt
 	    ut(l,ie,1) = utlnv(l,ie)
 	    vt(l,ie,1) = vtlnv(l,ie)
 	  end do
 	  do ii=1,3
-	    ze(ii,ie,1) = ze(ii,ie,1) + zenv(ii,ie) * dtt
+	    !ze(ii,ie,1) = ze(ii,ie,1) + zenv(ii,ie) * dtt
 	    ze(ii,ie,1) = zenv(ii,ie)
 	  end do
 	end do
 
-	do k=1,nkn
-	  lmax = ilhkv(k)
+	do k=1,nkn_off
+	  lmax = ilk(k)
 	  do l=1,lmax
-	    wn(l,k,1) = wn(l,k,1) + wlnv(l,k) * dtt
+	    !wn(l,k,1) = wn(l,k,1) + wlnv(l,k) * dtt
 	    wn(l,k,1) = wlnv(l,k)
-	    sn(l,k,1) = sn(l,k,1) + saltv(l,k) * dtt
+	    !sn(l,k,1) = sn(l,k,1) + saltv(l,k) * dtt
 	    sn(l,k,1) = saltv(l,k)
-	    tn(l,k,1) = tn(l,k,1) + tempv(l,k) * dtt
+	    !tn(l,k,1) = tn(l,k,1) + tempv(l,k) * dtt
 	    tn(l,k,1) = tempv(l,k)
+	    vd(l,k,1) = visv(l,k)
+	    dd(l,k,1) = difv(l,k)
 	  end do
-	  zn(k,1) = zn(k,1) + znv(k) * dtt
+	  !zn(k,1) = zn(k,1) + znv(k) * dtt
 	  zn(k,1) = znv(k)
-	  wn(0,k,1) = wn(0,k,1) + wlnv(0,k) * dtt
+	  !wn(0,k,1) = wn(0,k,1) + wlnv(0,k) * dtt
 	  wn(0,k,1) = wlnv(0,k)
+	  vd(0,k,1) = visv(0,k)
+	  dd(0,k,1) = difv(0,k)
 	end do
 
 	end
@@ -709,8 +690,8 @@
 	
 	subroutine off_aver
 
-	use levels
-	use basin, only : nkn,nel,ngr,mbw
+	!use levels
+	!use basin, only : nkn,nel,ngr,mbw
 	use mod_offline
 
 	implicit none
@@ -721,8 +702,8 @@
 	rr = 0.
 	if( dtr .gt. 0. ) rr = 1. / dtr
 
-	do ie=1,nel
-	  lmax = ilhv(ie)
+	do ie=1,nel_off
+	  lmax = ile(ie)
 	  do l=1,lmax
 	    ut(l,ie,1) = ut(l,ie,1) * rr
 	    vt(l,ie,1) = vt(l,ie,1) * rr
@@ -732,18 +713,44 @@
 	  end do
 	end do
 
-	do k=1,nkn
-	  lmax = ilhkv(k)
+	do k=1,nkn_off
+	  lmax = ilk(k)
 	  do l=1,lmax
 	    wn(l,k,1) = wn(l,k,1) * rr
 	    sn(l,k,1) = sn(l,k,1) * rr
 	    tn(l,k,1) = tn(l,k,1) * rr
+	    vd(l,k,1) = vd(l,k,1) * rr
+	    dd(l,k,1) = dd(l,k,1) * rr
 	  end do
 	  zn(k,1) = zn(k,1) * rr
 	  wn(0,k,1) = wn(0,k,1) * rr
+	  vd(0,k,1) = vd(0,k,1) * rr
+	  dd(0,k,1) = dd(0,k,1) * rr
 	end do
 
 	end
+
+!****************************************************************
+!****************************************************************
+!****************************************************************
+
+        subroutine off_print_debug_var
+
+        use mod_offline
+
+        implicit none
+
+	logical, parameter :: bprintoffvar = .false.
+	logical is_time_for_offline
+
+	if( .not. bprintoffvar ) return
+
+	if( is_time_for_offline() ) then
+	  write(6,*) 'off_print_debug_var'
+	  call print_debug_var
+	end if
+
+        end
 
 !****************************************************************
 !****************************************************************
@@ -774,8 +781,8 @@
 	smax = 100.
 	tmax = 100.
 
-	do ie=1,nel
-	  lmax = ilhv(ie)
+	do ie=1,nel_off
+	  lmax = ile(ie)
 	  do l=1,lmax
 	    call off_check_val('ut',ie,l,real(ut(l,ie,ig)),utmax,ierr)
 	    call off_check_val('vt',ie,l,real(vt(l,ie,ig)),utmax,ierr)
@@ -793,8 +800,8 @@
 	  end do
 	end do
 
-	do k=1,nkn
-	  lmax = ilhkv(k)
+	do k=1,nkn_off
+	  lmax = ilk(k)
 	  do l=1,lmax-1
 	    call off_check_val('wn',k,l,real(wn(l,k,ig)),wmax,ierr)
 	  end do
@@ -807,7 +814,7 @@
 
 	if( ierr .gt. 0 ) then
 	  write(6,*) 'errors checking variables read from file'
-	  write(6,*) time(ig),ig,ierr
+	  write(6,*) iitime(ig),ig,ierr
 	  stop 'error stop off_check: out of range'
 	else
 	  !write(6,*) 'finished offline error check... ok... ',it
@@ -839,11 +846,16 @@
 
 	subroutine off_write(iu,it)
 
+        use mod_offline
+        use shympi
+
 	implicit none
 
 	integer iu,it
 
-        write(6,*) 'writing offline record for time ',it
+	if( shympi_is_master() ) then
+          write(6,*) 'writing offline record for time ',it
+	end if
 
 	call off_write_record(iu,it)
 
@@ -853,9 +865,8 @@
 
         subroutine off_read(iu,ig,ierr)
 
-        use levels
-        use basin, only : nkn,nel,ngr,mbw
         use mod_offline
+        use shympi
 
         implicit none
 
@@ -866,7 +877,9 @@
 
         call off_read_record(iu,ig,it,ierr)
 
-        !write(6,*) 'offline record read: ',it,ig
+	if( shympi_is_master() ) then
+          write(6,*) 'reading offline record for time ',it
+	end if
 
 	end
 

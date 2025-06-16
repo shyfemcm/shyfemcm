@@ -32,6 +32,7 @@
 ! 26.09.2017	ggu	changed VERS_7_5_32
 ! 24.01.2018	ggu	changed VERS_7_5_41
 ! 14.02.2019	ggu	changed VERS_7_5_56
+! 08.04.2024	ggu	bug fix for dequeueing when no valyue available
 
 !===============================================================
 	module queue
@@ -298,6 +299,8 @@
 	  front = mod(front,max) + 1
 	  pentry(id)%front = front
 	  pentry(id)%fill = pentry(id)%fill - 1
+	else
+	  value = 0.
 	end if
 	end function queue_dequeue_d
 
@@ -375,7 +378,7 @@
 	valold = 0
 
 	do nl=1,nloop
-	  call rand_int(1,12,n)
+	  call rand_queue_int(1,12,n)
 	  if( bdebug ) write(6,*) 'enqueue values: ',n
 	  do i = 1,n
 	    val = val + 1
@@ -383,7 +386,7 @@
 	    call queue_enqueue(id,val)
 	  end do
 	  !call queue_info(id)
-	  call rand_int(1,10,n)
+	  call rand_queue_int(1,10,n)
 	  if( bdebug ) write(6,*) 'dequeue values: ',n
 	  do i = 1,n
 	    if( queue_dequeue(id,value) ) then
@@ -408,7 +411,7 @@
 
 !******************************************************************
 
-	subroutine rand_int(min,max,irand)
+	subroutine rand_queue_int(min,max,irand)
 
 	implicit none
 

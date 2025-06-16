@@ -46,11 +46,21 @@ LIBF = $(LIBFUM) $(LIBFMP) $(LIBFSU) $(LIBFUT)
 
 #----------------------------------------------------------------------------
 
+EXES = shypre shypre_orig shypre_noopti
 EXES = shypre
 
-#----------------------------------------------------------------------------
+OBJ_ORIG := rosen.o cuthill_mckee.o
+OBJ_OPTI := \
+		$(FEMDIR)/src/shyfem/shypre_subs.o \
+		$(FEMDIR)/src/shyfem/shypre_opti.o \
 
-OBJ := rosen.o cuthill_mckee.o
+OBJ_OLD := 	shypre_opti_subs.o rosen.o cuthill_mckee.o
+
+OBJ_NOOPTI := \
+		$(FEMDIR)/src/shyfem/shypre_subs.o \
+		$(FEMDIR)/src/shyfem/shypre_noopti.o
+
+MAKEDEPEND = $(FEMBIN)/mkdp.pl
 
 #----------------------------------------------------------------------------
 
@@ -60,12 +70,25 @@ fem: $(EXES) links
 links:
 	@$(FEMBIN)/symlink $(FEMBIN) $(EXES)
 
-$(EXES): $(OBJ) $(LIBF) $(EXES).o
+#$(EXES): $(OBJ) $(LIBF) $(EXES).o
+#	$(F77) $(FFLAGS) $(INCLUDE) $(LFLAGS) $^ $(LIBL) -o $@
+
+shypre_orig: $(OBJ_ORIG) $(LIBF) shypre_orig.o
+	$(F77) $(FFLAGS) $(INCLUDE) $(LFLAGS) $^ $(LIBL) -o $@
+
+shypre: $(OBJ_OPTI) $(LIBF) shypre.o
+	$(F77) $(FFLAGS) $(INCLUDE) $(LFLAGS) $^ $(LIBL) -o $@
+
+shypre_noopti: $(OBJ_NOOPTI) $(LIBF) shypre_noopti.o
 	$(F77) $(FFLAGS) $(INCLUDE) $(LFLAGS) $^ $(LIBL) -o $@
 
 #----------------------------------------------------------------------------
 
-clean: cleanobj cleanlinks cleanexe
+clean: cleanvar cleanobj cleanlinks cleanexe
+
+cleanvar:
+	-rm -f ggg hhh
+	-rm -f *.tmp *.bak
 
 cleanobj:
 	-rm -f *.o
@@ -82,6 +105,11 @@ cleanall: clean
 
 #----------------------------------------------------------------------------
 
+depend:
+	@-$(MAKEDEPEND) -moddir=$(MODDIR) *.f90
+
+#----------------------------------------------------------------------------
+
 %.o:%.f
 	${F77} $(FFLAGS) $(INCLUDE) -c $< -o $@
 
@@ -92,4 +120,19 @@ cleanall: clean
 	${CC} $(CFLAGS) $(INCLUDE) -c $< -o $@
 
 #----------------------------------------------------------------------------
+
+# DO NOT DELETE THIS LINE -- make depend depends on it.
+
+../../../lib/mod/mod_shypre.mod: shypre.o
+../../../lib/mod/mod_shypre.mod: shypre_noopti.o
+../../../lib/mod/mod_shypre.mod: shypre_orig.o
+shypre.o: ../../../lib/mod/clo.mod
+shypre_noopti.o: ../../../lib/mod/clo.mod
+shypre_opti.o: ../../../lib/mod/basin.mod ../../../lib/mod/grd.mod
+shypre_opti_subs.o: ../../../lib/mod/basin.mod \
+		../../../lib/mod/grd.mod 
+shypre_orig.o: ../../../lib/mod/basin.mod ../../../lib/mod/clo.mod \
+		../../../lib/mod/evgeom.mod \
+		../../../lib/mod/grd.mod \
+		../../../lib/mod/mod_sort.mod 
 

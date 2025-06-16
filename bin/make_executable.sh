@@ -27,10 +27,10 @@ do
   CHX $dir $dir/*.sh $dir/*.pl
 done
 
-dir=femlib/perl
+dir=lib/perl
 CHX $dir $dir/*.sh $dir/*.pl $dir/*.pm
 
-dir=femlib/python
+dir=lib/python
 CHX $dir $dir/*.sh $dir/*.py
 
 exit 0

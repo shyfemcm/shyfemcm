@@ -10,6 +10,10 @@
 #
 # compiles with different available compilers
 #
+# need the follwing routines:
+#	check_server.sh
+#	subst_make.pl
+#
 #--------------------------------------------------------
 
 compilers="GNU_GFORTRAN INTEL PGI"
@@ -17,13 +21,17 @@ compilers="GNU_GFORTRAN INTEL PGI"
 #compilers="INTEL"
 #compilers="PGI"
 
-rules_arc_dir=./arc/rules
-rules_dist_dir=./femcheck/rules
+femdir=$( pwd )
+
+rules_arc_dir=$femdir/arc/rules
+rules_dist_dir=$femdir/var/rules
 
 rules_save=$rules_arc_dir/Rules.save
 rules_dist=$rules_dist_dir/Rules.dist
 
-femdir=$( pwd )
+subst_make=$femdir/bin/subst_make.pl
+check_server=$femdir/var/servers/check_server.sh
+
 export FEMDIR=$femdir
 
 debug="YES"
@@ -37,6 +45,17 @@ catch_warnings="YES"
 trap Clean_up 1 2 15
 
 #--------------------------------------------------------
+
+Error()
+{
+  echo "*** $*"
+  exit 1
+}
+
+ExitOnError()
+{
+  [ $? -ne 0 ] && Error $*
+}
 
 Clean_up()
 {
@@ -69,6 +88,8 @@ Clean_after()
 
 SetUp()
 {
+  . bin/colors.sh
+
   mkdir -p $rules_arc_dir $rules_dist_dir
   if [ $? -ne 0 ]; then
     echo "Cannot create directory arc... aborting"
@@ -90,10 +111,10 @@ WrapUp()
   echo "================================="
   echo "Final message on all compilations: "
   if [ $lines -ne 0 ]; then
-    echo "  *** some errors occured in compilation..."
+    echo "${red}  *** some errors occured in compilation...${normal}"
     echo "  (see allstderr.tmp for more details)"
   else
-    echo "  no compilation errors"
+    echo "${green}  no compilation errors${normal}"
   fi
   echo "================================="
 }
@@ -103,19 +124,37 @@ WrapUp()
 CompTest()
 {
   echo "running CompTest"
-  $femdir/femcheck/servers/check_server.sh -show
+  $check_server -show
   Comp "NETCDF=false PARALLEL_OMP=true"
 }
 
 CompAll()
 {
-  Comp "ECOLOGICAL=NONE GOTM=true NETCDF=false SOLVER=SPARSKIT \
-		PARALLEL_OMP=false PARALLEL_MPI=NONE"
+  host=$( hostname )
+  echo "hostname = $host"
+  if [ "$host" = "tide" ]; then
+    METISDIR=$HOME/georg/lib/metis
+  else
+    METISDIR=$HOME/lib/metis
+  fi
+
+  INTEL_VERSION="IFORT"
+  #INTEL_VERSION="IFX"
+
+  Comp "INTEL_VERSION=$INTEL_VERSION \
+	ECOLOGICAL=NONE GOTM=true NETCDF=false \
+	SOLVER=SPARSKIT \
+	PARALLEL_OMP=false PARALLEL_MPI=NONE"
   #Comp "ECOLOGICAL=EUTRO GOTM=false SOLVER=PARDISO"
   Comp "ECOLOGICAL=EUTRO"
+  Comp "ECOLOGICAL=NONE MERCURY=true"
   #Comp "ECOLOGICAL=ERSEM GOTM=true NETCDF=true SOLVER=GAUSS"
-  Comp "ECOLOGICAL=NONE NETCDF=true SOLVER=SPARSKIT"
+  Comp "ECOLOGICAL=BFM NETCDF=true SOLVER=SPARSKIT"
   Comp "ECOLOGICAL=AQUABC NETCDF=false PARALLEL_OMP=true"
+  Comp "ECOLOGICAL=NONE GOTM=true NETCDF=false SOLVER=SPARSKIT \
+	PARALLEL_OMP=false PARALLEL_MPI=NODE \
+	PARTS=METIS METISDIR=$METISDIR"
+  Comp "SOLVER=PETSC"
 
   [ "$regress" = "NO" ] && return
 
@@ -134,8 +173,11 @@ Comp()
   echo "start compiling in" `pwd`
   rm -f stdout.out stderr.out
   touch stdout.out stderr.out
-  make cleanall > tmp.tmp 2> tmp.tmp
-  make fem > stdout.out 2> stderr.tmp
+
+  if [ "$dry_run" = "NO" ]; then
+    make cleanall > tmp.tmp 2> tmp.tmp
+    make fem > stdout.out 2> stderr.tmp
+  fi
 
   [ -f stderr.tmp ] && cat stderr.tmp | grep -v "ar: creating" > stderr.out
 
@@ -147,10 +189,10 @@ Comp()
   fi
 
   if [ $lines -ne 0 ]; then
-    echo "*** compilation errors..."
+    echo "${red}*** compilation errors...${normal}"
     cat stderr.out
   else
-    echo "no compilation errors"
+    echo "${green}successfull compilation${normal}"
   fi
   echo "-----------------"
 
@@ -172,10 +214,17 @@ Rules()
 {
   # sets variables in Rules.make
 
-  fembin/subst_make.pl -quiet -first "$1" Rules.make > tmp.tmp
+  $subst_make -quiet -first "$1" Rules.make > tmp.tmp
+  ExitOnError "error executing subst_make.pl ...aborting"
   mv tmp.tmp Rules.make
-  #fembin/subst_make.pl   "$1" Rules.make > tmp.tmp
 
+  echo "setting macros: $1"
+  echo "setting macros: $1" >> allstdout.txt
+  echo "setting macros: $1" >> allstderr.txt
+}
+
+PrintAll()
+{
   echo "setting macros: $1"
   echo "setting macros: $1" >> allstdout.txt
   echo "setting macros: $1" >> allstderr.txt
@@ -197,10 +246,11 @@ SetCompiler()
 {
   local comp=$1
 
-  local basedir=$femdir/femcheck/servers
-  local script=check_server.sh
-  local server=$( $basedir/$script -server )
   local compiler
+  local basedir=$femdir/var/servers
+  local script=$check_server
+  [ ! -x $script ] && Error "script not existing: $script"
+  local server=$( $script -server )
 
   [ "$debug" = "YES" ] && echo "SetCompiler: $comp $hostname"
 
@@ -227,8 +277,15 @@ SetCompiler()
 # start routine
 #--------------------------------------------------------------------
 
+if [ ! -f VERSION ]; then
+  echo "must be in base directory to run this script... aborting"
+  exit 1
+fi
+
 regress="NO"
 [ "$1" = "-regress" ] && regress="YES"
+dry_run="NO"
+[ "$1" = "-dry_run" ] && dry_run="YES"
 
 SetUp
 Clean_before
@@ -236,15 +293,15 @@ Clean_before
 for comp in $compilers
 do
 
-  echo "================================="
-  echo "compiling with $comp"
-  echo "================================="
-
-  RulesReset
-  Rules "FORTRAN_COMPILER=$comp"
+  PrintAll "================================="
+  PrintAll "compiling with $comp"
+  PrintAll "================================="
 
   SetCompiler $comp
   [ $? -ne 0 ] && continue
+
+  RulesReset
+  Rules "FORTRAN_COMPILER=$comp"
 
   make compiler_version > /dev/null 2>&1
   [ $? -ne 0 ] && echo "*** compiler $comp is not available..." && continue

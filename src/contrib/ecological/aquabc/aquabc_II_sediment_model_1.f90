@@ -37,7 +37,7 @@
 !  subroutine FLX_SED_MOD_1_TO_ALUKAS_II
 !  subroutine CALCULATE_PH_CORR_SED
 
-module BSED_MODEL_CONSTANTS
+module AQUABC_II_BSED_MODEL_CONSTANTS
     use AQUABC_II_GLOBAL
 
     !SEDIMENT MODEL COEFFICIENTS
@@ -254,13 +254,13 @@ module BSED_MODEL_CONSTANTS
 
     
     ! END OF COEFFICIENTS
-end module BSED_MODEL_CONSTANTS
+end module AQUABC_II_BSED_MODEL_CONSTANTS
 
 
 
 subroutine INIT_BSED_MODEL_CONSTANTS
-    use BSED_MODEL_CONSTANTS
-    use para_aqua
+    use AQUABC_II_BSED_MODEL_CONSTANTS
+    use aquabc_II_para_aqua
 
     !Constants
     call para_get_value('K_OXIC_DISS_POC'       , K_OXIC_DISS_POC      ) !1 ! PARTICULATE ORGANIC CARBON   Dissolution rate constant  at 20 C (aerobic) - 1/day
@@ -515,10 +515,10 @@ subroutine SEDIMENT_MODEL_1 &
             SED_BURRIAL_RATE_OUTPUTS, &
             ADVANCED_REDOX_OPTION)
 
-    use CO2SYS_CDIAC
+    use AQUABC_II_CO2SYS_CDIAC
     use AQUABC_II_GLOBAL
-    use BSED_MODEL_CONSTANTS
-    !use para_aqua
+    use AQUABC_II_BSED_MODEL_CONSTANTS
+    !use aquabc_II_para_aqua
 
     !use basin, only: ipv !0d correction
     
@@ -526,12 +526,6 @@ subroutine SEDIMENT_MODEL_1 &
     
 
     implicit none
-
-    !include 'param.h'
-
-
-!     integer ipv(nkndim)	!external node numbers
-!     common  /ipv/ipv
 
     !ARGUMENTS RELATED TO ARAY SIZES
 

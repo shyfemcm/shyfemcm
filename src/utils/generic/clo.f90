@@ -51,6 +51,9 @@
 ! 16.02.2019	ggu	changed VERS_7_5_60
 ! 15.05.2019	ggu	nicer error reporting
 ! 15.07.2021	ggu	reorder structure (double first)
+! 10.05.2024	ggu	implement no option
+! 25.11.2024	ggu	check length of string, use nlen to set max string len
+! 18.03.2025	ggu	more documentation
 !
 ! notes :
 !
@@ -66,27 +69,23 @@
 !
 ! usage :
 !
-!        call clo_init('feminf','fem-file','1.2')
+!       call clo_init(routine,files,version)	!initialize
 !
-!	 call clo_add_info('elaborates and rewrites a fem file')
-!        call clo_add_option('write',.false.,'write min/max of values')
-!        call clo_add_option('out',.false.,'create output file')
-!	 call clo_add_sep('other options')
-!        call clo_add_option('tmin time',-1
-!     +                          ,'only process starting from time')
-!        call clo_add_option('tmax time',-1
-!     +                          ,'only process up to time')
-!	 call clo_add_extra('time is YYYY-MM-DD[::hh:mm:ss]')
+!       call clo_add_option(name,value,text)	!add option
 !
-!        call clo_parse_options(1)       !expecting 1 file
+!       call clo_add_info(string)		!general info
+!       call clo_add_sep(text)			!add separator
+!       call clo_add_com(text)			!add comment
+!       call clo_add_extra(string)		!add extra information at end
 !
-!        call clo_get_option('write',bwrite)
-!        call clo_get_option('out',bout)
-!        call clo_get_option('tmin',tmin)
-!        call clo_get_option('tmax',tmax)
+!       call clo_parse_options			!parse options
 !
-!        nfile = clo_number_of_files()
-!        if( nfile > 0 ) call clo_get_file(1,infile)
+!       call clo_get_option(name,value)		!get value of single options
+!
+!       nfile = clo_number_of_files()		!number of command line files
+!       if( nfile > 0 ) call clo_get_file(1,infile)	!get file on CL
+!
+!	see also routine clo_test() at the end of this file
 !
 !**************************************************************
 
@@ -96,14 +95,17 @@
 
 	implicit none
 
+	integer, parameter, private :: nlen = 1024
+
 	type, private :: entry
 
 	  double precision :: value	! value if number
-	  integer :: itype		! type (1: number  2: flag  3: string)
+	  integer :: itype		! type (see clo_itype_*)
 	  logical :: flag		! flag if flag
 	  logical :: hidden		! option is hidden?
+	  logical :: bnoallow		! allow no-option
 	  character*80 :: name		! name of option
-	  character*80 :: string	! string if string
+	  character(len=nlen) :: string	! string if string
 	  character*80 :: text		! description for clo_fullusage
 	  character*80 :: textra	! if number or string extra info
 
@@ -118,6 +120,12 @@
 	integer, save, private :: last_item = 0
 	integer, save, private :: i_file = 0
 
+	integer, save, private :: clo_itype_none      = 0
+	integer, save, private :: clo_itype_numeric   = 1
+	integer, save, private :: clo_itype_flag      = 2
+	integer, save, private :: clo_itype_string    = 3
+	integer, save, private :: clo_itype_separator = 4
+
 	integer, save, private :: ielast = 0
 	character*80, save, private :: info = ' '
 	character*80, save, private, dimension(10) :: extra = ' '
@@ -129,7 +137,9 @@
 	INTERFACE clo_add_option
         MODULE PROCEDURE clo_add_option_d, clo_add_option_r,  &
      &			 clo_add_option_i, &
-     &			 clo_add_option_f, clo_add_option_s
+     &			 clo_add_option_s, &
+     &			 clo_add_option_f, &
+     &			 clo_add_option_f_notext, clo_add_option_f_noallow
 	END INTERFACE
 
 	INTERFACE clo_set_option
@@ -214,7 +224,7 @@
 	end if
 
 	pentry(id)%name = ' '
-	pentry(id)%itype = 0
+	pentry(id)%itype = clo_itype_none
 	pentry(id)%value = 0.
 	pentry(id)%flag = .false.
 	pentry(id)%string = ' '
@@ -371,7 +381,7 @@
 
 	id = clo_get_id(name)
 	if( id == 0 ) call clo_error(name,'option not existing')
-	if( pentry(id)%itype /= 1 ) then
+	if( pentry(id)%itype /= clo_itype_numeric ) then
 	  call clo_error(name,'wrong type for option')
 	end if
 
@@ -390,7 +400,7 @@
 
 	id = clo_get_id(name)
 	if( id == 0 ) call clo_error(name,'option not existing')
-	if( pentry(id)%itype /= 2 ) then
+	if( pentry(id)%itype /= clo_itype_flag ) then
 	  call clo_error(name,'wrong type for option')
 	end if
 
@@ -409,7 +419,7 @@
 
 	id = clo_get_id(name)
 	if( id == 0 ) call clo_error(name,'option not existing')
-	if( pentry(id)%itype /= 3 ) then
+	if( pentry(id)%itype /= clo_itype_string ) then
 	  call clo_error(name,'wrong type for option')
 	end if
 
@@ -426,7 +436,7 @@
 	character*(*) name
 	double precision value
 	character*(*) text
-	optional text
+	!optional text
 
 	call clo_add_option_n(name,value,text)
 
@@ -439,7 +449,7 @@
 	character*(*) name
 	real value
 	character*(*) text
-	optional text
+	!optional text
 
 	double precision dvalue
 
@@ -455,7 +465,7 @@
 	character*(*) name
 	integer value
 	character*(*) text
-	optional text
+	!optional text
 
 	double precision dvalue
 
@@ -471,7 +481,7 @@
 	character*(*) name
 	double precision value
 	character*(*) text
-	optional text
+	!optional text
 
 	integer id
 	character*80 name1,name2
@@ -484,11 +494,12 @@
 	call clo_init_new_id(id)
 
 	pentry(id)%name = name1
-	pentry(id)%itype = 1
+	pentry(id)%itype = clo_itype_numeric
 	pentry(id)%value = value
 	pentry(id)%textra = name2
 	pentry(id)%hidden = hide_options
-	if( present(text) ) pentry(id)%text = text
+	pentry(id)%text = text
+	!if( present(text) ) pentry(id)%text = text
 
 	end subroutine clo_add_option_n
 
@@ -499,8 +510,8 @@
 	character*(*) name
 	logical flag
 	character*(*) text
-	optional text
-
+	!optional text
+	
 	integer id
 	character*80 name1,name2
 
@@ -512,14 +523,68 @@
 	call clo_init_new_id(id)
 
 	pentry(id)%name = name
-	pentry(id)%itype = 2
+	pentry(id)%itype = clo_itype_flag
 	pentry(id)%flag = flag
 	pentry(id)%textra = name2
 	pentry(id)%hidden = hide_options
-	if( present(text) ) pentry(id)%text = text
+	pentry(id)%bnoallow = .false.
+	pentry(id)%text = text
+	!if( present(text) ) pentry(id)%text = text
 
 	end subroutine clo_add_option_f
 
+!******************************************************************
+
+	subroutine clo_add_option_f_notext(name,flag,yestext,notext)
+
+	character*(*) name
+	logical flag
+	character*(*) yestext,notext
+
+	character*80 noname
+
+	noname = 'no' // name
+	call clo_add_option_f(name,flag,yestext)
+	call clo_add_option_f(noname,flag,notext)
+	call clo_add_option_noallow(noname)
+
+	end subroutine clo_add_option_f_notext
+
+!******************************************************************
+
+	subroutine clo_add_option_f_noallow(name,flag,yestext,bnoallow)
+
+	character*(*) name
+	logical flag
+	character*(*) yestext
+	logical bnoallow
+
+	character*80 noname
+
+	noname = 'no' // name
+	call clo_add_option_f(name,flag,yestext)
+	if( bnoallow ) then
+	  call clo_add_option_f(noname,flag,' ')
+	  call clo_add_option_noallow(noname)
+	end if
+
+	end subroutine clo_add_option_f_noallow
+
+!******************************************************************
+
+	subroutine clo_add_option_noallow(name)
+
+	character*(*) name
+
+	integer id
+
+	id = clo_get_id(name)
+	if( id == 0 ) call clo_error(name,'no such option for no')
+
+	pentry(id)%bnoallow = .true.
+
+	end subroutine clo_add_option_noallow
+	
 !******************************************************************
 
 	subroutine clo_add_option_s(name,string,text)
@@ -527,7 +592,7 @@
 	character*(*) name
 	character*(*) string
 	character*(*) text
-	optional text
+	!optional text
 
 	integer id
 	character*80 name1,name2
@@ -540,11 +605,12 @@
 	call clo_init_new_id(id)
 
 	pentry(id)%name = name1
-	pentry(id)%itype = 3
+	pentry(id)%itype = clo_itype_string
 	pentry(id)%string = string
 	pentry(id)%textra = name2
 	pentry(id)%hidden = hide_options
-	if( present(text) ) pentry(id)%text = text
+	pentry(id)%text = text
+	!if( present(text) ) pentry(id)%text = text
 
 	end subroutine clo_add_option_s
 
@@ -559,7 +625,7 @@
 	call clo_init_new_id(id)
 
 	pentry(id)%name = ' '
-	pentry(id)%itype = 4
+	pentry(id)%itype = clo_itype_separator
 	pentry(id)%text = text
 	pentry(id)%hidden = hide_options
 
@@ -576,7 +642,7 @@
 	call clo_init_new_id(id)
 
 	pentry(id)%name = ' '
-	pentry(id)%itype = 4
+	pentry(id)%itype = clo_itype_separator
 	pentry(id)%text = text
 	pentry(id)%hidden = hide_options
 
@@ -634,7 +700,7 @@
 
 	id = clo_get_id(name)
 	if( id == 0 ) call clo_error(name,'option not existing')
-	if( pentry(id)%itype /= 1 ) then
+	if( pentry(id)%itype /= clo_itype_numeric ) then
 	  call clo_error(name,'wrong type for option')
 	end if
 
@@ -653,7 +719,7 @@
 
 	id = clo_get_id(name)
 	if( id == 0 ) call clo_error(name,'option not existing')
-	if( pentry(id)%itype /= 2 ) then
+	if( pentry(id)%itype /= clo_itype_flag ) then
 	  call clo_error(name,'wrong type for option')
 	end if
 
@@ -672,7 +738,7 @@
 
 	id = clo_get_id(name)
 	if( id == 0 ) call clo_error(name,'option not existing')
-	if( pentry(id)%itype /= 3 ) then
+	if( pentry(id)%itype /= clo_itype_string ) then
 	  call clo_error(name,'wrong type for option')
 	end if
 
@@ -694,7 +760,7 @@
 	clo_is_number = .false.
 	id = clo_get_id(name)
 	if( id == 0 ) return
-	if( pentry(id)%itype /= 1 ) return
+	if( pentry(id)%itype /= clo_itype_numeric ) return
 	clo_is_number = .true.
 
 	end function clo_is_number
@@ -711,7 +777,7 @@
 	clo_is_flag = .false.
 	id = clo_get_id(name)
 	if( id == 0 ) return
-	if( pentry(id)%itype /= 2 ) return
+	if( pentry(id)%itype /= clo_itype_flag ) return
 	clo_is_flag = .true.
 
 	end function clo_is_flag
@@ -728,7 +794,7 @@
 	clo_is_string = .false.
 	id = clo_get_id(name)
 	if( id == 0 ) return
-	if( pentry(id)%itype /= 3 ) return
+	if( pentry(id)%itype /= clo_itype_string ) return
 	clo_is_string = .true.
 
 	end function clo_is_string
@@ -900,10 +966,11 @@
 
 	integer, optional :: opt_nexpect  !number of expected files (at least)
 
+	logical bnooption
 	integer nexpect
-	integer nc,i,n
-	character*80 option
-	character*80 string
+	integer nc,i,n,nl
+	character*80 option,nooption
+	character(len=2*nlen) :: string
 	double precision value
 
 	nexpect = 0
@@ -924,6 +991,15 @@
 	  if( option(1:1) /= '-' ) exit
 
 	  option = option(2:)
+	  bnooption = .false.
+	  if( clo_has_option(option) .and. option(1:2) == 'no' ) then
+	    nooption = option(3:)
+	    if( clo_is_flag(nooption) ) then
+	      option = nooption
+	      bnooption = .true.
+	    end if
+	  end if
+
 	  if( option == 'h' .or. option == 'help' ) then
 	    call clo_fullusage
 	  else if( option == 'hh' .or. option == 'fullhelp' ) then
@@ -934,7 +1010,11 @@
 	    write(6,*) '*** no such option: ',trim(option)
 	    call clo_usage
 	  else if( clo_is_flag(option) ) then
-	    call clo_set_option(option,.true.)
+	    if( bnooption ) then
+	      call clo_set_option(option,.false.)
+	    else
+	      call clo_set_option(option,.true.)
+	    end if
 	  else
 	    i = i + 1
 	    if( i > nc ) then
@@ -946,6 +1026,14 @@
 	      call clo_s2d(string,value)
 	      call clo_set_option(option,value)
 	    else if( clo_is_string(option) ) then
+	      nl = len_trim(string)
+	      if( nl > nlen ) then
+		write(6,*) 'string is too long to be handled'
+		write(6,*) 'nstring,nmax: ',nl,nlen
+		write(6,*) trim(string)
+		write(6,*) 'please adjust nlen in clo.f90'
+	        stop 'error stop clo_parse_options: internal error (2)'
+	      end if
 	      call clo_set_option(option,string)
 	    else
 	      stop 'error stop clo_parse_options: internal error (1)'
@@ -1057,7 +1145,7 @@
 	integer nr,nf,nn,nt,ne,nl,np
 	integer itype,id,ie
 	integer length,l
-	character*80 name
+	character*80 name,fullname
 	character*80 text
 	character*80 textra
 
@@ -1070,6 +1158,7 @@
 	length = 0
 	do id=1,idlast
 	  l = clo_get_length(pentry(id)%name,pentry(id)%textra)
+	  if( pentry(id)%bnoallow .and. pentry(id)%text == ' ' ) l = l + 2
 	  length = max(length,l)
 	end do
 	length = max(length,clo_get_length('h|-help',' '))
@@ -1085,14 +1174,15 @@
 
 	do id=1,idlast
 	  name = pentry(id)%name
+	  call add_no_to_legend(name,fullname)
 	  textra = pentry(id)%textra
 	  text = pentry(id)%text
 	  bhidden = pentry(id)%hidden
 	  if( bshowall ) bhidden = .false.
-	  if( name == ' ' .and. .not. bhidden ) then
+	  if( name == ' ' .and. .not. bhidden ) then	!separator
 	    write(6,*) ' ',trim(text)
-	  else if( .not. bhidden ) then
-	    call clo_write_line(length,name,textra,text)
+	  else if( .not. bhidden .and. text /= ' ' ) then
+	    call clo_write_line(length,fullname,textra,text)
 	  end if
 	end do
 
@@ -1103,6 +1193,28 @@
 
 	stop
 	end subroutine clo_fullusage
+
+!**************************************************************
+
+	subroutine add_no_to_legend(name,fullname)
+
+	character*(*) name,fullname
+
+	integer id
+	character*80 noname
+
+	fullname = name
+	if( .not. clo_is_flag(name) ) return
+
+	noname = 'no' // name
+	id = clo_get_id(noname)
+	if( id <= 0 ) return
+
+	if( pentry(id)%bnoallow .and. pentry(id)%text == ' ' ) then
+	  fullname = '[no]' // name
+	end if
+	
+	end subroutine add_no_to_legend
 
 !**************************************************************
 
@@ -1145,6 +1257,55 @@
 !==================================================================
 
 	subroutine clo_test
+
+	use clo
+
+	implicit none
+
+	logical bwrite,bout,bopti
+	logical bnoallow
+	integer tmin,tmax,node,nfile
+	character*80 infile
+
+	bnoallow = .true.
+	infile = ' '
+
+        call clo_init('clo_test','','1.1')
+
+        call clo_add_info('elaborates and rewrites a fem file')
+        call clo_add_option('write',.false.,'write min/max of values',bnoallow)
+        call clo_add_option('out',.false.,'create output file')
+        call clo_add_option('opti',.false.,'optimize','do not optimize')
+        call clo_add_sep('other options')
+        call clo_add_option('node n',0 &
+     &                          ,'process node n')
+        call clo_add_com('  n is node number')
+        call clo_add_option('tmin time',-1 &
+     &                          ,'only process starting from time')
+        call clo_add_option('tmax time',-1 &
+     &                          ,'only process up to time')
+        call clo_add_extra('time is YYYY-MM-DD[::hh:mm:ss]')
+
+        call clo_parse_options	!use clo_parse_options(1) to insist on 1 file
+
+        call clo_get_option('write',bwrite)
+        call clo_get_option('out',bout)
+        call clo_get_option('opti',bopti)
+        call clo_get_option('node',node)
+        call clo_get_option('tmin',tmin)
+        call clo_get_option('tmax',tmax)
+
+        nfile = clo_number_of_files()
+        if( nfile > 0 ) call clo_get_file(1,infile)
+
+	write(6,*) 'infile: ',trim(infile)
+	write(6,*) 'write:  ',bwrite
+	write(6,*) 'out:    ',bout
+	write(6,*) 'opti:   ',bopti
+	write(6,*) 'node:   ',node
+	write(6,*) 'tmin:   ',tmin
+	write(6,*) 'tmax:   ',tmax
+
 	end
 
 !*****************************************************

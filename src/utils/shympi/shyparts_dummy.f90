@@ -59,7 +59,7 @@
 
 !*******************************************************************
 
-	subroutine check_partition(npart,epart,ierr1,ierr2)
+	subroutine check_partition(npart,epart,bdebug,ierr1,ierr2)
 
 	use basin
 
@@ -67,6 +67,7 @@
 
         integer npart(nkn)
         integer epart(nel)
+	logical bdebug
 	integer ierr1,ierr2
 
 	ierr1 = 0
@@ -76,7 +77,7 @@
 
 !****************************************************************
 
-	subroutine info_partition(nparts,area_node)
+	subroutine info_partition(nparts,area_node,pquality)
 
 ! write partition information to terminal
 
@@ -86,19 +87,39 @@
 
 	integer nparts
 	integer area_node(nkn)
+	real pquality
 
 	integer ic,k,ia
 	integer netot,neint
-	   integer min,max
+	integer min,max
 
-      integer, allocatable  :: nc(:)                  !array for check
-      integer, allocatable  :: ne(:)                  !array for check
-      integer, allocatable  :: ni(:)                  !array for check
+        integer, allocatable  :: nc(:)                  !array for check
+        integer, allocatable  :: ne(:)                  !array for check
+        integer, allocatable  :: ni(:)                  !array for check
 
-      return
+	pquality = 0.
 
 	end
 
+!*******************************************************************
 
+        subroutine write_partition_to_grd(grdfile,bdebug &
+     &                  ,nparts,npart,epart)
+
+! write grd files
+
+        use basin
+        !use grd
+
+        implicit none
+
+        character*(*) grdfile
+        logical bdebug
+        integer nparts
+        integer npart(nkn)
+        integer epart(nel)
+
+	end
 
 !*******************************************************************
+

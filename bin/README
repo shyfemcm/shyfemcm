@@ -1,0 +1,24 @@
+
+#------------------------------------------------------------------------
+#
+#    Copyright (C) 1985-2023  The SHYFEM team
+#
+#    This file is part of SHYFEM.
+#
+#------------------------------------------------------------------------
+
+this directory contains various routines for handling daily tasks
+
+sub-directories:
+
+check
+col
+git
+gps
+grd
+image
+ps
+revision
+shyfem
+time
+

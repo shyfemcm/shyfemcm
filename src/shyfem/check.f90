@@ -37,6 +37,8 @@
 ! subroutine mimafem(string)		writes some min/max values to stdout
 ! subroutine mass_conserve		checks mass conservation
 !
+! subroutine check_set_unit(iu)		sets unit for debug output
+! subroutine check_get_unit(iu)		gets unit for debug output
 ! subroutine check_node(k)		debug info on node k
 ! subroutine check_elem(ie)		debug info on element ie
 ! subroutine check_nodes_in_elem(ie)	debug info on nodes in element ie
@@ -109,6 +111,10 @@
 ! 27.03.2021	ggu	some femtime.h eliminated (not all), cleanup
 ! 31.05.2021	ggu	write time line in node/elem debug
 ! 02.04.2023	ggu	only master writes to iuinfo
+! 15.03.2024	ggu	new routine debug_write_var()
+! 10.09.2024	ggu&lrp	bug fix: do not compute mass balance on domain boundary
+! 10.09.2024    lrp     relax check_values
+! 08.02.2025    ggu     more info in check_* routines
 !
 !*************************************************************
 
@@ -249,7 +255,7 @@
         levdbg = nint(getpar('levdbg'))
 
         if( levdbg .ge. 5 ) call check_fem
-        if( levdbg .ge. 2 ) call check_values
+        if( levdbg .ge. 3 ) call check_values
 
 	!call mimafem('panic')
 
@@ -643,16 +649,21 @@
 ! computes and writes total water volume
 
 	use shympi
+	use mod_info_output
 
         implicit none
 
 	integer mode
 
         real mtot              !total computed mass of ts
+	real mtot_orig
+	double precision dmtot
 	double precision masscont
 	character*20 aline
 
 	integer, save :: iuinfo = 0
+
+	if( .not. binfo ) return
 
 	if( iuinfo == 0 ) then
 	  iuinfo = -1
@@ -664,12 +675,16 @@
 	  stop 'error stop vol_mass: wrong value for mode'
 	end if
 
-	mtot = masscont(mode)
+	dmtot = masscont(mode)
+	mtot_orig = real(dmtot)
 
-        if( iuinfo > 0 ) then
-	  call get_act_timeline(aline)
-	  write(iuinfo,*) 'total_volume: ',aline,mtot
-	end if
+	!dmtot = shympi_sum(dmtot)
+	!mtot = real(dmtot)
+        !if( iuinfo > 0 ) then
+	!  call get_act_timeline(aline)
+	!  write(iuinfo,*) 'total_volume: ',aline,mtot
+	!end if
+	call info_output('total_volume','sum',mtot_orig,.true.)
 
         end
 
@@ -688,11 +703,12 @@
 	use basin
 	use shympi
 	use mkonst
+	use mod_info_output
 
 	implicit none
 
 	logical berror,bdebug
-	integer ie,l,ii,k,lmin,lmax,mode,ks,kss
+	integer ie,l,ii,k,lmin,lmax,mode,ks,kss,ie_mpi
 	integer levdbg
 	real am,az,azt,dt,azpar,ampar
 	real areafv,b,c
@@ -702,6 +718,7 @@
 	real volo,voln
 	real ubar,vbar
 	real vbmax,vlmax,vrbmax,vrlmax
+	real verrvol(4)
 	real vrwarn,vrerr
 	real qinput
 	character*20 aline
@@ -745,7 +762,8 @@
 ! compute horizontal divergence
 !----------------------------------------------------------------
 
-        do ie=1,nel
+        do ie_mpi=1,nel
+          ie = ip_sort_elem(ie_mpi)
           areafv = 4. * ev(10,ie)               !area of triangle / 3
 	  lmin = jlhv(ie)
           lmax = ilhv(ie)
@@ -786,7 +804,7 @@
 	end if
 
 	vtotmax = 0.
-	do k=1,nkn
+	do k=1,nkn_inner
 	  lmin = jlhkv(k)
           lmax = ilhkv(k)
 	  abot = 0.
@@ -814,7 +832,7 @@
 	berror = .false.
 	vrmax = 0.
 	vmax = 0.
-	do k=1,nkn
+	do k=1,nkn_inner
 	  if( is_zeta_boundary(k) ) cycle
 	  if( is_external_boundary(k) ) cycle
 	  bdebug = k .eq. kss
@@ -866,7 +884,9 @@
 	    va(1,k) = 0.
 	end do
 
-        do ie=1,nel
+        do ie_mpi=1,nel
+          ie = ip_sort_elem(ie_mpi)
+
           areafv = 4. * ev(10,ie)               !area of triangle / 3
 
 	  ubar = 0.
@@ -891,7 +911,7 @@
 
 	vrmax = 0.
 	vmax = 0.
-	do k=1,nkn
+	do k=1,nkn_inner
 	 !if( is_inner(k) ) then
 	 if( .not. is_external_boundary(k) ) then
            lmax = ilhkv(k)
@@ -918,6 +938,8 @@
 	vbmax = vmax		!absolute error for water column
 	vrbmax = vrmax		!relative error for water column
 
+	verrvol = (/vlmax,vbmax,vrbmax,vrlmax/)
+
 !----------------------------------------------------------------
 ! write diagnostic output
 !----------------------------------------------------------------
@@ -943,9 +965,17 @@
 	  end if
 	end if
 
-	if( iuinfo > 0 ) then
-	  write(iuinfo,*) 'mass_balance: ',vbmax,vlmax,vrbmax,vrlmax
-	end if
+	verrvol = (/vbmax,vlmax,vrbmax,vrlmax/)
+	call info_output('mass_balance','max',4,verrvol)
+
+	vlmax = shympi_max(vlmax)
+	vbmax = shympi_max(vbmax)
+	vrbmax = shympi_max(vrbmax)
+	vrlmax = shympi_max(vrlmax)
+
+	!if( iuinfo > 0 ) then
+	!  write(iuinfo,*) 'mass_balance: ',vbmax,vlmax,vrbmax,vrlmax
+	!end if
 
 	deallocate(vf,va)
 
@@ -1034,6 +1064,8 @@
 
 	subroutine check_crc_2d(iu,text,nlvdi,n,levels,array)
 
+	use mod_debug
+
 	implicit none
 
 	integer iu
@@ -1055,6 +1087,8 @@
 !*************************************************************
 
 	subroutine check_crc_1d(iu,text,n,array)
+
+	use mod_debug
 
 	implicit none
 
@@ -1087,12 +1121,14 @@
 	subroutine check_set_unit(iu)
 
 	use check_unit
+	use shympi
 
 	implicit none
 
 	integer iu
 
 	iucheck = iu
+	if( iu /= 6 ) iucheck = iucheck + my_id
 
 	end
 
@@ -1129,16 +1165,19 @@
 	use mod_diff_visc_fric
 	use mod_hydro_vel
 	use mod_hydro
+	use mod_meteo
 	use levels
 	use basin
 	use mod_hydro_print
         use mod_nohyd
 	use femtime
+	use shympi
 
 	implicit none
 
 	integer k
 
+	logical binner,buniq
 	integer iu
 	integer l,lmax,lmin,kk
 	character*20 aline
@@ -1150,14 +1189,18 @@
         lmin = jlhkv(k)
 	lmax = ilhkv(k)
 	call get_act_timeline(aline)
+	binner = shympi_is_inner_node(k)
+	buniq = shympi_is_unique_node(k)
 
 	write(iu,*) '-------------------------------- check_node'
 	write(iu,*) 'time:            ',aline
+	write(iu,*) 'my,id,inner,uniq:',my_id,id_node(k),binner,buniq
 	write(iu,*) 'it,idt,k,kext:   ',it,idt,k,ipext(k)
 	write(iu,*) 'lmin,lmax,inodv: ',lmin,lmax,inodv(k)
 	write(iu,*) 'xgv,ygv:         ',xgv(k),ygv(k)
 	write(iu,*) 'zov,znv:         ',zov(k),znv(k)
 	write(iu,*) 'hkv,hkv+znv:     ',hkv(k),hkv(k)+znv(k)
+	write(iu,*) 'evapv:           ',evapv(k)
 	write(iu,*) 'hdkov:           ',(hdkov(l,k),l=1,lmax)
 	write(iu,*) 'hdknv:           ',(hdknv(l,k),l=1,lmax)
 	write(iu,*) 'areakv:          ',(areakv(l,k),l=1,lmax)
@@ -1191,11 +1234,13 @@
 	use levels
 	use basin
 	use femtime
+	use shympi
 
 	implicit none
 
 	integer ie
 
+	logical binner,buniq
 	integer iu
 	integer l,lmin,lmax,ii
 	real zmed
@@ -1208,9 +1253,13 @@
 	lmax = ilhv(ie)
 	zmed = sum(zenv(:,ie))/3.
 	call get_act_timeline(aline)
+	binner = shympi_is_inner_elem(ie)
+	buniq = shympi_is_unique_elem(ie)
 
 	write(iu,*) '-------------------------------- check_elem'
 	write(iu,*) 'time:             ',aline
+	write(iu,*) 'my_id,inner,uniq: ',my_id,binner,buniq
+	write(iu,*) 'id_elem:          ',id_elem(:,ie)
 	write(iu,*) 'it,idt,ie,ieext:  ',it,idt,ie,ieext(ie)
 	write(iu,*) 'lmin,lmax:        ',lmin,lmax
         write(iu,*) 'iwegv,iwetv:      ',iwegv(ie),iwetv(ie)
@@ -1327,6 +1376,134 @@
 	end do
 
 	end
+
+!*************************************************************
+
+        subroutine debug_write_var
+
+! this writes specific values on nodes and elements to file for comparison
+
+	use mod_hydro
+	use mod_hydro_vel
+	use mod_ts
+	use mod_diff_visc_fric
+        use basin
+        use levels
+        use shympi
+
+        implicit none
+
+        integer nelg,nkng
+	integer nktot,netot
+        integer ie_int,ie_ext
+        integer ik_int,ik_ext
+        integer i,ie,ik,lmax
+	integer iu,iubase,iumax
+	integer ihour
+        double precision dtime
+        character*80 name
+
+        integer, save, allocatable :: ies(:)
+        integer, save, allocatable :: iks(:)
+        integer, save, allocatable :: iue(:)
+        integer, save, allocatable :: iuk(:)
+        integer, save :: nie = 0
+        integer, save :: nik = 0
+        integer, save :: icall_local = 0
+
+        integer ieint, ipint
+        integer ieext, ipext
+
+	return
+
+        iubase = 700	! base unit
+	iumax = 0
+	nktot = 20	! how many nodes to write (0 for none)
+	netot = 20	! how many elems to write (0 for none)
+
+        nelg = nel_global
+        nkng = nkn_global
+
+        call get_act_dtime(dtime)
+
+        if( icall_local == 0 ) then
+
+          allocate(ies(nel))
+          allocate(iks(nkn))
+          allocate(iue(nel))
+          allocate(iuk(nkn))
+
+	  if( netot > 0 ) then
+            do i=1,nelg,nelg/netot
+	      ie_ext = ip_ext_elem(i)
+              ie_int = ieint(ie_ext)
+              if( ie_int > 0 .and. shympi_is_unique_elem(ie_int) ) then
+                nie = nie + 1
+                ies(nie) = ie_int
+                iu = iubase + ie_ext
+		iumax = max(iu,iumax)
+                iue(nie) = iu
+                call make_name_with_number('e',ie_ext,'aux',name)
+                open(iu,file=name,status='unknown',form='formatted')
+              end if
+            end do
+	  end if
+
+	  if( nktot > 0 ) then
+            do i=1,nkng,nkng/nktot
+	      ik_ext = ip_ext_node(i)
+              ik_int = ipint(ik_ext)
+              if( ik_int > 0 .and. shympi_is_unique_node(ik_int) ) then
+                nik = nik + 1
+                iks(nik) = ik_int
+                iu = iumax + ik_ext
+                iuk(nik) = iu
+                call make_name_with_number('n',ik_ext,'aux',name)
+                open(iu,file=name,status='unknown',form='formatted')
+              end if
+            end do
+	  end if
+
+          icall_local = 1
+        end if
+
+	!write(6,*) 'writing debug to files: ',nie,iue(1),nik,iuk(1)
+
+	ihour = dtime/3600
+	if( 3600*ihour /= dtime ) return
+
+        do i=1,nie
+          iu = iue(i)
+          ie = ies(i)
+          ie_ext = ieext(ie)
+          lmax = ilhv(ie)
+          write(iu,*) dtime
+          write(iu,*) ie_ext,lmax
+          write(iu,*) 'ze: ',zenv(:,ie)
+          write(iu,*) 'ut: ',utlnv(1:lmax,ie)
+          write(iu,*) 'vt: ',vtlnv(1:lmax,ie)
+	  flush(iu)
+        end do
+
+        do i=1,nik
+          iu = iuk(i)
+          ik = iks(i)
+          ik_ext = ipext(ik)
+          lmax = ilhkv(ik)
+          write(iu,*) dtime
+          write(iu,*) ik_ext,lmax
+          write(iu,*) 'zn: ',znv(ik)
+          write(iu,*) 'wn: ',wlnv(0:lmax,ik)
+          write(iu,*) 'salt: ',saltv(1:lmax,ik)
+          write(iu,*) 'temp: ',tempv(1:lmax,ik)
+          write(iu,*) 'vis: ',visv(0:lmax,ik)
+          write(iu,*) 'dif: ',difv(0:lmax,ik)
+	  flush(iu)
+        end do
+
+	call shympi_barrier
+
+        end
 
 !*************************************************************
 

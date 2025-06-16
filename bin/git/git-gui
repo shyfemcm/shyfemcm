@@ -21,6 +21,14 @@ ShowDate()
   done
 }
 
+WaitForInput()
+{
+  read -p "any input: " input
+  #echo "input: $input"
+}
+
+#----------------------------------------------------------------
+
 command dialog > /dev/null 2>&1
 if [ $? -ne 0 ]; then
   echo "dialog not available... exiting"
@@ -29,17 +37,30 @@ fi
 
 gui="YES"			#use gui for diffing
 showdate="NO"			#use gui for diffing
+tool=""
 if [ "$1" = "-h" -o "$1" = "-help" ]; then
-  echo "Usage: git-gui [-h|-help] [-nogui|-showdate]"
+  echo "Usage: git-gui [-h|-help] [-nogui|-showdate|-tool tool] [branch]"
   exit 0
 elif [ "$1" = "-nogui" ]; then
   gui="NO"
+  shift
 elif [ "$1" = "-showdate" ]; then
   showdate="YES"
+  shift
+elif [ "$1" = "-tool" ]; then
+  tool="-tool $2"
+  shift
+  shift
 fi
+branch=$1
 
 #files=$( git s|grep modified:|sed -e 's/\s*modified:\s*//'|sed -e 's/#//' )
-files=$( git s --short | grep -E '^.M' | sed -E 's/^.M\s*//' )
+if [ -z "$branch" ]; then
+  files=$( git s --short | grep -E '^.M' | sed -E 's/^.M\s*//' )
+else
+  echo "diffing with branch $branch"
+  files=$( git-diff -quiet $branch )
+fi
 
 if [ $showdate = "YES" ]; then
   ShowDate
@@ -61,6 +82,11 @@ buttons="--extra-button --extra-label edit \
 		--ok-label diff --cancel-label exit"
 
 choice=0
+
+if [ $n -eq 0 ]; then
+  echo "no changes found... exiting"
+  exit 0
+fi
 
 #------------------------------------------------------------
 # diff:0  edit:3  exit:1
@@ -87,12 +113,15 @@ do
     file=${array[$choice]}
     echo "diffing $file"
     if [ $gui = "YES" ]; then
-      git-diff $file
+      git-diff $tool $branch $file
     else
       git diff $file | less
     fi
     status=$?	#not working
-    [ $status -ne 0 ] && echo "error diffing..." && exit 7
+    if [ $status -ne 0 ]; then
+      echo "error diffing..."
+      WaitForInput
+    fi
   elif [ $status -eq 3 ]; then
     file=${array[$choice]}
     echo "editing $file"

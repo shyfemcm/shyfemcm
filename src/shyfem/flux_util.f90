@@ -355,11 +355,61 @@
 	  ntotal = ilast - ifirst + 1
 !	  write(6,*) kfluxm,nnode,ifirst,ilast,ntotal
 	  call flxinf(ns,ntotal,kflux(ifirst),iflux(1,ifirst))
+	  call flxtst(ns,ntotal,kflux(ifirst),iflux(1,ifirst))
 	end do
+
+	!stop 'flxtst output'
 
 !----------------------------------------------------------
 ! end of routine
 !----------------------------------------------------------
+
+	end
+
+!******************************************************************
+
+	subroutine flxtst(ns,n,kflux,iflux)
+
+! tests structure iflux(3,1) for one section
+
+	use shympi
+
+	implicit none
+
+	integer ns
+	integer n
+	integer kflux(n)
+	integer iflux(3,n)
+
+	integer i,k,nmax,nt,id
+	character*80 string
+	character*80 format
+	integer ids(n)
+
+	nmax = min(80,n)
+	nmax = n
+	nt = 0
+
+	do i=1,nmax
+	  k = kflux(i)
+	  if( k > 0 ) then
+	    nt = nt + 1
+	    id = id_node(k)
+	    !string(i:i) = '1'
+	  else
+	    id = -1
+	    !string(i:i) = '0'
+	  end if
+	  ids(i) = id
+	end do
+
+	write(format,'(a,i4,a)') '(a,',n+3,'i4)'
+	!write(6,*) 'format: ',trim(format)
+	call shympi_syncronize
+	if( nt > 0 ) then
+	  write(6,format) 'flxtst: ',my_id,ns,n,ids
+	end if
+	call shympi_syncronize
 
 	end
 

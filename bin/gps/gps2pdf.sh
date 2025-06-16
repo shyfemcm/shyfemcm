@@ -13,7 +13,7 @@
 # might also use option -2
 
 if [ $# -le 0 ]; then
-  echo "Usage gps2pdf file(s)"
+  echo "Usage gps2pdf.sh file(s)"
   exit 0
 fi
 

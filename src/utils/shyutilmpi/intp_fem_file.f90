@@ -109,6 +109,8 @@
 ! 09.05.2023    lrp     introduce top layer index variable
 ! 22.05.2023    ggu     new routine iff_ts_intp1()
 ! 05.06.2023    lrp     introduce z-star
+! 08.03.2024    ccf     changed error message for too many files opened
+! 07.02.2025    ggu     remember vconst as default value
 !
 !****************************************************************
 !
@@ -205,6 +207,7 @@
 	  integer, allocatable :: nodes(:)
 	  double precision, allocatable :: time(:)
 	  real, allocatable :: data(:,:,:,:)
+	  real, allocatable :: vconst(:)	!constant and default values
 
 	  double precision :: time_file = 0.	!maybe not needed
 
@@ -495,6 +498,8 @@
 
 	subroutine iff_set_description(id,ibc,string)
 
+! sets description of file
+
 	integer id
 	integer ibc
 	character*(*) string
@@ -655,7 +660,8 @@
 	idlast = idlast + 1
 	if( idlast > ndim ) then
 	  write(6,*) 'too many files opened: ',ndim
-	  write(6,*) 'please increase value of ndim in subfemintp.f'
+	  write(6,*) 'please increase value of ndim'
+	  write(6,*) 'file to change: intp_fem_file.f90'
 	  stop 'error stop iff_init: too many files opened'
 	end if
 	id = idlast
@@ -760,6 +766,8 @@
 	end if
 
 	allocate(pinfo(id)%strings_file(nvar))
+	allocate(pinfo(id)%vconst(nvar))
+        pinfo(id)%vconst(:) = vconst(:)		!used also as default values
 
 	if( id0 > 0 ) then
 	  pinfo(id)%strings_file = pinfo(id0)%strings_file
@@ -2516,23 +2524,30 @@
 	integer ldim		!vertical dimension of value
 	real value(ldim,ndim)
 
+	logical bbspline
 	integer nintp,lexp,nexp,ilast,node,nn
 	logical bonepoint,bconst,bnodes,b2d,bmulti,bflag
-	integer ipl,lfem,i,l,ip,j,iflag
-	real val,tr,flag
-	double precision time(pinfo(id)%nintp)
+	integer ipl,lfem,i,l,ip,j,iflag,iu
+	real val,tr,flag,vdefault
+	double precision tt,time(pinfo(id)%nintp)
 	double precision, parameter :: zero = 0.0d+0
 	!real time(pinfo(id)%nintp)
 	real vals(pinfo(id)%nintp)
+	double precision dval
+	double precision dvals(pinfo(id)%nintp)
 	double precision rd_intp_neville
 	real intp_neville
 	character*80 string
+	character*80 strings(pinfo(id)%nvar)
+
+	real getpar
 
         nintp = pinfo(id)%nintp
         lexp = max(1,pinfo(id)%lexp)
         nexp = pinfo(id)%nexp
         ilast = pinfo(id)%ilast
         flag = pinfo(id)%flag
+	vdefault = pinfo(id)%vconst(ivar)
         bonepoint = pinfo(id)%bonepoint
 	bconst = nintp == 0
 	bmulti = .not. bonepoint
@@ -2542,6 +2557,15 @@
 	tr = t		!real version of t
 	iflag = 0
 	nn = 0
+
+	strings = pinfo(id)%strings_file
+	string = strings(1)
+	bbspline = .false.
+	if( string(1:4) == 'wind' .and. nintp == 4 ) then
+	  if( nint(getpar('ibwind')) == 2 ) then
+	    bbspline = .true.
+	  end if
+	end if
 
 	if( bconst .or. bonepoint ) then
 	  if( bconst ) then
@@ -2555,16 +2579,45 @@
 	      if( vals(j) == flag ) bflag = .true.
 	    end do
 	    if( .not. bflag ) val = rd_intp_neville(nintp,time,vals,t)
+	    if( bflag ) val = vdefault
+
+	    if( bbspline .and. .not. bflag ) then
+	      dvals = vals
+	      dval = val
+	      call reorder(nintp,ilast,time)
+	      call compute_relative_time(nintp,time,t,tt)
+	      call reorder(nintp,ilast,dvals)
+	      call buspline(tt,dvals,dval)
+	      val = dval
+	    end if
+
+	if( .false. ) then
+	iu = 80
+	write(iu,*) '------------------'
+	write(iu,*) tt,val,nintp
+	write(iu,*) real(time)
+	write(iu,*) real(dvals)
+	write(iu+10,*) t,val
+	end if
+
 	  end if
 	  do i=1,nexp
 	    do l=1,lexp
 	      if( bmulti ) val = pinfo(id)%data(l,i,ivar,1)
 	      value(l,i) = val
-	      if( val == flag ) iflag = iflag + 1
+	      if( val == flag ) then
+		iflag = iflag + 1
+	        val = vdefault
+	        value(l,i) = val
+	      end if
 	    end do
 	  end do
 	else
 	  time = pinfo(id)%time
+	  if( bbspline ) then
+	    call reorder(nintp,ilast,time)
+	    call compute_relative_time(nintp,time,t,tt)
+	  end if
 	  value = -888.
 	  if( bdebugs ) call iff_debug(id,zero,'before ttt')
 	  do i=1,nexp
@@ -2579,7 +2632,6 @@
 	    else
 	      lfem = ilhkv_fem(ipl)
 	    end if
-	    val = -888.		!just for check
 	    do l=1,lfem
 	      bflag = .false.
 	      val = flag
@@ -2587,22 +2639,22 @@
 	        vals(j) = pinfo(id)%data(l,i,ivar,j)
 	        if( vals(j) == flag ) bflag = .true.
 	      end do
-	      if( bdebug_internal ) then
-	        if( id == 5 ) then
-	          node = pinfo(id)%nodes(i)
-		  write(6,*) 'yyyyyyyyyyy 1',i,l,lfem,nintp,node
-		  write(6,*) 'yyyyyyyyyyy 2',t
-		  write(6,*) 'yyyyyyyyyyy 3',time
-	  	  write(6,*) 'yyyyyyyyyyy 4',vals
-	        end if
-	      end if
 	      if( .not. bflag ) val = rd_intp_neville(nintp,time,vals,t)
+	      if( bflag ) then
+		val = vdefault
+		iflag = iflag + 1
+	      end if
+	    if( bbspline .and. .not. bflag ) then
+	      dvals = vals
+	      dval = val
+	      call reorder(nintp,ilast,dvals)
+	      call buspline(tt,dvals,dval)
+	      val = dval
+	    end if
 	      value(l,i) = val
-	      if( val == flag ) iflag = iflag + 1
 	    end do
 	    do l=lfem+1,ldim
 	      value(l,i) = val
-	      if( val == flag ) iflag = iflag + 1
 	    end do
 	  end do
 	end if
@@ -2628,6 +2680,63 @@
 	end if
 
 	end subroutine iff_final_time_interpolate
+
+!****************************************************************
+
+	subroutine compute_relative_time(nintp,time,t,tt)
+
+	implicit none
+
+	integer nintp
+	double precision time(4)
+	double precision t
+	double precision tt
+
+	double precision dt
+
+	dt = time(2) - time(1)
+	if( time(3) - time(2) /= dt ) goto 99
+	if( time(4) - time(3) /= dt ) goto 99
+
+	tt = (t-time(2))/(time(3)-time(2))
+
+	return
+   99	continue
+	write(6,*) 'time values: ',t
+	write(6,*) time
+	write(6,*) time(2) - time(1)
+	write(6,*) time(3) - time(2)
+	write(6,*) time(4) - time(3)
+	stop 'error stop compute_relative_time: time spacing not uniform'
+	end
+
+!****************************************************************
+
+	subroutine reorder(nintp,ilast,dvals)
+
+! reorders the array
+
+	implicit none
+
+	integer nintp
+	integer ilast
+	double precision dvals(0:3)
+
+	integer i,ip
+	double precision daux(0:3)
+
+	if( ilast == 4 ) return		! already ordered
+	ip = ilast - 1			! shift from [1-4] to [0-3]
+
+	daux = dvals
+
+	do i=0,3
+	  ip = mod(ip+1,4)
+	  dvals(i) = daux(ip)
+	end do
+
+	
+	end
 
 !****************************************************************
 

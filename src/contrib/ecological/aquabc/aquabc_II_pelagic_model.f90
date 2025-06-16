@@ -33,7 +33,7 @@
 ! module aquabc_II_wc_ini
 !     contains : subroutine calc_frac_avail_DON
 
-! module PELAGIC_MODEL_CONSTANTS
+! module AQUABC_II_PELAGIC_MODEL_CONSTANTS
 ! subroutine INIT_PELAGIC_MODEL_CONSTANTS
 ! subroutine PELAGIC_KINETICS
 ! SUBROUTINE cur_smith
@@ -73,7 +73,7 @@ end module aquabc_II_wc_ini
 
 
 
-module PELAGIC_MODEL_CONSTANTS
+module AQUABC_II_PELAGIC_MODEL_CONSTANTS
     use AQUABC_II_GLOBAL
 
     !Model constants
@@ -402,13 +402,13 @@ module PELAGIC_MODEL_CONSTANTS
     ! -------------------------------------------------------------------------
 
     !end of constatnts
-end module PELAGIC_MODEL_CONSTANTS
+end module AQUABC_II_PELAGIC_MODEL_CONSTANTS
 
 
 
 subroutine INIT_PELAGIC_MODEL_CONSTANTS
-    use PELAGIC_MODEL_CONSTANTS
-    use para_aqua
+    use AQUABC_II_PELAGIC_MODEL_CONSTANTS
+    use aquabc_II_para_aqua
 
     call para_get_value('K_A'                              ,                              K_A) !  1 Aeration coefficient (if negative calculates internally)
     call para_get_value('THETA_K_A'                        ,                        THETA_K_A) !  2 Temperature correction factor for aeration
@@ -753,20 +753,16 @@ subroutine PELAGIC_KINETICS &
             SURFACE_BOXES    , ZOOP_OPTION_1        , &
             ADVANCED_REDOX_OPTION)
 
-    use CO2SYS_CDIAC
+    use AQUABC_II_CO2SYS_CDIAC
     use AQUABC_II_GLOBAL
-    use PELAGIC_MODEL_CONSTANTS
-	!use para_aqua
+    use AQUABC_II_PELAGIC_MODEL_CONSTANTS
+	!use aquabc_II_para_aqua
     use aquabc_II_wc_ini
     !use basin, only: ipv !0d correction
 
-    use AQUABC_PEL_STATE_VAR_INDEXES
+    use AQUABC_II_PEL_STATE_VAR_INDEXES
     
     implicit none
-    !include 'param.h'
-
-    !integer ipv(nkndim)	       !external node numbers
-    !common  /ipv/ipv
 
     logical VALUE_strange(nkn) !For NaN and Inf checking
 
@@ -4953,8 +4949,8 @@ subroutine LIM_LIGHT(Ia, TCHLA, GITMAX, H, ke, LLIGHT, CCHL_RATIO,LIGHT_SAT,nkn)
     !      KC    - HARDCODED. Chlorophyll light extinction coefficient (1/m)
     !      PHIMX - HARDCODED. Max. Quantum Yield
 
-    use PELAGIC_MODEL_CONSTANTS
-    !use para_aqua
+    use AQUABC_II_PELAGIC_MODEL_CONSTANTS
+    !use aquabc_II_para_aqua
 
     implicit none
     integer nkn  ! number of nodes in grid
@@ -5278,8 +5274,8 @@ subroutine FLX_ALUKAS_II_TO_SED_MOD_1 &
     !  NOT_DEPOSITED_FLUXES - for each WC state variable, g/m2/day
 
     use AQUABC_II_GLOBAL
-    use PELAGIC_MODEL_CONSTANTS
-    use AQUABC_PEL_STATE_VAR_INDEXES
+    use AQUABC_II_PELAGIC_MODEL_CONSTANTS
+    use AQUABC_II_PEL_STATE_VAR_INDEXES
 
     implicit none
 
@@ -5454,8 +5450,8 @@ subroutine FLX_ALUKAS_II_TO_SED_MOD_1_VEC &
     !  NOT_DEPOSITED_FLUXES - for each WC state variable, g/m2/day
 
     use AQUABC_II_GLOBAL
-    use PELAGIC_MODEL_CONSTANTS
-    use AQUABC_PEL_STATE_VAR_INDEXES
+    use AQUABC_II_PELAGIC_MODEL_CONSTANTS
+    use AQUABC_II_PEL_STATE_VAR_INDEXES
 
     implicit none
 

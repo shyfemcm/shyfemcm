@@ -385,6 +385,22 @@
 ! 25.09.2023	ggu	version 7.5.84  Pre-community edition
 ! 28.09.2023	ggu	version 8.0.1   First beta community edition
 ! 23.10.2023	ggu	version 8.0.2   Second beta community edition
+! 29.02.2024	ggu	version 8.0.3   Third beta community edition
+! 06.03.2024	ggu	version 8.0.4   First community edition
+! 11.04.2024	ggu	version 8.0.5   Offline edition
+! 27.06.2024	ggu	version 8.0.6   Bucharest edition
+! 12.09.2024	ggu	version 8.0.7   NUOPC-start edition
+! 20.09.2024	ggu	version 8.0.8   NUOPC final framework edition
+! 08.10.2024	ggu	version 8.0.9   TVD MPI edition
+! 14.10.2024	ggu	version 8.0.10  INTEL_BUG edition
+! 08.11.2024	ggu	version 8.1.0   FRAIMA edition
+! 08.11.2024	ggu	version 8.2.0   FRAIMA edition - develop branch
+! 09.11.2024	ggu	version 8.2.1   FRAIMA bis edition
+! 24.11.2024	ggu	version 8.2.2   La Salute edition
+! 22.01.2025	ggu	version 8.2.3   WW3 edition
+! 10.03.2025	ggu	version 8.2.4   bug fix edition
+! 12.06.2025	ggu	version 8.2.5   Sankt Antonius edition
+! 15.06.2025	ggu	version 8.1.1   Sankt Antonius stable edition
 !
 !*****************************************************************
 
@@ -394,9 +410,9 @@
 
 ! DOCS	START	P_version
 !
-! \newcommand{\VERSION}{8.0.2}
-! \newcommand{\version}{8\_0\_2}
-! \newcommand{\COMMIT}{2023-10-23}
+! \newcommand{\VERSION}{8.1.1}
+! \newcommand{\version}{8\_1\_1}
+! \newcommand{\COMMIT}{2025-06-15}
 !
 ! DOCS	END
 
@@ -404,8 +420,9 @@
 
 	logical, save		:: bshort = .false.
 
-        character*10, parameter :: version = '8.0.2'
-        character*10, parameter :: commit  = '2023-10-23'
+        character*10, parameter :: version = '8.1.1'
+        character*10, parameter :: commit  = '2025-06-15'
+        character*50, parameter :: lcommit = '2025-06-15'
         character*17, parameter :: text    = 'SHYFEM VERSION = '
 
         character*40, parameter :: string = text//version//'  '//commit
@@ -413,7 +430,7 @@
 	character*50, parameter :: acronym =                        &
       &	    	'System of HydrodYnamic Finite Element Modules'
 	character*50, parameter :: copyright =                      &
-      &		'Copyright (C) The Shyfem Team 1985-2023'
+      &		'Copyright (C) The Shyfem Team 1985-2025'
 
 !=================================================================
 	end module shyfem_version
@@ -467,6 +484,22 @@
 	character*(*) comm
 
 	comm = commit
+
+	end
+
+!*****************************************************************
+
+        subroutine get_shyfem_local_commit(lcomm)
+
+! returns local commit of model
+
+	use shyfem_version
+
+	implicit none
+
+	character*(*) lcomm
+
+	lcomm = lcommit
 
 	end
 
@@ -548,3 +581,4 @@
 !	end
 
 !*****************************************************************
+

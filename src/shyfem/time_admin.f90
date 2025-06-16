@@ -125,6 +125,7 @@
 ! 21.03.2022	ggu	bug in set_timestep: dtmin is real, now use ddtmin as dp
 ! 28.03.2022	ggu	bug fix: ddtmin was not saved
 ! 02.04.2023    ggu     only master writes to iuinfo
+! 12.12.2023    ggu     introduced dtmax (maximum time to run to)
 !
 !**********************************************************************
 !**********************************************************************
@@ -460,14 +461,17 @@
 !********************************************************************
 !********************************************************************
 
-        subroutine set_timestep
+        subroutine set_timestep(dtmax)
 
 ! controls time step and adjusts it
 
 	use shympi
 	use femtime
+	use mod_info_output
 
         implicit none
+
+        double precision :: dtmax	!maximum time for run (normally dtend)
 
 	logical bdebug
         integer idtdone,idtrest,idts
@@ -476,11 +480,13 @@
 	integer idta(n_threads)
         double precision dt,dtnext,atime,ddts,dtsync,dtime,dt_recom
         double precision, save :: ddtmin
-        double precision :: dtmax
+        double precision :: dtbest
 	real dtr,dtaux
         real ri,rindex,rindex1,sindex
 	real perc,rmax
 	real dhpar,chpar,thpar,shpar
+	real array(5)
+	character*80 format
 
         real, save :: cmax,tfact,dtmin,zhpar
         integer, save :: idtsync,isplit,idtmin
@@ -518,6 +524,8 @@
         end if
 
         icall = icall + 1
+
+	call info_output('new timestep','none',0,array,.false.,'(a)')
 
 !----------------------------------------------------------------------
 !        idtsync = 0             !time step for syncronization
@@ -589,9 +597,11 @@
 
         dtaux = 0.
         if( rindex > 0 ) dtaux = cmax / rindex  ! maximum allowed time step
-        if( iuinfo > 0 ) then
-	  write(iuinfo,*) 'stability_hydro: ',rindex,dtaux,dt
-	end if
+        !if( iuinfo > 0 ) then
+	!  write(iuinfo,*) 'stability_hydro: ',rindex,dtaux,dt
+	!end if
+	array(1:3) = (/rindex,dtaux,real(dt)/)
+	call info_output('stability_hydro','none',3,array,.false.)
 
 	if( dt <= 0 ) then
 	  write(6,*) 'dt is negative after setting'
@@ -625,16 +635,16 @@
 !	syncronize time step
 !----------------------------------------------------------------------
 
-	dtmax = dt
+	dtbest = dt
 	dtime = t_act
 	dtsync = idts
         call sync_step(dtanf,dtsync,dtime,dt,bsync)
 
 	if( dt <= 0 ) stop 'error stop set_timestep: dt<=0'
 
-	if( dtime .gt. dtend ) then	!sync with end of sim
-	  dt = dtend - t_act
-	  dtime = dtend
+	if( dtime .gt. dtmax ) then	!sync with end of sim
+	  dt = dtmax - t_act
+	  dtime = dtmax
 	  bsync = .true.
 	end if
 
@@ -642,9 +652,9 @@
 
 	if( dt <= 0 ) then
 	  write(6,*) 'dt is negative after syncronize'
-	  write(6,*) dtmax
+	  write(6,*) dtbest
 	  write(6,*) dtime,t_act
-	  write(6,*) dtanf,dtend
+	  write(6,*) dtanf,dtend,dtmax
 	  write(6,*) dtr,isplit,idtfrac,dt_orig
 	  write(6,*) dt,cmax,rindex,cmax/rindex
 	  write(6,*) dtnext,bsync
@@ -710,11 +720,14 @@
 	iss = 0
 	if( bsync ) iss = 1
 
-	if( iuinfo > 0 ) then
-          write(iuinfo,1004) 'timestep: ',aline_act &
-     &				,t_act,istot,iss,dt,perc
-	  flush(iuinfo)	
-	end if
+!	if( iuinfo > 0 ) then
+!          write(iuinfo,1004) 'timestep: ',aline_act &
+!     &				,t_act,istot,iss,dt,perc
+!	  flush(iuinfo)	
+!	end if
+	array = (/real(t_act),real(istot),real(iss),real(dt),real(perc)/)
+	format = '(a,f18.4,f6.0,f4.0,2f10.2)'
+	call info_output(' timestep','none',5,array,.true.,format)
 
 	call shympi_barrier
 

@@ -9,13 +9,15 @@
 
 FEMDIR = ../..
 BINDIR = $(FEMDIR)/bin
-SUBDIRS = generic shyutil shympi shyutilmpi
+
+SUBDIRS = generic modules shyutil shympi shyutilmpi
 
 #------------------------------------------------------------------------
 
-default: fem
+default: shyfem
 
-fem: nothing
+fem: shyfem
+shyfem: nothing
 	@$(BINDIR)/recursivemake $@ $(SUBDIRS)
 
 test: nothing
@@ -29,6 +31,7 @@ list:
 	pwd; ls
 
 depend: nothing
+	@$(BINDIR)/recursivemake $@ $(SUBDIRS)
 
 clean: nothing
 	@$(BINDIR)/recursivemake $@ $(SUBDIRS)

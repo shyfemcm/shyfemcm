@@ -24,7 +24,7 @@ include $(FEMDIR)/Rules.make
 
 #--------------------------------------------- libraries
 
-ifeq ($(PARTS),METIS)
+ifeq ($(PARTS),$(filter $(PARTS),METIS PARMETIS))
   LIBG_METIS = -L$(METISDIR)/lib -lmetis
 endif
 
@@ -49,10 +49,6 @@ LIBL	+= $(LIBG_METIS)
 
 EXES	=	shyparts
 
-XXOBJ	=	mod_adj_grade.o \
-		adj4el.o adj5el.o adj7el.o adj575.o \
-		adjplo.o adjgrd.o adjneu.o adjvar.o
-
 ALL	=	$(OBJ)
 
 SPECIAL =       Makefile TODO README
@@ -70,7 +66,7 @@ links:
 	@$(FEMBIN)/symlink $(FEMBIN) $(EXES)
 
 shyparts: $(ALL) $(LIBF) shyparts.o
-	$(LINKER) $(LFLAGS) $(ALL) $@.o $(LIBL) -o $@
+	$(LINKER) $(FFLAGS) $(ALL) $@.o $(LIBL) -o $@
 
 #--------------------------------------------- clean
 
@@ -114,7 +110,7 @@ cleangrd:
 #--------------------------------------------- various
 
 depend:
-	@$(MAKEDEPEND) -moddir=$(MODDIR) *.f *.f90
+	@$(MAKEDEPEND) -moddir=$(MODDIR) *.f90
 
 list:
 	pwd; ls
@@ -148,4 +144,11 @@ strip:
 #--------------------------------------------- makedepend
 
 # DO NOT DELETE THIS LINE -- make depend depends on it.
+
+../../../lib/mod/mod_shyparts.mod: shyparts.o
+shyparts.o: ../../../lib/mod/basin.mod ../../../lib/mod/clo.mod \
+		../../../lib/mod/evgeom.mod \
+		../../../lib/mod/grd.mod \
+		../../../lib/mod/mod_geom.mod \
+		../../../lib/mod/shympi.mod 
 

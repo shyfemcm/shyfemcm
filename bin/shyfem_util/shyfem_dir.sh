@@ -25,13 +25,34 @@
 #
 #------------------------------------------------------
 
-FEMDIR=${SHYFEMDIR:=$HOME/shyfem}
-fembin=$FEMDIR/fembin
+dist=shyfemcm
 
-#FEMDIR_INSTALL=${SHYFEM_INSTALL:=$HOME/shyfem}
+FEMDIR=${SHYFEMDIR:=$HOME/$dist}
+FEMBIN=$FEMDIR/bin
+
+#FEMDIR_INSTALL=${SHYFEM_INSTALL:=$HOME/$dist}
 #FEMDIR_INSTALL=${SHYFEM_INSTALL:=$FEMDIR}
 FEMDIR_INSTALL=${FEMDIR}
-fembin_install=$FEMDIR_INSTALL/fembin
+FEMBIN_install=$FEMDIR_INSTALL/bin
+
+GetVersion()
+{
+  local dir=$1
+
+  if [ ! -x $shyutil/shyfem_version.sh ]; then
+    echo "*** cannot find shyfem_version.sh ...aborting" >&2
+    version=""
+  else
+    version=$( $shyutil/shyfem_version.sh $dir )
+  fi
+
+  echo $version
+}
+
+shyutil=$FEMBIN_install
+if [ -d $FEMBIN_install/shyfem_util ]; then
+  shyutil=$FEMBIN_install/shyfem_util
+fi
 
 # command line options ----------------------------
 
@@ -54,24 +75,23 @@ if [ -n "$1" ]; then
 
   [ $write = "debug" ] && echo "debug message: using dir as $dir"
 
-  version=`$fembin_install/shyfem_version.sh $dir`
+  version=$( GetVersion $dir )
   if [ -z "$version" -o "$version" = "unknown" ]; then
-    echo "cannot get version for $dir ... aborting" 1>&2
+    echo "*** cannot get version for $dir ... aborting" 1>&2
   else
     export SHYFEMDIR=$dir
-    FEMDIR=${SHYFEMDIR:=$HOME/shyfem}
-    fembin=$FEMDIR/fembin
+    FEMDIR=${SHYFEMDIR:=$HOME/$dist}
+    FEMBIN=$FEMDIR/bin
 
-    path=`$fembin_install/shyfem_path.pl $PATH`
-    #export PATH=$path:$fembin
-    export PATH=$fembin:$path
+    path=$( $shyutil/shyfem_path.pl $PATH )
+    export PATH=$FEMBIN:$path
   fi
 
 fi
 
 # show path and environment variables ---------------
 
-version=`$fembin_install/shyfem_version.sh`
+version=$( GetVersion )
 
 if [ $write != "quiet" ]; then
 

@@ -44,6 +44,7 @@
 ! 16.02.2019	ggu	changed VERS_7_5_60
 ! 16.02.2019	ggu	transferred and started close_inlets2()
 ! 10.11.2021    ggu     avoid warning for stack size
+! 03.12.2024    lrp     new parameter irain for the coupled model
 !
 !**********************************************************************
 
@@ -609,7 +610,7 @@
 	integer ndim
 	parameter (ndim=30000)
 
-	integer iwind,irain,nwind,nrain
+	integer iwind,irainl,nwind,nrain
 	integer itmax,i,n,nvar
 
 	integer, allocatable, save :: itwind(:)
@@ -617,7 +618,7 @@
 	real, allocatable, save :: wind(:)
 	real, allocatable, save :: rain(:)
 
-	save iwind,irain
+	save iwind,irainl
 	save nwind,nrain
 	data nwind,nrain /0,0/
 
@@ -630,7 +631,7 @@
 	  call read_ts('wind.dat',ndim,nvar,nwind,itwind,wind)
 	  call read_ts('rain.dat',ndim,nvar,nrain,itrain,rain)
 	  iwind = 1
-	  irain = 1
+	  irainl = 1
 	end if
 
 	itmax = it + 3600*ih
@@ -650,17 +651,17 @@
 
 ! rain
 
-	do while( irain .le. nrain .and. itrain(irain) .lt. it )
-	  irain = irain + 1
+	do while( irainl .le. nrain .and. itrain(irainl) .lt. it )
+	  irainl = irainl + 1
 	end do
-	i = irain
+	i = irainl
 	rmax = rain(i)
 	if( itrain(i) .gt. it .and. i .gt. 1 ) rmax = max(rmax,rain(i-1))
 	do while( i .le. nrain .and. itrain(i) .le. itmax )
 	  rmax = max(rmax,rain(i))
 	  i = i + 1
 	end do
-	!write(6,*) 'rain ',it,itmax,itrain(irain),irain,i,rmax
+	!write(6,*) 'rain ',it,itmax,itrain(irainl),irainl,i,rmax
 
 	end
 

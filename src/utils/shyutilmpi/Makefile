@@ -13,6 +13,7 @@ DIR	= shyutilmpi
 
 #--------------------------------------------- just for default
 FEMDIR = ../../..
+FEMBIN = $(FEMDIR)/bin
 F77    = g77
 FFLAGS =  -O -Wall -g
 LINKER = $(F77)
@@ -33,7 +34,6 @@ FFLAGS += $(INCLUDE)
 MOD  = \
 
 OBJ  = \
-	evgeom.o \
 	topo_update.o \
 	bnd_admin.o \
 	depth_util.o \
@@ -41,11 +41,20 @@ OBJ  = \
 	shy_util1.o \
 	intp_fem_file.o \
 	coordinates.o \
+	io_off.o \
+	trace_point.o \
+	info_output.o \
+	mod_restart.o \
+
+OBSOLETE = \
+	evgeom.o \
 	find.o \
 
 ALL = $(MOD) $(OBJ)
 
 SPECIAL =       Makefile
+
+MAKEDEPEND = $(FEMBIN)/mkdp.pl
 
 #--------------------------------------------- EXES
 
@@ -53,7 +62,8 @@ LIB = $(LIBDIR)/lib$(LIBNAME).a
 
 default: lib
 all:	lib
-fem: lib
+fem: shyfem
+shyfem: lib
 lib:	$(LIB) nothing
 
 nothing:
@@ -118,6 +128,9 @@ cleanlib:
 
 #--------------------------------------------- various
 
+depend:
+	@-$(MAKEDEPEND) -moddir=$(MODDIR) *.f90
+
 check:
 	~/shyfem/fem3d/bin/compile.sh -single *.f90
 	~/shyfem/fem3d/bin/usemod.pl *.f90
@@ -151,4 +164,43 @@ zip:	cleanall
 #--------------------------------------------- makedepend
 
 # DO NOT DELETE THIS LINE -- make depend depends on it.
+
+../../../lib/mod/coordinates.mod: coordinates.o
+../../../lib/mod/intp_fem_file.mod: intp_fem_file.o
+../../../lib/mod/mod_info_output.mod: info_output.o
+../../../lib/mod/mod_offline.mod: io_off.o
+../../../lib/mod/mod_restart.mod: mod_restart.o
+../../../lib/mod/mod_trace_point.mod: trace_point.o
+../../../lib/mod/shyutil.mod: shy_util1.o
+bnd_admin.o: ../../../lib/mod/mod_bnd.mod \
+		../../../lib/mod/mod_bound_geom.mod \
+		../../../lib/mod/nls.mod ../../../lib/mod/para.mod \
+		../../../lib/mod/shympi.mod 
+coordinates.o: ../../../lib/mod/basin.mod \
+		../../../lib/mod/shympi.mod 
+depth_util.o: ../../../lib/mod/basin.mod \
+		../../../lib/mod/mod_depth.mod \
+		../../../lib/mod/shympi.mod 
+info_output.o: ../../../lib/mod/shympi.mod
+intp_fem_file.o: ../../../lib/mod/shympi.mod
+io_off.o: ../../../lib/mod/basin.mod \
+		../../../lib/mod/mod_trace_point.mod \
+		../../../lib/mod/shympi.mod 
+mod_restart.o: ../../../lib/mod/shympi.mod
+shy_util.o: ../../../lib/mod/basin.mod ../../../lib/mod/levels.mod \
+		../../../lib/mod/mod_trace_point.mod \
+		../../../lib/mod/shyfile.mod \
+		../../../lib/mod/shympi.mod \
+		../../../lib/mod/simul.mod 
+shy_util1.o: ../../../lib/mod/basin.mod \
+		../../../lib/mod/evgeom.mod \
+		../../../lib/mod/levels.mod \
+		../../../lib/mod/mod_depth.mod \
+		../../../lib/mod/mod_sort.mod 
+topo_update.o: ../../../lib/mod/basin.mod \
+		../../../lib/mod/evgeom.mod \
+		../../../lib/mod/mod_geom.mod \
+		../../../lib/mod/mod_geom_dynamic.mod \
+		../../../lib/mod/shympi.mod 
+trace_point.o: ../../../lib/mod/shympi.mod
 

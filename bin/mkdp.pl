@@ -2,7 +2,7 @@
 #
 #------------------------------------------------------------------------
 #
-#    Copyright (C) 1985-2020  Georg Umgiesser
+#    Copyright (C) 1985-2024  Georg Umgiesser
 #
 #    This file is part of SHYFEM.
 #
@@ -15,28 +15,36 @@
 # 26.02.2015	ggu	adapted for f90 files
 # 04.01.2016	ggu	sort targets and dependencies alphabetically
 # 24.06.2019    mbj     adapted for F90 files
+# 23.10.2024    ggu     avoid infinite loop
 #
 #------------------------------------------------------
+
+use Term::ANSIColor qw(:constants);
 
 use strict;
 
 #------------------------------------------------------
 
 %::ignore_use_modules = (
-			'mpi.mod'		=> 	1,
-			'netcdf.mod'		=> 	1,
-			'ifposix.mod'		=> 	1,
-			'iso_c_binding.mod'	=> 	1,
+			'mpi.mod'			=> 	1,
+			'netcdf.mod'			=> 	1,
+			'ifposix.mod'			=> 	1,
+			'iso_c_binding.mod'		=> 	1,
+			'iso_fortran_env.mod'		=> 	1,
 		    );
 
 %::ignore_define_modules = (
-			'mod_zeta_system.mod'	=> 	1,
-			'shympi.mod'		=> 	1,
+			'mod_zeta_system.mod'		=> 	1,
+			'shympi.mod'			=> 	1,
 		    );
 
 %::ignore_files = (
-			'subww3.f'		=> 	1,
-			'subww3_dummy.f'	=> 	1,
+			'subww3.f'			=> 	1,
+			'subww3_dummy.f'		=> 	1,
+			'amgx_c_wrapper_dummy.f90'	=> 	1,
+			'mod_petsc_global.f90'		=> 	1,
+			'mod_petsc_system.f90'		=> 	1,
+			'simsys_petsc.f90'		=> 	1,
 		    );
 
 #------------------------------------------------------
@@ -72,11 +80,13 @@ if( not $::make ) {
 my $mfile = change_makefile(\@lines);
 
 if( is_different("$mfile","$mfile.new") ) {
-  print STDERR "Makefile changed... substituting\n";
+  print STDERR RED, "Makefile changed... substituting\n", RESET;
+  #print STDERR "Makefile changed... substituting\n";
   rename("$mfile","$mfile.bak");
   rename("$mfile.new","$mfile");
 } else {
-  print STDERR "Makefile did not change... not substituting\n";
+  print STDERR GREEN, "Makefile did not change... not substituting\n", RESET;
+  #print STDERR "Makefile did not change... not substituting\n";
   rename("$mfile.new","$mfile.bak");
 }
 
@@ -283,9 +293,12 @@ sub get_part {
     my $rest = "";
     my $full = 0;
     foreach my $word (@words) {
-
       if( $full or ( length($part . $word) > $len )) {
-	$rest .= "$word ";
+	if( not $part ) {	# first word is too long... insert anyway
+	  $part .= "$word ";
+	} else {
+	  $rest .= "$word ";
+	}
 	$full = 1;
       } else {
 	$part .= "$word ";

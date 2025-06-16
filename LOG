@@ -1,4 +1,586 @@
 
+12.06.2025
+
+! ./src/shyfem/explicit.f90:
+! 24.04.2025    ggu     handle new value for ibarcl == 5
+!
+! ./src/shyfem/bnd_routines.f90:
+! 12.06.2025    clc     set dvols to 0 to avoid compiler warning
+!
+! ./src/shyfem/conz_common.f90:
+! 16.04.2025	ggu	contau eliminated, added wsettlv
+!
+! ./src/shyfem/conz_admin.f90:
+! 16.04.2025    ggu     variable sinking (wsettlv) introduced
+!
+! ./src/shyfem/baroclinic.f90:
+! 24.04.2025    ggu     new value for ibarcl: ibercl == 5
+!
+! ./src/shyfem/wetdry.f90:
+! 24.04.2025	ggu	write out dry elements and nodes
+!
+! ./src/shyfem/shyfem_subs.f90:
+! 10.03.2025    ggu	write local commit
+!
+! ./src/shyfem/def_para.f90:
+! 01.04.2025    ggu     new value 5 for ibarcl
+! 16.04.2025    ggu     new parameter wsettl
+!
+! ./src/shyfem/mod_petsc_system.f90:
+! 24.05.2025	clr&ccf	replace PETSC_NULL_INTEGER with PETSC_NULL_OPTIONS 
+!
+! ./src/shyfem/bndo.f90:
+! 12.06.2025	ggu	extra info on error
+!
+! ./src/tools/shyplot/supout.f90:
+!  02.04.2025	ggu	adjust adjust_no_plot_area() to only plot in some areas
+!
+! ./src/tools/shyelab/shyelab1.f90:
+! 01.04.2025    ggu     better error message
+!
+! ./src/tools/shyelab/extelab1.f90:
+! 12.06.2025	ggu	prepare for writing station name
+!
+! ./src/tools/shynetcdf/nc2fem.f90:
+! 25.04.2025    ggu     new option -rfact
+!
+! ./src/tools/shynetcdf/netcdf.f90:
+! 01.04.2025	ggu	handle variables with no CL description
+! 07.04.2025	ggu	new routine handle_time_string()
+!
+! ./src/tools/shynetcdf/nc_tutil.f90:
+! 07.04.2025	ggu	new time_type == 3 (time as string)
+!
+! ./src/tools/shynetcdf/nc_domain.f90:
+! 25.04.2025	ggu	use ncnames_get_dim_coord_info() to find coord name
+!
+! ./src/tools/shynetcdf/nc_dim_coords.f90:
+! 24.04.2025	ggu	new routine ncnames_get_dim_coord_info()
+!
+! ./src/tools/femutil/optintp/optintp.f90:
+! 18.03.2025	ggu	write new complementary files
+! 12.06.2025	ggu	minor changes
+!
+! ./src/tools/femutil/netcdf/nc_dim_coords.f90:
+! 24.04.2025	ggu	new routine ncnames_get_dim_coord_info()
+!
+! ./src/utils/generic/compatibility.f90:
+! 12.03.2025    clc     fixed bug for INTEL compiler in compiler information
+!
+! ./src/utils/generic/clo.f90:
+! 18.03.2025	ggu	more documentation
+!
+! ./src/utils/generic/femfile.f90:
+! 18.03.2025	ggu	deal with lmax == 0 in writing record
+!
+! ./src/utils/generic/unitutils.f90:
+! 12.06.2025	ggu	if string is available add it to file name
+!
+! ./src/utils/shyutilmpi/shy_util.f90:
+! 01.04.2025    ggu     write subrange of variables
+! 10.04.2025    ggu     new routine shyfem_init_scalar_fix_file() (nfix)
+!
+! ./src/utils/shyutil/strings.f90:
+! 01.04.2025	ggu	ivar values and range for BFM model
+! 24.04.2025	ggu	new entries for sensible, latent and long wave heat flux
+!
+! ./src/utils/shyutil/io_shy.f90:
+! 10.04.2025    ggu     new nfix introduced for fixed vertical structure
+!
+! ./src/utils/modules/mod_sedim.f90:
+! 12.06.2025    clc     set sedpa to 0 (avoid undefined value)
+
+
+09.03.2025
+
+! ./src/shyfem/restart.f90:
+! 26.01.2025    ggu     fix mpi bug for ibfm /= 0 (only master writes)
+! 08.03.2025    ggu     extracted mod_restart in its own file
+! 09.03.2025    ggu     call shympi_barrier after finishing restart file
+!
+! ./src/shyfem/heat_admin2.f90:
+! 08.02.2025    ggu     some new debug code
+!
+! ./src/shyfem/openmp_admin.f90:
+! 29.01.2025	ggu	nomp==-1 uses maximal available procs (OMP_NUM_THREADS)
+!
+! ./src/shyfem/boxes.f90:
+! 09.03.2025	ggu	avoid access out of bounds in finalize_nslayers()
+!
+! ./src/shyfem/shyfem_subs.f90:
+! 08.03.2025    ggu	write compiler information
+! 09.03.2025    ggu	write compiler profile
+!
+! ./src/shyfem/lnkmpi.f90:
+! 04.02.2025    ggu     new routine check_2id_elements() (not yet finished)
+!
+! ./src/shyfem/check.f90:
+! 08.02.2025    ggu     more info in check_* routines
+!
+! ./src/shyfem/meteo_forcing.f90:
+! 25.01.2025    ggu     tentative cubic interpolation for wind (bbspline)
+!
+! ./src/tools/shyplot/supsim.f90:
+!  08.03.2025	ggu	plot nodal code
+!
+! ./src/tools/femutil/optintp/optintp.f90:
+! 20.02.2025	ggu	completely restructured
+!
+! ./src/tools/femutil/optintp/suboi.f90:
+! 20.02.2025	ggu	some refactoring
+!
+! ./src/contrib/ecological/bfm/arc/bfm_internal.f90:
+! 08.03.2025	ggu	bug fix in restart routines (now only master writes)
+!
+! ./src/utils/shympi/mpi_node.f90:
+! 28.01.2025    ggu     compatibility for gfortran 4 inserted
+! 06.02.2025    ggu     new routines shympi_exchange_fix_node/elem()
+!
+! ./src/utils/shympi/mpi_dummy.f90:
+! 06.02.2025    ggu     new routines shympi_exchange_fix_node/elem()
+!
+! ./src/utils/generic/grd.f90:
+! 08.03.2025	ggu	in grd_init() make sure that lines are allocated
+!
+! ./src/utils/generic/compatibility.f90:
+! 28.01.2025    ggu     written from scratch
+! 08.03.2025    ggu     added compiler information
+! 09.03.2025    ggu     added compiler profile
+!
+! ./src/utils/generic/intp.f90:
+! 25.01.2025	ggu	new routine buspline() for uniform cubic b-spline
+!
+! ./src/utils/shyutilmpi/intp_fem_file.f90:
+! 07.02.2025    ggu     remember vconst as default value
+!
+! ./src/utils/shyutil/regular.f90:
+! 20.02.2025	ggu	new routine create_reg()
+!
+! ./src/utils/shyutil/sigma.f90:
+! 09.03.2025	ggu	avoid out of bounds access (hlvaux)
+!
+! ./src/utils/shyutil/zadaptutil.f90:
+! 09.03.2025	ggu	avoid out of bounds access (hlvaux)
+
+
+21.01.2025
+
+! ./src/shyfem/elems_dealing.f90:
+! 01.12.2024    ggu     in masscont() and scalcont() do not exchange
+!
+! ./src/shyfem/explicit.f90:
+! 01.12.2024    ggu     in momentum_advective_stability() do not reduce
+!
+! ./src/shyfem/bnd_routines.f90:
+! 03.12.2024    ggu     run init_flux() only for ibtyp>1
+!
+! ./src/shyfem/boxes.f90:
+! 16.12.2024	ggu	introduced barea3d and bdtarea3d
+! 17.12.2024	ggu	bug fixes for vertical variables, still no 3dmass cons.
+! 20.12.2024	ggu	finished 3d mass conservation check
+!
+! ./src/shyfem/outputd.f90:
+! 04.12.2024    ggu     routines updated, more documentation
+! 10.12.2024    ggu     new routine is_last_output_d()
+!
+! ./src/shyfem/ww3_dummy.f90:
+! 03.12.2024    lrp     ww3 restored
+!
+! ./src/shyfem/intp_tst.f90:
+! 03.12.2024    lrp     new parameter irain for the coupled model
+!
+! ./src/shyfem/flux.f90:
+! 10.12.2024    ggu     only reduce one time, then write
+!
+! ./src/shyfem/const.f90:
+! 03.12.2024    lrp     ww3 restored
+!
+! ./src/shyfem/baroclinic.f90:
+! 03.12.2024    ggu     new info_output framework
+!
+! ./src/shyfem/flxm.f90:
+! 10.12.2024	ggu	new routine flux_file_close(), no wait on barrier
+!
+! ./src/shyfem/shyfem_subs.f90:
+! 03.12.2024    lrp     ww3 restored
+!
+! ./src/shyfem/meteo_admin.f90:
+! 03.12.2024    lrp     irain for the coupled model
+!
+! ./src/shyfem/extra.f90:
+! 04.12.2024	ggu	only do one reduce call for mpi
+! 09.12.2024	ggu	extra finished and tested
+!
+! ./src/shyfem/def_para.f90:
+! 03.12.2024    lrp     new parameter irain for the coupled model
+!
+! ./src/shyfem/ww3.f90:
+! 03.12.2024    lrp     ww3 restored
+!
+! ./src/shyfem/meteo_forcing.f90:
+! 03.12.2024    lrp     new parameter irain for the coupled model
+!
+! ./src/tools/shyplot/supano.f90:
+!  09.01.2025	ggu	avoid divide by zero in scale_legend(): 10 -> 10.
+!
+! ./src/tools/shyelab/dbg_flx.f90:
+! 10.12.2024    ggu     written from scratch
+! 13.12.2024    ggu     error_stop and other small changes
+!
+! ./src/tools/shyelab/elabtime.f90:
+! 17.01.2025	ggu	if time step changes write also old time step
+!
+! ./src/tools/shyelab/dbg_box.f90:
+! 14.12.2024    ggu     written from scratch
+!
+! ./src/tools/shynetcdf/nc_dim_coords.f90:
+! 15.01.2025	ggu	check also if coordinate is without dimension
+!
+! ./src/tools/femutil/optintp/optutil.f90:
+! 12.01.2025	ggu	written from scratch
+!
+! ./src/tools/femutil/netcdf/ncinfo.f90:
+! 15.01.2025    ggu     adjourned
+!
+! ./src/tools/femutil/netcdf/ncf_util.f90:
+! 15.01.2025    ggu     get description for variables
+!
+! ./src/tools/shybas/msh.f90:
+! 03.12.2024    lrp     ww3 restored
+!
+! ./src/utils/shympi/shyparts_basutil.f90:
+! 30.11.2024    ggu     renamed check_color() to check_part_color()
+!
+! ./src/utils/shympi/shyparts_util.f90:
+! 29.11.2024	ggu	compute number of non contiguous areas
+! 30.11.2024	ggu	use color as aux array for flood_fill
+!
+! ./src/utils/shympi/shyparts_metis.f90:
+! 29.11.2024	ggu	option to force contigous areas
+!
+! ./src/utils/shympi/check_shympi_debug.f90:
+! 21.12.2024    ggu     more functionallity, possible dump of data record
+!
+! ./src/utils/shympi/mpi_node.f90:
+! 04.12.2024    ggu     implement bmpi_allgather for gather routines
+! 07.12.2024    ggu     big changes: make sure arrays are same length for reduce
+! 13.12.2024    ggu     error_stop() implemented
+!
+! ./src/utils/shympi/mpi_dummy.f90:
+! 13.12.2024    ggu     error_stop() implemented
+!
+! ./src/utils/shympi/mpi_node_internal.f90:
+! 30.11.2024    ggu     new routine shympi_icomment()
+! 04.12.2024    ggu     new routines shympi_gather_internal_r/i()
+! 05.12.2024    ggu     renamed module from shympi_aux to shympi_internal
+! 07.12.2024    ggu     big changes: check if arrays have same length for gather
+!
+! ./src/utils/generic/chk_NaN.f90:
+! 19.12.2024	ggu	new routines to compute checksum
+!
+! ./src/utils/generic/errorstop.f90:
+! 12.12.2024	ggu	written from scratch
+!
+! ./src/utils/generic/clo.f90:
+! 25.11.2024	ggu	check length of string, use nlen to set max string len
+!
+! ./src/utils/shyutilmpi/bnd_admin.f90:
+! 03.12.2024	ggu	do not complain for holes in zeta boundary
+!
+! ./src/utils/shyutilmpi/shy_util.f90:
+! 04.12.2024    ggu     new framework for not doing gather_all
+! 07.12.2024    ggu     reduce only to root (not all)
+!
+! ./src/utils/shyutilmpi/info_output.f90:
+! 01.12.2024    ggu     written from scratch
+! 03.12.2024    ggu     allow for optional format
+!
+! ./src/utils/shyutil/io_shy.f90:
+! 25.11.2024    ggu     can use shy_[sg]et_simpar() with flexible nsimpar
+! 04.12.2024    ggu     new routine shy_get_status()
+!
+! ./src/utils/modules/mod_flux.f90:
+! 10.12.2024	ggu	allocation taken out from flux.f90, new name mod_flux
+
+
+24.11.2024
+
+! ./src/shyfem/iostr.f90:
+! 15.11.2024    ggu     double for energy introduced
+!
+! ./src/shyfem/bnd_routines.f90:
+! 13.11.2024    ggu     marked old code with INTEL_BUG_OLD
+!
+! ./src/shyfem/constants.f90:
+! 16.11.2024	ggu	in handle_grid_read() use ibasin to decide what to do
+!
+! ./src/shyfem/model3d_util.f90:
+! 15.11.2024    ggu     double for energy introduced
+!
+! ./src/shyfem/arc/area_util.f90:
+! 10.11.2024	ggu	copied from area_utils.f90 and started
+!
+! ./src/shyfem/shyfem_subs.f90:
+! 15.11.2024    ggu     flush iuinfo before stopping
+! 23.11.2024    ggu     introduced check_partition_quality()
+!
+! ./src/shyfem/tidef.f90:
+! 13.11.2024    ggu     marked old code with INTEL_BUG_OLD
+!
+! ./src/shyfem/lnkmpi.f90:
+! 13.11.2024    ggu     indicate other domain (not yet finished)
+!
+! ./src/shyfem/bcvel.f90:
+! 13.11.2024	ggu	marked old code with INTEL_BUG_OLD
+!
+! ./src/shyfem/def_para.f90:
+! 16.11.2024	ggu	new parameter ibasin
+! 23.11.2024	ggu	new parameter pqual
+!
+! ./src/shyfem/meteo_forcing.f90:
+! 13.11.2024    ggu     marked old code with INTEL_BUG_OLD
+!
+! ./src/tools/shynetcdf/nc_dim_coords.f90:
+! 15.11.2024	ggu	use bclip for some coordinates
+!
+! ./src/tools/shyparts/shyparts.f90:
+! 21.11.2024	ggu	honor debug flag
+! 23.11.2024	ggu	introduced pqual
+!
+! ./src/tools/shybas/basutil.f90:
+! 09.11.2024	ggu	new option -layers to compute areas and volumes
+!
+! ./src/tools/shybas/basutil_layers.f90:
+! 09.11.2024	ggu	copied, computes areas and volumes of layers
+!
+! ./src/utils/shympi/shyparts_basutil.f90:
+! 21.11.2024    ggu     call check routines with bdebug, less error messages
+! 23.11.2024    ggu     ignore errors in connectivity
+!
+! ./src/utils/shympi/mpi_tripple.f90:
+! 21.11.2024    ggu     test for external neigbor was wrong
+!
+! ./src/utils/shympi/shyparts_util.f90:
+! 18.11.2024	ggu	writes partition.np.txt
+! 21.11.2024	ggu	use make_name_with_number() to create file names
+! 23.11.2024	ggu	new routine info_partition_quality()
+!
+! ./src/utils/shympi/shyparts_metis.f90:
+! 21.11.2024	ggu	call check_partition() with bdebug flag
+! 23.11.2024	ggu	code cleaned
+!
+! ./src/utils/shympi/mpi_basin.f90:
+! 21.11.2024	ggu	new call to check_partition() and write_partition()
+! 23.11.2024	ggu	eliminate error stop in handle_partition()
+!
+! ./src/utils/shympi/mpi_node.f90:
+! 13.11.2024    ggu     new routine shympi_find_element()
+! 23.11.2024    ggu     new variable pquality
+!
+! ./src/utils/shympi/mpi_node_internal.f90:
+! 21.11.2024    ggu     change in shympi_abort_internal() -> hangs for ever
+!
+! ./src/utils/shyutilmpi/depth_util.f90:
+! 13.11.2024    ggu     marked old code with INTEL_BUG_OLD
+!
+! ./src/utils/shyutil/defnames.f90:
+! 21.11.2024	ggu	in make_name_with_number() use no dot if ext == ''
+
+
+08.11.2024
+
+! ./src/shyfem/tidef.f90:
+! 15.10.2024	ggu	bug fix for INTEL_BUG (IFX)
+!
+! ./src/shyfem/lnkmpi.f90:
+! 07.11.2024    ggu     updated to new connection framework
+!
+! ./src/tools/shyelab/shyelab1.f90:
+! 17.10.2024    ggu     for shy_make_basin_aver() allow for percentile
+!
+! ./src/tools/shyelab/elabutil.f90:
+! 17.10.2024    ggu     new option percentile
+! 24.10.2024    ggu     new option smooth
+!
+! ./src/utils/shympi/shyparts_basutil.f90:
+! 07.11.2024    ggu     ignore connection errors
+!
+! ./src/utils/shympi/shyparts_metis.f90:
+! 15.10.2024	ggu	set array tpwgts (which is real, not dble) (IFX bug)
+!
+! ./src/utils/generic/grd.f90:
+! 07.11.2024	ggu	in write_grd_file_with_detail() also write zoom window
+!
+! ./src/utils/generic/connections.f90:
+! 07.11.2024	ggu	is ready now (completely auto-sufficient)
+!
+! ./src/utils/shyutilmpi/topo_update.f90:
+! 07.11.2024	ggu	updated call to update_ielt()
+!
+! ./src/utils/shyutilmpi/shy_util1.f90:
+! 17.10.2024    ggu     in shy_make_basin_aver() allow for percentile
+!
+! ./src/utils/shyutilmpi/depth_util.f90:
+! 15.10.2024	ggu	INTEL_BUG (IFX) solved
+!
+! ./src/utils/shyutil/topological.f90:
+! 07.11.2024	ggu	new framework for connection
+!
+! ./src/utils/shyutil/geom.f90:
+! 07.11.2024	ggu	introduced buselink (must be false)
+! ./src/utils/shyutil/links.f90:
+! 07.11.2024    ggu     this file is not used anymore
+!
+! ./src/utils/shyutil/shyaver.f90:
+! 18.10.2024	ggu	shyaver started
+! ./src/utils/shyutil/lnku.f90:
+! 07.11.2024	ggu	new framework for connection
+
+
+14.10.2024
+
+! ./src/shyfem/explicit.f90:
+! 13.10.2024    ggu     bug fix for INTEL_BUG
+!
+! ./src/shyfem/bnd_routines.f90:
+! 10.10.2024    ggu     introduced dfluxnode to avoid INTEL_BUG compiler bug
+! 13.10.2024    ggu     introduced drvols to avoid INTEL_BUG compiler bug
+!
+! ./src/shyfem/shyfem_subs.f90:
+! 13.10.2024    ggu     more debug output for *.dbg files, reordered
+!
+! ./src/shyfem/tidef.f90:
+! 13.10.2024	ggu	bug fix for INTEL_BUG
+!
+! ./src/shyfem/meteo_admin.f90:
+! 13.10.2024	ggu	in convert_distributed() exchange rqdsv
+!
+! ./src/shyfem/bcvel.f90:
+! 14.10.2024	ggu	fixed INTEL_BUG
+!
+! ./src/shyfem/meteo_forcing.f90:
+! 13.10.2024    ggu     deal with INTEL_BUG
+!
+! ./src/utils/shympi/mpi_node.f90:
+! 13.10.2024    ggu     new parameter bextra_exchange to deal with INTEL_BUG
+!
+! ./src/utils/shympi/mpi_ghost.f90:
+! 11.10.2024	ggu	only write if my_unit > 0
+! ./src/utils/shympi/mpi_check.f90:
+! 08.10.2024	ggu	copied from mpi tvd
+
+
+08.10.2024
+
+! ./src/shyfem/heat_admin2.f90:
+! 21.09.2024    ggu     new handle_skin() for handling skin temperature output
+!
+! ./src/shyfem/shyfem_subs.f90:
+! 29.09.2024    ggu     call tvd_init before time loop
+!
+! ./src/shyfem/tvd_admin.f90:
+! 26.09.2024    ggu     mark old tvd code with TVD_OLD, btvddebug introduced
+! 29.09.2024    ggu     use ltvdup to decide if remote data exists
+! 05.10.2024    ggu     introduced quad_tree_search()
+!
+! ./src/shyfem/concentration_omp.f90:
+! 24.09.2024    ggu     introduced tvd mpi (bmpi)
+!
+! ./src/shyfem/meteo_forcing.f90:
+! 22.09.2024    ggu     read meteo output times and from str file
+!
+! ./src/shyfem/concentration.f90:
+! 27.09.2024    ggu     btvddebug introduced
+!
+! ./src/tools/shyelab/shyelab_output.f90:
+! 03.10.2024    ggu     added var_dim
+!
+! ./src/tools/shyelab/shystrings.f90:
+! 21.09.2024	ggu	written from scratch
+!
+! ./src/tools/shynetcdf/netcdf.f90:
+! 03.10.2024	ggu	introduced directional variable
+! 03.10.2024	ggu	new variables added
+!
+! ./src/tools/shynetcdf/elab_nc.f90:
+! 03.10.2024	ggu	introduced dim and dir
+!
+! ./src/tools/shybas/basutil_fastfind.f90:
+! 01.10.2024	ggu	written from scratch
+! 04.10.2024	ggu	also adapted to quad_tree routines
+!
+! ./src/tools/shybas/basutil.f90:
+! 03.10.2024	ggu	new option -fastfind to test fast_find routines
+!
+! ./src/utils/shympi/mpi_tvd.f90:
+! 27.09.2024	ggu	first running version... still to be cleaned
+! 05.10.2024	ggu	introduced quad_tree_search() - feature complete
+! 07.10.2024	ggu	tvd mpi finished
+!
+! ./src/utils/generic/list.f90:
+! 05.10.2024	ggu	file copied from stack
+! ./src/utils/generic/stack.f90:
+! 01.10.2024	ggu	new stack_get_entries() introduced
+! 03.10.2024	ggu	bug fix for stack_get_entries()
+! 04.10.2024	ggu	bug fix for stack_peek()
+! ./src/utils/generic/histogram.f90:
+! 22.09.2024	ggu	revisited - allocate arrays
+!
+! ./src/utils/generic/convert.f90:
+! 21.09.2024	ggu	new routines is_whitespace() and is_integer()
+!
+! ./src/utils/shyutilmpi/shy_util.f90:
+! 22.09.2024    ggu     bug fix in shy_check_nvar() - use also dtime0
+!
+! ./src/utils/shyutil/strings.f90:
+! 20.09.2024	ggu	new variable skin temperature (14)
+! 21.09.2024	ggu	cleaned, some new helper routines
+! 03.10.2024	ggu	new has_direction_ivar() and is_2d()
+!
+! ./src/utils/shyutil/fast_find.f90:
+! 01.10.2024	ggu	fast_find started
+! 03.10.2024	ggu	fast_find debugged
+! 03.10.2024	ggu	small bug fixes
+! ./src/utils/shyutil/tvd.f90:
+! 23.09.2024	ggu	new array itvdup()
+! ./src/utils/shyutil/quad_tree.f90:
+! 01.10.2024	ggu	quad_tree started
+! 03.10.2024	ggu	quad_tree debugged
+! 04.10.2024	ggu	quad_tree finished
+! 05.10.2024	ggu	final changes
+! ./src/utils/shyutil/io_shy.f90:
+! 22.09.2024    ggu     increase nvar_act earlier (bug)
+!
+! ./src/utils/shyutil/evgeom.f90:
+! 24.09.2024	ggu	new routine femintp_xi()
+!
+! ./src/utils/shyutil/version.f90:
+! 20.09.2024	ggu	version 8.0.8   NUOPC final framework edition
+
+
+20.09.2024
+
+! ./src/shyfem/iostr.f90:
+! 13.09.2024    lrp     iatm and coupling with atmospheric model
+!
+! ./src/shyfem/heat_admin2.f90:
+! 13.09.2024    lrp     iatm and coupling with atmospheric model
+!
+! ./src/shyfem/constants.f90:
+! 17.09.2024	lrp&ggu	call sleep(1) after writing basin
+!
+! ./src/shyfem/def_para.f90:
+! 13.09.2024    lrp     new parameter iatm
+!
+! ./src/shyfem/shypre_subs.f90:
+! 12.09.2024    ggu     flush bas file before closing (intel bug)
+!
+! ./src/shyfem/meteo_forcing.f90:
+! 13.09.2024    lrp     iatm and coupling with atmospheric model
+!
+! ./src/utils/shyutil/version.f90:
+! 12.09.2024	ggu	version 8.0.7   NUOPC-start edition
+
 25.09.2023
 
 c ./fem3d/subuti.f:

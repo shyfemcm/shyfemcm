@@ -9,7 +9,7 @@
 
 # makefile for fem/bin
 
-DIR = fembin
+DIR = bin
 
 DEFDIR  = $(HOME)
 FEMDIR  = ..
@@ -27,6 +27,9 @@ all: fem
 fem: nothing
 nothing:
 	@true
+
+links:
+	-ln -fs gps/gps.sh
 
 #----------------------------------------------------------
 

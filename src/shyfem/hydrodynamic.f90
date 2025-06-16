@@ -277,6 +277,7 @@
 ! 02.05.2023    ggu     fix mpi bug for nlv==1
 ! 09.05.2023    lrp     introduce top layer index variable
 ! 08.06.2023    ggu     new zeta_debug(), cleaned, call to compute_dry_elements
+! 25.07.2024    ggu     new implementation of OMP for hydro
 !
 !******************************************************************
 
@@ -295,7 +296,9 @@
 	!use basin, only : nkn,nel,ngr,mbw
 	use basin
 	use shympi
+	use shympi_debug
         use mod_zeta_system, only : solver_type
+	use mod_trace_point
 
 	implicit none
 
@@ -326,6 +329,8 @@
 !-----------------------------------------------------------------
 ! set parameter for hydro or non hydro 
 !-----------------------------------------------------------------
+
+	call trace_point('start_of_hydro')
 
 	call nonhydro_get_flag(bnohyd)
         iwvel = nint(getpar('iwvel')) !DWNH
@@ -379,13 +384,17 @@
 	  call adjust_mass_flux		!cope with dry nodes
 
 	  call system_init		!initializes matrix
+	  call trace_point('hydro_zeta')
 	  call hydro_zeta(rqv)		!assemble system matrix for z
 	  call cpu_time_start(3)
+	  call trace_point('system_solve')
 	  call system_solve(nkn,znv)	!solves system matrix for z
 	  call cpu_time_end(3)
+	  call trace_point('system_get')
 	  call system_get(nkn,znv)	!copies solution to new z
 
 	  if( trim(solver_type) /= 'PETSc' ) then
+	    call trace_point('exchange_znv')
             call shympi_exchange_2d_node(znv)
           endif
 
@@ -395,18 +404,28 @@
 
 	end do
 
+	call trace_point('hydro_transports_final')
 	call hydro_transports_final	!final transports (also barotropic)
 
+	if( bextra_exchange ) then
+	  call shympi_exchange_3d_elem(utlnv)
+	  call shympi_exchange_3d_elem(vtlnv)
+	  call shympi_exchange_2d_elem(unv)
+	  call shympi_exchange_2d_elem(vnv)
+	end if
+
 !-----------------------------------------------------------------
-! end of soulution for hydrodynamic variables
+! end of solution for hydrodynamic variables
 !-----------------------------------------------------------------
 
         call setzev			!copy znv to zenv
         call setuvd			!set velocities in dry areas
 	call baro2l 			!sets transports in dry areas
 
+	call trace_point('make_new_depth')
 	call make_new_depth
 	call check_volume		!checks for negative volume 
+	call trace_point('arper')
         call arper
 
 !-----------------------------------------------------------------
@@ -418,6 +437,7 @@
 	  call nonhydro_adjust
 	end if
 
+	call trace_point('hydro_vertical')
 	call hydro_vertical(dzeta)		!compute vertical velocities
 
 	if (bnohyd .or. (iwvel .eq. 1)) then
@@ -441,6 +461,7 @@
 ! some checks
 !-----------------------------------------------------------------
 
+	call trace_point('vol_mass')
 	call vol_mass(1)		!computes and writes total volume
 	call mass_conserve		!check mass balance
 
@@ -448,7 +469,9 @@
 ! compute velocities on elements and nodes
 !-----------------------------------------------------------------
 
+	call trace_point('compute_velocities')
 	call compute_velocities
+	call trace_point('end_of_hydro')
 
 !-----------------------------------------------------------------
 ! end of routine
@@ -743,17 +766,21 @@
 	integer ie
 	integer ies,iend
 	integer ith
-	integer count0,dcount,chunk,nt
+	integer chunk,nt
 	integer ibaroc
 	integer ilin,itlin
 	integer num_threads,myid,el_do,rest_do,init_do,end_do
 	integer nchunk,nthreads
+	!integer count0,dcount
+	integer count,dcount
+	integer, save :: acount = 0
 	logical bcolin,baroc
 	real az,am,af,at,av,azpar,ampar
 	real rlin,radv
 	real vismol,rrho0
 	real dt
 
+	double precision dtime
 	double precision rmsdif,rmsmax
 	double precision tempo
 	double precision openmp_get_wtime
@@ -803,46 +830,32 @@
 ! loop over elements
 !-------------------------------------------------------------
 
-!$OMP PARALLEL 
-!$OMP SINGLE
+	call get_act_dtime(dtime)
 
-        call omp_compute_chunk(nel,nchunk)
+	call get_clock_count(count)
 
-	do ie=1,nel,nchunk
+!$OMP PARALLEL DO FIRSTPRIVATE(bcolin,baroc,az,am,af,at,radv       &
+!$OMP &            ,vismol,rrho0,dt) PRIVATE(ie,rmsdif)  &
+!$OMP &     SHARED(nel,nchunk)   DEFAULT(NONE)
 
-!$OMP TASK FIRSTPRIVATE(ie,bcolin,baroc,az,am,af,at,radv       &
-!$OMP & 	   ,vismol,rrho0,dt) PRIVATE(ies,iend,rmsdif,rmsmax)  &
-!$OMP &     SHARED(nel,nchunk)	 DEFAULT(NONE)
-	 
-	  rmsmax = 0.
- 	  iend = ie+nchunk-1
- 	  if(iend .gt. nel) iend = nel
-
- 	  do ies=ie,iend
-	    call hydro_intern(ies,bcolin,baroc,az,am,af,at,radv &
+ 	  do ie=1,nel
+	    call hydro_intern(ie,bcolin,baroc,az,am,af,at,radv &
      &			,vismol,rrho0,dt,rmsdif)
-	    rmsmax = max(rmsmax,rmsdif)
+	    if( rmsdif > 1.D-10 ) then
+	      write(6,*) 'rmsdif: ',rmsdif
+	      stop 'error stop hydro_transports: rms too high'
+	    end if
 	  end do
 
-	  if( rmsmax > 1.D-10 ) then
-	    write(6,*) 'rmsmax: ',rmsmax
-	    stop 'error stop hydro_transports: rms too high'
-	  end if
-
-!$OMP END TASK
-
-	end do
-
-!$OMP END SINGLE
-!$OMP TASKWAIT	
-!$OMP END PARALLEL      
+!$OMP END PARALLEL DO
 
 !-------------------------------------------------------------
 ! end of loop over elements
 !-------------------------------------------------------------
 
-!cc	call get_clock_count_diff(count0,dcount)
-!cc	write(6,*) 'count: ',dcount
+	call get_clock_count_diff(count,dcount)
+	acount = acount + dcount
+	!write(653,*) dcount,acount
 
 !-------------------------------------------------------------
 ! end of routine
@@ -948,6 +961,7 @@
 	double precision rvecp(6*nlvdi)		!ASYM (3 systems to solve)
 	double precision solv(6*nlvdi)		!ASYM (3 systems to solve)
 	double precision ppx,ppy
+	double precision ppx_aux,ppy_aux
 !-----------------------------------------
 ! function
 	integer locssp
@@ -955,11 +969,14 @@
         real epseps
         parameter (epseps = 1.e-6)
 
+	double precision dtime
+
 !-------------------------------------------------------------
 ! initialization and baroclinic terms
 !-------------------------------------------------------------
 
 	bnewpenta = .true.
+
 	bdebug=.false.
 	debug=.false.
         barea0 = .false.     ! baroclinic only with ia = 0 (HACK - do not use)
@@ -968,6 +985,8 @@
 	if( barea0 ) then               !$$BAROC_AREA $$BAROC_AREA0
 	  if( iarv(ie) .ne. 0 ) bbaroc = .false.
         end if
+
+	call get_act_dtime(dtime)
 
 !-------------------------------------------------------------
 ! dimensions of vertical system
@@ -1225,12 +1244,24 @@
 !	ppy corresponds to -F^y_l in the documentation
 !	------------------------------------------------------
 
-	ppx = ppx + aat*uui - bbt*uuip - cct*uuim - gammat*vvi  &
+	ppx_aux = aat*uui - bbt*uuip - cct*uuim - gammat*vvi  &
      &			+ gravx + (hhi/rowass)*presx + xexpl  &
      &  		+ wavex
-	ppy = ppy + aat*vvi - bbt*vvip - cct*vvim + gammat*uui  &
+	ppy_aux = aat*vvi - bbt*vvip - cct*vvim + gammat*uui  &
      &			+ gravy + (hhi/rowass)*presy + yexpl  &
      &  		+ wavey
+
+	ppx = ppx + ppx_aux	!INTEL_BUG
+	ppy = ppy + ppy_aux
+
+	!below INTEL_BUG_OLD
+!	ppx = ppx + aat*uui - bbt*uuip - cct*uuim - gammat*vvi  &
+!     &			+ gravx + (hhi/rowass)*presx + xexpl  &
+!     &  		+ wavex
+!	ppy = ppy + aat*vvi - bbt*vvip - cct*vvim + gammat*uui  &
+!     &			+ gravy + (hhi/rowass)*presy + yexpl  &
+!     &  		+ wavey
+
 
 !	------------------------------------------------------
 !	set up matrix A
